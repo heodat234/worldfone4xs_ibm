@@ -1,0 +1,13 @@
+body {
+	background: #7CFC00;  /* fallback for old browsers */
+	background: -webkit-linear-gradient(to left, #FFFFFF, 	#7CFC00);  /* Chrome 10-25, Safari 5.1-6 */
+	background: linear-gradient(to left, #FFFFFF, 	#7CFC00); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+}
+
+#login-container .login-title {
+	border-radius: 15px 15px 0 0;
+}
+
+#login-container .push-bit {
+	border-radius: 0 0 15px 15px
+}

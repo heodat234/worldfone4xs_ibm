@@ -1,0 +1,23 @@
+{
+    "wff_version": "4.1",
+    "wff_env": "DEV",
+    "wff_unique_login": false,
+    "wff_auth_redirect": true,
+    "record_activity": true,
+    "record_event": true,
+    "use_worker": false,
+    "wff_time_cache": 10,
+    "show_customer": "ALL",
+    "show_cdr": "ALL",
+    "phone_type": "microsip",
+    "brand_title": "JACCS",
+    "brand_logo": "public\/picture\/logo\/avatarwf4xs.png",
+    "loader_layer": true,
+    "login_logout_ipphone": false,
+    "short_key_ipphone": false,
+    "ip_sip_server": "",
+    "login_background_img": false,
+    "login_background_color": "#3ad267",
+    "login_background_img_url": "public\/picture\/background\/BC07586E-2BBF-44CE-BBA8-622B883713AE.jpg",
+    "login_brand_img": "public\/picture\/brandimage\/Jacss.png"
+}

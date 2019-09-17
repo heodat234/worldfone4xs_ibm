@@ -1,0 +1,33 @@
+#popup-contain {
+	 max-height: 0; 
+	 display: none;
+}
+
+#allPopup .form-group {
+    margin-bottom: 0px !important;
+}
+
+hr.popup {
+    margin: 0 0 15px !important;
+}
+
+.k-tabstrip-wrapper .k-content {
+    padding: 0 !important;
+}
+
+.title-row {
+  padding: 5px 0; 
+  position: relative;
+}
+
+.title-row span {
+  position: absolute; 
+  background-color: white; 
+  padding: 0 10px; 
+  font-size: 16px
+}
+
+.title-row hr {
+  margin-left: 5px !important;  
+  margin-top: 10px !important
+}

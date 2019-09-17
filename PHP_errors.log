@@ -1,0 +1,480 @@
+[12-Mar-2019 15:51:13 Asia/Ho_Chi_Minh] PHP Fatal error:  Class 'SoapClient' not found in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 13
+[12-Mar-2019 15:56:42 Asia/Ho_Chi_Minh] PHP Fatal error:  Class 'Soap' not found in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 13
+[12-Mar-2019 16:02:36 Asia/Ho_Chi_Minh] PHP Fatal error:  Class 'Soap' not found in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 13
+[12-Mar-2019 16:02:44 Asia/Ho_Chi_Minh] PHP Fatal error:  SOAP-ERROR: Parsing WSDL: Couldn't load from 'http://example.com/webservices?wsdl' : failed to load external entity "http://example.com/webservices?wsdl"
+ in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 13
+[12-Mar-2019 16:37:32 Asia/Ho_Chi_Minh] PHP Fatal error:  SOAP-ERROR: Parsing WSDL: Couldn't load from 'http://10.2.10.12:9090/API_ContactCenter' : failed to load external entity "http://10.2.10.12:9090/API_ContactCenter"
+ in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 16
+[12-Mar-2019 16:37:42 Asia/Ho_Chi_Minh] PHP Fatal error:  SOAP-ERROR: Parsing WSDL: Couldn't load from 'http://10.2.10.12:9090/API_ContactCenter' : failed to load external entity "http://10.2.10.12:9090/API_ContactCenter"
+ in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 16
+[12-Mar-2019 16:38:33 Asia/Ho_Chi_Minh] PHP Fatal error:  SOAP-ERROR: Parsing WSDL: Couldn't load from 'http://10.2.10.12:9090/API_ContactCenter' : failed to load external entity "http://10.2.10.12:9090/API_ContactCenter"
+ in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 16
+[12-Mar-2019 16:41:36 Asia/Ho_Chi_Minh] PHP Fatal error:  SOAP-ERROR: Parsing WSDL: Couldn't load from 'http://10.2.10.12:9090/API_ContactCenter?WSDL' : failed to load external entity "http://10.2.10.12:9090/API_ContactCenter?WSDL"
+ in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 16
+[12-Mar-2019 16:42:02 Asia/Ho_Chi_Minh] PHP Fatal error:  SOAP-ERROR: Parsing WSDL: Couldn't load from 'http://10.2.10.12:9090/API_ContactCenter' : failed to load external entity "http://10.2.10.12:9090/API_ContactCenter"
+ in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 16
+[12-Mar-2019 16:42:11 Asia/Ho_Chi_Minh] PHP Fatal error:  SOAP-ERROR: Parsing WSDL: Couldn't load from 'http://10.2.10.12:9090/API_ContactCenter' : failed to load external entity "http://10.2.10.12:9090/API_ContactCenter"
+ in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 16
+[12-Mar-2019 16:43:00 Asia/Ho_Chi_Minh] PHP Fatal error:  SOAP-ERROR: Parsing WSDL: Couldn't load from 'http://10.2.10.12:9090/API_ContactCenter/CEP/CEPService' : failed to load external entity "http://10.2.10.12:9090/API_ContactCenter/CEP/CEPService"
+ in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 16
+[12-Mar-2019 16:43:21 Asia/Ho_Chi_Minh] PHP Fatal error:  SOAP-ERROR: Parsing WSDL: Couldn't load from 'http://10.2.10.12:9090/CEP/CEPService' : failed to load external entity "http://10.2.10.12:9090/CEP/CEPService"
+ in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 16
+[12-Mar-2019 16:43:22 Asia/Ho_Chi_Minh] PHP Fatal error:  SOAP-ERROR: Parsing WSDL: Couldn't load from 'http://10.2.10.12:9090/CEP/CEPService' : failed to load external entity "http://10.2.10.12:9090/CEP/CEPService"
+ in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 16
+[12-Mar-2019 16:45:35 Asia/Ho_Chi_Minh] PHP Fatal error:  SOAP-ERROR: Parsing WSDL: Couldn't load from 'http://10.2.10.12:9090/API_ContactCenter' : failed to load external entity "http://10.2.10.12:9090/API_ContactCenter"
+ in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 16
+[12-Mar-2019 16:47:53 Asia/Ho_Chi_Minh] PHP Fatal error:  SOAP-ERROR: Parsing WSDL: Couldn't load from 'http://10.2.10.12:9090/API_ContactCenter/' : failed to load external entity "http://10.2.10.12:9090/API_ContactCenter/"
+ in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 16
+[12-Mar-2019 17:00:19 Asia/Ho_Chi_Minh] PHP Fatal error:  SOAP-ERROR: Parsing WSDL: Couldn't load from 'http://10.2.10.12:9090/API_ContactCenter' : failed to load external entity "http://10.2.10.12:9090/API_ContactCenter"
+ in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 16
+[12-Mar-2019 17:05:38 Asia/Ho_Chi_Minh] PHP Fatal error:  SOAP-ERROR: Parsing WSDL: Couldn't load from 'http://10.2.10.12:9090' : Premature end of data in tag html line 3
+ in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 16
+[12-Mar-2019 17:05:58 Asia/Ho_Chi_Minh] PHP Fatal error:  SOAP-ERROR: Parsing WSDL: Couldn't load from 'http://10.2.10.12:9090/' : Premature end of data in tag html line 3
+ in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 16
+[12-Mar-2019 17:22:41 Asia/Ho_Chi_Minh] PHP Fatal error:  SOAP-ERROR: Parsing WSDL: Couldn't load from 'http://10.2.10.12:9090' : Premature end of data in tag html line 3
+ in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 16
+[12-Mar-2019 17:28:30 Asia/Ho_Chi_Minh] PHP Fatal error:  SOAP-ERROR: Parsing WSDL: Couldn't find <definitions> in 'http://10.2.10.12:9090/API_ContactCenter/ContactCenterService' in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 16
+[12-Mar-2019 17:29:10 Asia/Ho_Chi_Minh] PHP Fatal error:  SOAP-ERROR: Parsing WSDL: Couldn't find <definitions> in 'http://10.2.10.12:9090/API_ContactCenter/ContactCenterService' in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 16
+[12-Mar-2019 17:40:20 Asia/Ho_Chi_Minh] PHP Fatal error:  SOAP-ERROR: Parsing WSDL: Couldn't find <definitions> in 'http://10.2.10.12:9090/API_ContactCenter/ContactCenterService' in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 20
+[13-Mar-2019 10:14:45 Asia/Ho_Chi_Minh] PHP Fatal error:  SOAP-ERROR: Parsing WSDL: Couldn't find <definitions> in 'http://10.2.10.12:9090/API_ContactCenter/ContactCenterService' in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 20
+[13-Mar-2019 14:20:45 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined function xmlToArray() in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 77
+[13-Mar-2019 14:20:54 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined function xmlToArray() in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 137
+[13-Mar-2019 14:29:07 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function getDocNamespaces() on boolean in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 122
+[13-Mar-2019 14:29:30 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function getDocNamespaces() on boolean in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 122
+[13-Mar-2019 14:29:49 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function getDocNamespaces() on boolean in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 120
+[13-Mar-2019 14:34:55 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function getDocNamespaces() on boolean in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 120
+[13-Mar-2019 14:35:40 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function getDocNamespaces() on boolean in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 135
+[13-Mar-2019 14:36:29 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function getDocNamespaces() on boolean in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 117
+[13-Mar-2019 15:00:52 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function children() on null in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 78
+[13-Mar-2019 15:02:12 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function attributes() on null in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 78
+[13-Mar-2019 15:02:57 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined method SimpleXMLElement::getChildren() in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 78
+[13-Mar-2019 15:07:02 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function attributes() on null in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 78
+[13-Mar-2019 15:08:35 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function getDocNamespaces() on string in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 117
+[13-Mar-2019 15:08:56 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function getDocNamespaces() on string in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 117
+[13-Mar-2019 15:12:09 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function asXML() on null in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 78
+[13-Mar-2019 15:43:24 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function asXML() on null in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 93
+[13-Mar-2019 16:45:52 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined method XMLWriter::addCData() in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 32
+[13-Mar-2019 17:17:49 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function __soapCall() on null in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 69
+[13-Mar-2019 17:18:00 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function __soapCall() on null in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 69
+[14-Mar-2019 10:12:47 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined method stdClass::getInfoCustomerResponse() in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 96
+[14-Mar-2019 10:13:25 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined method stdClass::getInfoCustomerResponse() in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 96
+[14-Mar-2019 11:05:07 Asia/Ho_Chi_Minh] PHP Fatal error:  SOAP-ERROR: Encoding: SoapVar has no 'enc_type' property in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 100
+[14-Mar-2019 11:28:43 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected 'throw' (T_THROW) in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 148
+[14-Mar-2019 11:37:15 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined method SimpleXMLElement::getChildren() in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 149
+[14-Mar-2019 11:38:13 Asia/Ho_Chi_Minh] PHP Fatal error:  Class 'SimpleXML' not found in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 148
+[14-Mar-2019 11:38:47 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined method SimpleXMLElement::getChildren() in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 149
+[14-Mar-2019 13:57:21 Asia/Ho_Chi_Minh] PHP Fatal error:  Class 'SimpleXML' not found in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 148
+[14-Mar-2019 14:00:32 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function children() on string in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 150
+[14-Mar-2019 14:02:03 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function getDocNamespaces() on string in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 191
+[14-Mar-2019 14:02:37 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function getDocNamespaces() on string in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 191
+[14-Mar-2019 14:06:43 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined method DOMNodeList::saveXML() in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 151
+[14-Mar-2019 14:07:32 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined method DOMElement::saveXML() in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 151
+[14-Mar-2019 14:15:11 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined method DOMNodeList::hasAttributes() in /var/www/html/worldfone4xs/application/helpers/xml_helper.php on line 6
+[14-Mar-2019 14:23:05 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function hasAttributes() on null in /var/www/html/worldfone4xs/application/helpers/xml_helper.php on line 24
+[14-Mar-2019 14:23:22 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function hasAttributes() on string in /var/www/html/worldfone4xs/application/helpers/xml_helper.php on line 24
+[14-Mar-2019 14:24:18 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected ')' in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 151
+[14-Mar-2019 15:16:48 Asia/Ho_Chi_Minh] PHP Fatal error:  Default value for parameters with a class type hint can only be NULL in /var/www/html/worldfone4xs/application/helpers/xml_helper.php on line 69
+[14-Mar-2019 15:48:20 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected '$request' (T_VARIABLE) in /var/www/html/worldfone4xs/application/models/Namaapi_model.php on line 17
+[14-Mar-2019 16:07:28 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected '}' in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 44
+[17-Mar-2019 14:00:43 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined method Mongo_db::or_where() in /var/www/html/worldfone4xs/application/controllers/api/v1/Popup.php on line 35
+[19-Mar-2019 15:56:23 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected '->' (T_OBJECT_OPERATOR) in /var/www/html/worldfone4xs/application/models/Sms_model.php on line 25
+[19-Mar-2019 15:56:29 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected '->' (T_OBJECT_OPERATOR) in /var/www/html/worldfone4xs/application/models/Sms_model.php on line 25
+[19-Mar-2019 15:59:39 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined method Mongo_db::where_id() in /var/www/html/worldfone4xs/application/models/Sms_model.php on line 21
+[19-Mar-2019 16:01:36 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function getAgent() on null in /var/www/html/worldfone4xs/application/controllers/app/Chat_group_manager.php on line 61
+[19-Mar-2019 16:02:15 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function getAgent() on null in /var/www/html/worldfone4xs/application/controllers/app/Chat_group_manager.php on line 61
+[19-Mar-2019 16:02:18 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function getAgent() on null in /var/www/html/worldfone4xs/application/controllers/app/Chat_group_manager.php on line 61
+[19-Mar-2019 16:02:18 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function getAgent() on null in /var/www/html/worldfone4xs/application/controllers/app/Chat_group_manager.php on line 61
+[19-Mar-2019 16:02:18 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function getAgent() on null in /var/www/html/worldfone4xs/application/controllers/app/Chat_group_manager.php on line 61
+[19-Mar-2019 16:02:18 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function getAgent() on null in /var/www/html/worldfone4xs/application/controllers/app/Chat_group_manager.php on line 61
+[19-Mar-2019 16:02:18 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function getAgent() on null in /var/www/html/worldfone4xs/application/controllers/app/Chat_group_manager.php on line 61
+[19-Mar-2019 16:02:18 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function getAgent() on null in /var/www/html/worldfone4xs/application/controllers/app/Chat_group_manager.php on line 61
+[19-Mar-2019 16:02:19 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function getAgent() on null in /var/www/html/worldfone4xs/application/controllers/app/Chat_group_manager.php on line 61
+[19-Mar-2019 16:03:57 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function getAgent() on null in /var/www/html/worldfone4xs/application/controllers/app/Chat_group_manager.php on line 61
+[19-Mar-2019 16:03:59 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function getAgent() on null in /var/www/html/worldfone4xs/application/controllers/app/Chat_group_manager.php on line 61
+[19-Mar-2019 16:04:00 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function getAgent() on null in /var/www/html/worldfone4xs/application/controllers/app/Chat_group_manager.php on line 61
+[19-Mar-2019 16:04:00 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function getAgent() on null in /var/www/html/worldfone4xs/application/controllers/app/Chat_group_manager.php on line 61
+[19-Mar-2019 16:04:00 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function getAgent() on null in /var/www/html/worldfone4xs/application/controllers/app/Chat_group_manager.php on line 61
+[19-Mar-2019 16:04:00 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function getAgent() on null in /var/www/html/worldfone4xs/application/controllers/app/Chat_group_manager.php on line 61
+[19-Mar-2019 16:04:00 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function getAgent() on null in /var/www/html/worldfone4xs/application/controllers/app/Chat_group_manager.php on line 61
+[19-Mar-2019 16:04:49 Asia/Ho_Chi_Minh] PHP Fatal error:  Class 'WFF_Model' not found in /var/www/html/worldfone4xs/application/models/models_chat/Wfpbx_model.php on line 3
+[19-Mar-2019 16:04:51 Asia/Ho_Chi_Minh] PHP Fatal error:  Class MongoId may not inherit from final class (MongoDB\BSON\ObjectId) in /var/www/html/worldfone4xs/application/helpers/common_helper.php on line 0
+[19-Mar-2019 16:04:51 Asia/Ho_Chi_Minh] PHP Fatal error:  Class MongoId may not inherit from final class (MongoDB\BSON\ObjectId) in /var/www/html/worldfone4xs/application/helpers/common_helper.php on line 0
+[19-Mar-2019 16:04:51 Asia/Ho_Chi_Minh] PHP Fatal error:  Class MongoId may not inherit from final class (MongoDB\BSON\ObjectId) in /var/www/html/worldfone4xs/application/helpers/common_helper.php on line 0
+[19-Mar-2019 16:04:51 Asia/Ho_Chi_Minh] PHP Fatal error:  Class MongoId may not inherit from final class (MongoDB\BSON\ObjectId) in /var/www/html/worldfone4xs/application/helpers/common_helper.php on line 0
+[19-Mar-2019 16:04:51 Asia/Ho_Chi_Minh] PHP Fatal error:  Class MongoId may not inherit from final class (MongoDB\BSON\ObjectId) in /var/www/html/worldfone4xs/application/helpers/common_helper.php on line 0
+[19-Mar-2019 16:04:51 Asia/Ho_Chi_Minh] PHP Fatal error:  Class MongoId may not inherit from final class (MongoDB\BSON\ObjectId) in /var/www/html/worldfone4xs/application/helpers/common_helper.php on line 0
+[19-Mar-2019 16:04:51 Asia/Ho_Chi_Minh] PHP Fatal error:  Class MongoId may not inherit from final class (MongoDB\BSON\ObjectId) in /var/www/html/worldfone4xs/application/helpers/common_helper.php on line 0
+[19-Mar-2019 16:04:58 Asia/Ho_Chi_Minh] PHP Fatal error:  Class MongoId may not inherit from final class (MongoDB\BSON\ObjectId) in /var/www/html/worldfone4xs/application/helpers/common_helper.php on line 0
+[19-Mar-2019 16:04:59 Asia/Ho_Chi_Minh] PHP Fatal error:  Class MongoId may not inherit from final class (MongoDB\BSON\ObjectId) in /var/www/html/worldfone4xs/application/helpers/common_helper.php on line 0
+[19-Mar-2019 16:05:01 Asia/Ho_Chi_Minh] PHP Fatal error:  Class MongoId may not inherit from final class (MongoDB\BSON\ObjectId) in /var/www/html/worldfone4xs/application/helpers/common_helper.php on line 0
+[19-Mar-2019 16:05:01 Asia/Ho_Chi_Minh] PHP Fatal error:  Class MongoId may not inherit from final class (MongoDB\BSON\ObjectId) in /var/www/html/worldfone4xs/application/helpers/common_helper.php on line 0
+[19-Mar-2019 16:05:01 Asia/Ho_Chi_Minh] PHP Fatal error:  Class MongoId may not inherit from final class (MongoDB\BSON\ObjectId) in /var/www/html/worldfone4xs/application/helpers/common_helper.php on line 0
+[19-Mar-2019 16:05:02 Asia/Ho_Chi_Minh] PHP Fatal error:  Class MongoId may not inherit from final class (MongoDB\BSON\ObjectId) in /var/www/html/worldfone4xs/application/helpers/common_helper.php on line 0
+[19-Mar-2019 16:05:02 Asia/Ho_Chi_Minh] PHP Fatal error:  Class MongoId may not inherit from final class (MongoDB\BSON\ObjectId) in /var/www/html/worldfone4xs/application/helpers/common_helper.php on line 0
+[19-Mar-2019 16:05:34 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected 'function' (T_FUNCTION), expecting '{' in /var/www/html/worldfone4xs/application/helpers/common_helper.php on line 17
+[19-Mar-2019 16:05:34 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected 'function' (T_FUNCTION), expecting '{' in /var/www/html/worldfone4xs/application/helpers/common_helper.php on line 17
+[19-Mar-2019 16:05:34 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected 'function' (T_FUNCTION), expecting '{' in /var/www/html/worldfone4xs/application/helpers/common_helper.php on line 17
+[19-Mar-2019 16:05:34 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected 'function' (T_FUNCTION), expecting '{' in /var/www/html/worldfone4xs/application/helpers/common_helper.php on line 17
+[19-Mar-2019 16:05:34 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected 'function' (T_FUNCTION), expecting '{' in /var/www/html/worldfone4xs/application/helpers/common_helper.php on line 17
+[19-Mar-2019 16:06:02 Asia/Ho_Chi_Minh] PHP Fatal error:  Class declarations may not be nested in /var/www/html/worldfone4xs/application/controllers/manage/Browse.php on line 11
+[19-Mar-2019 16:06:08 Asia/Ho_Chi_Minh] PHP Fatal error:  Class declarations may not be nested in /var/www/html/worldfone4xs/application/controllers/manage/Browse.php on line 10
+[19-Mar-2019 16:06:10 Asia/Ho_Chi_Minh] PHP Fatal error:  Class declarations may not be nested in /var/www/html/worldfone4xs/application/controllers/manage/Browse.php on line 10
+[19-Mar-2019 16:06:18 Asia/Ho_Chi_Minh] PHP Fatal error:  Class MongoId may not inherit from final class (MongoDB\BSON\ObjectId) in /var/www/html/worldfone4xs/application/controllers/manage/Browse.php on line 0
+[22-Mar-2019 09:43:13 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected ';' in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 17
+[22-Mar-2019 09:56:17 Asia/Ho_Chi_Minh] PHP Fatal error:  Class 'CI_Mongo_db' not found in /var/www/html/worldfone4xs/system/core/Common.php on line 196
+[22-Mar-2019 09:56:18 Asia/Ho_Chi_Minh] PHP Fatal error:  Class 'CI_Mongo_db' not found in /var/www/html/worldfone4xs/system/core/Common.php on line 196
+[29-Mar-2019 16:33:25 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined method Mongo_private::select() in /var/www/html/worldfone4xs/application/controllers/api/namabank/CardServices.php on line 57
+[10-May-2019 16:49:02 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined function imap_open() in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 23
+[10-May-2019 17:00:19 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined function imap_open() in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 23
+[10-May-2019 17:00:53 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined function imap_open() in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 23
+[10-May-2019 17:00:54 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined function imap_open() in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 23
+[10-May-2019 17:00:54 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined function imap_open() in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 23
+[10-May-2019 17:00:54 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined function imap_open() in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 23
+[10-May-2019 17:00:54 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined function imap_open() in /var/www/html/worldfone4xs/application/controllers/api/namabank/Test.php on line 23
+[13-May-2019 14:37:44 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined method Chat_model::getNewNotify() in /var/www/html/worldfone4xs/application/controllers/api/v1/Ping.php on line 186
+[13-May-2019 14:37:44 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined method Chat_model::getNewNotify() in /var/www/html/worldfone4xs/application/controllers/api/v1/Ping.php on line 186
+[13-May-2019 14:37:48 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined method Chat_model::getNewNotify() in /var/www/html/worldfone4xs/application/controllers/api/v1/Ping.php on line 186
+[13-May-2019 14:37:54 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined method Chat_model::getNewNotify() in /var/www/html/worldfone4xs/application/controllers/api/v1/Ping.php on line 186
+[13-May-2019 14:42:46 Asia/Ho_Chi_Minh] PHP Warning:  Unterminated comment starting line 104 in /var/www/html/worldfone4xs/application/core/WFF_Controller.php on line 104
+[13-May-2019 14:42:46 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected end of file in /var/www/html/worldfone4xs/application/core/WFF_Controller.php on line 106
+[13-May-2019 14:42:46 Asia/Ho_Chi_Minh] PHP Fatal error:  Class 'WFF_Controller' not found in /var/www/html/worldfone4xs/application/controllers/Page.php on line 4
+[13-May-2019 14:51:44 Asia/Ho_Chi_Minh] PHP Fatal error:  Uncaught exception 'MongoDuplicateKeyException' with message 'localhost:27017: E11000 duplicate key error collection: _worldfone4xs.Session index: _id_ dup key: { : "s3emd2241go1e31f37vgrtvoa60b0444" }' in /var/www/html/worldfone4xs/application/libraries/Session/drivers/Session_mongo_driver.php:213
+Stack trace:
+#0 /var/www/html/worldfone4xs/application/libraries/Session/drivers/Session_mongo_driver.php(213): MongoCollection->insert(Array, Array)
+#1 [internal function]: CI_Session_mongo_driver->write('s3emd2241go1e31...', '__ci_last_regen...')
+#2 [internal function]: session_write_close()
+#3 {main}
+  thrown in /var/www/html/worldfone4xs/application/libraries/Session/drivers/Session_mongo_driver.php on line 213
+[14-May-2019 00:47:23 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected '{' in /var/www/html/worldfone4xs/application/controllers/api/app/User.php on line 21
+[14-May-2019 00:47:29 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected '{' in /var/www/html/worldfone4xs/application/controllers/api/app/User.php on line 21
+[16-May-2019 11:27:32 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function switch_db() on null in /var/www/html/worldfone4xs/application/controllers/api/restful/DropDownListConfig.php on line 12
+[16-May-2019 11:28:56 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function switch_db() on null in /var/www/html/worldfone4xs/application/controllers/api/restful/DropDownListConfig.php on line 12
+[16-May-2019 11:29:19 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function switch_db() on null in /var/www/html/worldfone4xs/application/controllers/api/restful/DropDownListConfig.php on line 15
+[16-May-2019 11:29:40 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function switch_db() on null in /var/www/html/worldfone4xs/application/controllers/api/restful/DropDownListConfig.php on line 15
+[16-May-2019 11:35:07 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function switch_db() on null in /var/www/html/worldfone4xs/application/controllers/api/restful/DropDownListConfig.php on line 15
+[16-May-2019 11:36:53 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function switch_db() on null in /var/www/html/worldfone4xs/application/controllers/api/restful/DropDownListConfig.php on line 12
+[17-May-2019 10:15:35 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected '}' in /var/www/html/worldfone4xs/application/controllers/api/v1/Ticket.php on line 104
+[17-May-2019 10:39:19 Asia/Ho_Chi_Minh] PHP Fatal error:  Cannot access empty property in /var/www/html/worldfone4xs/application/controllers/api/v1/Ticket.php on line 16
+[17-May-2019 10:46:47 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function select_db() on null in /var/www/html/worldfone4xs/application/controllers/api/v1/Ticket.php on line 16
+[18-May-2019 15:31:58 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined method Mongo_db::sort() in /var/www/html/worldfone4xs/application/controllers/api/v1/Ticket.php on line 97
+[20-May-2019 15:37:05 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined method Crud::assignToExtension() in /var/www/html/worldfone4xs/application/controllers/manage/Ticket.php on line 39
+[21-May-2019 13:37:03 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function userdata() on null in /var/www/html/worldfone4xs/application/views/templates/ticket/detail.php on line 670
+[21-May-2019 13:38:17 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function userdata() on null in /var/www/html/worldfone4xs/application/views/templates/ticket/detail.php on line 670
+[21-May-2019 16:45:44 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined method Crud::select() in /var/www/html/worldfone4xs/application/controllers/api/v1/Ticket.php on line 133
+[21-May-2019 16:45:45 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined method Crud::select() in /var/www/html/worldfone4xs/application/controllers/api/v1/Ticket.php on line 133
+[22-May-2019 15:01:05 Asia/Ho_Chi_Minh] PHP Fatal error:  Cannot use object of type MongoDB\Driver\WriteResult as array in /var/www/html/worldfone4xs/application/controllers/api/restful/Ticket.php on line 179
+[28-May-2019 13:43:06 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined function baseUrl() in /var/www/html/worldfone4xs/application/views/chat/chat_view.php on line 1
+[28-May-2019 13:44:12 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined function baseurl() in /var/www/html/worldfone4xs/application/views/chat/chat_view.php on line 1
+[28-May-2019 13:44:34 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined function baseurl() in /var/www/html/worldfone4xs/application/views/chat/chat_view.php on line 1
+[28-May-2019 13:46:35 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined function baseurl() in /var/www/html/worldfone4xs/application/views/chat/chat_view.php on line 1
+[28-May-2019 14:38:52 Asia/Ho_Chi_Minh] PHP Fatal error:  Class 'Omnisales\Omnisales' not found in /var/www/html/worldfone4xs/application/models/models_chat/Chat_model.php on line 23
+[28-May-2019 14:38:52 Asia/Ho_Chi_Minh] PHP Fatal error:  Class 'Omnisales\Omnisales' not found in /var/www/html/worldfone4xs/application/models/models_chat/Chat_model.php on line 23
+[28-May-2019 14:38:52 Asia/Ho_Chi_Minh] PHP Fatal error:  Class 'Omnisales\Omnisales' not found in /var/www/html/worldfone4xs/application/models/models_chat/Chat_model.php on line 23
+[28-May-2019 14:38:52 Asia/Ho_Chi_Minh] PHP Fatal error:  Class 'Omnisales\Omnisales' not found in /var/www/html/worldfone4xs/application/models/models_chat/Chat_model.php on line 23
+[28-May-2019 14:38:52 Asia/Ho_Chi_Minh] PHP Fatal error:  Class 'Omnisales\Omnisales' not found in /var/www/html/worldfone4xs/application/models/models_chat/Chat_model.php on line 23
+[28-May-2019 14:41:47 Asia/Ho_Chi_Minh] PHP Warning:  Missing boundary in multipart/form-data POST data in Unknown on line 0
+[28-May-2019 14:41:52 Asia/Ho_Chi_Minh] PHP Warning:  Missing boundary in multipart/form-data POST data in Unknown on line 0
+[29-May-2019 16:15:02 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined method User_model::set_sub() in /var/www/html/worldfone4xs/application/models/Emailticket_model.php on line 95
+[29-May-2019 16:38:12 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined method Mongo_private::distinct() in /var/www/html/worldfone4xs/application/models/User_model.php on line 41
+[30-May-2019 10:53:51 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected 'try' (T_TRY) in /var/www/html/worldfone4xs/application/controllers/api/v1/App.php on line 55
+[30-May-2019 10:53:51 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected 'try' (T_TRY) in /var/www/html/worldfone4xs/application/controllers/api/v1/App.php on line 55
+[30-May-2019 10:54:11 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected '}' in /var/www/html/worldfone4xs/application/controllers/api/v1/App.php on line 109
+[30-May-2019 10:54:11 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected '}' in /var/www/html/worldfone4xs/application/controllers/api/v1/App.php on line 109
+[30-May-2019 21:55:53 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected '->' (T_OBJECT_OPERATOR) in /var/www/html/worldfone4xs/application/controllers/api/v1/Popup.php on line 16
+[30-May-2019 21:55:55 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected '->' (T_OBJECT_OPERATOR) in /var/www/html/worldfone4xs/application/controllers/api/v1/Popup.php on line 16
+[01-Jun-2019 14:25:54 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected ',', expecting ']' in /var/www/html/worldfone4xs/application/controllers/api/v1/App.php on line 197
+[01-Jun-2019 14:35:13 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected ',', expecting ']' in /var/www/html/worldfone4xs/application/controllers/api/v1/App.php on line 197
+[03-Jun-2019 11:04:20 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected ')' in /var/www/html/worldfone4xs/application/controllers/api/v1/Customer.php on line 33
+[03-Jun-2019 11:04:43 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected ')' in /var/www/html/worldfone4xs/application/controllers/api/v1/Customer.php on line 33
+[03-Jun-2019 17:28:49 Asia/Ho_Chi_Minh] PHP Fatal error:  Cannot use object of type stdClass as array in /var/www/html/worldfone4xs/application/controllers/api/v1/Customer.php on line 63
+[03-Jun-2019 17:29:40 Asia/Ho_Chi_Minh] PHP Fatal error:  Cannot use object of type stdClass as array in /var/www/html/worldfone4xs/application/controllers/api/v1/Customer.php on line 63
+[04-Jun-2019 18:03:17 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected '=>' (T_DOUBLE_ARROW) in /var/www/html/worldfone4xs/application/controllers/app/Chat.php on line 45
+[04-Jun-2019 18:03:35 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected ')' in /var/www/html/worldfone4xs/application/controllers/app/Chat.php on line 45
+[05-Jun-2019 10:06:38 Asia/Ho_Chi_Minh] PHP Warning:  Unterminated comment starting line 1215 in /var/www/html/worldfone4xs/application/libraries/Mongo_db.php on line 1215
+[05-Jun-2019 10:06:38 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected end of file, expecting function (T_FUNCTION) in /var/www/html/worldfone4xs/application/libraries/Mongo_db.php on line 1216
+[05-Jun-2019 13:52:09 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined method Mongo_db::where_exists() in /var/www/html/worldfone4xs/application/controllers/app/Chat.php on line 1306
+[05-Jun-2019 13:52:13 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined method Mongo_db::where_exists() in /var/www/html/worldfone4xs/application/controllers/app/Chat.php on line 1306
+[05-Jun-2019 13:52:15 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined method Mongo_db::where_exists() in /var/www/html/worldfone4xs/application/controllers/app/Chat.php on line 1306
+[05-Jun-2019 13:52:29 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined method Mongo_db::where_exists() in /var/www/html/worldfone4xs/application/controllers/app/Chat.php on line 1306
+[05-Jun-2019 13:53:55 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined method Mongo_db::where_exists() in /var/www/html/worldfone4xs/application/controllers/app/Chat.php on line 1306
+[05-Jun-2019 13:56:05 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined method Mongo_db::where_exists() in /var/www/html/worldfone4xs/application/controllers/app/Chat.php on line 1306
+[05-Jun-2019 13:59:19 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined method Mongo_db::where_exists() in /var/www/html/worldfone4xs/application/controllers/app/Chat.php on line 1306
+[05-Jun-2019 14:44:08 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected '->' (T_OBJECT_OPERATOR) in /var/www/html/worldfone4xs/application/controllers/app/Chat.php on line 1304
+[05-Jun-2019 14:44:08 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected '->' (T_OBJECT_OPERATOR) in /var/www/html/worldfone4xs/application/controllers/app/Chat.php on line 1304
+[05-Jun-2019 14:44:08 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected '->' (T_OBJECT_OPERATOR) in /var/www/html/worldfone4xs/application/controllers/app/Chat.php on line 1304
+[05-Jun-2019 14:44:08 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected '->' (T_OBJECT_OPERATOR) in /var/www/html/worldfone4xs/application/controllers/app/Chat.php on line 1304
+[05-Jun-2019 14:44:36 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected '->' (T_OBJECT_OPERATOR) in /var/www/html/worldfone4xs/application/controllers/app/Chat.php on line 1304
+[05-Jun-2019 14:44:36 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected '->' (T_OBJECT_OPERATOR) in /var/www/html/worldfone4xs/application/controllers/app/Chat.php on line 1304
+[05-Jun-2019 14:44:36 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected '->' (T_OBJECT_OPERATOR) in /var/www/html/worldfone4xs/application/controllers/app/Chat.php on line 1304
+[05-Jun-2019 14:44:36 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected '->' (T_OBJECT_OPERATOR) in /var/www/html/worldfone4xs/application/controllers/app/Chat.php on line 1304
+[06-Jun-2019 14:48:00 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined method Ticket::assignToExtension() in /var/www/html/worldfone4xs/application/controllers/manage/Ticket.php on line 36
+[06-Jun-2019 15:49:29 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected 'if' (T_IF) in /var/www/html/worldfone4xs/application/controllers/api/v1/Pnrdetail.php on line 17
+[06-Jun-2019 16:14:41 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected ')' in /var/www/html/worldfone4xs/application/controllers/api/v1/App.php on line 276
+[06-Jun-2019 16:16:50 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected ')' in /var/www/html/worldfone4xs/application/controllers/api/v1/App.php on line 276
+[06-Jun-2019 16:18:43 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected ')' in /var/www/html/worldfone4xs/application/controllers/api/v1/App.php on line 276
+[06-Jun-2019 16:57:30 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined method Mongo_private::where_in() in /var/www/html/worldfone4xs/application/controllers/api/v1/App.php on line 277
+[06-Jun-2019 16:57:47 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined method Mongo_private::where_in() in /var/www/html/worldfone4xs/application/controllers/api/v1/App.php on line 277
+[06-Jun-2019 17:00:11 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected ')', expecting ']' in /var/www/html/worldfone4xs/application/controllers/api/v1/App.php on line 277
+[06-Jun-2019 17:05:00 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined method Mongo_private::select() in /var/www/html/worldfone4xs/application/controllers/api/v1/App.php on line 277
+[06-Jun-2019 17:05:09 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined method Mongo_private::select() in /var/www/html/worldfone4xs/application/controllers/api/v1/App.php on line 277
+[07-Jun-2019 16:34:32 Asia/Ho_Chi_Minh] PHP Warning:  Missing boundary in multipart/form-data POST data in Unknown on line 0
+[07-Jun-2019 16:36:50 Asia/Ho_Chi_Minh] PHP Warning:  Missing boundary in multipart/form-data POST data in Unknown on line 0
+[07-Jun-2019 16:36:58 Asia/Ho_Chi_Minh] PHP Warning:  Missing boundary in multipart/form-data POST data in Unknown on line 0
+[07-Jun-2019 16:41:19 Asia/Ho_Chi_Minh] PHP Warning:  Missing boundary in multipart/form-data POST data in Unknown on line 0
+[07-Jun-2019 16:42:24 Asia/Ho_Chi_Minh] PHP Warning:  Missing boundary in multipart/form-data POST data in Unknown on line 0
+[10-Jun-2019 15:08:41 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected '/' in /var/www/html/worldfone4xs/application/controllers/api/v1/App.php on line 451
+[10-Jun-2019 15:11:11 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected '' (T_ENCAPSED_AND_WHITESPACE), expecting identifier (T_STRING) or variable (T_VARIABLE) or number (T_NUM_STRING) in /var/www/html/worldfone4xs/application/controllers/api/v1/App.php on line 451
+[11-Jun-2019 15:51:24 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected ')', expecting ';' in /var/www/html/worldfone4xs/application/controllers/api/v1/App.php on line 452
+[11-Jun-2019 16:05:17 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected ';', expecting ']' in /var/www/html/worldfone4xs/application/controllers/api/v1/App.php on line 476
+[11-Jun-2019 16:23:27 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected ''-1'' (T_CONSTANT_ENCAPSED_STRING) in /var/www/html/worldfone4xs/application/controllers/api/v1/App.php on line 455
+[12-Jun-2019 16:31:21 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function post() on null in /var/www/html/worldfone4xs/application/controllers/app/Chat.php on line 1122
+[12-Jun-2019 16:32:16 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function post() on null in /var/www/html/worldfone4xs/application/controllers/app/Chat.php on line 1122
+[12-Jun-2019 18:56:34 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected ';' in /var/www/html/worldfone4xs/application/controllers/api/v1/Pnrdetail.php on line 96
+[13-Jun-2019 09:18:30 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined method chat::getNameRoom() in /var/www/html/worldfone4xs/application/controllers/app/Chat.php on line 1463
+[13-Jun-2019 09:20:10 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined method chat::getNameRoom() in /var/www/html/worldfone4xs/application/controllers/app/Chat.php on line 1463
+[13-Jun-2019 09:20:12 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined method chat::getNameRoom() in /var/www/html/worldfone4xs/application/controllers/app/Chat.php on line 1463
+[14-Jun-2019 11:47:37 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected '}' in /var/www/html/worldfone4xs/application/controllers/api/v1/Ticket.php on line 356
+[14-Jun-2019 16:51:26 Asia/Ho_Chi_Minh] PHP Fatal error:  Cannot use object of type stdClass as array in /var/www/html/worldfone4xs/application/controllers/api/v1/App.php on line 75
+[14-Jun-2019 16:51:41 Asia/Ho_Chi_Minh] PHP Fatal error:  Cannot use object of type stdClass as array in /var/www/html/worldfone4xs/application/controllers/api/v1/App.php on line 75
+[14-Jun-2019 17:01:35 Asia/Ho_Chi_Minh] PHP Fatal error:  Cannot use object of type stdClass as array in /var/www/html/worldfone4xs/application/controllers/api/v1/App.php on line 75
+[14-Jun-2019 17:03:48 Asia/Ho_Chi_Minh] PHP Fatal error:  Cannot use object of type stdClass as array in /var/www/html/worldfone4xs/application/controllers/api/v1/App.php on line 75
+[14-Jun-2019 17:04:06 Asia/Ho_Chi_Minh] PHP Fatal error:  Cannot use object of type stdClass as array in /var/www/html/worldfone4xs/application/controllers/api/v1/App.php on line 75
+[14-Jun-2019 17:06:07 Asia/Ho_Chi_Minh] PHP Fatal error:  Cannot use object of type stdClass as array in /var/www/html/worldfone4xs/application/controllers/api/v1/App.php on line 75
+[14-Jun-2019 18:09:24 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected ';' in /var/www/html/worldfone4xs/application/controllers/api/v1/App.php on line 45
+[14-Jun-2019 18:10:59 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected ';' in /var/www/html/worldfone4xs/application/controllers/api/v1/App.php on line 45
+[14-Jun-2019 18:12:02 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected ';' in /var/www/html/worldfone4xs/application/controllers/api/v1/App.php on line 45
+[14-Jun-2019 19:15:10 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected ';' in /var/www/html/worldfone4xs/application/controllers/api/v1/App.php on line 45
+[14-Jun-2019 19:15:10 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected ';' in /var/www/html/worldfone4xs/application/controllers/api/v1/App.php on line 45
+[14-Jun-2019 19:15:54 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected ';' in /var/www/html/worldfone4xs/application/controllers/api/v1/App.php on line 45
+[14-Jun-2019 19:16:16 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected ';' in /var/www/html/worldfone4xs/application/controllers/api/v1/App.php on line 45
+[14-Jun-2019 19:16:16 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected ';' in /var/www/html/worldfone4xs/application/controllers/api/v1/App.php on line 45
+[14-Jun-2019 19:16:17 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected ';' in /var/www/html/worldfone4xs/application/controllers/api/v1/App.php on line 45
+[14-Jun-2019 19:16:31 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected ';' in /var/www/html/worldfone4xs/application/controllers/api/v1/App.php on line 45
+[14-Jun-2019 19:16:52 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected ';' in /var/www/html/worldfone4xs/application/controllers/api/v1/App.php on line 45
+[14-Jun-2019 19:16:54 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected ';' in /var/www/html/worldfone4xs/application/controllers/api/v1/App.php on line 45
+[14-Jun-2019 19:36:10 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected ';' in /var/www/html/worldfone4xs/application/controllers/api/v1/App.php on line 45
+[14-Jun-2019 19:36:10 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected ';' in /var/www/html/worldfone4xs/application/controllers/api/v1/App.php on line 45
+[14-Jun-2019 19:36:27 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected ';' in /var/www/html/worldfone4xs/application/controllers/api/v1/App.php on line 45
+[14-Jun-2019 19:36:29 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected ';' in /var/www/html/worldfone4xs/application/controllers/api/v1/App.php on line 45
+[14-Jun-2019 19:36:30 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected ';' in /var/www/html/worldfone4xs/application/controllers/api/v1/App.php on line 45
+[14-Jun-2019 19:37:18 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected ';' in /var/www/html/worldfone4xs/application/controllers/api/v1/App.php on line 45
+[14-Jun-2019 19:37:32 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected ';' in /var/www/html/worldfone4xs/application/controllers/api/v1/App.php on line 45
+[14-Jun-2019 19:37:42 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected ';' in /var/www/html/worldfone4xs/application/controllers/api/v1/App.php on line 45
+[15-Jun-2019 11:40:41 Asia/Ho_Chi_Minh] PHP Fatal error:  Cannot use isset() on the result of an expression (you can use "null !== expression" instead) in /var/www/html/worldfone4xs/application/controllers/api/v1/App.php on line 60
+[15-Jun-2019 11:41:06 Asia/Ho_Chi_Minh] PHP Fatal error:  Cannot use isset() on the result of an expression (you can use "null !== expression" instead) in /var/www/html/worldfone4xs/application/controllers/api/v1/App.php on line 60
+[15-Jun-2019 11:43:37 Asia/Ho_Chi_Minh] PHP Fatal error:  Cannot use isset() on the result of an expression (you can use "null !== expression" instead) in /var/www/html/worldfone4xs/application/controllers/api/v1/App.php on line 60
+[15-Jun-2019 11:43:58 Asia/Ho_Chi_Minh] PHP Fatal error:  Cannot use isset() on the result of an expression (you can use "null !== expression" instead) in /var/www/html/worldfone4xs/application/controllers/api/v1/App.php on line 60
+[15-Jun-2019 11:44:30 Asia/Ho_Chi_Minh] PHP Fatal error:  Cannot use isset() on the result of an expression (you can use "null !== expression" instead) in /var/www/html/worldfone4xs/application/controllers/api/v1/App.php on line 60
+[15-Jun-2019 11:44:34 Asia/Ho_Chi_Minh] PHP Fatal error:  Cannot use isset() on the result of an expression (you can use "null !== expression" instead) in /var/www/html/worldfone4xs/application/controllers/api/v1/App.php on line 60
+[15-Jun-2019 11:44:55 Asia/Ho_Chi_Minh] PHP Fatal error:  Cannot use isset() on the result of an expression (you can use "null !== expression" instead) in /var/www/html/worldfone4xs/application/controllers/api/v1/App.php on line 60
+[17-Jun-2019 10:18:12 Asia/Ho_Chi_Minh] PHP Fatal error:  Cannot use object of type stdClass as array in /var/www/html/worldfone4xs/application/controllers/api/v1/App.php on line 117
+[17-Jun-2019 11:25:53 Asia/Ho_Chi_Minh] PHP Fatal error:  Cannot use object of type stdClass as array in /var/www/html/worldfone4xs/application/controllers/api/v1/App.php on line 117
+[18-Jun-2019 10:47:19 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected '$request' (T_VARIABLE) in /var/www/html/worldfone4xs/application/controllers/api/v1/Pnrdetail.php on line 97
+[19-Jun-2019 10:49:40 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected '->' (T_OBJECT_OPERATOR), expecting ',' or ';' in /var/www/html/worldfone4xs/application/controllers/api/v1/App_vj.php on line 10
+[20-Jun-2019 22:53:29 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined function lang() in /var/www/html/worldfone4xs/application/views/chat/chat_view.php on line 2380
+[20-Jun-2019 23:00:50 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined function lang() in /var/www/html/worldfone4xs/application/views/chat/chat_group_manager_view.php on line 77
+[21-Jun-2019 09:00:45 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined function lang() in /var/www/html/worldfone4xs/application/views/chat/chat_view.php on line 2380
+[21-Jun-2019 09:00:50 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined function lang() in /var/www/html/worldfone4xs/application/views/chat/chat_view.php on line 2380
+[21-Jun-2019 09:00:56 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined function lang() in /var/www/html/worldfone4xs/application/views/chat/chat_view.php on line 2380
+[21-Jun-2019 09:01:00 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined function lang() in /var/www/html/worldfone4xs/application/views/chat/chat_view.php on line 2380
+[21-Jun-2019 09:01:00 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined function lang() in /var/www/html/worldfone4xs/application/views/chat/chat_view.php on line 2380
+[21-Jun-2019 09:01:00 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined function lang() in /var/www/html/worldfone4xs/application/views/chat/chat_view.php on line 2380
+[21-Jun-2019 09:01:00 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined function lang() in /var/www/html/worldfone4xs/application/views/chat/chat_view.php on line 2380
+[21-Jun-2019 09:01:00 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined function lang() in /var/www/html/worldfone4xs/application/views/chat/chat_view.php on line 2380
+[21-Jun-2019 09:01:00 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined function lang() in /var/www/html/worldfone4xs/application/views/chat/chat_view.php on line 2380
+[21-Jun-2019 09:01:01 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined function lang() in /var/www/html/worldfone4xs/application/views/chat/chat_view.php on line 2380
+[21-Jun-2019 09:01:01 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined function lang() in /var/www/html/worldfone4xs/application/views/chat/chat_view.php on line 2380
+[21-Jun-2019 09:01:01 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined function lang() in /var/www/html/worldfone4xs/application/views/chat/chat_view.php on line 2380
+[21-Jun-2019 09:01:05 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined function lang() in /var/www/html/worldfone4xs/application/views/chat/chat_view.php on line 2380
+[21-Jun-2019 09:01:41 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined function lang() in /var/www/html/worldfone4xs/application/views/chat/chat_view.php on line 2380
+[21-Jun-2019 09:01:57 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined function lang() in /var/www/html/worldfone4xs/application/views/chat/chat_group_manager_view.php on line 77
+[21-Jun-2019 09:05:14 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to undefined function lang() in /var/www/html/worldfone4xs/application/views/chat/chat_group_manager_view.php on line 77
+[24-Jun-2019 14:00:38 Asia/Ho_Chi_Minh] PHP Fatal error:  Uncaught exception 'MongoDuplicateKeyException' with message 'localhost:27017: E11000 duplicate key error collection: _worldfone4xs-vj.Session index: _id_ dup key: { : "778pbnogg4fvgs89jkbiasdu3vkrl42k" }' in /var/www/html/worldfone4xs-vietjet/application/libraries/Session/drivers/Session_mongo_driver.php:213
+Stack trace:
+#0 /var/www/html/worldfone4xs-vietjet/application/libraries/Session/drivers/Session_mongo_driver.php(213): MongoCollection->insert(Array, Array)
+#1 [internal function]: CI_Session_mongo_driver->write('778pbnogg4fvgs8...', '__ci_last_regen...')
+#2 [internal function]: session_write_close()
+#3 {main}
+  thrown in /var/www/html/worldfone4xs-vietjet/application/libraries/Session/drivers/Session_mongo_driver.php on line 213
+[24-Jun-2019 14:46:30 Asia/Ho_Chi_Minh] PHP Fatal error:  Uncaught exception 'MongoDuplicateKeyException' with message 'localhost:27017: E11000 duplicate key error collection: _worldfone4xs-vj.Session index: _id_ dup key: { : "03jrg4esarbfpubm7hsthjo1e4vorcg7" }' in /var/www/html/worldfone4xs-vietjet/application/libraries/Session/drivers/Session_mongo_driver.php:213
+Stack trace:
+#0 /var/www/html/worldfone4xs-vietjet/application/libraries/Session/drivers/Session_mongo_driver.php(213): MongoCollection->insert(Array, Array)
+#1 [internal function]: CI_Session_mongo_driver->write('03jrg4esarbfpub...', '__ci_last_regen...')
+#2 [internal function]: session_write_close()
+#3 {main}
+  thrown in /var/www/html/worldfone4xs-vietjet/application/libraries/Session/drivers/Session_mongo_driver.php on line 213
+[24-Jun-2019 14:51:31 Asia/Ho_Chi_Minh] PHP Fatal error:  Uncaught exception 'MongoDuplicateKeyException' with message 'localhost:27017: E11000 duplicate key error collection: _worldfone4xs-vj.Session index: _id_ dup key: { : "n4a0vu3d310g8t4o9sua2degsqqi79ae" }' in /var/www/html/worldfone4xs-vietjet/application/libraries/Session/drivers/Session_mongo_driver.php:213
+Stack trace:
+#0 /var/www/html/worldfone4xs-vietjet/application/libraries/Session/drivers/Session_mongo_driver.php(213): MongoCollection->insert(Array, Array)
+#1 [internal function]: CI_Session_mongo_driver->write('n4a0vu3d310g8t4...', '__ci_last_regen...')
+#2 [internal function]: session_write_close()
+#3 {main}
+  thrown in /var/www/html/worldfone4xs-vietjet/application/libraries/Session/drivers/Session_mongo_driver.php on line 213
+[24-Jun-2019 14:59:00 Asia/Ho_Chi_Minh] PHP Fatal error:  Uncaught exception 'MongoDuplicateKeyException' with message 'localhost:27017: E11000 duplicate key error collection: _worldfone4xs.Session index: _id_ dup key: { : "38cq0754et50urriee4eqokkpkk8d7q1" }' in /var/www/html/worldfone4xs/application/libraries/Session/drivers/Session_mongo_driver.php:213
+Stack trace:
+#0 /var/www/html/worldfone4xs/application/libraries/Session/drivers/Session_mongo_driver.php(213): MongoCollection->insert(Array, Array)
+#1 [internal function]: CI_Session_mongo_driver->write('38cq0754et50urr...', '__ci_last_regen...')
+#2 [internal function]: session_write_close()
+#3 {main}
+  thrown in /var/www/html/worldfone4xs/application/libraries/Session/drivers/Session_mongo_driver.php on line 213
+[24-Jun-2019 15:07:28 Asia/Ho_Chi_Minh] PHP Fatal error:  Uncaught exception 'MongoDuplicateKeyException' with message 'localhost:27017: E11000 duplicate key error collection: _worldfone4xs.Session index: _id_ dup key: { : "6n5gqojikbtn28jsgl7uug6uaacbp5p5" }' in /var/www/html/worldfone4xs/application/libraries/Session/drivers/Session_mongo_driver.php:213
+Stack trace:
+#0 /var/www/html/worldfone4xs/application/libraries/Session/drivers/Session_mongo_driver.php(213): MongoCollection->insert(Array, Array)
+#1 [internal function]: CI_Session_mongo_driver->write('6n5gqojikbtn28j...', '__ci_last_regen...')
+#2 [internal function]: session_write_close()
+#3 {main}
+  thrown in /var/www/html/worldfone4xs/application/libraries/Session/drivers/Session_mongo_driver.php on line 213
+[24-Jun-2019 15:07:28 Asia/Ho_Chi_Minh] PHP Fatal error:  Uncaught exception 'MongoDuplicateKeyException' with message 'localhost:27017: E11000 duplicate key error collection: _worldfone4xs.Session index: _id_ dup key: { : "6n5gqojikbtn28jsgl7uug6uaacbp5p5" }' in /var/www/html/worldfone4xs/application/libraries/Session/drivers/Session_mongo_driver.php:213
+Stack trace:
+#0 /var/www/html/worldfone4xs/application/libraries/Session/drivers/Session_mongo_driver.php(213): MongoCollection->insert(Array, Array)
+#1 [internal function]: CI_Session_mongo_driver->write('6n5gqojikbtn28j...', '__ci_last_regen...')
+#2 [internal function]: session_write_close()
+#3 {main}
+  thrown in /var/www/html/worldfone4xs/application/libraries/Session/drivers/Session_mongo_driver.php on line 213
+[24-Jun-2019 15:17:31 Asia/Ho_Chi_Minh] PHP Fatal error:  Uncaught exception 'MongoDuplicateKeyException' with message 'localhost:27017: E11000 duplicate key error collection: _worldfone4xs-vj.Session index: _id_ dup key: { : "b5f7v1unjrie9bhd3m54gv7d2ibi5pf9" }' in /var/www/html/worldfone4xs-vietjet/application/libraries/Session/drivers/Session_mongo_driver.php:213
+Stack trace:
+#0 /var/www/html/worldfone4xs-vietjet/application/libraries/Session/drivers/Session_mongo_driver.php(213): MongoCollection->insert(Array, Array)
+#1 [internal function]: CI_Session_mongo_driver->write('b5f7v1unjrie9bh...', '__ci_last_regen...')
+#2 [internal function]: session_write_close()
+#3 {main}
+  thrown in /var/www/html/worldfone4xs-vietjet/application/libraries/Session/drivers/Session_mongo_driver.php on line 213
+[24-Jun-2019 20:52:15 Asia/Ho_Chi_Minh] PHP Fatal error:  Uncaught exception 'MongoDuplicateKeyException' with message 'localhost:27017: E11000 duplicate key error collection: _worldfone4xs.Session index: _id_ dup key: { : "it4o227q4aq1fjp3bo0ojfbk0ntd5231" }' in /var/www/html/worldfone4xs/application/libraries/Session/drivers/Session_mongo_driver.php:213
+Stack trace:
+#0 /var/www/html/worldfone4xs/application/libraries/Session/drivers/Session_mongo_driver.php(213): MongoCollection->insert(Array, Array)
+#1 [internal function]: CI_Session_mongo_driver->write('it4o227q4aq1fjp...', '__ci_last_regen...')
+#2 [internal function]: session_write_close()
+#3 {main}
+  thrown in /var/www/html/worldfone4xs/application/libraries/Session/drivers/Session_mongo_driver.php on line 213
+[24-Jun-2019 20:57:16 Asia/Ho_Chi_Minh] PHP Fatal error:  Uncaught exception 'MongoDuplicateKeyException' with message 'localhost:27017: E11000 duplicate key error collection: _worldfone4xs.Session index: _id_ dup key: { : "8rnbuok20smjrq8j0vl5i1mckctm1sb2" }' in /var/www/html/worldfone4xs/application/libraries/Session/drivers/Session_mongo_driver.php:213
+Stack trace:
+#0 /var/www/html/worldfone4xs/application/libraries/Session/drivers/Session_mongo_driver.php(213): MongoCollection->insert(Array, Array)
+#1 [internal function]: CI_Session_mongo_driver->write('8rnbuok20smjrq8...', '__ci_last_regen...')
+#2 [internal function]: session_write_close()
+#3 {main}
+  thrown in /var/www/html/worldfone4xs/application/libraries/Session/drivers/Session_mongo_driver.php on line 213
+[24-Jun-2019 21:02:17 Asia/Ho_Chi_Minh] PHP Fatal error:  Uncaught exception 'MongoDuplicateKeyException' with message 'localhost:27017: E11000 duplicate key error collection: _worldfone4xs.Session index: _id_ dup key: { : "mt6ldsl9m4eh8893vfu5ub82jc6se930" }' in /var/www/html/worldfone4xs/application/libraries/Session/drivers/Session_mongo_driver.php:213
+Stack trace:
+#0 /var/www/html/worldfone4xs/application/libraries/Session/drivers/Session_mongo_driver.php(213): MongoCollection->insert(Array, Array)
+#1 [internal function]: CI_Session_mongo_driver->write('mt6ldsl9m4eh889...', '__ci_last_regen...')
+#2 [internal function]: session_write_close()
+#3 {main}
+  thrown in /var/www/html/worldfone4xs/application/libraries/Session/drivers/Session_mongo_driver.php on line 213
+[24-Jun-2019 21:07:18 Asia/Ho_Chi_Minh] PHP Fatal error:  Uncaught exception 'MongoDuplicateKeyException' with message 'localhost:27017: E11000 duplicate key error collection: _worldfone4xs.Session index: _id_ dup key: { : "gpfsi9o3ppnbelhqblch5scb2ekrv081" }' in /var/www/html/worldfone4xs/application/libraries/Session/drivers/Session_mongo_driver.php:213
+Stack trace:
+#0 /var/www/html/worldfone4xs/application/libraries/Session/drivers/Session_mongo_driver.php(213): MongoCollection->insert(Array, Array)
+#1 [internal function]: CI_Session_mongo_driver->write('gpfsi9o3ppnbelh...', '__ci_last_regen...')
+#2 [internal function]: session_write_close()
+#3 {main}
+  thrown in /var/www/html/worldfone4xs/application/libraries/Session/drivers/Session_mongo_driver.php on line 213
+[24-Jun-2019 21:17:20 Asia/Ho_Chi_Minh] PHP Fatal error:  Uncaught exception 'MongoDuplicateKeyException' with message 'localhost:27017: E11000 duplicate key error collection: _worldfone4xs.Session index: _id_ dup key: { : "6pcrm390tl3qq7414j09incdl67jb9pt" }' in /var/www/html/worldfone4xs/application/libraries/Session/drivers/Session_mongo_driver.php:213
+Stack trace:
+#0 /var/www/html/worldfone4xs/application/libraries/Session/drivers/Session_mongo_driver.php(213): MongoCollection->insert(Array, Array)
+#1 [internal function]: CI_Session_mongo_driver->write('6pcrm390tl3qq74...', '__ci_last_regen...')
+#2 [internal function]: session_write_close()
+#3 {main}
+  thrown in /var/www/html/worldfone4xs/application/libraries/Session/drivers/Session_mongo_driver.php on line 213
+[24-Jun-2019 21:22:21 Asia/Ho_Chi_Minh] PHP Fatal error:  Uncaught exception 'MongoDuplicateKeyException' with message 'localhost:27017: E11000 duplicate key error collection: _worldfone4xs.Session index: _id_ dup key: { : "21lvhdulk16k34tlmdo6rh32jk30dl1t" }' in /var/www/html/worldfone4xs/application/libraries/Session/drivers/Session_mongo_driver.php:213
+Stack trace:
+#0 /var/www/html/worldfone4xs/application/libraries/Session/drivers/Session_mongo_driver.php(213): MongoCollection->insert(Array, Array)
+#1 [internal function]: CI_Session_mongo_driver->write('21lvhdulk16k34t...', '__ci_last_regen...')
+#2 [internal function]: session_write_close()
+#3 {main}
+  thrown in /var/www/html/worldfone4xs/application/libraries/Session/drivers/Session_mongo_driver.php on line 213
+[25-Jun-2019 16:54:49 Asia/Ho_Chi_Minh] PHP Fatal error:  Uncaught exception 'MongoDuplicateKeyException' with message 'localhost:27017: E11000 duplicate key error collection: _worldfone4xs-vj.Session index: _id_ dup key: { : "qqalkm2c1nt44c620c3ljijoahcff094" }' in /var/www/html/worldfone4xs-vietjet/application/libraries/Session/drivers/Session_mongo_driver.php:213
+Stack trace:
+#0 /var/www/html/worldfone4xs-vietjet/application/libraries/Session/drivers/Session_mongo_driver.php(213): MongoCollection->insert(Array, Array)
+#1 [internal function]: CI_Session_mongo_driver->write('qqalkm2c1nt44c6...', '__ci_last_regen...')
+#2 [internal function]: session_write_close()
+#3 {main}
+  thrown in /var/www/html/worldfone4xs-vietjet/application/libraries/Session/drivers/Session_mongo_driver.php on line 213
+[25-Jun-2019 17:33:08 Asia/Ho_Chi_Minh] PHP Fatal error:  Uncaught exception 'MongoDuplicateKeyException' with message 'localhost:27017: E11000 duplicate key error collection: _worldfone4xs.Session index: _id_ dup key: { : "7anqgafmg3q90h65np3jgaevgtqv0ke6" }' in /var/www/html/worldfone4xs/application/libraries/Session/drivers/Session_mongo_driver.php:213
+Stack trace:
+#0 /var/www/html/worldfone4xs/application/libraries/Session/drivers/Session_mongo_driver.php(213): MongoCollection->insert(Array, Array)
+#1 [internal function]: CI_Session_mongo_driver->write('7anqgafmg3q90h6...', '__ci_last_regen...')
+#2 [internal function]: session_write_close()
+#3 {main}
+  thrown in /var/www/html/worldfone4xs/application/libraries/Session/drivers/Session_mongo_driver.php on line 213
+[25-Jun-2019 17:38:10 Asia/Ho_Chi_Minh] PHP Fatal error:  Uncaught exception 'MongoDuplicateKeyException' with message 'localhost:27017: E11000 duplicate key error collection: _worldfone4xs.Session index: _id_ dup key: { : "vjpv1kt82ed7bebv7gajmcuv5gs0234v" }' in /var/www/html/worldfone4xs/application/libraries/Session/drivers/Session_mongo_driver.php:213
+Stack trace:
+#0 /var/www/html/worldfone4xs/application/libraries/Session/drivers/Session_mongo_driver.php(213): MongoCollection->insert(Array, Array)
+#1 [internal function]: CI_Session_mongo_driver->write('vjpv1kt82ed7beb...', '__ci_last_regen...')
+#2 [internal function]: session_write_close()
+#3 {main}
+  thrown in /var/www/html/worldfone4xs/application/libraries/Session/drivers/Session_mongo_driver.php on line 213
+[27-Jun-2019 11:59:54 Asia/Ho_Chi_Minh] PHP Fatal error:  Uncaught exception 'MongoDuplicateKeyException' with message 'localhost:27017: E11000 duplicate key error collection: _worldfone4xs.Session index: _id_ dup key: { : "8qjh6crn61n66kcr9n77s83trdm1trfj" }' in /var/www/html/worldfone4xs/application/libraries/Session/drivers/Session_mongo_driver.php:213
+Stack trace:
+#0 /var/www/html/worldfone4xs/application/libraries/Session/drivers/Session_mongo_driver.php(213): MongoCollection->insert(Array, Array)
+#1 [internal function]: CI_Session_mongo_driver->write('8qjh6crn61n66kc...', '__ci_last_regen...')
+#2 [internal function]: session_write_close()
+#3 {main}
+  thrown in /var/www/html/worldfone4xs/application/libraries/Session/drivers/Session_mongo_driver.php on line 213
+[27-Jun-2019 12:09:57 Asia/Ho_Chi_Minh] PHP Fatal error:  Uncaught exception 'MongoDuplicateKeyException' with message 'localhost:27017: E11000 duplicate key error collection: _worldfone4xs.Session index: _id_ dup key: { : "9aipc9vo3scg4b6o5pum49cfj265859q" }' in /var/www/html/worldfone4xs/application/libraries/Session/drivers/Session_mongo_driver.php:213
+Stack trace:
+#0 /var/www/html/worldfone4xs/application/libraries/Session/drivers/Session_mongo_driver.php(213): MongoCollection->insert(Array, Array)
+#1 [internal function]: CI_Session_mongo_driver->write('9aipc9vo3scg4b6...', '__ci_last_regen...')
+#2 [internal function]: session_write_close()
+#3 {main}
+  thrown in /var/www/html/worldfone4xs/application/libraries/Session/drivers/Session_mongo_driver.php on line 213
+[27-Jun-2019 12:14:58 Asia/Ho_Chi_Minh] PHP Fatal error:  Uncaught exception 'MongoDuplicateKeyException' with message 'localhost:27017: E11000 duplicate key error collection: _worldfone4xs.Session index: _id_ dup key: { : "d07poe7o1gs1mekk5gbn34v0s3eouvu5" }' in /var/www/html/worldfone4xs/application/libraries/Session/drivers/Session_mongo_driver.php:213
+Stack trace:
+#0 /var/www/html/worldfone4xs/application/libraries/Session/drivers/Session_mongo_driver.php(213): MongoCollection->insert(Array, Array)
+#1 [internal function]: CI_Session_mongo_driver->write('d07poe7o1gs1mek...', '__ci_last_regen...')
+#2 [internal function]: session_write_close()
+#3 {main}
+  thrown in /var/www/html/worldfone4xs/application/libraries/Session/drivers/Session_mongo_driver.php on line 213
+[27-Jun-2019 12:20:00 Asia/Ho_Chi_Minh] PHP Fatal error:  Uncaught exception 'MongoDuplicateKeyException' with message 'localhost:27017: E11000 duplicate key error collection: _worldfone4xs.Session index: _id_ dup key: { : "4f1hmgr6gba6uvk5hsaajauodv46vn16" }' in /var/www/html/worldfone4xs/application/libraries/Session/drivers/Session_mongo_driver.php:213
+Stack trace:
+#0 /var/www/html/worldfone4xs/application/libraries/Session/drivers/Session_mongo_driver.php(213): MongoCollection->insert(Array, Array)
+#1 [internal function]: CI_Session_mongo_driver->write('4f1hmgr6gba6uvk...', '__ci_last_regen...')
+#2 [internal function]: session_write_close()
+#3 {main}
+  thrown in /var/www/html/worldfone4xs/application/libraries/Session/drivers/Session_mongo_driver.php on line 213
+[08-Jul-2019 13:29:12 Asia/Ho_Chi_Minh] PHP Fatal error:  Uncaught exception 'MongoDuplicateKeyException' with message 'localhost:27017: E11000 duplicate key error collection: _worldfone4xs.Session index: _id_ dup key: { : "apt01029vo903to2qhsf7fvj9j2aqov5" }' in /var/www/html/worldfone4xs/application/libraries/Session/drivers/Session_mongo_driver.php:213
+Stack trace:
+#0 /var/www/html/worldfone4xs/application/libraries/Session/drivers/Session_mongo_driver.php(213): MongoCollection->insert(Array, Array)
+#1 [internal function]: CI_Session_mongo_driver->write('apt01029vo903to...', '__ci_last_regen...')
+#2 [internal function]: session_write_close()
+#3 {main}
+  thrown in /var/www/html/worldfone4xs/application/libraries/Session/drivers/Session_mongo_driver.php on line 213
+[24-Jul-2019 16:18:34 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function insert() on null in /var/www/html/worldfone4xs_ibm/application/libraries/Session/drivers/Session_mongo_driver.php on line 213
+[24-Jul-2019 16:18:34 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function close() on null in /var/www/html/worldfone4xs_ibm/application/libraries/Session/drivers/Session_mongo_driver.php on line 247
+[24-Jul-2019 16:18:35 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function insert() on null in /var/www/html/worldfone4xs_ibm/application/libraries/Session/drivers/Session_mongo_driver.php on line 213
+[24-Jul-2019 16:18:35 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function close() on null in /var/www/html/worldfone4xs_ibm/application/libraries/Session/drivers/Session_mongo_driver.php on line 247
+[24-Jul-2019 16:19:01 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function insert() on null in /var/www/html/worldfone4xs_ibm/application/libraries/Session/drivers/Session_mongo_driver.php on line 213
+[24-Jul-2019 16:19:01 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function close() on null in /var/www/html/worldfone4xs_ibm/application/libraries/Session/drivers/Session_mongo_driver.php on line 247
+[24-Jul-2019 16:19:02 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function insert() on null in /var/www/html/worldfone4xs_ibm/application/libraries/Session/drivers/Session_mongo_driver.php on line 213
+[24-Jul-2019 16:19:02 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function close() on null in /var/www/html/worldfone4xs_ibm/application/libraries/Session/drivers/Session_mongo_driver.php on line 247
+[24-Jul-2019 17:04:32 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function insert() on null in /var/www/html/worldfone4xs_ibm/application/libraries/Session/drivers/Session_mongo_driver.php on line 213
+[24-Jul-2019 17:04:32 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function close() on null in /var/www/html/worldfone4xs_ibm/application/libraries/Session/drivers/Session_mongo_driver.php on line 247
+[24-Jul-2019 17:04:55 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function insert() on null in /var/www/html/worldfone4xs_ibm/application/libraries/Session/drivers/Session_mongo_driver.php on line 213
+[24-Jul-2019 17:04:55 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function close() on null in /var/www/html/worldfone4xs_ibm/application/libraries/Session/drivers/Session_mongo_driver.php on line 247
+[24-Jul-2019 17:51:06 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function insert() on null in /var/www/html/worldfone4xs_ibm/application/libraries/Session/drivers/Session_mongo_driver.php on line 213
+[24-Jul-2019 17:51:06 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function close() on null in /var/www/html/worldfone4xs_ibm/application/libraries/Session/drivers/Session_mongo_driver.php on line 247
+[24-Jul-2019 22:20:18 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function insert() on null in /var/www/html/worldfone4xs_ibm/application/libraries/Session/drivers/Session_mongo_driver.php on line 213
+[24-Jul-2019 22:20:18 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function close() on null in /var/www/html/worldfone4xs_ibm/application/libraries/Session/drivers/Session_mongo_driver.php on line 247
+[24-Jul-2019 22:29:35 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function insert() on null in /var/www/html/worldfone4xs_ibm/application/libraries/Session/drivers/Session_mongo_driver.php on line 213
+[24-Jul-2019 22:29:35 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function close() on null in /var/www/html/worldfone4xs_ibm/application/libraries/Session/drivers/Session_mongo_driver.php on line 247
+[24-Jul-2019 22:30:20 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function insert() on null in /var/www/html/worldfone4xs_ibm/application/libraries/Session/drivers/Session_mongo_driver.php on line 213
+[24-Jul-2019 22:30:20 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function close() on null in /var/www/html/worldfone4xs_ibm/application/libraries/Session/drivers/Session_mongo_driver.php on line 247
+[24-Jul-2019 22:41:51 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function insert() on null in /var/www/html/worldfone4xs_ibm/application/libraries/Session/drivers/Session_mongo_driver.php on line 213
+[24-Jul-2019 22:41:51 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function close() on null in /var/www/html/worldfone4xs_ibm/application/libraries/Session/drivers/Session_mongo_driver.php on line 247
+[24-Jul-2019 22:41:53 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function insert() on null in /var/www/html/worldfone4xs_ibm/application/libraries/Session/drivers/Session_mongo_driver.php on line 213
+[24-Jul-2019 22:41:53 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function close() on null in /var/www/html/worldfone4xs_ibm/application/libraries/Session/drivers/Session_mongo_driver.php on line 247
+[24-Jul-2019 22:44:52 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function insert() on null in /var/www/html/worldfone4xs_ibm/application/libraries/Session/drivers/Session_mongo_driver.php on line 213
+[24-Jul-2019 22:44:52 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function close() on null in /var/www/html/worldfone4xs_ibm/application/libraries/Session/drivers/Session_mongo_driver.php on line 247
+[24-Jul-2019 22:45:22 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function insert() on null in /var/www/html/worldfone4xs_ibm/application/libraries/Session/drivers/Session_mongo_driver.php on line 213
+[24-Jul-2019 22:45:22 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function close() on null in /var/www/html/worldfone4xs_ibm/application/libraries/Session/drivers/Session_mongo_driver.php on line 247
+[24-Jul-2019 22:45:24 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function insert() on null in /var/www/html/worldfone4xs_ibm/application/libraries/Session/drivers/Session_mongo_driver.php on line 213
+[24-Jul-2019 22:45:24 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function close() on null in /var/www/html/worldfone4xs_ibm/application/libraries/Session/drivers/Session_mongo_driver.php on line 247
+[24-Jul-2019 22:45:47 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function insert() on null in /var/www/html/worldfone4xs_ibm/application/libraries/Session/drivers/Session_mongo_driver.php on line 213
+[24-Jul-2019 22:45:47 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function close() on null in /var/www/html/worldfone4xs_ibm/application/libraries/Session/drivers/Session_mongo_driver.php on line 247
+[24-Jul-2019 22:45:48 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function insert() on null in /var/www/html/worldfone4xs_ibm/application/libraries/Session/drivers/Session_mongo_driver.php on line 213
+[24-Jul-2019 22:45:48 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function close() on null in /var/www/html/worldfone4xs_ibm/application/libraries/Session/drivers/Session_mongo_driver.php on line 247
+[24-Jul-2019 22:45:49 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function insert() on null in /var/www/html/worldfone4xs_ibm/application/libraries/Session/drivers/Session_mongo_driver.php on line 213
+[24-Jul-2019 22:45:49 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function close() on null in /var/www/html/worldfone4xs_ibm/application/libraries/Session/drivers/Session_mongo_driver.php on line 247
+[24-Jul-2019 22:45:49 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function insert() on null in /var/www/html/worldfone4xs_ibm/application/libraries/Session/drivers/Session_mongo_driver.php on line 213
+[24-Jul-2019 22:45:49 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function close() on null in /var/www/html/worldfone4xs_ibm/application/libraries/Session/drivers/Session_mongo_driver.php on line 247
+[24-Jul-2019 22:45:49 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function insert() on null in /var/www/html/worldfone4xs_ibm/application/libraries/Session/drivers/Session_mongo_driver.php on line 213
+[24-Jul-2019 22:45:49 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function close() on null in /var/www/html/worldfone4xs_ibm/application/libraries/Session/drivers/Session_mongo_driver.php on line 247
+[24-Jul-2019 22:45:49 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function insert() on null in /var/www/html/worldfone4xs_ibm/application/libraries/Session/drivers/Session_mongo_driver.php on line 213
+[24-Jul-2019 22:45:49 Asia/Ho_Chi_Minh] PHP Fatal error:  Call to a member function close() on null in /var/www/html/worldfone4xs_ibm/application/libraries/Session/drivers/Session_mongo_driver.php on line 247

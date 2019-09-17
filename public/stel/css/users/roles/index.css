@@ -1,0 +1,58 @@
+span.k-in a.btn {
+    display: none;
+}
+span.k-in.k-state-selected a.btn {
+    display: inline-block;
+}
+.fa.k-sprite, .fa.k-sprite::before {
+    line-height: 20px;
+}
+.k-listview {
+    border-width: 0;
+}
+@-webkit-keyframes glowing {
+  0% { background-color: #ff6600; -webkit-box-shadow: 0 0 3px #ff6600; border-color: #ff6600}
+  50% { background-color: #0094FF; -webkit-box-shadow: 0 0 10px #0094FF; border-color: #0094FF}
+  100% { background-color: #ff6600; -webkit-box-shadow: 0 0 3px #ff6600; border-color: #ff6600}
+}
+ 
+@-moz-keyframes glowing {
+  0% { background-color: #ff6600; -moz-box-shadow: 0 0 3px #ff6600; border-color: #ff6600}
+  50% { background-color: #0094FF; -moz-box-shadow: 0 0 10px #0094FF; border-color: #0094FF}
+  100% { background-color: #ff6600; -moz-box-shadow: 0 0 3px #ff6600; border-color: #ff6600}
+}
+ 
+@-o-keyframes glowing {
+  0% { background-color: #ff6600; box-shadow: 0 0 3px #ff6600; border-color: #ff6600}
+  50% { background-color: #0094FF; box-shadow: 0 0 10px #0094FF; border-color: #0094FF}
+  100% { background-color: #ff6600; box-shadow: 0 0 3px #ff6600; border-color: #ff6600}
+}
+ 
+@keyframes glowing {
+  0% { background-color: #ff6600; box-shadow: 0 0 3px #ff6600; border-color: #ff6600}
+  50% { background-color: #0094FF; box-shadow: 0 0 10px #0094FF; border-color: #0094FF}
+  100% { background-color: #ff6600; box-shadow: 0 0 3px #ff6600; border-color: #ff6600}
+}
+ 
+.btn-alert {
+  -webkit-animation: glowing 3000ms infinite;
+  -moz-animation: glowing 3000ms infinite;
+  -o-animation: glowing 3000ms infinite;
+  animation: glowing 3000ms infinite;
+}
+
+
+#left-col, #right-col {
+    padding: 10px 25px;
+    height: 80vh;
+}
+
+#left-col {
+    overflow-x: auto;
+    border-right: 1px solid lightgray; 
+}
+
+#right-col {
+  background-color: ghostwhite;
+  overflow-y: scroll;
+}

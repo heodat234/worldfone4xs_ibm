@@ -1,0 +1,100 @@
+#!/bin/bash
+#
+# /etc/rc.d/init.d/wfscanjobd
+#
+# description: Report SMS to Global system 
+#
+# Required-Start: httpd mongod
+# chkconfig: 2345 89 90
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+#Define variables
+
+exec="/var/www/worldfone4x_prod/worldfone4x/application/third_party/cli/service-scanJob.sh"
+prog="service-scanjob.sh"
+progchild="phpscanjob"
+lockfile="/var/lock/subsys/wfscanjobd"
+servicename="wfscanjobd"
+
+start() {
+    [ -x $exec ] || exit 5
+    echo -n $"Starting $servicename..."
+    # use daemon to start the service 
+        daemon $exec &
+    retval=$?
+    echo
+    [ $retval -eq 0 ] && touch $lockfile
+    return $retval
+}
+
+stop() {
+    echo -n $"Stopping $servicename..."
+    # use kill proc to stop the service
+    #    killproc $prog
+    #	killproc $progchild
+    retval=$?
+    echo
+    [ $retval -eq 0 ] && rm -f $lockfile
+    return $retval
+}
+
+restart() {
+    stop
+    start
+}
+
+reload() {
+    restart
+}
+
+force_reload() {
+    restart
+}
+
+rh_status() {
+    # run checks to determine if the service is running or use generic status
+    status $prog
+}
+
+rh_status_q() {
+    rh_status >/dev/null 2>&1
+}
+
+case "$1" in
+    start)
+        #Only if service is not running
+        rh_status_q && echo "service already started" && exit 0
+        $1
+        ;;
+    stop)
+        # Only if service is running
+        rh_status_q || exit 0
+        $1
+        ;;
+    restart)
+        $1
+        ;;
+    reload)
+        rh_status_q || exit 7
+        $1
+        ;;
+    force-reload)
+        force_reload
+        ;;
+    status)
+        rh_status
+        ;;
+    condrestart|try-restart)
+        rh_status_q || exit 0
+        restart
+        ;;
+    *)
+        echo $"Usage: $0 {start|stop|status|restart|condrestart|try-restart|reload|force-reload}"
+        exit 2
+
+esac
+exit $?
+
+

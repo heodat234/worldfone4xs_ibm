@@ -1,0 +1,1 @@
+<a href="<?= base_url('page/signout') ?>" data-toggle="tooltip" data-placement="bottom" title="@Logout@"><i class="gi gi-exit"></i></a>

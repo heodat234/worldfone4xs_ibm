@@ -1,0 +1,1 @@
+<a href="<?= base_url('/ticket/email') ?>" data-toggle="tooltip" data-placement="bottom" title="@Email ticket@"><i class="gi gi-envelope"></i></a>
