@@ -27,39 +27,22 @@ Class Test extends CI_Controller {
 		$result = $this->navitaire_model->getBooking("123");
 		pre($result);
 	}
-    function check_your_datetime($x) {
-        return (date('d/m/Y', strtotime($x)) == $x);
-    }
-    function filter_mydate($s) {
-        if (preg_match('@^(\d\d)/(\d\d)/(\d\d\d\d)$@', $s) == false) {
-            return false;
-        }
-        if (checkdate($m[2], $m[3], $m[1]) == false || $m[4] >= 24 || $m[5] >= 60 || $m[6] >= 60) {
-            return false;
-        }
-        return $s;
-    }
+    
     public function test1()
     {
-        $date = "1230220000";
-        if (!strtotime($date)) {
-            echo "sai";
-        }else{
-            echo "đúng";
+        $path = FCPATH.'upload\users\import\\';
+
+        $items = array_diff(scandir($path), array('..', '.'));
+        foreach ($items as $name) {
+                $file_path = $path . $name;
+                $file_info = new SplFileInfo($file_path);
+                $file_name = $file_info->getFilename();
+                $ext = $file_info->getExtension();
+            echo "<pre>";
+            print_r($file_path);
+            echo "</pre>";
         }
-        var_dump(date('d/m/Y', strtotime($date)));
-        if(preg_match('@^(\d\d)-(\d\d)-(\d\d\d\d)$@', $date)){
-            $arr = explode('/', $date);
-            $new = $arr[1].'/'.$arr[0].'/'.$arr[2];
-            var_dump(date('d/m/Y', strtotime($new)));
-        }else{
-            echo "sai";
-        }
-        // if (!empty($errors['warning_count'])) {
-        //     echo "Strictly speaking, that date was invalid!\n";
-        // }else{
-        //     echo "phải";
-        // }
+        exit;
     }
     function convertCSVToJson() {
         $this->load->library("mongo_db");
@@ -67,30 +50,12 @@ Class Test extends CI_Controller {
         $duoifile = 'xlsx';
         $insertData = array();
         if ($duoifile == 'xlsx') {
-            $this->load->library('excel_PHP');
-            $objPHPExcel = PHPExcel_IOFactory::load($filePath);
+            $this->load->library('Excel');
 
-            // $objWorksheet  = $objPHPExcel->setActiveSheetIndex(0);
-            // $highestRow    = $objWorksheet->getHighestRow();
-            // $highestColumn = $objWorksheet->getHighestColumn();
-            // $highestColumnIndex = PHPExcel_Cell::columnIndexFromString($highestColumn);
-            // $array = array();
-            // $data = array();
-            // $arr_candidate = array();
-            // $i = 0;
-            // for ($row = 3; $row <= $highestRow;$row++)
-            // {
-            //     for ($j=0; $j < $highestColumnIndex; $j++) { 
-            //         $data[$i][$j] = $objWorksheet->getCellByColumnAndRow($j,$row)->getCalculatedValue();
-            //     }
-            //     $i++;
-                
-            // }
- 
-            $maxCell = $objPHPExcel->getActiveSheet()->getHighestRowAndColumn();
-            $data = $objPHPExcel->getActiveSheet()->rangeToArray('A1:' . $maxCell['column'] . $maxCell['row']);
-            $data = array_map('array_filter', $data);
-            $rowDataRaw = array_filter($data);
+            $rowDataRaw = $this->excel->read($filePath, 50, 1);
+            if(!empty($rowDataRaw['data'])) {
+                $rowDataRaw = $rowDataRaw['data'];
+            }
 
             foreach ($rowDataRaw as $key => $value) {
                 if($key === 0) {

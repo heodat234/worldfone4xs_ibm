@@ -8,55 +8,100 @@ class Import_model extends CI_Model {
     function __construct() {
         parent::__construct();
         $this->load->library('mongo_db');
+        $this->load->library("crud");
         $this->load->library("session");
         $this->sub = set_sub_collection();
         $this->collection = $this->sub . $this->collection;
+        
 
     }
 
-    function importData($filePath,$duoifile,$collection)
+    function importData($filePath,$duoifile,$collection,$idImport)
     {
         $collection = $this->sub . $collection;
 
-        $insertData = array();
+        $request = array (
+          'take' => 30,
+          'skip' => 0,
+          'page' => 1,
+          'pageSize' => 30,
+          "sort" => array(array("field" => "index", "dir" => "asc"))
+        );
+        $this->crud->select_db($this->config->item("_mongo_db"));
+        $match = array( "collection" => $collection );
+        $response = $this->crud->read("Model", $request, ["index","field", "title", "type"], $match);
+        if(!empty($response['data'])) {
+            $titleData = $response['data'];
+        }
+        
+        $insertData = $error = array();
         if ($duoifile == 'xlsx') {
-            $this->load->library('excel_PHP');
-            $objPHPExcel = PHPExcel_IOFactory::load($filePath);
-            $maxCell = $objPHPExcel->getActiveSheet()->getHighestRowAndColumn();
-            $data = $objPHPExcel->getActiveSheet()->rangeToArray('A1:'. $maxCell['column'] . $maxCell['row']);
-            $data = array_map('array_filter', $data);
-            $rowDataRaw = array_filter($data);
+            $this->load->library('Excel');
 
-            foreach ($rowDataRaw as $key => $value) {
-                if($key === 0) {
-                    continue;
-                }
+            $rowDataRaw = $this->excel->read($filePath, 50, 1);
+            if(!empty($rowDataRaw['data'])) {
+                $rowDataRaw = $rowDataRaw['data'];
+            }
+
+            $objWorksheet   = $this->excel->getActiveSheet($filePath);
+            $highestRow     = $this->excel->getHighestRow($objWorksheet);
+            // $highestColumn  = $this->excel->getHighestColumn($objWorksheet);
+            $k = 0;
+            for ($i=2; $i <= $highestRow; $i++) { 
                 $rowData = array();
-                foreach ($rowDataRaw[0] as $titleKey => $titleValue) {
-                    if ($titleValue == '') {
+                foreach ($titleData as $titleKey => $titleValue) {
+                    $cell   = $this->excel->getCell($objWorksheet,$titleKey + 1,$i);
+                    $type   =  $this->excel->getDataType($cell);
+                    $column = $this->excel->stringFromColumnIndex($titleKey + 1);
+                    $value  =  $this->excel->getValue($cell);
+
+                    if ($type != 'n' && ($titleValue['type'] =='int' || $titleValue['type'] == 'double')) {
+                        $error[$k] = array('cell' =>$column.$i,'type' =>'number');
+                        $k++;
                         continue;
                     }
-                    $titleValue = trim(str_replace(".", "", $titleValue));
-                    $titleValue = str_replace(" ", "_", $titleValue);
-                    $titleValue = str_replace("\n", "", $titleValue);
-                    if(isset($value[$titleKey]) && strtotime($value[$titleKey])) {
-                        $value[$titleKey] = strtotime($value[$titleKey]);
+                    if ($type != 'b' && $titleValue['type'] =='boolean' ) {
+                        $error[$k] = array('cell' =>$column.$i,'type' =>'boolean');
+                        $k++;
+                        continue;
                     }
-                    $rowData[$titleValue] = isset($value[$titleKey]) ? $value[$titleKey] : '';
+                    if (isset($value) && $titleValue['type'] == 'timestamp') {
+                        $value = str_replace('/', '-', $value);
+                        if(strtotime($value) ) {
+                            $value = strtotime($value);
+                        }else{
+                            $error[$k] =  array('cell' =>$column.$i,'type' =>'date');
+                            $k++;
+                            continue;
+                        }
+                    }
+                    
+                    switch ($titleValue['type']) {
+                        case 'string':
+                            $value = (string)$value;
+                            break;
+                        case 'int':
+                            $value = (int)$value;
+                            break;
+                        case 'double':
+                            $value = (double)$value;
+                            break;
+                        default:
+                           
+                    }
+                    $rowData[$titleValue['field']] = isset($value) ? $value : '';
                 }
                 $rowData['createdAt']        = time();
-                $rowData['Assigned_by']      = 'By Admin';
+                $rowData['last_modified']    = 0;
+                $rowData['id_import']        = $idImport;
+                $rowData['assigned_by']      = 'By Admin';
                 array_push($insertData, $rowData);
             }
+            
         }else if ($duoifile == 'csv') {
-            $titleData = array();
+            // $titleData = array();
             if (($h = fopen($filePath, "r")) !== FALSE) 
             {
-                while (($rowData = fgetcsv($h, 1000, ",")) !== FALSE) 
-                {     
-                    array_push($titleData, $rowData);
-                    break;
-                }
                 $i = 0;
                 while (($row = fgetcsv($h, 1000, ",")) !== FALSE) 
                 {   
@@ -65,32 +110,43 @@ class Import_model extends CI_Model {
                        continue;
                     }
                     $rowData = array();
-                    foreach ($titleData[0] as $titleKey => $titleValue) {
-                        if ($titleValue == '') {
+                    foreach ($titleData as $titleKey => $titleValue) {
+                        if ($titleValue['field'] == '') {
                             continue;
                         }
-                        $titleValue = trim(str_replace(".", "", $titleValue));
-                        $titleValue = str_replace(" ", "_", $titleValue);
-                        $titleValue = str_replace("\n", "", $titleValue);
                         if(isset($value[$titleKey]) && strtotime($value[$titleKey])) {
                             $value[$titleKey] = strtotime($value[$titleKey]);
                         }
-                        $rowData[$titleValue] = isset($value[$titleKey]) ? $value[$titleKey] : '';                       
+                        $rowData[$titleValue['field']] = isset($value[$titleKey]) ? $value[$titleKey] : '';                       
                     }
                     $rowData['createdAt']        = time();
-                    $rowData['Assigned_by']      = 'By Admin';
+                    $rowData['last_modified']    = 0;
+                    $rowData['id_import']        = $idImport;
+                    $rowData['assigned_by']      = 'By Admin';
                     array_push($insertData, $rowData);
                     $i++;
                 }
               fclose($h);
             }
         }
+        $this->mongo_db->switch_db();
+        if (count($error) <= 0) {
+           $this->mongo_db->batch_insert($collection, $insertData);
+           return 1;
+        }else{
+            return $error;
+        }
         
-        $this->mongo_db->batch_insert($collection, $insertData);
     }
 
     public function importFile($data)
     {
-        $this->mongo_db->insert($this->collection, $data);    
+        $response = $this->mongo_db->insert($this->collection, $data);    
+        return $response['id'];
+    }
+
+    public function updateImportHistory($id,$data)
+    {
+        $this->mongo_db->where_id($id)->set($data)->update($this->collection);
     }
 }

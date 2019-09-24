@@ -261,7 +261,10 @@ Class Excel {
 
 			$worksheet = $spreadsheet->getActiveSheet();
 
-			$sheetData = $worksheet->toArray(null, false, false, true);
+			$maxCell = $worksheet->getHighestRowAndColumn();
+            $sheetData = $worksheet->rangeToArray('A1:' . $maxCell['column'] . $maxCell['row']);
+
+			// $sheetData = $worksheet->rangeToArray();
 		}
 		return $sheetData;
     }
@@ -284,5 +287,43 @@ Class Excel {
 			$total = $worksheet->getHighestDataRow();
 		}
 		return $total;
+    }
+
+    public function getActiveSheet($file_path)
+    {
+		$spreadsheet = $this->reader->load($file_path);
+		$worksheet = $spreadsheet->getActiveSheet();
+		return $worksheet;
+    }
+    public function getHighestRow($worksheet)
+    {
+		$value = $worksheet->getHighestRow();
+		return $value;
+    }
+    public function getHighestColumn($worksheet)
+    {
+		$value = $worksheet->getHighestColumn();
+		// $index = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($value);
+		return $value;
+    }
+    public function stringFromColumnIndex($columnIndex)
+    {
+		$value = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($columnIndex);
+		return $value;
+    }
+    public function getCell($worksheet,$col,$row)
+    {
+		$cell = $worksheet->getCellByColumnAndRow($col,$row);
+		return $cell;
+    }
+    public function getValue($cell)
+    {
+		$value = $cell->getValue();
+		return $value;
+    }
+    public function getDataType($cell)
+    {
+		$type = $cell->getDataType();
+		return $type;
     }
 }

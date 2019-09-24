@@ -12,11 +12,23 @@
         
     </ul>
 </div>
+<style type="text/css">
+	.swal-footer {
+	    text-align: center;
+	}
+	.swal-button--ftp {
+		background: #0f73a5;
+	}
+	.swal-button--danger {
+		background: #f1be06;
+	}
+</style>
 <script>
 var Config = {
     crudApi: `${ENV.restApi}`,
     templateApi: `${ENV.templateApi}`,
     collection: "Import_history",
+    filter: {field: "collection", operator: "eq", value: 'Telesalelist'},
     observable: {
     },
     model: {
@@ -49,11 +61,9 @@ var Config = {
         },{
             field: "file_name",
             title: "File Name",
-            locked: true,
         },{
             field: "source",
             title: "Source",
-            locked: true,
         },{
             field: "status",
             title: "Status",
@@ -74,7 +84,7 @@ var Config = {
         ]
 }; 
 </script>
-<script src="<?= STEL_PATH.'js/table2.js' ?>"></script>
+<script src="<?= STEL_PATH.'js/tablev2.js' ?>"></script>
 <script type="text/javascript">
 	
 
@@ -110,17 +120,19 @@ var Config = {
 	function divideList(ele) {
 		var uid = $(ele).data('uid');
 		var dataItem = Table.dataSource.getByUid(uid);
-		router.navigate(`/divide`);
+		router.navigate(`/divide/${dataItem.id}`);
 	}
 
 	function detailData(ele) {
 		var uid = $(ele).data('uid');
 		var dataItem = Table.dataSource.getByUid(uid);
 		router.navigate(`/detail/${dataItem.id}`);
+		// router.navigate(`/`);
 	}
 
 	$(document).on("click", ".grid-name", function() {
 		detailData($(this).closest("tr"));
+        divideList($(this).closest("tr"));
 	})
 	$( document ).ready(function() {
         Table.init();

@@ -29,15 +29,15 @@ var layoutViewModel = kendo.observable({
 		}
 	},
 	hasDetail: false,
-	diallistList: [],
-	addDiallistList: function(diallist) {
-		var link = ENV.currentUri + '/#/detail/' + diallist.id;
-		var check = this.diallistList.find(obj => obj.id == diallist.id);
+	telesaleList: [],
+	addTelesalelistList: function(telesaleList) {
+		var link = ENV.currentUri + '/#/detail/' + telesaleList.id;
+		var check = this.telesaleList.find(obj => obj.id == telesaleList.id);
 		if(!check) {
-			this.diallistList.push({id: diallist.id, url: link, name: diallist.name, active: true})
+			this.telesaleList.push({id: telesaleList.id, url: link, name: telesaleList.name, active: true})
 		}
-		for (var i = 0; i < this.diallistList.length; i++) {
-			this.set(`diallistList[${i}].active`, (this.diallistList[i].id == diallist.id) ? true : false);
+		for (var i = 0; i < this.telesaleList.length; i++) {
+			this.set(`diallistList[${i}].active`, (this.telesaleList[i].id == telesaleList.id) ? true : false);
 		}
 		this.set("hasDetail", true);
 	}
@@ -67,18 +67,18 @@ router.route("/", async function() {
 
 router.route("/detail/:id", async function(id) {
 	layoutViewModel.setActive(1);
-	var dataItemFull = await $.get(`${ENV.restApi}diallist/${id}`);
+	var dataItemFull = await $.get(`${ENV.restApi}import_history/${id}`);
 	if(!dataItemFull) {
-		notification.show("Can't find diallist", "error");
+		notification.show("Can't find Detail List", "error");
 		return;
 	}
-	layoutViewModel.addDiallistList(dataItemFull);
-	layoutViewModel.set("breadcrumb", `${dataItemFull.name}`);
-	var HTML = await $.get(`${Config.templateApi}diallist/detail?id=${id}`);
-	var model = {
-	}
-	var kendoView = new kendo.View(HTML, { model: model, template: false, wrap: false });
-    layout.showIn("#bottom-row", kendoView);
+	// layoutViewModel.addTelesalelistList(dataItemFull);
+	layoutViewModel.set("breadcrumb", dataItemFull.file_name);
+	var HTML = await $.get(`${Config.templateApi}telesalelist/overview?id=${id}`);
+	var kendoView = new kendo.View(HTML, { model: {}, template: false, wrap: false });
+    await layout.showIn("#bottom-row", kendoView);
+    var widget = await $.get(`${Config.templateApi}telesalelist/widget`);
+    await $("#page-widget").html(widget);
 });
 
 router.route("/import", async function() {
@@ -93,10 +93,19 @@ router.route("/history", async function() {
 	layout.showIn("#bottom-row", kendoView);
 });
 
-router.route("/divide", async function() {
-	var HTML = await $.get(`${Config.templateApi}telesalelist/divide_list`);
-	var kendoView = new kendo.View(HTML);
-	layout.showIn("#bottom-row", kendoView);
+router.route("/divide/:id", async function(id) {
+	layoutViewModel.setActive(1);
+	var dataItemFull = await $.get(`${ENV.restApi}import_history/${id}`);
+	if(!dataItemFull) {
+		notification.show("Can't find Divide List", "error");
+		return;
+	}
+	layoutViewModel.set("breadcrumb", `Divide List`);
+	var HTML = await $.get(`${Config.templateApi}telesalelist/divide_list?id=${id}`);
+	var model = {
+	}
+	var kendoView = new kendo.View(HTML, { model: model, template: false, wrap: false });
+    layout.showIn("#bottom-row", kendoView);
 });
 
 router.start();
@@ -117,6 +126,7 @@ async function addForm() {
 	$("#right-form").empty();
 	var kendoView = new kendo.View(formHtml, { wrap: false, model: model, evalTemplate: false });
 	kendoView.render($("#right-form"));
+	router.navigate(`/`);
 }
 
 document.onkeydown = function(evt) {

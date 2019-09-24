@@ -1,13 +1,38 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Import extends WFF_Controller {
+Class Import extends WFF_Controller {
 
 	function __construct()
     { 
     	parent::__construct();
     	$this->load->model('import_model');
+        header('Content-type: application/json');
         $this->only_main_content = (bool) $this->input->get("omc");
+        // $this->collection = set_sub_collection($this->collection);
+    }
+
+    function read()
+    {
+        try {
+            $request = json_decode($this->input->get("q"), TRUE);
+
+            $arr = array();
+            $path = FCPATH.'upload\users\import\\';
+
+            $items = array_diff(scandir($path), array('..', '.'));
+            foreach ($items as $name) {
+                    $row['file_path'] = $path . $name;
+                    $file_info = new SplFileInfo($row['file_path']);
+                    $row['file_name'] = $file_info->getFilename();
+                    $ext = $file_info->getExtension();
+                    array_push($arr, $row);
+            }
+            $response = array('data'=> $arr, 'total' => count($arr));
+            echo json_encode($response);
+        } catch (Exception $e) {
+            echo json_encode(array("status" => 0, "message" => $e->getMessage()));
+        }
     }
 
     public function upload($collection)
@@ -43,26 +68,87 @@ class Import extends WFF_Controller {
             }else{
                 $type = 'file';
             }            
-     		try {
-     			// $collection = 'Telesalelist';
-            	$this->import_model->importData($filePath,$duoifile,$collection);
-            	$status = 1;
-            	$message = 'Upload successfully';
-            } 
-            catch (Exception $e) {
-            	$status = 0;
-            	$message = 'Upload error';
-			}	
-	        
+     		$status = 1;
+	        $error = [];
         }
-        $dataImport = array(
-     				'begin_import' 	          => $start,
-     				'complete_import' 		  => $complete,
-     				'file_name' 	          => $config['file_name'],
-     				'source'		          => 'Manual',
-     				'status'		          => $status
-     			);
-        $this->import_model->importFile($dataImport);
-        echo json_encode(array("status" => $status, "message" => $message));
+        try {
+            $dataImport = array(
+                'collection'              => $collection,
+                'begin_import'            => $start,
+                'complete_import'         => $complete,
+                'file_name'               => $config['file_name'],
+                'source'                  => 'Manual',
+                'status'                  => 2
+            );
+            $idImport = $this->import_model->importFile($dataImport);
+            if ($status == 1) {
+                $response = $this->import_model->importData($filePath,$duoifile,$collection,$idImport);
+                if ($response == 1) {
+                    $dataImport = array(
+                        'complete_import'         => time(),
+                        'status'                  => 1
+                    );
+                    $this->import_model->updateImportHistory($idImport,$dataImport);
+                    $error = [];
+                    $message = 'Upload successfully';
+                }else{
+                    $status = 0;
+                    $dataImport = array(
+                        'complete_import'         => time(),
+                        'status'                  => $status
+                    );
+                    $this->import_model->updateImportHistory($idImport,$dataImport);
+                    $error = $response;
+                    $message = 'Upload error';
+                }
+            }
+        } 
+        catch (Exception $e) {
+            $status = 0;
+            $message = 'Upload error';
+        }   
+        echo json_encode(array("status" => $status, "message" => $message,'error' => $error));
+    }
+
+    function importFTP($collection)
+    {
+        try {
+            $file_path = $this->input->post('file_path');
+            $file_name = $this->input->post('file_name');
+            $duoifile = pathinfo($file_name, PATHINFO_EXTENSION);
+
+            $dataImport = array(
+                'collection'              => $collection,
+                'begin_import'            => time(),
+                'complete_import'         => 0,
+                'file_name'               => $file_name,
+                'source'                  => 'FTP',
+                'status'                  => 2
+            );
+            $idImport = $this->import_model->importFile($dataImport);
+                $response = $this->import_model->importData($file_path,$duoifile,$collection,$idImport);
+                if ($response == 1) {
+                    $dataImport = array(
+                        'complete_import'         => time(),
+                        'status'                  => 1
+                    );
+                    $this->import_model->updateImportHistory($idImport,$dataImport);
+                    $error = [];
+                    $message = 'Upload successfully';
+                }else{
+                    $status = 0;
+                    $dataImport = array(
+                        'complete_import'         => time(),
+                        'status'                  => $status
+                    );
+                    $this->import_model->updateImportHistory($idImport,$dataImport);
+                    $error = $response;
+                    $message = 'Upload successfully';
+                }
+            
+            echo json_encode(array("status" => 1,"message" => $message));
+        } catch (Exception $e) {
+            echo json_encode(array("status" => 0, "message" => $e->getMessage()));
+        }
     }
 }

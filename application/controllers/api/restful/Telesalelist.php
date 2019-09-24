@@ -17,8 +17,9 @@ Class Telesalelist extends WFF_Controller {
 	{
 		try {
 			$request = json_decode($this->input->get("q"), TRUE);
-			$where = array('ownership' => $this->session->userdata("extension"));
-			$response = $this->crud->read($this->collection, $request,'',$where);
+			// $where = array('ownership' => $this->session->userdata("extension"));
+			// $response = $this->crud->read($this->collection, $request,'',$where);
+			$response = $this->crud->read($this->collection, $request);
 			echo json_encode($response);
 		} catch (Exception $e) {
 			echo json_encode(array("status" => 0, "message" => $e->getMessage()));
