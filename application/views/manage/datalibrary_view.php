@@ -101,10 +101,10 @@
         });
 
         router.route("/", async function() {
-            var HTML = await $.get(`${Config.templateApi}telesalelist/overview`);
+            var HTML = await $.get(`${Config.templateApi}data_library/overview`);
             var kendoView = new kendo.View(HTML, { model: {}, template: false, wrap: false });
             await layout.showIn("#bottom-row", kendoView);
-            var widget = await $.get(`${Config.templateApi}telesalelist/widget`);
+            var widget = await $.get(`${Config.templateApi}data_library/widget`);
             await $("#page-widget").html(widget);
         
         });
@@ -126,31 +126,18 @@
         });
 
         router.route("/import", async function() {
-            var HTML = await $.get(`${Config.templateApi}telesalelist/import`);
+            var HTML = await $.get(`${Config.templateApi}data_library/import`);
             var kendoView = new kendo.View(HTML);
             layout.showIn("#bottom-row", kendoView);
         });
 
         router.route("/history", async function() {
-            var HTML = await $.get(`${Config.templateApi}telesalelist/history`);
+            var HTML = await $.get(`${Config.templateApi}data_library/history`);
             var kendoView = new kendo.View(HTML);
             layout.showIn("#bottom-row", kendoView);
         });
 
-        router.route("/divide/:id", async function(id) {
-            layoutViewModel.setActive(1);
-            var dataItemFull = await $.get(`${ENV.restApi}import_history/${id}`);
-            if(!dataItemFull) {
-                notification.show("Can't find Divide List", "error");
-                return;
-            }
-            layoutViewModel.set("breadcrumb", `Divide List`);
-            var HTML = await $.get(`${Config.templateApi}telesalelist/divide_list?id=${id}`);
-            var model = {
-            }
-            var kendoView = new kendo.View(HTML, { model: model, template: false, wrap: false });
-            layout.showIn("#bottom-row", kendoView);
-        });
+        
 
         router.start();
 

@@ -4,84 +4,84 @@
 		<!-- <div id="main-form" style="width: 65%" data-width="65%"> -->
 			<div class="form-group" data-field="@Name@">
 				<label>@Source@</label>
-				<input class="k-textbox" style="width: 100%" data-bind="value: item.Source">
+				<input class="k-textbox" style="width: 100%" data-bind="value: item.source">
 			</div>
 			<div class="form-group" data-field="@Phone@">
 				<label>@Exporting Date@</label>
 				<input data-role="datetimepicker"
-                    data-bind="value: item.Exporting_Date" style="width: 100%"/>
+                    data-bind="value: item.exporting_date" style="width: 100%"/>
 			</div>
 			<div class="form-group" data-field="@Email@">
 				<label>@Contract No.@</label>
-				<input class="k-textbox" style="width: 100%" data-bind="value: item.Contract_No">
+				<input class="k-textbox" style="width: 100%" data-bind="value: item.contract_no">
 			</div>
 			<div class="form-group" data-field="@Email@">
 				<label>@CIF@</label>
-				<input class="k-textbox" style="width: 100%" data-bind="value: item.CIF">
+				<input class="k-textbox" style="width: 100%" data-bind="value: item.cif">
 			</div>
 			<div class="form-group" data-field="@Email@">
 				<label>@Customer name@</label>
-				<input class="k-textbox" style="width: 100%" data-bind="value: item.Customer_name">
+				<input class="k-textbox" style="width: 100%" data-bind="value: item.customer_name">
 			</div>
 			<div class="form-group" data-field="@Email@">
 				<label>@Date of birth@</label>
 				<input data-role="datetimepicker"
-                    data-bind="value: item.Date_of_birth" style="width: 100%"/>
+                    data-bind="value: item.date_of_birth" style="width: 100%"/>
 			</div>
 			<div class="form-group" data-field="@Email@">
 				<label>@ID No@</label>
-				<input class="k-textbox" style="width: 100%" data-bind="value: item.ID_No">
+				<input class="k-textbox" style="width: 100%" data-bind="value: item.id_no">
 			</div>
 			<div class="form-group" data-field="@Email@">
 				<label>@Mobile Phone No.@</label>
-				<input class="k-textbox" style="width: 100%" data-bind="value: item.Mobile_Phone_No">
+				<input class="k-textbox" style="width: 100%" data-bind="value: item.mobile_phone_no">
 			</div>
 			
 		</div>
 		<div id="main-form" style="width: 50%" data-width="50%">
 			<div class="form-group" data-field="@Email@">
 				<label>@Product(MB/CE/PL)@</label>
-				<input class="k-textbox" style="width: 100%" data-bind="value: item.Product">
+				<input class="k-textbox" style="width: 100%" data-bind="value: item.product">
 			</div>
 			<div class="form-group" data-field="@Email@">
 				<label>@Interest Rate(Latest Loan)@</label>
-				<input class="k-textbox" style="width: 100%" data-bind="value: item.Interest_Rate">
+				<input class="k-textbox" style="width: 100%" data-bind="value: item.interest_rate">
 			</div>
 			<div class="form-group" data-field="@Email@">
 				<label>@First due date(Latest Loan)@</label>
-				<input class="k-textbox" style="width: 100%" data-bind="value: item.First_due_date">
+				<input class="k-textbox" style="width: 100%" data-bind="value: item.first_due_date">
 			</div>
 			<div class="form-group" data-field="@Email@">
 				<label>@Term(Latest Loan)@</label>
-				<input class="k-textbox" style="width: 100%" data-bind="value: item.Term">
+				<input class="k-textbox" style="width: 100%" data-bind="value: item.term">
 			</div>
 			<div class="form-group" data-field="@Email@">
 				<label>@Balance(Latest Loan)@</label>
-				<input class="k-textbox" style="width: 100%" data-bind="value: item.Balance">
+				<input class="k-textbox" style="width: 100%" data-bind="value: item.balance">
 			</div>
 			<div class="form-group" data-field="@Email@">
 				<label>@Debt group@</label>
-				<input class="k-textbox" style="width: 100%" data-bind="value: item.Debt_group">
+				<input class="k-textbox" style="width: 100%" data-bind="value: item.debt_group">
 			</div>
 			<div class="form-group" data-field="@Email@">
 				<label>@No. of late(10-29 days)@</label>
-				<input class="k-textbox" style="width: 100%" data-bind="value: item.No_of_late_1">
+				<input class="k-textbox" style="width: 100%" data-bind="value: item.no_of_late_1">
 			</div>
 			<div class="form-group" data-field="@Name@">
 				<label>@No. of late( > 30 days)@</label>
-				<input class="k-textbox" style="width: 100%" data-bind="value: item.No_of_late_2">
+				<input class="k-textbox" style="width: 100%" data-bind="value: item.no_of_late_2">
 			</div>
 			<div class="form-group" data-field="@Name@">
 				<label>@PL-Interest Rate@</label>
-				<input class="k-textbox" style="width: 100%" data-bind="value: item.PL_Interest_Rate">
+				<input class="k-textbox" style="width: 100%" data-bind="value: item.pl_interest_rate">
 			</div>
 			<div class="form-group" data-field="@Name@">
 				<label>@Note@</label>
-				<input class="k-textbox" style="width: 100%" data-bind="value: item.Note">
+				<input class="k-textbox" style="width: 100%" data-bind="value: item.note">
 			</div>
 			<div class="form-group" data-field="@Name@">
-				<label>@ownership@</label>
-				<input class="k-textbox" style="width: 100%" data-bind="value: item.ownership">
+				<label>@Assign@</label>
+				<input class="k-textbox" style="width: 100%" data-bind="value: item.assign">
 			</div>
 			<div class="form-group" data-field="@Name@">
 				<label>@date send data@</label>
@@ -99,7 +99,7 @@
 			</div>
 			<div class="form-group" data-field="@Name@">
 				<label>@Area PL@</label>
-				<input class="k-textbox " style="width: 100%" data-bind="value: item.Area_PL">
+				<input class="k-textbox " style="width: 100%" data-bind="value: item.area_pl">
 			</div>
 	    </div>
 	</div>

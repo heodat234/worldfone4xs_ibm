@@ -14,7 +14,6 @@
 	            <div class="container-fluid">
 	                <div class="row">
 	                    <div class="col-sm-12">
-                            <input type="hidden" name="<?php echo ini_get("session.upload_progress.name"); ?>" value="advancedProgress" />
 							<input id="excel-file" type="file" name="file" />
 						</div>
 						
@@ -90,7 +89,7 @@
     $("#excel-file").kendoUpload({
         async: {
         	autoUpload: false,
-            saveUrl: Config.crudApi+"import/upload/Telesalelist"
+            saveUrl: Config.crudApi+"import/upload/Datalibrary"
         },
         multiple: false,
         localization: {
@@ -238,7 +237,7 @@
                 .then((value) => {
                     if (value == 'import') {
                         $.ajax({
-                            url: Config.crudApi + Config.collection + "/importFTP/Telesalelist",
+                            url: Config.crudApi + Config.collection + "/importFTP/Datalibrary",
                             type: "POST",
                             data: {file_path: dataItem.file_path, file_name: dataItem.file_name},
                             success: function(result) {

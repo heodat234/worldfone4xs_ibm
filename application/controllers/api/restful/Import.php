@@ -18,7 +18,7 @@ Class Import extends WFF_Controller {
             $request = json_decode($this->input->get("q"), TRUE);
 
             $arr = array();
-            $path = FCPATH.'upload\users\import\\';
+            $path = FCPATH.'upload/users/import/';
 
             $items = array_diff(scandir($path), array('..', '.'));
             foreach ($items as $name) {
@@ -37,6 +37,11 @@ Class Import extends WFF_Controller {
 
     public function upload($collection)
     {
+        $key = ini_get("session.upload_progress.prefix") . "advancedProgress";
+        if (isset($_SESSION[$key]))
+        {
+            var_dump('expression');exit;
+        }
     	$json = array();
         $config['upload_path']          = './upload/users/import';
         $config['allowed_types']        = 'csv||doc|docx|xls|xlsx|application/vnd.ms-excel|zip|7zip|rar|application/x-rar-compressed|application/rar|application/x-rar|application/octet-stream|application/force-download|pdf|application/pdf';
@@ -48,7 +53,15 @@ Class Import extends WFF_Controller {
         if (file_exists(FCPATH.'/upload/users/import') == "") {
             mkdir( FCPATH.'/upload/users/import', 0777, true );
         }
-
+        $dataImport = array(
+            'collection'              => $collection,
+            'begin_import'            => $start,
+            'complete_import'         => 0,
+            'file_name'               => $config['file_name'],
+            'source'                  => 'Manual',
+            'status'                  => 2
+        );
+        $idImport = $this->import_model->importFile($dataImport);
         $this->load->library('upload', $config);
 
         if ( ! $this->upload->do_upload('file')){
@@ -72,15 +85,7 @@ Class Import extends WFF_Controller {
 	        $error = [];
         }
         try {
-            $dataImport = array(
-                'collection'              => $collection,
-                'begin_import'            => $start,
-                'complete_import'         => $complete,
-                'file_name'               => $config['file_name'],
-                'source'                  => 'Manual',
-                'status'                  => 2
-            );
-            $idImport = $this->import_model->importFile($dataImport);
+            
             if ($status == 1) {
                 $response = $this->import_model->importData($filePath,$duoifile,$collection,$idImport);
                 if ($response == 1) {
@@ -95,19 +100,26 @@ Class Import extends WFF_Controller {
                     $status = 0;
                     $dataImport = array(
                         'complete_import'         => time(),
-                        'status'                  => $status
+                        'status'                  => $status,
+                        'error'                   => $response
                     );
                     $this->import_model->updateImportHistory($idImport,$dataImport);
                     $error = $response;
                     $message = 'Upload error';
                 }
+            }else{
+                $dataImport = array(
+                    'complete_import'         => time(),
+                    'status'                  => $status,
+                );
+                $this->import_model->updateImportHistory($idImport,$dataImport);
             }
         } 
         catch (Exception $e) {
             $status = 0;
             $message = 'Upload error';
         }   
-        echo json_encode(array("status" => $status, "message" => $message,'error' => $error));
+        echo json_encode(array("status" => $status, "message" => $message));
     }
 
     function importFTP($collection)
@@ -126,29 +138,42 @@ Class Import extends WFF_Controller {
                 'status'                  => 2
             );
             $idImport = $this->import_model->importFile($dataImport);
-                $response = $this->import_model->importData($file_path,$duoifile,$collection,$idImport);
-                if ($response == 1) {
-                    $dataImport = array(
-                        'complete_import'         => time(),
-                        'status'                  => 1
-                    );
-                    $this->import_model->updateImportHistory($idImport,$dataImport);
-                    $error = [];
-                    $message = 'Upload successfully';
-                }else{
-                    $status = 0;
-                    $dataImport = array(
-                        'complete_import'         => time(),
-                        'status'                  => $status
-                    );
-                    $this->import_model->updateImportHistory($idImport,$dataImport);
-                    $error = $response;
-                    $message = 'Upload successfully';
-                }
+            $response = $this->import_model->importData($file_path,$duoifile,$collection,$idImport);
+            if ($response == 1) {
+                $dataImport = array(
+                    'complete_import'         => time(),
+                    'status'                  => 1
+                );
+                $this->import_model->updateImportHistory($idImport,$dataImport);
+                $status = 1;
+                $message = 'Upload successfully';
+            }else{
+                $status = 0;
+                $dataImport = array(
+                    'complete_import'         => time(),
+                    'status'                  => $status,
+                    'error'                   => $response
+                );
+                $this->import_model->updateImportHistory($idImport,$dataImport);
+                $status = 0;
+                $error = $response;
+                $message = 'Upload successfully';
+            }
             
-            echo json_encode(array("status" => 1,"message" => $message));
+            echo json_encode(array("status" => $status,"message" => $message));
         } catch (Exception $e) {
             echo json_encode(array("status" => 0, "message" => $e->getMessage()));
         }
+    }
+
+    function cancelUpload()
+    {
+        $idImport = $this->input->post('id');
+       $dataImport = array(
+            'complete_import'         => time(),
+            'status'                  => 0
+        );
+        $this->import_model->updateImportHistory($idImport,$dataImport);
+         echo json_encode(array("status" =>1,"message" => 'Cancel upload successfully'));
     }
 }

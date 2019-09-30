@@ -33,7 +33,7 @@ class Import_model extends CI_Model {
         if(!empty($response['data'])) {
             $titleData = $response['data'];
         }
-        
+        // var_dump($titleData);exit;
         $insertData = $error = array();
         if ($duoifile == 'xlsx') {
             $this->load->library('Excel');
@@ -44,16 +44,16 @@ class Import_model extends CI_Model {
             }
 
             $objWorksheet   = $this->excel->getActiveSheet($filePath);
-            $highestRow     = $this->excel->getHighestRow($objWorksheet);
+            $highestRow     = $objWorksheet->getHighestRow();
             // $highestColumn  = $this->excel->getHighestColumn($objWorksheet);
             $k = 0;
             for ($i=2; $i <= $highestRow; $i++) { 
                 $rowData = array();
                 foreach ($titleData as $titleKey => $titleValue) {
-                    $cell   = $this->excel->getCell($objWorksheet,$titleKey + 1,$i);
-                    $type   =  $this->excel->getDataType($cell);
+                    $cell   = $objWorksheet->getCellByColumnAndRow($titleKey + 1,$i);
+                    $type   = $cell->getDataType();
                     $column = $this->excel->stringFromColumnIndex($titleKey + 1);
-                    $value  =  $this->excel->getValue($cell);
+                    $value  = $cell->getValue();
 
                     if ($type != 'n' && ($titleValue['type'] =='int' || $titleValue['type'] == 'double')) {
                         $error[$k] = array('cell' =>$column.$i,'type' =>'number');

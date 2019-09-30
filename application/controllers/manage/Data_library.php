@@ -9,7 +9,7 @@ if (!defined('BASEPATH')) {
  */
 
 
-class Telesalelist extends WFF_Controller {
+class Data_library extends WFF_Controller {
 
     public function __construct() {
         parent::__construct();
@@ -21,6 +21,6 @@ class Telesalelist extends WFF_Controller {
         $this->output->data["js"][] = KENDOUI_PATH . "js/jszip.min.js";
         $this->output->data["js"][] = STEL_PATH . "js/tools.js";
         // $this->output->data["js"][] = STEL_PATH . "js/manage/telesalelist.js";
-        $this->load->view('manage/telesalelist_view');
+        $this->load->view('manage/datalibrary_view');
     }
 }

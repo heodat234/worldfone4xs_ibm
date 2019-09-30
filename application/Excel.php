@@ -288,17 +288,4 @@ Class Excel {
 		}
 		return $total;
     }
-
-    public function getActiveSheet($file_path)
-    {
-		$spreadsheet = $this->reader->load($file_path);
-		$worksheet = $spreadsheet->getActiveSheet();
-		return $worksheet;
-    }
-    
-    public function stringFromColumnIndex($columnIndex)
-    {
-		$value = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($columnIndex);
-		return $value;
-    }
 }

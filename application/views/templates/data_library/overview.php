@@ -1,6 +1,6 @@
 <?php $id = $this->input->get("id") ?>
-<div class="col-sm-3" style="margin: 10px 0" id="page-widget"></div>
-<!-- <div class="col-sm-9 filter-mvvm" style="display: none; margin: 10px 0"></div> -->
+<div class="col-sm-2" style="margin: 10px 0" id="page-widget"></div>
+<div class="col-sm-10 filter-mvvm" style="display: none; margin: 10px 0"></div>
 <div class="col-sm-12" style="overflow-y: auto; padding: 0">
 	<div id="grid"></div>
 </div>
@@ -18,7 +18,7 @@
         filter: '<?= $id ?>' != '' ? {field: "id_import", operator: "eq", value: '<?= $id ?>'} : null,
         crudApi: `${ENV.restApi}`,
         templateApi: `${ENV.templateApi}`,
-        collection: "Telesalelist",
+        collection: "Datalibrary",
         observable: {
             scrollTo: function(e) {
                 var id = $(e.currentTarget).data('id');
@@ -235,7 +235,6 @@
     customerFields.read().then(function(){
         var columns = customerFields.data().toJSON();
         columns.map(col => {
-            col.width = 150;
             switch (col.type) {
                 case "name":
                     col.template = (dataItem) => gridName(dataItem[col.field]);

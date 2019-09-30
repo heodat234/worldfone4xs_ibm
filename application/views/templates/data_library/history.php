@@ -6,8 +6,8 @@
 <div id="action-menu">
     <ul>
     	<a href="javascript:void(0)" data-type="detail" onclick="detailData(this)"><li><i class="fa fa-exclamation-circle text-info"></i><span>View Detail</span></li></a>
-    	<a href="javascript:void(0)" onclick="divideList(this)"><li><i class="fa fa-exclamation-circle text-info"></i><span>Divide List</span></li></a>
-    	<li class="devide"></li>
+    	<!-- <a href="javascript:void(0)" onclick="divideList(this)"><li><i class="fa fa-exclamation-circle text-info"></i><span>Divide List</span></li></a> -->
+    	<!-- <li class="devide"></li> -->
         <!-- <a href="javascript:void(0)" data-type="import" onclick="re_Upload(this)"><li><i class="fa fa-exclamation-circle text-info"></i><span>Re-Upload</span></li></a> -->
         
     </ul>
@@ -25,25 +25,6 @@
     .grid {
         color: firebrick;
     }
-    .progress{
-        width:60%;
-        height: 15px;
-        border-radius: 20px;
-    }
-    .status-upload{
-        width: 60%;
-        margin-top: -17px;
-        opacity: 0.5;
-        text-align: center;
-        font-size: 10px;
-    }
-    .cancel-upload{
-        margin: -30px 0 0 107px;
-    }
-    .cancel-upload > a {
-        color: red;
-        text-decoration: underline;
-    }
 </style>
 <script id="detail-template" type="text/x-kendo-template">
   <div class="jsoneditor" style="width: 100%; height: 400px;"></div>
@@ -53,7 +34,7 @@ var Config = {
     crudApi: `${ENV.restApi}`,
     templateApi: `${ENV.templateApi}`,
     collection: "Import_history",
-    filter: {field: "collection", operator: "eq", value: 'Telesalelist'},
+    filter: {field: "collection", operator: "eq", value: 'Datalibrary'},
     observable: {
     },
     model: {
@@ -92,15 +73,13 @@ var Config = {
         },{
             field: "status",
             title: "@Status@",
-            width: 200,
+            locked: true,
             template: function(dataItem) {
-                if (dataItem.status == 1) {
-                    return '<h4 style="font-weight: bold">Success</h4>';
-                }else if (dataItem.status == 0) {
-                    return '<h4 style="font-weight: bold">Fail</h4>';
-                }else if(dataItem.status == 2){
-                    return '<div class"col-sm-8"><div class="progress"></div></div><div class="status-upload">Loading...</div><div class="col-sm-4 cancel-upload"><a href="javascript:void(0)" onclick="cancelUpload(`'+dataItem.id+'`)">Cancel</a></div>';
-                }
+            	if (dataItem.status == 1) {
+            		return '<h4 style="font-weight: bold">Success</h4>';
+            	}else if (dataItem.status == 0) {
+            		return '<h4 style="font-weight: bold">Fail</h4>';
+            	}
                 
             }
         },{
@@ -155,37 +134,6 @@ var Config = {
 		router.navigate(`/detail/${dataItem.id}`);
 		// router.navigate(`/`);
 	}
-
-    function cancelUpload(id) {
-        swal({
-            title: "Do you want to Cancel upload this file?",
-            icon: "warning",
-            buttons: {
-                confirm: {text:"Yes", value:"yes"},
-                cancel: "Cancel"
-            },
-            dangerMode: true,
-        })
-        .then((value) => {
-            switch (value) {
-                case "yes":
-                    $.ajax({
-                        url: Config.crudApi +"/import/cancelUpload",
-                        type: "POST",
-                        data: {id: id},
-                        success: function(result) {
-                            notification.show(result.message, result.status ? "success" : "error");
-                            Table.dataSource.read();
-                        },
-                        error: errorDataSource
-                    })
-                    break;
-                
-                default:
-             
-            }
-        });
-    }
 
 	$(document).on("click", ".grid-name", function() {
 		detailData($(this).closest("tr"));
@@ -297,17 +245,6 @@ var Config = {
                     },
                     dataBound: function() {
                         this.expandRow(this.tbody.find("tr.k-master-row").first());
-                        var grid = this;
-                        grid.tbody.find(".progress").each(function(e) {
-                            var row = $(this).closest("tr");
-                          var model = grid.dataItem(row);
-
-                          $(this).kendoProgressBar({
-                            max: 1000,
-                            // value: model.progress
-                            value: false
-                          })
-                        });
                     },
                     noRecords: {
                         template: `<h2 class='text-danger'>${KENDO.noRecords}</h2>`

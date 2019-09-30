@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-Class Telesalelist extends WFF_Controller {
+Class Data_library extends WFF_Controller {
 
 	private $collection = "Telesalelist";
 

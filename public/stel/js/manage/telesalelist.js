@@ -34,10 +34,10 @@ var layoutViewModel = kendo.observable({
 		var link = ENV.currentUri + '/#/detail/' + telesaleList.id;
 		var check = this.telesaleList.find(obj => obj.id == telesaleList.id);
 		if(!check) {
-			this.telesaleList.push({id: telesaleList.id, url: link, name: telesaleList.name, active: true})
+			this.telesaleList.push({id: telesaleList.id, url: link, name: telesaleList.file_name, active: true})
 		}
 		for (var i = 0; i < this.telesaleList.length; i++) {
-			this.set(`diallistList[${i}].active`, (this.telesaleList[i].id == telesaleList.id) ? true : false);
+			this.set(`telesaleList[${i}].active`, (this.telesaleList[i].id == telesaleList.id) ? true : false);
 		}
 		this.set("hasDetail", true);
 	}
