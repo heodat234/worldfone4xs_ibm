@@ -105,7 +105,13 @@ var Config = {
             }
         },{
             // Use uid to fix bug data-uid of row undefined
-            template: '<a role="button" class="btn btn-sm btn-circle btn-action" style="background: yellow;" data-uid="#: uid #"><i class="fa fa-ellipsis-v"></i></a>',
+            template: function(dataItem) {
+                if (dataItem.status == 1) {
+                    return '<a role="button" class="btn btn-sm btn-circle btn-action" style="background: yellow;" data-uid="#: uid #"><i class="fa fa-ellipsis-v"></i></a>';
+                }else {
+                    return '';
+                }
+            },
             width: 20
         }
         ]

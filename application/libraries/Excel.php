@@ -158,10 +158,13 @@ Class Excel {
 		return $file_path;
     }
 
-    function read($file_path, $pageSize = 5, $titleRow = 1)
+    function read($file_path, $pageSize = 5, $titleRow = 1, $limit_column = null)
     {
     	$total = $this->getTotal($file_path);
-    	$data = $this->getData($file_path, $titleRow, $pageSize + 1);
+    	if(empty($pageSize)) {
+            $pageSize = $total;
+        }
+    	$data = $this->getData($file_path, $titleRow, $pageSize + 1, $limit_column);
     	$show_data = array();
     	for ($i = 0; $i < $pageSize; $i++) { 
     		if(isset($data[$i]))
@@ -170,9 +173,9 @@ Class Excel {
     	return array("data" => $show_data, "total" => $total);
     }
 
-    function convert($file_path, $convert, $from_row = 0, $to_row = 1000000)
+    function convert($file_path, $convert, $from_row = 0, $to_row = 1000000, $limit_column = null, $titleRow = 1)
     {
-    	$excel_data = $this->getValueData($file_path, $from_row, $to_row);
+    	$excel_data = $this->getValueData($file_path, $from_row, $to_row, $titleRow, $limit_column);
     	$data = array();
     	foreach ($excel_data as $row) {
 			$doc = array();
@@ -185,14 +188,14 @@ Class Excel {
 		return $data;
     }
 
-    function getValueData($file_path, $from_row = 0, $to_row = 1000000, $titleRow = 1)
+    function getValueData($file_path, $from_row = 0, $to_row = 1000000, $titleRow = 1, $limit_column)
     {
     	$collection = $file_path;
     	$csv_data = $this->WFF->mongo_db->limit($to_row)->select([], ["_id"])->get($collection);
     	if($csv_data) {
     		$data = $csv_data;
     	} else {
-	    	$excel_data = $this->getData($file_path, $from_row, $to_row);
+	    	$excel_data = $this->getData($file_path, $from_row, $to_row, $limit_column);
 	    	$data = array();
 	    	foreach ($excel_data as $index => $value) {
 	    		if($index > $titleRow)
@@ -251,8 +254,12 @@ Class Excel {
 			// Filter
 			$filter = new MyReadFilter();
 			$filter->setRows($from_row, $to_row);
-			if($limit_column) 
-				$filter->setColumns("A", $limit_column);
+			if($limit_column) {
+                $filter->setColumns("A", $limit_column);
+            }
+//			else {
+//                $filter->setColumns("A", $limit_column);
+//            }
 
 			$this->reader->setReadFilter( $filter );
 
@@ -300,5 +307,10 @@ Class Excel {
     {
 		$value = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($columnIndex);
 		return $value;
+    }
+    function toFormattedString($value,$format)
+    {
+    	$cell_value = \PhpOffice\PhpSpreadsheet\Style\NumberFormat::toFormattedString($value, $format);
+    	return $cell_value;
     }
 }

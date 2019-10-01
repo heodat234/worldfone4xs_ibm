@@ -67,6 +67,8 @@ class Import_model extends CI_Model {
                     }
                     if (isset($value) && $titleValue['type'] == 'timestamp') {
                         $value = str_replace('/', '-', $value);
+                        // $value = $this->excel->toFormattedString($cell->getValue(), 'dd/mm/yyyy');
+                        // var_dump(strtotime($value));exit;
                         if(strtotime($value) ) {
                             $value = strtotime($value);
                         }else{

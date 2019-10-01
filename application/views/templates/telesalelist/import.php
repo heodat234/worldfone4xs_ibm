@@ -110,7 +110,7 @@
         success: function(e) {
     		notification.show(e.response.message, e.response.status ? "success" : "error");  
             if (e.response.status == 0) {
-                router.navigate(`/history`);
+                // router.navigate(`/history`);
             }      	
         }
     });

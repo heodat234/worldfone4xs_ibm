@@ -106,6 +106,7 @@
             },{
                 field: "mobile_phone_no",
                 title: "@Mobile Phone No.@",
+                template: dataItem => gridCallResult(dataItem.mobile_phone_no),
                 width: 150,
             },{
                 field: "product",
