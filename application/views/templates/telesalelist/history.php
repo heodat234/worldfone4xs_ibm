@@ -105,19 +105,12 @@ var Config = {
             }
         },{
             // Use uid to fix bug data-uid of row undefined
-            template: function(dataItem) {
-                if (dataItem.status == 1) {
-                    return '<a role="button" class="btn btn-sm btn-circle btn-action" style="background: yellow;" data-uid="#: uid #"><i class="fa fa-ellipsis-v"></i></a>';
-                }else {
-                    return '';
-                }
-            },
+            template: '<a role="button" class="btn btn-sm btn-circle btn-action" style="background: yellow;" data-uid="#: uid #"><i class="fa fa-ellipsis-v"></i></a>',
             width: 20
         }
         ]
 }; 
 </script>
-<!-- <script src="<?= STEL_PATH.'js/tablev2.js' ?>"></script> -->
 <script type="text/javascript">
     var router = new kendo.Router({routeMissing: function(e) { router.navigate("/") }});
 	function re_Upload(ele) {
@@ -137,7 +130,6 @@ var Config = {
 			var dataItem = Table.dataSource.getByUid(uid);
 		  	switch (value) {
 		    	case "ftp":
-		    		console.log(dataItem);
 	      			swal("Pikachu fainted!");
 		      		break;
 		    	case "manual":
@@ -219,7 +211,7 @@ var Config = {
         }
         return {
             dataSource: {},
-            grid: {},
+            grid_1: {},
             columns: Config.columns,
             gridOptions: {},
             init: function() {
@@ -268,7 +260,7 @@ var Config = {
                     error: errorDataSource
                 });
 
-                var grid = this.grid = $("#grid_1").kendoGrid({
+                var grid_1 = this.grid_1 = $("#grid_1").kendoGrid({
                     dataSource: dataSource,
                     excel: {allPages: true},
                     excelExport: function(e) {
@@ -293,7 +285,7 @@ var Config = {
                     sortable: true,
                     scrollable: Boolean(Config.scrollable),
                     columns: this.columns,
-                    filterable: Config.filterable ? Config.filterable : true,
+                    filterable: false,
                     editable: false,
                     detailTemplate: 'Cell Error: <div class="grid"></div>',
                     detailInit: function(e) {

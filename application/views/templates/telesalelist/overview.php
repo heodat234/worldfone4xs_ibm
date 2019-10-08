@@ -1,6 +1,18 @@
 <?php $id = $this->input->get("id") ?>
 <div class="col-sm-3" style="margin: 10px 0" id="page-widget"></div>
-<!-- <div class="col-sm-9 filter-mvvm" style="display: none; margin: 10px 0"></div> -->
+<div class="col-sm-9 change-mvvm" style=" margin: 10px 0;">
+    <div class="col-sm-2"><label>Re-Assign</label></div>
+    <div class="col-sm-4" class="form-group">
+        <input data-role="dropdownlist"
+               data-text-field="agentname"
+               data-value-field="extension"
+                    data-value-primitive="true"
+                    data-bind="source: userListData" style="width: 100%" id="changeAssign">
+    </div>
+    <div class="col-sm-1">
+        <button class="btn btn-sm btn-primary btn-save" onclick="saveChangeAssign()">@Save@</button>
+    </div>
+</div>
 <div class="col-sm-12" style="overflow-y: auto; padding: 0">
 	<div id="grid"></div>
 </div>
@@ -9,10 +21,15 @@
     	<a href="javascript:void(0)" data-type="detail" onclick="detailData(this)"><li><i class="fa fa-exclamation-circle text-info"></i><span>Detail</span></li></a>
     	<a href="javascript:void(0)" data-type="import" onclick="importData(this)"><li><i class="fa fa-download text-success"></i><span>Import</span></li></a>
     	<li class="devide"></li>
-        <a href="javascript:void(0)" data-type="update" onclick="openForm({title: 'Edit diallist', width: 1000}); editForm(this)"><li><i class="fa fa-pencil-square-o text-warning"></i><span>Edit</span></li></a>
-        <a href="javascript:void(0)" data-type="delete" onclick="deleteDataItem(this)"><li><i class="fa fa-times-circle text-danger"></i><span>Delete</span></li></a>
+        <a href="javascript:void(0)" data-type="update" onclick="openForm({title: 'Edit assign', width: 300}); editForm(this)"><li><i class="fa fa-pencil-square-o text-warning"></i><span>Edit Assign</span></li></a>
+        
     </ul>
 </div> -->
+<style type="text/css">
+    .change-mvvm {
+        display: none;
+    }
+</style>
 <script>
     var Config = {
         filter: '<?= $id ?>' != '' ? {field: "id_import", operator: "eq", value: '<?= $id ?>'} : null,
@@ -46,7 +63,7 @@
                 date_of_birth: {type: "date"},
                 date_send_data: {type: "date"},
                 date_receive_data: {type: "date"},
-                last_modified: {type: "date"}
+                updatedAt: {type: "date"},
             }
         },
         parse: function (response) {
@@ -56,41 +73,49 @@
                 doc.date_of_birth = doc.date_of_birth ? new Date(doc.date_of_birth * 1000) : null;
                 doc.date_send_data = doc.date_send_data ? new Date(doc.date_send_data * 1000) : null;
                 doc.date_receive_data = doc.date_receive_data ? new Date(doc.date_receive_data * 1000) : null;
-                doc.last_modified = doc.last_modified ? new Date(doc.last_modified * 1000) : null;
+                doc.updatedAt = doc.updatedAt ? new Date(doc.updatedAt * 1000) : null;
                 return doc;
             })
             return response;
         },
         columns: [
             {
+                selectable: true, 
+                width: "50px" 
+            },
+            {
                 field: "source",
                 title: "@Source@",
                 width: 150,
+                filterable: false
                 // locked: true
             },{
                 field: "exporting_date",
                 title: "@Exporting Date@",
-                // width: 100,
                 template: function(dataItem) {
                     return (kendo.toString(dataItem.date_of_birth, "dd/MM/yyyy") ||  "").toString();
                 },
                 width: 150,
+                filterable: false
                 // locked: true
 
             },{
                 field: "contract_no",
                 title: "@Contract No.(Latest Loan)@",
                 width: 150,
+                filterable: false
                 // locked: true
             },{
                 field: "cif",
                 title: "@CIF@",
                 width: 150,
+                filterable: false
                 // locked: true
             },{
                 field: "customer_name",
                 title: "@Customer Name@",
                 width: 150,
+                filterable: false
                 // locked: true
             },{
                 field: "date_of_birth",
@@ -99,55 +124,67 @@
                     return (kendo.toString(dataItem.date_of_birth, "dd/MM/yyyy") ||  "").toString();
                 },
                 width: 150,
+                filterable: false
             },{
                 field: "id_no",
                 title: "@ID No@",
                 width: 150,
+                filterable: false
             },{
                 field: "mobile_phone_no",
                 title: "@Mobile Phone No.@",
-                template: dataItem => gridCallResult(dataItem.mobile_phone_no),
                 width: 150,
+                filterable: false
             },{
                 field: "product",
                 title: "@Product(MB/CE/PL)@",
                 width: 150,
+                filterable: false
             },{
                 field: "interest_rate",
                 title: "@Interest Rate(Latest Loan)@",
                 width: 150,
+                filterable: false
             },{
                 field: "first_due_date",
                 title: "@First due date(Latest Loan)@",
                 width: 150,
+                filterable: false
             },{
                 field: "term",
                 title: "@Term(Latest Loan)@",
                 width: 150,
+                filterable: false
             },{
                 field: "balance",
                 title: "@Balance(Latest Loan)@",
                 width: 150,
+                filterable: false
             },{
                 field: "debt_group",
                 title: "@Debt group@",
                 width: 150,
+                filterable: false
             },{
                 field: "no_of_late_1",
                 title: "@No. of late(10-29 days)@",
                 width: 150,
+                filterable: false
             },{
                 field: "no_of_late_2",
                 title: "@No. of late( > 30 days)@",
                 width: 150,
+                filterable: false
             },{
                 field: "pl_interest_rate",
                 title: "@PL-Interest Rate@",
                 width: 150,
+                filterable: false
             },{
                 field: "note",
                 title: "@Note@",
                 width: 150,
+                filterable: false
             },{
                 field: "assign",
                 title: "@Assign@",
@@ -159,6 +196,7 @@
                     return (kendo.toString(dataItem.date_of_birth, "dd/MM/yyyy") ||  "").toString();
                 },
                 width: 150,
+                filterable: false
             },{
                 field: "date_receive_data",
                 title: "@Date receive Data@",
@@ -166,14 +204,17 @@
                     return (kendo.toString(dataItem.date_receive_data, "dd/MM/yyyy") ||  "").toString();
                 },
                 width: 150,
+                filterable: false
             },{
                 field: "code",
                 title: "@Code@",
                 width: 150,
+                filterable: false
             },{
                 field: "area_pl",
                 title: "@Area PL@",
                 width: 150,
+                filterable: false
             },{
                 field: "createdAt",
                 title: "@Created At@",
@@ -181,22 +222,26 @@
                     return (kendo.toString(dataItem.createdAt, "dd/MM/yy H:mm:ss") ||  "").toString();
                 },
                 width: 150,
+                filterable: false
             },{
-                field: "last_modified",
+                field: "updatedAt",
                 title: "@Last Modified@",
                 template: function(dataItem) {
-                    return (kendo.toString(dataItem.last_modified, "dd/MM/yyyy") ||  "").toString();
+                    return (kendo.toString(dataItem.updatedAt, "dd/MM/yyyy H:mm:ss") ||  "").toString();
                 },
                 width: 150,
+                filterable: false
             },{
                 field: "assigned_by",
                 title: "@Assigned by@",
                 width: 150,
-            },
-            // },{
+                filterable: false
+            }
+            // ,{
             //     // Use uid to fix bug data-uid of row undefined
             //     template: '<a role="button" class="btn btn-sm btn-circle btn-action" data-uid="#: uid #"><i class="fa fa-ellipsis-v"></i></a>',
-            //     width: 20
+            //     locked:true,
+            //     width: 40
             // }
         ]
     }; 
@@ -204,9 +249,76 @@
 <script src="<?= STEL_PATH.'js/table.js' ?>"></script>
 <script type="text/javascript">
     $( document ).ready(function() {
+        $('.change-mvvm').hide();
         Table.init();
     });
+
+    var select = [];
+    Table.grid.bind("change", grid_change);
+    function grid_change(arg) {
+        var selectUid = this.selectedKeyNames();
+        if (selectUid.length > 0) {
+            //hiên Re-Assign
+            select = [];
+            $('.change-mvvm').show();
+            for(var i in selectUid){
+                var item = Table.dataSource.getByUid(selectUid[i]);
+                select.push(item.id);
+            }
+        }else{
+            //an Re-Assign
+            $('.change-mvvm').hide();
+        }
+        // console.log(this.selectedKeyNames());
+    }
 	
+    var $userListElement = $(".change-mvvm");
+    var userListObservable = kendo.observable({
+        userListData: new kendo.data.DataSource({
+            transport: {
+                read: ENV.vApi + "widget/user_list",
+                parameterMap: parameterMap
+            },
+            schema: {
+                data: "data",
+                total: "total",
+               
+            }
+        })
+    });
+    kendo.bind($userListElement, userListObservable);
+
+    function saveChangeAssign() {
+        var assign = $('#changeAssign').val();
+        if (assign == '') {
+            swal({
+                title: "Please choose an assign",
+                icon: "warning",
+                dangerMode: true,
+            })
+        }else{
+            $.ajax({
+                url: Config.crudApi + Config.collection + '/changeAssign',
+                type: 'POST',
+                data: {assign: assign, select: select},
+                beforeSend: function(){
+                  if(HELPER.loaderHtml) $("#form-loader").html(HELPER.loaderHtml).show();
+               },
+               complete: function(){
+                  if(HELPER.loaderHtml) $("#form-loader").html("").hide();
+               },
+               success: function(response) {
+                  if(response.status) {
+                    notification.show("@Success@", "success");
+                    Table.dataSource.read();
+                  } else notification.show("@No success@", "error");
+               },
+               error: errorDataSource
+            })
+        }
+            
+    }
+
     var customerFields = new kendo.data.DataSource({
         serverFiltering: true,
         serverSorting: true,

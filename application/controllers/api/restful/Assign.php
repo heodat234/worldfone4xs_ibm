@@ -77,7 +77,8 @@ Class Assign extends CI_Controller {
 		shuffle($response);
 		
 		for ($i=0; $i < $data['random']; $i++) { 
-			$insert_data["assign"]	= $data['extension'];
+			$insert_data["assign"]		= $data['extension'];
+			$insert_data["assigned_by"]	= 'BySystemRandom';
 			$this->crud->where_id($response[$i]['id'])->update($this->sub_collection, array('$set' => $insert_data));
 		}
 		echo json_encode(array("status" => 1, "data" => []));

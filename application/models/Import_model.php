@@ -55,7 +55,7 @@ class Import_model extends CI_Model {
                     $column = $this->excel->stringFromColumnIndex($titleKey + 1);
                     $value  = $cell->getValue();
 
-                    if ($type != 'n' && ($titleValue['type'] =='int' || $titleValue['type'] == 'double')) {
+                    if ($type != 'n' && !is_numeric($value) && ($titleValue['type'] =='int' || $titleValue['type'] == 'double')) {
                         $error[$k] = array('cell' =>$column.$i,'type' =>'number');
                         $k++;
                         continue;
@@ -93,10 +93,16 @@ class Import_model extends CI_Model {
                     }
                     $rowData[$titleValue['field']] = isset($value) ? $value : '';
                 }
+
                 $rowData['createdAt']        = time();
-                $rowData['last_modified']    = 0;
+                // $rowData['last_modified']    = 0;
                 $rowData['id_import']        = $idImport;
-                $rowData['assigned_by']      = 'By Admin';
+                if ($rowData['assign'] != '') {
+                    $rowData['assigned_by']  = 'Byfixed-Import';
+                }else{
+                    $rowData['assigned_by']  = '';
+                }
+                
                 array_push($insertData, $rowData);
             }
             
