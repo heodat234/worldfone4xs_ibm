@@ -51,12 +51,12 @@ Class Ping extends CI_Controller {
         	$this->echoEvent("chat_status", json_encode($chat_status));
      	}  
 
-        if($time % 2 == 0 && $this->events["chat_notifications"]) {
+        /*if($time % 2 == 0 && $this->events["chat_notifications"]) {
         	// Chat
         	$chat_notifications = $this->get_chat_notifications();
         	$this->echoEvent("chat_notifications", 
         		json_encode(array("data" => $chat_notifications, "total" => count($chat_notifications))));
-        }
+        }*/
     	
     	if($time % 2 == 0 && $this->events["wait_in_queue"]) {
     		// Wait in queue

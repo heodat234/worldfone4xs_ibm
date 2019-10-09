@@ -286,7 +286,7 @@
 			var item = await $.get(ENV.vApi + "config/detail");
 			frameElement.src = "/page/signin_view?" + httpBuildQuery({
 				bg_image: item.login_background_img ? item.login_background_img_url : "",
-				bg_color: !item.login_background_img ? item.login_background_color : "",
+				bg_color: !item.login_background_img ? item.login_background_color.replace("#", "") : "",
 				brand_img: item.login_brand_img
 			});
 			kendo.bind($("#page-content"), kendo.observable({

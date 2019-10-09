@@ -245,7 +245,7 @@ Class Excel {
 			$this->inputFileType = $inputFileType;
 			$this->reader = \PhpOffice\PhpSpreadsheet\IOFactory::createReader($inputFileType);
 		}
-		if($this->inputFileType == "Csv") {
+		if($this->inputFileType == "csv") {
 			$collection = $file_path;
 			$sheetData = $this->WFF->mongo_db->limit($to_row)->select([], ["_id"])->get($collection);
 		} else {
@@ -254,6 +254,8 @@ Class Excel {
 			// Filter
 			$filter = new MyReadFilter();
 			$filter->setRows($from_row, $to_row);
+            print_r("TEST");
+            exit();
 			if($limit_column) {
                 $filter->setColumns("A", $limit_column);
             }
@@ -269,6 +271,7 @@ Class Excel {
 			$worksheet = $spreadsheet->getActiveSheet();
 
 			$maxCell = $worksheet->getHighestRowAndColumn();
+
             $sheetData = $worksheet->rangeToArray('A1:' . $maxCell['column'] . $maxCell['row']);
 
 			// $sheetData = $worksheet->rangeToArray();

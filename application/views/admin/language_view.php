@@ -64,7 +64,7 @@ var Config = {
 <div id="page-content">
     <!-- Table Styles Header -->
     <ul class="breadcrumb breadcrumb-top">
-        <li><a href="<?= base_url("users") ?>">@User@</a></li>
+        <li>@User@</li>
         <li>@Language@</li>
         <li class="pull-right none-breakcrumb" id="top-row">
         	<div class="btn-group btn-group-sm">

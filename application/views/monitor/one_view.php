@@ -23,6 +23,7 @@
                 <button href="#/" class="btn btn-alt btn-default" data-bind="click: goTo, css: {active: activeArray[0]}">@Overview@</button>
                 <button href="#/callin" class="btn btn-alt btn-default" data-bind="click: goTo, css: {active: activeArray[1]}">@Call in@</button>
                 <button href="#/callout" class="btn btn-alt btn-default" data-bind="click: goTo, css: {active: activeArray[2]}">@Call out@</button>
+                <button href="#/activity" class="btn btn-alt btn-default" data-bind="click: goTo, css: {active: activeArray[3]}">@Activity@</button>
             </div>
         </li>
     </ul>

@@ -27,7 +27,7 @@
                 if(this.item.SUN) {
                     swal({
                         title: "IP Phone @Unvailable@.",
-                        text: `@Availabe phone to use@.`,
+                        text: `@Available phone to use@.`,
                         icon: "warning",
                         buttons: true,
                         dangerMode: false,

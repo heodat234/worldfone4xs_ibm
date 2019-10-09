@@ -49,7 +49,7 @@ class Page extends WFF_Controller {
 
         $background_color = $this->input->get("bg_color");
         if($background_color) {
-            $data['login_background_color'] = $background_color ? "#" . $background_color : "";
+            $data['login_background_color'] = "#" . $background_color;
         } else {
             $data['login_background_img_url'] = $this->input->get("bg_image");
         }

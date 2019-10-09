@@ -15,15 +15,6 @@
                 <li>
                     @TICKET@
                 </li>
-                <li data-bind="click: openAccount">
-                    @ACCOUNT@
-                </li>
-                <li data-bind="click: openCard" class="hidden">
-                    @CARD@
-                </li>
-                <li data-bind="click: openOnlineBanking">
-                    ONLINE BANKING
-                </li>
                 <li>
                     @LOG@
                 </li>
@@ -137,105 +128,6 @@
                                 </ul>
                                 <div class="text-center">
                                     <a href="javascript:void(0)" data-bind="click: viewMoreTicket">@Show more@</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div>
-                <div class="container-fluid">
-                    <div class="row">
-                        <div class="panel panel-default">
-                            <div class="panel-heading">@ACCOUNT@</div>
-                            <div class="panel-body">
-                                <div class="row" data-template="account-template" data-bind="source: accountData">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div  class="hidden">
-                <div class="container-fluid">
-                    <div class="row">
-                        <div class="panel panel-primary">
-                            <div class="panel-heading">@Card transaction@</div>
-                            <div class="panel-body" style="padding: 0">
-                                <div data-role="grid"
-                                    data-auto-bind="false"
-                                    data-pageable="{refresh: true}"
-                                    data-no-records="{
-                                        template: `<h2 class='text-danger'>@NO DATA@</h2>`
-                                    }"
-                                    data-columns="[
-                                        {field:'amnd_date', title: 'DATE_CREATE'},
-                                        {field:'card_id', title: 'CARD ID'},
-                                        {field:'card_number', title: 'CARD NUMBER'},
-                                        {field:'billing_amount', title: 'BILLING_AMOUNT'},
-                                        {field:'trans_amout', title: 'TRANSACTION'},
-                                        {field:'txn_type', title: 'TXN_TYPE'},
-                                        {field:'note', title: 'Note'},
-                                        {field:'requirement', title: 'Requirement'},
-                                        ]"
-                                  data-bind="source: cardTransactionData"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div>
-                <div class="container-fluid">
-                    <div class="row">
-                        <div class="panel panel-default">
-                            <div class="panel-heading">@SERVICE@</div>
-                            <div class="panel-body">
-                                <div class="container-fluid">
-                                    <div class="row form-horizontal">
-                                        <div class="col-sm-6">
-                                            <?php $fields = array(
-                                                "tgtt"              => "TGTT",
-                                                "tgtk"              => "Tiền gửi có kỳ hạn",
-                                                "combo_goispdv"     => "Gói sản phẩm/dịch vụ",
-                                                "combo_ctkm"        => "Chương trình khuyến mãi",
-                                                "hd_tudong"         => "Hóa đơn tự động",
-                                                "internetbanking"   => "Internet Banking",
-                                                "mobilebanking"     => "Mobile Banking",
-                                                "phonebanking"      => "Phone Banking",
-                                                "atm"               => "Thẻ ATM"
-                                            );
-                                            foreach ($fields as $key => $value) { ?>
-                                                <div class="form-group hover-row">
-                                                    <label class="col-xs-8"><?= $value ?></label>
-                                                    <div class="col-xs-4">
-                                                        <i class="fa fa-check text-success" data-bind="visible: onlineBanking.<?= $key ?>"></i>
-                                                        <i class="fa fa-times text-danger" data-bind="invisible: onlineBanking.<?= $key ?>"></i>
-                                                    </div>
-                                                </div>
-                                            <?php } ?>
-                                        </div>
-                                        <div class="col-sm-6">
-                                            <?php $fields = array(
-                                                "tienvay"               => "Tiền vay",
-                                                "so_du_bl_theo_cl"      => "Số dư bảo lãnh theo L/C",
-                                                "so_du_bl"              => "Số dư bảo lãnh",
-                                                "the_tt_qt"             => "Thẻ tín dụng quốc tế",
-                                                "ctdi_nd"               => "Dịch vụ chuyển tiền đi nội địa",
-                                                "ctden_nd"              => "Dịch vụ chuyển tiền đến nội địa",
-                                                "ctden_qt"              => "Dịch vụ chuyển tiền đến nước ngoài",
-                                                "ctdi_qt"               => "Dịch vụ chuyển tiền ra nước ngoài"
-                                            );
-                                            foreach ($fields as $key => $value) { ?>
-                                                <div class="form-group hover-row">
-                                                    <label class="col-xs-8"><?= $value ?></label>
-                                                    <div class="col-xs-4">
-                                                        <i class="fa fa-check text-success" data-bind="visible: onlineBanking.<?= $key ?>"></i>
-                                                        <i class="fa fa-times text-danger" data-bind="invisible: onlineBanking.<?= $key ?>"></i>
-                                                    </div>
-                                                </div>
-                                            <?php } ?>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -886,19 +778,6 @@ var Detail = function() {
         },
         openCard: function() {
             this.cardTransactionData.filter({field: "cif", operator: "eq", value: this.get("item.cif")})
-        },
-        onlineBanking: {},
-        openOnlineBanking: function() {
-            $.ajax({
-                url: ENV.namaApi + "core/getThongTinDVNHDT",
-                data: {q: JSON.stringify({cif: this.item.cif})},
-                success: response => {
-                    if(response.status) {
-                        this.set("onlineBanking", response.doc);
-                    }
-                },
-                error: errorDataSource
-            })
         },
         caseData: new kendo.data.DataSource({
             serverFiltering: true,

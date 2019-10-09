@@ -29,20 +29,25 @@
     }
 </style>
 <!-- Table Styles Header -->
+<?php if(empty($only_main_content)) { ?>
 <ul class="breadcrumb breadcrumb-top">
     <li>@Tool@</li>
     <li>@Chat internal@</li>
 </ul>
+<?php } ?>
 <div class="container-fluid" id="chat-window">
 	<div class="row">
 		<!-- Chat Block -->
-		<div class="block">
+		<div class="block" style="margin-bottom: 0">
 		    <!-- Title -->
 		    <div class="block-title">
 		        <div class="block-options pull-right">
 		            <div class="btn-group btn-group-sm">
 		                <a href="javascript:void(0)" class="btn btn-alt btn-sm btn-default dropdown-toggle enable-tooltip" data-toggle="dropdown" title="@Setting@"><i class="fa fa-cog"></i></a>
 		                <ul class="dropdown-menu dropdown-custom dropdown-menu-right">
+		                	<li data-bind="visible: room_id">
+		                        <a href="javascript:void(0)" data-bind="click: togglePinRoom"><i class="gi gi-pushpin text-info"></i></i><span>@Pin@ / @Unpin@</span></a>
+		                    </li>
 		                    <li>
 		                        <a href="javascript:void(0)" data-bind="click: addChatGroup"><i class="gi gi-conversation text-success"></i><span>@Create@ @group@ chat</span></a>
 		                    </li>
@@ -59,7 +64,15 @@
 		                </ul>
 		            </div>
 		        </div>
-		        <h2><i class="fa fa-commenting" data-bind="invisible: chatName, css: {text-success: isConnect}""></i><span data-bind="visible: chatName, css: {text-success: isConnect}"><i class="fa fa-user" data-bind="invisible: isGroup"></i><i class="fa fa-users" data-bind="visible: isGroup"></i></span> <span data-bind="html: chatName"></span></h2>
+		        <h2>
+		        	<i class="fa fa-commenting" data-bind="invisible: chatName, css: {text-success: isConnect}""></i>
+		        	<span data-bind="visible: chatName, css: {text-success: isConnect}">
+		        		<i class="fa fa-user" data-bind="invisible: isGroup"></i>
+		        		<i class="fa fa-users" data-bind="visible: isGroup"></i>
+		        		<sup data-bind="visible: isGroup">(<span data-bind="text: membersCount"></span>)</sup>
+		        	</span> 
+		        	<span data-bind="html: chatName"></span>
+		        </h2>
 		    </div>
 		    <!-- END Title -->
 
@@ -69,13 +82,13 @@
 		        <div class="chatui-people themed-background-dark" id="right-chat-menu">
 		            <div class="chatui-people-scroll">
 
-		            	<h2 class="chatui-header">
+		            	<h2 class="chatui-header" data-bind="visible: visibleSearch">
 		            		<input class="form-control" data-bind="events: {keyup: searchChange}" style="width: 100%"
 		            		placeholder="@Search@...">
 		            	</h2>
 
 		            	<!-- Recent -->
-		                <h2 class="chatui-header"><i class="gi gi-comments text-info pull-right"></i><strong>@Recent@</strong> <span data-bind="visible: filterRecentText">(<span data-bind="text: filterRecentText"></span>)</span></h2>
+		                <h2 class="chatui-header" style="margin: 20px 0 15px"><a href="javascript:void(0)" data-bind="click: toggleSearch"><i class="fa fa-search text-info pull-right"></i></a><strong>@Recent@</strong> <span data-bind="visible: filterRecentText">(<span data-bind="text: filterRecentText"></span>)</span></h2>
 		                <div class="list-group" data-template="room-template" data-bind="source: recentChatData">
 		                </div>
 		                <!-- END Recent -->
@@ -102,7 +115,10 @@
 	</div>
 </div>
 <div id="create-group-container"></div>
-<div><input name="file" type="file" id="upload-images"/></div>
+<div class="hidden">
+	<input name="file" type="file" id="upload-image"/>
+	<input name="file" type="file" id="upload-file"/>
+</div>
 <style type="text/css">
 	#right-chat-menu .list-group .list-group-item {
 		padding: 5px 7px;
@@ -145,8 +161,11 @@
         	<img data-bind="visible: avatar, attr: {src: avatar}" alt="Avatar" class="img-circle">
         	<img data-bind="invisible: avatar" src="public/proui/img/placeholders/avatars/avatar.jpg" alt="Avatar" class="img-circle">
     	</div>
-        <h5 class="list-group-item-heading room-name"><b data-bind="text: name"></b></h5>
-        <h6 class="list-group-item-heading" data-bind="html: last_message, visible: last_message"></h6>
+        <h5 class="list-group-item-heading room-name">
+        	<b data-bind="text: name"></b>
+        	<i class="gi gi-pushpin text-muted" data-bind="visible: pin"></i>
+        </h5>
+        <h6 class="list-group-item-heading last-message" data-bind="text: last_message"></h6>
     </a>
     # } else { #
     <a href="javascript:void(0)" data-bind="click: openRoomChat, css: {active: active}, attr: {data-room-id: id}" class="list-group-item">
@@ -158,8 +177,11 @@
         	<img data-bind="visible: avatar, attr: {src: avatar}" alt="Avatar" class="img-circle">
         	<img data-bind="invisible: avatar" src="public/proui/img/placeholders/avatars/avatar.jpg" alt="Avatar" class="img-circle">
     	</div>
-        <h5 class="list-group-item-heading room-name"><b data-bind="text: extension"></b> (<span data-bind="text: agentname"></span>)</h5>
-        <h6 class="list-group-item-heading" data-bind="html: last_message, visible: last_message"></h6>
+        <h5 class="list-group-item-heading room-name">
+        	<b data-bind="text: extension"></b> (<span data-bind="text: agentname"></span>)
+        	<i class="gi gi-pushpin text-muted" data-bind="visible: pin"></i>
+        </h5>
+        <h6 class="list-group-item-heading last-message" data-bind="text: last_message"></h6>
     </a>
     # } #
 </script>
@@ -173,7 +195,7 @@
         	<img data-bind="invisible: avatar" src="public/proui/img/placeholders/avatars/avatar.jpg" alt="Avatar" class="img-circle">
         	<i class="fa fa-circle user-status # if(data.chat_statuscode){# text-success # }else{ # text-warning # } #"></i>
     	</div>
-        <h5 class="list-group-item-heading" style="line-height: 32px"><b data-bind="text: extension">Unknown</b> (<span data-bind="text: agentname"></span>)</h5>
+        <h5 class="list-group-item-heading room-name" style="line-height: 32px"><b data-bind="text: extension">Unknown</b> (<span data-bind="text: agentname"></span>)</h5>
     </a>
 </script>
 <script>
@@ -183,8 +205,7 @@
 	};
 
 	window.onload = function() {
-		ReadyChat.init(); 
-
+		ReadyChat.init();
 		/* Socket.io */
 		var webSocketURL = ENV.baseUrl;
 		var socket = window.socket = io(webSocketURL);
@@ -192,6 +213,41 @@
 			notification.show("Đã mở kết nối chat", "success");
 			chatWindowObservable.set("isConnect", true);
 			socket.emit('start session', ENV.extension);
+		});
+
+		socket.on('typing', (msg) => {
+			var chatUI = $("#chat").data("kendoMyChat");
+			if(!chatUI) return;
+
+			if (msg.indexOf("error") > 0) {
+	            console.log("Error: " + res + "\r\n");
+	        } else {
+	        	var data = JSON.parse(msg);
+	        	if(data.user_id == ENV.extension) return;
+
+	        	var user = {
+	        		id: data.user_id,
+	        		name: data.name
+	        	};
+	        	if(data.action == "start")
+	        		chatUI.renderUserTypingIndicator(user);
+	        	else chatUI.clearUserTypingIndicator(user);
+	        }
+		});
+
+		socket.on('typing all', (msg) => {
+			if (msg.indexOf("error") > 0) {
+	            console.log("Error: " + res + "\r\n");
+	        } else {
+	        	var data = JSON.parse(msg);
+	        	if(data.user_id == ENV.extension) return;
+	        	$lastMessage = $(`.list-group a.list-group-item[data-room-id='${data.room_id}'] .last-message`);
+	        	if(data.action == "start")
+	        		$lastMessage.data("last-message", $lastMessage.html()).html(`<i class="animation-pulse">${data.name} is typing ...</i>`);
+	        	else {
+	        		$lastMessage.data("last-message") ? $lastMessage.html($lastMessage.data("last-message")) : void 0;
+	        	}
+	        }
 		});
 
 		socket.on('chat message', (msg) => {
@@ -207,10 +263,7 @@
 	        		if(!data.from.iconUrl) {
 	        			data.from.iconUrl = Config.defaultIconUrl;
 	        		}
-		        	chatUI.renderMessage({
-				        type: "text",
-				        text: data.text
-				    }, data.from);
+		        	chatUI.renderMessage(data, data.from);
 			    } else {
 			    	if(data.status && data.uid) {
 		        		$("#" + data.uid).find(".k-message-status").html(`<i class="fa fa-check-circle text-success"></i>`);
@@ -253,6 +306,9 @@
 		var chatWindowObservable = window.chatWindowObservable = kendo.observable({
 			chatName: "",
 			agentName: "",
+			toggleSearch: function(e) {
+				this.set("visibleSearch", !this.get("visibleSearch"));
+			},
 			searchChange: function(e) {
 				var value = e.currentTarget.value;
 				this.recentChatData.filter({
@@ -269,6 +325,33 @@
 						{field: "agentname", operator: "contains", value: value}
 					]
 				})
+			},
+			togglePinRoom: function(e) {
+				var room = this.recentChatData.get(this.get("room_id")),
+					operation = room.pin ? "@Unpin@" : "@Pin@";
+				swal({
+                    title: operation + " @this group@.",
+                    text: `@Are you sure@?`,
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: false,
+                })
+                .then((sure) => {
+                    if(sure) {
+                        $.ajax({
+							url: ENV.vApi + "chat/pinRoom/" + this.get("room_id"),
+							type: "POST",
+							contentType: "application/json; charset=utf-8",
+							data: JSON.stringify({pin: !room.pin}),
+							success: (res) => {
+								if(res.status) {
+									chatWindowObservable.recentChatData.read();
+									notification.show(operation + " @group@ @success@", "success");
+								} else notification.show(res.message, "error");
+							}
+						});
+                    }
+                })
 			},
 			addChatGroup: function(e) {
 				if($("#create-group-popup").data("kendoWindow")) {
@@ -297,11 +380,16 @@
                         $popup.destroy();
                     },
                     save: function(e) {
+                    	var data = this.item.toJSON();
+                    	if(!data.members || (data.members.length < 3)) {
+                    		notification.show("@Your data is invalid@", "error");
+                    		return;
+                    	}
                     	$.ajax({
 							url: ENV.vApi + "chat/createRoom",
 							type: "POST",
 							contentType: "application/json; charset=utf-8",
-							data: JSON.stringify(this.item.toJSON()),
+							data: JSON.stringify(data),
 							success: (res) => {
 								if(res.status) {
 									chatWindowObservable.recentChatData.read();
@@ -406,10 +494,12 @@
 				}
 			}),
 			recentChatData: new kendo.data.DataSource({
+				pageSize: 5,
+				serverPaging: true,
 				serverFiltering: true,
 				serverSorting: true,
 				filter: {field: "members", operator: "eq", value: ENV.extension},
-				sort: [{field: "last_time", dir: "desc"}, {field: "updatedAt", dir: "desc"}],
+				sort: [{field: "pin", dir: "desc"}, {field: "last_time", dir: "desc"}, {field: "updatedAt", dir: "desc"}],
 				transport: {
 					read: ENV.vApi + "chat/rooms",
 					parameterMap: parameterMap
@@ -477,6 +567,7 @@
 				var id = $(e.currentTarget).data("room-id"),
 					room = this.recentChatData.get(id);
 				this.set("isGroup", Boolean(room.type == "group"));
+				this.set("membersCount", room.members.length)
 			},
 			openRoomChatAsync: async function(e) {
 				var $chat = $("#chat");
@@ -513,17 +604,30 @@
 				    	args.uid = window.kendo.guid();
 				    	args.status = `<i class="fa fa-spinner fa-pulse"></i>`;
 				    	args.sender.renderMessage(args, args.from);
-		                socket.emit('chat message', JSON.stringify({type: args.type, text: args.text, from: args.from, time: args.timestamp, user_id: ENV.extension, room_id: room_id, uid: args.uid}));
+		                socket.emit('chat message', JSON.stringify({type: args.type, text: args.text, from: args.from, time: args.timestamp, user_id: ENV.extension, room_id: room_id, uid: args.uid, org_type: ENV.type}));
+		            },
+		            typingStart: function(e) {
+		            	socket.emit('typing', JSON.stringify({action: "start", user_id: ENV.extension, name: ENV.agentname, room_id: chatWindowObservable.get("room_id")}));
+		            },
+		            typingEnd: function(e) {
+		            	socket.emit('typing', JSON.stringify({action: "end", user_id: ENV.extension, name: ENV.agentname, room_id: chatWindowObservable.get("room_id")}));
 		            },
 		            toolClick: function (ev) {
-	                    if (ev.name === "sendimage") {
-	                        $("#upload-images").click();
-	                    }
+		            	switch(ev.name) {
+		            		case "sendimage":
+		            			$("#upload-image").click();
+		            			break;
+		            		case "sendfile":
+		            			$("#upload-file").click();
+		            			break;
+		            		default: break;
+		            	}
 	                },
 	                toolbar: {
 	                    toggleable: true,
 	                    buttons: [
-	                        { name: "sendimage", iconClass: "k-icon k-i-image" }
+	                        { name: "sendimage", iconClass: "k-icon k-i-image", text: "@Upload@ @image@" },
+	                        { name: "sendfile", iconClass: "k-icon k-i-file", text: "@Upload@ @file@" }
 	                    ]
 	                }
 				}).data("kendoMyChat");
@@ -532,6 +636,8 @@
 				setTimeout(() => chatUI.scrollToBottom(), 1000);
 
 				$messageList = $chat.find(".k-message-list");
+
+				this.currentScrollTop = 0;
 
 				$messageList.on("scroll", () => {
 					if($messageList.scrollTop() < 10 && $messageList.scrollTop() < this.currentScrollTop) {
@@ -551,14 +657,17 @@
 					this.currentScrollTop = $messageList.scrollTop();
 				});
 
-				$(".k-chat .k-message-box .k-input").after('<input id="emoji-btn">');
+				chatUI.messageBox.input.after('<input id="emoji-btn" style="width: 0">');
 
 				$("#emoji-btn").emojioneArea({
 					standalone: true,
+					buttonTitle: "@Use the TAB key to insert emoji faster@",
+					searchPosition: "bottom",
 					events: {
 						change: function (editor, event) {
-							$(".k-chat .k-message-box .k-input").val($(".k-chat .k-message-box .k-input").val() + $(".k-chat .k-message-box #emoji-btn").val());
+							chatUI.messageBox.input.val($(".k-chat .k-message-box .k-input").val() + $("#emoji-btn").val());
 							$("#emoji-btn").val("");
+							chatUI.messageBox.input.focus();
 					    }
 					}
 				});
@@ -612,7 +721,7 @@
             </div>
             <div class="k-edit-buttons k-state-default">
                 <a class="k-button k-primary k-scheduler-update" data-bind="click: save">@Save@</a>
-                <a class="k-button k-scheduler-cancel" href="#" data-bind="click: close">@Cancel@</a>
+                <a class="k-button k-scheduler-cancel" data-bind="click: close">@Cancel@</a>
             </div>
         </div>
     </div>
@@ -620,7 +729,7 @@
 
 <script type="text/javascript">
 	function renderAfter() {
-		var upload = $("#upload-images").kendoUpload({
+		var upload = $("#upload-image").kendoUpload({
 	        async: {
 	            saveUrl: "api/v1/upload/avatar/chatimg",
 	            autoUpload: true
@@ -632,8 +741,6 @@
 	        showFileList: false,
 	        dropZone: "#chat"
 	    }).data("kendoUpload");
-
-	    upload.wrapper.hide();
 
 	    function onSuccess(e) {
 	        if (e.operation === "upload") {
@@ -655,7 +762,34 @@
 	        }
 	    }
 
-	    
+	    var uploadFile = $("#upload-file").kendoUpload({
+	        async: {
+	            saveUrl: "api/v1/upload/file/chatattachment",
+	            autoUpload: true
+	        },
+	        success: function (e) {
+		        if (e.operation === "upload") {
+		        	notification.show(e.response.message, e.response.status ? "success" : "error");
+	  				e.sender.clearAllFiles();
+	  				if(e.response.filepath) {
+	  					var msg = {
+	  						type: "file", 
+	  						text: e.response.filename,
+	  						size: e.response.size,
+	  						url: e.response.filepath, 
+	  						from: chatUI.getUser(), 
+	  						time: new Date, 
+	  						user_id: ENV.extension, 
+	  						room_id: window.chatWindowObservable.get("room_id"), 
+	  						uid: window.kendo.guid()
+	  					};
+	  					chatUI.renderMessage(msg, chatUI.getUser());
+	  					socket.emit("chat message", JSON.stringify(msg));
+	  				}
+		        }
+		    },
+	        showFileList: false
+	    }).data("kendoUpload");
 
 	    var IMAGE_CARD_TEMPLATE = kendo.template(
 	        '<div class="k-card k-card-type-rich">' +

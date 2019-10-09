@@ -43,6 +43,9 @@ const PERMISSION = <?= isset($permission) ? json_encode($permission) : "{}" ?>;
 </script>
 <?php if(!empty($only_main_content)) { ?>
     <style>
+        html {
+            overflow: hidden;
+        }
         #sidebar {
             width: 0 !important;
         }

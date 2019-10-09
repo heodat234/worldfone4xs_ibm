@@ -273,6 +273,9 @@
         var columns = telesaleFields.data().toJSON();
         columns.map(col => {
             col.width = 130;
+            if (col.field != 'assign') {
+                col.filterable = false;
+            }
             switch (col.type) {
                 case "name":
                     col.template = (dataItem) => gridName(dataItem[col.field]);

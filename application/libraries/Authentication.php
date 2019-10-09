@@ -32,41 +32,36 @@ class Authentication {
         $config = $this->WFF->mongo_db->where(array("deleted" => array('$ne' => true)))
         ->getOne($this->config_collection);
         // Reset
-        // $this->WFF->mongo_db->switch_db();
+        $this->WFF->mongo_db->switch_db();
         try {
             if(!$config) throw new Exception("Not config");
             //call webservice login
-            // $secret = $config['secret_key'];
-            // $pbx_url = $config["pbx_url"];  
-            // $curl = curl_init();          
-            // curl_setopt_array($curl, array(
-            //   CURLOPT_URL => $pbx_url . $this->external_path . "agentlogin.php",
-            //   CURLOPT_RETURNTRANSFER => true,
-            //   CURLOPT_ENCODING => "",
-            //   CURLOPT_MAXREDIRS => 10,
-            //   CURLOPT_TIMEOUT => 30,
-            //   CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            //   CURLOPT_CUSTOMREQUEST => "POST",
-            //   CURLOPT_POSTFIELDS => json_encode(array("secret"=>$secret)),
-            //   CURLOPT_HTTPHEADER => array(
-            //     "accept: application/json",
-            //     "authorization: Basic " .base64_encode("$username:$password"),
-            //     "cache-control: no-cache",
-            //     "content-type: application/json"
-            //   ),
-            // ));
-            // $response = curl_exec($curl);
-            // $err = curl_error($curl);
-            // curl_close($curl);
-            // if($err) throw new Exception("Curl error: $err");
-            // $responseObj = json_decode($response);
-            // if( !isset($responseObj->result) ) throw new Exception("Authentication error: $response");
-
-            $response = $this->WFF->mongo_db->where("extension","911")->getOne("2_User");
-            $response['callcenter_type'] = 2;
-            $response['username'] = "sysadmin";
-            $responseObj = (object)$response;
-            $this->create_login_session($responseObj);
+            $secret = $config['secret_key'];
+            $pbx_url = $config["pbx_url"];  
+            $curl = curl_init();          
+            curl_setopt_array($curl, array(
+              CURLOPT_URL => $pbx_url . $this->external_path . "agentlogin.php",
+              CURLOPT_RETURNTRANSFER => true,
+              CURLOPT_ENCODING => "",
+              CURLOPT_MAXREDIRS => 10,
+              CURLOPT_TIMEOUT => 30,
+              CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+              CURLOPT_CUSTOMREQUEST => "POST",
+              CURLOPT_POSTFIELDS => json_encode(array("secret"=>$secret)),
+              CURLOPT_HTTPHEADER => array(
+                "accept: application/json",
+                "authorization: Basic " .base64_encode("$username:$password"),
+                "cache-control: no-cache",
+                "content-type: application/json"
+              ),
+            ));
+            $response = curl_exec($curl);
+            $err = curl_error($curl);
+            curl_close($curl);
+            if($err) throw new Exception("Curl error: $err");
+            $responseObj = json_decode($response);
+            if( !isset($responseObj->result) ) throw new Exception("Authentication error: $response");
+            $this->create_login_session($responseObj->result);
             return TRUE;
         } catch (Exception $e) {
             $this->WFF->load->library("session");

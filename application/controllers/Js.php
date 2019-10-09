@@ -26,6 +26,7 @@ Class Js extends CI_Controller {
          * SET ENV const javascript
          */
         // System config
+      
         $env["currentUri"]      = $currentUri;
         $env["softphone"]       = $this->config->item("softphone");
         $env["brandTitle"]      = $this->config->item("brand_title");
@@ -43,10 +44,6 @@ Class Js extends CI_Controller {
         $env["agentname"]       = $this->session->userdata("agentname")
             . ($this->session->userdata("test_mode") ? " (TM)" : "");
         $env["sound_effect"]    = $this->session->userdata("sound_effect");
-
-        // Chat
-        $env["OMNI_WEBHOOK_SOCKET_URL"]     = "http://" . $_SERVER['SERVER_ADDR'] . ":8001";
-        $env["OMNI_SOCKET_LIVECHAT_REMOTE"] = "http://" . $_SERVER['SERVER_ADDR'] . ":8006";
 
         $data['ENV'] = json_encode($env);
 

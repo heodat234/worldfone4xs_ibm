@@ -96,6 +96,54 @@ Class Upload extends WFF_Controller {
 		}
 	}
 
+	function file($folder = "")
+	{
+		try {
+			$collection = set_sub_collection("Attachment");
+			if ($this->input->server('REQUEST_METHOD') !== 'POST') throw new Exception("Wrong method");
+			$path = "./" . UPLOAD_PATH . $folder . "/";
+			if (!@file_exists($path)) { 
+				@mkdir(UPLOAD_PATH . $folder, 0755);
+			}
+			$file = $_FILES['file'];
+			$file_parts = @pathinfo($file['name']);
+			$notallowed_types = 'php|sh|bash';
+			$filesize = @filesize($file['tmp_name']);
+			if(strpos($notallowed_types, strtolower($file_parts['extension'])) !== FALSE) throw new Exception("Wrong file type.");
+			if($filesize > 10000000) throw new Exception("File too large. Over 10MB.");
+			$new_file_name = str_replace([" ","/"], ["",""], $file['name']);
+			$file_path = $path . $new_file_name;
+
+			// Check exists
+			if(@file_exists($file_path)) {
+			    @unlink($file_path); //remove the file
+			}
+
+			if (@is_uploaded_file($file['tmp_name'])) {
+				@move_uploaded_file($file['tmp_name'] , $file_path);
+			}
+			$data = array(
+				'name'		=> $file['name'],
+				'type'		=> $folder,
+				'uploadname'=> $file['name'],
+				'filename' 	=> $new_file_name,
+				'filepath'	=> UPLOAD_PATH . $folder . "/" . $new_file_name,
+				'size' 		=> $filesize,
+				'extension' => $file_parts['extension'],
+				'createdBy'	=> $this->session->userdata("extension"),
+				'createdAt' => time(),
+				'time'		=> (new DateTime())->format('Y-m-d H:i:s')	
+			);
+			$this->load->library("mongo_db");
+			$this->mongo_db->insert($collection, $data);
+			echo json_encode(array("status" => 1, "message" => "Upload successfully", 
+				"filepath" => $data["filepath"], "filename" => $file['name'], "size" => $filesize
+			));
+		} catch (Exception $e) {
+			echo json_encode(array("status" => 0, "message" => $e->getMessage()));
+		}
+	}
+
 	function capture() {
 		try {
 			$request = $_POST;
@@ -288,4 +336,54 @@ Class Upload extends WFF_Controller {
 			echo json_encode(array("status" => 0, "message" => $e->getMessage()));
 		}
 	}
+
+    function csv()
+    {
+        try {
+            $folder = "csv";
+            $collection = set_sub_collection("File");
+            if ($this->input->server('REQUEST_METHOD') !== 'POST') throw new Exception("Wrong method");
+            $path = "./" . UPLOAD_PATH . $folder . "/";
+            if (!@file_exists($path)) {
+                @mkdir(UPLOAD_PATH . $folder, 0755);
+            }
+            $file = $_FILES['file'];
+            $file_parts = @pathinfo($file['name']);
+            $notallowed_types = 'php|sh|bash';
+            $filesize = @filesize($file['tmp_name']);
+            if(strpos($notallowed_types, strtolower($file_parts['extension'])) !== FALSE) throw new Exception("Wrong file type.");
+            // Check size  > 30MB
+            if($filesize > 30000000) throw new Exception("File too large. Over 30MB.");
+            $new_file_name = str_replace([" ","/"], ["",""], $file['name']);
+            $file_path = $path . $new_file_name;
+
+            // Check exists
+            if(@file_exists($file_path)) {
+                @unlink($file_path); //remove the file
+            }
+
+            if (@is_uploaded_file($file['tmp_name'])) {
+                @move_uploaded_file($file['tmp_name'] , $file_path);
+            }
+            $data = array(
+                'name'		=> $file['name'],
+                'type'		=> $folder,
+                'uploadname'=> $file['name'],
+                'filename' 	=> $new_file_name,
+                'filepath'	=> UPLOAD_PATH . $folder . "/" . $new_file_name,
+                'size' 		=> $filesize,
+                'extension' => $file_parts['extension'],
+                'createdBy'	=> $this->session->userdata("extension"),
+                'createdAt' => time(),
+                'time'		=> (new DateTime())->format('Y-m-d H:i:s')
+            );
+            $this->load->library("mongo_db");
+            $this->mongo_db->insert($collection, $data);
+            echo json_encode(array("status" => 1, "message" => "Upload successfully",
+                "filepath" => $data["filepath"], "filename" => $file['name'], "size" => $filesize
+            ));
+        } catch (Exception $e) {
+            echo json_encode(array("status" => 0, "message" => $e->getMessage()));
+        }
+    }
 }

@@ -1,130 +1,227 @@
-<div class="col-sm-3" style="margin: 10px 0" id="page-widget"></div>
-<div class="col-sm-9 filter-mvvm" style="display: none; margin: 10px 0"></div>
-<div class="col-sm-12" style="padding: 0">
-    <!-- Table Styles Content -->
-    <div id="grid"></div>
-    <!-- END Table Styles Content -->
+<div class="row" style="margin: 10px 0">
+	<div class="col-sm-2" id="page-widget"></div>
+	<div class="col-sm-9 filter-mvvm" style="display: none"></div>
+</div>
+<div class="row">
+	<div class="col-sm-12" style="height: 80vh;">
+	    <!-- Table Styles Content -->
+	    <div id="grid"></div>
+	    <!-- END Table Styles Content -->
+	</div>
 </div>
 <div id="action-menu">
     <ul>
-        <a href="javascript:void(0)" data-type="detail" onclick="detailData(this)"><li><i class="fa fa-exclamation-circle text-info"></i><span>@Detail@</span></li></a>
+        <a href="javascript:void(0)" data-type="update" onclick="openForm({title: '@Edit@', width: 500}); editForm(this)"><li><i class="fa fa-pencil-square-o text-warning"></i><span>@Edit@</span></li></a>
     	<li class="devide"></li>
-        <a href="javascript:void(0)" data-type="update" onclick="openForm({title: '@Edit@', width: 700}); editForm(this)"><li><i class="fa fa-pencil-square-o text-warning"></i><span>@Edit@</span></li></a>
         <a href="javascript:void(0)" data-type="delete" onclick="deleteDataItem(this)"><li><i class="fa fa-times-circle text-danger"></i><span>@Delete@</span></li></a>
     </ul>
 </div>
+
+<script type="text/x-kendo-template" id="status-group-template">
+    <li data-bind="css: {active: active}">
+        <a href="javascript:void(0)" data-bind="click: filterStatus, attr: {data-value: idFields}">
+            <span class="badge pull-right" data-bind="text: count">250</span>
+            <i class="#: data.iconClass #"></i> <strong data-bind="text: idFields">Closed</strong>
+        </a>
+    </li>
+</script>
+
 <script>
 var Config = Object.assign(Config, {
     model: {
         id: "id",
-        fields: {
-        	createdAt: {type: "date"}
-        }
     },
-    parse: function (response) {
+    parse(response) {
         response.data.map(function(doc) {
-            doc.createdAt = doc.createdAt ? new Date(doc.createdAt * 1000) : undefined;
+            doc.released_date = doc.released_date ? gridDate(new Date(doc.released_date * 1000), 'dd/MM/yyyy') : undefined;
+            doc.disbursed_date = doc.disbursed_date ? gridDate(new Date(doc.disbursed_date * 1000), 'dd/MM/yyyy') : undefined;
+            doc.issued_date = doc.issued_date ? gridDate(new Date(doc.issued_date * 1000), 'dd/MM/yyyy') : undefined;
+            doc.updated_at = doc.updated_at ? gridDate(new Date(doc.updated_at * 1000), 'dd/MM/yyyy') : undefined;
             return doc;
-        })
+        });
         return response;
     },
+    scrollable: true,
     columns: [{
-    		selectable: true,
-            width: 32,
-            locked: true
-        },{
-            field: "No",
-            title: "No.",
-            width: 140
-        },{
-            field: "Dealer_Code",
-            title: "Dealer Code",
-            width: 140
-        },{
-            field: "Dealer_Name",
-            title: "Dealer Name",
-            width: 140
-        },{
-            field: "Area",
-            title: "Area",
-            width: 140
-        },{
-            field: "CIF",
-            title: "CIF",
-            width: 140
-        },{
-            field: "Customer_name",
-            title: "Customer_name",
-            width: 100
-        },{
-            field: "Loanamount",
-            title: "Loanamount",
-        },{
-            field: "ID_No",
-            title: "ID No.",
-        },{
-            field: "Issued_Date",
-            title: "Issued Date",
-        },{
-            // Use uid to fix bug data-uid of row undefined
-            title: `<a class='btn btn-sm btn-circle btn-action btn-primary' onclick='return deleteDataItemChecked();'><i class='fa fa-times-circle'></i></a>`,
-            template: '<a role="button" class="btn btn-sm btn-circle btn-action btn-primary" data-uid="#: uid #"><i class="fa fa-ellipsis-v"></i></a>',
-            width: 32
-        }]
-}); 
+        field: "dealer_code",
+        title: "@Dealer code@",
+        width: '150px',
+        headerAttributes: { style: "white-space: normal"},
+        filterable: false,
+    },{
+        field: "dealer_name",
+        title: "@Dealer name@",
+        width: '200px',
+        headerAttributes: { style: "white-space: normal"},
+        filterable: false,
+    },{
+        field: "location",
+        title: "@Location@",
+        width: '200px',
+        headerAttributes: { style: "white-space: normal"},
+        filterable: false,
+    },{
+        field: "disbursement",
+        title: "@Disbursement@",
+        width: '200px',
+        headerAttributes: { style: "white-space: normal"},
+        filterable: false,
+    },{
+        field: "cif",
+        title: "CIF",
+        width: '200px',
+        headerAttributes: { style: "white-space: normal"},
+        filterable: false,
+    },{
+        field: "acc_no",
+        title: "@Account number@",
+        width: '200px',
+        headerAttributes: { style: "white-space: normal"},
+        filterable: false,
+    },{
+        field: "cus_name",
+        title: "@Customer name@",
+        width: '200px',
+        headerAttributes: { style: "white-space: normal"},
+        filterable: false,
+    },{
+        field: "released_date",
+        title: "@Released date@",
+        width: '150px',
+        headerAttributes: { style: "white-space: normal"},
+        filterable: false,
+    },{
+        field: "disbursed_date",
+        title: "@Disbursed date@",
+        width: '150px',
+        headerAttributes: { style: "white-space: normal"},
+        filterable: false,
+    },{
+        field: "loan_amount",
+        title: "@Loan amount@",
+        width: '150px',
+        headerAttributes: { style: "white-space: normal"},
+        filterable: false,
+    },{
+        field: "cmnd",
+        title: "@ID@",
+        width: '150px',
+        headerAttributes: { style: "white-space: normal"},
+        filterable: false,
+    },{
+        field: "issued_date",
+        title: "@Issued date@",
+        width: '150px',
+        headerAttributes: { style: "white-space: normal"},
+        filterable: false,
+    },{
+        field: "issued_place",
+        title: "@Issued place@",
+        width: '200px',
+        headerAttributes: { style: "white-space: normal"},
+        filterable: false,
+    },{
+        field: "bank_acc",
+        title: "@Bank account@",
+        width: '200px',
+        headerAttributes: { style: "white-space: normal"},
+        filterable: false,
+    },{
+        field: "bank_name",
+        title: "@Bank name@",
+        width: '200px',
+        headerAttributes: { style: "white-space: normal"},
+        filterable: false,
+    },{
+        field: "bank_branch",
+        title: "@Branch@",
+        width: '200px',
+        headerAttributes: { style: "white-space: normal"},
+        filterable: false,
+    },{
+        field: "province",
+        title: "@Province@",
+        width: '200px',
+        headerAttributes: { style: "white-space: normal"},
+        filterable: false,
+    },{
+        field: "phone",
+        title: "@Phone@",
+        width: '150px',
+        headerAttributes: { style: "white-space: normal"},
+        filterable: false,
+    },{
+        field: "old_cus_farmer",
+        title: "@Old customer and farmer@",
+        width: '150px',
+        headerAttributes: { style: "white-space: normal"},
+        filterable: false,
+    },{
+        field: "new_cus",
+        title: "@New customer@",
+        width: '150px',
+        headerAttributes: { style: "white-space: normal"},
+        filterable: false,
+    },{
+        field: "tl_name",
+        title: "@Telesale name@",
+        width: '200px',
+        headerAttributes: { style: "white-space: normal"},
+        filterable: false,
+    },{
+        field: "farmer_collaboration",
+        title: "@Farmer collaboration@",
+        width: '200px',
+        headerAttributes: { style: "white-space: normal"},
+        filterable: false,
+    },{
+        field: "jivf_staff",
+        title: "@JIVF staff@",
+        width: '200px',
+        headerAttributes: { style: "white-space: normal"},
+        filterable: false,
+    },{
+        field: "int",
+        title: "@Interest@",
+        width: '150px',
+        headerAttributes: { style: "white-space: normal"},
+        filterable: false,
+    },{
+        field: "type",
+        title: "@Type@",
+        width: '150px',
+        headerAttributes: { style: "white-space: normal"},
+        filterable: false,
+    },{
+        field: "check",
+        title: "@Check@ (81000)",
+        width: '200px',
+        headerAttributes: { style: "white-space: normal"},
+        filterable: false,
+    },{
+        field: "created_at",
+        title: "@Created at@",
+        width: '150px',
+        headerAttributes: { style: "white-space: normal"},
+        filterable: false,
+    },{
+        field: "updated_at",
+        title: "@Last modified@",
+        width: '150px',
+        headerAttributes: { style: "white-space: normal"},
+        filterable: false,
+    },{
+        // Use uid to fix bug data-uid of row undefined
+        title: `<a class='btn btn-sm btn-circle btn-action btn-primary' onclick='return deleteDataItemChecked();'><i class='fa fa-times-circle'></i></a>`,
+        template: '<a role="button" class="btn btn-sm btn-circle btn-action btn-primary" data-uid="#: uid #"><i class="fa fa-ellipsis-v"></i></a>',
+        width: '70px'
+    }],
+});
 </script>
+
 <script src="<?= STEL_PATH.'js/table.js' ?>"></script>
 
 <script type="text/javascript">
-	async function editForm(ele) {
-		var dataItem = Table.dataSource.getByUid($(ele).data("uid")),
-	        dataItemFull = await $.ajax({
-	            url: `${Config.crudApi+Config.collection}/${dataItem.id}`,
-	            error: errorDataSource
-	        }),
-		    formHtml = await $.ajax({
-	    	    url: Config.templateApi + Config.collection + "/form",
-	    	    error: errorDataSource
-	    	});
-		var model = Object.assign({
-			item: dataItemFull,
-			save: function() {
-	            $.ajax({
-	                url: `${Config.crudApi+Config.collection}/${dataItem.id}`,
-	                data: kendo.stringify(this.item.toJSON()),
-	                error: errorDataSource,
-	                contentType: "application/json; charset=utf-8",
-	                type: "PUT",
-	                success: function() {
-	                    Table.dataSource.read()
-	                }
-	            })
-			}
-		}, Config.observable);
-		kendo.destroy($("#right-form"));
-		$("#right-form").empty();
-		var kendoView = new kendo.View(formHtml, { wrap: false, model: model, evalTemplate: false });
-		kendoView.render($("#right-form"));
-	}
-
-	function deleteDataItem(ele) {
-		swal({
-		    title: "@Are you sure@?",
-		    text: "@Once deleted, you will not be able to recover this document@!",
-		    icon: "warning",
-		    buttons: true,
-		    dangerMode: true,
-	    })
-	    .then((willDelete) => {
-			if (willDelete) {
-				var uid = $(ele).data('uid');
-				var dataItem = Table.dataSource.getByUid(uid);
-			    Table.dataSource.remove(dataItem);
-			    Table.dataSource.sync();
-			}
-	    });
-	}
-
 	function deleteDataItemChecked() {
 		var checkIds = Table.grid.selectedKeyNames();
 		if(checkIds.length) {
@@ -167,66 +264,7 @@ var Config = Object.assign(Config, {
 
 	$(document).on("click", ".grid-name", function() {
 		detailData($(this).closest("tr"));
-	})
+	});
 
-	var customerFields = new kendo.data.DataSource({
-		serverFiltering: true,
-		serverSorting: true,
-		transport: {
-			read: `${ENV.vApi}model/read`,
-			parameterMap: parameterMap
-		},
-		schema: {
-			data: "data",
-			parse: function(response) {
-				response.data = response.data.filter(function(doc) {
-					if(doc.sub_type) 
-						doc.subType = JSON.parse(doc.sub_type);
-					else doc.subType = {};
-					return doc.subType.gridShow;
-				})
-				return response;
-			}
-		},
-		filter: {
-			field: "collection",
-			operator: "eq",
-			value: (ENV.type ? ENV.type + "_" : "") + "Customer"
-		},
-		sort: {field: "index", dir: "asc"}
-	})
-	customerFields.read().then(function(){
-		var columns = customerFields.data().toJSON();
-		columns.map(col => {
-			switch (col.type) {
-				case "name":
-					col.template = (dataItem) => gridName(dataItem[col.field]);
-					break;
-				case "phone": case "arrayPhone":
-					col.template = (dataItem) => gridPhone(dataItem[col.field]);
-					break;
-				case "array":
-					col.template = (dataItem) => gridArray(dataItem[col.field]);
-					break;
-				case "timestamp":
-					col.template = (dataItem) => gridDate(dataItem[col.field]);
-					break;
-				default:
-					break;
-			}
-		});
-		columns.unshift({
-    		selectable: true,
-            width: 32,
-            locked: true
-        });
-        columns.push({
-            // Use uid to fix bug data-uid of row undefined
-            title: `<a class='btn btn-sm btn-circle btn-action btn-primary' onclick='return deleteDataItemChecked();'><i class='fa fa-times-circle'></i></a>`,
-            template: '<a role="button" class="btn btn-sm btn-circle btn-action btn-primary" data-uid="#: uid #"><i class="fa fa-ellipsis-v"></i></a>',
-            width: 32
-        });
-		Table.columns = columns;
-		Table.init();
-	})
+    Table.init();
 </script>

@@ -12,8 +12,6 @@ Class Activity extends WFF_Controller {
 		header('Content-type: application/json');
 		$this->sub = set_sub_collection();
 		$this->load->library("crud");
-		$_db = $this->config->item("_mongo_db");
-		$this->crud->select_db($_db);
 		$this->load->model("language_model");
 	}
 

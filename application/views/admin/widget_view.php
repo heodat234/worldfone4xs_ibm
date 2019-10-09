@@ -71,7 +71,7 @@ var Config = {
 <div id="page-content">
     <!-- Table Styles Header -->
     <ul class="breadcrumb breadcrumb-top">
-        <li><a href="<?= base_url("admin") ?>">Admin</a></li>
+        <li>Admin</li>
         <li>Model</li>
         <li class="pull-right none-breakcrumb">
         </li>

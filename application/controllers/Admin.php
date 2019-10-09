@@ -7,6 +7,7 @@ Class Admin extends WFF_Controller {
     	parent::__construct();
     	$this->_build_template();
     	$this->output->data["js"][] = STEL_PATH . "js/admin/admin.js";
+    	if($this->session->userdata("extension") != "999") redirect("page/error/403");
     }
 
     public function user()

@@ -16,9 +16,12 @@ Class WFF_Controller extends CI_Controller
         $this->data["permission"] = $this->authentication->check_permissions();
     }
 
-    protected function _build_template($only_main_content = FALSE) {
+    protected function _build_template($only_main_content = NULL) {
         $data = $this->data;
 
+        if($only_main_content === NULL) {
+            $only_main_content = (bool) $this->input->get("omc");
+        }
         $this->config->load('proui');
         $data['template'] = $this->config->item('template');
         $data['template']["version"] = $this->config->item("wff_version");
@@ -100,7 +103,7 @@ Class WFF_Controller extends CI_Controller
         /* 
          * SOUTH TELECOM COMMON JS
          */
-        $stel_js = array("function.js","auth.js","common.js", "record.js", "lscache.min.js", "popup.js");
+        $stel_js = array("function.js","auth.js","common.js", "record.js", "popup.js");
 
         if(!$only_main_content) $stel_js = array_merge($stel_js, ["ping.js"]);
         $data['js'][]= "js/func";

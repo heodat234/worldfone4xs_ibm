@@ -19,6 +19,7 @@ class Tool extends WFF_Controller {
     }
 
     public function chat() {
+        $this->output->data["css"][] = KENDOUI_PATH . "styles/kendo.office365.min.css";
         $this->output->data["js"][] = PROUI_PATH . "js/pages/readyChat.js";
         $this->output->data["js"][] = STEL_PATH . "js/chat/socket.io.js";
         $this->output->data["js"][] = STEL_PATH . "js/chat/kendo.mychat.min.js";

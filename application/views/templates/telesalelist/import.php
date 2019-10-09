@@ -14,7 +14,6 @@
 	            <div class="container-fluid">
 	                <div class="row">
 	                    <div class="col-sm-12">
-                            <input type="hidden" name="<?php echo ini_get("session.upload_progress.name"); ?>" value="advancedProgress" />
 							<input id="excel-file" type="file" name="file" />
 						</div>
 						
@@ -110,7 +109,7 @@
         success: function(e) {
     		notification.show(e.response.message, e.response.status ? "success" : "error");  
             if (e.response.status == 0) {
-                // router.navigate(`/history`);
+                router.navigate(`/history`);
             }      	
         }
     });

@@ -197,7 +197,7 @@ var detailTable = function() {
 				var uid = $(ele).data('uid');
 				var dataItem = detailTable.dataSource.getByUid(uid);
 			    $.ajax({
-			    	url: ENV.vApi + "sms/send/" + dataItem.id,
+			    	url: ENV.vApi + "sms/send_from_pending/" + dataItem.id,
 			    	success: function(res) {
 			    		notification.show(res.status ? "Success" : res.message, res.status ? "success" : "error");
 			    		detailTable.dataSource.read();

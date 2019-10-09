@@ -1,5 +1,5 @@
 <li>
-  <canvas id="clock-canvas" style="width: 68px; height: 34px; margin-top: 7px"></canvas>
+  <canvas id="clock-canvas" style="width: 68px; height: 34px; margin-top: 7px;margin-right: -26px;margin-left: 10px;"></canvas>
 </li>
 
 <script>

@@ -97,7 +97,7 @@ var Config = {
 <div id="page-content">
     <!-- Table Styles Header -->
     <ul class="breadcrumb breadcrumb-top">
-        <li><a href="<?= base_url("admin") ?>">@User@</a></li>
+        <li>@User@</li>
         <li>@Browse@</li>
         <li class="pull-right none-breakcrumb">
             <div class="input-group-btn column-widget">

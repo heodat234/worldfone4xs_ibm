@@ -11,11 +11,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 /* Template variables */
 $config['template'] = array(
-    'name'              => 'Worldfone 4X',
+    'name'              => 'WorldfoneCMS',
     'version'           => '1.0',
     'author'            => 'dung.huynh@southtelecom.vn',
     'robots'            => 'noindex, nofollow',
-    'title'             => 'Worldfone 4X',
+    'title'             => 'WorldfoneCMS',
     'description'       => '',
     // true                     enable page preloader
     // false                    disable page preloader

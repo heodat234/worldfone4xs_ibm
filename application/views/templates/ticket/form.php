@@ -209,7 +209,7 @@
         })
     }
 
-    Config.observable.ticketInfo = {
+    Config.observable = Object.assign(Config.observable, {
         isAgentAssignHide: false,
         isGroupAssignHide: true,
         ci_name: '',
@@ -515,7 +515,7 @@
             this.set('item.PNRListDetail', PNRListDetail);
 
         }
-    };
+    });
 
     $(document).ready(function() {
         $("body").tooltip({ selector: '[data-toggle=tooltip]' });
