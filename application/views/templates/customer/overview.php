@@ -210,6 +210,7 @@ var Config = Object.assign(Config, {
             template: '<a role="button" class="btn btn-sm btn-circle btn-action btn-primary" data-uid="#: uid #"><i class="fa fa-ellipsis-v"></i></a>',
             width: 32
         });
+
 		Table.columns = columns;
 		Table.init();
 	})

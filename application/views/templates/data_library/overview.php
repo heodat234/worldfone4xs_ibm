@@ -194,12 +194,9 @@
 </script>
 <script src="<?= STEL_PATH.'js/table.js' ?>"></script>
 <script type="text/javascript">
-    $( document ).ready(function() {
-        Table.init();
-       
-    });
 	
     var customerFields = new kendo.data.DataSource({
+        serverPaging: true,
         serverFiltering: true,
         serverSorting: true,
         transport: {
@@ -208,16 +205,9 @@
         },
         schema: {
             data: "data",
-            parse: function(response) {
-                response.data = response.data.filter(function(doc) {
-                    if(doc.sub_type) 
-                        doc.subType = JSON.parse(doc.sub_type);
-                    else doc.subType = {};
-                    return doc.subType.gridShow;
-                })
-                return response;
-            }
+            
         },
+        pageSize: 30,
         filter: {
             field: "collection",
             operator: "eq",
@@ -228,6 +218,7 @@
     customerFields.read().then(function(){
         var columns = customerFields.data().toJSON();
         columns.map(col => {
+            col.width = 130;
             switch (col.type) {
                 case "name":
                     col.template = (dataItem) => gridName(dataItem[col.field]);
@@ -257,7 +248,7 @@
         //     width: 32
         // });
         Table.columns = columns;
-        // Table.init();
+        Table.init();
     })
 
 	$(document).on("click", ".grid-name", function() {

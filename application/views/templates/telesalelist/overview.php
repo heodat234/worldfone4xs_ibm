@@ -31,7 +31,7 @@
     }
 </style>
 <script>
-    var Config = {
+    var Config = Object.assign(Config, {
         filter: '<?= $id ?>' != '' ? {field: "id_import", operator: "eq", value: '<?= $id ?>'} : null,
         crudApi: `${ENV.restApi}`,
         templateApi: `${ENV.templateApi}`,
@@ -244,17 +244,74 @@
             //     width: 40
             // }
         ]
-    }; 
+    }); 
 </script>
 <script src="<?= STEL_PATH.'js/table.js' ?>"></script>
 <script type="text/javascript">
+    var telesaleFields = new kendo.data.DataSource({
+        serverPaging: true,
+        serverFiltering: true,
+        serverSorting: true,
+        transport: {
+            read: `${ENV.vApi}model/read`,
+            parameterMap: parameterMap
+        },
+        schema: {
+            data: "data",
+           
+        },
+        filter: {
+            field: "collection",
+            operator: "eq",
+            value: (ENV.type ? ENV.type + "_" : "") + "Telesalelist"
+        },
+        page: 1,
+        pageSize: 30,
+        sort: {field: "index", dir: "asc"}
+    })
+    telesaleFields.read().then(function(){
+        var columns = telesaleFields.data().toJSON();
+        columns.map(col => {
+            col.width = 130;
+            switch (col.type) {
+                case "name":
+                    col.template = (dataItem) => gridName(dataItem[col.field]);
+                    break;
+                case "phone": case "arrayPhone":
+                    col.template = (dataItem) => gridPhone(dataItem[col.field]);
+                    break;
+                case "array":
+                    col.template = (dataItem) => gridArray(dataItem[col.field]);
+                    break;
+                case "timestamp":
+                    col.template = (dataItem) => gridDate(dataItem[col.field]);
+                    break;
+                default:
+                    break;
+            }
+        });
+        columns.unshift({
+            selectable: true,
+            width: 32,
+            locked: true
+        });
+        // columns.push({
+        //     // Use uid to fix bug data-uid of row undefined
+        //     title: `<a class='btn btn-sm btn-circle btn-action btn-primary' onclick='return deleteDataItemChecked();'><i class='fa fa-times-circle'></i></a>`,
+        //     template: '<a role="button" class="btn btn-sm btn-circle btn-action btn-primary" data-uid="#: uid #"><i class="fa fa-ellipsis-v"></i></a>',
+        //     width: 32
+        // });
+
+        Table.columns = columns;
+        Table.init();
+        Table.grid.bind("change", grid_change);
+    })
+
     $( document ).ready(function() {
         $('.change-mvvm').hide();
-        Table.init();
     });
-
     var select = [];
-    Table.grid.bind("change", grid_change);
+    
     function grid_change(arg) {
         var selectUid = this.selectedKeyNames();
         if (selectUid.length > 0) {
@@ -271,7 +328,7 @@
         }
         // console.log(this.selectedKeyNames());
     }
-	
+    
     var $userListElement = $(".change-mvvm");
     var userListObservable = kendo.observable({
         userListData: new kendo.data.DataSource({
@@ -319,67 +376,11 @@
             
     }
 
-    var customerFields = new kendo.data.DataSource({
-        serverFiltering: true,
-        serverSorting: true,
-        transport: {
-            read: `${ENV.vApi}model/read`,
-            parameterMap: parameterMap
-        },
-        schema: {
-            data: "data",
-            parse: function(response) {
-                response.data = response.data.filter(function(doc) {
-                    if(doc.sub_type) 
-                        doc.subType = JSON.parse(doc.sub_type);
-                    else doc.subType = {};
-                    return doc.subType.gridShow;
-                })
-                return response;
-            }
-        },
-        filter: {
-            field: "collection",
-            operator: "eq",
-            value: (ENV.type ? ENV.type + "_" : "") + Config.collection
-        },
-        sort: {field: "index", dir: "asc"}
-    })
-    customerFields.read().then(function(){
-        var columns = customerFields.data().toJSON();
-        columns.map(col => {
-            col.width = 150;
-            switch (col.type) {
-                case "name":
-                    col.template = (dataItem) => gridName(dataItem[col.field]);
-                    break;
-                case "phone": case "arrayPhone":
-                    col.template = (dataItem) => gridPhone(dataItem[col.field]);
-                    break;
-                case "array":
-                    col.template = (dataItem) => gridArray(dataItem[col.field]);
-                    break;
-                case "timestamp":
-                    col.template = (dataItem) => gridDate(dataItem[col.field]);
-                    break;
-                default:
-                    break;
-            }
-        });
-        // columns.unshift({
-        //     selectable: true,
-        //     width: 32,
-        //     locked: true
-        // });
-        // columns.push({
-        //     // Use uid to fix bug data-uid of row undefined
-        //     title: `<a class='btn btn-sm btn-circle btn-action btn-primary' onclick='return deleteDataItemChecked();'><i class='fa fa-times-circle'></i></a>`,
-        //     template: '<a role="button" class="btn btn-sm btn-circle btn-action btn-primary" data-uid="#: uid #"><i class="fa fa-ellipsis-v"></i></a>',
-        //     width: 32
-        // });
-        Table.columns = columns;
-        // Table.init();
-    })
+    // function detailData(ele) {
+    //     var uid = $(ele).data('uid');
+    //     var dataItem = Table.dataSource.getByUid(uid);
+    //     router.navigate(`/detail/${dataItem.id}`);
+    // }
 
 	$(document).on("click", ".grid-name", function() {
 		detailData($(this).closest("tr"));
