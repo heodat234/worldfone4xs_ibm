@@ -17,12 +17,15 @@ class livechat_webhook_hander_clients extends CI_Controller {
     }
 
     public function index(){
-        $data = $_REQUEST;
-        // var_dump($data);
+        // $data = $_REQUEST;
        /* $f = fopen("/var/www/worldfone4x_kim_tientran/worldfone4x/application/controllers/apis/webhook_in.txt", "a+");
         fwrite($f, print_r($data, true));
         fclose($f);*/
+        $data = json_decode(file_get_contents('php://input'));
+        // var_dump($body);
         if (empty($data)) {
+            header('Content-Type: application/json');
+            echo json_encode(array( 'status'    => 1, 'errorMessage' => 'Empty data' ));
             exit();
         }
 
@@ -35,27 +38,19 @@ class livechat_webhook_hander_clients extends CI_Controller {
                 'requestTimestamp'      => time(),
             );
             $data_put_to_queue = json_decode(json_encode($data_put_to_queue));
-            // $data_put_to_queue = (object)$data_put_to_queue;
-            /*$data_put_to_queue = array_map(function($array){
-                return (object)$array;
-            }, $data_put_to_queue);*/
-            // var_dump($data_put_to_queue);
-            /*$f = fopen("/var/www/worldfone4x_kim_tientran/worldfone4x/application/controllers/apis/webhook_in.txt", "a+");
-            fwrite($f, print_r($data_put_to_queue, true));
-            fclose($f);*/
+
             $this->run($data_put_to_queue);
-            // $queue->useTube('omni.handlemsg')->put(json_encode($data_put_to_queue), 0);
-            echo json_encode(array( 'status'    => 0, 'errorMessage' => 'success' ));
             header('Content-Type: application/json');
+            echo json_encode(array( 'status'    => 0, 'errorMessage' => 'success' ));
+ 
             exit();
         }
     }
     function run($data) { 
         $webhook_data = $data->webhook_data;
-        
+
         $page_app_id = $webhook_data->page_id;
         $page_info = $this->mongo_db->where(array('page_id'=> $page_app_id, 'source' => 'livechat_remote'))->getOne('livechat_remote_pageapps');
-        // $data->webhook_data->page_name = $page_info['page_info']['name'];
         if (!empty($page_info)) {
             $page_id = $page_info['_id']->{'$id'};
         }else{
@@ -71,15 +66,14 @@ class livechat_webhook_hander_clients extends CI_Controller {
                 $this->sendmessage_image($page_id,$data);
             }
             
-
-            
         }
     }
 
-    public function sendmessage_text(){
-        $data = $_REQUEST;
+    public function sendmessage_text($page_id,$data){
+        // $data = $_REQUEST;
+        // $data = json_decode(file_get_contents('php://input'));
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $data_put_to_queue = array(
+            /*$data_put_to_queue = array(
                 'webhook_type'  => 'livechat_remote',
                 'webhook_method' => 'POST',
                 'webhook_headers' => getallheaders(),
@@ -88,24 +82,24 @@ class livechat_webhook_hander_clients extends CI_Controller {
             );
             $data_put_to_queue = json_decode(json_encode($data_put_to_queue));
             $data = $data_put_to_queue;// $this->run($data_put_to_queue);
-
+*/
             /*var_dump($data);
         
             $f = fopen("/var/www/worldfone4x_kim_tientran/worldfone4x/application/controllers/apis/webhook_in.txt", "a+");
             fwrite($f, print_r($data, true));
             fclose($f);*/
 
-            $webhook_data = $data->webhook_data;
+            // $webhook_data = $data->webhook_data;
             
-            $page_app_id = $webhook_data->page_id;
-            $page_info = $this->mongo_db->where(array('_id'=> new mongoId($page_app_id), 'source' => 'livechat_remote'))->getOne('livechat_remote_pageapps');
+            // $page_app_id = $webhook_data->page_id;
+            /*$page_info = $this->mongo_db->where(array('_id'=> new mongoId($page_app_id), 'source' => 'livechat_remote'))->getOne('livechat_remote_pageapps');
          
 
             if (!empty($page_info)) {
                 $page_id = $page_info['_id']->{'$id'};
             }else{
                 return;
-            }
+            }*/
 
             $this->pullMsgText($page_id,$data);
         }
@@ -249,10 +243,10 @@ class livechat_webhook_hander_clients extends CI_Controller {
             $this->mongo_db->insert('livechat_remote_chatMessages', $message_data);
             
         }
-    public function sendmessage_image(){
-        $data = $_REQUEST;
+    public function sendmessage_image($page_id,$data){
+        // $data = $_REQUEST;
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $data_put_to_queue = array(
+            /*$data_put_to_queue = array(
                 'webhook_type'  => 'livechat_remote',
                 'webhook_method' => 'POST',
                 'webhook_headers' => getallheaders(),
@@ -261,14 +255,14 @@ class livechat_webhook_hander_clients extends CI_Controller {
             );
             $data_put_to_queue = json_decode(json_encode($data_put_to_queue));
             $data = $data_put_to_queue;// $this->run($data_put_to_queue);
-
-            /*var_dump($data);
+*/
+            var_dump($data);
         
-            $f = fopen("/var/www/worldfone4x_kim_tientran/worldfone4x/application/controllers/apis/webhook_in.txt", "a+");
+            $f = fopen("/var/www/html/worldfone4x/application/controllers/apis/webhook_in.txt", "a+");
             fwrite($f, print_r($data, true));
-            fclose($f);*/
+            fclose($f);
 
-            $webhook_data = $data->webhook_data;
+            /*$webhook_data = $data->webhook_data;
             
             $page_app_id = $webhook_data->page_id;
             $page_info = $this->mongo_db->where(array('_id'=> new mongoId($page_app_id), 'source' => 'livechat_remote'))->getOne('livechat_remote_pageapps');
@@ -278,7 +272,7 @@ class livechat_webhook_hander_clients extends CI_Controller {
                 $page_id = $page_info['_id']->{'$id'};
             }else{
                 return;
-            }
+            }*/
 
             $this->pullMsgImage($page_id,$data);
         }
@@ -288,9 +282,9 @@ class livechat_webhook_hander_clients extends CI_Controller {
         $webhook_data = $data->webhook_data;
         
         $type = 'image';
-        $f = fopen("/var/www/worldfone4x_kim_tientran/worldfone4x/application/controllers/apis/webhook_in.txt", "a+");
+        /*$f = fopen("/var/www/worldfone4x_kim_tientran/worldfone4x/application/controllers/apis/webhook_in.txt", "a+");
         fwrite($f, print_r($webhook_data, true));
-        fclose($f);
+        fclose($f);*/
         $text = $webhook_data->messages->text;
         $url = $webhook_data->messages->url;
         $timestamp = strtotime(date('Y-m-d H:i:s', $webhook_data->timestamp));
@@ -421,9 +415,9 @@ class livechat_webhook_hander_clients extends CI_Controller {
             );
 
             $this->mongo_db->insert('livechat_remote_chatMessages', $message_data);
-            $f = fopen("/var/www/worldfone4x_kim_tientran/worldfone4x/application/controllers/apis/webhook_in.txt", "a+");
+            /*$f = fopen("/var/www/worldfone4x_kim_tientran/worldfone4x/application/controllers/apis/webhook_in.txt", "a+");
             fwrite($f, print_r($data, true));
-            fclose($f);
+            fclose($f);*/
             
         }
 
@@ -735,9 +729,10 @@ class livechat_webhook_hander_clients extends CI_Controller {
     public function upload_image(){
         $data = $_REQUEST;
         var_dump($data);
-        $f = fopen("/var/www/worldfone4x_kim_tientran/worldfone4x/application/controllers/apis/webhook_in.txt", "a+");
+        var_dump($_POST);
+        /*$f = fopen("/var/www/worldfone4x_kim_tientran/worldfone4x/application/controllers/apis/webhook_in.txt", "a+");
         fwrite($f, print_r($data, true));
-        fclose($f);
+        fclose($f);*/
 
         // basename($_FILES["fileToUpload"]["name"]);
         /*$target_dir = "uploads/";

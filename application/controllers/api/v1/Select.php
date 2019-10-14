@@ -165,20 +165,33 @@ Class Select extends WFF_Controller {
 	}
 
 	function queuemembers()
-	{
+	{	
 		$collection = "Group";
 		$collection = $this->sub . $collection;
+		$user_collection = $this->sub . "User";
 		$this->load->library('mongo_db');
 		$members = array();
 		$queues = $this->input->get("queues");
-		$where = $queues ? array("queuename" => array('$in' => $queues)) : [];
-		$groups = $this->mongo_db->where($where)->select(["members"])->get($collection);
-		$members = array();
-		foreach ($groups as $group) {
-			$members = array_merge($members, $group["members"]);
+		$selects = ["extension","agentname"];
+		if($queues) {
+			$where = array("queuename" => array('$in' => $queues));
+			$groups = $this->mongo_db->where($where)->select(["members"])->get($collection);
+			$members = array();
+			foreach ($groups as $group) {
+				$members = array_merge($members, $group["members"]);
+			}
+			$members = array_values(array_unique($members));
+			$data = [];
+			$this->mongo_db->switch_db($this->config->item("_mongo_db"));
+			foreach ($members as $extension) {
+				$data[] = $this->mongo_db->select($selects)->getOne($user_collection);
+			}
+		} else {
+			$this->mongo_db->switch_db($this->config->item("_mongo_db"));
+			$data = $this->mongo_db->select($selects)->get($user_collection);
 		}
-		$members = array_values(array_unique($members));
-		echo json_encode(array("data" => $members, "total" => count($members)));
+
+		echo json_encode(array("data" => $data, "total" => count($data)));
 	}
 
 	function groups_and_extensions()

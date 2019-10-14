@@ -65,6 +65,16 @@
         <div style="padding: 10px">
             <h4 class="text-center" style="margin-top: 4px; margin-bottom: 10px">@OPTION@</h4>
             <div class="row">
+                <div class="col-md-3"><label>@SEARCH@</label></div>
+                <div class="col-md-9">
+                    <input data-role="autocomplete"
+                     data-filter="contains"
+                     data-text-field="extensionAndAgentname"
+                     data-value-field="extensionAndAgentname"
+                     data-bind="source: dataSource">
+                </div>
+            </div>
+            <div class="row" style="margin-top: 10px">
                 <div class="col-md-3"><label>@DISPLAY@</label></div>
                 <div class="col-md-9" data-role="listview" data-selectable="true" data-template="display-list-template" data-bind="source: displayOption, events: {change: displayChange}">
                 </div>
@@ -557,6 +567,7 @@ var List = function() {
                             doc.online = false;
                             doc.extension = Number(doc.extension);
                             doc.currentCallStatus = {};
+                            doc.extensionAndAgentname = doc.extension + " (" + doc.agentname + ")";
                             if(doc.status.length) {
                                 doc.status.map(state => {
                                     if(!doc.last_update) doc.last_update = state.last_update;

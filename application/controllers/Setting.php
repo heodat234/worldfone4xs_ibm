@@ -38,7 +38,7 @@ Class Setting extends WFF_Controller {
 	function group()
 	{
 		$this->output->data["css"][] = STEL_PATH . "css/table.css";
-		$this->output->data["js"][] = STEL_PATH . "js/setting/group.js";
+		//$this->output->data["js"][] = STEL_PATH . "js/setting/group.js";
 		$this->load->view("setting/group_view");
 	}
 
@@ -91,5 +91,10 @@ Class Setting extends WFF_Controller {
         $this->output->data["css"][] = STEL_PATH . "css/table.css";
         $this->output->data["js"][] = STEL_PATH . "js/admin/trigger.js";
         $this->load->view("setting/trigger_view");
+    }
+
+    function organization() {
+        $this->output->data["js"][] = STEL_PATH . "js/admin/admin.js";
+        $this->load->view("setting/organization_view");
     }
 }

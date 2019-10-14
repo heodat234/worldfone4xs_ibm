@@ -391,4 +391,25 @@ Class Sibs extends WFF_Controller {
 //        print_r($array);
     }
 
+    function callPYFromPHP() {
+        $importLog = array(
+            'collection'        => 'Sibs',
+            'begin_import'      => $starttime,
+            'file_name'         => basename($request["filepath"]),
+            'file_path'         => $request["filepath"],
+            'source'            => $request['import_type'],
+            'file_type'         => $request['import_file_type'],
+            'total_row'         => $request['total_data'],
+            'error_row'         => 0,
+            'success_row'       => 0,
+            'status'            => 2
+        );
+
+        $importLogResult = $this->crud->create(set_sub_collection('Import'), $importLog);
+
+        $command = escapeshellcmd("python3.6 /var/www/html/python/readfrommongod.py " . $importLogResult['id'] . " " . $this->session->userdata("extension"));
+        $output = shell_exec($command);
+        print($output);
+    }
+
 }

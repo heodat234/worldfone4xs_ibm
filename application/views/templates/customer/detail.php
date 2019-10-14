@@ -12,9 +12,7 @@
                 <li class="k-state-active">
                     @BASIC INFORMATION@
                 </li>
-                <li>
-                    @TICKET@
-                </li>
+
                 <li>
                     @LOG@
                 </li>
@@ -22,7 +20,7 @@
             <div>
                 <div class="container-fluid">
                     <div class="row">
-                        <div class="col-sm-2" style="border-right: 1px solid lightgray; height: 90vh">
+                        <div class="col-sm-2" style="border-right: 1px solid lightgray; height: 100vh">
                             <div class="row text-center" style="padding: 15px 0">
                                 <div class="col-sm-12">
                                     <a href="javascript:void(0)">
@@ -109,21 +107,21 @@
                                 </div>
                             </div>
                             <div class="row form-horizontal" style="padding-top: 10px;">
-                                <div class="col-sm-12" id="customer-detail-view">
+                                <div class="col-sm-12" id="customer-detail-view" style="height: 300px">
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div>
+            <!-- <div>
                 <div class="container-fluid">
                     <div class="row">
                         <div class="col-sm-12">
                             <div class="timeline block-content-full">
                                 <a data-role="button" class="pull-right" style="margin-top: 14px" data-bind="click: createTicket">@Create@ @ticket@</a>
                                 <h3 class="timeline-header">@Ticket@ @timeline@</h3>
-                                <!-- You can remove the class .timeline-hover if you don't want each event to be highlighted on mouse hover -->
+                                You can remove the class .timeline-hover if you don't want each event to be highlighted on mouse hover
                                 <ul class="timeline-list timeline-hover" data-template="ticket-timeline-template" data-bind="source: caseData">
                                 </ul>
                                 <div class="text-center">
@@ -133,12 +131,12 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> -->
             <div>
                 <div class="container-fluid">
                     <div class="row" style="margin-bottom: 10px">
                         <div class="panel panel-primary">
-                            <div class="panel-heading">@CASE HISTORY@</div>
+                            <div class="panel-heading">@APPOINTMENT HISTORY@</div>
                             <div class="panel-body" style="padding: 0">
                                 <div data-role="grid"
                                     data-pageable="{refresh: true}"
@@ -187,64 +185,12 @@
                         </div>
                     </div>
                     <hr>
-                    <div class="row" style="margin-bottom: 10px">
-                        <div class="panel panel-danger">
-                            <div class="panel-heading">@EMAIL HISTORY@</div>
-                            <div class="panel-body" style="padding: 0">
-                                <div data-role="grid"
-                                    data-pageable="{refresh: true}"
-                                    data-no-records="{
-                                        template: `<h2 class='text-danger'>@NO DATA@</h2>`
-                                    }"
-                                    data-columns="[
-                                        {
-                                            field: 'email',
-                                            title: '@Email@',
-                                            width: 200,
-                                        },{
-                                            field: 'subject',
-                                            title: '@Subject@',
-                                            width: 170,
-                                        },
-                                        {field:'createdBy', title: '@Created by@'},
-                                        {field:'createdAtText', title: '@Created at@'}
-                                        ]"
-                                  data-bind="source: emailData"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <hr>
-                    <div class="row">
-                        <div class="panel panel-info">
-                            <div class="panel-heading">@SMS HISTORY@</div>
-                            <div class="panel-body" style="padding: 0">
-                                <div data-role="grid"
-                                    data-pageable="{refresh: true}"
-                                    data-no-records="{
-                                        template: `<h2 class='text-danger'>@NO DATA@</h2>`
-                                    }"
-                                    data-columns="[
-                                        {
-                                            field: 'phone',
-                                            title: '@Phone@',
-                                            width: 120,
-                                        },{
-                                            field: 'content',
-                                            title: '@Content@',
-                                        },
-                                        {field:'createdBy', title: '@Created by@'},
-                                        {field:'createdAtText', title: '@Created at@'}
-                                        ]"
-                                  data-bind="source: smsData"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <hr>
+
                     <div class="row hidden">
                         <div class="panel panel-info">
                             <div class="panel-heading">@CONVERSATION HISTORY@</div>
                             <div class="panel-body" style="padding: 0">
-                                <div 
+                                <div
                                     data-pageable="{refresh: true}"
                                     data-no-records="{
                                         template: `<h2 class='text-danger'>@NO DATA@</h2>`
@@ -292,9 +238,9 @@
                     </div>
                 </div>
             </div>
-        </div>  
+        </div>
     </div>
-    
+
     <div class="col-sm-3" style="height: 90vh; overflow-y: auto; padding: 0">
         <!-- Default Tabs -->
         <div data-role="tabstrip">
@@ -383,19 +329,19 @@
     <li data-bind="css: {active: active}, attr: {data-id: id}">
         <a href="javascript:void(0)" #if(data.active){#data-bind="click: deactive"#}#>
             <div class="timeline-icon">
-                # switch(data.type) { 
+                # switch(data.type) {
                     case "call": #
                     <i class="fa fa-phone"></i>
-                #   break; 
+                #   break;
                     case "email": #
                     <i class="fa fa-envelope"></i>
-                #   break; 
+                #   break;
                     case "sms": #
                     <i class="fa fa-commenting"></i>
-                #   break; 
+                #   break;
                     case "chat": #
                     <i class="gi gi-conversation"></i>
-                #   break; 
+                #   break;
                 } #
             </div>
         </a>
@@ -497,7 +443,7 @@ function templateAccountList(data) {
                             <li><label>@Branchname@:</label> ${account.AccountBranchName}</li>
                             <li><label>@Account no@:</label> ${account.AccountNumber}</li>
                             <li><label>@Account Branch@:</label> ${account.AccountBranch}</li>
-                            <li><label>@AmountFinanced@:</label> ${kendo.toString(Number(account.AmountFinanced), "n0")}</li> 
+                            <li><label>@AmountFinanced@:</label> ${kendo.toString(Number(account.AmountFinanced), "n0")}</li>
                             <li><label>@Currency@:</label> ${account.Currency}</li>
                             <li><label>@Account Status@:</label> ${account.AccStatus}</li>
                         </ul>
@@ -521,7 +467,7 @@ function playAction(ele) {
         dataItem = Detail.model.callHistory.getByUid(uid),
         calluuid = dataItem.calluuid,
         callduration = dataItem.callduration;
-    if(callduration) 
+    if(callduration)
         play(calluuid);
     else notification.show("No recording", "warning");
 }
@@ -531,7 +477,7 @@ function downloadAction(ele) {
         dataItem = Detail.model.callHistory.getByUid(uid),
         calluuid = dataItem.calluuid,
         callduration = dataItem.callduration;
-    if(callduration) 
+    if(callduration)
         downloadRecord(calluuid);
     else notification.show("No recording", "warning");
 }
@@ -869,6 +815,12 @@ var Detail = function() {
             dataItemFull.other_phonesHTML = gridPhone(dataItemFull.other_phones);
             dataItemFull.createdAtText = gridTimestamp(dataItemFull.createdAt);
             dataItemFull.updatedAtText = gridTimestamp(dataItemFull.updatedAt);
+            dataItemFull.detail[0].date_of_birthText = gridTimestamp(dataItemFull.detail[0].date_of_birth);
+            dataItemFull.detail[0].date_receive_dataText = gridTimestamp(dataItemFull.detail[0].date_receive_data);
+            dataItemFull.detail[0].date_send_dataText = gridTimestamp(dataItemFull.detail[0].date_send_data);
+            dataItemFull.detail[0].exporting_dateText = gridTimestamp(dataItemFull.detail[0].exporting_date);
+            dataItemFull.detail[0].first_due_dateText = gridTimestamp(dataItemFull.detail[0].first_due_date);
+
             customerModel.data.forEach(doc => {
 
                 if(!doc.sub_type) return;
@@ -906,13 +858,55 @@ var Detail = function() {
                     }
                 }
             });
+
+            var customerModel_1 = await $.get(`${ENV.vApi}model/read`, {
+                q: JSON.stringify({filter: {field: "collection", operator: "eq", value: (ENV.type ? ENV.type + "_" : "") + "Telesalelist"}, sort: {field: "index", dir: "asc"}, take: 30,skip:0})
+            });
+            customerModel_1.data.forEach(doc => {
+
+                if(!doc.sub_type) return;
+                let sub_type = JSON.parse(doc.sub_type);
+                if(!sub_type.detailShow) return;
+
+                if(doc.field != "name") {
+                    switch(doc.type) {
+                        case "phone": case "arrayPhone":
+                            dataItemFull[doc.field + "HTML"] = gridPhone(dataItemFull[doc.field]);
+                            customerHTMLArray.push(`<div class="form-group">
+                                <label class="col-sm-3 control-label">${doc.title}</label>
+                                <div class="col-sm-9">
+                                    <p class="form-control-static" data-bind="html: item.detail[0].${doc.field}HTML"></p>
+                                </div>
+                            </div>`);
+                            break;
+                        case "timestamp":
+                            dataItemFull[doc.field + "Text"] = gridTimestamp(dataItemFull[doc.field]);
+                            customerHTMLArray.push(`<div class="form-group">
+                                <label class="col-sm-3 control-label">${doc.title}</label>
+                                <div class="col-sm-9">
+                                    <p class="form-control-static" data-bind="text: item.detail[0].${doc.field}Text"></p>
+                                </div>
+                            </div>`);
+                            break;
+                        default:
+                            customerHTMLArray.push(`<div class="form-group">
+                                <label class="col-sm-3 control-label">${doc.title}</label>
+                                <div class="col-sm-9">
+                                    <p class="form-control-static copy-item" data-bind="text: item.detail[0].${doc.field}"></p>
+                                </div>
+                            </div>`);
+                            break;
+                    }
+                }
+            });
+
             $("#customer-detail-view").html(customerHTMLArray.join(''));
             this.model.set("item", dataItemFull);
 
             // Sig_code
             if(dataItemFull.cif) {
-                $.get(ENV.namaApi + "core/getInfoListSignature", 
-                    {q: JSON.stringify({cif: dataItemFull.cif})}, 
+                $.get(ENV.namaApi + "core/getInfoListSignature",
+                    {q: JSON.stringify({cif: dataItemFull.cif})},
                     function(response) {
                         if(response.status && response.doc) {
                             $("#customer-sign-img").attr("src", "data:image/png;base64, " + response.doc.Sig_code);
@@ -923,7 +917,7 @@ var Detail = function() {
 
             // CDR
             var filter = {
-                logic: "or", 
+                logic: "or",
                 filters: [
                     {field: "customernumber", operator: "eq", value: dataItemFull.phone}
                 ]
@@ -987,7 +981,7 @@ var Detail = function() {
 
                 function showMenu(e, that) {
                     //hide menu if already shown
-                    menu.hide(); 
+                    menu.hide();
 
                     //Get id value of document
                     var uid = $(that).data('uid');
@@ -1021,7 +1015,7 @@ var Detail = function() {
                         }
 
                         //finally show the menu
-                        menu.show();     
+                        menu.show();
                     }
                 }
             })

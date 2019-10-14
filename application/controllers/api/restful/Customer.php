@@ -4,6 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 Class Customer extends WFF_Controller {
 
 	private $collection = "Customer";
+   private $sub_collection = "Telesalelist";
 
 	function __construct()
 	{
@@ -11,6 +12,7 @@ Class Customer extends WFF_Controller {
 		header('Content-type: application/json');
 		$this->load->library("crud");
 		$this->collection = set_sub_collection($this->collection);
+      $this->sub_collection = set_sub_collection($this->sub_collection);
 	}
 
 	function read()
@@ -27,7 +29,22 @@ Class Customer extends WFF_Controller {
 	function detail($id)
 	{
 		try {
-			$response = $this->crud->where_id($id)->getOne($this->collection);
+         $this->load->library("crud");
+
+         $aggregate = array(
+            array('$match'    => array('_id' => new MongoDB\BSON\ObjectId($id))),
+            array('$lookup' => array(
+               "from" => $this->sub_collection,
+                "localField" => "cmnd",
+                "foreignField" => "id_no",
+                "as" => "detail"
+            ))
+         );
+         $response = $this->crud->aggregate_pipeline($this->collection, $aggregate);
+         if (isset($response[0])) {
+            $response = $response[0];
+         }
+			// $response = $this->crud->where_id($id)->getOne($this->collection);
 			echo json_encode($response);
 		} catch (Exception $e) {
 			echo json_encode(array("status" => 0, "message" => $e->getMessage()));

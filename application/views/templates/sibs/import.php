@@ -19,6 +19,7 @@
                         <div class="row">
                             <div class="col-sm-12 text-center" style="padding: 10px">
                                 <a data-role="button" data-bind="click: uploadExcel">@Upload@ excel</a>
+                                <a data-role="button" data-bind="click: importExcelFromPython">Nhập excel</a>
                                 <div class="hidden">
                                     <input name="file" type="file" id="upload-excel"
                                            data-role="upload"
@@ -276,6 +277,25 @@
                     total: "total"
                 },
             }),
+            importExcelFromPython: function() {
+                $.ajax({
+                    url: ENV.vApi + "sibs/callPYFromPHP",
+                    // type: "PATCH",
+                    // contentType: "application/json; charset=utf-8",
+                    // data: kendo.stringify({filepath: filepath, convert: convert, import_type: 'manual', import_file_type: 'excel', total_data: totaldata, columnModel: columnModel}),
+                    success: function(res) {
+                        // if(res.status) {
+                        //     syncDataSource();
+                        //     router.navigate(`/`);
+                        // }
+                        // else {
+                        //     notification.show("Đã có lỗi trong quá trình nhập dữ liệu. Xin vui lòng kiểm tra lại trong lịch sử nhập dữ liệu", "error");
+                        // }
+                        console.log(res);
+                    },
+                    error: errorDataSource
+                })
+            }
         };
         kendo.bind(".mvvm", kendo.observable(model));
     });

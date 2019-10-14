@@ -1,16 +1,15 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-Class Navigator extends WFF_Controller {
+Class Organization extends WFF_Controller {
 
-	private $collection = "Navigator";
+	private $collection = "Organization";
 
 	function __construct()
 	{
 		parent::__construct();
 		header('Content-type: application/json');
 		$this->load->library("crud");
-		$this->load->config("_mongo");
 		$_db = $this->config->item("_mongo_db");
 		$this->crud->select_db($_db);
 		$this->collection = set_sub_collection($this->collection);
@@ -49,11 +48,12 @@ Class Navigator extends WFF_Controller {
 	function update($id)
 	{
 		$data = json_decode(file_get_contents('php://input'), TRUE);
-		//unset($data["selected"], $data["expanded"]);
-		unset($data["selected"]);
+		unset($data["selected"], $data["expanded"], $data["items"]);
 		$result = $this->crud->where_id($id)->update($this->collection, array('$set' => $data));
 		if(!isset($data["parent_id"])) {
 			$this->updateChild($data["id"], $data["id"]);
+		} else {
+			$this->updateParent($data["parent_id"]);
 		}
 		echo json_encode(array("status" => $result ? 1 : 0));
 	}
@@ -91,9 +91,7 @@ Class Navigator extends WFF_Controller {
 	{
 		$doc = array();
 		$childData = $this->crud->where_object_id("parent_id", $id)->get($this->collection);
-		$doc = $childData ? 
-				array("hasChild" => TRUE, "uri" => "parent", "apis" => [], "module_id" => NULL) : 
-				array("hasChild" => FALSE, "uri" => "");
+		$doc = $childData ? array("hasChild" => TRUE) : array("hasChild" => FALSE);
 		$this->crud->where_id($id)->update($this->collection, array('$set' => $doc));
 		return $doc;
 	}
