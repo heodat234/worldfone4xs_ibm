@@ -9,7 +9,7 @@
         filter: '<?= $id ?>' != '' ? {field: "id_import", operator: "eq", value: '<?= $id ?>'} : null,
         crudApi: `${ENV.restApi}`,
         templateApi: `${ENV.templateApi}`,
-        collection: "Datalibrary",
+        collection: "Data_library",
         observable: {
             scrollTo: function(e) {
                 var id = $(e.currentTarget).data('id');
@@ -48,153 +48,12 @@
             })
             return response;
         },
-        columns: [
-            {
-                field: "source",
-                title: "@Source@",
-                width: 150,
-                filterable: false,
-                // locked: true
-            },{
-                field: "exporting_date",
-                title: "@Exporting Date@",
-                // width: 100,
-                template: function(dataItem) {
-                    return (kendo.toString(dataItem.date_of_birth, "dd/MM/yyyy") ||  "").toString();
-                },
-                width: 150,
-                filterable: false,
-                // locked: true
-
-            },{
-                field: "contract_no",
-                title: "@Contract No.(Latest Loan)@",
-                width: 150,
-                filterable: false,
-                // locked: true
-            },{
-                field: "cif",
-                title: "@CIF@",
-                width: 150,
-                filterable: false,
-                // locked: true
-            },{
-                field: "customer_name",
-                title: "@Customer Name@",
-                width: 150,
-                filterable: false,
-                // locked: true
-            },{
-                field: "date_of_birth",
-                title: "@Date of birth@",
-                template: function(dataItem) {
-                    return (kendo.toString(dataItem.date_of_birth, "dd/MM/yyyy") ||  "").toString();
-                },
-                width: 150,
-                filterable: false,
-            },{
-                field: "id_no",
-                title: "@ID No@",
-                width: 150,
-                filterable: false,
-            },{
-                field: "mobile_phone_no",
-                title: "@Mobile Phone No.@",
-                width: 150,
-                filterable: false,
-            },{
-                field: "product",
-                title: "@Product(MB/CE/PL)@",
-                width: 150,
-                filterable: false,
-            },{
-                field: "interest_rate",
-                title: "@Interest Rate(Latest Loan)@",
-                width: 150,
-                filterable: false,
-            },{
-                field: "first_due_date",
-                title: "@First due date(Latest Loan)@",
-                width: 150,
-                filterable: false,
-            },{
-                field: "term",
-                title: "@Term(Latest Loan)@",
-                width: 150,
-                filterable: false,
-            },{
-                field: "balance",
-                title: "@Balance(Latest Loan)@",
-                width: 150,
-                filterable: false,
-            },{
-                field: "debt_group",
-                title: "@Debt group@",
-                width: 150,
-                filterable: false,
-            },{
-                field: "no_of_late_1",
-                title: "@No. of late(10-29 days)@",
-                width: 150,
-                filterable: false,
-            },{
-                field: "no_of_late_2",
-                title: "@No. of late( > 30 days)@",
-                width: 150,
-                filterable: false,
-            },{
-                field: "pl_interest_rate",
-                title: "@PL-Interest Rate@",
-                width: 150,
-                filterable: false,
-            },{
-                field: "note",
-                title: "@Note@",
-                width: 150,
-                filterable: false,
-            },{
-                field: "assign",
-                title: "@Assign@",
-                width: 150,
-                filterable: false,
-            },{
-                field: "date_send_data",
-                title: "@Date send Data@",
-                template: function(dataItem) {
-                    return (kendo.toString(dataItem.date_of_birth, "dd/MM/yyyy") ||  "").toString();
-                },
-                width: 150,
-                filterable: false,
-            },{
-                field: "date_receive_data",
-                title: "@Date receive Data@",
-                template: function(dataItem) {
-                    return (kendo.toString(dataItem.date_receive_data, "dd/MM/yyyy") ||  "").toString();
-                },
-                width: 150,
-                filterable: false,
-            },{
-                field: "code",
-                title: "@Code@",
-                width: 150,
-                filterable: false,
-            },{
-                field: "area_pl",
-                title: "@Area PL@",
-                width: 150,
-                filterable: false,
-            }
-            // },{
-            //     // Use uid to fix bug data-uid of row undefined
-            //     template: '<a role="button" class="btn btn-sm btn-circle btn-action" data-uid="#: uid #"><i class="fa fa-ellipsis-v"></i></a>',
-            //     width: 20
-            // }
-        ]
+        
     }; 
 </script>
 <script src="<?= STEL_PATH.'js/table.js' ?>"></script>
 <script type="text/javascript">
-	
+	var router = new kendo.Router({routeMissing: function(e) { router.navigate("/") }});
     var customerFields = new kendo.data.DataSource({
         serverPaging: true,
         serverFiltering: true,
@@ -211,7 +70,7 @@
         filter: {
             field: "collection",
             operator: "eq",
-            value: (ENV.type ? ENV.type + "_" : "") + Config.collection
+            value: (ENV.type ? ENV.type + "_" : "") + 'Datalibrary'
         },
         sort: {field: "index", dir: "asc"}
     })
@@ -236,20 +95,16 @@
                     break;
             }
         });
-        // columns.unshift({
-        //     selectable: true,
-        //     width: 32,
-        //     locked: true
-        // });
-        // columns.push({
-        //     // Use uid to fix bug data-uid of row undefined
-        //     title: `<a class='btn btn-sm btn-circle btn-action btn-primary' onclick='return deleteDataItemChecked();'><i class='fa fa-times-circle'></i></a>`,
-        //     template: '<a role="button" class="btn btn-sm btn-circle btn-action btn-primary" data-uid="#: uid #"><i class="fa fa-ellipsis-v"></i></a>',
-        //     width: 32
-        // });
+        
         Table.columns = columns;
         Table.init();
     })
+
+    function detailData(ele) {
+        var uid = $(ele).data('uid');
+        var dataItem = Table.dataSource.getByUid(uid);
+        router.navigate(`/detail_customer/${dataItem.id}`);
+    }
 
 	$(document).on("click", ".grid-name", function() {
 		detailData($(this).closest("tr"));

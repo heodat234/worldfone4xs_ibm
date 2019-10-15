@@ -77,11 +77,11 @@
             },
             hasDetail: false,
             telesaleList: [],
-            addTelesalelistList: function(telesaleList) {
-                var link = ENV.currentUri + '/#/detail/' + telesaleList.id;
+            addCustomerList: function(telesaleList) {
+                var link = ENV.currentUri + '/#/detail_customer/' + telesaleList.id;
                 var check = this.telesaleList.find(obj => obj.id == telesaleList.id);
                 if(!check) {
-                    this.telesaleList.push({id: telesaleList.id, url: link, name: telesaleList.file_name, active: true})
+                    this.telesaleList.push({id: telesaleList.id, url: link, name: telesaleList.customer_name, active: true})
                 }
                 for (var i = 0; i < this.telesaleList.length; i++) {
                     this.set(`telesaleList[${i}].active`, (this.telesaleList[i].id == telesaleList.id) ? true : false);
@@ -118,10 +118,10 @@
             }
             // layoutViewModel.addTelesalelistList(dataItemFull);
             layoutViewModel.set("breadcrumb", dataItemFull.file_name);
-            var HTML = await $.get(`${Config.templateApi}telesalelist/overview?id=${id}`);
+            var HTML = await $.get(`${Config.templateApi}data_library/overview?id=${id}`);
             var kendoView = new kendo.View(HTML, { model: {}, template: false, wrap: false });
             await layout.showIn("#bottom-row", kendoView);
-            var widget = await $.get(`${Config.templateApi}telesalelist/widget`);
+            var widget = await $.get(`${Config.templateApi}data_library/widget`);
             await $("#page-widget").html(widget);
         });
 
@@ -137,7 +137,21 @@
             layout.showIn("#bottom-row", kendoView);
         });
 
-        
+        router.route("/detail_customer/:id", async function(id) {
+            layoutViewModel.setActive(1);
+            var dataItemFull = await $.get(`${ENV.restApi}data_library/${id}`);
+            if(!dataItemFull) {
+                notification.show("Can't find customer", "error");
+                return;
+            }
+            layoutViewModel.addCustomerList(dataItemFull);
+            layoutViewModel.set("breadcrumb", `${dataItemFull.customer_name}`);
+            var HTML = await $.get(`${Config.templateApi}data_library/detail?id=${id}`);
+            var model = {
+            }
+            var kendoView = new kendo.View(HTML, { model: model, template: false, wrap: false });
+            layout.showIn("#bottom-row", kendoView);
+        });
 
         router.start();
 

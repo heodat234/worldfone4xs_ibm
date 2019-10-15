@@ -143,16 +143,99 @@
                                     data-no-records="{
                                         template: `<h2 class='text-danger'>@NO DATA@</h2>`
                                     }"
-                                    data-columns="[
-                                        {field:'ticket_id', title: '@Case code@'},
-                                        {field:'service', title: '@Service@'},
-                                        {field:'status', title: '@Status@'},
-                                        {field:'customerFormat', title: '@Customer format@'},
-                                        {field:'source', title: '@Contact_channel@'},
-                                        {field:'createdBy', title: '@Created by@'},
-                                        {field:'createdAtText', title: '@Created at@'}
-                                        ]"
-                                  data-bind="source: caseData"></div>
+                                    data-columns='[
+                                        {
+                                            title: "@Created at@",
+                                            field: "created_at",
+                                            headerAttributes: { style: "white-space: normal"},
+                                            width: "110px",
+                                            filterable: false,
+                                            template: data => gridDate(data.appointment_date),
+                                        },{
+                                            title: "@Telesale code@",
+                                            field: "tl_code",
+                                            headerAttributes: { style: "white-space: normal"},
+                                            width: "110px",
+                                            filterable: false
+                                        },{
+                                            field: "tl_name",
+                                            title: "@Telesale name@",
+                                            headerAttributes: { style: "white-space: normal"},
+                                            width: "110px",
+                                            filterable: false
+                                        },{
+                                            title: "@Customer@",
+                                            columns: [{
+                                                field: "customer_info.cmnd",
+                                                title: "@National ID@",
+                                                headerAttributes: { style: "white-space: normal"},
+                                                width: "110px",
+                                                filterable: false
+                                            }, {
+                                                field: "customer_info.name",
+                                                title: "@Name@",
+                                                width: "200px",
+                                                headerAttributes: { style: "white-space: normal"},
+                                                filterable: false
+                                            }, {
+                                                field: "customer_info.phone",
+                                                title: "@Phone@",
+                                                width: "150px",
+                                                headerAttributes: { style: "white-space: normal"},
+                                                filterable: false
+                                            }]
+                                        },{
+                                            field: "appointment_date",
+                                            title: "@Appointment date@",
+                                            headerAttributes: { style: "white-space: normal"},
+                                            width: "150px",
+                                            template: data => gridDate(data.appointment_date, "dd/MM/yyyy"),
+                                            filterable: false
+                                        },{
+                                            title: "@Loan Counter@",
+                                            columns: [{
+                                                field: "dealer_code",
+                                                title: "@Code@",
+                                                headerAttributes: { style: "white-space: normal"},
+                                                width: "100px",
+                                                filterable: false
+                                            }, {
+                                                field: "dealer_name",
+                                                title: "@Name@",
+                                                headerAttributes: { style: "white-space: normal"},
+                                                width: "200px",
+                                                filterable: false
+                                            }, {
+                                                field: "dealer_address",
+                                                title: "@Address@",
+                                                headerAttributes: { style: "white-space: normal"},
+                                                width: "250px",
+                                                filterable: false
+                                            }]
+                                        },{
+                                            title: "SC",
+                                            columns: [{
+                                                field: "sc_code",
+                                                title: "@Code@",
+                                                headerAttributes: { style: "white-space: normal"},
+                                                width: "100px",
+                                                filterable: false
+                                            }, {
+                                                field: "sc_name",
+                                                title: "@Name@",
+                                                headerAttributes: { style: "white-space: normal"},
+                                                width: "200px",
+                                                filterable: false
+                                            }, {
+                                                field: "sc_phone",
+                                                title: "@Phone@",
+                                                headerAttributes: { style: "white-space: normal"},
+                                                width: "150px",
+                                                filterable: false
+                                            }]
+                                        }
+                                        ]'
+                                  data-bind="source: appointment_log"></div>
                             </div>
                         </div>
                     </div>
@@ -725,14 +808,14 @@ var Detail = function() {
         openCard: function() {
             this.cardTransactionData.filter({field: "cif", operator: "eq", value: this.get("item.cif")})
         },
-        caseData: new kendo.data.DataSource({
+        appointment_log: new kendo.data.DataSource({
             serverFiltering: true,
             serverPaging: true,
             serverSorting: true,
-            filter: {field: "sender_id", operator: "eq", value: Config.id},
-            pageSize: 2,
+            // filter: {field: "cmnd", operator: "eq", value: "5d81d7c71ef2b43aff4326ac"},
+            pageSize: 5,
             transport: {
-                read: ENV.restApi + "ticket",
+                read: ENV.restApi + "appointment_log",
                 parameterMap: parameterMap
             },
             schema: {
@@ -815,12 +898,7 @@ var Detail = function() {
             dataItemFull.other_phonesHTML = gridPhone(dataItemFull.other_phones);
             dataItemFull.createdAtText = gridTimestamp(dataItemFull.createdAt);
             dataItemFull.updatedAtText = gridTimestamp(dataItemFull.updatedAt);
-            dataItemFull.detail[0].date_of_birthText = gridTimestamp(dataItemFull.detail[0].date_of_birth);
-            dataItemFull.detail[0].date_receive_dataText = gridTimestamp(dataItemFull.detail[0].date_receive_data);
-            dataItemFull.detail[0].date_send_dataText = gridTimestamp(dataItemFull.detail[0].date_send_data);
-            dataItemFull.detail[0].exporting_dateText = gridTimestamp(dataItemFull.detail[0].exporting_date);
-            dataItemFull.detail[0].first_due_dateText = gridTimestamp(dataItemFull.detail[0].first_due_date);
-
+           
             customerModel.data.forEach(doc => {
 
                 if(!doc.sub_type) return;
@@ -859,46 +937,7 @@ var Detail = function() {
                 }
             });
 
-            var customerModel_1 = await $.get(`${ENV.vApi}model/read`, {
-                q: JSON.stringify({filter: {field: "collection", operator: "eq", value: (ENV.type ? ENV.type + "_" : "") + "Telesalelist"}, sort: {field: "index", dir: "asc"}, take: 30,skip:0})
-            });
-            customerModel_1.data.forEach(doc => {
-
-                if(!doc.sub_type) return;
-                let sub_type = JSON.parse(doc.sub_type);
-                if(!sub_type.detailShow) return;
-
-                if(doc.field != "name") {
-                    switch(doc.type) {
-                        case "phone": case "arrayPhone":
-                            dataItemFull[doc.field + "HTML"] = gridPhone(dataItemFull[doc.field]);
-                            customerHTMLArray.push(`<div class="form-group">
-                                <label class="col-sm-3 control-label">${doc.title}</label>
-                                <div class="col-sm-9">
-                                    <p class="form-control-static" data-bind="html: item.detail[0].${doc.field}HTML"></p>
-                                </div>
-                            </div>`);
-                            break;
-                        case "timestamp":
-                            dataItemFull[doc.field + "Text"] = gridTimestamp(dataItemFull[doc.field]);
-                            customerHTMLArray.push(`<div class="form-group">
-                                <label class="col-sm-3 control-label">${doc.title}</label>
-                                <div class="col-sm-9">
-                                    <p class="form-control-static" data-bind="text: item.detail[0].${doc.field}Text"></p>
-                                </div>
-                            </div>`);
-                            break;
-                        default:
-                            customerHTMLArray.push(`<div class="form-group">
-                                <label class="col-sm-3 control-label">${doc.title}</label>
-                                <div class="col-sm-9">
-                                    <p class="form-control-static copy-item" data-bind="text: item.detail[0].${doc.field}"></p>
-                                </div>
-                            </div>`);
-                            break;
-                    }
-                }
-            });
+            
 
             $("#customer-detail-view").html(customerHTMLArray.join(''));
             this.model.set("item", dataItemFull);
@@ -928,6 +967,16 @@ var Detail = function() {
                 })
             }
             this.model.callHistory.filter(filter);
+
+            var filter_appointment = {
+                logic: "or",
+                filters: [
+                    {field: "cmnd", operator: "eq", value: dataItemFull.cmnd}
+                ]
+            };
+            this.model.appointment_log.filter(filter_appointment);
+
+
             var interactiveFilters = [{
                 logic: "and",
                 filters: [

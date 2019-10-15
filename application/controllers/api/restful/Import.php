@@ -37,11 +37,11 @@ Class Import extends WFF_Controller {
 
     public function upload($collection)
     {
-        $key = ini_get("session.upload_progress.prefix") . "advancedProgress";
-        if (isset($_SESSION[$key]))
-        {
-            var_dump('expression');exit;
-        }
+        // $key = ini_get("session.upload_progress.prefix") . "advancedProgress";
+        // if (isset($_SESSION[$key]))
+        // {
+        //     var_dump('expression');exit;
+        // }
     	$json = array();
         $config['upload_path']          = './upload/users/import';
         $config['allowed_types']        = 'csv||doc|docx|xls|xlsx|application/vnd.ms-excel|zip|7zip|rar|application/x-rar-compressed|application/rar|application/x-rar|application/octet-stream|application/force-download|pdf|application/pdf';

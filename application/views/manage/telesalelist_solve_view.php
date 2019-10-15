@@ -77,11 +77,11 @@
             },
             hasDetail: false,
             telesaleList: [],
-            addTelesalelistList: function(telesaleList) {
-                var link = ENV.currentUri + '/#/detail/' + telesaleList.id;
+            addCustomerList: function(telesaleList) {
+                var link = ENV.currentUri + '/#/detail_customer/' + telesaleList.id;
                 var check = this.telesaleList.find(obj => obj.id == telesaleList.id);
                 if(!check) {
-                    this.telesaleList.push({id: telesaleList.id, url: link, name: telesaleList.file_name, active: true})
+                    this.telesaleList.push({id: telesaleList.id, url: link, name: telesaleList.customer_name, active: true})
                 }
                 for (var i = 0; i < this.telesaleList.length; i++) {
                     this.set(`telesaleList[${i}].active`, (this.telesaleList[i].id == telesaleList.id) ? true : false);
@@ -109,7 +109,21 @@
         
         });
 
-
+        router.route("/detail_customer/:id", async function(id) {
+            layoutViewModel.setActive(1);
+            var dataItemFull = await $.get(`${ENV.restApi}telesalelist/${id}`);
+            if(!dataItemFull) {
+                notification.show("Can't find customer", "error");
+                return;
+            }
+            layoutViewModel.addCustomerList(dataItemFull);
+            layoutViewModel.set("breadcrumb", `${dataItemFull.customer_name}`);
+            var HTML = await $.get(`${Config.templateApi}telesalelist/detail?id=${id}`);
+            var model = {
+            }
+            var kendoView = new kendo.View(HTML, { model: model, template: false, wrap: false });
+            layout.showIn("#bottom-row", kendoView);
+        });
         router.start();
 
     
@@ -144,7 +158,9 @@
         <li class="pull-right none-breakcrumb" id="top-row">
         	<div class="btn-group btn-group-sm">
                 <button href="#/" class="btn btn-alt btn-default" data-bind="click: goTo, css: {active: activeArray[0]}">@Overview@</button>
-                
+                <button class="btn btn-alt btn-default" data-bind="css: {active: activeArray[1]}, visible: hasDetail" data-toggle="dropdown" id="btn-detail">@Detail@ (<span data-bind="text: telesaleList.length"></span>) <span class="caret"></span></button>
+                <ul class="dropdown-menu dropdown-custom dropdown-options" data-bind="source: telesaleList" data-template="detail-dropdown-template">
+                </ul>
             </div>
         </li>
     </ul>

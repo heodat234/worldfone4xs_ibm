@@ -33,15 +33,10 @@ class Import_model extends CI_Model {
         if(!empty($response['data'])) {
             $titleData = $response['data'];
         }
-        // var_dump($titleData);exit;
+        // var_dump($duoifile);exit;
         $insertData = $error = array();
         if ($duoifile == 'xlsx') {
             $this->load->library('Excel');
-
-            $rowDataRaw = $this->excel->read($filePath, 50, 1);
-            if(!empty($rowDataRaw['data'])) {
-                $rowDataRaw = $rowDataRaw['data'];
-            }
 
             $objWorksheet   = $this->excel->getActiveSheet($filePath);
             $highestRow     = $objWorksheet->getHighestRow();
@@ -89,7 +84,7 @@ class Import_model extends CI_Model {
                             $value = (double)$value;
                             break;
                         default:
-                           
+                           $value = (string)$value;
                     }
                     $rowData[$titleValue['field']] = isset($value) ? $value : '';
                 }
@@ -105,7 +100,7 @@ class Import_model extends CI_Model {
                 
                 array_push($insertData, $rowData);
             }
-            
+            // var_dump($insertData);exit;
         }else if ($duoifile == 'csv') {
             // $titleData = array();
             if (($h = fopen($filePath, "r")) !== FALSE) 

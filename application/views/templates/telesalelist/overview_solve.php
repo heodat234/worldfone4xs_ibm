@@ -80,6 +80,7 @@
 </script>
 <script src="<?= STEL_PATH.'js/table.js' ?>"></script>
 <script type="text/javascript">
+    var router = new kendo.Router({routeMissing: function(e) { router.navigate("/") }});
     var telesaleFields = new kendo.data.DataSource({
         serverPaging: true,
         serverFiltering: true,
@@ -211,11 +212,11 @@
             
     }
 
-    // function detailData(ele) {
-    //     var uid = $(ele).data('uid');
-    //     var dataItem = Table.dataSource.getByUid(uid);
-    //     router.navigate(`/detail/${dataItem.id}`);
-    // }
+    function detailData(ele) {
+        var uid = $(ele).data('uid');
+        var dataItem = Table.dataSource.getByUid(uid);
+        router.navigate(`/detail_customer/${dataItem.id}`);
+    }
 
 	$(document).on("click", ".grid-name", function() {
 		detailData($(this).closest("tr"));

@@ -3,7 +3,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 Class Data_library extends WFF_Controller {
 
-	private $collection = "Telesalelist";
+	private $collection = "Datalibrary";
 
 	function __construct()
 	{

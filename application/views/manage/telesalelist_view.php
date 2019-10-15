@@ -77,11 +77,11 @@
             },
             hasDetail: false,
             telesaleList: [],
-            addTelesalelistList: function(telesaleList) {
-                var link = ENV.currentUri + '/#/detail/' + telesaleList.id;
+            addCustomerList: function(telesaleList) {
+                var link = ENV.currentUri + '/#/detail_customer/' + telesaleList.id;
                 var check = this.telesaleList.find(obj => obj.id == telesaleList.id);
                 if(!check) {
-                    this.telesaleList.push({id: telesaleList.id, url: link, name: telesaleList.file_name, active: true})
+                    this.telesaleList.push({id: telesaleList.id, url: link, name: telesaleList.customer_name, active: true})
                 }
                 for (var i = 0; i < this.telesaleList.length; i++) {
                     this.set(`telesaleList[${i}].active`, (this.telesaleList[i].id == telesaleList.id) ? true : false);
@@ -146,6 +146,22 @@
             }
             layoutViewModel.set("breadcrumb", `Divide List`);
             var HTML = await $.get(`${Config.templateApi}telesalelist/divide_list?id=${id}`);
+            var model = {
+            }
+            var kendoView = new kendo.View(HTML, { model: model, template: false, wrap: false });
+            layout.showIn("#bottom-row", kendoView);
+        });
+
+        router.route("/detail_customer/:id", async function(id) {
+            layoutViewModel.setActive(1);
+            var dataItemFull = await $.get(`${ENV.restApi}telesalelist/${id}`);
+            if(!dataItemFull) {
+                notification.show("Can't find customer", "error");
+                return;
+            }
+            layoutViewModel.addCustomerList(dataItemFull);
+            layoutViewModel.set("breadcrumb", `${dataItemFull.customer_name}`);
+            var HTML = await $.get(`${Config.templateApi}telesalelist/detail?id=${id}`);
             var model = {
             }
             var kendoView = new kendo.View(HTML, { model: model, template: false, wrap: false });

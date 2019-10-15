@@ -122,23 +122,17 @@ var Config = {
 		});
 	    
 	}
-	function divideList(ele) {
-		var uid = $(ele).data('uid');
-		var dataItem = Table.dataSource.getByUid(uid);
-		router.navigate(`/divide/${dataItem.id}`);
-	}
 
+	
 	function detailData(ele) {
-		var uid = $(ele).data('uid');
-		var dataItem = Table.dataSource.getByUid(uid);
-		router.navigate(`/detail/${dataItem.id}`);
-		// router.navigate(`/`);
-	}
+        var uid = $(ele).data('uid');
+        var dataItem = Table.dataSource.getByUid(uid);
+        router.navigate(`/detail_customer/${dataItem.id}`);
+    }
 
-	$(document).on("click", ".grid-name", function() {
-		detailData($(this).closest("tr"));
-        divideList($(this).closest("tr"));
-	})
+    $(document).on("click", ".grid-name", function() {
+        detailData($(this).closest("tr"));
+    })
 
     var Table = function() {
         var columnsStorage = JSON.parse(sessionStorage.getItem("columns_" + ENV.currentUri));

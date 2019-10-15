@@ -301,6 +301,13 @@ Class Excel {
 
     public function getActiveSheet($file_path)
     {
+    	if(!isset($this->reader)) {
+	    	/**  Identify the type of $file_path  **/
+			$inputFileType = \PhpOffice\PhpSpreadsheet\IOFactory::identify($file_path);
+			/**  Create a new Reader of the type that has been identified  **/
+			$this->inputFileType = $inputFileType;
+			$this->reader = \PhpOffice\PhpSpreadsheet\IOFactory::createReader($inputFileType);
+		}
 		$spreadsheet = $this->reader->load($file_path);
 		$worksheet = $spreadsheet->getActiveSheet();
 		return $worksheet;
