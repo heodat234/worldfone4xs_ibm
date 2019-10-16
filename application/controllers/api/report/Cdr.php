@@ -5,8 +5,8 @@ Class Cdr extends WFF_Controller {
 
     /**
      * API restful [worldfonepbxmanager] collection.
-     * READ from base_url + api/restful/cdr 
-     * DETAIL from base_url + api/restful/cdr/$id 
+     * READ from base_url + api/restful/cdr
+     * DETAIL from base_url + api/restful/cdr/$id
      */
 
     private $collection = "worldfonepbxmanager";
@@ -35,7 +35,7 @@ Class Cdr extends WFF_Controller {
         $request = json_decode($this->input->get("q"), TRUE);
         $model = $this->crud->build_model($this->collection);
         // Kendo to aggregate
-        $this->load->library("kendo_aggregate", $model);   
+        $this->load->library("kendo_aggregate", $model);
         $this->kendo_aggregate->set_kendo_query($request)->selecting();
         $this->kendo_aggregate->filtering();
         // Get total

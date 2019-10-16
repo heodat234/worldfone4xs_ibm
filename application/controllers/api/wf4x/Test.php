@@ -27,6 +27,17 @@ Class Test extends CI_Controller {
 		$result = $this->navitaire_model->getBooking("123");
 		pre($result);
 	}
+   function testPhone()
+   {
+      $string = '84903950907';
+      $pattern = '#^\(?[\d]{3}\)?-\(?[\d]{2}\)?-[\d]{2}\.[\d]{3}-[\d]{3}$#';
+      if(preg_match($pattern, $string, $match) == 1){
+      echo '<span style=\'color:#298426\'>Bạn vừa nhập vào số điện thoại hợp lệ!</span>';
+      }
+      else{
+      echo '<span style=\'color:#FF0400\'>Bạn vừa nhập vào số điện thoại không hợp lệ!</span>';
+      }
+   }
 
     function convertCSVToJson() {
         $this->load->library('excel');
