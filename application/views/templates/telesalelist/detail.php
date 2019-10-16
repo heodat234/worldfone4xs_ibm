@@ -369,7 +369,6 @@
         <!-- END Default Tabs -->
     </div>
 </div>
-
 <link rel="stylesheet" href="<?= STEL_PATH.'css/detail.css' ?>" type="text/css">
 
 <script type="text/x-kendo-template" id="ticket-timeline-template">
@@ -461,9 +460,9 @@
 <script>
 var Config = Object.assign(Config, {
     id: '<?= $this->input->get("id") ?>',
+    extension: `${ENV.extension}`,
     collection: 'telesalelist'
 });
-
 function detailChatView(data) {
     return '<a role="button" target="_blank" class="btn btn-sm btn-action" href="'+ENV.baseUrl+'app/chatdetail?room_id='+data.id+'" >Chi tiết chat</a>'
 }
@@ -677,9 +676,13 @@ var Detail = function() {
         noteData: new kendo.data.DataSource({
             serverFiltering: true,
             serverSorting: true,
-            filter: [
-                {field: "foreign_id", operator: "eq", value: Config.id}
-            ],
+            filter: {
+               logic: "and",
+                filters: [
+                    {field: "foreign_id", operator: "eq", value: Config.id},
+                    {field: "createdBy", operator: "eq", value: Config.extension}
+                ]
+            },
             sort: [{field: "createdAt", dir: "desc"}],
             transport: {
                 read: `${ENV.restApi}customer_note`,
@@ -961,22 +964,20 @@ var Detail = function() {
 
             // CDR
             var filter = {
-                logic: "or",
+                logic: "and",
                 filters: [
-                    {field: "customernumber", operator: "eq", value: dataItemFull.phone}
+                    {field: "customernumber", operator: "eq", value: dataItemFull.mobile_phone_no},
+                    {field: "userextension", operator: "eq", value: Config.extension}
                 ]
             };
-            if(dataItemFull.other_phones) {
-                dataItemFull.other_phones.forEach(function(phone){
-                    filter.filters.push({field: "customernumber", operator: "eq", value: phone})
-                })
-            }
+
             this.model.callHistory.filter(filter);
 
             var filter_appointment = {
-                logic: "or",
+                logic: "and",
                 filters: [
-                    {field: "cmnd", operator: "eq", value: dataItemFull.cmnd}
+                    {field: "customer_info.cmnd", operator: "eq", value: dataItemFull.id_no},
+                    {field: "tl_code", operator: "eq", value: Config.extension}
                 ]
             };
             this.model.appointment_log.filter(filter_appointment);

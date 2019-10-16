@@ -249,7 +249,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                 </div>
             </div>
         </div>
@@ -392,6 +392,7 @@
 <script>
 var Config = Object.assign(Config, {
     id: '<?= $this->input->get("id") ?>',
+    extension: `${ENV.extension}`,
     collection: 'data_library'
 });
 
@@ -608,9 +609,13 @@ var Detail = function() {
         noteData: new kendo.data.DataSource({
             serverFiltering: true,
             serverSorting: true,
-            filter: [
-                {field: "foreign_id", operator: "eq", value: Config.id}
-            ],
+            filter: {
+               logic: "and",
+                filters: [
+                    {field: "foreign_id", operator: "eq", value: Config.id},
+                    {field: "createdBy", operator: "eq", value: Config.extension}
+                ]
+            },
             sort: [{field: "createdAt", dir: "desc"}],
             transport: {
                 read: `${ENV.restApi}customer_note`,
@@ -780,7 +785,7 @@ var Detail = function() {
             },
             error: errorDataSource
         }),
-       
+
     });
     var model = kendo.observable(observable);
     return {
@@ -799,44 +804,6 @@ var Detail = function() {
             dataItemFull.date_send_dataText = gridTimestamp(dataItemFull.date_send_data);
             dataItemFull.exporting_dateText = gridTimestamp(dataItemFull.exporting_date);
             dataItemFull.first_due_dateText = gridTimestamp(dataItemFull.first_due_date);
-
-            // customerModel.data.forEach(doc => {
-
-            //     if(!doc.sub_type) return;
-            //     let sub_type = JSON.parse(doc.sub_type);
-            //     if(!sub_type.detailShow) return;
-
-            //     if(doc.field != "name") {
-            //         switch(doc.type) {
-            //             case "phone": case "arrayPhone":
-            //                 dataItemFull[doc.field + "HTML"] = gridPhone(dataItemFull[doc.field]);
-            //                 customerHTMLArray.push(`<div class="form-group">
-            //                     <label class="col-sm-3 control-label">${doc.title}</label>
-            //                     <div class="col-sm-9">
-            //                         <p class="form-control-static" data-bind="html: item.${doc.field}HTML"></p>
-            //                     </div>
-            //                 </div>`);
-            //                 break;
-            //             case "timestamp":
-            //                 dataItemFull[doc.field + "Text"] = gridTimestamp(dataItemFull[doc.field]);
-            //                 customerHTMLArray.push(`<div class="form-group">
-            //                     <label class="col-sm-3 control-label">${doc.title}</label>
-            //                     <div class="col-sm-9">
-            //                         <p class="form-control-static" data-bind="text: item.${doc.field}Text"></p>
-            //                     </div>
-            //                 </div>`);
-            //                 break;
-            //             default:
-            //                 customerHTMLArray.push(`<div class="form-group">
-            //                     <label class="col-sm-3 control-label">${doc.title}</label>
-            //                     <div class="col-sm-9">
-            //                         <p class="form-control-static copy-item" data-bind="text: item.${doc.field}"></p>
-            //                     </div>
-            //                 </div>`);
-            //                 break;
-            //         }
-            //     }
-            // });
 
             var customerModel_1 = await $.get(`${ENV.vApi}model/read`, {
                 q: JSON.stringify({filter: {field: "collection", operator: "eq", value: (ENV.type ? ENV.type + "_" : "") + "Telesalelist"}, sort: {field: "index", dir: "asc"}, take: 30,skip:0})
@@ -896,22 +863,20 @@ var Detail = function() {
 
             // CDR
             var filter = {
-                logic: "or",
+                logic: "and",
                 filters: [
-                    {field: "customernumber", operator: "eq", value: dataItemFull.phone}
+                    {field: "customernumber", operator: "eq", value: dataItemFull.mobile_phone_no},
+                    {field: "userextension", operator: "eq", value: Config.extension}
                 ]
             };
-            if(dataItemFull.other_phones) {
-                dataItemFull.other_phones.forEach(function(phone){
-                    filter.filters.push({field: "customernumber", operator: "eq", value: phone})
-                })
-            }
+
             this.model.callHistory.filter(filter);
 
             var filter_appointment = {
                 logic: "or",
                 filters: [
-                    {field: "cmnd", operator: "eq", value: dataItemFull.cmnd}
+                    {field: "cmnd", operator: "eq", value: dataItemFull.id_no},
+                    {field: "tl_code", operator: "eq", value: Config.extension}
                 ]
             };
             this.model.appointment_log.filter(filter_appointment);
@@ -1020,7 +985,7 @@ async function editForm(ele) {
             url: Config.templateApi + Config.collection + "/form",
             error: errorDataSource
         });
-    
+
     dataItemFull.exporting_date = new Date((dataItemFull.exporting_date) * 1000 + 86400000);
     dataItemFull.date_of_birth = new Date((dataItemFull.date_of_birth) * 1000 + 86400000);
     dataItemFull.date_send_data = new Date((dataItemFull.date_send_data) * 1000 + 86400000);
