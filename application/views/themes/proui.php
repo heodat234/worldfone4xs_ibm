@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html class="no-js" lang="vi">
+<html class="no-js" lang="<?= isset($template['language']) ? substr($template['language'], 0, 2) : 'en' ?>">
     <head>
         <meta charset="utf-8">
         <title><?= $template['title'] ?></title>

@@ -16,7 +16,7 @@
 	                    <div class="col-sm-12">
 							<input id="excel-file" type="file" name="file" />
 						</div>
-						
+
 	                </div>
 	            </div>
 	        </div>
@@ -39,7 +39,7 @@
 			<div class="col-xs-12 text-center"><button data-role="button" data-bind="click: goToAssign">Agree</button></div>
 		</div>
 	</div>
-	
+
 </div>
 <div class="col-sm-8">
 </div>
@@ -74,15 +74,15 @@
         background-color: #2db245;
     }
     .k-spreadsheet {
-     width: 100%; 
+     width: 100%;
     }
 </style>
 <!-- <script src="https://cdn.jsdelivr.net/npm/sweetalert2@8"></script> -->
 
 <script type="text/javascript">
-	$("#spreadsheet").kendoSpreadsheet({toolbar: false});
-	$("#spreadsheet").hide();
-   	var spreadsheet = $("#spreadsheet").data("kendoSpreadsheet"); 
+	// $("#spreadsheet").kendoSpreadsheet({toolbar: false});
+	// $("#spreadsheet").hide();
+   	// var spreadsheet = $("#spreadsheet").data("kendoSpreadsheet");
 
 	var ALLOWED_EXTENSIONS = [".xlsx",".csv"];
 
@@ -101,20 +101,20 @@
                 alert("Please, select a supported file format excel or csv");
                 e.preventDefault();
             }
-            $("#spreadsheet").show();
-        	spreadsheet.fromFile(e.files[0]['rawFile']);
+            // $("#spreadsheet").show();
+        	// spreadsheet.fromFile(e.files[0]['rawFile']);
         },
         clear: onClear,
         progress: onProgress,
         success: function(e) {
-    		notification.show(e.response.message, e.response.status ? "success" : "error");  
+    		notification.show(e.response.message, e.response.status ? "success" : "error");
             if (e.response.status == 0) {
                 router.navigate(`/history`);
-            }      	
+            }
         }
     });
     function onClear(e) {
-        $("#spreadsheet").hide();
+        // $("#spreadsheet").hide();
     }
   	function onProgress(e) {
         var files = e.files;
@@ -124,9 +124,9 @@
 	function getDataFromSpreadSheet(rows) {
 		var data = [];
 		var headerData = rows[0].cells;
-		
+
 		rows.forEach(function(row, index) {
-			var doc = {}; 
+			var doc = {};
 			row.cells.forEach(function(cell, idx){
 				if(index != 0 && cell.value != undefined) {
 					doc["C"+cell.index] = cell.value;
@@ -138,7 +138,7 @@
 		})
 		return data;
 	}
-	
+
 </script>
 <script>
     var router = new kendo.Router({routeMissing: function(e) { router.navigate("/") }});
@@ -156,7 +156,7 @@
                 title: "File Name",
                 template: '<a role="button" href="javascript:void(0)" class="btn btn-sm" onclick="uploadFile(this)"><b>#= file_name #</b></a>'
             }]
-    }; 
+    };
 
     var detailTable = function() {
         return {
@@ -187,7 +187,7 @@
                     error: errorDataSource
                 });
 
-               
+
                 var grid = this.grid = $(`#grid-3`).kendoGrid({
                     dataSource: dataSource,
                     resizable: true,
@@ -215,8 +215,8 @@
                     return checkedIds;
                 }
 
-                
-              
+
+
             }
         }
     }();
@@ -251,6 +251,6 @@
                     }
                 });
     }
-    
+
     detailTable.init();
 </script>

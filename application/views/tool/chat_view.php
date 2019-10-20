@@ -88,7 +88,18 @@
 		            	</h2>
 
 		            	<!-- Recent -->
-		                <h2 class="chatui-header" style="margin: 20px 0 15px"><a href="javascript:void(0)" data-bind="click: toggleSearch"><i class="fa fa-search text-info pull-right"></i></a><strong>@Recent@</strong> <span data-bind="visible: filterRecentText">(<span data-bind="text: filterRecentText"></span>)</span></h2>
+		                <h2 class="chatui-header" style="margin: 20px 0 15px">
+		                	<a href="javascript:void(0)" data-bind="click: toggleSearch, invisible: invisibleIconSearch">
+		                		<i class="fa fa-search text-info pull-right"></i>
+		                	</a>
+		                	<a href="javascript:void(0)" data-bind="click: toggleRecent">
+			                	<strong>
+			                		<i class="fa fa-caret-down"></i>
+			                		@Recent@
+			                	</strong> 
+		                	</a>
+		                	<span data-bind="visible: filterRecentText">(<span data-bind="text: filterRecentText"></span>)</span>
+		                </h2>
 		                <div class="list-group" data-template="room-template" data-bind="source: recentChatData">
 		                </div>
 		                <!-- END Recent -->
@@ -120,6 +131,9 @@
 	<input name="file" type="file" id="upload-file"/>
 </div>
 <style type="text/css">
+	#right-chat-menu {
+		transition: height 0.25s ease-in;
+	}
 	#right-chat-menu .list-group .list-group-item {
 		padding: 5px 7px;
 	}
@@ -148,6 +162,13 @@
 	}
 	.chatui-people .chatui-header {
 		margin-top: 15px;margin-bottom: 10px;padding-top: 0px;padding-bottom: 0px;padding-right: 10px;padding-left: 10px;
+	}
+	.rotated-counter-clock {
+	    -webkit-transform: rotate(-90deg);  /* Chrome, Safari 3.1+ */
+	    -moz-transform: rotate(-90deg);  /* Firefox 3.5-15 */
+	    -ms-transform: rotate(-90deg);  /* IE 9 */
+	    -o-transform: rotate(-90deg);  /* Opera 10.50-12.00 */
+	    transform: rotate(-90deg);  /* Firefox 16+, IE 10+, Opera 12.10+ */
 	}
 </style>
 <script type="text/x-kendo-template" id="room-template">
@@ -308,6 +329,26 @@
 			agentName: "",
 			toggleSearch: function(e) {
 				this.set("visibleSearch", !this.get("visibleSearch"));
+			},
+			toggleRecent: function(e) {
+				$caretIcon = $(e.currentTarget).find(".fa");
+				$caretIcon.toggleClass("rotated-counter-clock");
+				$("div[data-template=room-template]").slideToggle( "slow" );
+				var windowW = window.innerWidth
+                    || document.documentElement.clientWidth
+                    || document.body.clientWidth;
+                if (windowW < 768) {
+                	if($caretIcon.hasClass("rotated-counter-clock")) {
+                		$("#right-chat-menu").css('height', 50);
+                		$('.chatui-talk').css('height', 450);
+                		this.set("invisibleIconSearch", true);
+                		this.set("visibleSearch", false);
+	                } else {
+	                	$("#right-chat-menu").css('height', 250);
+                		$('.chatui-talk').css('height', 250);
+                		this.set("invisibleIconSearch", false);
+	                }
+                }
 			},
 			searchChange: function(e) {
 				var value = e.currentTarget.value;

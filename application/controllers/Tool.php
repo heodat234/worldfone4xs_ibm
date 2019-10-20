@@ -18,6 +18,11 @@ class Tool extends WFF_Controller {
         $this->load->view('tool/scheduler_view', $_GET);
     }
 
+    public function library() {
+        $this->output->data["css"][] = STEL_PATH . "css/users/roles/index.css";
+        $this->load->view('tool/library_view');
+    }
+
     public function chat() {
         $this->output->data["css"][] = KENDOUI_PATH . "styles/kendo.office365.min.css";
         $this->output->data["js"][] = PROUI_PATH . "js/pages/readyChat.js";

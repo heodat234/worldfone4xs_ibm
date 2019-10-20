@@ -1,5 +1,5 @@
 <li>
-    <a href="javascript:void(0)" class="btn btn-alt btn-sm btn-default" data-toggle="tooltip" title="@Quick chat@" data-placement="bottom" onclick="openForm({title: '@Quick chat@', width: 400}); quickChat();">
+    <a href="javascript:void(0)" class="btn btn-alt btn-sm btn-default" data-toggle="tooltip" title="@Quick chat@" data-placement="bottom" onclick="openForm({title: '@Quick chat@', width: 500}); quickChat();">
         <i class="gi gi-conversation"></i>
     </a>
 </li>

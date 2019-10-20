@@ -5,7 +5,7 @@ Class Preference extends WFF_Controller {
 
 	private $collection = "User";
 	private $sub = "";
-	private $fields = array("theme", "language", "page_preloader", "ringtone", "avatar", "email", "phone","sound_effect");
+	private $fields = array("theme", "language", "page_preloader", "ringtone", "avatar", "email", "phone","sound_effect","text_tool");
 
 	function __construct()
 	{
@@ -27,6 +27,10 @@ Class Preference extends WFF_Controller {
 		if(empty($response["language"])) $response["language"] = "eng";
 		if(empty($response["theme"])) $response["theme"] = $this->config->item("template")["theme"];
         if(!isset($response["page_preloader"])) $response["page_preloader"] = $this->config->item("template")["page_preloader"];
+        // By session
+        foreach (["text_tool"] as $value) {
+        	$response[$value] = $this->session->userdata($value);
+        }
 		echo json_encode($response);
 	}
 

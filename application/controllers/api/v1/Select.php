@@ -120,17 +120,19 @@ Class Select extends WFF_Controller {
 
 	function path($type = "")
 	{
-		$api_path = APPPATH."controllers";
-		$list_files = find_all_files($api_path);
 		$list_uri = array();
+		$controller_path = APPPATH."controllers";
+		$list_files = find_all_files($controller_path);
+		
 		foreach ($list_files as $file) {
-			$uri = str_replace([$api_path."/",".php"], ["",""], $file);
+			$uri = str_replace([$controller_path."/",".php"], ["",""], $file);
 			$uriArr = explode("/", $uri);
 			foreach ($uriArr as $i => $uriPart) {
 				$uriArr[$i] = lcfirst($uriPart);
 			}
 			$list_uri[] = implode("/", $uriArr);
 		}
+
 		switch ($type) {
 			case 'api':
 				$list_uri = array_filter($list_uri, function ($element){

@@ -71,7 +71,7 @@ class Page extends WFF_Controller {
         $this->load->view("page/{$number}", $data);
     }
 
-    protected function _build_template($only_main_content = FALSE)
+    public function _build_template($only_main_content = FALSE)
     {
         $this->config->load('proui');
         $data['template'] = $this->config->item('template');

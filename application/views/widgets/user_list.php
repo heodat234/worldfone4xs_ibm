@@ -56,7 +56,7 @@
     }
 </style>
 <script id="user-list-template" type="text/x-kendo-template">
-<tr>
+<tr data-bind="visible: totalCurrentUser">
     <td class="text-center"><span class="badge" data-bind="text: extension, css: {success: totalCurrentUser}"></span></td>
     <td class="text-center" data-bind="attr: {title: substatus}">
         # switch(data.statuscode) { 

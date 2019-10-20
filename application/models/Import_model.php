@@ -3,7 +3,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Import_model extends CI_Model {
 
     private $collection = "Import";
-    
+
 
     function __construct() {
         parent::__construct();
@@ -12,7 +12,7 @@ class Import_model extends CI_Model {
         $this->load->library("session");
         $this->sub = set_sub_collection();
         $this->collection = $this->sub . $this->collection;
-        
+
 
     }
 
@@ -40,9 +40,10 @@ class Import_model extends CI_Model {
 
             $objWorksheet   = $this->excel->getActiveSheet($filePath);
             $highestRow     = $objWorksheet->getHighestRow();
+            var_dump($highestRow);exit;
             // $highestColumn  = $this->excel->getHighestColumn($objWorksheet);
             $k = 0;
-            for ($i=2; $i <= $highestRow; $i++) { 
+            for ($i=2; $i <= $highestRow; $i++) {
                 $rowData = array();
                 foreach ($titleData as $titleKey => $titleValue) {
                     $cell   = $objWorksheet->getCellByColumnAndRow($titleKey + 1,$i);
@@ -72,7 +73,7 @@ class Import_model extends CI_Model {
                             continue;
                         }
                     }
-                    
+
                     switch ($titleValue['type']) {
                         case 'string':
                             $value = (string)$value;
@@ -97,17 +98,18 @@ class Import_model extends CI_Model {
                 }else{
                     $rowData['assigned_by']  = '';
                 }
-                
+
                 array_push($insertData, $rowData);
             }
-            // var_dump($insertData);exit;
+            // var_dump($error);exit;
         }else if ($duoifile == 'csv') {
             // $titleData = array();
-            if (($h = fopen($filePath, "r")) !== FALSE) 
+            if (($h = fopen($filePath, "r")) !== FALSE)
             {
                 $i = 0;
-                while (($row = fgetcsv($h, 1000, ",")) !== FALSE) 
-                {   
+                while (($row = fgetcsv($h, 1000, ",")) !== FALSE)
+                {
+                     // var_dump($row);exit;
                     if ($i == 0) {
                         $i++;
                        continue;
@@ -117,20 +119,25 @@ class Import_model extends CI_Model {
                         if ($titleValue['field'] == '') {
                             continue;
                         }
-                        if(isset($value[$titleKey]) && strtotime($value[$titleKey])) {
-                            $value[$titleKey] = strtotime($value[$titleKey]);
+                        if(isset($row[$titleKey]) && strtotime($row[$titleKey])) {
+                            $row[$titleKey] = strtotime($row[$titleKey]);
                         }
-                        $rowData[$titleValue['field']] = isset($value[$titleKey]) ? $value[$titleKey] : '';                       
+                        $rowData[$titleValue['field']] = isset($row[$titleKey]) ? $row[$titleKey] : '';
                     }
                     $rowData['createdAt']        = time();
-                    $rowData['last_modified']    = 0;
+                    // $rowData['last_modified']    = 0;
                     $rowData['id_import']        = $idImport;
-                    $rowData['assigned_by']      = 'By Admin';
+                    if ($rowData['assign'] != '') {
+                       $rowData['assigned_by']  = 'Byfixed-Import';
+                   }else{
+                       $rowData['assigned_by']  = '';
+                   }
                     array_push($insertData, $rowData);
                     $i++;
                 }
               fclose($h);
             }
+            // var_dump($inser)
         }
         $this->mongo_db->switch_db();
         if (count($error) <= 0) {
@@ -139,12 +146,12 @@ class Import_model extends CI_Model {
         }else{
             return $error;
         }
-        
+
     }
 
     public function importFile($data)
     {
-        $response = $this->mongo_db->insert($this->collection, $data);    
+        $response = $this->mongo_db->insert($this->collection, $data);
         return $response['id'];
     }
 

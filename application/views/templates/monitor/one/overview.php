@@ -5,7 +5,7 @@
              ]"
              data-orientation="horizontal" class="after-breadcrumb" style="overflow-y: auto;" id="splitter-view">
     <div class="col-sm-9" id="left-col">
-        <div id="overview-wait-in-queue">
+        <div id="overview-wait-in-queue" style="border-bottom: 1px dashed lightgray">
             <h3 class="text-center" style="margin-top: 10px; margin-bottom: 0"><span data-bind="css: {animation-pulse: waitInQueue.total, label: waitInQueue.total, label-danger: waitInQueue.total}">@Call in queue@</span></h3>
             <div data-bind="visible: waitInQueue.total">
                 <table class="text-left table table-hover" style="width: 100%; margin-bottom: 0; font-size: 22px">

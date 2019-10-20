@@ -104,3 +104,17 @@ function playSound(type) {
           </audio>`);
     }
 }
+
+async function translateForm(text) {
+  openForm({title: "@Translate@", width: 400})
+  $rightForm = $("#right-form");
+  var formHtml = await $.ajax({
+      url: ENV.templateApi + "translate/form",
+      data: {text: text},
+      type: "POST",
+      error: errorDataSource
+  });
+  kendo.destroy($rightForm);
+  $rightForm.empty();
+  $rightForm.append(formHtml);
+}

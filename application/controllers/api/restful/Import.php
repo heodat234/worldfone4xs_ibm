@@ -4,7 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 Class Import extends WFF_Controller {
 
 	function __construct()
-    { 
+    {
     	parent::__construct();
     	$this->load->model('import_model');
         header('Content-type: application/json');
@@ -35,8 +35,10 @@ Class Import extends WFF_Controller {
         }
     }
 
-    public function upload($collection)
+    public function upload($collection1)
     {
+      $collection = set_sub_collection($collection1);
+      // var_dump($collection);exit;
         // $key = ini_get("session.upload_progress.prefix") . "advancedProgress";
         // if (isset($_SESSION[$key]))
         // {
@@ -45,7 +47,7 @@ Class Import extends WFF_Controller {
     	$json = array();
         $config['upload_path']          = './upload/users/import';
         $config['allowed_types']        = 'csv||doc|docx|xls|xlsx|application/vnd.ms-excel|zip|7zip|rar|application/x-rar-compressed|application/rar|application/x-rar|application/octet-stream|application/force-download|pdf|application/pdf';
-        $config['max_size']             = 25000;
+        $config['max_size']             = 204800;
         $config['file_name'] = $_FILES['file']['name'];
 
         $start = time();
@@ -53,15 +55,7 @@ Class Import extends WFF_Controller {
         if (file_exists(FCPATH.'/upload/users/import') == "") {
             mkdir( FCPATH.'/upload/users/import', 0777, true );
         }
-        $dataImport = array(
-            'collection'              => $collection,
-            'begin_import'            => $start,
-            'complete_import'         => 0,
-            'file_name'               => $config['file_name'],
-            'source'                  => 'Manual',
-            'status'                  => 2
-        );
-        $idImport = $this->import_model->importFile($dataImport);
+
         $this->load->library('upload', $config);
 
         if ( ! $this->upload->do_upload('file')){
@@ -69,42 +63,43 @@ Class Import extends WFF_Controller {
             $json['error'] = $error['error'];
             $status = 0;
             $message = 'Upload error';
+            $filePath = '';
         }
         else{
-        	$complete = time();
+        	   $complete = time();
             $data = array('upload_data' => $this->upload->data());
             $duoifile = pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION);
-            $filePath =$data['upload_data']['full_path'];
-           
+            $filePath = $data['upload_data']['full_path'];
+            $config['file_name'] = $data['upload_data']['file_name'];
             if(in_array($duoifile,array("jpg","jpe","jpeg","gif","png")) ) {
                 $type = 'image';
             }else{
                 $type = 'file';
-            }            
-     		$status = 1;
+            }
+     		  $status = 1;
 	        $error = [];
         }
+         $dataImport = array(
+            'collection'              => $collection1,
+            'begin_import'            => $start,
+            'complete_import'         => 0,
+            'file_name'               => $config['file_name'],
+            'file_path'               => $filePath,
+            'source'                  => 'Manual',
+            'status'                  => 2
+        );
+        $idImport = $this->import_model->importFile($dataImport);
+
         try {
-            
             if ($status == 1) {
-                $response = $this->import_model->importData($filePath,$duoifile,$collection,$idImport);
+               $output = shell_exec('python3.6 /var/www/html/python/excel_1.py ' . $idImport . " ". $collection ." 2>&1");
+               $response = trim($output);
+               $response = substr($response, -2, 1);
+                // $response = $this->import_model->importData($filePath,$duoifile,$collection,$idImport);
                 if ($response == 1) {
-                    $dataImport = array(
-                        'complete_import'         => time(),
-                        'status'                  => 1
-                    );
-                    $this->import_model->updateImportHistory($idImport,$dataImport);
-                    $error = [];
                     $message = 'Upload successfully';
                 }else{
                     $status = 0;
-                    $dataImport = array(
-                        'complete_import'         => time(),
-                        'status'                  => $status,
-                        'error'                   => $response
-                    );
-                    $this->import_model->updateImportHistory($idImport,$dataImport);
-                    $error = $response;
                     $message = 'Upload error';
                 }
             }else{
@@ -114,11 +109,11 @@ Class Import extends WFF_Controller {
                 );
                 $this->import_model->updateImportHistory($idImport,$dataImport);
             }
-        } 
+        }
         catch (Exception $e) {
             $status = 0;
             $message = 'Upload error';
-        }   
+        }
         echo json_encode(array("status" => $status, "message" => $message));
     }
 
@@ -159,7 +154,7 @@ Class Import extends WFF_Controller {
                 $error = $response;
                 $message = 'Upload successfully';
             }
-            
+
             echo json_encode(array("status" => $status,"message" => $message));
         } catch (Exception $e) {
             echo json_encode(array("status" => 0, "message" => $e->getMessage()));

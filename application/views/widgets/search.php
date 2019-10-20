@@ -39,7 +39,7 @@
 				select: function(e) {
 					switch (e.dataItem.type) {
 						case "Customer":
-							location.href = "manage/customer/#/detail/" + e.dataItem.id;
+							window.open("manage/customer/#/detail/" + e.dataItem.id);
 							break;
 						case "Page":
 							location.href = e.dataItem.uri;

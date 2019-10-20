@@ -2,7 +2,7 @@
     <!-- Table Styles Header -->
     <ul class="breadcrumb breadcrumb-top">
         <li>@Report@</li>
-        <li>@Appointment@</li>
+        <li>@Call Out Report@</li>
         <li class="pull-right none-breakcrumb" id="top-row">
             <div class="btn-group btn-group-sm">
                 <!-- <button href="#/" class="btn btn-alt btn-default active" >@Overview@</button> -->

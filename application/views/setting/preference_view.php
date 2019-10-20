@@ -124,6 +124,16 @@
 	                   data-bind="events: { select: uploadSelect, upload: uploadEvent , success: uploadSuccess }">
 			        </div>
 			    </div>
+			    <?php if($this->session->userdata("isadmin")) { ?>
+			    <div class="form-group">
+			        <label class="control-label col-sm-4">@Text tool@</label>
+			        <div class="col-sm-8">
+			        	<label class="switch switch-primary">
+			        		<input type="checkbox" data-bind="checked: item.text_tool, events: {change: textToolChange}"><span></span>
+			        	</label>
+			        </div>
+			    </div>
+				<?php } ?>
 			</div>
 		</form>
 	</div>
@@ -231,6 +241,10 @@
 			},
 			defaultAvatar: function(e) {
 				this.set("item.avatar", "");
+			},
+			textToolChange: function(e) {
+				if(e.currentTarget.checked)
+					notification.show("@This change only have effect at this session@", "warning");
 			},
 			save: function() {
 				var data = this.item.toJSON();

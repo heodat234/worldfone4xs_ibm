@@ -38,6 +38,10 @@ var Config = Object.assign(Config, {
         });
         return response;
     },
+    sort: [{
+        created_at: -1,
+        dealer_code: 1
+    }],
     columns: [{
         field: "from_date",
         title: "@Date@",

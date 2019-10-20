@@ -48,7 +48,7 @@ class upload extends CI_Controller {
             }
             $data = array('upload_data' => $this->upload->data());*/
             $duoifile = pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION);
-            $link = 'http://192.168.16.105/'.'upload/livechat/'.$config['file_name'].'.'.$duoifile;
+            $link = 'http://115.146.126.84/'.'upload/livechat/'.$config['file_name'].'.'.$duoifile;
             // $text = $_FILES['file']['name'];
 
             if (empty($response['error'])) {
