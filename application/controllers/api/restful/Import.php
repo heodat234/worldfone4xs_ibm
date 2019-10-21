@@ -37,7 +37,8 @@ Class Import extends WFF_Controller {
 
     public function upload($collection1)
     {
-      $collection = set_sub_collection($collection1);
+        ini_set('max_execution_time', '300');
+        $collection = set_sub_collection($collection1);
       // var_dump($collection);exit;
         // $key = ini_get("session.upload_progress.prefix") . "advancedProgress";
         // if (isset($_SESSION[$key]))
@@ -92,7 +93,8 @@ Class Import extends WFF_Controller {
 
         try {
             if ($status == 1) {
-               $output = shell_exec('python3.6 /var/www/html/python/excel_1.py ' . $idImport . " ". $collection ." 2>&1");
+                $extension = $this->session->userdata("extension");
+               $output = shell_exec('python3.6 /var/www/html/python/importCSV.py ' . $idImport . " ". $collection ." ". $extension ." 2>&1");
                $response = trim($output);
                $response = substr($response, -2, 1);
                 // $response = $this->import_model->importData($filePath,$duoifile,$collection,$idImport);

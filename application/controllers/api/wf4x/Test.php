@@ -75,93 +75,15 @@ Class Test extends CI_Controller {
 
        return $value;
    }
-   function testExcel()
-   {
-      $this->load->library("crud");
-      $filePath ="/var/www/html/worldfone4xs_ibm/upload/users/import/Data_thu_vien_chung.csv";
-
-      $request = array (
-          'take' => 30,
-          'skip' => 0,
-          'page' => 1,
-          'pageSize' => 30,
-          "sort" => array(array("field" => "index", "dir" => "asc"))
-        );
-      $this->crud->select_db($this->config->item("_mongo_db"));
-      $match = array( "collection" => '2_Datalibrary' );
-      $response = $this->crud->read("Model", $request, ["index","field", "title", "type"], $match);
-      if(!empty($response['data'])) {
-         $titleData = $response['data'];
-      }
-      $result = $this->read_csv($filePath,10000,',');
-      // $rows = array_chunk($result, 100);
-      $insertData = array();
-      // $k = 0;
-      // for ($r=1; $r < count($rows); $r++) {
-      //     $rowData = array();
-      //     foreach ($titleData as $titleKey => $titleValue) {
-      //         $value  = $rows[$r][$titleKey];
-      //         var_dump($value);exit;
-
-      //         if ( !is_numeric($value) && ($titleValue['type'] =='int' || $titleValue['type'] == 'double')) {
-      //             $error[$k] = array('cell' =>$r.$titleKey,'type' =>'number');
-      //             $k++;
-      //             continue;
-      //         }
-      //         // if ($titleValue['type'] =='boolean' ) {
-      //         //     $error[$k] = array('cell' =>$column.$i,'type' =>'boolean');
-      //         //     $k++;
-      //         //     continue;
-      //         // }
-      //         if (isset($value) && $titleValue['type'] == 'timestamp') {
-      //             $value = str_replace('/', '-', $value);
-      //             // $value = $this->excel->toFormattedString($cell->getValue(), 'dd/mm/yyyy');
-      //             // var_dump(strtotime($value));exit;
-      //             if(strtotime($value) ) {
-      //                 $value = strtotime($value);
-      //             }else{
-      //                 $error[$k] =  array('cell' =>$r.$titleKey,'type' =>'date');
-      //                 $k++;
-      //                 continue;
-      //             }
-      //         }
-
-      //         switch ($titleValue['type']) {
-      //             case 'string':
-      //                 $value = (string)$value;
-      //                 break;
-      //             case 'int':
-      //                 $value = (int)$value;
-      //                 break;
-      //             case 'double':
-      //                 $value = (double)$value;
-      //                 break;
-      //             default:
-      //                $value = (string)$value;
-      //         }
-      //         $rowData[$titleValue['field']] = isset($value) ? $value : '';
-      //     }
-      //     $rowData['createdAt']        = time();
-      //     // $rowData['id_import']        = $idImport;
-      //     if ($rowData['assign'] != '') {
-      //         $rowData['assigned_by']  = 'Byfixed-Import';
-      //     }else{
-      //         $rowData['assigned_by']  = '';
-      //     }
-
-      //     array_push($insertData, $rowData);
-      // }
-      echo "<pre>";
-      print_r($result);
-
-
-   }
+   
 
    function testFile()
    {
+      ini_set('max_execution_time', '300');
       $collection = '2_Datalibrary';
-      $idImport = "5da9f9301ef2b41d9248de02";
-      $output = shell_exec('python3.6 /var/www/html/python/excel_1.py ' . $idImport . " ". $collection ." 2>&1");
+      $idImport = "5dad73db1ef2b40f4b6315f3";
+      $extension = '999';
+      $output = shell_exec('PYTHONIOENCODING=utf-8 python3.6 /var/www/html/python/importCSV.py ' . $idImport . " ". $collection ." ". $extension ." 2>&1");
 
       echo $output;
    }

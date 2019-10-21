@@ -18,9 +18,9 @@
 	            timeZoneOffset = date.getTimezoneOffset() * 60000;
 	            date.setHours(- timeZoneOffset / 3600000, 0, 0 ,0);
 	        var model = kendo.observable({
-	            cif: '',
-	            loanContract: '',
-	            nationalID: '',
+	            cif: 0,
+	            loanContract: 0,
+	            nationalID:0,
 	            cifChange: function(e) {
 					// console.log(e.data.cif);
 
@@ -33,6 +33,7 @@
 	            search: function() {
 	            	var filter = dataSource.filter();
 	                var cif = $('#cif_id').val();
+	                console.log(cif);
 	                var loanContract = $('#loan_id').val();
 	                var nationalID = $('#national').val();
 	                
@@ -55,50 +56,50 @@
 	                var filterTime = {
 	                    logic: "and",
 	                    filters: [
-	                        filter_1,filter_2,filter_3
+	                        filter_1
 	                    ]
 	                };
-	                if (cif == '' && loanContract == '' && nationalID == '') {
-	                	var flag = false;
-	                }else{
-	                	var flag = true;
-	                }
-	                if(filter && flag) {
-	                	var setFlag = false;
-	                	filter.filters.map((subFilters, index) => {
-	            			if(subFilters.filters) {
-	            				for (var i = 0; i < subFilters.filters.length; i++) {
-	            					if(subFilters.filters[i].field == field_1) {
-	            						subFilters.filters = [];
-	            						break;
-	            					}
-	            					if(subFilters.filters[i].field == field_2) {
-	            						subFilters.filters = [];
-	            						break;
-	            					}
-	            					if(subFilters.filters[i].field == field_3) {
-	            						subFilters.filters = [];
-	            						break;
-	            					}
-	            				}
-	            				if(!subFilters.filters.length) {
-	            					filter.filters[index] = filterTime;
-	            					setFlag = true;
-	            				}
-	            			} else {
-	            				if(subFilters[index] && subFilters[index].length)
-	            					subFilters[index] = subFilters[index].filter(doc => doc.field != field);
-	            			}
-	            		})
-	                	if(!setFlag) filter.filters.push(filterTime);
-	                } else {
-	                	filter = {
-	                		logic: "and",
-	                		filters: []
-	                	};
-	                	filter.filters.push(filterTime);
-	                }
-	                dataSource.filter(filter);
+	              //   if (cif == '' && loanContract == '' && nationalID == '') {
+	              //   	var flag = false;
+	              //   }else{
+	              //   	var flag = true;
+	              //   }
+	              //   if(filter && flag) {
+	              //   	var setFlag = false;
+	              //   	filter.filters.map((subFilters, index) => {
+	            		// 	if(subFilters.filters) {
+	            		// 		for (var i = 0; i < subFilters.filters.length; i++) {
+	            		// 			if(subFilters.filters[i].field == field_1) {
+	            		// 				subFilters.filters = [];
+	            		// 				break;
+	            		// 			}
+	            		// 			if(subFilters.filters[i].field == field_2) {
+	            		// 				subFilters.filters = [];
+	            		// 				break;
+	            		// 			}
+	            		// 			if(subFilters.filters[i].field == field_3) {
+	            		// 				subFilters.filters = [];
+	            		// 				break;
+	            		// 			}
+	            		// 		}
+	            		// 		if(!subFilters.filters.length) {
+	            		// 			filter.filters[index] = filterTime;
+	            		// 			setFlag = true;
+	            		// 		}
+	            		// 	} else {
+	            		// 		if(subFilters[index] && subFilters[index].length)
+	            		// 			subFilters[index] = subFilters[index].filter(doc => doc.field != field);
+	            		// 	}
+	            		// })
+	              //   	if(!setFlag) filter.filters.push(filterTime);
+	              //   } else {
+	              //   	filter = {
+	              //   		logic: "and",
+	              //   		filters: []
+	              //   	};
+	              //   	filter.filters.push(filterTime);
+	              //   }
+	                dataSource.filter(filterTime);
 	            }
 	        })
 	        var template = await $.get(`${Config.templateApi}data_library/customfilter`);
