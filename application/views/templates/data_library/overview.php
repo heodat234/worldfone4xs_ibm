@@ -27,7 +27,7 @@
                 }
             }
         },
-        filterable: false,
+        filterable: KENDO.filterable,
         scrollable: true,
         model: {
             id: "id",
@@ -78,6 +78,7 @@
         var columns = customerFields.data().toJSON();
         columns.map(col => {
             col.width = 130;
+            col.filterable = false;
             switch (col.type) {
                 case "name":
                     col.template = (dataItem) => gridName(dataItem[col.field]);

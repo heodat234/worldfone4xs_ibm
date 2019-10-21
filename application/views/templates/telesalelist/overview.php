@@ -78,176 +78,27 @@
             })
             return response;
         },
-        columns: [
-            {
-                selectable: true, 
-                width: "50px" 
-            },
-            {
-                field: "source",
-                title: "@Source@",
-                width: 150,
-                filterable: false
-                // locked: true
-            },{
-                field: "exporting_date",
-                title: "@Exporting Date@",
-                template: function(dataItem) {
-                    return (kendo.toString(dataItem.date_of_birth, "dd/MM/yyyy") ||  "").toString();
-                },
-                width: 150,
-                filterable: false
-                // locked: true
-
-            },{
-                field: "contract_no",
-                title: "@Contract No.(Latest Loan)@",
-                width: 150,
-                filterable: false
-                // locked: true
-            },{
-                field: "cif",
-                title: "@CIF@",
-                width: 150,
-                filterable: false
-                // locked: true
-            },{
-                field: "customer_name",
-                title: "@Customer Name@",
-                width: 150,
-                filterable: false
-                // locked: true
-            },{
-                field: "date_of_birth",
-                title: "@Date of birth@",
-                template: function(dataItem) {
-                    return (kendo.toString(dataItem.date_of_birth, "dd/MM/yyyy") ||  "").toString();
-                },
-                width: 150,
-                filterable: false
-            },{
-                field: "id_no",
-                title: "@ID No@",
-                width: 150,
-                filterable: false
-            },{
-                field: "mobile_phone_no",
-                title: "@Mobile Phone No.@",
-                width: 150,
-                filterable: false
-            },{
-                field: "product",
-                title: "@Product(MB/CE/PL)@",
-                width: 150,
-                filterable: false
-            },{
-                field: "interest_rate",
-                title: "@Interest Rate(Latest Loan)@",
-                width: 150,
-                filterable: false
-            },{
-                field: "first_due_date",
-                title: "@First due date(Latest Loan)@",
-                width: 150,
-                filterable: false
-            },{
-                field: "term",
-                title: "@Term(Latest Loan)@",
-                width: 150,
-                filterable: false
-            },{
-                field: "balance",
-                title: "@Balance(Latest Loan)@",
-                width: 150,
-                filterable: false
-            },{
-                field: "debt_group",
-                title: "@Debt group@",
-                width: 150,
-                filterable: false
-            },{
-                field: "no_of_late_1",
-                title: "@No. of late(10-29 days)@",
-                width: 150,
-                filterable: false
-            },{
-                field: "no_of_late_2",
-                title: "@No. of late( > 30 days)@",
-                width: 150,
-                filterable: false
-            },{
-                field: "pl_interest_rate",
-                title: "@PL-Interest Rate@",
-                width: 150,
-                filterable: false
-            },{
-                field: "note",
-                title: "@Note@",
-                width: 150,
-                filterable: false
-            },{
-                field: "assign",
-                title: "@Assign@",
-                width: 150,
-            },{
-                field: "date_send_data",
-                title: "@Date send Data@",
-                template: function(dataItem) {
-                    return (kendo.toString(dataItem.date_of_birth, "dd/MM/yyyy") ||  "").toString();
-                },
-                width: 150,
-                filterable: false
-            },{
-                field: "date_receive_data",
-                title: "@Date receive Data@",
-                template: function(dataItem) {
-                    return (kendo.toString(dataItem.date_receive_data, "dd/MM/yyyy") ||  "").toString();
-                },
-                width: 150,
-                filterable: false
-            },{
-                field: "code",
-                title: "@Code@",
-                width: 150,
-                filterable: false
-            },{
-                field: "area_pl",
-                title: "@Area PL@",
-                width: 150,
-                filterable: false
-            },{
-                field: "createdAt",
-                title: "@Created At@",
-                template: function(dataItem) {
-                    return (kendo.toString(dataItem.createdAt, "dd/MM/yy H:mm:ss") ||  "").toString();
-                },
-                width: 150,
-                filterable: false
-            },{
-                field: "updatedAt",
-                title: "@Last Modified@",
-                template: function(dataItem) {
-                    return (kendo.toString(dataItem.updatedAt, "dd/MM/yyyy H:mm:ss") ||  "").toString();
-                },
-                width: 150,
-                filterable: false
-            },{
-                field: "assigned_by",
-                title: "@Assigned by@",
-                width: 150,
-                filterable: false
-            }
-            // ,{
-            //     // Use uid to fix bug data-uid of row undefined
-            //     template: '<a role="button" class="btn btn-sm btn-circle btn-action" data-uid="#: uid #"><i class="fa fa-ellipsis-v"></i></a>',
-            //     locked:true,
-            //     width: 40
-            // }
-        ]
+        
     }); 
 </script>
 <script src="<?= STEL_PATH.'js/table.js' ?>"></script>
 <script type="text/javascript">
+    function gridPhone(data,id,type) {
+        var html = "<span></span>";
+        if(data) {
+            if(typeof data == "string") {
+                html = `<a href="javascript:void(0)" class="label label-info" onclick="makeCallWithDialog('${data}','${id}','${type}')" title="Call now" data-role="tooltip" data-position="top">${data}</a>`;
+            } else {
+                if(data.length) {
+                    template = $.map($.makeArray(data), function(value, index) {
+                        return `<a href="javascript:void(0)" class="label label-default" data-index="${index}" onclick="makeCallWithDialog('${value}','${id}','${type}')" title="Call now" data-role="tooltip" data-position="top">${value}</a>`;
+                    });;
+                    html = template.join(' ');
+                }
+            }
+        }
+        return html;
+    }
     var router = new kendo.Router({routeMissing: function(e) { router.navigate("/") }});
     var telesaleFields = new kendo.data.DataSource({
         serverPaging: true,
@@ -282,7 +133,7 @@
                     col.template = (dataItem) => gridName(dataItem[col.field]);
                     break;
                 case "phone": case "arrayPhone":
-                    col.template = (dataItem) => gridPhone(dataItem[col.field]);
+                    col.template = (dataItem) => gridPhone(dataItem[col.field],dataItem['id'],'telesale');
                     break;
                 case "array":
                     col.template = (dataItem) => gridArray(dataItem[col.field]);
