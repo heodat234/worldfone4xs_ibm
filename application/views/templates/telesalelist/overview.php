@@ -78,7 +78,7 @@
             })
             return response;
         },
-        
+        columns: []
     }); 
 </script>
 <script src="<?= STEL_PATH.'js/table.js' ?>"></script>

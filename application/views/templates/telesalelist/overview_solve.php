@@ -75,11 +75,29 @@
                 return doc;
             })
             return response;
-        }
+        },
+        columns: []
+
     }); 
 </script>
 <script src="<?= STEL_PATH.'js/table.js' ?>"></script>
 <script type="text/javascript">
+    function gridPhone(data,id,type) {
+        var html = "<span></span>";
+        if(data) {
+            if(typeof data == "string") {
+                html = `<a href="javascript:void(0)" class="label label-info" onclick="makeCallWithDialog('${data}','${id}','${type}')" title="Call now" data-role="tooltip" data-position="top">${data}</a>`;
+            } else {
+                if(data.length) {
+                    template = $.map($.makeArray(data), function(value, index) {
+                        return `<a href="javascript:void(0)" class="label label-default" data-index="${index}" onclick="makeCallWithDialog('${value}','${id}','${type}')" title="Call now" data-role="tooltip" data-position="top">${value}</a>`;
+                    });;
+                    html = template.join(' ');
+                }
+            }
+        }
+        return html;
+    }
     var router = new kendo.Router({routeMissing: function(e) { router.navigate("/") }});
     var telesaleFields = new kendo.data.DataSource({
         serverPaging: true,
@@ -114,7 +132,7 @@
                     col.template = (dataItem) => gridName(dataItem[col.field]);
                     break;
                 case "phone": case "arrayPhone":
-                    col.template = (dataItem) => gridPhone(dataItem[col.field]);
+                    col.template = (dataItem) => gridPhone(dataItem[col.field],dataItem['id'],'telesale');
                     break;
                 case "array":
                     col.template = (dataItem) => gridArray(dataItem[col.field]);
