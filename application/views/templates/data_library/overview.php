@@ -27,7 +27,7 @@
                 }
             }
         },
-        filterable: true,
+        filterable: false,
         scrollable: true,
         model: {
             id: "id",

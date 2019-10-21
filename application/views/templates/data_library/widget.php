@@ -18,9 +18,9 @@
 	            timeZoneOffset = date.getTimezoneOffset() * 60000;
 	            date.setHours(- timeZoneOffset / 3600000, 0, 0 ,0);
 	        var model = kendo.observable({
-	            cif: 0,
-	            loanContract: 0,
-	            nationalID:0,
+	            cif: '',
+	            loanContract: '',
+	            nationalID: '',
 	            cifChange: function(e) {
 					// console.log(e.data.cif);
 
@@ -33,7 +33,6 @@
 	            search: function() {
 	            	var filter = dataSource.filter();
 	                var cif = $('#cif_id').val();
-	                console.log(cif);
 	                var loanContract = $('#loan_id').val();
 	                var nationalID = $('#national').val();
 	                
@@ -56,7 +55,7 @@
 	                var filterTime = {
 	                    logic: "and",
 	                    filters: [
-	                        filter_1
+	                        filter_1,filter_2,filter_3
 	                    ]
 	                };
 	              //   if (cif == '' && loanContract == '' && nationalID == '') {
