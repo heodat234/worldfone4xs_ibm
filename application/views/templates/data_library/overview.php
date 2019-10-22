@@ -36,6 +36,7 @@
                 date_of_birth: {type: "date"},
                 date_send_data: {type: "date"},
                 date_receive_data: {type: "date"},
+                first_due_date: {type: "date"},
             }
         },
         parse: function (response) {
@@ -44,6 +45,7 @@
                 doc.date_of_birth = doc.date_of_birth ? new Date(doc.date_of_birth * 1000) : null;
                 doc.date_send_data = doc.date_send_data ? new Date(doc.date_send_data * 1000) : null;
                 doc.date_receive_data = doc.date_receive_data ? new Date(doc.date_receive_data * 1000) : null;
+                doc.first_due_date = doc.first_due_date ? new Date(doc.first_due_date * 1000) : null;
                 return doc;
             })
             return response;

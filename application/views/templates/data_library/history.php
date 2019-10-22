@@ -25,6 +25,18 @@
     .grid {
         color: firebrick;
     }
+    .progress{
+        width:60%;
+        height: 15px;
+        border-radius: 20px;
+    }
+    .status-upload{
+        width: 60%;
+        margin-top: -17px;
+        opacity: 0.5;
+        text-align: center;
+        font-size: 10px;
+    }
 </style>
 <script id="detail-template" type="text/x-kendo-template">
   <div class="jsoneditor" style="width: 100%; height: 400px;"></div>
@@ -79,7 +91,9 @@ var Config = {
             		return '<h4 style="font-weight: bold">Success</h4>';
             	}else if (dataItem.status == 0) {
             		return '<h4 style="font-weight: bold">Fail</h4>';
-            	}
+            	}else if(dataItem.status == 2){
+                    return '<div class"col-sm-8"><div class="progress"></div></div><div class="status-upload">Loading...</div></div>';
+                }
 
             }
         }
@@ -240,6 +254,17 @@ var Config = {
                     },
                     dataBound: function() {
                         this.expandRow(this.tbody.find("tr.k-master-row").first());
+                        var grid = this;
+                        grid.tbody.find(".progress").each(function(e) {
+                            var row = $(this).closest("tr");
+                          var model = grid.dataItem(row);
+
+                          $(this).kendoProgressBar({
+                            max: 1000,
+                            // value: model.progress
+                            value: false
+                          })
+                        });
                     },
                     noRecords: {
                         template: `<h2 class='text-danger'>${KENDO.noRecords}</h2>`
