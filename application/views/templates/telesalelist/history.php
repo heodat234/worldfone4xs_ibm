@@ -9,7 +9,7 @@
     	<a href="javascript:void(0)" onclick="divideList(this)"><li><i class="fa fa-exclamation-circle text-info"></i><span>Divide List</span></li></a>
     	<li class="devide"></li>
         <!-- <a href="javascript:void(0)" data-type="import" onclick="re_Upload(this)"><li><i class="fa fa-exclamation-circle text-info"></i><span>Re-Upload</span></li></a> -->
-        
+
     </ul>
 </div>
 <style type="text/css">
@@ -101,7 +101,7 @@ var Config = {
                 }else if(dataItem.status == 2){
                     return '<div class"col-sm-8"><div class="progress"></div></div><div class="status-upload">Loading...</div></div>';
                 }
-                
+
             }
         },{
             // Use uid to fix bug data-uid of row undefined
@@ -109,7 +109,7 @@ var Config = {
             width: 20
         }
         ]
-}; 
+};
 </script>
 <script type="text/javascript">
     var router = new kendo.Router({routeMissing: function(e) { router.navigate("/") }});
@@ -136,10 +136,10 @@ var Config = {
 		      		swal("Gotcha!", "Pikachu was caught!", "success");
 		      		break;
 		    	default:
-		     
+
 		  	}
 		});
-	    
+
 	}
 	function divideList(ele) {
 		var uid = $(ele).data('uid');
@@ -178,9 +178,9 @@ var Config = {
                         error: errorDataSource
                     })
                     break;
-                
+
                 default:
-             
+
             }
         });
     }
@@ -220,7 +220,7 @@ var Config = {
                     serverPaging: true,
                     serverSorting: true,
                     serverGrouping: false,
-                    filter: Config.filter ? Config.filter : null,
+                    filter: {field: "collection", operator: "eq", value: 'Telesalelist'},
                     sort:  null,
                     page:  null,
                     pageSize: 10,
@@ -328,7 +328,7 @@ var Config = {
                  */
                 var menu = $("#action-menu");
                 if(!menu.length) return;
-                
+
                 $("html").on("click", function() {menu.hide()});
 
                 $(document).on("click", "#grid_1 tr[role=row] a.btn-action", function(e){
@@ -339,7 +339,7 @@ var Config = {
 
                 function showMenu(e, that) {
                     //hide menu if already shown
-                    menu.hide(); 
+                    menu.hide();
 
                     //Get id value of document
                     var uid = $(that).data('uid');
@@ -373,7 +373,7 @@ var Config = {
                         }
 
                         //finally show the menu
-                        menu.show();     
+                        menu.show();
                     }
                 }
             }
@@ -385,5 +385,5 @@ var Config = {
 
 </script>
 <script>
-   
+
 </script>

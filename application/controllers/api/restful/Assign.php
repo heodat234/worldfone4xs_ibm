@@ -18,11 +18,11 @@ Class Assign extends CI_Controller {
 		$this->import_collection = set_sub_collection($this->import_collection);
 	}
 
-	function read($)
-	{	
+	function read($id_import)
+	{
 		$this->crud->select_db($this->config->item("_mongo_db"));
 		$users = $this->crud->read($this->collection,array(),array('extension','agentname'));
-		
+
 
 		$this->mongo_db->switch_db();
 		$match['id_import'] = $id_import;
@@ -80,8 +80,8 @@ Class Assign extends CI_Controller {
         $response = $this->crud->read($this->sub_collection, $request = array(), array(), $match);
         $response = $response['data'];
 		shuffle($response);
-		
-		for ($i=0; $i < $data['random']; $i++) { 
+
+		for ($i=0; $i < $data['random']; $i++) {
 			$insert_data["assign"]		= $data['extension'];
 			$insert_data["assigned_by"]	= 'BySystemRandom';
 			$this->crud->where_id($response[$i]['id'])->update($this->sub_collection, array('$set' => $insert_data));
