@@ -20,7 +20,7 @@
             <div>
                 <div class="container-fluid">
                     <div class="row">
-                        <div class="col-sm-2" style="border-right: 1px solid lightgray; height: 100vh">
+                        <!-- <div class="col-sm-2" style="border-right: 1px solid lightgray; height: 100vh">
                             <div class="row text-center" style="padding: 15px 0">
                                 <div class="col-sm-12">
                                     <a href="javascript:void(0)">
@@ -44,12 +44,11 @@
                                     </a>
                                 </div>
                             </div>
-                        </div>
-                        <div class="col-sm-10">
+                        </div> -->
+                        <div class="col-sm-12">
                             <div class="row" style="border-bottom: 1px solid lightgray">
                                 <div class="col-sm-9" style="margin-bottom: 0">
                                     <h4>
-                                        <span data-bind="text: item.customer_name" class="copy-item"></span>
                                         <span class="social-icon" data-bind="invisible: item.facebook">
                                             <span class="fa-stack fa-sm">
                                                 <i class="fa fa-circle-thin fa-stack-2x"></i>
@@ -86,6 +85,7 @@
                                                 <i class="fa fa-linkedin fa-stack-1x"></i>
                                             </span>
                                         </a>
+                                        <span data-bind="text: item.customer_name" class="copy-item"></span>
                                     </h4>
                                     <i data-bind="text: item.job"></i>
                                     <span data-bind="visible: item.work_location"> at </span>
@@ -107,7 +107,7 @@
                                 </div>
                             </div>
                             <div class="row form-horizontal" style="padding-top: 10px;">
-                                <div class="col-sm-12" id="customer-detail-view" style="height: 300px">
+                                <div class="col-sm-12" id="customer-detail-view" style="height: 480px">
                                 </div>
                             </div>
                         </div>
@@ -1089,6 +1089,7 @@ async function editForm(ele) {
 
     dataItemFull.exporting_date = new Date((dataItemFull.exporting_date) * 1000 + 86400000);
     dataItemFull.date_of_birth = new Date((dataItemFull.date_of_birth) * 1000 + 86400000);
+    dataItemFull.first_due_date = new Date((dataItemFull.first_due_date) * 1000 + 86400000);
     dataItemFull.date_send_data = new Date((dataItemFull.date_send_data) * 1000 + 86400000);
     dataItemFull.date_receive_data = new Date((dataItemFull.date_receive_data) * 1000 + 86400000);
     var model = Object.assign(Config.observable, {

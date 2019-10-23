@@ -43,8 +43,8 @@ Class Data_library extends WFF_Controller {
                $match = array(
                   '$match' => array(
                      '$and' => array(
-                        array('source'=> 'CE'),
-                        // array('createdAt'=> array( '$gte'=> (string)$start, '$lte'=> (string)$end))
+                        // array('source'=> 'PL'),
+                        array('createdAt' => array( '$gte'=> $start, '$lte'=> $end))
                      )
                   )
                );

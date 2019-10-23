@@ -45,48 +45,15 @@ Class Import extends WFF_Controller {
         if (!@file_exists($path)) { 
             @mkdir($path, 0755);
         }
-        // $config['upload_path']          = './upload/users/import';
-        // $config['allowed_types']        = 'csv||doc|docx|xls|xlsx|application/vnd.ms-excel|zip|7zip|rar|application/x-rar-compressed|application/rar|application/x-rar|application/octet-stream|application/force-download|pdf|application/pdf';
-        // $config['max_size']             = 204800;
-        // $config['file_name'] = $_FILES['file']['name'];
 
-        // $start = time();
-        // $complete = 0;
-        // if (file_exists(FCPATH.'/upload/users/import') == "") {
-        //     mkdir( FCPATH.'/upload/users/import', 0777, true );
-        // }
-
-        // $this->load->library('upload', $config);
-
-        // if ( ! $this->upload->do_upload('file')){
-        //     $error = array('error' => $this->upload->display_errors());
-        //     echo $error;
-        //     $json['error'] = $error['error'];
-        //     $status = 0;
-        //     $message = 'Upload error';
-        //     $filePath = '';
-        // }
-        // else{
-        // 	   $complete = time();
-        //     $data = array('upload_data' => $this->upload->data());
-        //     $duoifile = pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION);
-        //     $filePath = $data['upload_data']['full_path'];
-        //     $config['file_name'] = $data['upload_data']['file_name'];
-        //     if(in_array($duoifile,array("jpg","jpe","jpeg","gif","png")) ) {
-        //         $type = 'image';
-        //     }else{
-        //         $type = 'file';
-        //     }
-     		 //  $status = 1;
-	       //  $error = [];
-        // }
-
+        $start = time();
+        $complete = 0;
         $file = $_FILES['file'];
         $file_parts = @pathinfo($file['name']);
         $notallowed_types = 'php|sh|bash';
         $filesize = @filesize($file['tmp_name']);
         if(strpos($notallowed_types, strtolower($file_parts['extension'])) !== FALSE) throw new Exception("Wrong file type.");
-        if($filesize > 10000000) throw new Exception("File too large. Over 10MB.");
+        // if($filesize > 10000000) throw new Exception("File too large. Over 10MB.");
         $new_file_name = str_replace([" ","/"], ["",""], $file['name']);
         $file_path = $path . $new_file_name;
 
@@ -110,19 +77,15 @@ Class Import extends WFF_Controller {
         $idImport = $this->import_model->importFile($dataImport);
 
         try {
-            // if ($status == 1) {
-                $extension = $this->session->userdata("extension");
-                $output = exec('PYTHONIOENCODING=utf-8 python3.6 /var/www/html/python/importCSV.py ' . $idImport . " ". $collection ." ". $extension ." > /dev/null &");
-                $status = -1;
-                $message = 'Upload pending';
-            // }else{
-            //     $dataImport = array(
-            //         'complete_import'         => time(),
-            //         'status'                  => $status,
-            //         'error'                   => $json
-            //     );
-            //     $this->import_model->updateImportHistory($idImport,$dataImport);
-            // }
+            $extension = $this->session->userdata("extension");
+            if ($collection1 == 'Datalibrary') {
+                exec('PYTHONIOENCODING=utf-8 python3.6 /var/www/html/python/importCSV.py ' . $idImport . " ". $collection ." ". $extension ." > /dev/null &");
+            }else{
+                exec('PYTHONIOENCODING=utf-8 python3.6 /var/www/html/python/importTelesaleCSV.py ' . $idImport . " ". $collection ." ". $extension ." > /dev/null &");
+            }
+            
+            $status = -1;
+            $message = 'Upload pending';
         }
         catch (Exception $e) {
             $status = 0;

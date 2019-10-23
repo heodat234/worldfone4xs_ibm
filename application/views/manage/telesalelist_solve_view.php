@@ -103,9 +103,9 @@
         router.route("/", async function() {
             var HTML = await $.get(`${Config.templateApi}telesalelist/overview_solve`);
             var kendoView = new kendo.View(HTML, { model: {}, template: false, wrap: false });
-            await layout.showIn("#bottom-row", kendoView);
+            layout.showIn("#bottom-row", kendoView);
             var widget = await $.get(`${Config.templateApi}telesalelist/widget`);
-            await $("#page-widget").html(widget);
+            $("#page-widget").html(widget);
         
         });
 

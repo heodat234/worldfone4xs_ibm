@@ -103,9 +103,9 @@
         router.route("/", async function() {
             var HTML = await $.get(`${Config.templateApi}telesalelist/overview`);
             var kendoView = new kendo.View(HTML, { model: {}, template: false, wrap: false });
-            await layout.showIn("#bottom-row", kendoView);
+            layout.showIn("#bottom-row", kendoView);
             var widget = await $.get(`${Config.templateApi}telesalelist/widget`);
-            await $("#page-widget").html(widget);
+            $("#page-widget").html(widget);
         
         });
 
@@ -120,9 +120,9 @@
             layoutViewModel.set("breadcrumb", dataItemFull.file_name);
             var HTML = await $.get(`${Config.templateApi}telesalelist/overview?id=${id}`);
             var kendoView = new kendo.View(HTML, { model: {}, template: false, wrap: false });
-            await layout.showIn("#bottom-row", kendoView);
+            layout.showIn("#bottom-row", kendoView);
             var widget = await $.get(`${Config.templateApi}telesalelist/widget`);
-            await $("#page-widget").html(widget);
+            $("#page-widget").html(widget);
         });
 
         router.route("/import", async function() {
@@ -140,10 +140,10 @@
         router.route("/divide/:id", async function(id) {
             layoutViewModel.setActive(1);
             var dataItemFull = await $.get(`${ENV.restApi}import_history/${id}`);
-            if(!dataItemFull) {
-                notification.show("Can't find Divide List", "error");
-                return;
-            }
+            // if(!dataItemFull) {
+            //     notification.show("Can't find Divide List", "error");
+            //     return;
+            // }
             layoutViewModel.set("breadcrumb", `Divide List`);
             var HTML = await $.get(`${Config.templateApi}telesalelist/divide_list?id=${id}`);
             var model = {

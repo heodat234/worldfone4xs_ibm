@@ -103,9 +103,9 @@
         router.route("/", async function() {
             var HTML = await $.get(`${Config.templateApi}data_library/overview`);
             var kendoView = new kendo.View(HTML, { model: {}, template: false, wrap: false });
-            await layout.showIn("#bottom-row", kendoView);
+            layout.showIn("#bottom-row", kendoView);
             var widget = await $.get(`${Config.templateApi}data_library/widget`);
-            await $("#page-widget").html(widget);
+            $("#page-widget").html(widget);
         
         });
 
@@ -120,9 +120,9 @@
             layoutViewModel.set("breadcrumb", dataItemFull.file_name);
             var HTML = await $.get(`${Config.templateApi}data_library/overview?id=${id}`);
             var kendoView = new kendo.View(HTML, { model: {}, template: false, wrap: false });
-            await layout.showIn("#bottom-row", kendoView);
+            layout.showIn("#bottom-row", kendoView);
             var widget = await $.get(`${Config.templateApi}data_library/widget`);
-            await $("#page-widget").html(widget);
+            $("#page-widget").html(widget);
         });
 
         router.route("/import", async function() {

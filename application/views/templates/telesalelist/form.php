@@ -8,8 +8,8 @@
 			</div>
 			<div class="form-group" data-field="@Phone@">
 				<label>@Exporting Date@</label>
-				<input data-role="datetimepicker"
-                    data-bind="value: item.exporting_date" style="width: 100%"/>
+				<input data-role="datepicker"
+                    data-bind="value: item.exporting_date" data-format="dd/MM/yyyy H:mm:ss" style="width: 100%"/>
 			</div>
 			<div class="form-group" data-field="@Email@">
 				<label>@Contract No.@</label>
@@ -25,8 +25,8 @@
 			</div>
 			<div class="form-group" data-field="@Email@">
 				<label>@Date of birth@</label>
-				<input data-role="datetimepicker"
-                    data-bind="value: item.date_of_birth" style="width: 100%"/>
+				<input data-role="datepicker"
+                    data-bind="value: item.date_of_birth" data-format="dd/MM/yyyy H:mm:ss" style="width: 100%"/>
 			</div>
 			<div class="form-group" data-field="@Email@">
 				<label>@ID No@</label>
@@ -49,7 +49,8 @@
 			</div>
 			<div class="form-group" data-field="@Email@">
 				<label>@First due date(Latest Loan)@</label>
-				<input class="k-textbox" style="width: 100%" data-bind="value: item.first_due_date">
+				<input data-role="datepicker"
+                    data-bind="value: item.first_due_date" data-format="dd/MM/yyyy H:mm:ss" style="width: 100%"/>
 			</div>
 			<div class="form-group" data-field="@Email@">
 				<label>@Term(Latest Loan)@</label>
@@ -85,13 +86,13 @@
 			</div>
 			<div class="form-group" data-field="@Name@">
 				<label>@date send data@</label>
-				<input data-role="datetimepicker"
-                    data-bind="value: item.date_send_data" style="width: 100%"/>
+				<input data-role="datepicker"
+                    data-bind="value: item.date_send_data" data-format="dd/MM/yyyy H:mm:ss" style="width: 100%"/>
 			</div>
 			<div class="form-group" data-field="@Name@">
 				<label>@date receive data@</label>
-				<input data-role="datetimepicker"
-                    data-bind="value: item.date_receive_data" style="width: 100%"/>
+				<input data-role="datepicker"
+                    data-bind="value: item.date_receive_data" data-format="dd/MM/yyyy H:mm:ss" style="width: 100%"/>
 			</div>
 			<div class="form-group" data-field="@Name@">
 				<label>@code@</label>

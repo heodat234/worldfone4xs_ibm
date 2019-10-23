@@ -180,8 +180,8 @@ var Config = {
                     serverSorting: true,
                     serverGrouping: false,
                     filter: Config.filter ? Config.filter : null,
-                    sort: Config.sort ? Config.sort : null,
-                    page: Config.page ? Config.page : null,
+                    sort: null,
+                    page: null,
                     pageSize: 10,
                     batch: false,
                     schema: {
@@ -270,17 +270,6 @@ var Config = {
                         template: `<h2 class='text-danger'>${KENDO.noRecords}</h2>`
                     }
                 }).data("kendoGrid");
-
-                // grid.selectedKeyNames = function() {
-                //     var items = this.select(),
-                //         that = this,
-                //         checkedIds = [];
-                //     $.each(items, function(){
-                //         if(that.dataItem(this))
-                //             checkedIds.push(that.dataItem(this).uid);
-                //     })
-                //     return checkedIds;
-                // }
 
                 /*
                  * Right Click Menu

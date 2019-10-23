@@ -99,7 +99,7 @@ var Config = {
                 }else if (dataItem.status == 0) {
                     return '<h4 style="font-weight: bold">Fail</h4>';
                 }else if(dataItem.status == 2){
-                    return '<div class"col-sm-8"><div class="progress"></div></div><div class="status-upload">Loading...</div><div class="col-sm-4 cancel-upload"><a href="javascript:void(0)" onclick="cancelUpload(`'+dataItem.id+'`)">Cancel</a></div>';
+                    return '<div class"col-sm-8"><div class="progress"></div></div><div class="status-upload">Loading...</div></div>';
                 }
                 
             }
@@ -221,8 +221,8 @@ var Config = {
                     serverSorting: true,
                     serverGrouping: false,
                     filter: Config.filter ? Config.filter : null,
-                    sort: Config.sort ? Config.sort : null,
-                    page: Config.page ? Config.page : null,
+                    sort:  null,
+                    page:  null,
                     pageSize: 10,
                     batch: false,
                     schema: {

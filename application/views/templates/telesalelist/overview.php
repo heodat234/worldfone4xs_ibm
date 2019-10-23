@@ -16,15 +16,6 @@
 <div class="col-sm-12" style="overflow-y: auto; padding: 0">
 	<div id="grid"></div>
 </div>
-<!-- <div id="action-menu">
-    <ul>
-    	<a href="javascript:void(0)" data-type="detail" onclick="detailData(this)"><li><i class="fa fa-exclamation-circle text-info"></i><span>Detail</span></li></a>
-    	<a href="javascript:void(0)" data-type="import" onclick="importData(this)"><li><i class="fa fa-download text-success"></i><span>Import</span></li></a>
-    	<li class="devide"></li>
-        <a href="javascript:void(0)" data-type="update" onclick="openForm({title: 'Edit assign', width: 300}); editForm(this)"><li><i class="fa fa-pencil-square-o text-warning"></i><span>Edit Assign</span></li></a>
-        
-    </ul>
-</div> -->
 <style type="text/css">
     .change-mvvm {
         display: none;
@@ -64,6 +55,7 @@
                 date_send_data: {type: "date"},
                 date_receive_data: {type: "date"},
                 updatedAt: {type: "date"},
+                first_due_date: {type: "date"},
             }
         },
         parse: function (response) {
@@ -74,6 +66,7 @@
                 doc.date_send_data = doc.date_send_data ? new Date(doc.date_send_data * 1000) : null;
                 doc.date_receive_data = doc.date_receive_data ? new Date(doc.date_receive_data * 1000) : null;
                 doc.updatedAt = doc.updatedAt ? new Date(doc.updatedAt * 1000) : null;
+                doc.first_due_date = doc.first_due_date ? new Date(doc.first_due_date * 1000) : null;
                 return doc;
             })
             return response;
@@ -150,12 +143,6 @@
             width: 32,
             locked: true
         });
-        // columns.push({
-        //     // Use uid to fix bug data-uid of row undefined
-        //     title: `<a class='btn btn-sm btn-circle btn-action btn-primary' onclick='return deleteDataItemChecked();'><i class='fa fa-times-circle'></i></a>`,
-        //     template: '<a role="button" class="btn btn-sm btn-circle btn-action btn-primary" data-uid="#: uid #"><i class="fa fa-ellipsis-v"></i></a>',
-        //     width: 32
-        // });
 
         Table.columns = columns;
         Table.init();

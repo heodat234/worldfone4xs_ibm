@@ -4,7 +4,7 @@
 		<div id="popup-tabstrip" data-role="tabstrip" style="margin-top: 2px">
 	        <ul>
 	            <li class="k-state-active">
-	                EXCEL
+	                CSV
 	            </li>
 	            <li>
 	                FTP
@@ -80,11 +80,11 @@
 <!-- <script src="https://cdn.jsdelivr.net/npm/sweetalert2@8"></script> -->
 
 <script type="text/javascript">
-	$("#spreadsheet").kendoSpreadsheet({toolbar: false});
-	$("#spreadsheet").hide();
-   	var spreadsheet = $("#spreadsheet").data("kendoSpreadsheet"); 
+	// $("#spreadsheet").kendoSpreadsheet({toolbar: false});
+	// $("#spreadsheet").hide();
+ //   	var spreadsheet = $("#spreadsheet").data("kendoSpreadsheet"); 
 
-	var ALLOWED_EXTENSIONS = [".xlsx",".csv"];
+	var ALLOWED_EXTENSIONS = [".csv"];
 
     $("#excel-file").kendoUpload({
         async: {
@@ -98,18 +98,20 @@
         select: function(e) {
             var extension = e.files[0].extension.toLowerCase();
             if (ALLOWED_EXTENSIONS.indexOf(extension) == -1) {
-                alert("Please, select a supported file format excel or csv");
+                alert("Please, select a supported file format csv");
                 e.preventDefault();
             }
-            $("#spreadsheet").show();
-        	spreadsheet.fromFile(e.files[0]['rawFile']);
+            // $("#spreadsheet").show();
+        	// spreadsheet.fromFile(e.files[0]['rawFile']);
         },
         clear: onClear,
         progress: onProgress,
         success: function(e) {
-    		notification.show(e.response.message, e.response.status ? "success" : "error");  
-            if (e.response.status == 0) {
-                router.navigate(`/history`);
+    		if (e.response.status == -1) {
+                swal({text: "Quá trình upload đang được thực hiện. Vui lòng đợi vài phút và kiểm tra trong lịch sử."});
+            }else{
+                notification.show(e.response.message, e.response.status ? "success" : "error");
+                // router.navigate(`/history`);
             }      	
         }
     });
@@ -121,23 +123,7 @@
         console.log(e.percentComplete);
     }
 
-	function getDataFromSpreadSheet(rows) {
-		var data = [];
-		var headerData = rows[0].cells;
-		
-		rows.forEach(function(row, index) {
-			var doc = {}; 
-			row.cells.forEach(function(cell, idx){
-				if(index != 0 && cell.value != undefined) {
-					doc["C"+cell.index] = cell.value;
-				}
-			})
-			if(Object.keys(doc).length !== 0) {
-				data.push(doc);
-			}
-		})
-		return data;
-	}
+	
 	
 </script>
 <script>

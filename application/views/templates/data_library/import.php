@@ -98,7 +98,7 @@
         select: function(e) {
             var extension = e.files[0].extension.toLowerCase();
             if (ALLOWED_EXTENSIONS.indexOf(extension) == -1) {
-                alert("Please, select a supported file format excel or csv");
+                alert("Please, select a supported file format csv");
                 e.preventDefault();
             }
             // $("#spreadsheet").show();
