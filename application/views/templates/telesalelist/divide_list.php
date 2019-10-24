@@ -251,6 +251,17 @@
 
         dataItem = grid.dataItem($(e.target).closest("tr"));
         var count_random = dataItem.count_random;
+        if (count_random == 0) {
+        	$("#saveChanges").kendoButton({
+                enable: false
+            });
+        	swal({
+                title: "Đã phân công tất cả data",
+                icon: "warning",
+                cancel: true,
+                dangerMode: true,
+            })
+        }
         data.map(function(doc) {	
         	if (doc.uid == dataItem.uid) {
         		if (doc.checked == 1) {

@@ -7,6 +7,7 @@ Class Assign extends CI_Controller {
 	private $sub_collection = "Telesalelist";
 	private $import_collection = "Import";
 	private $jsondata_collection = "Jsondata";
+	private $log_collection = "Assign_log";
 
 	function __construct()
 	{
@@ -16,6 +17,7 @@ Class Assign extends CI_Controller {
 		$this->collection = set_sub_collection($this->collection);
 		$this->sub_collection = set_sub_collection($this->sub_collection);
 		$this->import_collection = set_sub_collection($this->import_collection);
+		$this->log_collection = set_sub_collection($this->log_collection);
 	}
 
 	function read($id_import)
@@ -26,8 +28,8 @@ Class Assign extends CI_Controller {
 
 		$this->mongo_db->switch_db();
 		$match['id_import'] = $id_import;
+		$match['assign'] = '';
         $response = $this->crud->read($this->sub_collection, $request = array(), array(), $match);
-        $id = '5db017c01ef2b4284709b0ad';
         $fixed = $this->crud->where_id($id_import)->getOne($this->import_collection);
         if (isset($fixed['count_fixed'])) {
         	$fixed = $fixed['count_fixed'];
@@ -44,7 +46,7 @@ Class Assign extends CI_Controller {
         	$count_fixed += $doc["count_detail"];
         }
 
-        $count_random = $response['total'] - $count_fixed;
+        $count_random = $response['total'];
         foreach ($users['data'] as &$doc) {
         	$doc['count_random'] = $count_random;
         	$doc['checked'] = 0;
@@ -77,14 +79,29 @@ Class Assign extends CI_Controller {
 		$match['id_import'] = $id;
 		$match['assign'] = '';
 
-        $response = $this->crud->read($this->sub_collection, $request = array(), array(), $match);
-        $response = $response['data'];
-		shuffle($response);
-
+        $assign_log = $this->crud->getOne($this->log_collection);
+        $array_cmnd = [];
+        if ($assign_log != NULL) {
+        	foreach ($assign_log as $key => $value) {
+	        	if ($key == $data['extension']) {
+	        		$array_cmnd = $value;
+	        	}
+	        }
+	        $match['id_no'] = array('$nin' => $array_cmnd);
+        }
+        
 		for ($i=0; $i < $data['random']; $i++) {
 			$insert_data["assign"]		= $data['extension'];
 			$insert_data["assigned_by"]	= 'BySystemRandom';
-			$this->crud->where_id($response[$i]['id'])->update($this->sub_collection, array('$set' => $insert_data));
+			$user = $this->crud->where($match)->getOne($this->sub_collection);
+			if ($user != NULL) {
+				$this->crud->where_id($user['id'])->update($this->sub_collection, array('$set' => $insert_data));
+
+				if ($assign_log != NULL) {
+					$this->crud->where_id($assign_log['id'])->update($this->log_collection, array('$push' => array($data['extension'] => $user['id_no'])));
+				}
+			}
+			
 		}
 		echo json_encode(array("status" => 1, "data" => []));
 	}

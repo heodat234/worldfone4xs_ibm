@@ -1,10 +1,10 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-Class Data_library extends WFF_Controller {
+Class Sc_deliver extends WFF_Controller {
 
-    private $collection = "Datalibrary";
     private $call_collection = "worldfonepbxmanager";
+    private $collection = "Telesalelist";
     private $app_collection = "Appointment";
 
     function __construct()
@@ -43,7 +43,6 @@ Class Data_library extends WFF_Controller {
                $match = array(
                   '$match' => array(
                      '$and' => array(
-                        // array('source'=> 'PL'),
                         array('createdAt'=> array( '$gte'=> $start, '$lte'=> $end))
                      )
                   )
@@ -60,7 +59,7 @@ Class Data_library extends WFF_Controller {
                   )
                );
             }
-            $lookup = array(
+            $lookup_call = array(
                '$lookup' => array(
                   "from" => $this->call_collection,
                    "localField" => "mobile_phone_no",
@@ -68,7 +67,7 @@ Class Data_library extends WFF_Controller {
                    "as" => "call_detail"
                )
             );
-            $lookup_1 = array(
+            $lookup = array(
                '$lookup' => array(
                   "from" => $this->app_collection,
                    "localField" => "id_no",
@@ -80,11 +79,10 @@ Class Data_library extends WFF_Controller {
             $group = array(
                '$group' => array(
                   '_id' => array('code'=>'$source'),
-                  'count_data' => array('$sum'=> 1),
-                  "call_detail" => array( '$last' => '$call_detail' ),
+                  // 'count_data' => array('$sum'=> 1),
                   "appointment_detail" => array( '$last' => '$appointment_detail' ),
+                  "call_detail" => array( '$push' => '$call_detail' ),
                   // 'customernumber' => array( '$push'=> '$call_detail.customernumber' ),
-                  // 'count_appointment' => array('$addToSet'=> '$count_appointment'),
                )
             );
             $project = array(
@@ -98,13 +96,12 @@ Class Data_library extends WFF_Controller {
                    ),
                   
                   // 'count_appointment'          => array('$size' => 'appointment_detail'),
-                  'count_data'            => 1,
+                  // 'count_data'            => 1,
                   'appointment_detail'        => 1
 
                ))
             );
-            // var_dump($match);
-            $this->kendo_aggregate->set_kendo_query($request)->selecting()->adding($match,$lookup,$lookup_1,$group,$project)->filtering();
+            $this->kendo_aggregate->set_kendo_query($request)->selecting()->adding($match,$lookup_call,$lookup,$group)->filtering();
             // Get total
             $total_aggregate = $this->kendo_aggregate->get_total_aggregate();//  pre($total_aggregate);
             $total_result = $this->mongo_db->aggregate_pipeline($this->collection, $total_aggregate);
@@ -113,18 +110,10 @@ Class Data_library extends WFF_Controller {
             $data_aggregate = $this->kendo_aggregate->sorting()->paging()->get_data_aggregate();
             $data = $this->mongo_db->aggregate_pipeline($this->collection, $data_aggregate);
             foreach ($data as &$value) {
-               // $value['count_appointment'] = $value['count_appointment'][0];
-              $value['customernumber'] = [];
-              $value['count_success'] = $value['count_dont_pickup']  = 0;
-              foreach ($value['call_detail'] as $call) {
-                  array_push($value['customernumber'], $call['customernumber']);
-                  if ($call['disposition'] == 'ANSWERED') {
-                    $value['count_success'] ++;
-                  }else{
-                    $value['count_dont_pickup'] ++;
-                  }
-              }
-              $value['count_called'] = count(array_unique($value['customernumber']));
+              // $temp = (array)$value['_id']['code'];
+              // $value['_id']['code'] = $temp[0];
+              // var_dump($value['_id']); 
+              $value['count_data'] = count($value['call_detail']);
               $value['count_appointment'] = count($value['appointment_detail']);
               
             }

@@ -81,7 +81,7 @@ Class Test extends CI_Controller {
    {
       ini_set('max_execution_time', '300');
       $collection = '2_Telesalelist';
-      $idImport = "5db04c991ef2b45f9852cacd";
+      $idImport = "5db04ee11ef2b467de5f02f3";
       $extension = '999';
 
       // $output = exec('PYTHONIOENCODING=utf-8 python3.6 /var/www/html/python/importCSV.py ' . $idImport . " ". $collection ." ". $extension ." > /dev/null &");

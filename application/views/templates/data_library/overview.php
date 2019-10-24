@@ -32,6 +32,7 @@
         model: {
             id: "id",
             fields: {
+                createdAt: {type: "date"},
                 exporting_date: {type: "date"},
                 date_of_birth: {type: "date"},
                 date_send_data: {type: "date"},
@@ -41,6 +42,7 @@
         },
         parse: function (response) {
             response.data.map(function(doc) {
+                doc.createdAt = new Date(doc.createdAt * 1000);
                 doc.exporting_date = doc.exporting_date ? new Date(doc.exporting_date * 1000) : null;
                 doc.date_of_birth = doc.date_of_birth ? new Date(doc.date_of_birth * 1000) : null;
                 doc.date_send_data = doc.date_send_data ? new Date(doc.date_send_data * 1000) : null;
