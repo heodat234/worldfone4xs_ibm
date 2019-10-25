@@ -79,10 +79,8 @@ Class Sc_deliver extends WFF_Controller {
             $group = array(
                '$group' => array(
                   '_id' => array('code'=>'$source'),
-                  // 'count_data' => array('$sum'=> 1),
-                  "appointment_detail" => array( '$last' => '$appointment_detail' ),
+                  "appointment_detail" => array( '$push' => '$appointment_detail' ),
                   "call_detail" => array( '$push' => '$call_detail' ),
-                  // 'customernumber' => array( '$push'=> '$call_detail.customernumber' ),
                )
             );
             $project = array(
@@ -91,7 +89,7 @@ Class Sc_deliver extends WFF_Controller {
                       '$filter'=> array(
                          'input'=> '$call_detail',
                          'as'=> 'item',
-                         'cond'=> array( '$eq'=> [ '$$item.direction', "outbound" ] )
+                         'cond'=> array( '$eq'=> [ '$$item.direction', "outbound" ])
                       )
                    ),
                   
@@ -112,9 +110,15 @@ Class Sc_deliver extends WFF_Controller {
             foreach ($data as &$value) {
               // $temp = (array)$value['_id']['code'];
               // $value['_id']['code'] = $temp[0];
-              // var_dump($value['_id']); 
-              $value['count_data'] = count($value['call_detail']);
-              $value['count_appointment'] = count($value['appointment_detail']);
+              
+              $call_detail = array_filter($value['call_detail'], function($item) {
+                  return $item != [];
+              });
+              $appointment_detail = array_filter($value['appointment_detail'], function($item) {
+                  return $item != [];
+              });
+              $value['count_data'] = count($call_detail);
+              $value['count_appointment'] = count($appointment_detail);
               
             }
             // var_dump($data);exit;

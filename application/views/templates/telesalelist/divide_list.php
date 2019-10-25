@@ -185,7 +185,7 @@
 		        	// 	i ++;
 		        	// }
 		        	doc.random = 0;
-		            doc.total = doc.count_detail + doc.random;
+		            doc.total = doc.count_detail + doc.random + doc.after_random;
 		            return doc;
 		        })
 		        return response;
@@ -193,6 +193,7 @@
         },
         aggregate: [ { field: "count_detail", aggregate: "sum" },
 	                  { field: "random", aggregate: "sum" },
+	                  { field: "after_random", aggregate: "sum" },
 	                  { field: "total", aggregate: "sum" }]
     });
 
@@ -228,7 +229,13 @@
 	            footerTemplate: " #=sum#"
             }, {
 	            field: "random",
-	            title: "Random",
+	            title: "Before Random",
+	            width: "100px",
+	            aggregates: ["sum"],
+	            footerTemplate: " #=sum#"
+            }, {
+	            field: "after_random",
+	            title: "After Random",
 	            width: "100px",
 	            aggregates: ["sum"],
 	            footerTemplate: " #=sum#"
@@ -319,7 +326,7 @@
     $("#saveChanges").kendoButton({
         click: function(e) {
             grid.saveChanges();
-            notification.show("Confirm successfully", "success");
+            swal({text: "Quá trình phân công đang được thực hiện. Vui lòng kiểm tra lại sau vài phút."});
         }
     })
     $("#saveChanges").removeClass('k-button');

@@ -43,7 +43,6 @@ Class Data_library extends WFF_Controller {
                $match = array(
                   '$match' => array(
                      '$and' => array(
-                        // array('source'=> 'PL'),
                         array('createdAt'=> array( '$gte'=> $start, '$lte'=> $end))
                      )
                   )
@@ -81,10 +80,8 @@ Class Data_library extends WFF_Controller {
                '$group' => array(
                   '_id' => array('code'=>'$source'),
                   'count_data' => array('$sum'=> 1),
-                  "call_detail" => array( '$last' => '$call_detail' ),
-                  "appointment_detail" => array( '$last' => '$appointment_detail' ),
-                  // 'customernumber' => array( '$push'=> '$call_detail.customernumber' ),
-                  // 'count_appointment' => array('$addToSet'=> '$count_appointment'),
+                  "call_detail" => array( '$push' => '$call_detail' ),
+                  "appointment_detail" => array( '$push' => '$appointment_detail' ),
                )
             );
             $project = array(
@@ -97,13 +94,11 @@ Class Data_library extends WFF_Controller {
                       )
                    ),
                   
-                  // 'count_appointment'          => array('$size' => 'appointment_detail'),
                   'count_data'            => 1,
                   'appointment_detail'        => 1
 
                ))
             );
-            // var_dump($match);
             $this->kendo_aggregate->set_kendo_query($request)->selecting()->adding($match,$lookup,$lookup_1,$group,$project)->filtering();
             // Get total
             $total_aggregate = $this->kendo_aggregate->get_total_aggregate();//  pre($total_aggregate);
@@ -113,10 +108,16 @@ Class Data_library extends WFF_Controller {
             $data_aggregate = $this->kendo_aggregate->sorting()->paging()->get_data_aggregate();
             $data = $this->mongo_db->aggregate_pipeline($this->collection, $data_aggregate);
             foreach ($data as &$value) {
-               // $value['count_appointment'] = $value['count_appointment'][0];
+              $call_detail = array_filter($value['call_detail'], function($item) {
+                  return $item != [];
+              });
+              $appointment_detail = array_filter($value['appointment_detail'], function($item) {
+                  return $item != [];
+              });
+              $value['count_appointment'] = count($appointment_detail);
               $value['customernumber'] = [];
               $value['count_success'] = $value['count_dont_pickup']  = 0;
-              foreach ($value['call_detail'] as $call) {
+              foreach ($call_detail as $call) {
                   array_push($value['customernumber'], $call['customernumber']);
                   if ($call['disposition'] == 'ANSWERED') {
                     $value['count_success'] ++;
@@ -125,10 +126,8 @@ Class Data_library extends WFF_Controller {
                   }
               }
               $value['count_called'] = count(array_unique($value['customernumber']));
-              $value['count_appointment'] = count($value['appointment_detail']);
               
             }
-            // var_dump($data);exit;
             $response = array("data" => $data, "total" => $total);
             echo json_encode($response);
         } catch (Exception $e) {

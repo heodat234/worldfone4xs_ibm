@@ -28,11 +28,14 @@ Class Assign extends CI_Controller {
 
 		$this->mongo_db->switch_db();
 		$match['id_import'] = $id_import;
-		$match['assign'] = '';
+		$match['assign'] = "";
         $response = $this->crud->read($this->sub_collection, $request = array(), array(), $match);
-        $fixed = $this->crud->where_id($id_import)->getOne($this->import_collection);
-        if (isset($fixed['count_fixed'])) {
-        	$fixed = $fixed['count_fixed'];
+        $import = $this->crud->where_id($id_import)->getOne($this->import_collection);
+        if (isset($import['count_fixed'])) {
+        	$fixed = $import['count_fixed'];
+        }
+        if (isset($import['random'])) {
+        	$after_random = $import['random'];
         }
         $count_fixed = 0;
         foreach ($users['data'] as &$doc) {
@@ -40,6 +43,11 @@ Class Assign extends CI_Controller {
         	foreach ($fixed as $key => $value) {
         		if ($doc['extension'] == $key) {
         			$doc['count_detail'] = $value;
+        		}
+        	}
+        	foreach ($after_random as $key_random => $value_random) {
+        		if ($doc['extension'] == $key_random) {
+        			$doc['after_random'] = $value_random;
         		}
         	}
         	$doc['id_import'] = $id_import;
@@ -76,34 +84,39 @@ Class Assign extends CI_Controller {
 	{
 		$data = json_decode(file_get_contents('php://input'), TRUE);
 		$id = $data['id_import'];
-		$match['id_import'] = $id;
-		$match['assign'] = '';
+		$random = $data['random'];
+		$extension = $data['extension'];
+		// $match['id_import'] = $id;
+		// $match['assign'] = '';
 
-        $assign_log = $this->crud->getOne($this->log_collection);
-        $array_cmnd = [];
-        if ($assign_log != NULL) {
-        	foreach ($assign_log as $key => $value) {
-	        	if ($key == $data['extension']) {
-	        		$array_cmnd = $value;
-	        	}
-	        }
-	        $match['id_no'] = array('$nin' => $array_cmnd);
-        }
+		exec('PYTHONIOENCODING=utf-8 python3.6 /var/www/html/python/assign.py ' . $id . " ". $random ." ". $extension ." > /dev/null &");
+		$update_data['random.'.$extension] = (int)$random;
+		$this->crud->where_id($id)->update($this->import_collection, array('$inc' => $update_data));
+  //       $assign_log = $this->crud->getOne($this->log_collection);
+  //       $array_cmnd = [];
+  //       if ($assign_log != NULL) {
+  //       	foreach ($assign_log as $key => $value) {
+	 //        	if ($key == $data['extension']) {
+	 //        		$array_cmnd = $value;
+	 //        	}
+	 //        }
+	 //        $match['id_no'] = array('$nin' => $array_cmnd);
+  //       }
         
-		for ($i=0; $i < $data['random']; $i++) {
-			$insert_data["assign"]		= $data['extension'];
-			$insert_data["assigned_by"]	= 'BySystemRandom';
-			$user = $this->crud->where($match)->getOne($this->sub_collection);
-			if ($user != NULL) {
-				$this->crud->where_id($user['id'])->update($this->sub_collection, array('$set' => $insert_data));
+		// for ($i=0; $i < $data['random']; $i++) {
+		// 	$insert_data["assign"]		= $data['extension'];
+		// 	$insert_data["assigned_by"]	= 'BySystemRandom';
+		// 	$user = $this->crud->where($match)->getOne($this->sub_collection);
+		// 	if ($user != NULL) {
+		// 		$this->crud->where_id($user['id'])->update($this->sub_collection, array('$set' => $insert_data));
 
-				if ($assign_log != NULL) {
-					$this->crud->where_id($assign_log['id'])->update($this->log_collection, array('$push' => array($data['extension'] => $user['id_no'])));
-				}
-			}
+		// 		if ($assign_log != NULL) {
+		// 			$this->crud->where_id($assign_log['id'])->update($this->log_collection, array('$push' => array($data['extension'] => $user['id_no'])));
+		// 		}
+		// 	}
 			
-		}
-		echo json_encode(array("status" => 1, "data" => []));
+		// }
+		echo json_encode(array("status" => -1, "data" => []));
 	}
 
 	function delete($id)

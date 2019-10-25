@@ -81,11 +81,23 @@ Class Test extends CI_Controller {
    {
       ini_set('max_execution_time', '300');
       $collection = '2_Telesalelist';
-      $idImport = "5db04ee11ef2b467de5f02f3";
+      $idImport = "5db268f51ef2b442430451e0";
       $extension = '999';
 
       // $output = exec('PYTHONIOENCODING=utf-8 python3.6 /var/www/html/python/importCSV.py ' . $idImport . " ". $collection ." ". $extension ." > /dev/null &");
       $output = shell_exec('PYTHONIOENCODING=utf-8 python3.6 /var/www/html/python/importTelesaleCSV.py ' . $idImport . " ". $collection ." ". $extension ." 2>&1");
+
+      echo $output;
+   }
+
+   function testAssign()
+   {
+      $random = '100';
+      $idImport = "5db268f51ef2b442430451e0";
+      $extension = '999';
+
+      // $output = exec('PYTHONIOENCODING=utf-8 python3.6 /var/www/html/python/importCSV.py ' . $idImport . " ". $collection ." ". $extension ." > /dev/null &");
+      $output = shell_exec('PYTHONIOENCODING=utf-8 python3.6 /var/www/html/python/assign.py ' . $idImport . " ". $random ." ". $extension ." 2>&1");
 
       echo $output;
    }
