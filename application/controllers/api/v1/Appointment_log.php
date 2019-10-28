@@ -26,8 +26,11 @@ Class Appointment_log extends WFF_Controller {
         try {
             $this->load->library("crud");
             $data = json_decode(file_get_contents('php://input'), TRUE);
-            $customerInfo = $this->crud->where_id($data['cmnd'])->getOne(set_sub_collection("Customer"));
+            $customerInfo = $this->crud->where_id($data['id_no'])->getOne(set_sub_collection("Telesalelist"));
             $data['customer_info'] = (!empty($customerInfo)) ? $customerInfo : array();
+            if(!empty($data['dealer_location']['location'])) {
+                $data['dealer_location'] = $data['dealer_location']['location'];
+            }
             $data['tl_code'] = $this->session->userdata("extension");
             $data['tl_name'] = $this->session->userdata("agentname");
             $data["created_at"]	= time();
@@ -190,6 +193,17 @@ Class Appointment_log extends WFF_Controller {
     function downloadFileFromFTP() {
         try {
             $this->ftp_model->downloadFileFromFTP(UPLOAD_PATH . "excel/", '');
+        }
+        catch (Exception $e) {
+            echo json_encode(array("status" => 0, "message" => $e->getMessage()));
+        }
+    }
+
+    function getLocation() {
+	    try {
+            $data = $this->crud->get(set_sub_collection('Dealer'));
+            $result = array_values(array_unique(array_column($data, 'location')));
+            echo json_encode(array("status" => 1, "data" => array("data" => $result, "total" => count($result))));
         }
         catch (Exception $e) {
             echo json_encode(array("status" => 0, "message" => $e->getMessage()));

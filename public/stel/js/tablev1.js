@@ -20,6 +20,9 @@ var Table = function() {
                 serverPaging: true,
                 serverSorting: true,
                 serverGrouping: false,
+                filter: Config.filter ? Config.filter : null,
+                sort: Config.sort ? Config.sort : null,
+                page: Config.page ? Config.page : null,
                 pageSize: 10,
                 batch: false,
                 schema: schema,
@@ -74,12 +77,21 @@ var Table = function() {
                     messages: KENDO.pageableMessages ? KENDO.pageableMessages : {}
                 },
                 sortable: true,
-                scrollable: false,
+                scrollable: Boolean(Config.scrollable),
                 columns: this.columns,
                 filterable: Config.filterable ? Config.filterable : true,
                 editable: false,
                 noRecords: {
                     template: `<h2 class='text-danger'>${KENDO.noRecords}</h2>`
+                },
+                page: function(e) {
+                    sessionStorage.setItem("page_" + ENV.currentUri, e.page);
+                },
+                sort: function(e) {
+                    sessionStorage.setItem("sort_" + ENV.currentUri, JSON.stringify(e.sort));
+                },
+                filter: function(e) {
+                    sessionStorage.setItem("filter_" + ENV.currentUri, JSON.stringify(e.filter));
                 }
             }).data("kendoGrid");
 

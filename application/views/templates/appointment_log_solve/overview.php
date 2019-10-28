@@ -61,19 +61,19 @@ var Config = Object.assign(Config, {
     },{
         title: "@Customer@",
         columns: [{
-            field: "customer_info.cmnd",
+            field: "customer_info.id_no",
             title: "@National ID@",
             headerAttributes: { style: "white-space: normal"},
             width: "110px",
             filterable: false
         }, {
-            field: "customer_info.name",
+            field: "customer_info.customer_name",
             title: "@Name@",
             width: "200px",
             headerAttributes: { style: "white-space: normal"},
             filterable: false
         }, {
-            field: "customer_info.phone",
+            field: "customer_info.mobile_phone_no",
             title: "@Phone@",
             width: "150px",
             headerAttributes: { style: "white-space: normal"},

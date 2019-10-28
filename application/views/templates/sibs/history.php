@@ -12,7 +12,6 @@
                                     'field': 'begin_import',
                                     'title': '@Begin Imported@',
                                     'template': function(dataItem) {
-                                        console.log(dataItem.begin_import);
                                         return (kendo.toString(new Date(dataItem.begin_import * 1000), 'dd/MM/yy H:mm:ss') ||  '').toString();
                                     },
                                     'width': '200px'
@@ -20,7 +19,10 @@
                                     'field': 'complete_import',
                                     'title': '@Finish Imported@',
                                     'template': function(dataItem) {
-                                        return (kendo.toString(new Date(dataItem.complete_import * 1000), 'dd/MM/yy H:mm:ss') ||  '').toString();
+                                        if(dataItem.complete_import) {
+                                            return (kendo.toString(new Date(dataItem.complete_import * 1000), 'dd/MM/yy H:mm:ss') ||  '').toString();
+                                        }
+                                        else return ''
                                     },
                                     'width': '200px'
                                 },{
@@ -32,10 +34,6 @@
                                     'title': '@Source@',
                                     'width': '150px'
                                 },{
-                                    'field': 'total_row',
-                                    'title': '@Total@',
-                                    'width': '100px'
-                                },{
                                     'field': 'status',
                                     'title': '@Status@',
                                     'template': function(dataItem) {
@@ -44,7 +42,7 @@
                                         }else if(dataItem.status == 0) {
                                             return '<h4 style=\'font-weight: bold\'>Fail</h4>';
                                         }else if(dataItem.status == 2) {
-                                            return '<div class=\'col-sm-8\'><div class=\'progress\' data-role=\'progressbar\' data-min=\'0\' data-max=\'100\' data-value=\'false\'></div><div class=\'status-upload\'>Loading...</div></div><div class=\'col-sm-4 cancel-upload\'><a href=\'javascript:void(0)\' onclick=\'cancelUpload(this)\'>Cancel</a></div>';
+                                            return '<div class=\'col-sm-8\'><div class=\'progress\' data-role=\'progressbar\' data-min=\'0\' data-max=\'100\' data-value=\'false\'></div><div class=\'status-upload\'>Loading...</div></div><div style=\'display: none\' class=\'col-sm-4 cancel-upload\'><a href=\'javascript:void(0)\' onclick=\'cancelUpload(this)\'>Cancel</a></div>';
                                         }
                                     },
                                 },{

@@ -1,8 +1,8 @@
 ư<div id="all-popup">
     <div id="popup-window" data-role="window"
-                     data-title="Click to call"
-                     data-width="1000"
-                     data-actions="['Save','Pause','Refresh', 'Minimize', 'Maximize', 'Close']"
+                     data-title="POPUP TELESALE"
+                     data-width="1200"
+                     data-actions="['Arrows-no-change', 'Save','Tri-state-indeterminate','Refresh', 'Minimize', 'Maximize', 'Close']"
                      data-position="{'top': 20}"
                      data-visible="false"
                      data-bind="events: {open: openPopup, close: closePopup, activate: activatePopup}" style="padding: 2px; max-height: 90vh">
@@ -11,7 +11,7 @@
                 <div id="popup-tabstrip" data-role="tabstrip" style="margin-top: 2px">
                     <ul>
                         <li class="k-state-active">
-                            CALL FORM
+                            <i class="fa fa-user"></i><b> OBJECT INFOMATION</b>
                         </li>
                         <li data-bind="visible: detailUrl, click: openDetail">
                             CUSTOMER DETAIL
@@ -25,66 +25,48 @@
                     </ul>
                     <div>
                         <div class="container-fluid">
-                            <div class="row title-row">
-                                <span class="text-primary">CUSTOMER INFOMATION</span>
-                                <hr class="popup">
+                            <div class="row form-horizontal" style="padding-top: 10px">
+                                <div class="col-sm-5">
+                                    <div class="form-group">
+                                        <label class="control-label col-xs-4">@Type of object@</label>
+                                        <div class="col-xs-8">
+                                            <span style="vertical-align: -7px">Other</span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                             <div class="row form-horizontal">
-                                <div class="col-sm-6">
+                                <div class="col-sm-5">
                                     <div class="form-group">
-                                        <label class="control-label col-xs-4">Customer Name</label>
+                                        <label class="control-label col-xs-4">@Name@</label>
                                         <div class="col-xs-8">
-                                            <input class="k-textbox upper-case-input" name="name" data-bind="value: item.name" style="width: 100%">
+                                            <div class="input-group">
+                                                <input class="k-textbox upper-case-input" name="customer_name" data-bind="value: item.customer_name, enabled: enableName" style="width: 100%">
+                                                <div class="input-group-addon">
+                                                    <label style="margin-bottom: 0; cursor: pointer">
+                                                        <input type="checkbox" class="hidden" data-bind="checked: enableName">
+                                                        <span class="fa fa-pencil"></span>
+                                                    </label>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="form-group">
-                                        <label class="control-label col-xs-4">Phone</label>
+                                        <label class="control-label col-xs-4">@Object's Phone@</label>
                                         <div class="col-xs-8">
-                                            <input class="k-textbox" name="phone" data-bind="value: item.phone" style="width: 100%">
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="control-label col-xs-4">Email</label>
-                                        <div class="col-xs-8">
-                                            <input class="k-textbox" name="email" data-bind="value: item.email" style="width: 100%">
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-sm-6">
-                                    <div class="form-group">
-                                        <label class="control-label col-xs-4">Person ID</label>
-                                        <div class="col-xs-8">
-                                            <input class="k-textbox" name="id_number" data-bind="value: item.id_number" style="width: 100%">
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="control-label col-xs-4">CIF</label>
-                                        <div class="col-xs-8">
-                                            <input class="k-textbox" name="cif" data-bind="value: item.cif" style="width: 100%">
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="control-label col-xs-4">Address</label>
-                                        <div class="col-xs-8">
-                                            <input class="k-textbox" name="address" data-bind="value: item.address" style="width: 100%">
+                                            <div class="input-group">
+                                                <input class="k-textbox" name="phone" data-bind="value: item.phone, enabled: enablePhone" style="width: 100%">
+                                                <div class="input-group-addon">
+                                                    <label style="margin-bottom: 0; cursor: pointer">
+                                                        <input type="checkbox" class="hidden" data-bind="checked: enablePhone">
+                                                        <span class="fa fa-pencil"></span>
+                                                    </label>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="row title-row">
-                                <span class="text-primary">CALL RESULT</span>
-                                <hr class="popup">
-                            </div>
-                            <div class="row form-horizontal">
-                                <div class="col-sm-6">
-                                    <div class="form-group">
-                                        <label class="control-label col-xs-4">Note</label>
-                                        <div class="col-xs-8">
-                                            <input class="k-textbox" name="note" data-bind="value: item.note" style="width: 100%">
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-sm-6">
+                                <div class="col-sm-4">
                                     <div class="form-group">
                                         <label class="control-label col-xs-4">Result</label>
                                         <div class="col-xs-8">
@@ -96,26 +78,24 @@
                                             style="width: 100%">
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                            <div class="row title-row">
-                                <span class="text-primary">RECALL</span>
-                                <hr class="popup">
-                            </div>
-                            <div class="row form-horizontal">
-                                <div class="col-sm-6">
                                     <div class="form-group">
-                                        <label class="control-label col-xs-4" style="padding-top: 2px">
-	                                        <input type="checkbox" data-bind="checked: followUpChecked">
-	                                        <span>ReCall</span>
-	                                    </label>
-	                                    <div class="col-xs-8">
-	                                        <input data-role="datetimepicker" data-date-input="true" data-format="dd/MM/yyyy H:mm" data-bind="value: followUp.reCall, visible: followUpChecked" style="width: 100%">
-	                                    </div>
+                                        <label class="control-label col-xs-4">Note</label>
+                                        <div class="col-xs-8">
+                                            <textarea class="k-textbox" name="note" data-bind="value: item.note" style="width: 100%; height: 72px"></textarea>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="col-sm-6">
+                                <div class="col-sm-3">
                                     <div class="form-group">
+                                        <label class="control-label col-xs-4" style="padding-top: 2px">
+                                            <input type="checkbox" data-bind="checked: followUpChecked">
+                                            <span>ReCall</span>
+                                        </label>
+                                        <div class="col-xs-8">
+                                            <input data-role="datetimepicker" data-date-input="true" data-format="dd/MM/yyyy H:mm" data-bind="value: followUp.reCall, visible: followUpChecked" style="width: 100%">
+                                        </div>
+                                    </div>
+                                    <div class="form-group" data-bind="visible: followUpChecked">
                                         <label class="control-label col-xs-4">Recall reason</label>
                                         <div class="col-xs-8">
                                             <input class="k-textbox" name="result" data-bind="value: call.result" style="width: 100%">
@@ -124,7 +104,8 @@
                                 </div>
                             </div>
                             <div class="row text-center">
-                                <button data-role="button" data-icon="save" data-bind="click: save">SAVE</button>
+                                <button data-role="button" class="btn-primary" data-icon="calendar" data-bind="click: makeAppointment">@Make appointment@</button>
+                                <button data-role="button" data-icon="save" data-bind="click: save">@Save@</button>
                             </div>
                         </div>
                     </div>
@@ -136,33 +117,33 @@
     </div>
 </div>
 <script type="text/javascript">
-class diallistPopup1 extends Popup {
+class otherPopup extends Popup {
     constructor(dataCall) {
         super(dataCall);
         Object.assign(this, {
-            _fieldId : "dialid",
-            _popupType: "default",
+            _fieldId : "customernumber",
+            _popupType: "other",
             phone: dataCall.customernumber,
             openDetail: function(e) {
-            	var $content = $("#customer-detail-content");
-            	if(!$content.find("iframe").length)
-            		$content.append(`<iframe src="${this.detailUrl}"" style="width: 100%; height: 70vh; border: 0"></iframe>`);
-            }
+                var $content = $("#customer-detail-content");
+                if(!$content.find("iframe").length)
+                    $content.append(`<iframe src="${this.detailUrl}"" style="width: 100%; height: 70vh; border: 0"></iframe>`);
+            },
         });
         return this;
     }
 
     async init(fieldId) {
-    	var fieldIdValue = this._dataCall[this._fieldId];
-
-        var responseObj = await $.get(ENV.restApi + `diallist_detail/${fieldIdValue}`);
+        var fieldIdValue = this._dataCall[this._fieldId];
+        /* Lấy dữ liệu */
+        var responseObj = await $.get(ENV.vApi + `popup/get_customer_by_phone`, {_: Date.now(), phone: fieldIdValue});
 
         if(!responseObj) {
-            notification.show("Something is wrong", "danger");
-            return;
+            responseObj = {};
         }
 
         this.item = responseObj;
+        /* Lấy iframe chi tiết khách hàng */
         var phone = responseObj.phone;
         var detailUrl = "";
         $.get(ENV.vApi + `popup/get_customer_by_phone?_=${Date.now()}&phone=${phone}`).then(res => {
@@ -178,9 +159,9 @@ class diallistPopup1 extends Popup {
 
 var callData = <?= json_encode($callData) ?>;
 
-window.popupObservable = new diallistPopup1(callData);
+window.popupObservable = new otherPopup(callData);
 window.popupObservable.assign({
-	followUp: {},
+    followUp: {},
     callCodeOption: dataSourceDropDownList("Call_code", ["text", "value", "type"]),
     playRecording: function(e) {
         play(this._dataCall.calluuid);
@@ -198,7 +179,37 @@ window.popupObservable.assign({
             },
             error: errorDataSource
         })
-    }
+    },
+    makeAppointment: function(e) {
+        // await this.save();
+        saveDiallist(this.item.toJSON());
+        openForm({title: '@Add@ @Appointment@', width: 700});
+        addForm(this.item.toJSON());
+    },
 })
 window.popupObservable.init();
+async function addForm(option = {}) {
+    $rightForm = $("#right-form");
+    var formHtml = await $.ajax({
+        url: ENV.templateApi + "appointment_log/formAutoFill",
+        data: {doc: option},
+        error: errorDataSource
+    });
+    kendo.destroy($rightForm);
+    $rightForm.empty();
+    $rightForm.append(formHtml);
+}
+function saveDiallist(data) {
+    $.ajax({
+        url: ENV.restApi + "diallist_detail/" + (data.id || "").toString(),
+        type: "PUT",
+        contentType: "application/json; charset=utf-8",
+        data: kendo.stringify(data),
+        success: (response) => {
+            if(response.status)
+                syncDataSource();
+        },
+        error: errorDataSource
+    })
+}
 </script>

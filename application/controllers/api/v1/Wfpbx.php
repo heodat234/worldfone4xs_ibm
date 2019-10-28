@@ -63,8 +63,35 @@ Class Wfpbx extends WFF_Controller {
 			$extension = $this->session->userdata("extension");
 			$response = $this->pbx_model->$method($queuename, $extension, false);
 			if(empty($response['status'])) throw new Exception("No success.");
-			$message = $this->language_model->translate("@{$action} success@!", "NOTIFICATION");
+			$message = $this->language_model->translate("@{$action}@ @success@!", "NOTIFICATION");
 			echo json_encode(array("status" => 1, "message" => ucfirst($message)));
+		} catch (Exception $e) {
+			$message = $this->language_model->translate($e->getMessage(), "NOTIFICATION");
+			echo json_encode(array("status" => 0, "message" => $message));
+		}
+	}
+
+	function change_queue_member($action = "add")
+	{
+		try {
+			$request = json_decode(file_get_contents('php://input'), TRUE);
+			if(!isset($request["queuename"])) throw new Exception("Queuename is empty!");
+			if(!isset($request["extension"])) throw new Exception("Extension is empty!");
+			
+			$method = $action . "_queue_member";
+			$queuename = $request["queuename"];
+			$extension = $request["extension"];
+			$response = $this->pbx_model->$method($queuename, $extension);
+			if(empty($response['status'])) throw new Exception("No success. Status pbx empty");
+			if($response['status'] != "200") throw new Exception("No success. Reason: ". json_encode($response));
+			if($response['data']['aqmstatus'] != ($action == "add" ? "ADDED" : "REMOVED")) 
+				throw new Exception("No success. Reason: ". $response['data']['aqmstatus']);
+			$action = ucfirst($action);
+			$message = $this->language_model->translate("@Success@", "NOTIFICATION");
+			$this->load->model("afterlogin_model");
+			$this->afterlogin_model->update_group();
+			//if($this->)
+			echo json_encode(array("status" => 1, "message" => $message. json_encode($response)));
 		} catch (Exception $e) {
 			$message = $this->language_model->translate($e->getMessage(), "NOTIFICATION");
 			echo json_encode(array("status" => 0, "message" => $message));

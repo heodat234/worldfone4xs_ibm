@@ -49,7 +49,7 @@ var Config = {
 <div id="page-content">
     <!-- Table Styles Header -->
     <ul class="breadcrumb breadcrumb-top">
-        <li><a href="<?= base_url("admin") ?>">Admin</a></li>
+        <li>Admin</li>
         <li>Jsondata</li>
         <li class="pull-right none-breakcrumb">
             <div class="input-group-btn">

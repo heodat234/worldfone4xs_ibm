@@ -19,13 +19,13 @@ Class Ftp_model extends CI_Model {
 	function connectToFTP() {
         $connId = ftp_connect($this->host);
         if($connId) {
-            if(@ftp_login($connId, $this->username, $this->password)){
-                return array("status" => "1", "message" => "", "data" => $connId);
+            if(ftp_login($connId, $this->username, $this->password)){
+                return $connId;
             }else{
-                return array("status" => "0", "message" => "Couldn't connect as $this->username", "data" => null);
+                return null;
             }
         }
-        else return array("status" => "0", "message" => "Couldn't connect to $this->host", "data" => null);
+        else return null;
     }
 
     function listFileInFTP($connId, $directory = ".") {
@@ -39,15 +39,28 @@ Class Ftp_model extends CI_Model {
     }
 
     function downloadFileFromFTP($localFilePath, $remoteFilePath) {
+        ini_set("display_errors", 1);
+        ini_set("display_startup_errors", 1);
+        error_reporting(E_ALL);
         // try to download a file from server
         $connId = $this->connectToFTP();
-        if(ftp_get($connId, $localFilePath, $remoteFilePath, FTP_BINARY)){
-            $result = array("status" => "1", "message" => "File transfer successful - $localFilePath", "data" => null);
-        }else{
-            $result = array("status" => "0", "message" => "There was an error while downloading $localFilePath", "data" => null);
+//        $buff = ftp_nlist($connId, "/");
+//        print_r($buff);
+//        print_r($connId);
+//        ftp_put($connId, '/ZACCF.csv', '/var/www/html/worldfone4xs_ibm/upload/csv/ZACCF.csv', FTP_ASCII);
+        if($connId) {
+            $fget = ftp_get($connId, (string)$localFilePath, (string)$remoteFilePath, FTP_BINARY);
+            if($fget){
+                $result = array("status" => "1", "message" => "File transfer successful - $localFilePath", "data" => $localFilePath);
+            }else{
+                $result = array("status" => "0", "message" => "There was an error while downloading $localFilePath", "data" => null);
+            }
+            $this->closeFTP($connId);
+            return $result;
         }
-        $this->closeFTP($connId);
-        return $result;
+        else {
+            return array("status" => "0", "message" => "There was an error while downloading $localFilePath", "data" => null);
+        }
     }
 
     function uploadFileToFTP($connId, $localFilePath, $remoteFilePath) {

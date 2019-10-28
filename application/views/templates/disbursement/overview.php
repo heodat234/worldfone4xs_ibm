@@ -43,6 +43,11 @@ var Config = Object.assign(Config, {
     },
     scrollable: true,
     columns: [{
+        // Use uid to fix bug data-uid of row undefined
+        title: `<a class='btn btn-sm btn-circle btn-action btn-primary' onclick='return deleteDataItemChecked();'><i class='fa fa-times-circle'></i></a>`,
+        template: '<a role="button" class="btn btn-sm btn-circle btn-action btn-primary" data-uid="#: uid #"><i class="fa fa-ellipsis-v"></i></a>',
+        width: '70px'
+    }, {
         field: "dealer_code",
         title: "@Dealer code@",
         width: '150px',
@@ -210,11 +215,6 @@ var Config = Object.assign(Config, {
         width: '150px',
         headerAttributes: { style: "white-space: normal"},
         filterable: false,
-    },{
-        // Use uid to fix bug data-uid of row undefined
-        title: `<a class='btn btn-sm btn-circle btn-action btn-primary' onclick='return deleteDataItemChecked();'><i class='fa fa-times-circle'></i></a>`,
-        template: '<a role="button" class="btn btn-sm btn-circle btn-action btn-primary" data-uid="#: uid #"><i class="fa fa-ellipsis-v"></i></a>',
-        width: '70px'
     }],
 });
 </script>
@@ -268,3 +268,13 @@ var Config = Object.assign(Config, {
 
     Table.init();
 </script>
+
+<style>
+    .k-grid-header th.k-header {
+        vertical-align: middle;
+    }
+
+    .k-grid-content {
+        max-height: 350px;
+    }
+</style>

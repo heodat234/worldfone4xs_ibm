@@ -276,15 +276,14 @@ input:checked + span {
 
 .fieldset-legend > span {
     position: absolute;
-    background: #fff;
     left: 0;
     top: 18px;
     z-index: 2;
-    padding-right: 10px;
+    margin-right: 10px;
 }
 
 .fieldset-legend::after {
-	border-bottom: 1px solid #f0f0f0;
+	border-bottom: 2px dashed ghostwhite;
     padding-top: 10px;
 	content: '';
 	position: absolute;
@@ -557,4 +556,12 @@ audio {
 }
 .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-switch {
     right: 0px; 
+}
+
+.input-group-addon {
+	min-width: 15px;
+}
+
+.dropdown-menu {
+	border-radius: 3px;
 }

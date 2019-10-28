@@ -19,7 +19,11 @@ Class Database extends WFF_Controller {
         if(is_dir($db_path)) {
             rename($db_path, $db_path . "_" . date("d-m-Y_H-i-s", filemtime($db_path)));
         }
-        $command = "mongodump --username {$this->username} --password {$this->password} --authenticationDatabase admin --out $path --db $db";
+        if($this->username) {
+            $command = "mongodump --username {$this->username} --password {$this->password} --authenticationDatabase admin --out $path --db $db";
+        } else {
+            $command = "mongodump --out $path --db $db";
+        }
         $result = exec($command);
         echo json_encode(array("status" => 1, "result" => $result));
     }
@@ -29,7 +33,11 @@ Class Database extends WFF_Controller {
         $this->backup_db($db);
         $path = APPPATH . "database";
         $db_path = $path . "/" . $db;
-        $command = "mongorestore --username {$this->username} --password {$this->password} --authenticationDatabase admin --db $db $db_path --drop";
+        if($this->username) {
+            $command = "mongorestore --username {$this->username} --password {$this->password} --authenticationDatabase admin --db $db $db_path --drop";
+        } else {
+            $command = "mongorestore --db $db $db_path --drop";
+        }
         $result = exec($command);
         echo json_encode(array("status" => 1, "message" => "Restore success $db"));
     }
@@ -51,7 +59,11 @@ Class Database extends WFF_Controller {
         $path = APPPATH . "database";
         $db_path = $path . "/" . $db;
         $collection_path = $db_path . "/" . $srcCollection . ".bson";
-        $command = "mongorestore --username {$this->username} --password {$this->password} --authenticationDatabase admin --db $db --collection $desCollection $collection_path " . ($drop ? "--drop" : "");
+        if($this->username) {
+            $command = "mongorestore --username {$this->username} --password {$this->password} --authenticationDatabase admin --db $db --collection $desCollection $collection_path " . ($drop ? "--drop" : "");
+        } else {
+            $command = "mongorestore --db $db --collection $desCollection $collection_path " . ($drop ? "--drop" : "");
+        }
         $result = exec($command);
         echo json_encode(array("status" => 1, "message" => "Restore success $db $desCollection"));
     }

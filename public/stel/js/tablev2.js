@@ -95,7 +95,6 @@ var Table = function() {
                 columns: this.columns,
                 filterable: Config.filterable ? Config.filterable : true,
                 editable: false,
-                detailTemplate: kendo.template($("#detail-template").html()),
                 noRecords: {
                     template: `<h2 class='text-danger'>${KENDO.noRecords}</h2>`
                 },

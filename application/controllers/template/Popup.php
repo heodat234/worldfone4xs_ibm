@@ -11,38 +11,37 @@ Class Popup extends CI_Controller {
 	function index($id = "")
     {
         $this->load->model("language_model");
-        $data["callData"] = $callData = json_decode($this->input->get("q"), TRUE);
-		$type = isset($callData["dialid"]) ? "diallist" : "default";
         $user_type = $this->session->userdata("type");
-        switch ($type) {
-        	case 'diallist':
-                switch ($callData["dialtype"]) {
-                    case 'dialmode_1':
-                        switch ($user_type) {
-                            case '2':
-                                $view = $this->load->view("templates/popup/telesale/diallist", $data, TRUE);
-                                break;
-                            
-                            default:
-                                $view = $this->load->view("templates/popup/diallist", $data, TRUE);
-                                break;
-                        }
-                        break;
-
-                    case 'cif':
-                        $view = $this->load->view("templates/popup/defaultcif", $data, TRUE);
-                        break;
-
-                    default:
-                        $view = $this->load->view("templates/popup/default", $data, TRUE);
-                        break;
-                }
-        		break;
-        	
-        	default:
-        		$view = $this->load->view("templates/popup/default", $data, TRUE);
-        		break;
+        switch ($user_type) {
+            case "2":
+                $view = $this->telesale();
+                break;
+            default:
+                $view = $this->loan();
+                break;
         }
         echo $this->language_model->translate($view, "CONTENT");
+    }
+
+    private function telesale()
+    {
+        $data["callData"] = $callData = json_decode($this->input->get("q"), TRUE);
+        if(isset($callData["dialid"])) {
+            $view = $this->load->view("templates/popup/telesale/" . $callData["dialtype"], $data, TRUE);
+        } else {
+            $view = $this->load->view("templates/popup/telesale/default", $data, TRUE);
+        }
+        return $view;
+    }
+
+    private function loan()
+    {
+        $data["callData"] = $callData = json_decode($this->input->get("q"), TRUE);
+        if(isset($callData["dialid"])) {
+            $view = $this->load->view("templates/popup/loan/" . $callData["dialtype"], $data, TRUE);
+        } else {
+            $view = $this->load->view("templates/popup/loan/default", $data, TRUE);
+        }
+        return $view;
     }
 }

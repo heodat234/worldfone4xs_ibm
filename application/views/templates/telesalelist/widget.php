@@ -8,3 +8,12 @@
     </ul>
 	<!-- <a role="button" class="btn btn-alt btn-sm btn-primary" data-field="createdAt" onclick="customFilter(this, Table.dataSource)"><i class="fa fa-filter"></i> <b>@Custom Filter@</b></a> -->
 </div>
+
+<script type="text/javascript">
+	$('.dropdown, .input-group-btn').on('hide.bs.dropdown', function (e) {
+        var button = $(e.target).find("[data-toggle=dropdown]");
+        if(button.hasClass("keepopen"))
+            return false;
+        else return true;
+    });
+</script>

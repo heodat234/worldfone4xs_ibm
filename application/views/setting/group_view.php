@@ -24,21 +24,43 @@ var Config = {
     <ul class="breadcrumb breadcrumb-top">
         <li>@Setting@</li>
         <li>@Group@</li>
-        <li class="pull-right none-breakcrumb">
-            <a role="button" onclick="openForm({title: `@Add@ @Group@`,width: 400}); addForm(this)" href="javascript:void(0)" class="btn btn-sm"><b>@Add@</b></a>
-        </li>
     </ul>
     <!-- END Table Styles Header -->
 
-    <div class="container-fluid">
-        <h4 class="fieldset-legend" style="margin: 10px 0 30px"><span style="font-weight: 500">@LIST@ @GROUP@ @CALL CENTER@</span></h4>
+    <div class="container-fluid" id="allview" data-bind="css: {editable: editable}">
         <div class="row">
-            <div class="col-sm-12" style="height: 80vh; overflow-y: auto; padding: 0">
-                <!-- Table Styles Content -->
-                <div data-role="listview" id="listview"
-                 data-template="template"
-                 data-bind="source: dataSource"></div>
-                <!-- END Table Styles Content -->
+            <div class="col-md-6" style="border-right: 1px solid lightgray; padding-right: 25px">
+                <div class="row">
+                    <h4 class="text-center" style="margin: 20px 0 10px"><span style="font-weight: 500">@GROUP@ @CALL CENTER@</span></h4>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12">
+                        <!-- Table Styles Content -->
+                        <div data-role="listview" id="listview"
+                         data-template="queue-group-template"
+                         data-bind="source: dataSource"></div>
+                        <!-- END Table Styles Content -->
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="row">
+                    <h4 class="text-center" style="margin: 20px 0 10px">
+                        <span style="font-weight: 500">@GROUP@ @CUSTOM@</span>
+                    </h4>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12">
+                        <!-- Table Styles Content -->
+                        <div data-role="listview" id="listview2"
+                         data-template="custom-group-template"
+                         data-bind="source: dataSourceCustom"></div>
+                        <!-- END Table Styles Content -->
+                    </div>
+                    <div class="col-xs-12 text-center">
+                        <button data-role="button" data-icon="add" onclick="openForm({title: `@Add@ @Custom group@`,width: 500}); addForm(this)" href="javascript:void(0)" class="btn btn-sm"><b>@Add@ @new@</b></button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -51,59 +73,98 @@ var Config = {
     </div>
     <!-- END Page Content -->
     <!-- <input type="checkbox" data-bind="checked: default"> -->
-    <script id="template" type="text/x-kendo-template">
+    <script id="queue-group-template" type="text/x-kendo-template">
         <div class="view-container">
             <span class="check-active">
-                <i class="fa fa-users text-muted"></i>
+                <i class="fa fa-users text-primary"></i>
             </span>
             <span class="group-name" data-bind="text: name, invisible: isEdit"></span>
             <input class="k-textbox" data-bind="value: name, visible: isEdit">
             <div class="pull-right">
-            	<a href="javascript:void(0)" class="btn-action" data-bind="click: toggleEditQueue, attr: {data-uid: uid}, invisible: isEdit"><i class="fa fa-pencil-square-o text-warning fa-2x"></i></a>
-                <i class="gi gi-floppy_save fa-2x text-success" data-bind="visible: isEdit"></i>
+            	<a class="k-button btn-edit" href="javascript:void(0)" data-bind="click: editQueue, attr: {data-uid: uid}, invisible: isEdit">
+                    <i class="fa fa-pencil-square-o text-warning"></i>&nbsp;
+                    <b>@Edit@</b>
+                </a>
+                <a class="k-button" href="javascript:void(0)" data-bind="click: saveQueue, attr: {data-uid: uid}, visible: isEdit">
+                    <i class="fa fa-floppy-o text-success" data-bind="visible: isEdit"></i>&nbsp;
+                    <b>@Save@</b>
+                </a>
+                <a class="k-button" href="javascript:void(0)" data-bind="click: cancelQueue, attr: {data-uid: uid}, visible: isEdit">
+                    <i class="gi gi-ban text-muted" data-bind="visible: isEdit"></i>&nbsp;
+                    <b>@Cancel@</b>
+                </a>
             </div>
             <br><br>
             <label>Queue: </label>
-            <span class="queue-array">
-                <span class="label label-info" data-bind="text: queuename"></span>
-            </span>
+            <span class="label label-info" data-bind="text: queuename" style="font-size: 16px"></span>
             <br>
             <label>@Members@: </label>
-            <span  data-bind="invisible: isEdit" class="member-array">#= gridArray(data.members) #</span>
+            <span  data-bind="invisible: isEdit" class="member-array">#= gridMembers(data.members) #</span>
             <div data-bind="visible: isEdit">
                 <select data-role="multiselect" 
                 data-text-field="agentname"
                 data-value-field="extension"
                 data-item-template="itemGroupTemplate"
                 data-tag-template="tagGroupTemplate"
+                data-clear-button="false"
                 data-value-primitive="true"  
                 data-bind="value: members, source: membersOption, events: {select: membersSelect, deselect: membersDeselect}"></select>
             </div>
         </div>
     </script>
+    <script id="custom-group-template" type="text/x-kendo-template">
+        <div class="view-container">
+            <span class="check-active">
+                <i class="fa fa-creative-commons text-primary"></i>
+            </span>
+            <span class="group-name" data-bind="text: name"></span>
+            <div class="pull-right">
+                <a class="k-button btn-edit" href="javascript:void(0)" data-bind="click: editCustomGroup, attr: {data-uid: uid}">
+                    <i class="fa fa-pencil-square-o text-warning"></i>&nbsp;
+                    <b>@Edit@</b>
+                </a>
+                <a class="k-button btn-delete" href="javascript:void(0)" onclick="deleteDataItem(this)" data-bind="attr: {data-uid: uid}">
+                    <i class="fa fa-times-circle text-danger"></i>&nbsp;
+                    <b>@Delete@</b>
+                </a>
+            </div>
+            <br><br>
+            <label>@Active@: </label>
+            <span>
+                <i class="fa fa-check text-success" data-bind="visible: active"></i>
+                <i class="fa fa-times text-danger" data-bind="invisible: active"></i>
+            </span>
+            <br>
+            <label>@Members@: </label>
+            <span class="member-array">#= gridMembers(data.members) #</span>
+        </div>
+    </script>
     <style type="text/css">
+        #allview:not(.editable) .btn-edit {
+            display: none;
+        }
+        .k-widget.k-listview {
+            background-color: inherit;
+        }
         .view-container {
         	border-radius: 5px;
             border: 1px solid lightgray;
             padding: 10px 20px;
-            margin: 10px;
-            width: 320px;
-            float: left;
+            width: 95%;
+            background-color: white;
+            margin-bottom: 5px;
         }
         .view-container span {
-            font-size: 20px;
+            font-size: 18px;
         }
-        #listview {
+        [data-role=listview] {
             border: 0;
         }
         .queue-array span, .member-array span {
     		font-size: 12px;
-    		vertical-align: 2px;
+    		vertical-align: -3px;
     	}
     	.check-active {
-    		border-radius: 7px;
-    		border: 1px dashed gray;
-    		padding: 1px 3px;
     	}
 
         .dropdown-header {
@@ -124,6 +185,15 @@ var Config = {
             background-size: 100%;
             margin-right: 5px;
             border-radius: 50%;
+        }
+
+        .member-element {
+            display: inline-block; 
+            border: 1px solid ghostwhite; 
+            border-radius: 4px; 
+            padding: 4px; 
+            font-size: 14px;
+            background-color: lightgray;
         }
     </style>
 </div>
@@ -185,11 +255,53 @@ var Config = {
                     error: errorDataSource
                 });
 
+                var dataSourceCustom = this.dataSourceCustom = new kendo.data.DataSource({
+                    filter: {field: "type", operator: "eq", value: "custom"},
+                    serverFiltering: true,
+                    serverPaging: true,
+                    serverSorting: true,
+                    serverGrouping: false,
+                    pageSize: 10,
+                    batch: false,
+                    schema: {
+                        data: "data",
+                        total: "total",
+                        model: Config.model,
+                    },
+                    transport: {
+                        read: {
+                            url: Config.crudApi + Config.collection,
+                        },
+                        update: {
+                            url: function(data) {
+                                return Config.crudApi + Config.collection + "/" + data.id;
+                            },
+                            type: "PUT",
+                            contentType: "application/json; charset=utf-8"
+                        },
+                        create: {
+                            url: Config.crudApi + Config.collection,
+                            type: "POST",
+                            contentType: "application/json; charset=utf-8"
+                        },
+                        destroy: {
+                            url: function(data) {
+                                return Config.crudApi + Config.collection + "/" + data.id;
+                            },
+                            type: "DELETE"
+                        },
+                        parameterMap: parameterMap
+                    },
+                    sync: syncDataSource,
+                    error: errorDataSource
+                });
+
                 var observable = this.observable = Object.assign({
-                    dataSource: dataSource
+                    dataSource: dataSource,
+                    dataSourceCustom: dataSourceCustom
                 }, Config.observable)
 
-                kendo.bind($("#listview"), observable)
+                kendo.bind($("#allview"), observable)
 
                 /*
                  * Right Click Menu
@@ -250,6 +362,7 @@ var Config = {
     window.onload = function() {
 
         Config.observable = Object.assign({
+            editable: true,
             typeOption: ["queue", "custom"],
             typeChange: function(e) {
                 let type = e.sender.value();
@@ -271,11 +384,12 @@ var Config = {
                     data: "data"
                 }
             }),
-            toggleEditQueue: function(e) {
+            editQueue: function(e) {
                 var uid = $(e.currentTarget).data("uid"),
                     dataItem = List.dataSource.getByUid(uid);
                 this.set("selectedQueue", dataItem.queuename);
-                dataItem.set("isEdit", !dataItem.get("isEdit"));
+                dataItem.set("isEdit", true);
+                this.set("editable", false);
             },
             membersOption: new kendo.data.DataSource({
                 transport: {
@@ -288,22 +402,108 @@ var Config = {
                 }
             }),
             membersSelect: function(e) {
-                /*$.ajax({
-                    url: ENV.vApi + "wfpbx/addExtensionToQueue",
-                    data: {extension: e.dataItem.extension,}
-                })*/
-                notification.show(`@Add@ ${e.dataItem.extension} (${e.dataItem.agentname}) @to@ queue ${this.get("selectedQueue")}`);
+                var extension = e.dataItem.extension,
+                    agentname = e.dataItem.agentname,
+                    queuename = this.get("selectedQueue"),
+                    members = e.sender.value();
+                swal({
+                    title: `@Are you sure@?`,
+                    text: `@Add@ ${extension} (${agentname}) @at@ queue ${queuename}`,
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: false,
+                })
+                .then((sure) => {
+                    if (sure) {
+                        $.ajax({
+                            url: ENV.vApi + "wfpbx/change_queue_member/add",
+                            data: JSON.stringify({extension: extension, queuename: queuename}),
+                            contentType: "application/json; charset=utf-8",
+                            type: "POST",
+                            success: function(res) {
+                                if(res.status) {
+                                    notification.show(`@Add@ ${extension} (${agentname}) @at@ queue ${queuename}`, "success");
+                                } else {
+                                    e.sender.value(members);
+                                    notification.show(res.message, "error");
+                                }
+                            }
+                        })  
+                    }
+                });
             },
             membersDeselect: function(e) {
-                notification.show(`@Remove@ ${e.dataItem.extension} (${e.dataItem.agentname}) @from@ queue ${this.get("selectedQueue")}`);
-            },
-            queuesChange: function(e) {
-                var queues = e.sender.value();
-                this.set("visibleMembers", Boolean(queues.length));
-                this.membersOption.read({queues: queues}).then(() => {
-                    let data = this.membersOption.data();
-                    this.set("item.members", data);
+                var extension = e.dataItem.extension,
+                    agentname = e.dataItem.agentname,
+                    queuename = this.get("selectedQueue"),
+                    members = e.sender.value();
+                swal({
+                    title: `@Are you sure@?`,
+                    text: `@Remove@ ${extension} (${agentname}) @from@ queue ${queuename}`,
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: false,
                 })
+                .then((sure) => {
+                    if (sure) {
+                        $.ajax({
+                            url: ENV.vApi + "wfpbx/change_queue_member/remove",
+                            data: JSON.stringify({extension: extension, queuename: queuename}),
+                            contentType: "application/json; charset=utf-8",
+                            type: "POST",
+                            success: function(res) {
+                                if(res.status) {
+                                    notification.show(`@Remove@ ${extension} (${agentname}) @from@ queue ${queuename}`, "success");
+                                } else {
+                                    e.sender.value(members);
+                                    notification.show(res.message, "error");
+                                }
+                            }
+                        }) 
+                    }
+                });
+            },
+            saveQueue: function(e) {
+                var uid = $(e.currentTarget).data("uid"),
+                    dataItem = List.dataSource.getByUid(uid);
+                if(dataItem.dirtyFields.name) {
+                    swal({
+                        title: `@Are you sure@?`,
+                        text: `@Change@ @group name@`,
+                        icon: "warning",
+                        buttons: true,
+                        dangerMode: false,
+                    })
+                    .then((sure) => {
+                        if (sure) {
+                            $.ajax({
+                                url: ENV.restApi + "group/" + dataItem.id,
+                                data: JSON.stringify({name: dataItem.name}),
+                                contentType: "application/json; charset=utf-8",
+                                type: "PUT",
+                                success: (res) => {
+                                    if(res.status) {
+                                        List.dataSource.read();
+                                        this.set("editable", true);
+                                        notification.show(`@Success@`, "success");
+                                    } else notification.show(res.message, "error");
+                                }
+                            })
+                        }
+                    });
+                } else {
+                    List.dataSource.read();
+                    this.set("editable", true);
+                } 
+            },
+            cancelQueue: function(e) {
+                var dataItem = List.dataSource.getByUid($(e.currentTarget).data("uid"));
+                dataItem.set("isEdit", false);
+                this.set("editable", true);
+            },
+            editCustomGroup: function(e) {
+                openForm({title: "@Edit@ @Custom group@", width: 500});
+                editForm(e.currentTarget)
             }
         }, Config.observable);
 
@@ -311,18 +511,32 @@ var Config = {
    
     }
 
+    function gridMembers(data = []) {
+        var bs_color = HELPER.bsColors,
+            template = [];
+        if(data && data.length) {
+            template = $.map($.makeArray(data), function(value, index) {
+                return "<div class=\"member-element\"><span class=\"selected-value\" style=\"background-image: url('/api/v1/avatar/agent/"+value+"')\"></span><b>"+value+"</b> ("+convertExtensionToAgentname[value]+")</div>";
+            });
+        }
+        return template.join(' ');
+    }
+
     async function editForm(ele) {
-        var dataItem = List.dataSource.getByUid($(ele).data("uid")),
+        var dataItem = List.dataSourceCustom.getByUid($(ele).data("uid")),
             formHtml = await $.ajax({
                 url: Config.templateApi + Config.collection + "/form",
                 error: errorDataSource
             });
         var model = Object.assign(Config.observable, {
-            visibleMembers: Boolean(dataItem.members),
-            disabled: Boolean(dataItem.type == "queue"),
             item: dataItem,
             save: function() {
-                List.dataSource.sync().then(() => {List.dataSource.read()});
+                List.dataSourceCustom.sync().then(() => {List.dataSourceCustom.read()});
+                closeForm();
+            },
+            cancel: function() {
+                List.dataSourceCustom.read();
+                closeForm();
             }
         });
         kendo.destroy($("#right-form"));
@@ -337,12 +551,11 @@ var Config = {
             error: errorDataSource
         });
         var model = Object.assign(Config.observable, {
-            visibleMembers: true,
-            // disabled: true,
-            // item: {type: "custom"},
+            item: {type: "custom"},
             save: function() {
-                List.dataSource.add(this.item);
-                List.dataSource.sync().then(() => {List.dataSource.read()});
+                List.dataSourceCustom.add(this.item);
+                List.dataSourceCustom.sync().then(() => {List.dataSourceCustom.read()});
+                closeForm();
             }
         });
         kendo.destroy($("#right-form"));
@@ -362,9 +575,9 @@ var Config = {
         .then((willDelete) => {
             if (willDelete) {
                 var uid = $(ele).data('uid');
-                var dataItem = List.dataSource.getByUid(uid);
-                List.dataSource.remove(dataItem);
-                List.dataSource.sync();
+                var dataItem = List.dataSourceCustom.getByUid(uid);
+                List.dataSourceCustom.remove(dataItem);
+                List.dataSourceCustom.sync();
             }
         });
     }

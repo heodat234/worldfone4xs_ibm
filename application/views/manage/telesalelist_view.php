@@ -103,9 +103,9 @@
         router.route("/", async function() {
             var HTML = await $.get(`${Config.templateApi}telesalelist/overview`);
             var kendoView = new kendo.View(HTML, { model: {}, template: false, wrap: false });
-            layout.showIn("#bottom-row", kendoView);
+            await layout.showIn("#bottom-row", kendoView);
             var widget = await $.get(`${Config.templateApi}telesalelist/widget`);
-            $("#page-widget").html(widget);
+            await $("#page-widget").html(widget);
         
         });
 
@@ -120,9 +120,9 @@
             layoutViewModel.set("breadcrumb", dataItemFull.file_name);
             var HTML = await $.get(`${Config.templateApi}telesalelist/overview?id=${id}`);
             var kendoView = new kendo.View(HTML, { model: {}, template: false, wrap: false });
-            layout.showIn("#bottom-row", kendoView);
+            await layout.showIn("#bottom-row", kendoView);
             var widget = await $.get(`${Config.templateApi}telesalelist/widget`);
-            $("#page-widget").html(widget);
+            await $("#page-widget").html(widget);
         });
 
         router.route("/import", async function() {
@@ -140,10 +140,10 @@
         router.route("/divide/:id", async function(id) {
             layoutViewModel.setActive(1);
             var dataItemFull = await $.get(`${ENV.restApi}import_history/${id}`);
-            // if(!dataItemFull) {
-            //     notification.show("Can't find Divide List", "error");
-            //     return;
-            // }
+            if(!dataItemFull) {
+                notification.show("Can't find Divide List", "error");
+                return;
+            }
             layoutViewModel.set("breadcrumb", `Divide List`);
             var HTML = await $.get(`${Config.templateApi}telesalelist/divide_list?id=${id}`);
             var model = {
@@ -212,6 +212,7 @@
 </script>
 
 <script id="layout" type="text/x-kendo-template">
+    <?php if(empty($only_main_content)) { ?>
     <ul class="breadcrumb breadcrumb-top">
         <li>@Manage@</li>
         <li>@Diallist@</li>
@@ -228,6 +229,7 @@
             </div>
         </li>
     </ul>
+    <?php } ?>
 	<div class="container-fluid">
         <div class="row" id="bottom-row"></div>
     </div>

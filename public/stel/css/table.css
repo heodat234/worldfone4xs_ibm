@@ -67,8 +67,42 @@
     margin-bottom: 5px
 }
 
+.filter-container {
+    max-height: 400px;
+    overflow-y: scroll;
+}
+
 .grid-name {
     cursor: pointer;
     color: dodgerblue;
     font-weight: bold;
+}
+
+input.custom-checkbox[type="checkbox"] {
+    display:none;
+}
+input.custom-checkbox[type="checkbox"] + span {
+    display:inline-block;
+    width:19px;
+    height:19px;
+    margin:-2px 0 0 0;
+    vertical-align:middle;
+    background:url(../img/check_radio_sheet.png) left top no-repeat;
+    cursor:pointer;
+    text-indent: 24px;
+    color: lightgray;
+}
+input.custom-checkbox[type="checkbox"]:checked + span {
+    background:url(../img/check_radio_sheet.png) -19px top no-repeat;
+    text-indent: 24px;
+    color: black;
+}
+
+input.custom-checkbox[type="checkbox"] + * + span {
+    cursor:pointer;
+    color: lightgray;
+}
+
+input.custom-checkbox[type="checkbox"]:checked + * + span {
+    color: black;
 }

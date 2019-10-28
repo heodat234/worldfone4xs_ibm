@@ -123,31 +123,31 @@ function intervalTimePopupFunction(time, type) {
 }
 
 function executeCall(e) {
-	var data = JSON.parse(e.data);
-	if(data) {
+    var data = JSON.parse(e.data);
+    if(data) {
         window.flagCall = true;
-		switch(data.workstatus) {
-			case "Ring":
+        switch(data.workstatus) {
+            case "Ring":
                 //if(Math.floor(Date.now() / 1000) % 10 == 0) notification.show("Ringing", "warning");
                 // Phone ring function
                 phoneRingMiniPopup(data);
                 //
                 if(sessionStorage.getItem('callPopup') != 'false' && !window.waitingPopup && data.direction == "outbound") {
-    				if(!window.flagPopup && typeof startPopup != "undefined") startPopup(data);
+                    if(!window.flagPopup && typeof startPopup != "undefined") startPopup(data);
                     if(window.flagPopup && typeof onRingPopup != "undefined") onRingPopup(data);
                 }
-				break;
-			case "On-Call":
-				if(Math.floor(Date.now() / 1000) % 10 == 0) notification.show("On call", "success");
+                break;
+            case "On-Call":
+                if(Math.floor(Date.now() / 1000) % 10 == 0) notification.show("On call", "success");
                 if(sessionStorage.getItem('callPopup') != 'false' && !window.waitingPopup) {
                     if(!window.flagPopup && typeof startPopup != "undefined") startPopup(data);
-				    if(window.flagPopup && typeof onCallPopup != "undefined") onCallPopup(data);
+                    if(window.flagPopup && typeof onCallPopup != "undefined") onCallPopup(data);
                 }
-				break;
-			default:
-				break;
+                break;
+            default:
+                break;
         }
-	} else window.flagCall = false;
+    } else window.flagCall = false;
 }
 
 function tabTitle(title = "", favicon = "") {
@@ -233,7 +233,7 @@ class Popup {
                         $(mev.currentTarget).tooltip('show');
                     }
                 });
-                e.sender.wrapper.find(".k-i-pause").parent("a").click((ev) => {
+                e.sender.wrapper.find(".k-i-tri-state-indeterminate").parent("a").click((ev) => {
                     ev.preventDefault();
                     hangupCall(this._dataCall.calluuid);
                 }).mouseover((mev) => {

@@ -61,73 +61,41 @@ Class Disbursement extends WFF_Controller {
             $isUpdate = false;
             if($data) {
                 foreach ($data as $index => $doc) {
-                    $doc['dealer_code'] = (string)$doc['dealer_code'];
-                    $doc['cif'] = (string)$doc['cif'];
-                    $doc['acc_no'] = (string)((int)$doc['acc_no']);
-                    $doc['released_date'] = strtotime($doc['released_date']);
-                    $doc['disbursed_date'] = strtotime($doc['disbursed_date']);
-                    $doc['loan_amount'] = (double)$doc['loan_amount'];
-                    $doc['issued_date'] = (string)$doc['issued_date'];
-                    $issuedDate = explode(" ", $doc['issued_date']);
-                    $doc['issued_date'] = strtotime($issuedDate[0] . '-' . $issuedDate[1] . '-' . $issuedDate[2]);
-                    $doc['bank_acc'] = (string)((int)$doc['bank_acc']);
-                    $doc['phone'] = (string)$doc['phone'];
-                    $doc['old_cus_farmer'] = (string)$doc['old_cus_farmer'];
-                    $doc['new_cus'] = (string)$doc['new_cus'];
-                    $doc['int'] = (string)$doc['int'];
-                    $errorCell = '';
-                    $errorCellType = '';
-                    $result = true;
-//                    if(empty($doc['dealer_code']) || empty($doc['dealer_name']) || empty($doc['location'])) {
-//                        if(empty($doc['dealer_code'])) {
-//                            $errorCell = $columnStringByIndex['dealer_code'] . ($index + 1);
-//                            $errorCellType = $columnModel['dealer_code'];
-//                            $errorMesg = "Thiếu thông tin Mã quầy";
-//                        }
-//                        if(empty($doc['dealer_name'])) {
-//                            $errorCell = $columnStringByIndex['dealer_name'] . ($index + 1);
-//                            $errorCellType = $columnModel['dealer_name'];
-//                            $errorMesg = "Thiếu thông tin Tên quầy";
-//                        }
-//                        if(empty($doc['location'])) {
-//                            $errorCell = $columnStringByIndex['location'] . ($index + 1);
-//                            $errorCellType = $columnModel['location'];
-//                            $errorMesg = "Thiếu thông tin khu vực";
-//                        }
-//                        $result = false;
-//                    }
-//                    else {
-//                        $checkExist = $this->crud->where(array('dealer_code' => (string)$doc['dealer_code']))->getOne($this->collection, array('dealer_code', 'update_import_id'));
-//                        if(!empty($checkExist)) {
-//                            $updateImportId = (!empty($checkExist['update_import_id'])) ? $checkExist['update_import_id'] : array();
-//                            array_push($updateImportId, $importLogResult['id']);
-//                            $doc["updated_by"] =	    $extension;
-//                            $doc["updated_at"] =	    time();
-//                            $doc["update_import_id"] =  $updateImportId;
-//                        }
-//                        else {
-//                            $doc["created_by"] =        $extension;
-//                            $doc["created_at"] =        time();
-//                            $doc["import_id"] =         $importLogResult['id'];
-//                        }
-//                        $result = true;
-//                    }
-                    $doc["created_by"]       = $extension;
-                    $doc["created_at"]       = time();
-                    $doc["import_id"]        = $importLogResult['id'];
-                    $result = true;
-                    if(!empty($result)) {
-                        $doc["result"] = 'success';
-                        array_push($importData, $doc);
+                    if(array_filter($doc)) {
+                        $doc['dealer_code'] = (string)$doc['dealer_code'];
+                        $doc['cif'] = (string)$doc['cif'];
+                        $doc['acc_no'] = (string)((int)$doc['acc_no']);
+                        $doc['released_date'] = strtotime($doc['released_date']);
+                        $doc['disbursed_date'] = strtotime($doc['disbursed_date']);
+                        $doc['loan_amount'] = (double)$doc['loan_amount'];
+                        $doc['issued_date'] = (string)$doc['issued_date'];
+                        $issuedDate = explode(" ", $doc['issued_date']);
+                        $doc['issued_date'] = strtotime($issuedDate[0] . '-' . $issuedDate[1] . '-' . $issuedDate[2]);
+                        $doc['bank_acc'] = (string)((int)$doc['bank_acc']);
+                        $doc['phone'] = (string)$doc['phone'];
+                        $doc['old_cus_farmer'] = (string)$doc['old_cus_farmer'];
+                        $doc['new_cus'] = (string)$doc['new_cus'];
+                        $doc['int'] = (string)$doc['int'];
+                        $errorCell = '';
+                        $errorCellType = '';
+                        $result = true;
+                        $doc["created_by"]       = $extension;
+                        $doc["created_at"]       = time();
+                        $doc["import_id"]        = $importLogResult['id'];
+                        if(!empty($result)) {
+                            $doc["result"] = 'success';
+                            array_push($importData, $doc);
+                        }
+                        else {
+                            $doc["error_cell"] = $errorCell;
+                            $doc["type"] = $errorCellType;
+                            $doc["error_mesg"] = $errorMesg;
+                            $doc["result"] = 'error';
+                            array_push($errorData, $doc);
+                            $errorCount++;
+                        }
                     }
-                    else {
-                        $doc["error_cell"] = $errorCell;
-                        $doc["type"] = $errorCellType;
-                        $doc["error_mesg"] = $errorMesg;
-                        $doc["result"] = 'error';
-                        array_push($errorData, $doc);
-                        $errorCount++;
-                    }
+                    else continue;
                 }
             }
 
@@ -135,19 +103,12 @@ Class Disbursement extends WFF_Controller {
 
             if($errorCount > 0) {
                 $this->crud->where_id($importLogResult['id'])->set(array('complete_import' => $endtime, 'status' => 0, 'id' => $importLogResult['id']))->update(set_sub_collection('Import'));
-                $this->mongo_db->batch_insert(set_sub_collection('Appointment_import_result'), $errorData);
+                $this->mongo_db->batch_insert(set_sub_collection('Disbursement_import_result'), $errorData);
             }
             else {
                 $this->mongo_db->where_id($importLogResult['id'])->set(array('complete_import' => $endtime, 'status' => 1, 'id' => $importLogResult['id']))->update(set_sub_collection('Import'));
-                $this->mongo_db->batch_insert(set_sub_collection('Appointment_import_result'), $importData);
-                foreach ($importData as $key => $value) {
-                    if($value['isUpdate']) {
-                        $this->mongo_db->where(array('cif' => $value['cif']))->update($this->collection, $value);
-                    }
-                    else {
-                        $this->mongo_db->insert($this->collection, $value);
-                    }
-                }
+                $this->mongo_db->batch_insert(set_sub_collection('Disbursement_import_result'), $importData);
+                $this->mongo_db->batch_insert($this->collection, $importData);
 
             }
             echo json_encode(array("status" => ($errorCount === 0) ? 1 : 0));

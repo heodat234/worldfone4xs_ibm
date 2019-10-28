@@ -43,7 +43,7 @@
                                         <label class="control-label col-xs-4">@Name@</label>
                                         <div class="col-xs-8">
 	                                        <div class="input-group">
-						                        <input class="k-textbox upper-case-input" name="name" data-bind="value: item.name, enabled: enableName" style="width: 100%">
+						                        <input class="k-textbox upper-case-input" name="customer_name" data-bind="value: item.customer_name, enabled: enableName" style="width: 100%">
 						                        <div class="input-group-addon">
 						                        	<label style="margin-bottom: 0; cursor: pointer">
 						                        		<input type="checkbox" class="hidden" data-bind="checked: enableName">
@@ -223,7 +223,7 @@
                                 </div>
                             </div>
                             <div class="row text-center">
-                            	<button data-role="button" class="btn-primary" data-icon="calendar" data-bind="click: makeAppointment">@Make appointment@</button>
+                                <button data-role="button" class="btn-primary" data-icon="calendar" data-bind="click: makeAppointment">@Make appointment@</button>
                                 <button data-role="button" data-icon="save" data-bind="click: save">@Save@</button>
                             </div>
                         </div>
@@ -247,23 +247,24 @@ class diallistPopup1 extends Popup {
             	var $content = $("#customer-detail-content");
             	if(!$content.find("iframe").length)
             		$content.append(`<iframe src="${this.detailUrl}"" style="width: 100%; height: 70vh; border: 0"></iframe>`);
-            }
+            },
         });
         return this;
     }
 
     async init(fieldId) {
     	var fieldIdValue = this._dataCall[this._fieldId];
-
-        var responseObj = await $.get(ENV.restApi + `diallist_detail/${fieldIdValue}`);
+        /* Lấy dữ liệu */
+        var responseObj = await $.get(ENV.restApi + `telesalelist/${fieldIdValue}`);
 
         if(!responseObj) {
-        	responseObj = {};
-            /*notification.show("Diallist detail is not found", "error");
-            return;*/
+            responseObj = {};
+            notification.show("Telesale data is not found", "error");
+            return;
         }
 
         this.item = responseObj;
+        /* Lấy iframe chi tiết khách hàng */
         var phone = responseObj.phone;
         var detailUrl = "";
         $.get(ENV.vApi + `popup/get_customer_by_phone?_=${Date.now()}&phone=${phone}`).then(res => {
@@ -312,7 +313,37 @@ window.popupObservable.assign({
             },
             error: errorDataSource
         })
-    }
+    },
+    makeAppointment: function(e) {
+	    // await this.save();
+        saveDiallist(this.item.toJSON());
+        openForm({title: '@Add@ @Appointment@', width: 700});
+        addForm(this.item.toJSON());
+    },
 })
 window.popupObservable.init();
+async function addForm(option = {}) {
+    $rightForm = $("#right-form");
+    var formHtml = await $.ajax({
+        url: ENV.templateApi + "appointment_log/formAutoFill",
+        data: {doc: option},
+        error: errorDataSource
+    });
+    kendo.destroy($rightForm);
+    $rightForm.empty();
+    $rightForm.append(formHtml);
+}
+function saveDiallist(data) {
+    $.ajax({
+        url: ENV.restApi + "diallist_detail/" + (data.id || "").toString(),
+        type: "PUT",
+        contentType: "application/json; charset=utf-8",
+        data: kendo.stringify(data),
+        success: (response) => {
+            if(response.status)
+                syncDataSource();
+        },
+        error: errorDataSource
+    })
+}
 </script>

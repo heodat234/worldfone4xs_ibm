@@ -115,8 +115,7 @@ class Agentsign_model extends CI_Model {
             "memory_usage"  => $memory_usage,
             "createdAt"     => $time,
         );
-        $this->load->library("mongo_private");
-        $this->mongo_private->insert("Activity_log", $data);
+        $this->mongo_db->insert("Activity", $data);
     }
 
     function update($data = array()) {

@@ -109,7 +109,8 @@ var Config = {
         template: '<a role="button" class="btn btn-sm btn-circle btn-action btn-primary" data-uid="#: uid #"><i class="fa fa-ellipsis-v"></i></a>',
         width: 20
     }],
-    filterable: KENDO.filterable
+    filterable: KENDO.filterable,
+    reorderable: true
 }; 
 
 

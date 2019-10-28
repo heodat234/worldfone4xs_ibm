@@ -90,8 +90,8 @@ Class Assign extends CI_Controller {
 		// $match['assign'] = '';
 
 		exec('PYTHONIOENCODING=utf-8 python3.6 /var/www/html/python/assign.py ' . $id . " ". $random ." ". $extension ." > /dev/null &");
-		$update_data['random.'.$extension] = (int)$random;
-		$this->crud->where_id($id)->update($this->import_collection, array('$inc' => $update_data));
+		// $update_data['random.'.$extension] = (int)$random;
+		// $this->crud->where_id($id)->update($this->import_collection, array('$inc' => $update_data));
   //       $assign_log = $this->crud->getOne($this->log_collection);
   //       $array_cmnd = [];
   //       if ($assign_log != NULL) {

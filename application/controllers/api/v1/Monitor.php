@@ -239,7 +239,7 @@ Class Monitor extends CI_Controller {
             $exc_extensions[] = $this->session->userdata("extension");
             $match = array("extension" => array('$nin' => $exc_extensions));
             $request = json_decode($this->input->get("q"), TRUE);
-            $response = $this->crud->read("Activity_log", $request, ["extension","agentname","directory","class","function","method", "uri", "ajaxs_elapsed_time", "createdAt"], $match);
+            $response = $this->crud->read("Activity", $request, ["extension","agentname","directory","class","function","method", "uri", "ajaxs_elapsed_time", "createdAt"], $match);
             foreach ($response["data"] as &$doc) {
                 $where = array();
                 foreach (["directory","class","function","method"] as $field) {

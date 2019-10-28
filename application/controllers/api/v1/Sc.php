@@ -60,50 +60,53 @@ Class Sc extends WFF_Controller {
             if($data) {
                 $this->mongo_db->delete($this->collection);
                 foreach ($data as $index => $doc) {
-                    $doc['sc_code'] = (string)$doc['sc_code'];
-                    $errorCell = '';
-                    if(empty($doc['sc_code']) || empty($doc['sc_name'])) {
-                        if(empty($doc['sc_code'])) {
-                            $errorCell = $columnStringByIndex['sc_code'] . ($index + 1);
-                            $errorCellType = $columnModel['sc_code'];
-                            $errorMesg = "Thiếu thông tin Mã SC";
-                        }
-                        if(empty($doc['sc_name'])) {
-                            $errorCell = $columnStringByIndex['sc_name'] . ($index + 1);
-                            $errorCellType = $columnModel['sc_name'];
-                            $errorMesg = "Thiếu thông tin Tên SC";
-                        }
-                        $result = false;
-                    }
-                    else {
-                        $checkExist = $this->crud->where(array('sc_code' => (string)$doc['sc_code']))->getOne($this->collection, array('sc_code', 'update_import_id'));
-                        if(!empty($checkExist)) {
-                            $updateImportId = (!empty($checkExist['update_import_id'])) ? $checkExist['update_import_id'] : array();
-                            array_push($updateImportId, $importLogResult['id']);
-                            $doc["updated_by"] =	    $extension;
-                            $doc["updated_at"] =	    time();
-                            $doc["update_import_id"] =  $updateImportId;
+                    if(array_filter($doc)) {
+                        $doc['sc_code'] = (string)$doc['sc_code'];
+                        $errorCell = '';
+                        if(empty($doc['sc_code']) || empty($doc['sc_name'])) {
+                            if(empty($doc['sc_code'])) {
+                                $errorCell = $columnStringByIndex['sc_code'] . ($index + 1);
+                                $errorCellType = $columnModel['sc_code'];
+                                $errorMesg = "Thiếu thông tin Mã SC";
+                            }
+                            if(empty($doc['sc_name'])) {
+                                $errorCell = $columnStringByIndex['sc_name'] . ($index + 1);
+                                $errorCellType = $columnModel['sc_name'];
+                                $errorMesg = "Thiếu thông tin Tên SC";
+                            }
+                            $result = false;
                         }
                         else {
-                            $doc["created_by"] =        $extension;
-                            $doc["created_at"] =        time();
-                            $doc["import_id"] =         $importLogResult['id'];
+                            $checkExist = $this->crud->where(array('sc_code' => (string)$doc['sc_code']))->getOne($this->collection, array('sc_code', 'update_import_id'));
+                            if(!empty($checkExist)) {
+                                $updateImportId = (!empty($checkExist['update_import_id'])) ? $checkExist['update_import_id'] : array();
+                                array_push($updateImportId, $importLogResult['id']);
+                                $doc["updated_by"] =	    $extension;
+                                $doc["updated_at"] =	    time();
+                                $doc["update_import_id"] =  $updateImportId;
+                            }
+                            else {
+                                $doc["created_by"] =        $extension;
+                                $doc["created_at"] =        time();
+                                $doc["import_id"] =         $importLogResult['id'];
+                            }
+                            $result = true;
                         }
-                        $result = true;
+                        $doc["import_id"] = $importLogResult['id'];
+                        if(!empty($result)) {
+                            $doc["result"] = 'success';
+                            array_push($importData, $doc);
+                        }
+                        else {
+                            $doc["error_cell"] = $errorCell;
+                            $doc["type"] = $errorCellType;
+                            $doc["error_mesg"] = $errorMesg;
+                            $doc["result"] = 'error';
+                            array_push($errorData, $doc);
+                            $errorCount++;
+                        }
                     }
-                    $doc["import_id"] = $importLogResult['id'];
-                    if(!empty($result)) {
-                        $doc["result"] = 'success';
-                        array_push($importData, $doc);
-                    }
-                    else {
-                        $doc["error_cell"] = $errorCell;
-                        $doc["type"] = $errorCellType;
-                        $doc["error_mesg"] = $errorMesg;
-                        $doc["result"] = 'error';
-                        array_push($errorData, $doc);
-                        $errorCount++;
-                    }
+                    else continue;
                 }
             }
 

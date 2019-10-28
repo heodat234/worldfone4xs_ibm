@@ -49,6 +49,7 @@ var Config = Object.assign(Config, {
     },{
         field: "phone",
         title: "@Phone@",
+        template: (dataItem) => gridPhone(dataItem['phone'], dataItem['id'], 'sc'),
         filterable: false
     },{
         field: "email",

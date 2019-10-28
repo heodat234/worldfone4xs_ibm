@@ -61,79 +61,47 @@ Class Appointment extends WFF_Controller {
             $isUpdate = false;
             if($data) {
                 foreach ($data as $index => $doc) {
-                    $doc['tl_code'] = (string)$doc['tl_code'];
-                    $doc['cmnd'] = (string)$doc['cmnd'];
-                    $doc['cif'] = (string)$doc['cif'];
-                    $doc['cus_phone'] = (string)$doc['cus_phone'];
-                    $doc['loan_amount'] = (double)$doc['loan_amount'];
-                    $doc['sc_phone'] = (string)$doc['sc_phone'];
-                    $doc['dc_code'] = (string)$doc['dc_code'];
-                    $doc['is_code'] = (string)$doc['is_code'];
-                    $errorCell = '';
-                    $errorCellType = '';
-                    $result = true;
-//                    if(empty($doc['dealer_code']) || empty($doc['dealer_name']) || empty($doc['location'])) {
-//                        if(empty($doc['dealer_code'])) {
-//                            $errorCell = $columnStringByIndex['dealer_code'] . ($index + 1);
-//                            $errorCellType = $columnModel['dealer_code'];
-//                            $errorMesg = "Thiếu thông tin Mã quầy";
-//                        }
-//                        if(empty($doc['dealer_name'])) {
-//                            $errorCell = $columnStringByIndex['dealer_name'] . ($index + 1);
-//                            $errorCellType = $columnModel['dealer_name'];
-//                            $errorMesg = "Thiếu thông tin Tên quầy";
-//                        }
-//                        if(empty($doc['location'])) {
-//                            $errorCell = $columnStringByIndex['location'] . ($index + 1);
-//                            $errorCellType = $columnModel['location'];
-//                            $errorMesg = "Thiếu thông tin khu vực";
-//                        }
-//                        $result = false;
-//                    }
-//                    else {
-//                        $checkExist = $this->crud->where(array('dealer_code' => (string)$doc['dealer_code']))->getOne($this->collection, array('dealer_code', 'update_import_id'));
-//                        if(!empty($checkExist)) {
-//                            $updateImportId = (!empty($checkExist['update_import_id'])) ? $checkExist['update_import_id'] : array();
-//                            array_push($updateImportId, $importLogResult['id']);
-//                            $doc["updated_by"] =	    $extension;
-//                            $doc["updated_at"] =	    time();
-//                            $doc["update_import_id"] =  $updateImportId;
-//                        }
-//                        else {
-//                            $doc["created_by"] =        $extension;
-//                            $doc["created_at"] =        time();
-//                            $doc["import_id"] =         $importLogResult['id'];
-//                        }
-//                        $result = true;
-//                    }
-                    $checkExist = $this->crud->where(array('cif' => (string)$doc['cif']))->getOne($this->collection);
-                    if(!empty($checkExist)) {
-                        $updateImportId = (!empty($checkExist['update_import_id'])) ? $checkExist['update_import_id'] : array();
-                        array_push($updateImportId, $importLogResult['id']);
-                        $doc["updated_by"]       = $extension;
-                        $doc["updated_at"]       = time();
-                        $doc["update_import_id"] = $updateImportId;
-                        $doc["isUpdate"]         = true;
+                    if(array_filter($doc)) {
+                        $doc['tl_code'] = (string)$doc['tl_code'];
+                        $doc['cmnd'] = (string)$doc['cmnd'];
+                        $doc['cif'] = (string)$doc['cif'];
+                        $doc['cus_phone'] = (string)$doc['cus_phone'];
+                        $doc['loan_amount'] = (double)$doc['loan_amount'];
+                        $doc['sc_phone'] = (string)$doc['sc_phone'];
+                        $doc['dc_code'] = (string)$doc['dc_code'];
+                        $doc['is_code'] = (string)$doc['is_code'];
+                        $errorCell = '';
+                        $errorCellType = '';
+                        $result = true;
+                        $checkExist = $this->crud->where(array('cif' => (string)$doc['cif']))->getOne($this->collection);
+                        if(!empty($checkExist)) {
+                            $updateImportId = (!empty($checkExist['update_import_id'])) ? $checkExist['update_import_id'] : array();
+                            array_push($updateImportId, $importLogResult['id']);
+                            $doc["updated_by"]       = $extension;
+                            $doc["updated_at"]       = time();
+                            $doc["update_import_id"] = $updateImportId;
+                            $doc["isUpdate"]         = true;
+                        }
+                        else {
+                            $doc["created_by"]       = $extension;
+                            $doc["created_at"]       = time();
+                            $doc["import_id"]        = $importLogResult['id'];
+                            $doc["isUpdate"]         = false;
+                        }
+                        if(!empty($result)) {
+                            $doc["result"] = 'success';
+                            array_push($importData, $doc);
+                        }
+                        else {
+                            $doc["error_cell"] = $errorCell;
+                            $doc["type"] = $errorCellType;
+                            $doc["error_mesg"] = $errorMesg;
+                            $doc["result"] = 'error';
+                            array_push($errorData, $doc);
+                            $errorCount++;
+                        }
                     }
-                    else {
-                        $doc["created_by"]       = $extension;
-                        $doc["created_at"]       = time();
-                        $doc["import_id"]        = $importLogResult['id'];
-                        $doc["isUpdate"]         = false;
-                    }
-                    $result = true;
-                    if(!empty($result)) {
-                        $doc["result"] = 'success';
-                        array_push($importData, $doc);
-                    }
-                    else {
-                        $doc["error_cell"] = $errorCell;
-                        $doc["type"] = $errorCellType;
-                        $doc["error_mesg"] = $errorMesg;
-                        $doc["result"] = 'error';
-                        array_push($errorData, $doc);
-                        $errorCount++;
-                    }
+                    else continue;
                 }
             }
 

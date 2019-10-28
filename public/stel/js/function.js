@@ -53,7 +53,7 @@ function gridArray(data = []) {
     if(data && data.length) {
         template = $.map($.makeArray(data), function(value, index) {
             return "<span class=\"label label-"+bs_color[index%6]+"\">"+value+"</span>";
-        });;
+        });
     }
     return template.join(' ');
 }
@@ -62,34 +62,6 @@ function gridBoolean(data) {
     return data ? `<i class="fa fa-check text-success"></i>` : `<i class="fa fa-times text-danger"></i>`;
 }
 
-/*
-***
-Kendo format
-"d"		Renders the day of the month, from 1 through 31.
-"dd"	The day of the month, from 01 through 31.
-"ddd"	The abbreviated name of the day of the week.
-"dddd"	The full name of the day of the week.
-"f"		The tenths of a second in a date and time value.
-"ff"	The hundredths of a second in a date and time value.
-"fff"	The milliseconds in a date and time value.
-"M"		The month, from 1 through 12.
-"MM"	The month, from 01 through 12.
-"MMM"	The abbreviated name of the month.
-"MMMM"	The full name of the month.
-"h"		The hour, using a 12-hour clock from 1 to 12.
-"hh"	The hour, using a 12-hour clock from 01 to 12.
-"H"		The hour, using a 24-hour clock from 1 to 23.
-"HH"	The hour, using a 24-hour clock from 01 to 23.
-"m"		The minute, from 0 through 59.
-"mm"	The minute, from 00 through 59.
-"s"		The second, from 0 through 59.
-"ss"	The second, from 00 through 59.
-"tt"	The AM/PM designator.
-"yy"	The last two characters from the year value.
-"yyyy"	The year full value.
-"zzz"	The local timezone when using formats to parse UTC date strings.
-**
-*/
 function gridDate(data, format = "dd/MM/yy H:mm") {
     return data ? kendo.toString(data, format) : "";
 }
@@ -98,23 +70,23 @@ function gridTimestamp(data, format = "dd/MM/yy H:mm") {
     return data ? kendo.toString(new Date(data * 1000), format) : "";
 }
 
-function gridName(name) {
-    return `<span class="grid-name">${name}</span>`;
+function gridName(name, href = "javascript:void(0)") {
+    return `<a href="${href}"><span class="grid-name">${name}</span></a>`;
 }
 
-function gridInterger(data) {
-    return kendo.toString(Number(data), "n0");
+function gridInterger(data, format = "n0") {
+    return kendo.toString(Number(data), format);
 }
 
-function gridPhone(data) {
+function gridPhone(data, id = '', type = '') {
     var html = "<span></span>";
     if(data) {
         if(typeof data == "string") {
-            html = `<a href="javascript:void(0)" class="label label-info" onclick="makeCallWithDialog('${data}')" title="Call now" data-role="tooltip" data-position="top">${data}</a>`;
+            html = `<a href="javascript:void(0)" class="label label-info" onclick="makeCallWithDialog('${data}','${id}','${type}')" title="Call now" data-role="tooltip" data-position="top">${data}</a>`;
         } else {
             if(data.length) {
                 template = $.map($.makeArray(data), function(value, index) {
-                    return `<a href="javascript:void(0)" class="label label-default" data-index="${index}" onclick="makeCallWithDialog('${value}')" title="Call now" data-role="tooltip" data-position="top">${value}</a>`;
+                    return `<a href="javascript:void(0)" class="label label-default" data-index="${index}" onclick="makeCallWithDialog('${value}','${id}','${type}')" title="Call now" data-role="tooltip" data-position="top">${value}</a>`;
                 });;
                 html = template.join(' ');
             }
@@ -122,6 +94,16 @@ function gridPhone(data) {
     }
     return html;
 }
+
+function gridLongText(data, leng = 30) {
+    var content = (data || '').toString();
+    var html = '';
+    if(content.length > leng)
+        html = content.slice(0, (leng - 3)) + '...' + `<a href='javascript:void(0)' data-role='tooltip' title='${content}' onclick='return $(this).parent().html($(this).attr("title"));'>See more</a>`
+    else html = content;
+    return html;
+}
+
 /*
  * Dropdownlist for grid cell
  */
@@ -239,7 +221,7 @@ function errorDataSource(e) {
 function getUrlParams(url) {
     var vars = {};
     var parts = url.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
-      vars[key] = decodeURIComponent(value);
+      vars[key] = value;
     });
     return vars;
 }
@@ -249,7 +231,7 @@ function httpBuildQuery(params) {
         params = {};
         return params;
     }
-    return Object.keys(params).map(key => key + '=' + encodeURIComponent(params[key])).join('&');
+    return Object.keys(params).map(key => key + '=' + params[key]).join('&');
 }
 
 // Get unique array from array.filter(onlyUnique)
@@ -317,7 +299,7 @@ function makeCall(phone, dialid = "", type = "") {
             data: {phone: phone, dialid: dialid, type: type},
             success: function(e) {
                 notification.show(e.message, e.status ? "success" : "error");
-                //if(typeof actionPhoneRing != "undefined") actionPhoneRing();
+                if(typeof actionPhoneRing != "undefined" && e.status) actionPhoneRing();
             },
             error: errorDataSource
         })
@@ -358,20 +340,6 @@ function showMenuNotifications(e) {
             menuNotification(doc.class, doc.count);
         })
     }
-}
-
-function copyToClipboard(value) {
-    if(typeof value == "object") {
-        value = value.textContent
-    }
-    var input = document.createElement("input");
-    document.body.appendChild(input);
-    input.value = value;
-    input.select();
-    document.execCommand("copy");
-    document.body.removeChild(input);
-    document.body.dataset.clipboard = value;
-    notification.show("Copy to clipboard", "success");
 }
 
 function templateDirection(data) {
@@ -462,7 +430,7 @@ function selectFilter(element, collection, field) {
 async function ticketForm(option = {}) {
     $rightForm = $("#right-form");
     var formHtml = await $.ajax({
-        url: ENV.templateApi + "ticket/formAutoFill",
+        url: ENV.templateApi + "ticket_solve/formAutoFill",
         data: {doc: option},
         error: errorDataSource
     });
@@ -481,52 +449,39 @@ function secondsToTime(secs)
     return s;
 }
 
-/* Currency format */
-function gridNumberFormat(data, format = "##,#") {
-    return data ? kendo.toString(data, format) : "0";
+function bodauTiengViet(str) {
+    str = str.toLowerCase();
+    str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, 'a');
+    str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, 'e');
+    str = str.replace(/ì|í|ị|ỉ|ĩ/g, 'i');
+    str = str.replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, 'o');
+    str = str.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, 'u');
+    str = str.replace(/ỳ|ý|ỵ|ỷ|ỹ/g, 'y');
+    str = str.replace(/đ/g, 'd');
+    str = str.replace(/ /g, '');
+    // str = str.replace(/\W+/g, ' ');
+    // str = str.replace(/\s/g, '-');
+    return str;
 }
 
-/*
-	https://stackoverflow.com/questions/680929/how-to-extract-extension-from-filename-string-in-javascript
-	Explanation
-	(?:         # begin non-capturing group
-	  \.        #   a dot
-	  (         #   begin capturing group (captures the actual extension)
-		[^.]+   #     anything except a dot, multiple times
-	  )         #   end capturing group
-	)?          # end non-capturing group, make it optional
-	$           # anchor to the end of the string
-*/
-function extractExtensionFromFileNameString(filename = '') {
-	var re = /(?:\.([^.]+))?$/;
-	var ext = re.exec(filename)[1];   // "txt"
-	return ext;
-}
-
-function getFileNameFromFullUrl(url = '') {
-	var filename = url.substring(url.lastIndexOf('/')+1);
-	filename = filename.substr(0, filename.lastIndexOf('.'));
-	return filename;
-}
-
-function arrayJsonData(tags) {
-    var result = [];
-    $.ajax({
-        async: false,
-        global: false,
-        url: ENV.vApi + "select/jsondata",
-        data: {tags: tags},
-        success: function (response) {
-            result = response;
-        },
-        error: errorDataSource
-    });
-    return result;
+function humanFileSize(bytes, si) {
+    var thresh = si ? 1000 : 1024;
+    if(Math.abs(bytes) < thresh) {
+        return bytes + ' B';
+    }
+    var units = si
+        ? ['kB','MB','GB','TB','PB','EB','ZB','YB']
+        : ['KiB','MiB','GiB','TiB','PiB','EiB','ZiB','YiB'];
+    var u = -1;
+    do {
+        bytes /= thresh;
+        ++u;
+    } while(Math.abs(bytes) >= thresh && u < units.length - 1);
+    return bytes.toFixed(1)+' '+units[u];
 }
 
 function arrayColumn(inputArray, columnKey, indexKey)
 {
-    // console.log(inputArray);
     function isArray(inputValue)
     {
         return Object.prototype.toString.call(inputValue) === '[object Array]';
@@ -594,27 +549,21 @@ function arrayColumn(inputArray, columnKey, indexKey)
     return (isReturnArray ? outputArray : outputObject);
 }
 
-// Remember current state
-function setTableState(collection, Table) {
-    var state = {
-        page	: Table.dataSource.page(),
-        pageSize: Table.dataSource.pageSize(),
-        sort	: Table.dataSource.sort(),
-        filter	: Table.dataSource.filter(),
-        group	: Table.dataSource.group(),
-    };
-    sessionStorage.setItem(collection, JSON.stringify(state));
-    console.log(sessionStorage.getItem(collection));
+// Steven Moseley
+// https://stackoverflow.com/questions/17415579/how-to-iso-8601-format-a-date-with-timezone-offset-in-javascript
+Date.prototype.toIsoLocalString = function() {
+    var tzo = -this.getTimezoneOffset(),
+        dif = tzo >= 0 ? '+' : '-',
+        pad = function(num) {
+            var norm = Math.floor(Math.abs(num));
+            return (norm < 10 ? '0' : '') + norm;
+        };
+    return this.getFullYear() +
+        '-' + pad(this.getMonth() + 1) +
+        '-' + pad(this.getDate()) +
+        'T' + pad(this.getHours()) +
+        ':' + pad(this.getMinutes()) +
+        ':' + pad(this.getSeconds()) +
+        dif + pad(tzo / 60) +
+        ':' + pad(tzo % 60);
 }
-// Remember current state
-
-// Set current state
-function setTableState(collection, Table) {
-    var option = JSON.parse(sessionStorage.getItem(collection));
-    if(typeof option !== 'undefined' && option !== null) {
-        Table.dataSource.query(option);
-        console.log(Table);
-        sessionStorage.removeItem(collection);
-    }
-}
-// Set current state

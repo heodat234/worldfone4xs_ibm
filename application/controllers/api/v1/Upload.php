@@ -340,6 +340,7 @@ Class Upload extends WFF_Controller {
     function csv()
     {
         try {
+            print_r("TEST");
             $folder = "csv";
             $collection = set_sub_collection("File");
             if ($this->input->server('REQUEST_METHOD') !== 'POST') throw new Exception("Wrong method");

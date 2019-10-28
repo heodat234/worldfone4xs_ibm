@@ -6,6 +6,7 @@ Class Preference extends WFF_Controller {
 	private $collection = "User";
 	private $sub = "";
 	private $fields = array("theme", "language", "page_preloader", "ringtone", "avatar", "email", "phone","sound_effect","text_tool");
+	private $only_session_fields = array("text_tool");
 
 	function __construct()
 	{
@@ -27,8 +28,8 @@ Class Preference extends WFF_Controller {
 		if(empty($response["language"])) $response["language"] = "eng";
 		if(empty($response["theme"])) $response["theme"] = $this->config->item("template")["theme"];
         if(!isset($response["page_preloader"])) $response["page_preloader"] = $this->config->item("template")["page_preloader"];
-        // By session
-        foreach (["text_tool"] as $value) {
+        // Only session fields
+        foreach ($this->only_session_fields as $value) {
         	$response[$value] = $this->session->userdata($value);
         }
 		echo json_encode($response);
@@ -50,12 +51,17 @@ Class Preference extends WFF_Controller {
 				}
 			}
 
-			$result = $this->crud->where(array("extension" => $extension))->update($this->collection, array('$set' => $data));
-			if(!$result) throw new Exception("Error Processing Request", 1);
-			
 			foreach ($data as $key => $value) {
 				$this->session->set_userdata($key, $value);
 			}
+
+			// Only session fields
+	        foreach ($this->only_session_fields as $value) {
+	        	unset($data[$value]);
+	        }
+
+			$result = $this->crud->where(array("extension" => $extension))->update($this->collection, array('$set' => $data));
+			if(!$result) throw new Exception("Error Processing Request", 1);
 
 			$this->load->driver('cache', array('adapter' => 'memcached', 'backup' => 'file'));
 	    	$my_session_id = $this->session->userdata("my_session_id");

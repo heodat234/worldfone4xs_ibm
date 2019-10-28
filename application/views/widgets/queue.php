@@ -45,7 +45,7 @@
         if(!data) return;
         if(!data.agentstate) return;
         var agentstate = data.agentstate;
-        agentstate.dnd = Boolean(Number(agentstate.dnd));
+        agentstate.dnd = Number(agentstate.dnd) && (["LOGGEDOFF","UNKNOWN"].indexOf(agentstate.state) == -1);
         if(agentstate.queues) {
             agentstate.queues.queue.map(function(ele) {
                 switch(ele.queuememberstatus) {

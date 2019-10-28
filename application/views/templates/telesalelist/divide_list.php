@@ -1,17 +1,17 @@
 <?php $id = $this->input->get("id") ?>
 <div class="col-md-12">
 	<div class="col-md-12">
-		<div class="col-md-1" style="padding: 14px">
+		<!-- <div class="col-md-1" style="padding: 14px">
 			<img src="http://192.168.16.130:7777/public/picture/agent/Amy.jpg" width="80px" alt="avatar">
-		</div>
-		<div class="col-md-11">
+		</div> -->
+		<div class="col-md-12">
 			<div>
 				<h2>You want to divide list to TeleSale' box</h2>
 				<p style="opacity: .5">Please select who will receive</p>
 			</div>
 		</div>
 	</div>
-	<div class="col-md-12" style="border: 2px solid #867b7b; border-radius: 20px; height: 500px;background: #fff">
+	<div class="col-md-12" style="border: 2px solid #867b7b; border-radius: 12px; height: 500px;background: #fff">
 		<div id="grid_2"></div>
 		<div style="text-align: center;    margin-top: 15px;">
 			<button id="saveChanges" class="btn btn-warning" style="width: 150px;margin-right: 10px">Confirm</button>
@@ -277,7 +277,7 @@
         			doc.set("checked",1);
         		}
         		doc.random = 0;
-				doc.set("total",doc.count_detail);
+				doc.set("total",doc.count_detail+doc.after_random);
         	}
         });
 		var allSelected = $("input.chkbx");

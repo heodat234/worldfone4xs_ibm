@@ -3,7 +3,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 Class Activity extends WFF_Controller {
 
-	private $collection = "Activity_log";
+	private $collection = "Activity";
 	private $sub = "";
 
 	function __construct()

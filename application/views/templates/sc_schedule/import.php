@@ -187,9 +187,12 @@
                         contentType: "application/json; charset=utf-8",
                         data: kendo.stringify({filepath: e.response.filepath, import_type: 'manual', import_file_type: 'excel'}),
                         success: function(res) {
-                            if(res.status) {
+                            if(res.status == 1) {
                                 syncDataSource();
                                 router.navigate(`/`);
+                            }
+                            else if(res.status == 2) {
+                                notification.show(res.message, "warning");
                             }
                             else {
                                 notification.show("Đã có lỗi trong quá trình nhập dữ liệu. Xin vui lòng kiểm tra lại trong lịch sử nhập dữ liệu", "error");

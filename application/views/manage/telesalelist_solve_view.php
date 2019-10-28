@@ -151,6 +151,7 @@
 </script>
 
 <script id="layout" type="text/x-kendo-template">
+    <?php if(empty($only_main_content)) { ?>
     <ul class="breadcrumb breadcrumb-top">
         <li>@Manage@</li>
         <li>@Diallist@</li>
@@ -164,6 +165,7 @@
             </div>
         </li>
     </ul>
+    <?php } ?>
 	<div class="container-fluid">
         <div class="row" id="bottom-row"></div>
     </div>

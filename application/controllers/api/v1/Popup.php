@@ -23,6 +23,19 @@ Class Popup extends CI_Controller {
         }
 	}
 
+	function get_telesale_customer_by_phone()
+	{
+		$phone = $this->input->get("phone");
+		try {
+			if(!$phone) throw new Exception("Error Processing Request", 1);
+			
+			$customers = $this->mongo_db->where(array('$or' => array(array("phone" => $phone), array("mobile_phone_no" => $phone))))->get("{$this->sub}Telesalelist");
+			echo json_encode(array("status" => 1, "data" => $customers, "total" => count($customers)));
+		} catch (Exception $e) {
+            echo json_encode(array("status" => 0, "message" => $e->getMessage()));
+        }
+	}
+
 	function complete($calluuid = "")
 	{
 		$id = $this->input->get("id");

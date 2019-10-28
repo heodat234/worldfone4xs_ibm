@@ -118,7 +118,7 @@
                           },
                           {
                               field: "count_dont_pickup",
-                              title: "@Don't pick up phone@",
+                              title: "@Dont pick up phone@",
                               width: 150,
                           },
                           {

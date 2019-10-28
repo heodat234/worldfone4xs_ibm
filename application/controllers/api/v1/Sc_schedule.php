@@ -23,21 +23,27 @@ Class Sc_schedule extends WFF_Controller {
     {
         try {
             $request = json_decode(file_get_contents('php://input'), TRUE);
-            $importLog = array(
-                'collection'    => $this->collection,
-                'begin_import'  => time(),
-                'file_name'     => basename($request["filepath"]),
-                'file_path'     => $request['filepath'],
-                'source'        => $request['import_type'],
-                'file_type'     => $request['import_file_type'],
-                'status'        => 2,
-                'created_by'    => $this->session->userdata("extension")
-            );
-//            $importLogId = $this->crud->create(set_sub_collection('Import'), $importLog);
-            $command = escapeshellcmd("python3.6 /var/www/html/python/importSCSchedule.py");
-            $output = shell_exec($command);
-            print_r($output);
-            echo json_encode($output);
+            $checkScriptRunning = $this->mongo_db->where(array('collection' => 'Sc_schedule', 'status' => 2))->get(set_sub_collection('Import'));
+            if(!empty($checkScriptRunning)) {
+                echo json_encode(array("status" => 0, "message" => '@A file is importing. Please try again later@'));
+            }
+            else {
+                $importLog = array(
+                    'collection'    => "Sc_schedule",
+                    'begin_import'  => time(),
+                    'file_name'     => basename($request["filepath"]),
+                    'file_path'     => $request['filepath'],
+                    'source'        => $request['import_type'],
+                    'file_type'     => $request['import_file_type'],
+                    'status'        => 2,
+                    'created_by'    => $this->session->userdata("extension")
+                );
+                $importLogId = $this->crud->create(set_sub_collection('Import'), $importLog);
+                $command = escapeshellcmd("python3.6 /var/www/html/python/importSCSchedule.py " . $importLogId['id']) . ' > /dev/null &';
+                $output = shell_exec($command);
+//                $checkImport = $this->crud->where_id($importLogId['id'])->where(array('status' => 1))->get(set_sub_collection('Import'));
+                echo json_encode(array('status' => 2, "message" => "@Importing... Please check import history for more detail@"));
+            }
         } catch (Exception $e) {
             echo json_encode(array("status" => 0, "message" => $e->getMessage()));
         }
@@ -109,4 +115,62 @@ Class Sc_schedule extends WFF_Controller {
 //            echo json_encode(array("status" => 0, "message" => $e->getMessage()));
 //        }
 //    }
+    function read() {
+	    try {
+	        $result = array();
+            $request = json_decode($this->input->get("q"), TRUE);
+            $pipeline = array();
+            if(!empty($request['filter']['filters'][0]['filters'])) {
+                $match = array('from_date' => array());
+                foreach ($request['filter']['filters'][0]['filters'] as $key => $value) {
+                    if($value['operator'] == 'gte') {
+                        $match['from_date']['$gte'] = strtotime($value['value']);
+                    }
+                    if($value['operator'] == 'lte') {
+                        $match['from_date']['$lte'] = strtotime($value['value']);
+                    }
+                }
+                $pipeline[] = array(
+                    '$match' => $match
+                );
+            }
+            $pipeline[] = array(
+                '$group'                        => array(
+                    '_id'                       => '$dealer_code',
+                    'schedule'                  => array(
+                        '$push'                 => array(
+                            'dealer_code'       => '$dealer_code',
+                            'sc_code'           => '$sc_code',
+                            'kendoGridField'    => '$kendoGridField'
+                        )
+                    )
+                )
+            );
+            $pipelineTotal = $pipeline;
+            array_push($pipelineTotal, array('$count' => "total"));
+            array_push($pipeline, array('$skip' => $request['skip']));
+            array_push($pipeline,array('$limit' => $request['take']));
+            $data = $this->crud->aggregate_pipeline($this->collection, $pipeline);
+            foreach ($data as $key => &$value) {
+                $listSchedule = array();
+                foreach ($value['schedule'] as $key1 => $value1) {
+                    $listSchedule[$value1['kendoGridField']] = implode(", ", $value1['sc_code']);
+                }
+                $value = array_merge($value, $listSchedule, array('dealer_code' => $value['_id']));
+                unset($value['schedule']);
+                array_push($result, $value);
+            }
+            $total = $this->crud->aggregate_pipeline($this->collection, $pipelineTotal);
+            if(!empty($total)) {
+                $total = $total[0]['total'];
+            }
+            else {
+                $total = 0;
+            }
+            echo json_encode(array('data' => $result, 'total' => $total));
+        }
+        catch(Exception $e) {
+            echo json_encode(array("status" => 0, "message" => $e->getMessage()));
+        }
+    }
 }

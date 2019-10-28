@@ -5,16 +5,17 @@
             <div class="form-group">
                 <label>@Date@</label>
                 <input data-role="datepicker"
+                       data-format="dd/MM/yyyy"
                        data-bind="value: item.appointment_date"
                        style="width: 100%"/>
             </div>
             <div class="form-group">
                 <label>@Area@</label>
                 <input data-role="dropdownlist"
-                       data-value-primitive="true"
-                       data-text-field="text"
-                       data-value-field="value"
+                       data-value-primitive="false"
                        data-filter="contains"
+                       data-text-field="location"
+                       data-value-field="location"
                        data-bind="value: item.dealer_location, source: locationOption" style="width: 100%"/>
             </div>
             <div class="form-group">
@@ -38,7 +39,7 @@
                 <label>@SC's code@</label>
                 <input id="sc-info" data-role="dropdownlist"
                        data-value-primitive="true"
-                       data-text-field="sc_name"
+                       data-text-field="sc_code"
                        data-value-field="sc_code"
                        data-filter="contains"
                        data-bind="value: item.sc_code, source: scOption, events: {change: onChangeSC}" style="width: 100%"/>
@@ -57,10 +58,10 @@
                 <label>@National ID@</label>
                 <input id="customer-info" data-role="dropdownlist"
                        data-value-primitive="true"
-                       data-text-field="cmnd"
+                       data-text-field="id_no"
                        data-value-field="id"
                        data-filter="contains"
-                       data-bind="value: item.cmnd, source: customerOption, events:{change: onChangeCMND}" style="width: 100%"/>
+                       data-bind="value: item.id_no, source: customerOption, events:{change: onChangeCMND}" style="width: 100%"/>
             </div>
             <div class="form-group">
                 <label>@Customer name@</label>
@@ -91,15 +92,27 @@
     }
 
     Config.observable = Object.assign(Config.observable, {
+        dealerDataSource: new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: ENV.restApi + "Dealer",
+                },
+                parameterMap: parameterMap
+            },
+            schema: {
+                data: "data",
+                total: "total"
+            },
+        }),
         listSCByDateAndDealer: [],
-        locationOption: () => dataSourceJsonData(["SC", "Dealer", "location"]),
+        locationOption: () => dataSourceDistinct('Dealer', 'location'),
         dealerOption: function() {
             var location = this.get('item.dealer_location');
             if(location) {
                 return new kendo.data.DataSource({
                     pageSize: 5,
                     serverFiltering: true,
-                    filter: [{field: 'location', operator: 'eq', value: location}],
+                    filter: [{field: 'location', operator: 'eq', value: location.location}],
                     transport: {
                         read: {
                             url: ENV.restApi + "Dealer",
@@ -131,7 +144,7 @@
                             logic: 'and',
                             filters: [
                                 {field: 'dealer_code', operator: 'eq', value: dealer_code},
-                                {field: 'from_date', operator: 'eq', value: (appointment_date.getTime() / 1000)}
+                                {field: 'from_date', operator: 'eq', value: appointment_date.toIsoLocalString()},
                             ]
                         }
                     })
@@ -170,7 +183,7 @@
             serverFiltering: true,
             transport: {
                 read: {
-                    url: ENV.restApi + "Customer",
+                    url: ENV.restApi + "Telesalelist",
                 },
                 parameterMap: parameterMap
             },
@@ -182,7 +195,7 @@
         onChangeCMND: function() {
             var customerDropDown = $("#customer-info").data("kendoDropDownList");
             var dataItem = customerDropDown.dataItem();
-            this.set('item.cus_name', dataItem.name);
+            this.set('item.cus_name', dataItem.customer_name);
         },
         // save: function () {
         //     $.ajax({
@@ -208,6 +221,7 @@
     $(document).ready(function() {
         $("body").tooltip({ selector: '[data-toggle=tooltip]' });
     });
+    function convertDateToUTC(date) { return new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), date.getUTCHours(), date.getUTCMinutes(), date.getUTCSeconds()); }
 </script>
 
 <style>

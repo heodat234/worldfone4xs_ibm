@@ -26,7 +26,7 @@ Class Monitor extends WFF_Controller {
 	public function telesale()
 	{
 		$this->output->data["css"][] = STEL_PATH . "css/table.css";
-		$this->output->data["js"][] = STEL_PATH . "js/monitor/two.js";
+		$this->output->data["js"][] = STEL_PATH . "js/monitor/telesale.js";
 		$this->load->view('monitor/telesale_view');
 	}
 }

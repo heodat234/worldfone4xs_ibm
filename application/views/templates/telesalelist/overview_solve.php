@@ -132,7 +132,7 @@
                     col.template = (dataItem) => gridName(dataItem[col.field]);
                     break;
                 case "phone": case "arrayPhone":
-                    col.template = (dataItem) => gridPhone(dataItem[col.field],dataItem['id'],'telesale');
+                    col.template = (dataItem) => gridPhone(dataItem[col.field],dataItem['id'],'customer');
                     break;
                 case "array":
                     col.template = (dataItem) => gridArray(dataItem[col.field]);

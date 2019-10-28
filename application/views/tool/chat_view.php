@@ -228,7 +228,7 @@
 	window.onload = function() {
 		ReadyChat.init();
 		/* Socket.io */
-		var webSocketURL = ENV.baseUrl;
+		var webSocketURL = "<?= $webSocketURL ?>";
 		var socket = window.socket = io(webSocketURL);
 		socket.on('connect', function(){
 			notification.show("Đã mở kết nối chat", "success");
@@ -635,7 +635,7 @@
 			  	/* Chat UI */
 				var chatUI = window.chatUI = $chat.kendoMyChat({
 					user: {
-						iconUrl: ENV.avatar,
+						iconUrl: "/api/v1/avatar/agent/" + ENV.extension,
 						name: ENV.agentname
 					},
 				    messages: {

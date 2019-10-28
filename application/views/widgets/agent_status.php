@@ -12,7 +12,7 @@
     <ul class="dropdown-menu dropdown-custom dropdown-options">
         <li class="dropdown-header" data-bind="css: {disabled: item.AVA}"><a href="javascript:void(0)" data-bind="click: changeStatus" data-code="1"><i class="gi gi-headset"></i> <span class="label label-success">@Ready@</span><span data-bind="text: item.time, visible: item.AVA"></span></a></li>
         <li data-bind="css: {disabled: item.ACW}"><a href="javascript:void(0)" data-bind="click: changeStatus" data-code="4"><i class="gi gi-briefcase"></i> <span class="label label-warning">@ACW@</span><span data-bind="text: item.time, visible: item.ACW"></span></a></li>
-        <!-- <li class="dropdown-header" data-bind="css: {disabled: item.UNV}"><a href="javascript:void(0)" data-bind="click: changeStatus" data-code="3"><i class="gi gi-airplane"></i> <span class="label label-danger">@Block@</span><span data-bind="text: item.time, visible: item.UNV"></span></a></li> -->
+        <li class="dropdown-header" data-bind="css: {disabled: item.UNV}"><a href="javascript:void(0)" data-bind="click: changeStatus" data-code="3"><i class="gi gi-airplane"></i> <span class="label label-danger">@Block@</span><span data-bind="text: item.time, visible: item.UNV"></span></a></li>
     </ul>
 </li>
 <script type="text/javascript">
@@ -26,7 +26,7 @@
             statusClick: function() {
                 if(this.item.SUN) {
                     swal({
-                        title: "IP Phone @Unvailable@.",
+                        title: "Soft phone @Unvailable@.",
                         text: `@Available phone to use@.`,
                         icon: "warning",
                         buttons: true,
@@ -34,7 +34,7 @@
                     })
                     .then((sure) => {
                         if(sure && typeof ipphoneForm != "undefined") {
-                            openForm({title: "@Select@ IP phone"});
+                            openForm({title: "@Select@ Soft phone"});
                             ipphoneForm();
                         }
                     })

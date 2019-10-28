@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-Class Model extends CI_Controller {
+Class Model extends WFF_Controller {
 
 	private $collection = "Model";
 
@@ -59,5 +59,13 @@ Class Model extends CI_Controller {
 		} catch(Exception $e) {
 			echo json_encode(array("status" => 0, "message" => $e->getMessage()));
 		}
+	}
+
+	function getModel($table)
+	{
+		$data = $this->mongo_db->where("collection", $table)->select(["field","type"], ["_id"])->get($this->collection);
+		$this->output
+        ->set_content_type('application/json')
+        ->set_output(json_encode($data));
 	}
 }

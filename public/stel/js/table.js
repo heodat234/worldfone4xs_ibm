@@ -17,6 +17,21 @@ var Table = function() {
     if(filterStorage) {
         Config.filter = filterStorage;
     }
+    var columnsStorage = JSON.parse(sessionStorage.getItem("columns_" + ENV.currentUri));
+    if(columnsStorage) {
+        var fieldToIndex = {};
+        var fieldToWidth = {};
+        columnsStorage.forEach((col, idx) => {
+            if(col.field) {
+                fieldToIndex[col.field] = idx;
+            }
+        });
+        Config.columns.sort(function(a, b) {
+            if(a.field && b.field) {
+                return fieldToIndex[a.field] - fieldToIndex[b.field];
+            } return -1;
+        });
+    }
     return {
         dataSource: {},
         grid: {},
@@ -91,6 +106,7 @@ var Table = function() {
                     messages: KENDO.pageableMessages ? KENDO.pageableMessages : {}
                 },
                 sortable: true,
+                reorderable: Boolean(Config.reorderable),
                 scrollable: Boolean(Config.scrollable),
                 columns: this.columns,
                 filterable: Config.filterable ? Config.filterable : true,
@@ -106,6 +122,14 @@ var Table = function() {
                 },
                 filter: function(e) {
                     sessionStorage.setItem("filter_" + ENV.currentUri, JSON.stringify(e.filter));
+                },
+                columnReorder: function(e) {
+                    setTimeout(() => {
+                        sessionStorage.setItem("columns_" + ENV.currentUri, JSON.stringify(e.sender.columns));
+                    }, 100);
+                },
+                dataBinding: function() {
+                    record = (dataSource.page() -1) * dataSource.pageSize();
                 }
             }, Config.gridOptions);
 
