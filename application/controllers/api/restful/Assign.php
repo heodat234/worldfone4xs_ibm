@@ -82,41 +82,29 @@ Class Assign extends CI_Controller {
 
 	function update()
 	{
-		$data = json_decode(file_get_contents('php://input'), TRUE);
-		$id = $data['id_import'];
-		$random = $data['random'];
-		$extension = $data['extension'];
-		// $match['id_import'] = $id;
-		// $match['assign'] = '';
+		$data = $this->input->post();
+		if (isset($data['updated'])) {
+			$data = $data['updated'];
+			$random = $extension = '';
+			if (is_array($data)) {
+				foreach ($data as $value) {
+					$id = $value['id_import'];
+					$random = $random.','.$value['random'];
+					$extension = $extension.','.$value['extension'];
+				}
+			}
+			$random = trim($random,',');
+			$extension = trim($extension,',');
+			// $id = $data['id_import'];
+			// $random = $data['random'];
+			// $extension = $data['extension'];
 
-		exec('PYTHONIOENCODING=utf-8 python3.6 /var/www/html/python/assign.py ' . $id . " ". $random ." ". $extension ." > /dev/null &");
-		// $update_data['random.'.$extension] = (int)$random;
-		// $this->crud->where_id($id)->update($this->import_collection, array('$inc' => $update_data));
-  //       $assign_log = $this->crud->getOne($this->log_collection);
-  //       $array_cmnd = [];
-  //       if ($assign_log != NULL) {
-  //       	foreach ($assign_log as $key => $value) {
-	 //        	if ($key == $data['extension']) {
-	 //        		$array_cmnd = $value;
-	 //        	}
-	 //        }
-	 //        $match['id_no'] = array('$nin' => $array_cmnd);
-  //       }
-        
-		// for ($i=0; $i < $data['random']; $i++) {
-		// 	$insert_data["assign"]		= $data['extension'];
-		// 	$insert_data["assigned_by"]	= 'BySystemRandom';
-		// 	$user = $this->crud->where($match)->getOne($this->sub_collection);
-		// 	if ($user != NULL) {
-		// 		$this->crud->where_id($user['id'])->update($this->sub_collection, array('$set' => $insert_data));
-
-		// 		if ($assign_log != NULL) {
-		// 			$this->crud->where_id($assign_log['id'])->update($this->log_collection, array('$push' => array($data['extension'] => $user['id_no'])));
-		// 		}
-		// 	}
-			
-		// }
-		echo json_encode(array("status" => -1, "data" => []));
+			exec('PYTHONIOENCODING=utf-8 python3.6 /var/www/html/python/assign.py ' . $id . " ". $random ." ". $extension ." > /dev/null &");
+			echo json_encode(array("status" => -1, "data" => []));
+		}else{
+			echo json_encode(array("status" => 0, "data" => []));
+		}
+		
 	}
 
 	function delete($id)

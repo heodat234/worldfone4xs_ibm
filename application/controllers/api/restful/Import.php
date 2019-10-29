@@ -94,43 +94,32 @@ Class Import extends WFF_Controller {
         echo json_encode(array("status" => $status, "message" => $message));
     }
 
-    function importFTP($collection)
+    function importFTP($collection1)
     {
         try {
+            $collection = set_sub_collection($collection1);
             $file_path = $this->input->post('file_path');
             $file_name = $this->input->post('file_name');
             $duoifile = pathinfo($file_name, PATHINFO_EXTENSION);
 
             $dataImport = array(
-                'collection'              => $collection,
+                'collection'              => $collection1,
                 'begin_import'            => time(),
                 'complete_import'         => 0,
                 'file_name'               => $file_name,
+                'file_path'               => $file_path,
                 'source'                  => 'FTP',
                 'status'                  => 2
             );
             $idImport = $this->import_model->importFile($dataImport);
-            $response = $this->import_model->importData($file_path,$duoifile,$collection,$idImport);
-            if ($response == 1) {
-                $dataImport = array(
-                    'complete_import'         => time(),
-                    'status'                  => 1
-                );
-                $this->import_model->updateImportHistory($idImport,$dataImport);
-                $status = 1;
-                $message = 'Upload successfully';
+            $extension = $this->session->userdata("extension");
+            if ($collection1 == 'Datalibrary') {
+                exec('PYTHONIOENCODING=utf-8 python3.6 /var/www/html/python/importCSV.py ' . $idImport . " ". $collection ." ". $extension ." > /dev/null &");
             }else{
-                $status = 0;
-                $dataImport = array(
-                    'complete_import'         => time(),
-                    'status'                  => $status,
-                    'error'                   => $response
-                );
-                $this->import_model->updateImportHistory($idImport,$dataImport);
-                $status = 0;
-                $error = $response;
-                $message = 'Upload successfully';
+                exec('PYTHONIOENCODING=utf-8 python3.6 /var/www/html/python/importTelesaleCSV.py ' . $idImport . " ". $collection ." ". $extension ." > /dev/null &");
             }
+            $status = -1;
+            $message = 'Upload pending';
 
             echo json_encode(array("status" => $status,"message" => $message));
         } catch (Exception $e) {

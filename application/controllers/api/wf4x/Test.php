@@ -80,21 +80,21 @@ Class Test extends CI_Controller {
    function testFile()
    {
       ini_set('max_execution_time', '300');
-      $filePath = '/var/www/html/python/fileCSV.csv';
-      $idImport = "5db268f51ef2b442430451e0";
+      $collection = 'TS_Datalibrary';
+      $idImport = "5db7c16a1ef2b42f3925d857";
       $extension = '999';
 
-      // $output = exec('PYTHONIOENCODING=utf-8 python3.6 /var/www/html/python/importCSV.py ' . $idImport . " ". $collection ." ". $extension ." > /dev/null &");
-      $output = shell_exec('PYTHONIOENCODING=utf-8 python3.6 /var/www/html/python/testReadCSV.py ' . $filePath . " 2>&1");
+      $output = shell_exec('PYTHONIOENCODING=utf-8 python3.6 /var/www/html/python/importCSV.py ' . $idImport . " ". $collection ." ". $extension ." 2>&1");
+      // $output = shell_exec('PYTHONIOENCODING=utf-8 python3.6 /var/www/html/python/testReadCSV.py ' . $filePath . " 2>&1");
 
       echo $output;
    }
 
    function testAssign()
    {
-      $random = '100';
-      $idImport = "5db6a2ba1ef2b454e93bf1bc";
-      $extension = '888';
+      $random = '100,200';
+      $idImport = "5db7fda41ef2b417ac55d4d6";
+      $extension = '1051,888';
 
       // $output = exec('PYTHONIOENCODING=utf-8 python3.6 /var/www/html/python/importCSV.py ' . $idImport . " ". $collection ." ". $extension ." > /dev/null &");
       $output = shell_exec('PYTHONIOENCODING=utf-8 python3.6 /var/www/html/python/assign.py ' . $idImport . " ". $random ." ". $extension ." 2>&1");

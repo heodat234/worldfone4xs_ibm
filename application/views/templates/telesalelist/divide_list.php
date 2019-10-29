@@ -14,7 +14,7 @@
 	<div class="col-md-12" style="border: 2px solid #867b7b; border-radius: 12px; height: 500px;background: #fff">
 		<div id="grid_2"></div>
 		<div style="text-align: center;    margin-top: 15px;">
-			<button id="saveChanges" class="btn btn-warning" style="width: 150px;margin-right: 10px">Confirm</button>
+			<button id="saveChanges" onclick="saveChanges()" class="btn btn-warning" style="width: 150px;margin-right: 10px">Confirm</button>
 			<button class="btn btn-default" onclick="cancelChanges()">Cancel</button>
 		</div>
 	</div>
@@ -136,8 +136,7 @@
                 url: function(data) {
                     return Config.crudApi + Config.collection + "/update";
                 },
-                type: "PUT",
-                contentType: "application/json; charset=utf-8"
+                type: "POST",
             },
             parameterMap: parameterMap
         },
@@ -304,7 +303,7 @@
 		        		a += 1;
 		        		i ++;
 		        	}
-		            b = doc.count_detail + a;
+		            b = doc.count_detail + doc.after_random + a;
 		            doc.set("random",a);
 		            doc.set("total",b);
             	}
@@ -323,12 +322,60 @@
 	   
 	}
    	
-    $("#saveChanges").kendoButton({
-        click: function(e) {
-            grid.saveChanges();
-            swal({text: "Quá trình phân công đang được thực hiện. Vui lòng kiểm tra lại sau vài phút."});
-        }
-    })
+    // $("#saveChanges").kendoButton({
+    //     click: function(e) {
+    //         dataSource.sync();
+    //         swal({text: "Quá trình phân công đang được thực hiện. Vui lòng kiểm tra lại sau vài phút."});
+    //     }
+    // })
+    function saveChanges() {
+	    var grid = $("#grid_2").data("kendoGrid"),
+	        parameterMap = grid.dataSource.transport.parameterMap;
+
+	    //get the new and the updated records
+	    var currentData = grid.dataSource.data();
+	    var updatedRecords = [];
+	    var newRecords = [];
+
+	    for (var i = 0; i < currentData.length; i++) {
+	        if (currentData[i].isNew()) {
+	            //this record is new
+	            newRecords.push(currentData[i].toJSON());
+	        } else if(currentData[i].dirty) {         
+	            updatedRecords.push(currentData[i].toJSON());
+	        }
+	    }
+	    console.log(updatedRecords)
+	    //this records are deleted
+	    var deletedRecords = [];
+	    for (var i = 0; i < grid.dataSource._destroyed.length; i++) {
+	        deletedRecords.push(grid.dataSource._destroyed[i].toJSON());
+	    }
+
+	    var data = {};
+	    $.extend(data, { updated: updatedRecords });
+
+	    console.log(data)
+	    $.ajax({
+	        url: Config.crudApi + Config.collection + "/update",
+	        data: data,
+	        type: "POST",
+	        error: function () {
+	            //Handle the server errors using the approach from the previous example
+	        },
+	        success: function (result) {
+	        	if (result.status == -1) {
+	            	swal({text: "Quá trình phân công đang được thực hiện. Vui lòng kiểm tra lại sau vài phút."});
+	            	grid.dataSource._destroyed = [];
+	            	//refresh the grid - optional
+	           		grid.dataSource.read();
+	           	}else{
+	           		swal({text: "Bạn chưa chọn extension."});
+	           	}
+	        }
+	    })
+	}
+
     $("#saveChanges").removeClass('k-button');
 
     function cancelChanges() {
