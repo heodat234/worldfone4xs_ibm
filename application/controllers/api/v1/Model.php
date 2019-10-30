@@ -29,26 +29,21 @@ Class Model extends WFF_Controller {
 	function duplicate()
 	{
 		try {
-			$sub = strtoupper($this->input->get("sub"));
-			$config = $this->mongo_db->get("ConfigType", "type");
-			$and_where = array();
-			foreach ($config as $doc) {
-				if(!empty($doc["type"])) {
-					$and_where[] = array("collection" => array('$regex' => '^(?!' . $doc["type"] . '.*$).*', '$options' => ""));
-				}
-			}
-			$data = $this->mongo_db->where(array(
-					'$and' => $and_where
+			$fromDepartment = strtoupper($this->input->get("fromDepartment"));
+			$toDepartment = strtoupper($this->input->get("toDepartment"));
+			$data = $this->mongo_db->where(
+				array(
+					"collection" => array('$regex' => '^' . $fromDepartment, '$options' => "")
 				)
 			)->get($this->collection);
 
 			foreach ($data as $doc) {
 				if(isset($doc["collection"], $doc["field"])) {
-					$doc["collection"] = $sub . "_" . $doc["collection"];
+					$origin_collection = str_replace($fromDepartment . "_", "", $doc["collection"]);
+					$doc["collection"] = $toDepartment . "_" . $origin_collection;
 					$check = $this->mongo_db->where(array(
-						"collection" => $doc["collection"],
-						"field" => $doc["field"],
-						"deleted" => array('$ne' => true)
+						"collection" 	=> $doc["collection"],
+						"field" 		=> $doc["field"]
 					))->getOne($this->collection);
 					if(!$check) {
 						$this->mongo_db->insert($this->collection, $doc);

@@ -59,7 +59,8 @@ Class Agentstatuscode extends CI_Controller {
 				array("value" => 0, "text" => "Softphone Unvailable", "code" => "SUN", "active" => true, "iconClass" => "gi gi-ban text-muted"),
 				array("value" => 1, "text" => "Available", "code" => "AVA", "active" => true, "iconClass" => "gi gi-headset text-success"),
 				array("value" => 2, "text" => "Softphone oncall", "code" => "SOC", "active" => true, "iconClass" => "gi gi-earphone text-primary"),
-				array("value" => 4, "text" => "After call work", "code" => "ACW", "active" => true, "iconClass" => "gi gi-briefcase text-warning", "sub" => ["Save data"]),
+				array("value" => 3, "text" => "Block", "code" => "UNV", "active" => true, "iconClass" => "gi gi-airplane text-danger", "sub" => ["Other"]),
+				array("value" => 4, "text" => "After call work", "code" => "ACW", "active" => true, "iconClass" => "gi gi-briefcase text-warning", "sub" => ["Other"]),
 			);
 			$resultAll = 1;
 			foreach ($data as $doc) {

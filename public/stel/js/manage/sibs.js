@@ -84,7 +84,9 @@ router.route("/setting", async function() {
 });
 
 router.route("/import", async function() {
-    var filepath = await $.get(`${ENV.vApi}${Config.collection}/downloadFileFromFTP`);
+    ajaxStart();
+    var filepath = await $.get(`${ENV.vApi}${Config.collection}/downloadFileFromFTP`)
+    ajaxComplete();
     Config.ftp_filepath = (filepath.data) ? filepath.data : '';
     var HTML = await $.get(`${Config.templateApi}${Config.collection}/import`);
     var kendoView = new kendo.View(HTML, {model: {}});

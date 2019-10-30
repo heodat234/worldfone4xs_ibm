@@ -565,3 +565,11 @@ audio {
 .dropdown-menu {
 	border-radius: 3px;
 }
+
+.panel-heading {
+	padding: 10px;
+}
+
+.sidebar-visible-lg-mini a.sidebar-brand {
+	overflow: hidden;
+}

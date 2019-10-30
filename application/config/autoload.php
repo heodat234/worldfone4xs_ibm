@@ -103,7 +103,7 @@ $autoload['helper'] = array("url","common");
 | config files.  Otherwise, leave it blank.
 |
 */
-$autoload['config'] = array("_mongo", "wff", "chat");
+$autoload['config'] = array("_mongo", "wff");
 
 /*
 | -------------------------------------------------------------------

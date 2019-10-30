@@ -58,7 +58,7 @@ Class Crud {
         $total_result = $this->CI->mongo_db->aggregate_pipeline($collection, $total_aggregate);
         $total = isset($total_result[0]) ? $total_result[0]['total'] : 0;
         // Get data
-        $data_aggregate = $Kendo_aggregate->selecting($selects)->sorting()->paging()->get_data_aggregate();
+        $data_aggregate = $Kendo_aggregate->sorting()->paging()->selecting($selects)->get_data_aggregate();
         $data = $this->aggregate_pipeline($collection, $data_aggregate);
         // Result
         $result = array("data" => $data, "total" => $total);
@@ -237,6 +237,10 @@ Class Crud {
                     
                     case 'timestamp':
                         $value = strtotime(preg_replace('/\([^)]*\)/', '', $value));
+                        break;
+
+                    case 'datetime':
+                        $value = $this->CI->mongo_db->date(strtotime(preg_replace('/\([^)]*\)/', '', $value)));
                         break;
 
                     case 'boolean':

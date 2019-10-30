@@ -29,9 +29,11 @@ var Config = {
 
     <div class="container-fluid" id="allview" data-bind="css: {editable: editable}">
         <div class="row">
-            <div class="col-md-6" style="border-right: 1px solid lightgray; padding-right: 25px">
+            <div class="col-md-6" style="border-right: 1px solid lightgray; padding-right: 30px">
                 <div class="row">
-                    <h4 class="text-center" style="margin: 20px 0 10px"><span style="font-weight: 500">@GROUP@ @CALL CENTER@</span></h4>
+                    <h4 class="text-center" style="margin: 20px 0 10px">
+                        <span style="font-weight: 500">@GROUP@ @CALL CENTER@</span>
+                    </h4>
                 </div>
                 <div class="row">
                     <div class="col-xs-12">
@@ -40,6 +42,9 @@ var Config = {
                          data-template="queue-group-template"
                          data-bind="source: dataSource"></div>
                         <!-- END Table Styles Content -->
+                    </div>
+                    <div class="col-xs-12 text-center">
+                        <a data-role="button" data-icon="refresh" data-bind="click: updateQueueMembers"><b>@Update@</b></a>
                     </div>
                 </div>
             </div>
@@ -134,6 +139,12 @@ var Config = {
                 <i class="fa fa-check text-success" data-bind="visible: active"></i>
                 <i class="fa fa-times text-danger" data-bind="invisible: active"></i>
             </span>
+            <label style="margin-left: 20px">@Link@ @to@ queue: </label>
+            <span>
+                <i class="fa fa-check text-success" data-bind="visible: isLinkToQueue"></i>
+                <i class="fa fa-times text-danger" data-bind="invisible: isLinkToQueue"></i>
+                <span class="label label-info" data-bind="text: queuename, visible: isLinkToQueue"></span>
+            </span>
             <br>
             <label>@Members@: </label>
             <span class="member-array">#= gridMembers(data.members) #</span>
@@ -190,7 +201,7 @@ var Config = {
         .member-element {
             display: inline-block; 
             border: 1px solid ghostwhite; 
-            border-radius: 4px; 
+            border-radius: 5px; 
             padding: 4px; 
             font-size: 14px;
             background-color: lightgray;
@@ -504,11 +515,57 @@ var Config = {
             editCustomGroup: function(e) {
                 openForm({title: "@Edit@ @Custom group@", width: 500});
                 editForm(e.currentTarget)
+            },
+            updateQueueMembers: function(e) {
+                $.get(ENV.vApi + "wfpbx/updateQueueMembers", (res) => {
+                    notification.show(res.message, res.status ? "success" : "error");
+                    this.dataSource.read();
+                })
+            },
+            addMembersFromGroup: function(e) {
+                var uid = $(e.currentTarget).data("uid"),
+                    dataItem = List.dataSource.getByUid(uid);
+                var data = this.dataSourceCustom.data().toJSON();
+                let buttons = {cancel: true};
+                for (let i = 0; i < data.length; i++) {
+                    buttons[i] = {text: data[i].name};
+                }
+                swal({
+                  title: "@Choose one@",
+                  text: `@Add@ @Members@ @from@ @group@`,
+                  icon: "warning",
+                  buttons: buttons
+                })
+                .then(idx => {
+                    if(idx === null) return;
+                    let doc = data[idx];
+                    if(doc.members) {
+                        let addMembers = doc.members.filter(extension => (dataItem.members || []).indexOf(extension) == -1);
+                        var queuename = dataItem.queuename;
+                        addMembers.forEach(extension => {
+                            $.ajax({
+                                url: ENV.vApi + "wfpbx/change_queue_member/add",
+                                data: JSON.stringify({extension: extension, queuename: queuename}),
+                                contentType: "application/json; charset=utf-8",
+                                type: "POST",
+                                success: (res) => {
+                                    if(res.status) {
+                                        notification.show(`@Add@ ${extension} (${convertExtensionToAgentname[extension]}) @at@ queue ${queuename}`, "success");
+                                        this.updateQueueMembers();
+                                        this.set("editable", true);
+                                    } else {
+                                        notification.show(res.message, "error");
+                                    }
+                                }
+                            })
+                        })   
+                    }
+                })
             }
         }, Config.observable);
 
         List.init();
-   
+
     }
 
     function gridMembers(data = []) {
@@ -522,14 +579,82 @@ var Config = {
         return template.join(' ');
     }
 
+    var commonObservable = {
+        membersSelect: function(e) {
+            if(!this.item.isLinkToQueue) return;
+            var extension = e.dataItem.extension,
+                agentname = e.dataItem.agentname,
+                queuename = this.get("item.queuename"),
+                members = e.sender.value();
+            swal({
+                title: `@Are you sure@?`,
+                text: `@Add@ ${extension} (${agentname}) @at@ queue ${queuename}`,
+                icon: "warning",
+                buttons: true,
+                dangerMode: false,
+            })
+            .then((sure) => {
+                if (sure) {
+                    $.ajax({
+                        url: ENV.vApi + "wfpbx/change_queue_member/add",
+                        data: JSON.stringify({extension: extension, queuename: queuename}),
+                        contentType: "application/json; charset=utf-8",
+                        type: "POST",
+                        success: function(res) {
+                            if(res.status) {
+                                List.dataSource.read();
+                                notification.show(`@Add@ ${extension} (${agentname}) @at@ queue ${queuename}`, "success");
+                            } else {
+                                notification.show(res.message, "error");
+                            }
+                        }
+                    })  
+                }
+            });
+        },
+        membersDeselect: function(e) {
+            if(!this.item.isLinkToQueue) return;
+            var extension = e.dataItem.extension,
+                agentname = e.dataItem.agentname,
+                queuename = this.get("item.queuename"),
+                members = e.sender.value();
+            swal({
+                title: `@Are you sure@?`,
+                text: `@Remove@ ${extension} (${agentname}) @from@ queue ${queuename}`,
+                icon: "warning",
+                buttons: true,
+                dangerMode: false,
+            })
+            .then((sure) => {
+                if (sure) {
+                    $.ajax({
+                        url: ENV.vApi + "wfpbx/change_queue_member/remove",
+                        data: JSON.stringify({extension: extension, queuename: queuename}),
+                        contentType: "application/json; charset=utf-8",
+                        type: "POST",
+                        success: function(res) {
+                            if(res.status) {
+                                List.dataSource.read();
+                                notification.show(`@Remove@ ${extension} (${agentname}) @from@ queue ${queuename}`, "success");
+                            } else {
+                                notification.show(res.message, "error");
+                            }
+                        }
+                    }) 
+                }
+            });
+        }
+    }
+
     async function editForm(ele) {
         var dataItem = List.dataSourceCustom.getByUid($(ele).data("uid")),
             formHtml = await $.ajax({
                 url: Config.templateApi + Config.collection + "/form",
                 error: errorDataSource
             });
-        var model = Object.assign(Config.observable, {
+        var model = Object.assign(Config.observable, commonObservable, {
             item: dataItem,
+            queueOption: List.dataSource,
             save: function() {
                 List.dataSourceCustom.sync().then(() => {List.dataSourceCustom.read()});
                 closeForm();
@@ -550,8 +675,9 @@ var Config = {
             url: Config.templateApi + Config.collection + "/form",
             error: errorDataSource
         });
-        var model = Object.assign(Config.observable, {
+        var model = Object.assign(Config.observable, commonObservable, {
             item: {type: "custom"},
+            queueOption: List.dataSource,
             save: function() {
                 List.dataSourceCustom.add(this.item);
                 List.dataSourceCustom.sync().then(() => {List.dataSourceCustom.read()});

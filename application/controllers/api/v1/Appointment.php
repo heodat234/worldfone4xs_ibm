@@ -73,13 +73,13 @@ Class Appointment extends WFF_Controller {
                         $errorCell = '';
                         $errorCellType = '';
                         $result = true;
-                        $checkExist = $this->crud->where(array('cif' => (string)$doc['cif']))->getOne($this->collection);
+                        $checkExist = $this->crud->where(array('cif' => (string)$doc['cif']))->get($this->collection);
                         if(!empty($checkExist)) {
-                            $updateImportId = (!empty($checkExist['update_import_id'])) ? $checkExist['update_import_id'] : array();
+                            // $updateImportId = (!empty($checkExist['update_import_id'])) ? $checkExist['update_import_id'] : array();
                             array_push($updateImportId, $importLogResult['id']);
                             $doc["updated_by"]       = $extension;
                             $doc["updated_at"]       = time();
-                            $doc["update_import_id"] = $updateImportId;
+                            $doc["update_import_id"] = $importLogResult['id'];
                             $doc["isUpdate"]         = true;
                         }
                         else {

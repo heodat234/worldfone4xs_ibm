@@ -90,7 +90,6 @@ Class Wfpbx extends WFF_Controller {
 			$message = $this->language_model->translate("@Success@", "NOTIFICATION");
 			$this->load->model("afterlogin_model");
 			$this->afterlogin_model->update_group();
-			//if($this->)
 			echo json_encode(array("status" => 1, "message" => $message. json_encode($response)));
 		} catch (Exception $e) {
 			$message = $this->language_model->translate($e->getMessage(), "NOTIFICATION");
@@ -188,5 +187,17 @@ Class Wfpbx extends WFF_Controller {
 	    	$response[] = $day_data;
     	}
     	echo json_encode($response);
+    }
+
+    function updateQueueMembers() 
+    {
+    	try {
+			$this->load->model("afterlogin_model");
+			$this->afterlogin_model->update_group();
+			echo json_encode(array("status" => 1, "message" => "Success"));
+		} catch (Exception $e) {
+			$message = $this->language_model->translate($e->getMessage(), "NOTIFICATION");
+			echo json_encode(array("status" => 0, "message" => $message));
+		}
     }
 }

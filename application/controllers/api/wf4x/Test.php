@@ -80,11 +80,11 @@ Class Test extends CI_Controller {
    function testFile()
    {
       ini_set('max_execution_time', '300');
-      $collection = 'TS_Datalibrary';
-      $idImport = "5db7c16a1ef2b42f3925d857";
+      $collection = 'TS_Lawsuit';
+      $idImport = "5db90fa41ef2b42b652ccb63";
       $extension = '999';
 
-      $output = shell_exec('PYTHONIOENCODING=utf-8 python3.6 /var/www/html/python/importCSV.py ' . $idImport . " ". $collection ." ". $extension ." 2>&1");
+      $output = shell_exec('PYTHONIOENCODING=utf-8 python3.6 /var/www/html/python/importLawsuit.py ' . $idImport . " ". $collection ." ". $extension ." 2>&1");
       // $output = shell_exec('PYTHONIOENCODING=utf-8 python3.6 /var/www/html/python/testReadCSV.py ' . $filePath . " 2>&1");
 
       echo $output;

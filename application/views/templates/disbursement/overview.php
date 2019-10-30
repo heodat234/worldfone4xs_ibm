@@ -36,12 +36,14 @@ var Config = Object.assign(Config, {
             doc.released_date = doc.released_date ? gridDate(new Date(doc.released_date * 1000), 'dd/MM/yyyy') : undefined;
             doc.disbursed_date = doc.disbursed_date ? gridDate(new Date(doc.disbursed_date * 1000), 'dd/MM/yyyy') : undefined;
             doc.issued_date = doc.issued_date ? gridDate(new Date(doc.issued_date * 1000), 'dd/MM/yyyy') : undefined;
-            doc.updated_at = doc.updated_at ? gridDate(new Date(doc.updated_at * 1000), 'dd/MM/yyyy') : undefined;
+            doc.created_at = doc.created_at ? gridDate(new Date(doc.created_at * 1000)) : undefined;
+            doc.updated_at = doc.updated_at ? gridDate(new Date(doc.updated_at * 1000)) : undefined;
             return doc;
         });
         return response;
     },
     scrollable: true,
+    sort: [{field: 'created_at', dir: 'desc'}],
     columns: [{
         // Use uid to fix bug data-uid of row undefined
         title: `<a class='btn btn-sm btn-circle btn-action btn-primary' onclick='return deleteDataItemChecked();'><i class='fa fa-times-circle'></i></a>`,
@@ -212,6 +214,12 @@ var Config = Object.assign(Config, {
     },{
         field: "updated_at",
         title: "@Last modified@",
+        width: '150px',
+        headerAttributes: { style: "white-space: normal"},
+        filterable: false,
+    },{
+        field: "updated_by",
+        title: "@Modified by@",
         width: '150px',
         headerAttributes: { style: "white-space: normal"},
         filterable: false,

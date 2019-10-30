@@ -1,6 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
-Class WFF_Controller extends CI_Controller
+
+abstract Class WFF_Controller extends CI_Controller
 {   
     public $data = array();
 
@@ -16,7 +17,19 @@ Class WFF_Controller extends CI_Controller
         $this->data["permission"] = $this->authentication->check_permissions();
     }
 
-    protected function _build_template($only_main_content = NULL) {
+    /*
+     * Custom function for reroute many type
+     * @example: Call to test, Type = "CS" -> call to CS_test if exists 
+     */
+
+    function _remap($method, $params = array())
+    { 
+        $type = $this->session->userdata("type");
+        $type_method = ucwords($method) . "_" . $type;
+        return call_user_func_array(array($this, method_exists($this, $type_method) ? $type_method : $method), $params);
+    }
+
+    public function _build_template($only_main_content = NULL) {
         $data = $this->data;
 
         if($only_main_content === NULL) {
@@ -28,6 +41,7 @@ Class WFF_Controller extends CI_Controller
         // Set preference
         $data['template']["theme"]          = $this->session->userdata("theme");
         $data['template']["page_preloader"] = $this->session->userdata("page_preloader");
+        $data['template']["language"]       = $this->session->userdata("language");
 
         $data["currentUri"] = $this->uri->uri_string();
 
@@ -40,19 +54,6 @@ Class WFF_Controller extends CI_Controller
         $data['js'] = $data['css'] = array();
         // JQUERY
         $data['js_nodefer'][] = KENDOUI_PATH . "js/jquery.min.js";
-        /*
-         * BOOTSTRAP 4
-         * bootstrap.min.css -- Bootstrap is included in its original form, unaltered
-         * bootstrap.min.js -- Contain js need for bootstrap 4
-         */
-        // $bs4_css = array('bootstrap.min.css');
-        // foreach($bs4_css as $value) {
-        //     $data['css'][] = base_url('public/bootstrap-4.3.1/') . "css/{$value}";
-        // }
-        // $bs4_js = array('bootstrap.bundle.min.js');
-        // foreach($bs4_js as $value) {
-        //     $data['js'][] = base_url('public/bootstrap-4.3.1/') . "js/{$value}";
-        // }
         /*
          * PROUI CSS -- from template_start
          * bootstrap.min.css -- Bootstrap is included in its original form, unaltered
@@ -118,6 +119,13 @@ Class WFF_Controller extends CI_Controller
         foreach($chat_js as $value) {
             $data['js_nodefer'][] = CHAT_PATH . "{$value}";
         }*/
+
+        /*
+         * Selection js
+         */
+        if($this->session->userdata("text_tool")) {
+            $data["js"][] = base_url() . "public/selection/custom.js";
+        }
         
         /*
          * Use Template to render default

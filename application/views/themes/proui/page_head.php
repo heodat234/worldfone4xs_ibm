@@ -121,7 +121,7 @@
                 <div class="sidebar-content">
                     <!-- Brand -->
                     <a href="<?= base_url() ?>" class="sidebar-brand">
-                        <img src="<?=STEL_PATH?>img/logo-stel.png" alt="icon" width="30" height="30" style="vertical-align: -4px">
+                        <img src="<?=STEL_PATH?>img/logo-stel.png" alt="icon" height="30" style="vertical-align: -4px">
                         <span class="sidebar-nav-mini-hide" style="font-size: 30px"><b style="font-weight: bolder">Worldfone</b></span>
                     </a>
                     <!-- END Brand -->
@@ -151,12 +151,16 @@
 
         <script>
             $("div.sidebar-user-name").text((ENV.agentname || '').toString());
+            if(ENV.typename) {
+                ENV.brandTitle = ENV.typename;
+                $("a.sidebar-brand").addClass("text-center");
+            }
             if(ENV.brandTitle) {
                 $brandTitle = $("a.sidebar-brand span.sidebar-nav-mini-hide");
                 $brandTitle.text(ENV.brandTitle);
                 document.title = ENV.brandTitle;
-                if(ENV.brandTitle.length > 9 && ENV.brandTitle.length < 18) $brandTitle.css("font-size", 20);
-                else if(ENV.brandTitle.length > 18) $brandTitle.css("font-size", 13);
+                if(ENV.brandTitle.length > 7 && ENV.brandTitle.length < 14) $brandTitle.css("font-size", 23);
+                else if(ENV.brandTitle.length >= 14) $brandTitle.css("font-size", 13);
             }
             if(ENV.brandLogo) {
                 $("a.sidebar-brand img").attr("src", ENV.brandLogo);

@@ -21,7 +21,7 @@
                         <div class="row">
                             <div class="col-sm-12 text-center" style="padding: 10px">
                                 <a data-role="button" data-bind="click: uploadExcel">@Upload@ excel</a>
-                                <a data-role="button" data-bind="click: importExcelFromPython">Nhập excel</a>
+<!--                                <a data-role="button" data-bind="click: importExcelFromPython">Nhập excel</a>-->
                                 <div class="hidden">
                                     <input name="file" type="file" id="upload-excel"
                                            data-role="upload"

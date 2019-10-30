@@ -52,6 +52,7 @@ Class Import extends WFF_Controller {
         $file_parts = @pathinfo($file['name']);
         $notallowed_types = 'php|sh|bash';
         $filesize = @filesize($file['tmp_name']);
+        $file_extension = $file_parts['extension'];
         if(strpos($notallowed_types, strtolower($file_parts['extension'])) !== FALSE) throw new Exception("Wrong file type.");
         // if($filesize > 10000000) throw new Exception("File too large. Over 10MB.");
         $new_file_name = str_replace([" ","/"], ["",""], $file['name']);
@@ -80,8 +81,12 @@ Class Import extends WFF_Controller {
             $extension = $this->session->userdata("extension");
             if ($collection1 == 'Datalibrary') {
                 exec('PYTHONIOENCODING=utf-8 python3.6 /var/www/html/python/importCSV.py ' . $idImport . " ". $collection ." ". $extension ." > /dev/null &");
-            }else{
+            }else if ($collection1 == 'Telesalelist'){
                 exec('PYTHONIOENCODING=utf-8 python3.6 /var/www/html/python/importTelesaleCSV.py ' . $idImport . " ". $collection ." ". $extension ." > /dev/null &");
+            }else if ($collection1 == 'Lawsuit'){
+                if ($file_extension = 'xlsx') {
+                    exec('PYTHONIOENCODING=utf-8 python3.6 /var/www/html/python/importLawsuit.py ' . $idImport . " ". $collection ." ". $extension ." > /dev/null &");
+                }
             }
             
             $status = -1;

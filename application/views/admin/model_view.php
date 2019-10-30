@@ -73,25 +73,34 @@ function duplicateForDepartment() {
         for (let i = 0; i < data.length; i++) {
             buttons[data[i].type] = {text: data[i].type};
         }
-         
+
         swal({
           title: "Duplicate",
-          text: 'Duplicate data for new deparment.',
+          text: 'Duplicate data from deparment?',
           icon: "warning",
           buttons: buttons
         })
-        .then(inputText => {
-            if(!inputText) throw null;
-            $.ajax({
-                url: `${ENV.vApi}${Config.collection}/duplicate`,
-                data: {sub: inputText},
-                success: function(e) {
-                    if(e.status) {
-                        Table.dataSource.read();
-                        notification.show("Duplicate success", "success");
-                    } else notification.show("Duplicate not success " + e.message, "error");
-                },
-                error: errorDataSource
+        .then(fromDepartment => {
+            if(!fromDepartment) return;
+            swal({
+              title: "Duplicate",
+              text: 'Duplicate data for new deparment.',
+              icon: "warning",
+              buttons: buttons
+            })
+            .then(toDepartment => {
+                if(!toDepartment) return;
+                $.ajax({
+                    url: `${ENV.vApi}${Config.collection}/duplicate`,
+                    data: {fromDepartment: fromDepartment, toDepartment: toDepartment},
+                    success: function(e) {
+                        if(e.status) {
+                            Table.dataSource.read();
+                            notification.show("Duplicate success", "success");
+                        } else notification.show("Duplicate not success " + e.message, "error");
+                    },
+                    error: errorDataSource
+                })
             })
         })
       }, errorDataSource

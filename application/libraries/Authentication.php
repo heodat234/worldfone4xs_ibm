@@ -25,6 +25,7 @@ class Authentication {
     }
 
     function authenticate_pbx($username, $password) {
+        if( !$username ) throw new Exception("Username empty");
         $this->WFF->load->library("mongo_db");
         // Load db private
         $_db = $this->WFF->config->item("_mongo_db");
@@ -34,9 +35,9 @@ class Authentication {
         // Reset
         $this->WFF->mongo_db->switch_db();
         try {
-            if(!$config) throw new Exception("Not config");
-            //call webservice login
-            $secret = $config['secret_key'];
+        	if(!$config) throw new Exception("Not config");
+        	//call webservice login
+        	$secret = $config['secret_key'];
             $pbx_url = $config["pbx_url"];  
             $curl = curl_init();          
             curl_setopt_array($curl, array(
@@ -62,11 +63,11 @@ class Authentication {
             $responseObj = json_decode($response);
             if( !isset($responseObj->result) ) throw new Exception("Authentication error: $response");
             $this->create_login_session($responseObj->result);
-            return TRUE;
+			return TRUE;
         } catch (Exception $e) {
             $this->WFF->load->library("session");
-            $this->WFF->session->set_flashdata("error", $e->getMessage());
-            return FALSE;
+        	$this->WFF->session->set_flashdata("error", $e->getMessage());
+        	return FALSE;
         }
     }
 
@@ -154,7 +155,7 @@ class Authentication {
         //pre($permissions);
         $uri =  trim($this->WFF->uri->uri_string(), "/");
 
-        $defaultUri = array("");
+        $defaultUri = array("", "undefined");
         $check_flag = in_array($uri, $defaultUri);
 
         $allowUri = array("page");
@@ -231,6 +232,8 @@ class Authentication {
         unset($acc_permission["uri"], $acc_permission["module_id"], $acc_permission["view"], $acc_permission["apis"], $acc_permission["visible"]);
         $acc_permission["actions"]      = $acc_actions;
         $acc_permission["issysadmin"]   = $issysadmin;
+        $acc_permission["isadmin"]      = $this->WFF->session->userdata("isadmin");
+        $acc_permission["issupervisor"] = $this->WFF->session->userdata("issupervisor");
         return $acc_permission;
     }
 
@@ -314,7 +317,7 @@ class Authentication {
             "typename"      => $typename
         );
 
-        // Set preference
+        // Get preference in wff config. Custom here.
         $default_preference = $this->WFF->config->item("default_preference");
         
         $this->WFF->config->load('proui');

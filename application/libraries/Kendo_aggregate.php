@@ -108,7 +108,16 @@ Class Kendo_aggregate {
             if( $model )
             {
                 foreach($model as $field => $property) {
-                    $project[$field] = 1;
+                    if(!isset($property["type"])) continue;
+                    switch ($property["type"]) {
+                        case 'datetime':
+                            $project[$field] = array('$dateToString' => ["format" => "%Y-%m-%dT%H:%M:%S.%LZ","date" => '$'.$field]);
+                            break;
+                        
+                        default:
+                            $project[$field] = 1;
+                            break;
+                    }
                 }
             }
         }
@@ -190,7 +199,7 @@ Class Kendo_aggregate {
             $wheres = array();
             $aggMatches = array();
             for($i = 0, $filters = $filter["filters"], $length = count($filters); $i < $length;  $i++) {
-                $subfilter = $filters[$i];         
+                $subfilter = $filters[$i];
                 $subWhere = $this->filter_convert($subfilter, $model);
                 if($subWhere) 
                 {
@@ -294,7 +303,13 @@ Class Kendo_aggregate {
                             $where[$field] = array();
                             $timeString = preg_replace('/\([^)]*\)/', '', $value);
                             if(!$timeString) throw new Exception("Maybe time value format wrong");
-                            $where[$field][$mongoOperation] = strtotime($timeString) - date('Z');
+                            // Oanh them ngay 22/10/19
+                            if (strpos($value, 'Z') === false) {
+                                $where[$field][$mongoOperation] = strtotime($timeString);
+                            }
+                            else {
+                                $where[$field][$mongoOperation] = strtotime($timeString) - date('Z');
+                            }
                             break;
 
                         // Int filter
@@ -336,12 +351,4 @@ Class Kendo_aggregate {
             return $where;
         }
     }
-
-    function unwind($unwind = '')
-    {
-        if($unwind)
-            $this->_aggregate[] = array('$unwind' => '$' . $unwind);
-        return $this;
-    }
 }
-

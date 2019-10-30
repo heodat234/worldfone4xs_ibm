@@ -5,8 +5,8 @@
  */
 
 var ReadyChat = function() {
-    var chatHeight          = 600; // Default chat container height in large screens
-    var chatHeightSmall     = 300; // Default chat components (talk & people) height in small screens
+    var chatHeight          = 500; // Default chat container height in large screens
+    var chatHeightSmall     = 250; // Default chat components (talk & people) height in small screens
 
     /* Cache some often used variables */
     var chatCon             = $('.chatui-container');

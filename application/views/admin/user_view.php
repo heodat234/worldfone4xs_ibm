@@ -1,3 +1,20 @@
+<style type="text/css">
+    .user-avatar {
+        width: 36px;
+        height: 36px;
+        border: 1px solid lightgray;
+        margin-left: 2px;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.75);
+        overflow: hidden;
+    }
+
+    .user-avatar > img {
+        width: 36px;
+        height: 36px;
+        border-radius: 18px;
+    }
+</style>
 <script>
 function editRole(e) {
     e.preventDefault();
@@ -62,9 +79,13 @@ var Config = {
         }
     },
     columns: [{
-            field: "sipuser",
-            title: "@User@",
-            width: 100
+            width: 60,
+            headerTemplate: `<div class="text-center">@Image@</div>`,
+            template: function(data) {
+                return `<div class="user-avatar">
+                            <img src="/api/v1/avatar/agent/${data.extension}" id="avatar-img" alt="avatar">
+                        </div>`;
+            }
         },{
             field: "extension",
             title: "@Extension@",
@@ -82,7 +103,12 @@ var Config = {
         },{
             field: "role_name",
             title: "@Role@",
-            width: 240
+            width: 150
+        },{
+            field: "lastpingtime",
+            title: "@Last access@",
+            template: data => gridTimestamp(data.lastpingtime, "dd/MM/yy H:mm:ss"),
+            width: 150
         },{
             field: "description",
             title: "@Description@"
@@ -113,9 +139,9 @@ var Config = {
     </ul>
     <!-- END Table Styles Header -->
 
-    <div class="container-fluid">
+    <div class="container-fluid after-breadcrumb">
         <div class="row">
-            <div class="col-sm-12" style="height: 80vh; overflow-y: auto; padding: 0">
+            <div class="col-sm-12" style="overflow-y: auto; padding: 0">
                 <!-- Table Styles Content -->
                 <div id="grid"></div>
                 <!-- END Table Styles Content -->

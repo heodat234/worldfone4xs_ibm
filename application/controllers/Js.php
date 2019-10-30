@@ -40,6 +40,7 @@ Class Js extends CI_Controller {
         $env["avatar"]          = $this->session->userdata("avatar");
         $env["language"]        = $this->session->userdata("language");
         $env["type"]            = $this->session->userdata("type");
+        $env["typename"]        = $this->session->userdata("typename");
         $env["my_session_id"]   = $this->session->userdata("my_session_id");
         $env["agentname"]       = $this->session->userdata("agentname")
             . ($this->session->userdata("test_mode") ? " (TM)" : "");

@@ -143,7 +143,7 @@
 				        <div class="col-sm-6">
 				        	<div style="width: 215px" class="label-primary">
 					        	<a href="javascript:void(0)" class="sidebar-brand" style="padding: 0 10px 0 5px;">
-			                        <img data-bind="attr: {src: item.brand_logo}" alt="icon" style="vertical-align: -4px" width="30" height="30">
+			                        <img data-bind="attr: {src: item.brand_logo}" alt="icon" style="vertical-align: -4px" height="30">
 			                        <span class="sidebar-nav-mini-hide" id="brand-title-view" style="font-size: 30px" data-bind="text: item.brand_title">Worldfone</span>
 			                    </a>
 					        </div>

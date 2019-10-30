@@ -49,7 +49,8 @@ Class Ftp_model extends CI_Model {
 //        print_r($connId);
 //        ftp_put($connId, '/ZACCF.csv', '/var/www/html/worldfone4xs_ibm/upload/csv/ZACCF.csv', FTP_ASCII);
         if($connId) {
-            $fget = ftp_get($connId, (string)$localFilePath, (string)$remoteFilePath, FTP_BINARY);
+            $handle = fopen($localFilePath, 'w');
+            $fget = ftp_fget($connId, $handle, (string)$remoteFilePath,  FTP_BINARY);
             if($fget){
                 $result = array("status" => "1", "message" => "File transfer successful - $localFilePath", "data" => $localFilePath);
             }else{

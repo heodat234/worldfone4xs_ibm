@@ -254,14 +254,9 @@ Class Excel {
 			// Filter
 			$filter = new MyReadFilter();
 			$filter->setRows($from_row, $to_row);
-            print_r("TEST");
-            exit();
 			if($limit_column) {
                 $filter->setColumns("A", $limit_column);
             }
-//			else {
-//                $filter->setColumns("A", $limit_column);
-//            }
 
 			$this->reader->setReadFilter( $filter );
 
