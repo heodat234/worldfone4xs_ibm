@@ -132,7 +132,6 @@ class PHPExcel_IOFactory
 	public static function createWriter(PHPExcel $phpExcel, $writerType = '') {
 		// Search type
 		$searchType = 'IWriter';
-
 		// Include class
 		foreach (self::$_searchLocations as $searchLocation) {
 			if ($searchLocation['type'] == $searchType) {

@@ -323,8 +323,10 @@
           dataType: 'json',
           data: {startDate: startDate, endDate: endDate},
         })
-        .done(function() {
-          console.log("success");
+        .done(function(response) {
+          if (response.status == 1) {
+            window.location = response.data
+          }
         })
         .fail(function() {
           console.log("error");

@@ -268,49 +268,58 @@
                 dangerMode: true,
             })
         }
-        data.map(function(doc) {	
-        	if (doc.uid == dataItem.uid) {
-        		if (doc.checked == 1) {
-        			doc.set("checked",0);
-        		}else{
-        			doc.set("checked",1);
-        		}
-        		doc.random = 0;
-				doc.set("total",doc.count_detail+doc.after_random);
-        	}
-        });
-		var allSelected = $("input.chkbx");
-		$.each(allSelected, function(e){
-		  var row = $(this);
-		  if (row.is(':checked')) {
-		  	var dataItem1 = grid.dataItem(row.closest("tr"));
-		  	checkedIds.push(dataItem1.uid);
-		  }
-		  		 
-		});
-        var total_user = checkedIds.length;
+        // console.log(dataItem.check_assign);
+        if (dataItem.check_assign == true) {
+        	swal({
+                title: "Tiến trình phân công đang diễn ra.",
+                icon: "warning",
+                cancel: true,
+                dangerMode: true,
+            })
+        }else{
+	        data.map(function(doc) {	
+	        	if (doc.uid == dataItem.uid) {
+	        		if (doc.checked == 1) {
+	        			doc.set("checked",0);
+	        		}else{
+	        			doc.set("checked",1);
+	        		}
+	        		doc.random = 0;
+					doc.set("total",doc.count_detail+doc.after_random);
+	        	}
+	        });
+			var allSelected = $("input.chkbx");
+			$.each(allSelected, function(e){
+			  var row = $(this);
+			  if (row.is(':checked')) {
+			  	var dataItem1 = grid.dataItem(row.closest("tr"));
+			  	checkedIds.push(dataItem1.uid);
+			  }
+			  		 
+			});
+	        var total_user = checkedIds.length;
 
- 		var random = i = 0;
-    	if (count_random >= total_user) {
-    		random = parseInt(count_random / total_user);
-    		count_random = parseInt(count_random % total_user);
-    	}
-        checkedIds.map(function(row) {
-            data.map(function(doc) {	
-            	if (doc.uid == row) {
-            		var a = random;
-		        	if (count_random < total_user && i < count_random) {
-		        		a += 1;
-		        		i ++;
-		        	}
-		            b = doc.count_detail + doc.after_random + a;
-		            doc.set("random",a);
-		            doc.set("total",b);
-            	}
- 
-            });
-        });
-
+	 		var random = i = 0;
+	    	if (count_random >= total_user) {
+	    		random = parseInt(count_random / total_user);
+	    		count_random = parseInt(count_random % total_user);
+	    	}
+	        checkedIds.map(function(row) {
+	            data.map(function(doc) {	
+	            	if (doc.uid == row) {
+	            		var a = random;
+			        	if (count_random < total_user && i < count_random) {
+			        		a += 1;
+			        		i ++;
+			        	}
+			            b = doc.count_detail + doc.after_random + a;
+			            doc.set("random",a);
+			            doc.set("total",b);
+	            	}
+	 
+	            });
+	        });
+	    }
     });
 
   	function onDataBound(e) {

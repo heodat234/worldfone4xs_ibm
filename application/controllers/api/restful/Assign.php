@@ -53,11 +53,17 @@ Class Assign extends CI_Controller {
         	$doc['id_import'] = $id_import;
         	$count_fixed += $doc["count_detail"];
         }
-
+        
         $count_random = $response['total'];
         foreach ($users['data'] as &$doc) {
         	$doc['count_random'] = $count_random;
         	$doc['checked'] = 0;
+        	if(isset($import['assign']) && $import['assign'] == -1){
+	        	$doc['check_assign'] = true;
+	        }else{
+	        	$doc['check_assign'] = false;
+	        	
+	        }
         }
         // Result
         $response = array("data" => $users['data'], "total" => $users['total'],"count_random" => $count_random);

@@ -31,13 +31,13 @@ try:
     ftp.downLoadFile("/var/www/html/worldfone4xs_ibm/upload/csv/ftp/ZACCF full.csv", filename)
     ftp.close()
 
-    path, filename = os.path.split("/var/www/html/worldfone4xs_ibm/upload/csv/ftp/ZACCF full.csv")
+    path, file_name = os.path.split("/var/www/html/worldfone4xs_ibm/upload/csv/ftp/ZACCF full.csv")
 
     importLogInfo = {
         'collection'    : "Sibs",
         'begin_import'  : time.time(),
         'file_name'     : filename,
-        'file_path'     : path + '/' + filename,
+        'file_path'     : path + '/' + file_name,
         'source'        : 'ftp',
         'file_type'     : 'csv',
         'status'        : 2,
@@ -51,8 +51,8 @@ try:
         if(model['type'] == 'string'):
             sibsConverters[model['field']] = str
 
-    zaccfs = excel.getDataCSV(file_path=importLogInfo['file_path'], header=0, names=sibsColumns, usecols=[5, 6, 7, 116, 122], converters=sibsConverters)
-    
+    zaccfs = excel.getDataCSV(file_path=importLogInfo['file_path'], header=None, names=sibsColumns, usecols=[5, 6, 7, 116, 122], converters=sibsConverters)
+    pprint(zaccfs)
     zaccfList = zaccfs.to_dict('records')
 
     insertData = []
