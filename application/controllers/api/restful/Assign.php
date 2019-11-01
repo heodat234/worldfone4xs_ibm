@@ -101,11 +101,8 @@ Class Assign extends CI_Controller {
 			}
 			$random = trim($random,',');
 			$extension = trim($extension,',');
-			// $id = $data['id_import'];
-			// $random = $data['random'];
-			// $extension = $data['extension'];
 
-			exec('PYTHONIOENCODING=utf-8 python3.6 /var/www/html/python/assign.py ' . $id . " ". $random ." ". $extension ." > /dev/null &");
+			exec('PYTHONIOENCODING=utf-8 python3.6 /var/www/html/worldfone4xs_ibm/cronjob/python/Telesales/assign.py ' . $id . " ". $random ." ". $extension ." > /dev/null &");
 			echo json_encode(array("status" => -1, "data" => []));
 		}else{
 			echo json_encode(array("status" => 0, "data" => []));

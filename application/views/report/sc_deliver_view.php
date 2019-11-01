@@ -253,7 +253,7 @@
                this.asyncSearch();
             },
              asyncSearch: async function() {
-               var field = "created_at";
+               var field = "createdAt";
                var fromDateTime = new Date(this.fromDateTime.getTime() - timeZoneOffset).toISOString();
                 var toDateTime = new Date(this.toDateTime.getTime() - timeZoneOffset).toISOString();
 

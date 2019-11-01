@@ -52,7 +52,6 @@ Class Sc_deliver extends WFF_Controller {
                $match = array(
                   '$match' => array(
                      '$and' => array(
-                        // array('direction'=> 'outbound'),
                         array('assign' => array('$eq' => $config['extension'])),
                         array('createdAt'=> array( '$gte'=> $start, '$lte'=> $end))
                      )
@@ -92,9 +91,6 @@ Class Sc_deliver extends WFF_Controller {
                          'cond'=> array( '$eq'=> [ '$$item.direction', "outbound" ])
                       )
                    ),
-                  
-                  // 'count_appointment'          => array('$size' => 'appointment_detail'),
-                  // 'count_data'            => 1,
                   'appointment_detail'        => 1
 
                ))
@@ -105,12 +101,9 @@ Class Sc_deliver extends WFF_Controller {
             $total_result = $this->mongo_db->aggregate_pipeline($this->collection, $total_aggregate);
             $total = isset($total_result[0]) ? $total_result[0]['total'] : 0;
             // Get data
-            $data_aggregate = $this->kendo_aggregate->sorting()->paging()->get_data_aggregate();
+            $data_aggregate = $this->kendo_aggregate->get_data_aggregate();
             $data = $this->mongo_db->aggregate_pipeline($this->collection, $data_aggregate);
-            foreach ($data as &$value) {
-              // $temp = (array)$value['_id']['code'];
-              // $value['_id']['code'] = $temp[0];
-              
+            foreach ($data as &$value) {              
               $call_detail = array_filter($value['call_detail'], function($item) {
                   return $item != [];
               });

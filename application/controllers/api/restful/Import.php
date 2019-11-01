@@ -80,12 +80,12 @@ Class Import extends WFF_Controller {
         try {
             $extension = $this->session->userdata("extension");
             if ($collection1 == 'Datalibrary') {
-                exec('PYTHONIOENCODING=utf-8 python3.6 /var/www/html/python/importCSV.py ' . $idImport . " ". $collection ." ". $extension ." > /dev/null &");
+                exec('PYTHONIOENCODING=utf-8 python3.6 /var/www/html/worldfone4xs_ibm/cronjob/python/Telesales/importDataLibrary.py ' . $idImport . " ". $collection ." ". $extension ." > /dev/null &");
             }else if ($collection1 == 'Telesalelist'){
-                exec('PYTHONIOENCODING=utf-8 python3.6 /var/www/html/python/importTelesaleCSV.py ' . $idImport . " ". $collection ." ". $extension ." > /dev/null &");
+                exec('PYTHONIOENCODING=utf-8 python3.6 /var/www/html/worldfone4xs_ibm/cronjob/python/Telesales/importTelesale.py ' . $idImport . " ". $collection ." ". $extension ." > /dev/null &");
             }else if ($collection1 == 'Lawsuit'){
                 if ($file_extension = 'xlsx') {
-                    exec('PYTHONIOENCODING=utf-8 python3.6 /var/www/html/python/importLawsuit.py ' . $idImport . " ". $collection ." ". $extension ." > /dev/null &");
+                    exec('PYTHONIOENCODING=utf-8 python3.6 /var/www/html/worldfone4xs_ibm/cronjob/python/Loan/importLawsuit.py ' . $idImport . " ". $collection ." ". $extension ." > /dev/null &");
                 }
             }
             

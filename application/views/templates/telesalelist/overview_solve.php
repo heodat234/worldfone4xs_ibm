@@ -32,6 +32,7 @@
 <script>
     var Config = Object.assign(Config, {
         crudApi: `${ENV.restApi}`,
+        vApi: `${ENV.vApi}`,
         templateApi: `${ENV.templateApi}`,
         collection: "Telesalelist_solve",
         observable: {
@@ -209,7 +210,7 @@
             })
         }else{
             $.ajax({
-                url: Config.crudApi + Config.collection + '/changeAssign',
+                url: Config.vApi + 'Assign/changeAssign',
                 type: 'POST',
                 data: {assign: assign, select: select},
                 beforeSend: function(){

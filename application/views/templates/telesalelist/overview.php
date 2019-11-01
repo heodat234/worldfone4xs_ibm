@@ -25,6 +25,7 @@
     var Config = Object.assign(Config, {
         filter: '<?= $id ?>' != '' ? {field: "id_import", operator: "eq", value: '<?= $id ?>'} : null,
         crudApi: `${ENV.restApi}`,
+        vApi: `${ENV.vApi}`,
         templateApi: `${ENV.templateApi}`,
         collection: "Telesalelist",
         observable: {
@@ -181,7 +182,7 @@
             })
         }else{
             $.ajax({
-                url: Config.crudApi + Config.collection + '/changeAssign',
+                url: Config.vApi + 'Assign/changeAssign',
                 type: 'POST',
                 data: {assign: assign, select: select},
                 beforeSend: function(){
