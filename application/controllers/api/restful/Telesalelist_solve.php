@@ -84,21 +84,4 @@ Class Telesalelist_solve extends WFF_Controller {
 			echo json_encode(array("status" => 0, "message" => $e->getMessage()));
 		}
 	}
-
-	function changeAssign()
-	{
-		try {
-			$post = $this->input->post();
-			$assign = $post['assign'];
-			$data = array('assign' => $assign, 'assigned_by' => 'ByAdmin');
-			// var_dump($data);exit;
-			foreach ($post['select'] as $row) {
-				$this->crud->where_id($row)->update($this->collection, array('$set' => $data));
-			}
-			
-			echo json_encode(array("status" => 1, "data" => []));
-		} catch (Exception $e) {
-			echo json_encode(array("status" => 0, "message" => $e->getMessage()));
-		}
-	}
 }

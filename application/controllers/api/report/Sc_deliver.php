@@ -95,7 +95,7 @@ Class Sc_deliver extends WFF_Controller {
 
                ))
             );
-            $this->kendo_aggregate->set_kendo_query($request)->selecting()->adding($match,$lookup_call,$lookup,$group)->filtering();
+            $this->kendo_aggregate->set_kendo_query($request)->selecting()->adding($match/*,$lookup_call*/,$lookup,$group)->filtering();
             // Get total
             $total_aggregate = $this->kendo_aggregate->get_total_aggregate();//  pre($total_aggregate);
             $total_result = $this->mongo_db->aggregate_pipeline($this->collection, $total_aggregate);

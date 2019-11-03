@@ -58,7 +58,7 @@ Class Dealer extends WFF_Controller {
             $errorMesg = '';
             $errorCount = 0;
             if($data) {
-                $this->mongo_db->delete($this->collection);
+                $this->mongo_db->delete_all($this->collection);
                 foreach ($data as $index => $doc) {
                     $doc['dealer_code'] = (string)$doc['dealer_code'];
                     $errorCell = '';

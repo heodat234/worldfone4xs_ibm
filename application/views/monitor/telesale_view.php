@@ -20,11 +20,10 @@
         <li data-bind="text: breadcrumb"></li>
         <li class="pull-right none-breakcrumb" id="top-row">
             <div class="btn-group btn-group-sm">
-            	<button href="#/performance" class="btn btn-alt btn-default" data-bind="click: goTo, css: {active: activeArray[0]}">@Performance@</button>
-                <button href="#/" class="btn btn-alt btn-default" data-bind="click: goTo, css: {active: activeArray[1]}">@Overview@</button>
-                <button href="#/callin" class="btn btn-alt btn-default" data-bind="click: goTo, css: {active: activeArray[2]}">@Call in@</button>
-                <button href="#/callout" class="btn btn-alt btn-default" data-bind="click: goTo, css: {active: activeArray[3]}">@Call out@</button>
-                <button href="#/activity" class="btn btn-alt btn-default" data-bind="click: goTo, css: {active: activeArray[4]}">@Activity@</button>
+                <button href="#/" class="btn btn-alt btn-default" data-bind="click: goTo, css: {active: activeArray[0]}">@Overview@</button>
+                <button href="#/callin" class="btn btn-alt btn-default" data-bind="click: goTo, css: {active: activeArray[1]}">@Call in@</button>
+                <button href="#/callout" class="btn btn-alt btn-default" data-bind="click: goTo, css: {active: activeArray[2]}">@Call out@</button>
+                <button href="#/activity" class="btn btn-alt btn-default" data-bind="click: goTo, css: {active: activeArray[3]}">@Activity@</button>
             </div>
         </li>
     </ul>

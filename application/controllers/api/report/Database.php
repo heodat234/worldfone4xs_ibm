@@ -201,4 +201,73 @@ Class Database extends WFF_Controller {
             echo json_encode(array("status" => 0, "message" => $e->getMessage()));
         }
     }
+
+    function export_document()
+    {
+        try {
+            $db         = $this->input->post("db");
+            $collection = $this->input->post("collection");
+            $id         = $this->input->post("id");
+            $path = APPPATH . "database/document/";
+            if (!@file_exists($path)) { 
+                @mkdir($path, 0644);
+            }
+            $file_name = "{$db}@{$collection}@{$id}.json";
+            $file_path = $path . $file_name;
+            if($this->username) {
+                $command = "mongoexport --username {$this->username} --password {$this->password} --authenticationDatabase admin --db $db --collection $collection --query '{\"_id\":ObjectId(\"$id\")}' --out $file_path";
+            } else {
+                $command = "mongoexport --db $db --collection $collection --query '{\"_id\":ObjectId(\"$id\")}' --out $file_path";
+            }
+            $result = exec($command);
+            echo json_encode(array("status" => 1, "message" => "Export success {$file_name}"));
+        } catch (Exception $e) {
+            echo json_encode(array("status" => 0, "message" => $e->getMessage()));
+        }
+    }
+
+    function json_file_list($db, $collection)
+    {
+        try {
+            $path = APPPATH . "database/document/";
+            $files =  array_filter(scandir($path), function($v) use ($db, $collection) {
+                return strpos($v, $db . "@" . $collection) === 0;
+            });
+            $data = [];
+            foreach ($files as $key => $value) {
+                $data[] = array("file" => $value, "content" => file_get_contents($path . $value));
+            }
+            echo json_encode(array("status" => 1, "data" => $data, "total" => count($files)));
+        } catch (Exception $e) {
+            echo json_encode(array("status" => 0, "message" => $e->getMessage()));
+        }
+    }
+
+    function import_document($delete = "")
+    {
+        try {
+            $file         = $this->input->post("file");
+            list($db, $collection, $id_with_ext_json) = explode("@", $file);
+            $path = APPPATH . "database/document/";
+            if (!@file_exists($path)) { 
+                throw new Exception("Folder not exists");
+            }
+            $file_path = $path. $file;
+            if (!@file_exists($file_path)) { 
+                throw new Exception("File not exists");
+            }
+            if($this->username) {
+                $command = "mongoimport --username {$this->username} --password {$this->password} --authenticationDatabase admin --db $db --collection $collection $file_path";
+            } else {
+                $command = "mongoimport --db $db --collection $collection $file_path";
+            }
+            $result = exec($command);
+            if($delete)
+                unlink($file_path);
+            else rename($path . $file, $path . $db . "@" . $collection . "@imported.json");
+            echo json_encode(array("status" => 1, "message" => "Import success"));
+        } catch (Exception $e) {
+            echo json_encode(array("status" => 0, "message" => $e->getMessage()));
+        }
+    }
 }

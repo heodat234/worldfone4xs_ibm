@@ -13,7 +13,7 @@ Class Popup extends CI_Controller {
         $this->load->model("language_model");
         $user_type = $this->session->userdata("type");
         switch ($user_type) {
-            case "2":
+            case "TS":
                 $view = $this->telesale();
                 break;
             default:

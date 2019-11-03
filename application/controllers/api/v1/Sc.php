@@ -58,7 +58,7 @@ Class Sc extends WFF_Controller {
             $errorMesg = '';
             $errorCount = 0;
             if($data) {
-                $this->mongo_db->delete($this->collection);
+                $this->mongo_db->delete_all($this->collection);
                 foreach ($data as $index => $doc) {
                     if(array_filter($doc)) {
                         $doc['sc_code'] = (string)$doc['sc_code'];

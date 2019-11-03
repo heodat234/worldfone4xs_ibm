@@ -29,4 +29,10 @@ Class Monitor extends WFF_Controller {
 		$this->output->data["js"][] = STEL_PATH . "js/monitor/telesale.js";
 		$this->load->view('monitor/telesale_view');
 	}
+
+	public function performance()
+	{
+		$this->output->data["css"][] = STEL_PATH . "css/table.css";
+		$this->load->view('monitor/performance_view');
+	}
 }

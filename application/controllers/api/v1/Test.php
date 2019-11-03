@@ -9,15 +9,15 @@ Class Test extends CI_Controller {
 		parent::__construct();
 	}
 
-	function index()
+	function index($id = "")
 	{
-		$this->load->model("pbx_model");
-		$data = $this->pbx_model->list_queues();
-	    pre($data);
+		$this->load->library("session");
+		pre($this->session->userdata("role_name"));
 	}
 
-	function update($id)
+	function update()
 	{
-		
+		$this->load->model("afterlogin_model");
+		$data = $this->afterlogin_model->update_user();
 	}
 }

@@ -96,25 +96,6 @@ Class Sc_schedule extends WFF_Controller {
         }
     }
 
-//    function getFileFromFTP() {
-//        try {
-//            $connResult = $this->connectToFTP->connectToFTP();
-//            if($connResult['status'] == 1) {
-//                $connId = $connResult['data'];
-//                $listFTPResult = $this->connectToFTP->listFileInFTP($connId, '.');
-//                if($listFTPResult['status'] == 1) {
-//
-//                }
-//                else echo json_encode(array("status" => 0, "message" => $listFTPResult['message']));
-//            }
-//            else {
-//                echo json_encode(array("status" => 0, "message" => $connResult['message']));
-//            }
-//        }
-//        catch (Exception $e) {
-//            echo json_encode(array("status" => 0, "message" => $e->getMessage()));
-//        }
-//    }
     function read() {
 	    try {
 	        $result = array();

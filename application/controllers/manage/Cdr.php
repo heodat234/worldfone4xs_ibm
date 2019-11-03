@@ -13,8 +13,7 @@ class Cdr extends WFF_Controller {
     	$this->output->data["css"][] = STEL_PATH . "css/table.css";
         $this->output->data["js"][] = STEL_PATH . "js/table.js";
         $this->output->data["js"][] = STEL_PATH . "js/tools.js";
-		$this->output->data["js"][] = STEL_PATH . "js/manage/cdr.js";
-        $this->output->data["js"][] = KENDOUI_PATH . "js/jszip.min.js";
-        $this->load->view('manage/cdr_view');
+        $data["filter"] = $this->input->get("filter");
+        $this->load->view('manage/cdr_view', $data);
     }
 }

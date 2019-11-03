@@ -16,9 +16,11 @@ Class Sibs_solve extends WFF_Controller {
     function read()
     {
         try {
-            $match = array();
+            $match = array(
+                'cif'   => array()
+            );
             $request = json_decode($this->input->get("q"), TRUE);
-            $telesaleList = $this->crud->where(array('assign' => $this->session->userdata("extension")))->get(set_sub_collection('Telesalelist'), array('cif', 'last_modified', 'assigned_by', 'id'));
+            $telesaleList = $this->crud->where(array('assign' => $this->session->userdata("extension")))->get(set_sub_collection('Telesalelist'), array('cif', 'assign'));
             if(!empty($telesaleList)) {
                 $listCIF = array_values(array_unique(array_column($telesaleList, 'cif')));
                 $match['cif'] = array(

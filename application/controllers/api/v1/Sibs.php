@@ -95,7 +95,7 @@ Class Sibs extends WFF_Controller {
 
     function downloadFileFromFTP() {
         try {
-            $result = $this->ftp_model->downloadFileFromFTP("/var/www/html/worldfone4xs_ibm/upload/csv/ftp/ZACCF full.csv", '/ZACCF full.csv', FTP_BINARY);
+            $result = $this->ftp_model->downloadFileFromFTP("/var/www/html/worldfone4xs_ibm/upload/csv/ftp/ZACCF.csv", 'ZACCF.csv', FTP_BINARY);
             echo json_encode(array("status" => 1, "message" => '', 'data' => $result['data']));
         }
         catch (Exception $e) {
