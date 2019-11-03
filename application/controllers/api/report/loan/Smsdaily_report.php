@@ -25,11 +25,9 @@ Class Smsdaily_report extends WFF_Controller {
     {
         try {
             $request = json_decode($this->input->get("q"), TRUE);
-            // print_r($request);
             $response = $this->crud->read($this->collection, $request);
 
             $data = array();
-            print_r($response);
             foreach ($response['data'] as &$value) {
                if ( ((int)$value['overdue_amount_this_month'] - (int)$value['advance_balance'] > 40000) || ((int)$value['overdue_amount_this_month'] - (int)$value['advance_balance'] < 40000 && $value['installment_type'] == 'n') ){
                   array_push($data, $value);
