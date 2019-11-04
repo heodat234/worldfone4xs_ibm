@@ -26,6 +26,55 @@ Class Sc_deliver extends WFF_Controller {
 
             $model = $this->crud->build_model($this->collection);
             $this->load->library("kendo_aggregate", $model);
+            $this->kendo_aggregate->set_default("sort", null);
+
+            if ($config['issupervisor'] || $config['isadmin']) {
+               $match = array();
+            }
+            else if(!$config['issupervisor'] && !$config['isadmin']){
+               $match = array(
+                  '$match' => array('assign' => array('$eq' => $config['extension']))
+               );
+            }
+            $group = array(
+               '$group' => array(
+                  '_id' => array('code'=>'$source'),
+                  "id_no_arr" => array( '$push' => '$id_no' ),
+                  "mobile_phone_no_arr" => array( '$push' => '$mobile_phone_no' ),
+               )
+            );
+            $this->kendo_aggregate->set_kendo_query($request)->filtering()->adding($match, $group);
+            // Get total
+            $total_aggregate = $this->kendo_aggregate->get_total_aggregate();
+            $total_result = $this->mongo_db->aggregate_pipeline($this->collection, $total_aggregate);
+            $total = isset($total_result[0]) ? $total_result[0]['total'] : 0;
+            // Get data
+            $data_aggregate = $this->kendo_aggregate->paging()->get_data_aggregate();
+            $data = $this->mongo_db->aggregate_pipeline($this->collection, $data_aggregate);
+            foreach ($data as &$value) {              
+              $value['count_data'] = !empty($value["mobile_phone_no_arr"]) ? 
+              $this->mongo_db->where(
+                array("customernumber" => ['$in' => $value["mobile_phone_no_arr"]], "direction" => "outbound")
+              )->count($this->call_collection) : 0;
+              $value['count_appointment'] = !empty($value["id_no"]) ? $this->mongo_db->where_in("cmnd", $value["id_no_arr"])->count($this->app_collection) : 0;
+              unset($value["mobile_phone_no_arr"], $value["id_no_arr"]);
+            }
+            $response = array("data" => $data, "total" => $total);
+            echo json_encode($response);
+        } catch (Exception $e) {
+            echo json_encode(array("status" => 0, "message" => $e->getMessage()));
+        }
+    }
+
+    function index_old()
+    {
+        try {
+            $request = json_decode($this->input->get("q"), TRUE);
+
+            $config = $this->session->userdata();
+
+            $model = $this->crud->build_model($this->collection);
+            $this->load->library("kendo_aggregate", $model);
             $project = array();
             foreach ($model as $key => $value) {
                $project[$key] = 1;
@@ -95,13 +144,13 @@ Class Sc_deliver extends WFF_Controller {
 
                ))
             );
-            $this->kendo_aggregate->set_kendo_query($request)->selecting()->adding($match/*,$lookup_call*/,$lookup,$group)->filtering();
+            $this->kendo_aggregate->set_kendo_query($request)->selecting()->adding($match/*,$lookup_call,$lookup*/,$group)->filtering();
             // Get total
             $total_aggregate = $this->kendo_aggregate->get_total_aggregate();//  pre($total_aggregate);
             $total_result = $this->mongo_db->aggregate_pipeline($this->collection, $total_aggregate);
             $total = isset($total_result[0]) ? $total_result[0]['total'] : 0;
             // Get data
-            $data_aggregate = $this->kendo_aggregate->get_data_aggregate();
+            $data_aggregate = $this->kendo_aggregate->paging()->get_data_aggregate();
             $data = $this->mongo_db->aggregate_pipeline($this->collection, $data_aggregate);
             foreach ($data as &$value) {              
               $call_detail = array_filter($value['call_detail'], function($item) {
