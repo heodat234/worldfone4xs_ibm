@@ -80,11 +80,15 @@
                     <div class="block-options pull-right">
                         <span id="list-indexes"></span>
                         <a role="button" class="btn btn-sm btn-alt btn-success" href="javascript:void(0)" data-bind="click: createIndex"><i class="fa fa-sort"></i> <b>Add Index</b></a>
+                        <a role="button" class="btn btn-sm btn-alt btn-success" href="javascript:void(0)" data-bind="click: createColumn"><i class="fa fa-columns"></i> <b>Add Column</b></a>
+                        <a role="button" class="btn btn-sm btn-alt btn-success" href="javascript:void(0)" data-bind="click: importDocument"><i class="fa fa-database"></i> <b>Import</b></a>
+                        <a href="javascript:void(0)" class="btn btn-alt btn-sm btn-primary" data-toggle="block-toggle-fullscreen"><i class="fa fa-desktop"></i></a>
                     </div>
                 </div>
                 <!-- END Web Server Title -->
 
                 <div>
+                    <div id="json-file-list" data-bind="visible: importJsonVisible" style="margin-bottom: 10px"></div>
                     <div id="grid"></div>
                 </div>
 
@@ -115,7 +119,8 @@ var Config = {
     observable: {
     },
     model: {
-        id: "id"
+        id: "id",
+        fields: {}
     },
     parse: function(res) {
         res.data.map(doc => {
@@ -134,6 +139,7 @@ var Table = function() {
     return {
         dataSource: {},
         columns: Config.columns,
+        customColumns: [],
         init: function() {
             var dataSource = this.dataSource = new kendo.data.DataSource({
                 serverFiltering: true,
@@ -183,11 +189,12 @@ var Table = function() {
                 resizable: true,
                 pageable: {
                     refresh: true,
-                    pageSizes: true,
+                    pageSizes: [10,20,50,100],
                     input: true,
                     messages: KENDO.pageableMessages ? KENDO.pageableMessages : {}
                 },
                 sortable: true,
+                reorderable: true,
                 scrollable: Boolean(Config.scrollable),
                 columns: this.columns,
                 filterable: Config.filterable ? Config.filterable : true,
@@ -345,6 +352,8 @@ var Table = function() {
                 })
                 this.collections.data(collectionData);
                 detailData(this.get("dbname"), collectionName);
+                this.set("importJsonVisible", false);
+                Table.customColumns = [];
             },
             restoreCollection: function(e) {
                 var dbname = this.get('dbname');
@@ -449,11 +458,74 @@ var Table = function() {
                 var kendoView = new kendo.View("add-index-template", {model: model, wrap: false});
                 kendoView.render("#add-index-container");
                 $("#add-index-popup").data("kendoWindow").center().open();
-            }
+            },
+            createColumn: function() {
+                if($("#add-column-popup").data("kendoWindow")) {
+                    $("#add-column-popup").data("kendoWindow").destroy();
+                }
+                var model = {
+                    item: {width: 100, type: "string"},
+                    dataTypeOption: ["string", "number", "date", "boolean"],
+                    close: function(e) {
+                        $("#add-column-popup").data("kendoWindow").close();
+                    },
+                    add: function(e) {
+                        var dataItem = this.get("item").toJSON();
+                        Table.customColumns.push(dataItem);
+                        Config.model.fields[dataItem.field] = {type: dataItem.type}
+                        detailData(Config.database, Config.collection);
+                        this.close();
+                    }
+                };
+                var kendoView = new kendo.View("add-column-template", {model: model, wrap: false});
+                kendoView.render("#add-index-container");
+                $("#add-column-popup").data("kendoWindow").center().open();
+            },
+            importDocument: function() {
+                this.set("importJsonVisible", true);
+                var db = this.get("dbname"),
+                    collection = this.get("item.srcCollection");
+                $jsonFileList = $("#json-file-list");
+                if($jsonFileList.data("kendoGrid")) {
+                    $jsonFileList.data("kendoGrid").destroy();
+                    $jsonFileList.empty();
+                }
+                $("#json-file-list").kendoGrid({
+                    columns: [
+                        {field: "file", title: "File", width: 320},
+                        {field: "content", title: "Content", template: data => gridLongText(data.content, 70)},
+                        {field: "time", title: "Last access", width: 140, template: data => gridTimestamp(data.time)},
+                        {title: "Action", command: [{name: "import", text: "Import", click: importFile}, {name: "importthendelete", text: "Import then Delete", click: importFileThenDelete}], width: 120}
+                    ],
+                    sortable: true,
+                    filterable: KENDO.filterable,
+                    serverPaging: false,
+                    pageable: {refresh: true, pageSizes: [5, 10, 20, 50, 100, "all"], pageSize: 5},
+                    dataSource: {
+                        transport: {
+                            read: ENV.reportApi + `database/json_file_list/${db}/${collection}`,
+                        },
+                        schema: {
+                            data: "data",
+                            total: "total"
+                        }
+                    },
+                    detailTemplate: kendo.template($("#detail-template").html()),
+                    detailInit:  function(e) {
+                        var container = $(e.detailCell).find(".jsoneditor"); 
+                        var options = {
+                            mode: 'code',
+                            modes: ['tree','code']
+                        };
+                        var jsonEditor = new JSONEditor(container[0], options);
+                        jsonEditor.set(JSON.parse(e.data.content));
+                    },
+                });
+            },
         }));    
     }
 
-    function detailData(database, collection) {
+    function detailData(database, collection, columns = []) {
         if(Table.grid) {
             Table.grid.destroy();
             Table.grid = false;
@@ -463,7 +535,7 @@ var Table = function() {
             serverFiltering: true,
             serverSorting: true,
             serverPaging: true,
-            pageSize: 1,
+            pageSize: 10,
             transport: {
                 read: `${Config.crudApi}data/${database}/${collection}`,
                 parameterMap: parameterMap
@@ -475,7 +547,6 @@ var Table = function() {
         collectionFields.read().then(() => {
             var data = collectionFields.data().toJSON();
             if(data[0]) {
-                var columns = [];
                 var listedProp = [];
                 data.forEach((doc, idx) => {
                     for(var prop in doc) {
@@ -487,9 +558,8 @@ var Table = function() {
                 })
                 Config.database = database;
                 Config.collection = collection;
-                Table.columns = columns;
+                Table.columns = Table.customColumns.concat(columns);
                 Table.init();
-
                 listIndexes(database, collection);
             }
         })
@@ -552,10 +622,69 @@ var Table = function() {
             }
         });
     }
+
+    function exportDataItem(ele) {
+        swal({
+            title: "Are you sure?",
+            text: "Export this document to JSON file!",
+            icon: "warning",
+            buttons: true,
+            dangerMode: true,
+        })
+        .then((sure) => {
+            if (sure) {
+                var dataItem = Table.dataSource.getByUid($(ele).data("uid"));
+                $.ajax({
+                    url: ENV.reportApi + `database/export_document`,
+                    data: {db: Config.database, collection: Config.collection, id: dataItem.id},
+                    type: "POST",
+                    success: (res) => {
+                        if(res.status) {
+                            notification.show(res.message, "success");
+                        } else notification.show(res.message, "error");
+                    }
+                })
+            }
+        });
+    }
+
+    function importFile(e) {
+        e.preventDefault();
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        $.post({
+            url: ENV.reportApi + "database/import_document",
+            data: {file: dataItem.file},
+            success: function(res) {
+                if(res.status) {
+                    Table.dataSource.read();
+                    notification.show(res.message, "success");
+                    $("#json-file-list").data("kendoGrid").dataSource.read();
+                } else notification.show(res.message, "error");
+            }
+        })
+    }
+
+    function importFileThenDelete(e) {
+        e.preventDefault();
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        $.post({
+            url: ENV.reportApi + "database/import_document/delete",
+            data: {file: dataItem.file},
+            success: function(res) {
+                if(res.status) {
+                    Table.dataSource.read();
+                    notification.show(res.message, "success");
+                    $("#json-file-list").data("kendoGrid").dataSource.read();
+                } else notification.show(res.message, "error");
+            }
+        })
+    }
 </script>
 
 <div id="action-menu">
     <ul>
+        <a href="javascript:void(0)" data-type="export" onclick="exportDataItem(this)"><li><i class="fa fa-file-code-o text-success"></i><span>Export</span></li></a>
+        <li class="devide"></li>
         <a href="javascript:void(0)" data-type="delete" onclick="deleteDataItem(this)"><li><i class="fa fa-times-circle text-danger"></i><span>Delete</span></li></a>
     </ul>
 </div>
@@ -608,6 +737,39 @@ var Table = function() {
             </div>
             <div class="k-edit-buttons k-state-default">
                 <a class="k-button k-primary k-scheduler-update" data-bind="click: save">Save</a>
+                <a class="k-button k-scheduler-cancel" href="#" data-bind="click: close">Cancel</a>
+            </div>
+        </div>
+    </div>
+</script>
+
+<script type="text/x-kendo-template" id="add-column-template">
+    <div data-role="window" id="add-column-popup" style="padding: 14px 0"
+         data-title="Add column"
+         data-visible="false"
+         data-actions="['Close']"
+         data-bind="">
+        <div class="k-edit-form-container" style="width: 360px">
+            <div class="k-edit-label" style="width: 20%">
+                <label>Field</label>
+            </div>
+            <div class="k-edit-field" style="width: 70%">
+                <input class="k-textbox" data-bind="value: item.field" style="width: 100%">
+            </div>
+            <div class="k-edit-label" style="width: 20%">
+                <label>Width</label>
+            </div>
+            <div class="k-edit-field" style="width: 70%">
+                <input data-role="numerictextbox" data-format="n0" data-bind="value: item.width" style="width: 100%">
+            </div>
+            <div class="k-edit-label" style="width: 20%">
+                <label>Type</label>
+            </div>
+            <div class="k-edit-field" style="width: 70%">
+                <input data-role="dropdownlist" data-bind="value: item.type, source: dataTypeOption" style="width: 100%">
+            </div>
+            <div class="k-edit-buttons k-state-default">
+                <a class="k-button k-primary k-scheduler-update" data-bind="click: add">Add</a>
                 <a class="k-button k-scheduler-cancel" href="#" data-bind="click: close">Cancel</a>
             </div>
         </div>

@@ -42,11 +42,12 @@ var Config = {
         },
         width: 100
     },{
+        field: "dialtype",
+        title: "@Dial type@",
+        width: 100
+    },{
         field: "starttime",
         title: "@Time@",
-        /*template: function(dataItem) {
-            return (kendo.toString(dataItem.starttime, "dd/MM/yy H:mm:ss") ||  "").toString();
-        },*/
         format: "{0: dd/MM/yy HH:mm}",
         width: 100
     },{
@@ -57,10 +58,6 @@ var Config = {
         field: "agentname",
         title: "@Agent name@",
         width: 100
-    },{
-        field: "serviceLv",
-        title: "Service level",
-        width: 140
     },{
         field: "customer.name",
         title: "@Customer name@",
@@ -100,10 +97,6 @@ var Config = {
         field: "callduration",
         title: "@Call duration@",
         width: 120
-    /*},{
-        title: "Recording",
-        template: (data) => templateRecord(data),
-        width: 100*/
     },{
         // Use uid to fix bug data-uid of row undefined
         template: '<a role="button" class="btn btn-sm btn-circle btn-action btn-primary" data-uid="#: uid #"><i class="fa fa-ellipsis-v"></i></a>',
@@ -145,6 +138,13 @@ $(document).on("click", ".grid-name", function() {
         url = ENV.baseUrl + "manage/customer/#/detail/" + id;
     window.open(url,'_blank','noopener');
 })
+
+window.onload = function() {
+    <?php if(!empty($filter)) { ?>
+        Config.filter = <?= $filter ?>;
+    <?php } ?>
+    Table.init();
+}
 </script>
 
 <!-- Table Styles Header -->

@@ -60,14 +60,14 @@
                                                 <i class="fa fa-linkedin fa-stack-1x"></i>
                                             </span>
                                         </a>
-                                        <span data-bind="text: item.customer_name" class="copy-item"></span>
+                                        <span style="margin-left: 31px;" data-bind="text: item.customer_name" class="copy-item"></span>
                                     </h4>
                                     <i data-bind="text: item.job"></i>
                                     <span data-bind="visible: item.work_location"> at </span>
                                     <b data-bind="text: item.work_location"></b>
                                     <i class="text-danger" data-bind="text: item.status"></i>
                                 </div>
-                                <div class="col-sm-3 text-center" style="padding-top: 8px">
+                                <div class="col-sm-3 text-right" style="padding-top: 8px">
                                     <div class="btn-group">
                                         <a class="btn btn-alt btn-default btn-sm" data-type="update" onclick="openForm({title: '@Edit@ @Customer@ ' + Detail.model.get('item').customer_name}); editForm()" data-role="tooltip" title="@Edit@">
                                             <i class="fa fa-pencil"></i>

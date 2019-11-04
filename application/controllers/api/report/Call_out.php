@@ -5,6 +5,7 @@ Class Call_out extends WFF_Controller {
 
     private $collection = "worldfonepbxmanager";
     private $sub_collection = "Appointment";
+    private $ts_collection = "Telesalelist";
 
     function __construct()
     {
@@ -13,6 +14,7 @@ Class Call_out extends WFF_Controller {
         $this->load->library("crud");
         $this->collection = set_sub_collection($this->collection);
         $this->sub_collection = set_sub_collection($this->sub_collection);
+        $this->ts_collection = set_sub_collection($this->ts_collection);
     }
 
     function index()
@@ -23,6 +25,7 @@ Class Call_out extends WFF_Controller {
             $config = $this->session->userdata();
 
             $model = $this->crud->build_model($this->collection);
+            $model['dialid'] = array('type'=>'string');
             $this->load->library("kendo_aggregate", $model);
             $project = array();
             foreach ($model as $key => $value) {
@@ -58,12 +61,21 @@ Class Call_out extends WFF_Controller {
                   )
                );
             }
+            
             $lookup = array(
                '$lookup' => array(
                   "from" => $this->sub_collection,
                    "localField" => "userextension",
                    "foreignField" => "tl_code",
                    "as" => "appointment_detail"
+               )
+            );
+            $ts_lookup = array(
+               '$lookup' => array(
+                  "from" => $this->ts_collection,
+                   "localField" => "dialid",
+                   "foreignField" => '_id',
+                   "as" => "ts_detail"
                )
             );
             $group = array(
@@ -73,15 +85,17 @@ Class Call_out extends WFF_Controller {
                   'count_called' => array('$sum'=> 1),
                   'disposition' => array( '$push'=> '$disposition' ),
                   'count_appointment' => array('$addToSet'=> '$count_appointment'),
+                  'is_potential' => array( '$push'=> '$ts_detail' ),
                )
             );
             $project = array(
                '$project' => array_merge($project, array(
                   'count_appointment'          => array('$size' => '$appointment_detail'),
+                  'ts_detail'          => array('$size' => '$ts_detail'),
 
                ))
             );
-            $this->kendo_aggregate->set_kendo_query($request)->selecting()->adding($match,$lookup,$project,$group)->filtering();
+            $this->kendo_aggregate->set_kendo_query($request)->selecting()->adding($match,$lookup,$ts_lookup,$project,$group)->filtering();
             // Get total
             $total_aggregate = $this->kendo_aggregate->get_total_aggregate();//  pre($total_aggregate);
             $total_result = $this->mongo_db->aggregate_pipeline($this->collection, $total_aggregate);
@@ -89,7 +103,9 @@ Class Call_out extends WFF_Controller {
             // Get data
             $data_aggregate = $this->kendo_aggregate->sorting()->paging()->get_data_aggregate();
             $data = $this->mongo_db->aggregate_pipeline($this->collection, $data_aggregate);
+            // var_dump($data);exit;
             foreach ($data as &$value) {
+              $value['count_potential'] = array_sum($value['is_potential']);
                $value['count_appointment'] = $value['count_appointment'][0];
                $value['count_success'] = $value['count_dont_pickup']  = 0;
                $arr = array_count_values($value['disposition']);

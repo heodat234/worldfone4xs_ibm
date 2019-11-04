@@ -144,7 +144,7 @@
                 notification.show("Can't find Divide List", "error");
                 return;
             }
-            layoutViewModel.set("breadcrumb", `Divide List`);
+            layoutViewModel.set("breadcrumb", `@Divide List@`);
             var HTML = await $.get(`${Config.templateApi}telesalelist/divide_list?id=${id}`);
             var model = {
             }

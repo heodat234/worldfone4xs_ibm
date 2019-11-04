@@ -770,7 +770,7 @@ var Config = Object.assign(Config, {
             $.ajax({
                 async: false,
                 global: false,
-                url: ENV.vApi + "group/getListGoupIdName",
+                url: ENV.vApi + "group/getListGroupIdName",
                 success: function (response) {
                     tmp = response;
                 },

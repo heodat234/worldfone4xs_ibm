@@ -235,7 +235,9 @@ Class Database extends WFF_Controller {
             });
             $data = [];
             foreach ($files as $key => $value) {
-                $data[] = array("file" => $value, "content" => file_get_contents($path . $value));
+                $file_path = $path . $value;
+                $file_info = new SplFileInfo($file_path);
+                $data[] = array("file" => $value, "content" => file_get_contents($file_info), "time" => $file_info->getATime());
             }
             echo json_encode(array("status" => 1, "data" => $data, "total" => count($files)));
         } catch (Exception $e) {

@@ -9,7 +9,7 @@
         filter: '<?= $id ?>' != '' ? {field: "id_import", operator: "eq", value: '<?= $id ?>'} : null,
         crudApi: `${ENV.restApi}`,
         templateApi: `${ENV.templateApi}`,
-        collection: "Data_library",
+        collection: "data_library",
         observable: {
             scrollTo: function(e) {
                 var id = $(e.currentTarget).data('id');

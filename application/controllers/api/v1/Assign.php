@@ -17,7 +17,7 @@ Class Assign extends WFF_Controller {
 		try {
 			$post = $this->input->post();
 			$assign = $post['assign'];
-			$data = array('assign' => $assign, 'assigned_by' => 'ByAdmin');
+			$data = array('assign' => $assign, 'createdBy' => 'ByAdmin');
 			foreach ($post['select'] as $row) {
 				$this->crud->where_id($row)->update($this->collection, array('$set' => $data));
 			}

@@ -34,7 +34,7 @@
         crudApi: `${ENV.restApi}`,
         vApi: `${ENV.vApi}`,
         templateApi: `${ENV.templateApi}`,
-        collection: "Telesalelist_solve",
+        collection: "telesalelist_solve",
         observable: {
             scrollTo: function(e) {
                 var id = $(e.currentTarget).data('id');

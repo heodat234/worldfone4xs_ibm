@@ -134,6 +134,7 @@
                             </a>
                         </div>
                         <div class="sidebar-user-name"></div>
+                        <div class="sidebar-user-role" style="font-size: 12px"></div>
                         <div class="sidebar-user-links" id="sidebar-widget"></div>
                     </div>
                     <!-- END User Info -->
@@ -151,6 +152,7 @@
 
         <script>
             $("div.sidebar-user-name").text((ENV.agentname || '').toString());
+            $("div.sidebar-user-role").text((ENV.role_name || '').toString());
             if(ENV.typename) {
                 ENV.brandTitle = ENV.typename;
                 $("a.sidebar-brand").addClass("text-center");

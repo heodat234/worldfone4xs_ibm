@@ -65,7 +65,7 @@
             </div>
             <div class="form-group">
                 <label>@Customer name@</label>
-                <input class="k-textbox" style="width: 100%" data-bind="value: item.cus_name">
+                <input class="k-textbox" id="customer-info" style="width: 100%" data-bind="value: item.cus_name">
             </div>
         </div>
     </div>

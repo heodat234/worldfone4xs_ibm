@@ -1,4 +1,4 @@
-<div class="container-fluid">
+<div class="container-fluid change-form">
 	<div class="row">
 	    <div id="side-form" style="width: 50%">
 		<!-- <div id="main-form" style="width: 65%" data-width="65%"> -->
@@ -12,7 +12,7 @@
                     data-bind="value: item.exporting_date" data-format="dd/MM/yyyy H:mm:ss" style="width: 100%"/>
 			</div>
 			<div class="form-group" data-field="@Email@">
-				<label>@Contract No.@</label>
+				<label>@Contract No.(Latest Loan)@</label>
 				<input class="k-textbox" style="width: 100%" data-bind="value: item.contract_no">
 			</div>
 			<div class="form-group" data-field="@Email@">
@@ -82,20 +82,24 @@
 			</div>
 			<div class="form-group" data-field="@Name@">
 				<label>@Assign@</label>
-				<input class="k-textbox" style="width: 100%" data-bind="value: item.assign">
+				<input data-role="dropdownlist"
+               data-text-field="agentname"
+               data-value-field="extension"
+                    data-value-primitive="true"
+                    data-bind="value: item.assign, source: userListData" style="width: 100%" id="changeAssign">
 			</div>
 			<div class="form-group" data-field="@Name@">
-				<label>@date send data@</label>
+				<label>@Date send Data@</label>
 				<input data-role="datepicker"
                     data-bind="value: item.date_send_data" data-format="dd/MM/yyyy H:mm:ss" style="width: 100%"/>
 			</div>
 			<div class="form-group" data-field="@Name@">
-				<label>@date receive data@</label>
+				<label>@Date receive Data@</label>
 				<input data-role="datepicker"
                     data-bind="value: item.date_receive_data" data-format="dd/MM/yyyy H:mm:ss" style="width: 100%"/>
 			</div>
 			<div class="form-group" data-field="@Name@">
-				<label>@code@</label>
+				<label>@Code@</label>
 				<input class="k-textbox" style="width: 100%" data-bind="value: item.code">
 			</div>
 			<div class="form-group" data-field="@Name@">
@@ -111,3 +115,20 @@
 		</div>
 	</div>
 </div>
+<script>
+	var $userListElement = $(".change-form");
+    var userListObservable = kendo.observable({
+        userListData: new kendo.data.DataSource({
+            transport: {
+                read: ENV.vApi + "widget/user_list",
+                parameterMap: parameterMap
+            },
+            schema: {
+                data: "data",
+                total: "total",
+               
+            }
+        })
+    });
+    kendo.bind($userListElement, userListObservable);
+</script>

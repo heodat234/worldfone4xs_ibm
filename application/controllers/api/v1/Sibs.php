@@ -43,7 +43,7 @@ Class Sibs extends WFF_Controller {
                 );
 
                 $importLogId = $this->crud->create(set_sub_collection('Import'), $importLog);
-                $command = escapeshellcmd("python3.6 /var/www/html/python/importSibs.py " . $importLogId['id']) . ' > /dev/null &';
+                $command = escapeshellcmd("python3.6 /var/www/html/worldfone4xs_ibm/cronjob/python/Telesales/importSibs.py " . $importLogId['id']) . ' > /dev/null &';
                 $output = shell_exec($command);
                 echo json_encode(array("status" => 2, "message" => "@Importing... Please check import history for more detail@"));
             }
@@ -95,7 +95,8 @@ Class Sibs extends WFF_Controller {
 
     function downloadFileFromFTP() {
         try {
-            $result = $this->ftp_model->downloadFileFromFTP("/var/www/html/worldfone4xs_ibm/upload/csv/ftp/ZACCF.csv", 'ZACCF.csv', FTP_BINARY);
+            $ftpInfo = $this->crud->where(array('collection' => $this->$collection))->getOne(set_sub_collection('ftp_config'));
+            $result = $this->ftp_model->downloadFileFromFTP($ftpInfo['locallink'] . $ftpInfo['filename'], $ftpInfo['filename'], FTP_BINARY);
             echo json_encode(array("status" => 1, "message" => '', 'data' => $result['data']));
         }
         catch (Exception $e) {

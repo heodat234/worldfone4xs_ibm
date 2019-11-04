@@ -39,7 +39,7 @@ Class Sc_schedule extends WFF_Controller {
                     'created_by'    => $this->session->userdata("extension")
                 );
                 $importLogId = $this->crud->create(set_sub_collection('Import'), $importLog);
-                $command = escapeshellcmd("python3.6 /var/www/html/python/importSCSchedule.py " . $importLogId['id']) . ' > /dev/null &';
+                $command = escapeshellcmd("python3.6 /var/www/html/worldfone4xs_ibm/cronjob/python/Telesales/importSCSchedule.py " . $importLogId['id']) . ' > /dev/null &';
                 $output = shell_exec($command);
 //                $checkImport = $this->crud->where_id($importLogId['id'])->where(array('status' => 1))->get(set_sub_collection('Import'));
                 echo json_encode(array('status' => 2, "message" => "@Importing... Please check import history for more detail@"));
@@ -80,7 +80,10 @@ Class Sc_schedule extends WFF_Controller {
 
     function listFileFTP() {
         try {
-            echo json_encode(array('data' => array(array('filepath' => '/var/www/html/worldfone4xs_ibm/upload/excel/Danhsachquaytuvan.xlsx', 'filename' => 'Danhsachquaytuvan.xlsx')), 'total' => 1));
+            $request = json_decode($this->input->get("q"), TRUE);
+            $file_path = $request['ftp_filepath'];
+            $file_name = basename($file_path);
+            echo json_encode(array('data' => array(array('filepath' => $file_path, 'filename' => $file_name)), 'total' => 1));
         }
         catch (Exception $e) {
             echo json_encode(array("status" => 0, "message" => $e->getMessage()));
@@ -89,7 +92,9 @@ Class Sc_schedule extends WFF_Controller {
 
     function downloadFileFromFTP() {
         try {
-            $this->ftp_model->downloadFileFromFTP(UPLOAD_PATH . "excel/", '');
+            $ftpInfo = $this->crud->where(array('collection' => $this->$collection))->getOne(set_sub_collection('ftp_config'));
+            $result = $this->ftp_model->downloadFileFromFTP($ftpInfo['locallink'] . $ftpInfo['filename'], $ftpInfo['filename'], FTP_BINARY);
+            echo json_encode(array("status" => 1, "message" => '', 'data' => $result['data']));
         }
         catch (Exception $e) {
             echo json_encode(array("status" => 0, "message" => $e->getMessage()));

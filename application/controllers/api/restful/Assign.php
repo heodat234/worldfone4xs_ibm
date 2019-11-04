@@ -23,8 +23,7 @@ Class Assign extends CI_Controller {
 	function read($id_import)
 	{
 		$this->crud->select_db($this->config->item("_mongo_db"));
-		$users = $this->crud->read($this->collection,array(),array('extension','agentname'));
-
+		$users = $this->crud->read($this->collection,array(),array('extension','agentname'),array("active" => TRUE));
 
 		$this->mongo_db->switch_db();
 		$match['id_import'] = $id_import;

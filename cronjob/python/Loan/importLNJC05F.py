@@ -119,7 +119,8 @@ try:
 
       status = 1
    else:
-      status = 0
+      status = 0   
+   mongodb.remove_document(collection)
    mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertData)
    mongodb.update(MONGO_COLLECTION='LO_Import', WHERE={'_id': ObjectId(importLogId)}, VALUE={'complete_import': time.time(),'status': status,'error': errorData})
    pprint(1)

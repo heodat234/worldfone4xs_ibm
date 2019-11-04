@@ -88,9 +88,9 @@ try:
             
          if header['field'] == 'assign' and value != '':
             value = str(listDataLibrary[key][idx])
-            temp['assigned_by']  = 'Byfixed-Import'
+            temp['createdBy']  = 'Byfixed-Import'
          if header['field'] == 'assign' and value == '':
-            temp['assigned_by']  = ''
+            temp['createdBy']  = ''
 
          temp[header['field']]   = value
          temp['id_import']       = importLogId

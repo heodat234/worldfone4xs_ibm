@@ -6,16 +6,16 @@
 		</div> -->
 		<div class="col-md-12">
 			<div>
-				<h2>You want to divide list to TeleSale' box</h2>
-				<p style="opacity: .5">Please select who will receive</p>
+				<h2>@You want to divide list to TeleSale' box@</h2>
+				<p style="opacity: .5">@Please select who will receive@</p>
 			</div>
 		</div>
 	</div>
 	<div class="col-md-12" style="border: 2px solid #867b7b; border-radius: 12px; height: 500px;background: #fff">
 		<div id="grid_2"></div>
 		<div style="text-align: center;    margin-top: 15px;">
-			<button id="saveChanges" onclick="saveChanges()" class="btn btn-warning" style="width: 150px;margin-right: 10px">Confirm</button>
-			<button class="btn btn-default" onclick="cancelChanges()">Cancel</button>
+			<button id="saveChanges" onclick="saveChanges()" class="btn btn-warning" style="width: 150px;margin-right: 10px">@Confirm@</button>
+			<button class="btn btn-default" onclick="cancelChanges()">@Cancel@</button>
 		</div>
 	</div>
 </div>
@@ -209,38 +209,38 @@
         		width: "50px"
         	},{
         		field: "agentname",
-            	title: "TeleSales' Name",
+            	title: "@TeleSales' Name@",
             	width: "150px",
             	footerTemplate: "TOTAL"
         	}, {
 	            field: "extension",
-	            title: "TeleSales' Code",
+	            title: "@TeleSales' Code@",
 	            width: "100px"
             }, {
 	            field: "total_fixed",
-	            title: "Team",
+	            title: "@Team@",
 	            width: "100px"
             }, {
 	            field: "count_detail",
-	            title: "Fixed from List",
-	            width: "100px",
+	            title: "@Fixed from List@",
+	            width: "120px",
 	            aggregates: ["sum"],
 	            footerTemplate: " #=sum#"
             }, {
 	            field: "random",
-	            title: "Before Random",
-	            width: "100px",
+	            title: "@Before Random@",
+	            width: "120px",
 	            aggregates: ["sum"],
 	            footerTemplate: " #=sum#"
             }, {
 	            field: "after_random",
-	            title: "After Random",
-	            width: "100px",
+	            title: "@After Random@",
+	            width: "120px",
 	            aggregates: ["sum"],
 	            footerTemplate: " #=sum#"
             }, {
 	            field: "total",
-	            title: "Total",
+	            title: "@Total@",
 	            width: "100px",
 	            aggregates: ["sum"],
 	            footerTemplate: " #=sum#"

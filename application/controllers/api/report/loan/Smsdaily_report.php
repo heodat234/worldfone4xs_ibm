@@ -26,14 +26,13 @@ Class Smsdaily_report extends WFF_Controller {
         try {
             $request = json_decode($this->input->get("q"), TRUE);
             $response = $this->crud->read($this->collection, $request);
-
             $data = array();
             foreach ($response['data'] as &$value) {
                if ( ((int)$value['overdue_amount_this_month'] - (int)$value['advance_balance'] > 40000) || ((int)$value['overdue_amount_this_month'] - (int)$value['advance_balance'] < 40000 && $value['installment_type'] == 'n') ){
                   array_push($data, $value);
                }
             }
-            echo json_encode(array('data'=> $data, 'total' => count($data)));
+            echo json_encode(array('data'=> $data, 'total' => $response['total']));
 
         } catch (Exception $e) {
             echo json_encode(array("status" => 0, "message" => $e->getMessage()));
@@ -42,108 +41,91 @@ Class Smsdaily_report extends WFF_Controller {
     function saveAsExcel()
     {
         try {
-            $request    = $this->input->post();
-            $start      = strtotime($request['startDate']);
-            $end        = strtotime(str_replace('/', '-', $request['endDate'])) ;
+            $request    = array("take" => 1, "skip" => 0);
+            $response = $this->crud->read($this->collection, $request);
+            $total = $response['total'];
 
-            $match = array(
-                     '$and' => array(
-                        array('created_at'=> array( '$gte'=> $start, '$lte'=> $end))
-                     )
-                 );
-            $response = $this->crud->read($this->collection, array(),'',$match);
-            $data = $response['data'];
+            $count = 1000;
+            $vong_lap = (int)($total/$count);
+            $du = $total%$count;
+            $data = array();
 
-            $request = array (
-              'take' => 50,
-              'skip' => 0,
-              "sort" => array(array("field" => "index", "dir" => "asc"))
-            );
-            $match = array( "collection" => $this->collection, 'sub_type' => array('$exists' => 'true') );
-            $this->crud->select_db($this->config->item("_mongo_db"));
-            $response = $this->crud->read("Model", $request, ["index","field", "title", "type"], $match);
-            $response = $response['data'];
-            foreach ($response as $key => $value) {
-                $model[$value['field']] = $value;
+            for ($i=0; $i < $vong_lap; $i++) { 
+                $request    = array("take" => $count, "skip" => $i*$count);
+                $response = $this->crud->read($this->collection, $request);
+                foreach ($response['data'] as &$value) {
+                   if ( ((int)$value['overdue_amount_this_month'] - (int)$value['advance_balance'] > 40000) || ((int)$value['overdue_amount_this_month'] - (int)$value['advance_balance'] < 40000 && $value['installment_type'] == 'n') ){
+                      array_push($data, $value);
+                   }
+                }
             }
-            // $this->excel->write($data,$model);
+            var_dump($data);exit;
+            if ($du > 0) {
+                $request    = array("take" => $count, "skip" => $vong_lap*$count);
+                $response = $this->crud->read($this->collection, $request);
+                foreach ($response['data'] as &$value) {
+                   if ( ((int)$value['overdue_amount_this_month'] - (int)$value['advance_balance'] > 40000) || ((int)$value['overdue_amount_this_month'] - (int)$value['advance_balance'] < 40000 && $value['installment_type'] == 'n') ){
+                      array_push($data, $value);
+                   }
+                }
+            }
 
-            $filename = "export.xlsx";
-            $file_template = "templateLawsuit.xlsx";
 
-            //  Tiến hành đọc file excel
-            $inputFileType = \PhpOffice\PhpSpreadsheet\IOFactory::identify(UPLOAD_PATH . "excel/" . $file_template);
-            /**  Create a new Reader of the type that has been identified  **/
-            $reader = \PhpOffice\PhpSpreadsheet\IOFactory::createReader($inputFileType);
 
-            // loads the whole workbook into a PHP object
-            $excelWorkbook = $reader->load(UPLOAD_PATH . "excel/" . $file_template);
+            $filename = "SMS DAILY SMS REPORT.xlsx";
+            $spreadsheet = new Spreadsheet();
+            $spreadsheet->getProperties()
+            ->setCreator("South Telecom")
+            ->setLastModifiedBy("Thanh Hung")
+            ->setTitle("SMS DAILY SMS REPORT")
+            ->setSubject("SMS DAILY SMS REPORT")
+            ->setDescription("Office 2007 XLSX, generated using PHP classes.")
+            ->setKeywords("office 2007 openxml php")
+            ->setCategory("Report");
 
-            // makes the sheet 'data' available as an object
-            $worksheet = $excelWorkbook->setActiveSheetIndex(0);
-
+            $worksheet = $spreadsheet->getSheet(0);
+            $worksheet->setTitle('SMS SIBS');
             $fieldToCol = array();
             // Title row
-            $col = "B";
             $row = 1;
-            if($model) {
-                foreach ($model as $field => $prop) {
-                    $fieldToCol[ $field ] = $col;
-                    $col++;
-                }
-            }
-            --$col;
-            $maxCol = $col;
+            $worksheet->setCellValue("A1", "NO");
+            $worksheet->getColumnDimension('A')->setAutoSize(true);
+            $worksheet->setCellValue("B1", "GROUP");
+            $worksheet->getColumnDimension('B')->setAutoSize(true);
+            $worksheet->setCellValue("C1", "ACC");
+            $worksheet->getColumnDimension('A')->setAutoSize(true);
+            $worksheet->setCellValue("D1", "PHONE");
+            $worksheet->getColumnDimension('A')->setAutoSize(true);
+            $worksheet->setCellValue("E1", "NAME");
+            $worksheet->getColumnDimension('A')->setAutoSize(true);
+            $worksheet->setCellValue("F1", "AMOUNT");
+            $worksheet->getColumnDimension('A')->setAutoSize(true);
+            $worksheet->setCellValue("G1", "SENDING DATE");
+            $worksheet->getColumnDimension('A')->setAutoSize(true);
+
+            $worksheet->getStyle("A1:G1")->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setRGB('FFFF00');
+            $style = array('font' => array('bold' => true), 'alignment' => array('horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER));
+            $worksheet->getStyle("A1:G1")->applyFromArray($style);
             if($data) {
-                $row = 3;
-                $i = 0;
-                foreach ($data as $doc) {
-                    $worksheet->setCellValue('A' . $row, $i+1);
-                    foreach ($doc as $field => $value) {
-                        if(isset($fieldToCol[ $field ], $model[$field]) ) {
-                            $col = $fieldToCol[ $field ];
-                            switch ($model[$field]["type"]) {
-                                case 'array': case 'arrayPhone': case 'arrayEmail':
-                                    $val = implode(",", $value);
-                                    $worksheet->setCellValueExplicit($col . $row, $val, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-                                    break;
-
-                                case 'string': case 'name': case 'phone':
-                                case 'email':
-                                    $worksheet->setCellValueExplicit($col . $row, $value, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-                                    break;
-
-                                case 'boolean':
-                                    $worksheet->setCellValueExplicit($col . $row, $value, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_BOOLEAN);
-                                    break;
-
-
-                                case 'int': case 'double':
-                                    $worksheet->setCellValueExplicit($col . $row, $value, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
-                                    break;
-
-                                case 'timestamp':
-                                    if ($value != '') {
-                                        $value = date("d/m/Y",$value);
-                                    }
-                                    $worksheet->setCellValueExplicit($col . $row, $value, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-                                    break;
-
-                                default:
-                                    break;
-                            }
-                        }
-                    }
+                $row = 2;
+                foreach ($data as $value) {
+                    $worksheet->setCellValue("A".$row, $row - 1);
+                    $worksheet->setCellValue("B".$row, $value['group_id']);
+                    $worksheet->setCellValueExplicit('C' . $row, $value['account_number'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+                    $worksheet->setCellValue("D".$row, $value['mobile_num']);
+                    $worksheet->setCellValue("E".$row, $value['cus_name']);
+                    $worksheet->setCellValue("F".$row, number_format($value['overdue_amount_this_month']));
+                    $worksheet->setCellValue("G".$row, date('d/m/Y'));
                     $row++;
-                    $i++;
                 }
             }
-
+            
+            $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
             $file_path = UPLOAD_PATH . "excel/" . $filename;
-            $objWriter = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($excelWorkbook, $inputFileType);
-            $objWriter->save($file_path);
+            $writer->save($file_path);
             echo json_encode(array("status" => 1, "data" => $file_path));
-            // var_dump($response);
         } catch (Exception $e) {
             echo json_encode(array("status" => 0, "message" => $e->getMessage()));
         }

@@ -14,19 +14,10 @@
     <div class="container-fluid mvvm" style="padding-top: 20px; padding-bottom: 10px">
         <div class="row form-horizontal">
             <div class="form-group col-sm-4">
-               <label class="control-label col-xs-4">@From date@</label>
+               <label class="control-label col-xs-4">Date</label>
                <div class="col-xs-8">
-                  <input id="start-date" data-role="datepicker" data-format="dd/MM/yyyy H:mm:ss" name="fromDateTime" data-bind="value: fromDateTime, events: {change: startDate}">
+                  <input id="start-date" data-role="datepicker" data-format="dd/MM/yyyy" name="fromDateTime" disabled="" data-bind="value: fromDateTime, events: {change: startDate}">
                </div>
-            </div>
-            <div class="form-group col-sm-4">
-               <label class="control-label col-xs-4">@To date@</label>
-               <div class="col-xs-8">
-                  <input id="end-date" data-role="datepicker" data-format="dd/MM/yyyy H:mm:ss" name="toDateTime" data-bind="value: toDateTime, events: {change: endDate}">
-               </div>
-            </div>
-            <div class="form-group col-sm-4 text-center">
-                <button class="k-button" data-bind="click: search">@Search@</button>
             </div>
         </div>
         <div class="row chart-page"  style="background-color: white">
@@ -51,20 +42,11 @@
               dataSource: {},
               grid: {},
               columns: [],
-              fromDate: '',
-              toDate: '',
               init: function() {
                   var dataSource = this.dataSource = new kendo.data.DataSource({
                      serverPaging: true,
                      serverFiltering: true,
                      pageSize: 20,
-                     filter: {
-                    logic: "and",
-                    filters: [
-                              {field: 'due_date', operator: "gte", value: this.fromDate},
-                              {field: 'due_date', operator: "lte", value: this.toDate}
-                          ]
-                      },
                      transport: {
                         read: ENV.reportApi + "loan/smsdaily_report",
                         parameterMap: parameterMap
@@ -75,6 +57,7 @@
                         parse: function (response) {
                            i = 1;
                            response.data.map(function(doc) {
+                              doc.date = new Date().toLocaleDateString();
                               doc.stt = i;
                               i = i + 1;
                                  return doc;
@@ -86,19 +69,7 @@
 
                   var grid = this.grid = $("#grid").kendoGrid({
                      dataSource: dataSource,
-                     excel: {allPages: true},
-                     excelExport: function(e) {
-                        var sheet = e.workbook.sheets[0];
-                        for (var rowIndex = 1; rowIndex < sheet.rows.length; rowIndex++) {
-                          var row = sheet.rows[rowIndex];
-                          for (var cellIndex = 0; cellIndex < row.cells.length; cellIndex ++) {
-                              if(row.cells[cellIndex].value instanceof Date) {
-                                  row.cells[cellIndex].format = "dd-MM-yy hh:mm:ss"
-                              }
-                          }
-                        }
-                     },
-                     resizable: true,
+                     zable: true,
                      pageable: true,
                      sortable: true,
                      scrollable: true,
@@ -119,63 +90,7 @@
                       return checkedIds;
                   }
 
-                  /*
-                   * Right Click Menu
-                   */
-                  var menu = $("#action-menu");
-                  if(!menu.length) return;
-
-                  $("html").on("click", function() {menu.hide()});
-
-                  $(document).on("click", "#grid tr[role=row] a.btn-action", function(e){
-                      let btna = $(e.target);
-                      let row = $(e.target).closest("tr");
-                      e.pageX -= 20;
-                      showMenu(e, row, btna);
-                  });
-
-                  function showMenu(e, that,btna) {
-                      //hide menu if already shown
-                      menu.hide();
-
-                      //Get id value of document
-                      var uid = $(that).data('uid');
-                      var fltnumber = btna.data('flt');
-                      var date = btna.data('date');
-                      if(uid)
-                      {
-                          menu.find("a").data('uid',uid);
-                          menu.find("a").data('fltnumber',fltnumber);
-                          menu.find("a").data('date',date);
-                          menu.find("a").data('dpt',btna.data('dpt'));
-                          menu.find("a").data('arv',btna.data('arv'));
-                          //get x and y values of the click event
-                          var pageX = e.pageX;
-                          var pageY = e.pageY;
-
-                          //position menu div near mouse cliked area
-                          menu.css({top: pageY , left: pageX});
-
-                          var mwidth = menu.width();
-                          var mheight = menu.height();
-                          var screenWidth = $(window).width();
-                          var screenHeight = $(window).height();
-
-                          //if window is scrolled
-                          var scrTop = $(window).scrollTop();
-
-                          //if the menu is close to right edge of the window
-                          if(pageX+mwidth > screenWidth){
-                          menu.css({left:pageX-mwidth});
-                          }
-                          //if the menu is close to bottom edge of the window
-                          if(pageY+mheight > screenHeight+scrTop){
-                          menu.css({top:pageY-mheight});
-                          }
-                          //finally show the menu
-                          menu.show();
-                      }
-                  }
+                  
               }
           }
       }();
@@ -218,7 +133,7 @@
         lawsuitFields.read().then(function(){
             var columns = lawsuitFields.data().toJSON();
             columns.map(col => {
-               col.width = 180;
+               col.width = 150;
                 switch (col.type) {
                     case "name":
                         col.template = (dataItem) => gridName(dataItem[col.field]);
@@ -239,12 +154,15 @@
             columns.unshift({
                field: "stt",
                title: "No",
-               width: 100
+               width: 50
+            });
+            columns.push({
+               field: "date",
+               title: "SENDING DATE",
+               width: 150
             });
 
             Table.columns = columns;
-            Table.fromDate = fromDate;
-            Table.toDate = toDate;
             Table.init();
             // Table.grid.bind("change", grid_change);
         });
@@ -253,89 +171,19 @@
          var date =  new Date(),
                timeZoneOffset = date.getTimezoneOffset() * kendo.date.MS_PER_MINUTE;
                date.setHours(- timeZoneOffset / kendo.date.MS_PER_HOUR, 0, 0 ,0);
-
          var fromDate = new Date(date.getTime() + timeZoneOffset );
-         var toDate = new Date(date.getTime() + timeZoneOffset + kendo.date.MS_PER_DAY -1)
          var observable = kendo.observable({
-             trueVar: true,
-             loading: false,
-             visibleReport: false,
-             visibleNoData: false,
             fromDateTime: fromDate,
-            toDateTime: toDate,
-            filterField: "",
             fromDate: kendo.toString(fromDate, "dd/MM/yyyy H:mm"),
-            toDate: kendo.toString(toDate, "dd/MM/yyyy H:mm"),
-
-            startDate: function(e) {
-               var start = e.sender,
-                  startDate = start.value(),
-                  end = $("#end-date").data("kendoDatePicker"),
-                     endDate = end.value();
-
-                   if (startDate) {
-                       startDate = new Date(startDate);
-                       startDate.setDate(startDate.getDate());
-                       end.min(startDate);
-                   } else if (endDate) {
-                       start.max(new Date(endDate));
-                   } else {
-                       endDate = new Date();
-                       start.max(endDate);
-                       end.min(endDate);
-                   }
-            },
-            endDate: function(e) {
-               var end = e.sender,
-                  endDate = end.value(),
-                  start = $("#start-date").data("kendoDatePicker"),
-                  startDate = start.value();
-
-                if (endDate) {
-                    endDate = new Date(endDate);
-                    endDate.setDate(endDate.getDate());
-                    start.max(endDate);
-                } else if (startDate) {
-                    end.min(new Date(startDate));
-                } else {
-                    endDate = new Date();
-                    start.max(endDate);
-                    end.min(endDate);
-                }
-            },
-            search: function() {
-               this.set("fromDate", kendo.toString(this.get("fromDateTime"), "dd/MM/yyyy H:mm"));
-               this.set("toDate", kendo.toString(this.get("toDateTime"), "dd/MM/yyyy H:mm"));
-               this.asyncSearch();
-            },
-             asyncSearch: async function() {
-               var field = "due_date";
-               var fromDateTime = new Date(this.fromDateTime.getTime() - timeZoneOffset).toISOString();
-                var toDateTime = new Date(this.toDateTime.getTime() - timeZoneOffset).toISOString();
-
-                var filter = {
-                    logic: "and",
-                    filters: [
-                        {field: field, operator: "gte", value: fromDateTime},
-                        {field: field, operator: "lte", value: toDateTime}
-                    ]
-                };
-
-               Table.dataSource.filter(filter);
-
-            },
          })
          kendo.bind($(".mvvm"), observable);
       };
 
       function saveAsExcel() {
-        var startDate = $('#start-date').val();
-        var endDate = $('#end-date').val();
         $.ajax({
-          url: ENV.reportApi + "loan/lawsuit_report/saveAsExcel",
+          url: ENV.reportApi + "loan/smsdaily_report/saveAsExcel",
           type: 'POST',
           dataType: 'json',
-          data: {startDate: startDate, endDate: endDate},
         })
         .done(function(response) {
           if (response.status == 1) {

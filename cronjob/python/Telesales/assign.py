@@ -40,9 +40,7 @@ try:
          arrayCMND[user['extension']] = []
       assign_log['_id'] = mongodb.insert('TS_Assign_log', arrayCMND)
       array_cmnd = []
-   # else:
-   #    array_cmnd = assign_log[extension]
-
+ 
    for u,extension in enumerate(extensions):
       random  = randoms[u]
       array_cmnd = assign_log[extension]
@@ -53,20 +51,18 @@ try:
       for x in range(int(count)):
          users = mongodb.get(MONGO_COLLECTION='TS_Telesalelist', WHERE={'id_import': importLogId,'assign': '','id_no': {'$nin' :array_cmnd}},SELECT=['_id', 'id_no'], SORT=([('id', 1)]),SKIP=0, TAKE=int(10000))
          for idx,user in enumerate(users):
-            mongodb.update(MONGO_COLLECTION='TS_Telesalelist', WHERE={'_id': ObjectId(user['_id'])}, VALUE={'updatedAt': int(time.time()),'assign': extension,'assigned_by': 'BySystemRandom'})
+            mongodb.update(MONGO_COLLECTION='TS_Telesalelist', WHERE={'_id': ObjectId(user['_id'])}, VALUE={'updatedAt': int(time.time()),'assign': extension,'createdBy': 'BySystemRandom'})
             array_cmnd.append(user['id_no'])
-            # dem = dem + 1
       
       if int(du) > 0:
          users = mongodb.get(MONGO_COLLECTION='TS_Telesalelist', WHERE={'id_import': importLogId,'assign': '','id_no': {'$nin' :array_cmnd}},SELECT=['_id', 'id_no'], SORT=([('id', 1)]),SKIP=0, TAKE=int(du))
          for idx,user in enumerate(users):
-            mongodb.update(MONGO_COLLECTION='TS_Telesalelist', WHERE={'_id': ObjectId(user['_id'])}, VALUE={'updatedAt': int(time.time()),'assign': extension,'assigned_by': 'BySystemRandom'})
+            mongodb.update(MONGO_COLLECTION='TS_Telesalelist', WHERE={'_id': ObjectId(user['_id'])}, VALUE={'updatedAt': int(time.time()),'assign': extension,'createdBy': 'BySystemRandom'})
             array_cmnd.append(user['id_no'])
-            # dem = dem + 1
 
       mongodb.update(MONGO_COLLECTION='TS_Assign_log', WHERE={'_id': ObjectId(assign_log['_id'])}, VALUE={extension: array_cmnd})
       
-      count = mongodb.count(MONGO_COLLECTION='TS_Telesalelist', WHERE={'id_import': importLogId,'assign': extension,'assigned_by': 'BySystemRandom'})
+      count = mongodb.count(MONGO_COLLECTION='TS_Telesalelist', WHERE={'id_import': importLogId,'assign': extension,'createdBy': 'BySystemRandom'})
       mongodb.update(MONGO_COLLECTION='TS_Import', WHERE={'_id': ObjectId(importLogId)}, VALUE={'random.'+extension: int(count), 'assign': 0})
 
    now_end         = datetime.now()

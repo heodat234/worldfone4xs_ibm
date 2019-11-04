@@ -56,7 +56,7 @@
                   var dataSource = this.dataSource = new kendo.data.DataSource({
                      serverPaging: true,
                      serverFiltering: true,
-                     pageSize: 5,
+                     pageSize: 20,
                      transport: {
                         read: ENV.reportApi + "call_out",
                         parameterMap: parameterMap

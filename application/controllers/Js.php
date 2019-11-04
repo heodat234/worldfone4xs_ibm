@@ -45,6 +45,7 @@ Class Js extends CI_Controller {
         $env["agentname"]       = $this->session->userdata("agentname")
             . ($this->session->userdata("test_mode") ? " (TM)" : "");
         $env["sound_effect"]    = $this->session->userdata("sound_effect");
+        $env["role_name"]       = $this->session->userdata("role_name");
 
         $data['ENV'] = json_encode($env);
 

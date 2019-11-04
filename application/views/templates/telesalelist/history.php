@@ -5,8 +5,8 @@
 </div>
 <div id="action-menu">
     <ul>
-    	<a href="javascript:void(0)" data-type="detail" onclick="detailData(this)"><li><i class="fa fa-exclamation-circle text-info"></i><span>View Detail</span></li></a>
-    	<a href="javascript:void(0)" onclick="divideList(this)"><li><i class="fa fa-exclamation-circle text-info"></i><span>Divide List</span></li></a>
+    	<a href="javascript:void(0)" data-type="detail" onclick="detailData(this)"><li><i class="fa fa-exclamation-circle text-info"></i><span>@View Detail@</span></li></a>
+    	<a href="javascript:void(0)" onclick="divideList(this)"><li><i class="fa fa-exclamation-circle text-info"></i><span>@Divide List@</span></li></a>
     	<li class="devide"></li>
         <!-- <a href="javascript:void(0)" data-type="import" onclick="re_Upload(this)"><li><i class="fa fa-exclamation-circle text-info"></i><span>Re-Upload</span></li></a> -->
 
@@ -95,11 +95,11 @@ var Config = {
             width: 200,
             template: function(dataItem) {
                 if (dataItem.status == 1) {
-                    return '<h4 style="font-weight: bold">Success</h4>';
+                    return '<h4 style="font-weight: bold">@Success@</h4>';
                 }else if (dataItem.status == 0) {
-                    return '<h4 style="font-weight: bold">Fail</h4>';
+                    return '<h4 style="font-weight: bold">@Fail@</h4>';
                 }else if(dataItem.status == 2){
-                    return '<div class"col-sm-8"><div class="progress"></div></div><div class="status-upload">Loading...</div></div>';
+                    return '<div class"col-sm-8"><div class="progress"></div></div><div class="status-upload">@Loading@...</div></div>';
                 }
 
             }
@@ -287,7 +287,7 @@ var Config = {
                     columns: this.columns,
                     filterable: false,
                     editable: false,
-                    detailTemplate: 'Cell Error: <div class="grid"></div>',
+                    detailTemplate: 'Danh sách lỗi: <div class="grid"></div>',
                     detailInit: function(e) {
                         e.detailRow.find(".grid").kendoGrid({
                           dataSource: e.data.error

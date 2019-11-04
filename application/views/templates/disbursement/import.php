@@ -290,7 +290,13 @@
                 transport: {
                     read: {
                         url: ENV.vApi + "disbursement/listFileFTP",
-                    }
+                        data: function() {
+                            return {
+                                'ftp_filepath': Config.ftp_filepath,
+                            }
+                        }
+                    },
+                    parameterMap: parameterMap
                 },
                 schema: {
                     data: "data",

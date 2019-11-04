@@ -247,7 +247,13 @@
                 transport: {
                     read: {
                         url: ENV.vApi + "sc_schedule/listFileFTP",
-                    }
+                        data: function() {
+                            return {
+                                'ftp_filepath': Config.ftp_filepath,
+                            }
+                        }
+                    },
+                    parameterMap: parameterMap
                 },
                 schema: {
                     data: "data",

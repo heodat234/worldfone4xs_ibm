@@ -220,8 +220,8 @@
                timeZoneOffset = date.getTimezoneOffset() * kendo.date.MS_PER_MINUTE;
                date.setHours(- timeZoneOffset / kendo.date.MS_PER_HOUR, 0, 0 ,0);
 
-        var fromDate = new Date(date.getTime() + timeZoneOffset );
-        var toDate = new Date(date.getTime() + timeZoneOffset + kendo.date.MS_PER_DAY -1);
+        var fromDate = new Date(date.getTime());
+        var toDate = new Date(date.getTime() + kendo.date.MS_PER_DAY -1);
         var observable = kendo.observable({
             appointment_log: new kendo.data.DataSource({
                 serverFiltering: true,

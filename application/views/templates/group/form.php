@@ -7,20 +7,7 @@
             		<span></span>
             		<span>@Active@</span>
             	</label>
-            	<label>
-            		<input class="custom-checkbox" type="checkbox" data-bind="checked: item.isLinkToQueue, enabled: item.active"> 
-            		<span></span>
-            		<span>@Link@ @to@ queue</span>
-            	</label>
 	        </div>
-	        <div class="form-group" data-bind="visible: item.isLinkToQueue">
-				<label>Queue</label>
-				<input data-role="dropdownlist" name="linkQueues" multiple="multiple"
-					data-text-field="name"
-					data-value-field="queuename"
-					data-value-primitive="true"            
-                    data-bind="value: item.queuename, source: queueOption, enabled: item.active" style="width: 100%">
-			</div>
 	        <div class="form-group">
 				<label>@Group name@</label>
 				<input class="k-textbox" style="width: 100%" data-bind="value: item.name, enabled: item.active">
@@ -32,9 +19,14 @@
 					data-value-field="extension"
 					data-item-template="itemGroupTemplate"
 					data-tag-template="tagGroupTemplate"
-					data-value-primitive="true"            
-                    data-bind="value: item.members, source: membersOption, enabled: item.active, events: {select: membersSelect, deselect: membersDeselect}" style="width: 100%">
+					data-value-primitive="true"
+					data-clear-button="false"            
+                    data-bind="value: item.members, source: membersOption, enabled: item.active, events: {select: membersCustomSelect, deselect: membersCustomDeselect}" style="width: 100%">
                       </select>
+			</div>
+			<div class="form-group">
+				<label>@Link@ @to@ queue</label>
+				<div data-template="queue-template" data-bind="source: item.linkToQueues"></div>
 			</div>
 		</div>
 	</div>
@@ -45,3 +37,6 @@
 		</div>
 	</div>
 </div>
+<script id="queue-template" type="text/x-kendo-template">
+	<span class="label label-info" data-bind="text: this"></span>
+</script>

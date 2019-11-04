@@ -39,9 +39,7 @@ Class Telesalelist_solve extends WFF_Controller {
 	{
 		try {
 			$data = json_decode(file_get_contents('php://input'), TRUE);
-			$data["createdAt"]		=	time();
-			$data["last_modified"]	=	0;
-			$data["assigned_by"]	=	$this->session->userdata("extension");
+			$data["createdBy"]	=	$this->session->userdata("extension");
 			$result = $this->crud->create($this->collection, $data);
 			echo json_encode(array("status" => $result ? 1 : 0, "data" => [$result]));
 		} catch (Exception $e) {
@@ -69,6 +67,9 @@ Class Telesalelist_solve extends WFF_Controller {
 			$data = json_decode(file_get_contents('php://input'), TRUE);
 			$data["updatedBy"]	=	$this->session->userdata("extension");
 			$result = $this->crud->where_id($id)->update($this->collection, array('$set' => $data));
+			// Write log update
+			$data["createdBy"]  =	$this->session->userdata("extension");
+			$this->crud->create($this->collection . "_log", $data);
 			echo json_encode(array("status" => $result ? 1 : 0, "data" => []));
 		} catch (Exception $e) {
 			echo json_encode(array("status" => 0, "message" => $e->getMessage()));

@@ -13,7 +13,7 @@ var Config = {
             this.getNavigator(privileges);
         },
         addPrivilege: function(e) {
-            var privileges = this.get("item.privileges") ? this.get("item.privileges") : [];
+            var privileges = this.get("item.privileges") ? this.get("item.privileges").toJSON() : [];
             if(window.modules.length) {
                 privileges.push({module_id: window.modules[0].value, view: true, create: true, update: true, delete: true, actions: []});
                 this.set("item.privileges", privileges);

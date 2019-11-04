@@ -16,6 +16,9 @@
                         <li data-bind="visible: detailUrl, click: openDetail">
                             CUSTOMER DETAIL
                         </li>
+                        <li data-bind="click: openCdr">
+                            <i class="fa fa-phone-square"></i><b> CDR</b>
+                        </li>
                         <div class="pull-right">
                             <span data-bind="text: phone" style="font-size: 18px; vertical-align: -2px" class="text-primary"></span>
                             <a data-role="button" data-bind="click: playRecording, visible: _dataCall.record_file_name" title="Recording" style="vertical-align: 2px">
@@ -111,6 +114,8 @@
                     </div>
                     <div style="padding: 0; overflow-x: hidden; overflow-y: hidden; min-height: 100%" id="customer-detail-content">
                     </div>
+                    <div style="padding: 0; overflow-x: hidden; overflow-y: hidden; min-height: 100%" id="cdr-content">
+                    </div>
                 </div>
             </div>
         </div>
@@ -180,36 +185,35 @@ window.popupObservable.assign({
             error: errorDataSource
         })
     },
-    makeAppointment: function(e) {
-        // await this.save();
-        saveDiallist(this.item.toJSON());
-        openForm({title: '@Add@ @Appointment@', width: 700});
-        addForm(this.item.toJSON());
+    openAppointmentForm: async function(option = {}) {
+        $rightForm = $("#right-form");
+        var formHtml = await $.ajax({
+            url: ENV.templateApi + "appointment_log/formAutoFill",
+            data: {doc: option},
+            error: errorDataSource
+        });
+        kendo.destroy($rightForm);
+        $rightForm.empty();
+        $rightForm.append(formHtml);
     },
+    makeAppointment: function(e) {
+        this.save();
+        openForm({title: '@Add@ @Appointment@', width: 700});
+        this.openAppointmentForm(this.item.toJSON());
+        this.closePopup();
+    },
+    openCdr: function(e) {
+        var filter = JSON.stringify({
+            logic: "and",
+            filters: [
+                {field: "customernumber", operator: "eq", value: this.phone}
+            ]
+        });
+        var query = httpBuildQuery({filter: filter, omc: 1});
+        var $content = $("#cdr-content");
+        if(!$content.find("iframe").length)
+            $content.append(`<iframe src='${ENV.baseUrl}manage/cdr?${query}' style="width: 100%; height: 500px; border: 0"></iframe>`);
+    }
 })
 window.popupObservable.init();
-async function addForm(option = {}) {
-    $rightForm = $("#right-form");
-    var formHtml = await $.ajax({
-        url: ENV.templateApi + "appointment_log/formAutoFill",
-        data: {doc: option},
-        error: errorDataSource
-    });
-    kendo.destroy($rightForm);
-    $rightForm.empty();
-    $rightForm.append(formHtml);
-}
-function saveDiallist(data) {
-    $.ajax({
-        url: ENV.restApi + "diallist_detail/" + (data.id || "").toString(),
-        type: "PUT",
-        contentType: "application/json; charset=utf-8",
-        data: kendo.stringify(data),
-        success: (response) => {
-            if(response.status)
-                syncDataSource();
-        },
-        error: errorDataSource
-    })
-}
 </script>

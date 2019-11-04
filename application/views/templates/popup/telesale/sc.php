@@ -16,6 +16,9 @@
                         <li data-bind="visible: detailUrl, click: openDetail">
                             CUSTOMER DETAIL
                         </li>
+                        <li data-bind="click: openCdr">
+                            <i class="fa fa-phone-square"></i><b> CDR</b>
+                        </li>
                         <div class="pull-right">
                             <span data-bind="text: phone" style="font-size: 18px; vertical-align: -2px" class="text-primary"></span>
                             <a data-role="button" data-bind="click: playRecording, visible: _dataCall.record_file_name" title="Recording" style="vertical-align: 2px">
@@ -98,6 +101,8 @@
                     </div>
                     <div style="padding: 0; overflow-x: hidden; overflow-y: hidden; min-height: 100%" id="customer-detail-content">
                     </div>
+                    <div style="padding: 0; overflow-x: hidden; overflow-y: hidden; min-height: 100%" id="cdr-content">
+                    </div>
                 </div>
             </div>
         </div>
@@ -169,6 +174,18 @@ window.popupObservable.assign({
             },
             error: errorDataSource
         })
+    },
+    openCdr: function(e) {
+        var filter = JSON.stringify({
+            logic: "and",
+            filters: [
+                {field: "customernumber", operator: "eq", value: this.phone}
+            ]
+        });
+        var query = httpBuildQuery({filter: filter, omc: 1});
+        var $content = $("#cdr-content");
+        if(!$content.find("iframe").length)
+            $content.append(`<iframe src='${ENV.baseUrl}manage/cdr?${query}' style="width: 100%; height: 500px; border: 0"></iframe>`);
     }
 })
 window.popupObservable.init();

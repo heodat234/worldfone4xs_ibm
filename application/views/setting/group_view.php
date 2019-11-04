@@ -32,7 +32,7 @@ var Config = {
             <div class="col-md-6" style="border-right: 1px solid lightgray; padding-right: 30px">
                 <div class="row">
                     <h4 class="text-center" style="margin: 20px 0 10px">
-                        <span style="font-weight: 500">@GROUP@ @CALL CENTER@</span>
+                        <span style="font-weight: 500">QUEUE @CALL CENTER@</span>
                     </h4>
                 </div>
                 <div class="row">
@@ -103,8 +103,17 @@ var Config = {
             <label>Queue: </label>
             <span class="label label-info" data-bind="text: queuename" style="font-size: 16px"></span>
             <br>
+            <label>@Link@ @with@ @group@: </label>
+            <span data-bind="invisible: isEdit" class="member-array">#= gridCustomGroups(data.customGroups) #</span>
+            <select data-role="multiselect" multiple="multiple"
+                data-text-field="name"
+                data-value-field="id"
+                data-value-primitive="true"            
+                data-bind="value: customGroups, source: dataSourceCustom, visible: isEdit, events: {select: customGroupsSelect}" 
+                style="width: 100%"></select>
+            <br>
             <label>@Members@: </label>
-            <span  data-bind="invisible: isEdit" class="member-array">#= gridMembers(data.members) #</span>
+            <span data-bind="invisible: isEdit" class="member-array">#= gridMembers(data.members) #</span>
             <div data-bind="visible: isEdit">
                 <select data-role="multiselect" 
                 data-text-field="agentname"
@@ -138,12 +147,6 @@ var Config = {
             <span>
                 <i class="fa fa-check text-success" data-bind="visible: active"></i>
                 <i class="fa fa-times text-danger" data-bind="invisible: active"></i>
-            </span>
-            <label style="margin-left: 20px">@Link@ @to@ queue: </label>
-            <span>
-                <i class="fa fa-check text-success" data-bind="visible: isLinkToQueue"></i>
-                <i class="fa fa-times text-danger" data-bind="invisible: isLinkToQueue"></i>
-                <span class="label label-info" data-bind="text: queuename, visible: isLinkToQueue"></span>
             </span>
             <br>
             <label>@Members@: </label>
@@ -412,6 +415,21 @@ var Config = {
                     total: "total"
                 }
             }),
+            customGroupsSelect: function(e) {
+                var queuename = this.get("selectedQueue");
+                var members = e.dataItem.members.toJSON();
+                members.forEach(extension => {
+                    $.ajax({
+                        url: ENV.vApi + "wfpbx/change_queue_member/add",
+                        data: JSON.stringify({extension: extension, queuename: queuename}),
+                        contentType: "application/json; charset=utf-8",
+                        type: "POST",
+                        success: function(res) {
+                            console.log(res.message);
+                        }
+                    })
+                })
+            },
             membersSelect: function(e) {
                 var extension = e.dataItem.extension,
                     agentname = e.dataItem.agentname,
@@ -477,10 +495,10 @@ var Config = {
             saveQueue: function(e) {
                 var uid = $(e.currentTarget).data("uid"),
                     dataItem = List.dataSource.getByUid(uid);
-                if(dataItem.dirtyFields.name) {
+                if(dataItem.dirtyFields.name || dataItem.dirtyFields.customGroups) {
                     swal({
                         title: `@Are you sure@?`,
-                        text: `@Change@ @group name@`,
+                        text: `@Save@ @this change@`,
                         icon: "warning",
                         buttons: true,
                         dangerMode: false,
@@ -489,7 +507,7 @@ var Config = {
                         if (sure) {
                             $.ajax({
                                 url: ENV.restApi + "group/" + dataItem.id,
-                                data: JSON.stringify({name: dataItem.name}),
+                                data: JSON.stringify({name: dataItem.name, customGroups: dataItem.customGroups}),
                                 contentType: "application/json; charset=utf-8",
                                 type: "PUT",
                                 success: (res) => {
@@ -521,51 +539,21 @@ var Config = {
                     notification.show(res.message, res.status ? "success" : "error");
                     this.dataSource.read();
                 })
-            },
-            addMembersFromGroup: function(e) {
-                var uid = $(e.currentTarget).data("uid"),
-                    dataItem = List.dataSource.getByUid(uid);
-                var data = this.dataSourceCustom.data().toJSON();
-                let buttons = {cancel: true};
-                for (let i = 0; i < data.length; i++) {
-                    buttons[i] = {text: data[i].name};
-                }
-                swal({
-                  title: "@Choose one@",
-                  text: `@Add@ @Members@ @from@ @group@`,
-                  icon: "warning",
-                  buttons: buttons
-                })
-                .then(idx => {
-                    if(idx === null) return;
-                    let doc = data[idx];
-                    if(doc.members) {
-                        let addMembers = doc.members.filter(extension => (dataItem.members || []).indexOf(extension) == -1);
-                        var queuename = dataItem.queuename;
-                        addMembers.forEach(extension => {
-                            $.ajax({
-                                url: ENV.vApi + "wfpbx/change_queue_member/add",
-                                data: JSON.stringify({extension: extension, queuename: queuename}),
-                                contentType: "application/json; charset=utf-8",
-                                type: "POST",
-                                success: (res) => {
-                                    if(res.status) {
-                                        notification.show(`@Add@ ${extension} (${convertExtensionToAgentname[extension]}) @at@ queue ${queuename}`, "success");
-                                        this.updateQueueMembers();
-                                        this.set("editable", true);
-                                    } else {
-                                        notification.show(res.message, "error");
-                                    }
-                                }
-                            })
-                        })   
-                    }
-                })
             }
         }, Config.observable);
 
         List.init();
 
+    }
+
+    function gridCustomGroups(data = []) {
+        var template = [];
+        if(data && data.length) {
+            template = $.map($.makeArray(data), function(value, index) {
+                return `<img src="/api/v1/group/getImageNameById/${value}" style="height: 18px; padding: 2px; background-color: ghostwhite" class="img-thumbnail">`;
+            });
+        }
+        return template.join(' ');
     }
 
     function gridMembers(data = []) {
@@ -579,82 +567,64 @@ var Config = {
         return template.join(' ');
     }
 
-    var commonObservable = {
-        membersSelect: function(e) {
-            if(!this.item.isLinkToQueue) return;
-            var extension = e.dataItem.extension,
-                agentname = e.dataItem.agentname,
-                queuename = this.get("item.queuename"),
-                members = e.sender.value();
-            swal({
-                title: `@Are you sure@?`,
-                text: `@Add@ ${extension} (${agentname}) @at@ queue ${queuename}`,
-                icon: "warning",
-                buttons: true,
-                dangerMode: false,
-            })
-            .then((sure) => {
-                if (sure) {
-                    $.ajax({
-                        url: ENV.vApi + "wfpbx/change_queue_member/add",
-                        data: JSON.stringify({extension: extension, queuename: queuename}),
-                        contentType: "application/json; charset=utf-8",
-                        type: "POST",
-                        success: function(res) {
-                            if(res.status) {
-                                List.dataSource.read();
-                                notification.show(`@Add@ ${extension} (${agentname}) @at@ queue ${queuename}`, "success");
-                            } else {
-                                notification.show(res.message, "error");
-                            }
-                        }
-                    })  
-                }
-            });
-        },
-        membersDeselect: function(e) {
-            if(!this.item.isLinkToQueue) return;
-            var extension = e.dataItem.extension,
-                agentname = e.dataItem.agentname,
-                queuename = this.get("item.queuename"),
-                members = e.sender.value();
-            swal({
-                title: `@Are you sure@?`,
-                text: `@Remove@ ${extension} (${agentname}) @from@ queue ${queuename}`,
-                icon: "warning",
-                buttons: true,
-                dangerMode: false,
-            })
-            .then((sure) => {
-                if (sure) {
-                    $.ajax({
-                        url: ENV.vApi + "wfpbx/change_queue_member/remove",
-                        data: JSON.stringify({extension: extension, queuename: queuename}),
-                        contentType: "application/json; charset=utf-8",
-                        type: "POST",
-                        success: function(res) {
-                            if(res.status) {
-                                List.dataSource.read();
-                                notification.show(`@Remove@ ${extension} (${agentname}) @from@ queue ${queuename}`, "success");
-                            } else {
-                                notification.show(res.message, "error");
-                            }
-                        }
-                    }) 
-                }
-            });
-        }
-    }
-
     async function editForm(ele) {
         var dataItem = List.dataSourceCustom.getByUid($(ele).data("uid")),
             formHtml = await $.ajax({
                 url: Config.templateApi + Config.collection + "/form",
                 error: errorDataSource
             });
-        var model = Object.assign(Config.observable, commonObservable, {
+        
+        dataItem.linkToQueues = await $.get(ENV.vApi + Config.collection + "/getQueuesLinkToGroupId/" + dataItem.id);
+        var model = Object.assign(Config.observable, {
             item: dataItem,
-            queueOption: List.dataSource,
+            membersCustomSelect: function(e) {
+                var extension = e.dataItem.extension,
+                    agentname = e.dataItem.agentname,
+                    queues = this.get("item.linkToQueues"),
+                    members = e.sender.value();
+
+                if(queues.length) {
+                    queues.forEach(queuename => {
+                        $.ajax({
+                            url: ENV.vApi + "wfpbx/change_queue_member/add",
+                            data: JSON.stringify({extension: extension, queuename: queuename}),
+                            contentType: "application/json; charset=utf-8",
+                            type: "POST",
+                            success: (res) => {
+                                if(res.status) {
+                                    notification.show(`@Add@ ${extension} (${agentname}) @at@ queue ${queuename}`, "success");
+                                    List.dataSource.read();
+                                }
+                            }
+                        }) 
+                    })
+                }
+                setTimeout(() => List.dataSourceCustom.sync(), 100);
+            },
+            membersCustomDeselect: function(e) {
+                var extension = e.dataItem.extension,
+                    agentname = e.dataItem.agentname,
+                    queues = this.get("item.linkToQueues"),
+                    members = e.sender.value();
+
+                if(queues.length) {
+                    queues.forEach(queuename => {
+                        $.ajax({
+                            url: ENV.vApi + "wfpbx/change_queue_member/remove",
+                            data: JSON.stringify({extension: extension, queuename: queuename}),
+                            contentType: "application/json; charset=utf-8",
+                            type: "POST",
+                            success: (res) => {
+                                if(res.status) {
+                                    notification.show(`@Remove@ ${extension} (${agentname}) @from@ queue ${queuename}`, "success");
+                                    List.dataSource.read();
+                                }
+                            }
+                        })
+                    })
+                }
+                setTimeout(() => List.dataSourceCustom.sync(), 100);
+            },
             save: function() {
                 List.dataSourceCustom.sync().then(() => {List.dataSourceCustom.read()});
                 closeForm();
@@ -675,9 +645,8 @@ var Config = {
             url: Config.templateApi + Config.collection + "/form",
             error: errorDataSource
         });
-        var model = Object.assign(Config.observable, commonObservable, {
+        var model = Object.assign(Config.observable, {
             item: {type: "custom"},
-            queueOption: List.dataSource,
             save: function() {
                 List.dataSourceCustom.add(this.item);
                 List.dataSourceCustom.sync().then(() => {List.dataSourceCustom.read()});
