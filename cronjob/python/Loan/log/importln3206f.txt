@@ -1,0 +1,7 @@
+01/11/2019, 11:34:07: 'amt'
+01/11/2019, 11:36:01: 'amt'
+01/11/2019, 11:45:09: Too many columns specified: expected 6 and found 1
+01/11/2019, 11:45:56: Too many columns specified: expected 6 and found 1
+01/11/2019, 11:46:23: Too many columns specified: expected 6 and found 1
+01/11/2019, 11:46:35: Too many columns specified: expected 6 and found 1
+01/11/2019, 14:03:00: 'amt'

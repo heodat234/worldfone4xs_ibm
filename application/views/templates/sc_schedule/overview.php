@@ -56,7 +56,7 @@ function createColumn(startDate, endDate) {
     while(startDate <= endDate) {
         startDate.setHours(0, 0, 0, 0);
         var currentColumn = 'sc' + (startDate.getTime() / 1000);
-        var title = startDate.getDate();
+        var title = gridDate(startDate, "dd/MM/yy");
         // console.log('out: ' + currentColumn)
         columns.push({
             field: currentColumn,
@@ -153,8 +153,8 @@ var Config = Object.assign(Config, {
                 timeZoneOffset = date.getTimezoneOffset() * 60000;
             date.setHours(- timeZoneOffset / 3600000, 0, 0 ,0);
             var model = kendo.observable({
-                fromDateTime: new Date(date.getTime() + timeZoneOffset - (dateRange - 1) * 86400000),
-                toDateTime: new Date(date.getTime() + timeZoneOffset + 86400000 -1),
+                fromDateTime: window.defaultStartDate,
+                toDateTime: window.defaultEndDate,
                 startDateChange: function(e) {
                     var start = e.sender,
                         startDate = start.value(),

@@ -27,13 +27,8 @@
         <li class="pull-right none-breakcrumb" id="top-row">
             <div class="btn-group btn-group-sm">
                 <button href="#/" class="btn btn-alt btn-default" data-bind="click: goTo, css: {active: activeArray[0]}">@Overview@</button>
-                <button href="#/import" class="btn btn-alt btn-default" data-bind="click: goTo, css: {active: activeArray[1]}">@Import@</button>
-                <button href="#/history" class="btn btn-alt btn-default" data-bind="click: goTo, css: {active: activeArray[2]}">@Import history@</button>
-<!--                <button class="btn btn-alt btn-default" onclick="openForm({title: '@Add@ @Disbursement@', width: 500}); addForm(this)">@Create@</button>-->
-<!--                <button class="btn btn-alt btn-default" data-bind="css: {active: activeArray[1]}, visible: hasDetail" data-toggle="dropdown" id="btn-detail">@Detail@ (<span data-bind="text: detailList.length"></span>) <span class="caret"></span></button>-->
-                <ul class="dropdown-menu dropdown-custom dropdown-options" data-bind="source: detailList" data-template="detail-dropdown-template">
-                </ul>
-<!--                <button href="#/setting" class="btn btn-alt btn-default hidden" data-bind="click: goTo, css: {active: activeArray[3]}">@Setting@</button>-->
+                <button href="#/import" data-type="action/import" class="btn btn-alt btn-default" data-bind="click: goTo, css: {active: activeArray[1]}">@Import@</button>
+                <button href="#/history" data-type="action/import" class="btn btn-alt btn-default" data-bind="click: goTo, css: {active: activeArray[2]}">@Import history@</button>
             </div>
         </li>
     </ul>

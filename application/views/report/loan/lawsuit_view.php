@@ -2,11 +2,12 @@
     <!-- Table Styles Header -->
     <ul class="breadcrumb breadcrumb-top">
         <li>@Report@</li>
-        <li>@Lawsuit Report@</li>
+        <li>Lawsuit Report</li>
         <li class="pull-right none-breakcrumb" id="top-row">
             <div class="btn-group btn-group-sm">
-                <!-- <button href="#/" class="btn btn-alt btn-default active" >@Overview@</button> -->
-                <a role="button" class="btn btn-sm" onclick="saveAsExcel()"><i class="fa fa-file-excel-o"></i> <b>@Export@</b></a>
+              <a href="<?= base_url() ?>report/loan/lawsuit_report/" class="btn btn-alt btn-default active" >@Overview@</a>
+              <a href="<?= base_url() ?>report/loan/lawsuit_report/import/" class="btn btn-alt btn-default" >@Import@</a>
+              <a role="button" class="btn btn-sm" onclick="saveAsExcel()"><i class="fa fa-file-excel-o"></i> <b>@Export@</b></a>
             </div>
         </li>
     </ul>

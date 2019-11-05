@@ -1,58 +1,44 @@
 #!/usr/bin/python3.6
 # -*- coding: utf-8 -*-
-log = open("/var/www/html/worldfone4xs_ibm/cronjob/python/Telesales/importSibs.txt","a")
-
-import ftplib
 import calendar
 import time
 import sys
-import os
-sys.path.insert(1, '/var/www/html/worldfone4xs_ibm/cronjob/python')
-from ftp import Ftp
 from pprint import pprint
-from mongod import Mongodb
-from excel import Excel
 from datetime import datetime
 from datetime import date
 from bson import ObjectId
+from helper.ftp import Ftp
+from helper.mongod import Mongodb
+from helper.excel import Excel
+from helper.jaccs import Config
+from helper.common import Common
+
+mongodb = Mongodb("worldfone4xs")
+_mongodb = Mongodb("_worldfone4xs")
+excel = Excel()
+config = Config()
+ftp = Ftp()
+common = Common()
+base_url = config.base_url()
+log = open(base_url + "cronjob/python/Telesales/importSCschedule.txt","a")
+now = datetime.now()
+subUserType = 'TS'
+collection = common.getSubUser(subUserType, 'Sibs')
+
+importLogId = sys.argv[1]
+sibsColumns = []
+sibsConverters = {}
 
 try:
-    filename = 'ZACCF full.csv'
-    mongodb = Mongodb("worldfone4xs")
-    _mongodb = Mongodb("_worldfone4xs")
-    excel = Excel()
-    ftp = Ftp()
-    now = datetime.now()
+    importLogInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': ObjectId(importLogId)})
 
-    sibsColumns = []
-    sibsConverters = {}
-
-    ftp.connect()
-    ftp.downLoadFile("/var/www/html/worldfone4xs_ibm/upload/csv/ftp/ZACCF full.csv", filename)
-    ftp.close()
-
-    path, file_name = os.path.split("/var/www/html/worldfone4xs_ibm/upload/csv/ftp/ZACCF full.csv")
-
-    importLogInfo = {
-        'collection'    : "Sibs",
-        'begin_import'  : time.time(),
-        'file_name'     : filename,
-        'file_path'     : path + '/' + file_name,
-        'source'        : 'ftp',
-        'file_type'     : 'csv',
-        'status'        : 2,
-        'created_by'    : 'system'
-    }
-    importLogId = mongodb.insert(MONGO_COLLECTION='2_Import', insert_data=importLogInfo)
-
-    modelsSibs = _mongodb.get(MONGO_COLLECTION='Model', WHERE={'collection': '2_Sibs'}, SORT=[('index', 1)], SELECT=['index', 'collection', 'field', 'type'])
+    modelsSibs = _mongodb.get(MONGO_COLLECTION='Model', WHERE={'collection': collection}, SORT=[('index', 1)], SELECT=['index', 'collection', 'field', 'type'])
     for model in modelsSibs:
         sibsColumns.append(model['field'])
         if(model['type'] == 'string'):
             sibsConverters[model['field']] = str
 
     zaccfs = excel.getDataCSV(file_path=importLogInfo['file_path'], header=None, names=sibsColumns, usecols=[5, 6, 7, 116, 122], converters=sibsConverters)
-    pprint(zaccfs)
     zaccfList = zaccfs.to_dict('records')
 
     insertData = []
@@ -64,8 +50,8 @@ try:
     for idx, zaccf in enumerate(zaccfList):
         if zaccf['account_no'] not in (None, '') and zaccf['cif'] not in (None, '') and zaccf['cus_name'] not in (None, ''):
             result = True
-            checkSibs = mongodb.getOne(MONGO_COLLECTION='2_Sibs', WHERE={'account_no': zaccf['account_no']}, SELECT=['account_no'])
-            zaccf['import_id'] = str(importLogId)
+            checkSibs = mongodb.getOne(MONGO_COLLECTION=collection, WHERE={'account_no': zaccf['account_no']}, SELECT=['account_no'])
+            zaccf['import_id'] = importLogId
             try:
                 zaccf['advance'] = float(zaccf['advance'])
             except Exception as errorConvertDM:
@@ -97,17 +83,17 @@ try:
             continue
 
     if(len(errorData) > 0):
-        mongodb.batch_insert("2_Sibs_result", errorData)
+        mongodb.batch_insert(common.getSubUser(subUserType, 'Sibs_result'), errorData)
     else:
         if len(updateData) > 0:
             for upData in updateData:
-                mongodb.update(MONGO_COLLECTION='2_Sibs', WHERE={'account_no': upData['account_no']}, VALUE=upData)
-            mongodb.batch_insert("2_Sibs_result", updateData)
+                mongodb.update(MONGO_COLLECTION=collection, WHERE={'account_no': upData['account_no']}, VALUE=upData)
+            mongodb.batch_insert(common.getSubUser(subUserType, 'Sibs_result'), updateData)
         if len(insertData) > 0:
-            mongodb.batch_insert(MONGO_COLLECTION="2_Sibs", insert_data=insertData)
-            mongodb.batch_insert("2_Sibs_result", insert_data=insertData)
+            mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertData)
+            mongodb.batch_insert(common.getSubUser(subUserType, 'Sibs_result'), insert_data=insertData)
     
-    mongodb.update(MONGO_COLLECTION='2_Import', WHERE={'_id': importLogId}, VALUE={'status': 1, 'complete_import': time.time()})
-
+    mongodb.update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': ObjectId(importLogId)}, VALUE={'status': 1, 'complete_import': time.time()})
+    pprint({'status': 1})
 except Exception as e:
     log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')

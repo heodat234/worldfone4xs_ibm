@@ -11,6 +11,7 @@
 <script>
     var Config = {
         crudApi: `${ENV.restApi}`,
+        vApi: `${ENV.vApi}`,
         templateApi: `${ENV.templateApi}`,
         observable: {
             scrollTo: function(e) {
@@ -199,7 +200,7 @@
 <script id="layout" type="text/x-kendo-template">
     <ul class="breadcrumb breadcrumb-top">
         <li>@Manage@</li>
-        <li>@Diallist@</li>
+        <li>Data Library</li>
         <li data-bind="text: breadcrumb"></li>
         <li class="pull-right none-breakcrumb" id="top-row">
         	<div class="btn-group btn-group-sm">

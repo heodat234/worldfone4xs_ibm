@@ -382,7 +382,7 @@
     </div>
     
 <script type="text/x-kendo-template" id="treeViewTemplate">
-    <span>#: item.name #</span>
+    <span #if(!item.visible){#class="text-muted"#}#>#: item.name #</span>
     <a role="button" href="javascript:void(0)" title="Thêm thư mục/tập tin con" data-bind="invisible: parent_id, events: {click: addNode}" class="btn btn-xs btn-add" style="margin-left: 5px"><i class="fa fa-plus-circle text-success"></i></a>
     <a role="button" href="javascript:void(0)" title="Xóa thư mục/tập tin" data-bind="invisible: hasChildren, events: {click: removeNode}" class="btn btn-xs btn-delete" style="margin-left: 5px"><i class="fa fa-times-circle text-danger"></i></a>
 </script>

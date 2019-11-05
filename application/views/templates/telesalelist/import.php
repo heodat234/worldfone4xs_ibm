@@ -77,19 +77,15 @@
      width: 100%; 
     }
 </style>
-<!-- <script src="https://cdn.jsdelivr.net/npm/sweetalert2@8"></script> -->
 
 <script type="text/javascript">
-	// $("#spreadsheet").kendoSpreadsheet({toolbar: false});
-	// $("#spreadsheet").hide();
- //   	var spreadsheet = $("#spreadsheet").data("kendoSpreadsheet"); 
 
 	var ALLOWED_EXTENSIONS = [".csv"];
 
     $("#excel-file").kendoUpload({
         async: {
         	autoUpload: false,
-            saveUrl: Config.crudApi+"import/upload/Telesalelist"
+            saveUrl: Config.vApi+"import/upload/Telesalelist"
         },
         multiple: false,
         localization: {
@@ -101,8 +97,6 @@
                 alert("Please, select a supported file format csv");
                 e.preventDefault();
             }
-            // $("#spreadsheet").show();
-        	// spreadsheet.fromFile(e.files[0]['rawFile']);
         },
         clear: onClear,
         progress: onProgress,
@@ -130,6 +124,7 @@
     var router = new kendo.Router({routeMissing: function(e) { router.navigate("/") }});
     var Config = {
         crudApi: `${ENV.restApi}`,
+        vApi: `${ENV.vApi}`,
         templateApi: `${ENV.templateApi}`,
         collection: "Import",
         observable: {},
@@ -223,14 +218,16 @@
                 .then((value) => {
                     if (value == 'import') {
                         $.ajax({
-                            url: Config.crudApi + Config.collection + "/importFTP/Telesalelist",
+                            url: Config.vApi + Config.collection + "/importFTP/Telesalelist",
                             type: "POST",
                             data: {file_path: dataItem.file_path, file_name: dataItem.file_name},
                             success: function(result) {
-                                notification.show(result.message, result.status ? "success" : "error");
-                                if (result.status == 0) {
-                                    router.navigate(`/history`);
-                                }
+                                if (e.response.status == -1) {
+                                    swal({text: "Quá trình upload đang được thực hiện. Vui lòng đợi vài phút và kiểm tra trong lịch sử."});
+                                }else{
+                                    notification.show(e.response.message, e.response.status ? "success" : "error");
+                                    // router.navigate(`/history`);
+                                }  
                             },
                             error: errorDataSource
                         })

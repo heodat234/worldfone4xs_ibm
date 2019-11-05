@@ -2,7 +2,7 @@
     <!-- Table Styles Header -->
     <ul class="breadcrumb breadcrumb-top">
         <li>@Report@</li>
-        <li>@Lawsuit Report@</li>
+        <li>SMS Daily SMS Report</li>
         <li class="pull-right none-breakcrumb" id="top-row">
             <div class="btn-group btn-group-sm">
                 <!-- <button href="#/" class="btn btn-alt btn-default active" >@Overview@</button> -->
@@ -21,19 +21,33 @@
             </div>
         </div>
         <div class="row chart-page"  style="background-color: white">
-
-            <div class="col-sm-12">
-                <div id="grid"></div>
+          <div data-role="tabstrip">
+            <ul>
+                <li class="k-state-active">
+                    SMS SIBS
+                </li>
+                <li>
+                    SMS CARD
+                </li>
+            </ul>
+            <div>
+              <div class="container-fluid">
+                <div class="col-sm-12">
+                    <div id="grid"></div>
+                </div>
+              </div>
             </div>
-        </div>
-        <div class="row" data-bind="visible: visibleNoData">
-            <h3 class="text-center">@NO DATA@</h3>
+            <div>
+                <div class="container-fluid">
+                  <div class="col-sm-12">
+                    <div id="grid_1"></div>
+                  </div>
+                </div>
+            </div>
         </div>
     </div>
     <div id="action-menu">
         <ul>
-
-
         </ul>
     </div>
     <script>
@@ -42,13 +56,15 @@
               dataSource: {},
               grid: {},
               columns: [],
+              grid_name: '',
+              source_name: '',
               init: function() {
                   var dataSource = this.dataSource = new kendo.data.DataSource({
                      serverPaging: true,
                      serverFiltering: true,
                      pageSize: 20,
                      transport: {
-                        read: ENV.reportApi + "loan/smsdaily_report",
+                        read: ENV.reportApi + "loan/smsdaily_report/" + this.source_name,
                         parameterMap: parameterMap
                      },
                      schema: {
@@ -67,7 +83,7 @@
                      }
                   });
 
-                  var grid = this.grid = $("#grid").kendoGrid({
+                  var grid = this.grid = $("#"+this.grid_name).kendoGrid({
                      dataSource: dataSource,
                      zable: true,
                      pageable: true,
@@ -95,7 +111,7 @@
           }
       }();
       window.onload = function() {
-        var lawsuitFields = new kendo.data.DataSource({
+        var sibsFields = new kendo.data.DataSource({
             serverPaging: true,
             serverFiltering: true,
             serverSorting: true,
@@ -130,17 +146,17 @@
             page: 1,
             sort: {field: "index", dir: "asc"}
         })
-        lawsuitFields.read().then(function(){
-            var columns = lawsuitFields.data().toJSON();
+        sibsFields.read().then(function(){
+            var columns = sibsFields.data().toJSON();
             columns.map(col => {
                col.width = 150;
                 switch (col.type) {
                     case "name":
                         col.template = (dataItem) => gridName(dataItem[col.field]);
                         break;
-                    case "phone": case "arrayPhone":
-                        col.template = (dataItem) => gridPhone(dataItem[col.field]);
-                        break;
+                    // case "phone": case "arrayPhone":
+                    //     col.template = (dataItem) => gridPhone(dataItem[col.field]);
+                    //     break;
                     case "array":
                         col.template = (dataItem) => gridArray(dataItem[col.field]);
                         break;
@@ -161,7 +177,86 @@
                title: "SENDING DATE",
                width: 150
             });
+            Table.grid_name = 'grid';
+            Table.source_name = 'sibs';
+            Table.columns = columns;
+            Table.init();
+            // Table.grid.bind("change", grid_change);
+        });
 
+        var cardFields = new kendo.data.DataSource({
+            serverPaging: true,
+            serverFiltering: true,
+            serverSorting: true,
+            transport: {
+                read: {
+                  url: `${ENV.vApi}model/read`,
+                  data:  {
+                      skip: 0,
+                      take: 50
+                  }
+                },
+                parameterMap: parameterMap
+            },
+            schema: {
+                data: "data",
+                parse: function(response) {
+                  response.data = response.data.filter(function(doc) {
+                    if(doc.sub_type)
+                      doc.subType = JSON.parse(doc.sub_type);
+                    else doc.subType = {};
+                    return doc.subType.smsreport;
+                  })
+                  return response;
+                }
+
+            },
+            filter: {
+                field: "collection",
+                operator: "eq",
+                value: (ENV.type ? ENV.type + "_" : "") + "List_of_account_in_collection"
+            },
+            page: 1,
+            sort: {field: "index", dir: "asc"}
+        })
+        cardFields.read().then(function(){
+            var columns = cardFields.data().toJSON();
+            columns.map(col => {
+               col.width = 150;
+                switch (col.type) {
+                    case "name":
+                        col.template = (dataItem) => gridName(dataItem[col.field]);
+                        break;
+                    // case "phone": case "arrayPhone":
+                    //     col.template = (dataItem) => gridPhone(dataItem[col.field]);
+                    //     break;
+                    case "array":
+                        col.template = (dataItem) => gridArray(dataItem[col.field]);
+                        break;
+                    case "timestamp":
+                        col.template = (dataItem) => gridDate(dataItem[col.field] != '' ? new Date(dataItem[col.field] * 1000) : null);
+                        break;
+                    default:
+                        break;
+                }
+            });
+            columns.unshift({
+               field: "group",
+               title: "GROUP",
+               width: 100
+            });
+            columns.unshift({
+               field: "stt",
+               title: "No",
+               width: 50
+            });
+            columns.push({
+               field: "date",
+               title: "SENDING DATE",
+               width: 150
+            });
+            Table.grid_name = 'grid_1';
+            Table.source_name = 'card';
             Table.columns = columns;
             Table.init();
             // Table.grid.bind("change", grid_change);
@@ -184,6 +279,7 @@
           url: ENV.reportApi + "loan/smsdaily_report/saveAsExcel",
           type: 'POST',
           dataType: 'json',
+          timeout: 30000
         })
         .done(function(response) {
           if (response.status == 1) {

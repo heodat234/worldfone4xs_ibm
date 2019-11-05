@@ -70,15 +70,19 @@ var Config = {
         <div class="pull-right">
             <a href="javascript:void(0)" class="btn-action"><i class="fa fa-plug fa-2x"></i></a>
         </div>
+        <br><br>
+        <span>#= gridArray(data.actions) #</span>
     </div>
 </script>
 <style type="text/css">
     .view-container {
         border: 1px solid lightgray;
         padding: 10px 20px;
-        margin: 10px;
+        margin: 5px;
         width: 240px;
         float: left;
+        border-radius: 4px;
+        min-height: 70px;
     }
     .view-container span {
         font-size: 20px;

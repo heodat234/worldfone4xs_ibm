@@ -88,7 +88,7 @@
         dealerDataSource: new kendo.data.DataSource({
             transport: {
                 read: {
-                    url: ENV.restApi + "Dealer",
+                    url: ENV.restApi + "dealer",
                 },
                 parameterMap: parameterMap
             },
@@ -109,7 +109,7 @@
                     filter: [{field: 'location', operator: 'eq', value: location.location}],
                     transport: {
                         read: {
-                            url: ENV.restApi + "Dealer",
+                            url: ENV.restApi + "dealer",
                         },
                         parameterMap: parameterMap
                     },
@@ -132,7 +132,7 @@
             var dealer_code = this.get('item.dealer_code');
             var appointment_date = this.get('item.appointment_date');
             if(dealer_code && appointment_date) {
-                var listDealerCode = $.get(`${ENV.restApi}Sc_schedule`, {
+                var listDealerCode = $.get(`${ENV.restApi}sc_schedule`, {
                     q: JSON.stringify({
                         filter: {
                             logic: 'and',
@@ -154,7 +154,7 @@
                         ],
                         transport: {
                             read: {
-                                url: ENV.restApi + "Sc",
+                                url: ENV.restApi + "sc",
                             },
                             parameterMap: parameterMap
                         },
@@ -177,7 +177,7 @@
             serverFiltering: true,
             transport: {
                 read: {
-                    url: ENV.restApi + "Telesalelist",
+                    url: ENV.restApi + "telesalelist",
                 },
                 parameterMap: parameterMap
             },
@@ -191,25 +191,6 @@
             var dataItem = customerDropDown.dataItem();
             this.set('item.cus_name', dataItem.customer_name);
         },
-        // save: function () {
-        //     $.ajax({
-        //         url: ENV.vApi + "appointment_log/create",
-        //         type: "POST",
-        //         data: JSON.stringify(this.item),
-        //         contentType: "application/json; charset=utf-8",
-        //         dataType: 'JSON',
-        //         success: (response) => {
-        //             if(response.status == 1) {
-        //                 notificationAfterRefresh("@Create@ @appointment@ @success@", "success");
-        //                 location.reload();
-        //             }
-        //             else{
-        //                 notification.show("@Create@ @appointment@ @fail@", 'error')
-        //             }
-        //         },
-        //         error: errorDataSource
-        //     });
-        // }
         save: function() {
             var item = this.get('item');
             var appointment_date = new Date(this.item.appointment_date);
@@ -232,8 +213,7 @@
                 var cmnd = this.get('item.id_no');
                 var cmndDD = $("#id-no").data("kendoDropDownList");
                 cmndDD.text(cmnd);
-                this.set('item.id_no', cmndDD.value())
-                // cmndDD.trigger("dataBound");
+                this.set('item.id_no', cmndDD.value());
             }
         }
     };

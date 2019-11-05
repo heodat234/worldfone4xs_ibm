@@ -131,4 +131,5 @@
         })
     });
     kendo.bind($userListElement, userListObservable);
+    
 </script>

@@ -1,0 +1,1 @@
+04/11/2019, 14:22:47: [Errno 2] No such file or directory: '/var/www/html/worldfone4xs_ibm//var/www/html/worldfone4xs_ibm/upload/ftp/telesales/Lich_lam_viec_SC.xlsx'

@@ -1,0 +1,7 @@
+30/10/2019, 11:27:54: Passed header names mismatches usecols
+30/10/2019, 11:29:03: Passed header names mismatches usecols
+30/10/2019, 11:32:35: cannot specify usecols when specifying a multi-index header
+30/10/2019, 11:33:14: Passed header names mismatches usecols
+30/10/2019, 11:38:21: Passed header names mismatches usecols
+30/10/2019, 11:38:47: Passed header names mismatches usecols
+30/10/2019, 11:40:37: Passed header names mismatches usecols

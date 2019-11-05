@@ -11,6 +11,7 @@
 <script>
     var Config = {
         crudApi: `${ENV.restApi}`,
+        vApi: `${ENV.vApi}`,
         templateApi: `${ENV.templateApi}`,
         observable: {
             scrollTo: function(e) {

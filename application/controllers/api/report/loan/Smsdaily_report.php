@@ -9,6 +9,7 @@ use PhpOffice\PhpSpreadsheet\Reader;
 Class Smsdaily_report extends WFF_Controller {
 
     private $collection = "LNJC05";
+    private $card_collection = "List_of_account_in_collection";
     private $model_collection = "Model";
 
     function __construct()
@@ -18,10 +19,10 @@ Class Smsdaily_report extends WFF_Controller {
         $this->load->library("crud");
         $this->load->library("excel");
         $this->collection = set_sub_collection($this->collection);
-
+        $this->card_collection = set_sub_collection($this->card_collection);
     }
 
-    function index()
+    function sibs()
     {
         try {
             $request = json_decode($this->input->get("q"), TRUE);
@@ -38,6 +39,18 @@ Class Smsdaily_report extends WFF_Controller {
             echo json_encode(array("status" => 0, "message" => $e->getMessage()));
         }
     }
+    function card()
+    {
+        try {
+            $request = json_decode($this->input->get("q"), TRUE);
+            $response = $this->crud->read($this->card_collection, $request);
+            
+            echo json_encode($response);
+
+        } catch (Exception $e) {
+            echo json_encode(array("status" => 0, "message" => $e->getMessage()));
+        }
+    }
     function saveAsExcel()
     {
         try {
@@ -45,24 +58,23 @@ Class Smsdaily_report extends WFF_Controller {
             $response = $this->crud->read($this->collection, $request);
             $total = $response['total'];
 
-            $count = 1000;
-            $vong_lap = (int)($total/$count);
-            $du = $total%$count;
+            $limit = 1000;
+            $count = (int)($total/$limit);
             $data = array();
 
-            for ($i=0; $i < $vong_lap; $i++) { 
-                $request    = array("take" => $count, "skip" => $i*$count);
-                $response = $this->crud->read($this->collection, $request);
+            for ($i=0; $i < $count; $i++) { 
+                $request    = array("take" => $limit, "skip" => $i*$limit);
+                $response = $this->crud->read($this->collection, $request,['overdue_amount_this_month','advance_balance','installment_type','group_id','account_number','mobile_num','cus_name']);
                 foreach ($response['data'] as &$value) {
                    if ( ((int)$value['overdue_amount_this_month'] - (int)$value['advance_balance'] > 40000) || ((int)$value['overdue_amount_this_month'] - (int)$value['advance_balance'] < 40000 && $value['installment_type'] == 'n') ){
                       array_push($data, $value);
                    }
                 }
             }
-            var_dump($data);exit;
-            if ($du > 0) {
-                $request    = array("take" => $count, "skip" => $vong_lap*$count);
-                $response = $this->crud->read($this->collection, $request);
+            // var_dump($data);exit;
+            if (($total%$limit) > 0) {
+                $request    = array("take" => $limit, "skip" => $count*$limit);
+                $response = $this->crud->read($this->collection, $request,['overdue_amount_this_month','advance_balance','installment_type','group_id','account_number','mobile_num','cus_name']);
                 foreach ($response['data'] as &$value) {
                    if ( ((int)$value['overdue_amount_this_month'] - (int)$value['advance_balance'] > 40000) || ((int)$value['overdue_amount_this_month'] - (int)$value['advance_balance'] < 40000 && $value['installment_type'] == 'n') ){
                       array_push($data, $value);

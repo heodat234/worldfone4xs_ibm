@@ -1,21 +1,20 @@
 #!/usr/bin/python3.6
 # -*- coding: utf-8 -*-
-log         = open("/var/www/html/worldfone4xs_ibm/cronjob/python/Telesales/importTelesale.txt","a+")
 import sys
 import os
-sys.path.insert(1, '/var/www/html/worldfone4xs_ibm/cronjob/python')
+# sys.path.insert(1, '/var/www/html/worldfone4xs_ibm/cronjob/python')
 import calendar
 import time
 import ntpath
 import json
-from mongod import Mongodb
-from excel import Excel
 from datetime import datetime
 from datetime import date
 from xlsxwriter.utility import xl_rowcol_to_cell
 from pprint import pprint
 from bson import ObjectId
-from common import Common
+from helper.common import Common
+from helper.mongod import Mongodb
+from helper.excel import Excel
 from dateutil.parser import parse
 
 mongodb     = Mongodb("worldfone4xs")
@@ -23,6 +22,7 @@ _mongodb    = Mongodb("_worldfone4xs")
 excel       = Excel()
 common      = Common()
 now         = datetime.now()
+log         = open("/var/www/html/worldfone4xs_ibm/cronjob/python/Telesales/importTelesale.txt","a+")
 
 try:
    importLogId = sys.argv[1]
@@ -56,7 +56,6 @@ try:
    for key,listCol in enumerate(listDataLibrary):
       temp = {}
       checkErr = False
-      # log.write(str(key) + '\n')
       for idx,header in enumerate(headers):
          if header['index'] == 23:
             continue;
@@ -121,9 +120,6 @@ try:
          temp['updatedAt']       = int(time.time())
          temp['updatedBy']       = extension
 
-      # insertData.append(temp)
-      # pprint(temp)
-      # break
       if checkErr == False:
          try:
             mongodb.update(MONGO_COLLECTION=collection, WHERE={'id_no':temp['id_no']}, VALUE=temp)
@@ -134,8 +130,6 @@ try:
    
    if len(errorData) <= 0:
       # mongodb.insert('2_Assign_log', arrayCMND)
-   #    mongodb.remove_document(collection)
-   #    resultImport = mongodb.batch_insert(collection, insertData)
       status = 1
    else:
       status = 0

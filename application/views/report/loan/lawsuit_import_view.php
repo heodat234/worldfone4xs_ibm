@@ -158,11 +158,12 @@
 <script id="layout" type="text/x-kendo-template">
     <ul class="breadcrumb breadcrumb-top">
         <li>@Manage@</li>
-        <li>@Lawsuit Report@</li>
+        <li>Lawsuit Report</li>
         <li data-bind="text: breadcrumb"></li>
         <li class="pull-right none-breakcrumb" id="top-row">
         	<div class="btn-group btn-group-sm">
-                <button href="#/import" class="btn btn-alt btn-default" data-bind="click: goTo, css: {active: activeArray[0]}">@Import@</button>
+                <a href="<?= base_url() ?>report/loan/lawsuit_report/" class="btn btn-alt btn-default" >@Overview@</a>
+                <button href="#/import" class="btn btn-alt btn-default active" data-bind="click: goTo, css: {active: activeArray[0]}">@Import@</button>
                 <button href="#/history" class="btn btn-alt btn-default" data-bind="click: goTo, css: {active: activeArray[1]}">@Import History@</button>
             </div>
         </li>

@@ -13,6 +13,15 @@
 				<input class="k-textbox" style="width: 100%" data-bind="value: item.name, enabled: item.active">
 			</div>
 			<div class="form-group">
+				<label>@Lead@</label>
+				<input data-role="dropdownlist" name="lead"
+					data-text-field="agentname"
+					data-value-field="extension"
+					data-template="itemGroupTemplate"
+					data-value-primitive="true"           
+                    data-bind="value: item.lead, source: membersOption, enabled: item.active" style="width: 100%">
+			</div>
+			<div class="form-group">
 				<label>@Members@</label>
 				<select data-role="multiselect" name="members" multiple="multiple"
 					data-text-field="agentname"

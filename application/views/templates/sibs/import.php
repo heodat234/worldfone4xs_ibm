@@ -8,10 +8,10 @@
                 <li style="display: none">
                     EXCEL
                 </li>
-                <li class="k-state-active">
+                <li style="display: none">
                     CSV
                 </li>
-                <li>
+                <li class="k-state-active">
                     FTP
                 </li>
             </ul>
@@ -21,7 +21,6 @@
                         <div class="row">
                             <div class="col-sm-12 text-center" style="padding: 10px">
                                 <a data-role="button" data-bind="click: uploadExcel">@Upload@ excel</a>
-<!--                                <a data-role="button" data-bind="click: importExcelFromPython">Nhập excel</a>-->
                                 <div class="hidden">
                                     <input name="file" type="file" id="upload-excel"
                                            data-role="upload"
@@ -159,10 +158,8 @@
                 pageSize: 5,
                 transport: {
                     read: {
-                        // url: ENV.reportApi + "excecuteExcel/read",
                         url: ENV.vApi + "Sibs/getCSVData",
                         data: {
-                            // limit_column: "F",
                             pageSize: null
                         }
                     }
@@ -260,27 +257,6 @@
                     total: "total"
                 },
             }),
-            importExcelFromPython: function() {
-                $.ajax({
-                    url: ENV.vApi + "sibs/callPYFromPHP",
-                    // type: "PATCH",
-                    // contentType: "application/json; charset=utf-8",
-                    // data: kendo.stringify({filepath: filepath, convert: convert, import_type: 'manual', import_file_type: 'excel', total_data: totaldata, columnModel: columnModel}),
-                    success: function(res) {
-                        // if(res.status) {
-                        //     syncDataSource();
-                        //     router.navigate(`/`);
-                        // }
-                        // else {
-                        //     notification.show("Đã có lỗi trong quá trình nhập dữ liệu. Xin vui lòng kiểm tra lại trong lịch sử nhập dữ liệu", "error");
-                        // }
-                        console.log(res);
-                    },
-                    error: errorDataSource
-                })
-            },
-
-        };
         kendo.bind(".mvvm", kendo.observable(model));
     });
 
@@ -325,31 +301,6 @@
         var selectedNode = ftp_grid.select(),
             dataItem = ftp_grid.dataItem($(ele).closest("tr"));
         uploadExcelSuccess(dataItem.filepath);
-        // var columns = customerFields.data().toJSON();
-        // var columnModel = arrayColumn(columns, 'type', 'field');
-        // var colToField = arrayColumn(columns, "field");
-        // var grid = $("#data-grid").data("kendoGrid");
-        // save(dataItem.filepath, colToField, grid.dataSource.total(), columnModel);
-    }
-
-    function save(filepath, convert, totaldata, columnModel) {
-        $.ajax({
-            url: `${ENV.vApi}${Config.collection}/getCSVData`,
-            // url: `${ENV.vApi}${Config.collection}/importExcel`,
-            // type: "PATCH",
-            contentType: "application/json; charset=utf-8",
-            data: kendo.stringify({filepath: filepath, convert: convert, import_type: 'FTP', import_file_type: 'excel', total_data: totaldata, columnModel: columnModel}),
-            success: function(res) {
-                if(res.status) {
-                    syncDataSource();
-                    router.navigate(`/`);
-                }
-                else {
-                    notification.show("Đã có lỗi trong quá trình nhập dữ liệu. Xin vui lòng kiểm tra lại trong lịch sử nhập dữ liệu", "error");
-                }
-            },
-            error: errorDataSource
-        })
     }
 </script>
 

@@ -143,6 +143,9 @@ var Config = {
                 </a>
             </div>
             <br><br>
+            <label>@Lead@: </label>
+            <span class="member-array">#= gridMembers([data.lead]) #</span>
+            <br>
             <label>@Active@: </label>
             <span>
                 <i class="fa fa-check text-success" data-bind="visible: active"></i>
@@ -583,7 +586,7 @@ var Config = {
                     queues = this.get("item.linkToQueues"),
                     members = e.sender.value();
 
-                if(queues.length) {
+                if(queues && queues.length) {
                     queues.forEach(queuename => {
                         $.ajax({
                             url: ENV.vApi + "wfpbx/change_queue_member/add",
@@ -607,7 +610,7 @@ var Config = {
                     queues = this.get("item.linkToQueues"),
                     members = e.sender.value();
 
-                if(queues.length) {
+                if(queues && queues.length) {
                     queues.forEach(queuename => {
                         $.ajax({
                             url: ENV.vApi + "wfpbx/change_queue_member/remove",
@@ -647,6 +650,8 @@ var Config = {
         });
         var model = Object.assign(Config.observable, {
             item: {type: "custom"},
+            membersCustomSelect: () => {},
+            membersCustomDeselect: () => {},
             save: function() {
                 List.dataSourceCustom.add(this.item);
                 List.dataSourceCustom.sync().then(() => {List.dataSourceCustom.read()});

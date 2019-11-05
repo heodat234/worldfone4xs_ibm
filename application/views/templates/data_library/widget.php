@@ -21,15 +21,6 @@
 	            cif: '',
 	            loanContract: '',
 	            nationalID: '',
-	            cifChange: function(e) {
-					// console.log(e.data.cif);
-
-	                
-	            },
-	            loanContractChange: function(e) {
-	            	
-	            },
-	            nationalIDChange: function(e) {},
 	            search: function() {
 	            	var filter = dataSource.filter();
 	                var cif = $('#cif_id').val();
