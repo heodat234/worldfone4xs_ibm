@@ -106,16 +106,20 @@
       }();
       $("#spreadsheet").kendoSpreadsheet({toolbar: false});
       var spreadsheet = $("#spreadsheet").data("kendoSpreadsheet");
-      // var path = Server.MapPath("/var/www/html/worldfone4xs_ibm/upload/excel/a.xlsx");
+      // // var path = Server.MapPath("/var/www/html/worldfone4xs_ibm/upload/excel/a.xlsx");
+      // xhr.open('GET', '/var/www/html/worldfone4xs_ibm/upload/excel/a.xlsx');
+      // xhr.responseType = 'blob';
+      // xhr.send();
+      // https://forums.digitalpoint.com/threads/jquery-ajax-binary-blob-return-and-show-image-other-files.2790016/
       // console.log(path);
-      $.ajax({
-          url: '<?= base_url()?>api/report/loan/Daily_balance_report/readExcel',
-          dataType: 'json',
-          success: function (data) {
-            console.log(data);
-              spreadsheet.fromJSON(data);
-          }
-      });
+      // $.ajax({
+      //     url: '<?= base_url()?>api/report/loan/Daily_balance_report/readExcel',
+      //     dataType: 'json',
+      //     success: function (data) {
+      //       console.log(data);
+      //         spreadsheet.fromJSON(data);
+      //     }
+      // });
       
 
         var cardFields = new kendo.data.DataSource({
