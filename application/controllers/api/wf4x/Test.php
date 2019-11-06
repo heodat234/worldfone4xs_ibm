@@ -92,12 +92,12 @@ Class Test extends CI_Controller {
 
    function testAssign()
    {
-      $random = '100,200';
-      $idImport = "5db7fda41ef2b417ac55d4d6";
-      $extension = '1051,888';
+      $random = '10020,20020';
+      $idImport = "5dc0f3051ef2b4126c0efa24";
+      $extension = '1051,888,122';
 
       // $output = exec('PYTHONIOENCODING=utf-8 python3.6 /var/www/html/python/importCSV.py ' . $idImport . " ". $collection ." ". $extension ." > /dev/null &");
-      $output = shell_exec('PYTHONIOENCODING=utf-8 python3.6 /var/www/html/python/assign.py ' . $idImport . " ". $random ." ". $extension ." 2>&1");
+      $output = shell_exec('PYTHONIOENCODING=utf-8 python3.6 /var/www/html/worldfone4xs_ibm/cronjob/python/Telesales/assign.py ' . $idImport . " ". $random ." ". $extension ." 2>&1");
 
       echo $output;
    }

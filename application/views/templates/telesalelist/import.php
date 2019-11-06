@@ -78,48 +78,6 @@
     }
 </style>
 
-<script type="text/javascript">
-
-	var ALLOWED_EXTENSIONS = [".csv"];
-
-    $("#excel-file").kendoUpload({
-        async: {
-        	autoUpload: false,
-            saveUrl: Config.vApi+"import/upload/Telesalelist"
-        },
-        multiple: false,
-        localization: {
-            "select": "Chọn 1 tệp để nhập..."
-        },
-        select: function(e) {
-            var extension = e.files[0].extension.toLowerCase();
-            if (ALLOWED_EXTENSIONS.indexOf(extension) == -1) {
-                alert("Please, select a supported file format csv");
-                e.preventDefault();
-            }
-        },
-        clear: onClear,
-        progress: onProgress,
-        success: function(e) {
-    		if (e.response.status == -1) {
-                swal({text: "Quá trình upload đang được thực hiện. Vui lòng đợi vài phút và kiểm tra trong lịch sử."});
-            }else{
-                notification.show(e.response.message, e.response.status ? "success" : "error");
-                // router.navigate(`/history`);
-            }      	
-        }
-    });
-    function onClear(e) {
-        $("#spreadsheet").hide();
-    }
-  	function onProgress(e) {
-        var files = e.files;
-        console.log(e.percentComplete);
-    }
-
-	
-	
-</script>
 <script>
     var router = new kendo.Router({routeMissing: function(e) { router.navigate("/") }});
     var Config = {
@@ -201,6 +159,44 @@
             }
         }
     }();
+
+    var ALLOWED_EXTENSIONS = [".csv"];
+
+    $("#excel-file").kendoUpload({
+        async: {
+            autoUpload: false,
+            saveUrl: Config.vApi+"import/upload/Telesalelist"
+        },
+        multiple: false,
+        localization: {
+            "select": "Chọn 1 tệp để nhập..."
+        },
+        select: function(e) {
+            var extension = e.files[0].extension.toLowerCase();
+            if (ALLOWED_EXTENSIONS.indexOf(extension) == -1) {
+                alert("Please, select a supported file format csv");
+                e.preventDefault();
+            }
+        },
+        clear: onClear,
+        progress: onProgress,
+        success: function(e) {
+            if (e.response.status == -1) {
+                swal({text: "Quá trình upload đang được thực hiện. Vui lòng đợi vài phút và kiểm tra trong lịch sử."});
+            }else{
+                notification.show(e.response.message, e.response.status ? "success" : "error");
+                // router.navigate(`/history`);
+            }       
+        }
+    });
+    function onClear(e) {
+        $("#spreadsheet").hide();
+    }
+    function onProgress(e) {
+        var files = e.files;
+        console.log(e.percentComplete);
+    }
+
 
     function uploadFile(e) {
                 var gridview = $("#grid-3").data("kendoGrid"),

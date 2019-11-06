@@ -24,12 +24,4 @@ class Lawsuit_report extends WFF_Controller {
         $this->output->data["js"][] = STEL_PATH . "js/tools.js";
         $this->load->view('report/loan/lawsuit_view');
     }
-
-    public function import() {
-        $this->_build_template();
-        $this->output->data["css"][] = STEL_PATH . "css/table.css";
-        $this->output->data["js"][] = KENDOUI_PATH . "js/jszip.min.js";
-        $this->output->data["js"][] = STEL_PATH . "js/tools.js";
-        $this->load->view('report/loan/lawsuit_import_view');
-    }
 }

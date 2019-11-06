@@ -16,19 +16,19 @@ from helper.excel import Excel
 from helper.jaccs import Config
 from helper.common import Common
 
-try:
-    mongodb = Mongodb("worldfone4xs")
-    _mongodb = Mongodb("_worldfone4xs")
-    excel = Excel()
-    config = Config()
-    ftp = Ftp()
-    common = Common()
-    base_url = config.base_url()
-    log = open(base_url + "cronjob/python/Telesales/importSCschedule.txt","a")
-    now = datetime.now()
-    subUserType = 'TS'
-    collection = common.getSubUser(subUserType, 'Sibs')
+mongodb = Mongodb("worldfone4xs")
+_mongodb = Mongodb("_worldfone4xs")
+excel = Excel()
+config = Config()
+ftp = Ftp()
+common = Common()
+base_url = config.base_url()
+log = open(base_url + "cronjob/python/Telesales/importSibs.txt","a")
+now = datetime.now()
+subUserType = 'TS'
+collection = common.getSubUser(subUserType, 'Sibs')
 
+try:
     sibsColumns = []
     sibsConverters = {}
 

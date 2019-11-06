@@ -16,15 +16,16 @@ from datetime import datetime
 from datetime import date
 from bson import ObjectId
 
+mongodb = Mongodb("worldfone4xs")
+_mongodb = Mongodb("_worldfone4xs")
+excel = Excel()
+config = Config()
+ftp = Ftp()
+common = Common()
+base_url = config.base_url()
+log = open(base_url + "cronjob/python/Telesales/importAppointment.txt","a")
+
 try:
-    mongodb = Mongodb("worldfone4xs")
-    _mongodb = Mongodb("_worldfone4xs")
-    excel = Excel()
-    config = Config()
-    ftp = Ftp()
-    common = Common()
-    base_url = config.base_url()
-    log = open(base_url + "cronjob/python/Telesales/importAppointment.txt","a")
     now = datetime.now()
     subUserType = 'TS'
     collection = common.getSubUser(subUserType, 'Appointment')

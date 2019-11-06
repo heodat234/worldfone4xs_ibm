@@ -9,7 +9,6 @@ from datetime import date
 from xlsxwriter.utility import xl_rowcol_to_cell
 from pprint import pprint
 from bson import ObjectId
-from common import Common
 from time import mktime as mktime
 from helper.ftp import Ftp
 from helper.mongod import Mongodb

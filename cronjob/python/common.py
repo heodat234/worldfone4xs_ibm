@@ -4,10 +4,24 @@
 class Common:
     def __init__(self):
         import calendar, time
+        import sys
+        sys.path.insert(1, '/var/www/html/worldfone4xs_ibm/cronjob/python/config/')
         from pprint import pprint
+        import Jaccs as Jaccsconfig
+        self.Jaccsconfig = Jaccsconfig
         self.pprint = pprint
         self.calendar = calendar
         self.time = time
+
+    def base_url(self):
+        return self.Jaccsconfig.base_url
+
+    def getSubUser(self, type, collection):
+        typeList = {
+            'TS': 'TS',
+            'LO': 'LO'
+        }
+        return typeList[type] + '_' + collection
 
     def getFullPath(self, projectName='', path=''):
         return '/var/www/html/' + projectName + '/' + path
@@ -52,8 +66,8 @@ class Common:
     %Z or %z - time zone or name or abbreviation
     %% - a literal % character
     '''
-    def convertTimestamp(self, value, format="%d/%m/%Y"):
-        return int(self.time.mktime(self.time.strptime(value, format)))
+    def convertTimestamp(self, value, formatString="%d/%m/%Y"):
+        return int(self.time.mktime(self.time.strptime(str(value), formatString)))
 
     def convertInt(self, value, formatType=''):
         return int(value)
@@ -62,7 +76,8 @@ class Common:
         return bool(value)
     
     def convertDouble(self, value, formatType=''):
-        value = value.replace(',', '')
+        if isinstance(value, str):
+            value = value.replace(',', '')
         return float(value)
 
     def convertDefault(self, value, formatType=''):
@@ -84,3 +99,4 @@ class Common:
             'name'          : self.convertDefault
         }
         return switcher[datatype](data, formatType)
+        

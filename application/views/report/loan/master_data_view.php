@@ -11,6 +11,7 @@
 <script>
     var Config = {
         crudApi: `${ENV.restApi}`,
+        vApi: `${ENV.vApi}`,
         templateApi: `${ENV.templateApi}`,
         observable: {
             scrollTo: function(e) {
@@ -27,24 +28,12 @@
                         $(formGroup[i]).show();
                     else $(formGroup[i]).hide();
                 }
-            },
-            otherPhonesOpen: function(e) {
-                e.preventDefault();
-                var widget = e.sender;
-                widget.input[0].onkeyup = function(ev) {
-                    if(ev.keyCode == 13) {
-                        var values = widget.value();
-                        values.push(this.value);
-                        widget.dataSource.data(values);
-                        widget.value(values);
-                        widget.trigger("change");
-                    }
-                }
             }
         },
         filterable: KENDO.filterable
     }
     window.onload = function() {
+        
         var layoutViewModel = kendo.observable({
             breadcrumb: "",
             activeArray: [],
@@ -74,19 +63,6 @@
                         this.set(`activeArray[${i}]`, true);
                     else this.set(`activeArray[${i}]`, false);
                 }
-            },
-            hasDetail: false,
-            telesaleList: [],
-            addCustomerList: function(telesaleList) {
-                var link = ENV.currentUri + '/#/detail_customer/' + telesaleList.id;
-                var check = this.telesaleList.find(obj => obj.id == telesaleList.id);
-                if(!check) {
-                    this.telesaleList.push({id: telesaleList.id, url: link, name: telesaleList.customer_name, active: true})
-                }
-                for (var i = 0; i < this.telesaleList.length; i++) {
-                    this.set(`telesaleList[${i}].active`, (this.telesaleList[i].id == telesaleList.id) ? true : false);
-                }
-                this.set("hasDetail", true);
             }
         })
 
@@ -101,39 +77,37 @@
         });
 
         router.route("/", async function() {
-            var HTML = await $.get(`${Config.templateApi}lawsuit_report/import`);
-            var kendoView = new kendo.View(HTML, { model: {}, template: false, wrap: false });
+            var date =  new Date(),
+               timeZoneOffset = date.getTimezoneOffset() * kendo.date.MS_PER_MINUTE;
+               date.setHours(- timeZoneOffset / kendo.date.MS_PER_HOUR, 0, 0 ,0);
+            var fromDate = new Date(date.getTime() + timeZoneOffset );
+            var overViewModel = kendo.observable({
+                fromDateTime: fromDate,
+            });
+            var HTML = await $.get(`${Config.templateApi}master_data_report/overview`);
+            var kendoView = new kendo.View(HTML, { model: overViewModel, template: false, wrap: false });
+            layout.showIn("#bottom-row", kendoView);        
+        });
+
+        router.route("/import", async function() {
+            var HTML = await $.get(`${Config.templateApi}master_data_report/import`);
+            var kendoView = new kendo.View(HTML);
             layout.showIn("#bottom-row", kendoView);
         });
 
         router.route("/history", async function() {
-            var HTML = await $.get(`${Config.templateApi}lawsuit_report/history`);
+            var HTML = await $.get(`${Config.templateApi}master_data_report/history`);
             var kendoView = new kendo.View(HTML);
             layout.showIn("#bottom-row", kendoView);
         });
+
+        
 
         router.start();
 
     
     }
-    async function addForm() {
-        var formHtml = await $.ajax({
-            url: Config.templateApi + "telesalelist/form",
-            error: errorDataSource
-        });
-        var model = Object.assign(Config.observable, {
-            item: {},
-            save: function() {
-                Table.dataSource.add(this.item);
-                Table.dataSource.sync().then(() => {Table.dataSource.read()});
-            }
-        });
-        kendo.destroy($("#right-form"));
-        $("#right-form").empty();
-        var kendoView = new kendo.View(formHtml, { wrap: false, model: model, evalTemplate: false });
-        kendoView.render($("#right-form"));
-        router.navigate(`/`);
-    }
+    
 
     document.onkeydown = function(evt) {
         evt = evt || window.event;
@@ -143,47 +117,38 @@
         }
     };
 
-    function gridCallResult(data) {
-        var htmlArr = [];
-        if(data) {
-            data.forEach(doc => {
-                htmlArr.push(`<a href="javascript:void(0)" class="label label-${(doc.disposition == "ANSWERED")?'success':'warning'}" 
-                    title="${kendo.toString(new Date(doc.starttime * 1000), "dd/MM/yy H:mm:ss")}">${doc.disposition}</a>`);
-            })
-        }
-        return htmlArr.join("<br>");
-    }
+    
 </script>
 
 <script id="layout" type="text/x-kendo-template">
     <ul class="breadcrumb breadcrumb-top">
-        <li>@Manage@</li>
-        <li>Lawsuit Report</li>
+        <li>@Report@</li>
+        <li>Master Data Report</li>
         <li data-bind="text: breadcrumb"></li>
         <li class="pull-right none-breakcrumb" id="top-row">
-        	<div class="btn-group btn-group-sm">
-                <a href="<?= base_url() ?>report/loan/lawsuit_report/" class="btn btn-alt btn-default" >@Overview@</a>
-                <button href="#/import" class="btn btn-alt btn-default active" data-bind="click: goTo, css: {active: activeArray[0]}">@Import@</button>
-                <button href="#/history" class="btn btn-alt btn-default" data-bind="click: goTo, css: {active: activeArray[1]}">@Import History@</button>
+          <div class="btn-group btn-group-sm">
+                <button href="#/" class="btn btn-alt btn-default" data-bind="click: goTo, css: {active: activeArray[0]}">@Overview@</button>
+                <button href="#/import" class="btn btn-alt btn-default" data-bind="click: goTo, css: {active: activeArray[1]}">@Import@</button>
+                <button href="#/history" class="btn btn-alt btn-default" data-bind="click: goTo, css: {active: activeArray[2]}">@Import History@</button>
             </div>
         </li>
     </ul>
-	<div class="container-fluid">
+  <div class="container-fluid">
         <div class="row" id="bottom-row"></div>
     </div>
 </script>
 <script id="detail-dropdown-template" type="text/x-kendo-template">
-	<li data-bind="css: {dropdown-header: active}"><a data-bind="click: goTo, text: name, attr: {href: url}"></a></li>
+  <li data-bind="css: {dropdown-header: active}"><a data-bind="click: goTo, text: name, attr: {href: url}"></a></li>
 </script>
 <script type="text/x-kendo-template" id="diallist-detail-field-template">
-	<div class="item">
+  <div class="item">
         <span style="margin-left: 10px" data-bind="text: title"></span>
         <i class="fa fa-arrow-circle-o-right text-success" style="float: right; margin-top: 10px"></i>
     </div>
 </script>
 <script type="text/x-kendo-template" id="data-field-template">
-	<div class="item">
-		<span class="handler text-center"><i class="fa fa-arrows-v"></i></span>
+  <div class="item">
+    <span class="handler text-center"><i class="fa fa-arrows-v"></i></span>
         <span data-bind="text: field"></span>
     </div>
 </script>

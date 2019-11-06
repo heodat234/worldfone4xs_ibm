@@ -95,7 +95,7 @@ var Config = {
 
             }
         }
-    ]
+        ]
 };
 </script>
 <!-- <script src="<?= STEL_PATH.'js/tablev2.js' ?>"></script> -->
@@ -294,8 +294,5 @@ var Config = {
 	$( document ).ready(function() {
         Table.init();
     });
-
-</script>
-<script>
 
 </script>

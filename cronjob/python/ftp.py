@@ -6,17 +6,14 @@ class Ftp:
         import os
         import sys
         import ftplib
-        sys.path.insert(1, '/var/www/html/worldfone4xs_ibm/cronjob/python/config/')
-        import Jaccs as Jaccsconfig
-        self.sys = sys
+        self.sys = sys 
         self.ftplib = ftplib
-        self.Jaccsconfig = Jaccsconfig
         self.ftp = ftplib.FTP()
         self.os = os
 
-    def connect(self):
-        self.ftp.connect(self.Jaccsconfig.ftp_config['host'])
-        self.ftp.login(self.Jaccsconfig.ftp_config['username'], self.Jaccsconfig.ftp_config['password'])
+    def connect(self, host='', username='', password=''):
+        self.ftp.connect(host)
+        self.ftp.login(username, password)
 
     def getAllFileFromDirectory(self, directory = ''):
         files = self.ftp.nlst()

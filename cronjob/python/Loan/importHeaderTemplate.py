@@ -50,7 +50,7 @@ try:
         temp['field'] = key
         temp['title'] = inputData[1][key]
         temp['type'] = 'string'
-        temp['sub_type'] = '{"column": ' + inputData[2][key] + '}'
+        temp['sub_type'] = '{"column": ' + '"' + inputData[2][key] + '"' + '}'
         importData.append(temp)
     
     pprint(importData)

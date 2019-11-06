@@ -5,9 +5,8 @@
 </div>
 <div id="action-menu">
     <ul>
-    	<a href="javascript:void(0)" data-type="detail" onclick="detailData(this)"><li><i class="fa fa-exclamation-circle text-info"></i><span>View Detail</span></li></a>
-        <!-- <a href="javascript:void(0)" data-type="import" onclick="re_Upload(this)"><li><i class="fa fa-exclamation-circle text-info"></i><span>Re-Upload</span></li></a> -->
-
+    	<a href="javascript:void(0)" data-type="detail" onclick="detailData(this)"><li><i class="fa fa-exclamation-circle text-info"></i><span>@View Detail@</span></li></a>
+    	
     </ul>
 </div>
 <style type="text/css">
@@ -44,7 +43,7 @@ var Config = {
     crudApi: `${ENV.restApi}`,
     templateApi: `${ENV.templateApi}`,
     collection: "Import_history",
-    filter: {field: "collection", operator: "eq", value: 'Lawsuit'},
+    filter: {field: "collection", operator: "eq", value: 'Datalibrary'},
     observable: {
     },
     model: {
@@ -86,22 +85,56 @@ var Config = {
             locked: true,
             template: function(dataItem) {
             	if (dataItem.status == 1) {
-            		return '<h4 style="font-weight: bold">Success</h4>';
+            		return '<h4 style="font-weight: bold">@Success@</h4>';
             	}else if (dataItem.status == 0) {
-            		return '<h4 style="font-weight: bold">Fail</h4>';
+            		return '<h4 style="font-weight: bold">@Fail@</h4>';
             	}else if(dataItem.status == 2){
-                    return '<div class"col-sm-8"><div class="progress"></div></div><div class="status-upload">Loading...</div></div>';
+                    return '<div class"col-sm-8"><div class="progress"></div></div><div class="status-upload">@Loading@...</div></div>';
                 }
 
             }
         }
-    ]
+        // ,{
+        //     // Use uid to fix bug data-uid of row undefined
+        //     template: '<a role="button" class="btn btn-sm btn-circle btn-action" style="background: yellow;" data-uid="#: uid #"><i class="fa fa-ellipsis-v"></i></a>',
+        //     width: 20
+        // }
+        ]
 };
 </script>
 <!-- <script src="<?= STEL_PATH.'js/tablev2.js' ?>"></script> -->
 <script type="text/javascript">
     var router = new kendo.Router({routeMissing: function(e) { router.navigate("/") }});
-	
+	function re_Upload(ele) {
+		swal({
+		    title: "Do you want to Re-Upload this file?",
+		    // text: "Once deleted, you will not be able to recover this document!",
+		    icon: "warning",
+		    buttons: {
+		    	ftp: {text:"By FTP",value:"ftp"},
+		    	confirm: {text:"By Manual", value:"manual"},
+			    cancel: "Cancel"
+			},
+		 	dangerMode: true,
+	    })
+	    .then((value) => {
+	    	var uid = $(ele).data('uid');
+			var dataItem = Table.dataSource.getByUid(uid);
+		  	switch (value) {
+		    	case "ftp":
+		    		console.log(dataItem);
+	      			swal("Pikachu fainted!");
+		      		break;
+		    	case "manual":
+		      		swal("Gotcha!", "Pikachu was caught!", "success");
+		      		break;
+		    	default:
+
+		  	}
+		});
+
+	}
+
 
 	function detailData(ele) {
         var uid = $(ele).data('uid');
@@ -210,7 +243,7 @@ var Config = {
                     columns: this.columns,
                     filterable: Config.filterable ? Config.filterable : true,
                     editable: false,
-                    detailTemplate: 'Cell Error: <div class="grid"></div>',
+                    detailTemplate: 'Danh sách lỗi: <div class="grid"></div>',
                     detailInit: function(e) {
                         e.detailRow.find(".grid").kendoGrid({
                           dataSource: e.data.error

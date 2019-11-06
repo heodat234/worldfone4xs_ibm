@@ -84,28 +84,25 @@
             var overViewModel = kendo.observable({
                 fromDateTime: fromDate,
             });
-            var HTML = await $.get(`${Config.templateApi}sms_daily_report/overview`);
+            var HTML = await $.get(`${Config.templateApi}daily_balance_report/overview`);
             var kendoView = new kendo.View(HTML, { model: overViewModel, template: false, wrap: false });
             layout.showIn("#bottom-row", kendoView);        
         });
 
         router.route("/import", async function() {
-            var HTML = await $.get(`${Config.templateApi}sms_daily_report/import`);
+            var HTML = await $.get(`${Config.templateApi}daily_balance_report/import`);
             var kendoView = new kendo.View(HTML);
             layout.showIn("#bottom-row", kendoView);
         });
 
         router.route("/history", async function() {
-            var HTML = await $.get(`${Config.templateApi}sms_daily_report/history`);
+            var HTML = await $.get(`${Config.templateApi}daily_balance_report/history`);
             var kendoView = new kendo.View(HTML);
             layout.showIn("#bottom-row", kendoView);
         });
 
-        
-
         router.start();
 
-    
     }
     
 
@@ -123,32 +120,32 @@
 <script id="layout" type="text/x-kendo-template">
     <ul class="breadcrumb breadcrumb-top">
         <li>@Report@</li>
-        <li>SMS Daily SMS Report</li>
+        <li>Daily Report of OS Balance of Group BCDE</li>
         <li data-bind="text: breadcrumb"></li>
         <li class="pull-right none-breakcrumb" id="top-row">
-          <div class="btn-group btn-group-sm">
+        	<div class="btn-group btn-group-sm">
                 <button href="#/" class="btn btn-alt btn-default" data-bind="click: goTo, css: {active: activeArray[0]}">@Overview@</button>
                 <button href="#/import" class="btn btn-alt btn-default" data-bind="click: goTo, css: {active: activeArray[1]}">@Import@</button>
                 <button href="#/history" class="btn btn-alt btn-default" data-bind="click: goTo, css: {active: activeArray[2]}">@Import History@</button>
             </div>
         </li>
     </ul>
-  <div class="container-fluid">
+	<div class="container-fluid">
         <div class="row" id="bottom-row"></div>
     </div>
 </script>
 <script id="detail-dropdown-template" type="text/x-kendo-template">
-  <li data-bind="css: {dropdown-header: active}"><a data-bind="click: goTo, text: name, attr: {href: url}"></a></li>
+	<li data-bind="css: {dropdown-header: active}"><a data-bind="click: goTo, text: name, attr: {href: url}"></a></li>
 </script>
 <script type="text/x-kendo-template" id="diallist-detail-field-template">
-  <div class="item">
+	<div class="item">
         <span style="margin-left: 10px" data-bind="text: title"></span>
         <i class="fa fa-arrow-circle-o-right text-success" style="float: right; margin-top: 10px"></i>
     </div>
 </script>
 <script type="text/x-kendo-template" id="data-field-template">
-  <div class="item">
-    <span class="handler text-center"><i class="fa fa-arrows-v"></i></span>
+	<div class="item">
+		<span class="handler text-center"><i class="fa fa-arrows-v"></i></span>
         <span data-bind="text: field"></span>
     </div>
 </script>

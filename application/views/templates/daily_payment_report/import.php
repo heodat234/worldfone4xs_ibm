@@ -4,7 +4,7 @@
 		<div id="popup-tabstrip" data-role="tabstrip" style="margin-top: 2px">
 	        <ul>
 	            <li class="k-state-active">
-	                EXCEL
+	                CSV
 	            </li>
 	            <li>
 	                FTP
@@ -16,7 +16,7 @@
 	                    <div class="col-sm-12">
 							<input id="excel-file" type="file" name="file" />
 						</div>
-
+						
 	                </div>
 	            </div>
 	        </div>
@@ -39,15 +39,9 @@
 			<div class="col-xs-12 text-center"><button data-role="button" data-bind="click: goToAssign">Agree</button></div>
 		</div>
 	</div>
-
+	
 </div>
 <div class="col-sm-8">
-</div>
-<div class="col-md-12">
-	<h4 class="fieldset-legend" style="margin: 0 0 20px"><span style="font-weight: 500">DATA</span></h4>
-	<div>
-		<div id="spreadsheet"></div>
-	</div>
 </div>
 
 <style>
@@ -74,16 +68,17 @@
         background-color: #2db245;
     }
     .k-spreadsheet {
-     width: 100%;
+     width: 100%; 
     }
 </style>
+
 <script>
     var router = new kendo.Router({routeMissing: function(e) { router.navigate("/") }});
     var Config = {
         crudApi: `${ENV.restApi}`,
         vApi: `${ENV.vApi}`,
         templateApi: `${ENV.templateApi}`,
-        collection: "Lawsuit",
+        collection: "Payment",
         collection_import: "Import",
         observable: {},
         model: {
@@ -95,36 +90,8 @@
                 title: "File Name",
                 template: '<a role="button" href="javascript:void(0)" class="btn btn-sm" onclick="uploadFile(this)"><b>#= file_name #</b></a>'
             }]
-    };
+    }; 
 
-    var ALLOWED_EXTENSIONS = [".xlsx",".csv"];
-
-    $("#excel-file").kendoUpload({
-        async: {
-            autoUpload: false,
-            saveUrl: Config.vApi+"import/upload/"+Config.collection
-        },
-        multiple: false,
-        localization: {
-            "select": "Chọn 1 tệp để nhập..."
-        },
-        select: function(e) {
-            var extension = e.files[0].extension.toLowerCase();
-            if (ALLOWED_EXTENSIONS.indexOf(extension) == -1) {
-                alert("Please, select a supported file format excel or csv");
-                e.preventDefault();
-            }
-        },
-        success: function(e) {
-            if (e.response.status == -1) {
-                swal({text: "Quá trình upload đang được thực hiện. Vui lòng đợi vài phút và kiểm tra trong lịch sử."});
-            }else{
-                notification.show(e.response.message, e.response.status ? "success" : "error");
-                // router.navigate(`/history`);
-            }
-        }
-    });
-    
     var detailTable = function() {
         return {
             dataSource: {},
@@ -154,7 +121,7 @@
                     error: errorDataSource
                 });
 
-
+               
                 var grid = this.grid = $(`#grid-3`).kendoGrid({
                     dataSource: dataSource,
                     resizable: true,
@@ -182,11 +149,49 @@
                     return checkedIds;
                 }
 
-
-
+                
+              
             }
         }
     }();
+
+    var ALLOWED_EXTENSIONS = [".csv"];
+
+    $("#excel-file").kendoUpload({
+        async: {
+            autoUpload: false,
+            saveUrl: Config.vApi+"import/upload/"+Config.collection
+        },
+        multiple: false,
+        localization: {
+            "select": "Chọn 1 tệp để nhập..."
+        },
+        select: function(e) {
+            var extension = e.files[0].extension.toLowerCase();
+            if (ALLOWED_EXTENSIONS.indexOf(extension) == -1) {
+                alert("Please, select a supported file format csv");
+                e.preventDefault();
+            }
+        },
+        clear: onClear,
+        progress: onProgress,
+        success: function(e) {
+            if (e.response.status == -1) {
+                swal({text: "Quá trình upload đang được thực hiện. Vui lòng đợi vài phút và kiểm tra trong lịch sử."});
+            }else{
+                notification.show(e.response.message, e.response.status ? "success" : "error");
+                // router.navigate(`/history`);
+            }       
+        }
+    });
+    function onClear(e) {
+        $("#spreadsheet").hide();
+    }
+    function onProgress(e) {
+        var files = e.files;
+        console.log(e.percentComplete);
+    }
+
 
     function uploadFile(e) {
                 var gridview = $("#grid-3").data("kendoGrid"),
@@ -204,20 +209,22 @@
                 .then((value) => {
                     if (value == 'import') {
                         $.ajax({
-                            url: Config.crudApi + Config.collection_import + "/importFTP/"+Config.collection,
+                            url: Config.vApi + Config.collection_import + "/importFTP/"+ Config.collection,
                             type: "POST",
                             data: {file_path: dataItem.file_path, file_name: dataItem.file_name},
                             success: function(result) {
-                                notification.show(result.message, result.status ? "success" : "error");
-                                if (result.status == 0) {
-                                    router.navigate(`/history`);
-                                }
+                                if (e.response.status == -1) {
+                                    swal({text: "Quá trình upload đang được thực hiện. Vui lòng đợi vài phút và kiểm tra trong lịch sử."});
+                                }else{
+                                    notification.show(e.response.message, e.response.status ? "success" : "error");
+                                    // router.navigate(`/history`);
+                                }  
                             },
                             error: errorDataSource
                         })
                     }
                 });
     }
-
+    
     detailTable.init();
 </script>

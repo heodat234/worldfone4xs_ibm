@@ -146,7 +146,7 @@
             value: (ENV.type ? ENV.type + "_" : "") + "SIBS"
         },
         sort: {field: "index", dir: "asc"}
-    })
+    });
     customerFields.read().then(function(){
         var columns = customerFields.data().toJSON();
         var columnModel = arrayColumn(columns, 'type', 'field');
@@ -170,10 +170,10 @@
                 },
             }),
             dataColumns: [],
-            uploadExcel: function(e) {
+            uploadExcel: function (e) {
                 $("#upload-csv").click();
             },
-            uploadExcelSuccess: function(e) {
+            uploadExcelSuccess: function (e) {
                 swal({
                     title: "@Are you sure@?",
                     text: `@Import this data@.`,
@@ -186,13 +186,16 @@
                             url: `${ENV.vApi}${Config.collection}/importExcel`,
                             type: "PATCH",
                             contentType: "application/json; charset=utf-8",
-                            data: kendo.stringify({filepath: e.response.filepath, import_type: 'manual', import_file_type: 'excel'}),
-                            success: function(res) {
-                                if(res.status) {
+                            data: kendo.stringify({
+                                filepath: e.response.filepath,
+                                import_type: 'manual',
+                                import_file_type: 'excel'
+                            }),
+                            success: function (res) {
+                                if (res.status) {
                                     syncDataSource();
                                     router.navigate(`/`);
-                                }
-                                else {
+                                } else {
                                     notification.show("Đã có lỗi trong quá trình nhập dữ liệu. Xin vui lòng kiểm tra lại trong lịch sử nhập dữ liệu", "error");
                                 }
                             },
@@ -200,7 +203,7 @@
                         })
                     })
             },
-            import: function() {
+            import: function () {
                 swal({
                     title: "@Are you sure@?",
                     text: `@Import this data@.`,
@@ -209,30 +212,36 @@
                     dangerMode: false,
                 })
                     .then((sure) => {
-                        if(sure) {
+                        if (sure) {
                             var columns = this.columns.toJSON(),
                                 dataColumns = this.get("dataColumns").toJSON(0),
                                 colToField = {};
                             for (var i = 0; i < dataColumns.length; i++) {
-                                if(columns[i])
+                                if (columns[i])
                                     colToField[dataColumns[i].field.substr(1)] = columns[i].field;
                             }
                             this.save(this.file.filepath, colToField, $("#data-grid").data("kendoGrid").dataSource.total(), columnModel);
                         }
                     })
             },
-            save: function(filepath, convert, totaldata, columnModel) {
+            save: function (filepath, convert, totaldata, columnModel) {
                 $.ajax({
                     url: `${ENV.vApi}${Config.collection}/importExcel`,
                     type: "PATCH",
                     contentType: "application/json; charset=utf-8",
-                    data: kendo.stringify({filepath: filepath, convert: convert, import_type: 'manual', import_file_type: 'excel', total_data: totaldata, columnModel: columnModel}),
-                    success: function(res) {
-                        if(res.status) {
+                    data: kendo.stringify({
+                        filepath: filepath,
+                        convert: convert,
+                        import_type: 'manual',
+                        import_file_type: 'excel',
+                        total_data: totaldata,
+                        columnModel: columnModel
+                    }),
+                    success: function (res) {
+                        if (res.status) {
                             syncDataSource();
                             router.navigate(`/`);
-                        }
-                        else {
+                        } else {
                             notification.show("Đã có lỗi trong quá trình nhập dữ liệu. Xin vui lòng kiểm tra lại trong lịch sử nhập dữ liệu", "error");
                         }
                     },
@@ -244,7 +253,7 @@
                 transport: {
                     read: {
                         url: ENV.vApi + "sibs/listFileFTP",
-                        data: function() {
+                        data: function () {
                             return {
                                 'ftp_filepath': Config.ftp_filepath,
                             }
@@ -257,6 +266,7 @@
                     total: "total"
                 },
             }),
+        }
         kendo.bind(".mvvm", kendo.observable(model));
     });
 

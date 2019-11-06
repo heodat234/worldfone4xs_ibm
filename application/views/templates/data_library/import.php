@@ -77,13 +77,30 @@
      width: 100%;
     }
 </style>
-<script type="text/javascript">
+<script>
+    var router = new kendo.Router({routeMissing: function(e) { router.navigate("/") }});
+    var Config = {
+        crudApi: `${ENV.restApi}`,
+        vApi: `${ENV.vApi}`,
+        templateApi: `${ENV.templateApi}`,
+        collection: "Import",
+        observable: {},
+        model: {
+            id: "id",
+            fields: { }
+        },
+        columns: [{
+                field: "file_name",
+                title: "File Name",
+                template: '<a role="button" href="javascript:void(0)" class="btn btn-sm" onclick="uploadFile(this)"><b>#= file_name #</b></a>'
+            }]
+    };
 
-	var ALLOWED_EXTENSIONS = [".csv"];
+    var ALLOWED_EXTENSIONS = [".csv"];
 
     $("#excel-file").kendoUpload({
         async: {
-        	autoUpload: false,
+            autoUpload: false,
             saveUrl: Config.vApi+"import/upload/Datalibrary"
         },
         multiple: false,
@@ -111,33 +128,11 @@
     function onClear(e) {
         // $("#spreadsheet").hide();
     }
-  	function onProgress(e) {
+    function onProgress(e) {
         var files = e.files;
         // console.log(e.percentComplete);
     }
-
-	
-
-</script>
-<script>
-    var router = new kendo.Router({routeMissing: function(e) { router.navigate("/") }});
-    var Config = {
-        crudApi: `${ENV.restApi}`,
-        vApi: `${ENV.vApi}`,
-        templateApi: `${ENV.templateApi}`,
-        collection: "Import",
-        observable: {},
-        model: {
-            id: "id",
-            fields: { }
-        },
-        columns: [{
-                field: "file_name",
-                title: "File Name",
-                template: '<a role="button" href="javascript:void(0)" class="btn btn-sm" onclick="uploadFile(this)"><b>#= file_name #</b></a>'
-            }]
-    };
-
+    
     var detailTable = function() {
         return {
             dataSource: {},
