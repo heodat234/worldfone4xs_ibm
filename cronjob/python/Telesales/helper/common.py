@@ -70,6 +70,8 @@ class Common:
         return bool(value)
     
     def convertDouble(self, value, formatType=''):
+        if value in ['']:
+            value = 0
         if isinstance(value, str):
             value = value.replace(',', '')
         return float(value)

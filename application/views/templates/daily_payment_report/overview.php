@@ -44,11 +44,11 @@
                   title: "OVERDUE DATE",
                   width: 130
               },{
-                  field: "payment_date",
+                  field: "date",
                   title: "PAYMENT DATE",
                   width: 130
               },{
-                  field: "amount",
+                  field: "amt",
                   title: "AMOUNT",
                   width: 130
               },{

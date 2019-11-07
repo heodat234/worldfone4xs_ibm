@@ -4,3 +4,41 @@
 05/11/2019, 10:34:19: '122'
 ['122', '1051', '1050', '999']06/11/2019, 10:52:29: Start Log
 06/11/2019, 10:52:29: '122'
+06/11/2019, 11:23:05: Start Log
+06/11/2019, 11:23:05: name 'du' is not defined
+06/11/2019, 11:24:05: Start Log
+06/11/2019, 11:24:05: list index out of range
+06/11/2019, 11:25:43: Start Log
+[{'_id': ObjectId('5db6c0cf82c156a3f47224fd'), 'extension': '999', 'agentname': 'SYSADMIN'}, {'_id': ObjectId('5db7b5bc82c156a3f49a1fe8'), 'extension': '888', 'agentname': 'test'}, {'_id': ObjectId('5db7bc6382c156a3f4b31155'), 'extension': '1050', 'agentname': 'test-K'}, {'_id': ObjectId('5db7bc6382c156a3f4b31157'), 'extension': '1051', 'agentname': '1051'}, {'_id': ObjectId('5dbfe02731f0c7344daaa23d'), 'extension': '122', 'agentname': '1212'}]06/11/2019, 11:25:43: '1051'
+06/11/2019, 11:25:47: Start Log
+06/11/2019, 11:25:47: list index out of range
+06/11/2019, 11:28:58: Start Log
+06/11/2019, 11:28:58: list index out of range
+06/11/2019, 11:29:05: Start Log
+06/11/2019, 11:29:05: list index out of range
+06/11/2019, 11:31:18: Start Log
+06/11/2019, 11:31:18: list index out of range
+06/11/2019, 11:32:01: Start Log
+06/11/2019, 11:32:01: list index out of range
+06/11/2019, 11:32:13: Start Log
+06/11/2019, 11:32:13: list index out of range
+06/11/2019, 11:32:55: Start Log
+1.0022.00206/11/2019, 11:32:55: list index out of range
+06/11/2019, 11:34:36: Start Log
+06/11/2019, 11:34:36: list index out of range
+06/11/2019, 11:35:32: Start Log
+[][]06/11/2019, 11:35:32: list index out of range
+06/11/2019, 11:37:38: Start Log
+06/11/2019, 11:37:38: list index out of range
+06/11/2019, 11:39:10: Start Log
+06/11/2019, 11:39:10: list index out of range
+06/11/2019, 11:41:13: Start Log
+06/11/2019, 11:41:21: End Log
+06/11/2019, 11:42:28: Start Log
+06/11/2019, 11:42:29: End Log
+06/11/2019, 11:43:39: Start Log
+06/11/2019, 11:47:20: End Log
+06/11/2019, 12:08:56: Start Log
+06/11/2019, 12:08:56: '122'
+06/11/2019, 12:23:38: Start Log
+06/11/2019, 12:27:35: End Log

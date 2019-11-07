@@ -38,24 +38,29 @@ try:
     updateKey = []
     checkNullKey = []
 
-    ftpConfig = config.ftp_config()
     ftpInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'ftp_config'), WHERE={'collection': collection})
+    ftpConfig = config.ftp_config()
     ftpLocalUrl = base_url + ftpInfo['locallink'] + ftpInfo['filename']
 
-    ftp.connect(host=ftpConfig['host'], username=ftpConfig['username'], password=ftpConfig['password'])
-    ftp.downLoadFile(ftpLocalUrl, ftpInfo['filename'])
-    ftp.close()
+    try:
+        sys.argv[1]
+        importLogId = str(sys.argv[1])
+        importLogInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': ObjectId(sys.argv[1])})
+    except Exception as SysArgvError:
+        ftp.connect(host=ftpConfig['host'], username=ftpConfig['username'], password=ftpConfig['password'])
+        ftp.downLoadFile(ftpLocalUrl, ftpInfo['filename'])
+        ftp.close()
 
-    importLogInfo = {
-        'collection'    : collection, 
-        'begin_import'  : time.time(),
-        'file_name'     : ftpInfo['filename'],
-        'file_path'     : ftpLocalUrl, 
-        'source'        : 'ftp',
-        'status'        : 2,
-        'created_by'    : 'system'
-    }
-    importLogId = mongodb.insert(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), insert_data=importLogInfo) 
+        importLogInfo = {
+            'collection'    : collection, 
+            'begin_import'  : time.time(),
+            'file_name'     : ftpInfo['filename'],
+            'file_path'     : ftpLocalUrl, 
+            'source'        : 'ftp',
+            'status'        : 2,
+            'created_by'    : 'system'
+        }
+        importLogId = mongodb.insert(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), insert_data=importLogInfo)
 
     models = _mongodb.get(MONGO_COLLECTION='Model', WHERE={'collection': collection}, SORT=[('index', 1)], SELECT=['index', 'collection', 'field', 'type', 'sub_type'], TAKE=1000)
     
@@ -68,18 +73,12 @@ try:
             modelFormat[model['field']] = subtype['format']
         else:
             modelFormat[model['field']] = ''
-        
-        if 'update_key' in subtype.keys() and subtype['update_key'] == 1:
-            updateKey.append(model['field'])
-
-        if 'check_null_key' in subtype.keys():
-            checkNullKey.append(model['field'])
-
+            
     filenameExtension = ftpInfo['filename'].split('.')
     if(filenameExtension[1] == 'csv'):
-        inputDataRaw = excel.getDataCSV(file_path=importLogInfo['file_path'], sep=',', header=None, names=modelColumns, encoding='ISO-8859-1', low_memory=False)
+        inputDataRaw = excel.getDataCSV(file_path=importLogInfo['file_path'], sep=ftpInfo['sep'], header=int(ftpInfo['header']), names=modelColumns, encoding='ISO-8859-1', low_memory=False)
     else:
-        inputDataRaw = excel.getDataExcel(file_path=importLogInfo['file_path'], header=None, names=modelColumns, na_values='', encoding='ISO-8859-1')
+        inputDataRaw = excel.getDataExcel(file_path=importLogInfo['file_path'], active_sheet=ftpInfo['sheet'], header=int(ftpInfo['header']), names=modelColumns, na_values='', encoding='ISO-8859-1')
 
     inputData = inputDataRaw.to_dict('records')
     

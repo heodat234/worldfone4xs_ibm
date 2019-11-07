@@ -24,6 +24,7 @@ ftp = Ftp()
 common = Common()
 base_url = config.base_url()
 log = open(base_url + "cronjob/python/Telesales/importSibs.txt","a")
+logCount = open(base_url + "cronjob/python/Telesales/importSibsCount.txt","a")
 now = datetime.now()
 subUserType = 'TS'
 collection = common.getSubUser(subUserType, 'Sibs')
@@ -37,7 +38,8 @@ try:
     ftpLocalUrl = base_url + ftpInfo['locallink'] + ftpInfo['filename']
 
     ftp.connect(host=ftpConfig['host'], username=ftpConfig['username'], password=ftpConfig['password'])
-    ftp.downLoadFile(ftpLocalUrl, ftpInfo['filename'])
+    if sys.argv[1] is not None:
+        ftp.downLoadFile(ftpLocalUrl, ftpInfo['filename'])
     ftp.close()
 
     importLogInfo = {
@@ -93,28 +95,35 @@ try:
             
             if(result == False):
                 errorData.append(zaccf)
+                mongodb.insert(common.getSubUser(subUserType, 'Sibs_result'), insert_data=zaccf)
             else:
                 if(checkSibs is None):
-                    insertData.append(zaccf)
+                    mongodb.insert(collection, insert_data=zaccf)
+                    # insertData.append(zaccf)
                 else:
-                    updateData.append(zaccf)
+                    mongodb.update(MONGO_COLLECTION=collection, WHERE={'account_no': zaccf['account_no']}, VALUE=zaccf)
+                    # updateData.append(zaccf)
                 zaccf['result'] = 'success'
                 result = True
         else:
             continue
+        logCount.write(str(idx))
 
-    if(len(errorData) > 0):
-        mongodb.batch_insert(common.getSubUser(subUserType, 'Sibs_result'), errorData)
-    else:
-        if len(updateData) > 0:
-            for upData in updateData:
-                mongodb.update(MONGO_COLLECTION=collection, WHERE={'account_no': upData['account_no']}, VALUE=upData)
-            mongodb.batch_insert(common.getSubUser(subUserType, 'Sibs_result'), updateData)
-        if len(insertData) > 0:
-            mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertData)
-            mongodb.batch_insert(common.getSubUser(subUserType, 'Sibs_result'), insert_data=insertData)
+    # if(len(errorData) > 0):
+    #     mongodb.batch_insert(common.getSubUser(subUserType, 'Sibs_result'), errorData)
+    # else:
+    #     if len(updateData) > 0:
+    #         for upData in updateData:
+    #             mongodb.update(MONGO_COLLECTION=collection, WHERE={'account_no': upData['account_no']}, VALUE=upData)
+    #         mongodb.batch_insert(common.getSubUser(subUserType, 'Sibs_result'), updateData)
+    #     if len(insertData) > 0:
+    #         mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertData)
+    #         mongodb.batch_insert(common.getSubUser(subUserType, 'Sibs_result'), insert_data=insertData)
     
-    mongodb.update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': importLogId}, VALUE={'status': 1, 'complete_import': time.time()})
+    if len(errorData) > 0:
+        mongodb.update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': importLogId}, VALUE={'status': 0, 'complete_import': time.time()})
+    else:
+        mongodb.update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': importLogId}, VALUE={'status': 1, 'complete_import': time.time()})
 
 except Exception as e:
     log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')
