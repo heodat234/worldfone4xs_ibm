@@ -39,24 +39,29 @@ try:
     updateKey = []
     checkNullKey = []
 
-    ftpConfig = config.ftp_config()
     ftpInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'ftp_config'), WHERE={'collection': collection})
+    ftpConfig = config.ftp_config()
     ftpLocalUrl = base_url + ftpInfo['locallink'] + ftpInfo['filename']
 
-    ftp.connect(host=ftpConfig['host'], username=ftpConfig['username'], password=ftpConfig['password'])
-    ftp.downLoadFile(ftpLocalUrl, ftpInfo['filename'])
-    ftp.close()
+    try:
+        sys.argv[1]
+        importLogId = str(sys.argv[1])
+        importLogInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': ObjectId(sys.argv[1])})
+    except Exception as SysArgvError:
+        ftp.connect(host=ftpConfig['host'], username=ftpConfig['username'], password=ftpConfig['password'])
+        ftp.downLoadFile(ftpLocalUrl, ftpInfo['filename'])
+        ftp.close()
 
-    importLogInfo = {
-        'collection'    : collection, 
-        'begin_import'  : time.time(),
-        'file_name'     : ftpInfo['filename'],
-        'file_path'     : ftpLocalUrl, 
-        'source'        : 'ftp',
-        'status'        : 2,
-        'created_by'    : 'system'
-    }
-    importLogId = mongodb.insert(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), insert_data=importLogInfo) 
+        importLogInfo = {
+            'collection'    : collection, 
+            'begin_import'  : time.time(),
+            'file_name'     : ftpInfo['filename'],
+            'file_path'     : ftpLocalUrl, 
+            'source'        : 'ftp',
+            'status'        : 2,
+            'created_by'    : 'system'
+        }
+        importLogId = mongodb.insert(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), insert_data=importLogInfo) 
 
     models = _mongodb.get(MONGO_COLLECTION='Model', WHERE={'collection': collection}, SORT=[('index', 1)], SELECT=['index', 'collection', 'field', 'type', 'sub_type'], TAKE=1000)
     
@@ -77,10 +82,16 @@ try:
             checkNullKey.append(model['field'])
 
     filenameExtension = ftpInfo['filename'].split('.')
-    if(filenameExtension[1] == 'csv'):
-        inputDataRaw = excel.getDataCSV(file_path=importLogInfo['file_path'], sep=',', header=None, names=modelColumns, encoding='ISO-8859-1', low_memory=False)
+
+    if ftpInfo['header'] == 'None':
+        header = None
     else:
-        inputDataRaw = excel.getDataExcel(file_path=importLogInfo['file_path'], header=None, names=modelColumns, na_values='', encoding='ISO-8859-1')
+        header = [ int(x) for x in ftpInfo['header'] ]
+
+    if(filenameExtension[1] == 'csv'):
+        inputDataRaw = excel.getDataCSV(file_path=importLogInfo['file_path'], sep=',', header=header, names=modelColumns, encoding='ISO-8859-1', low_memory=False)
+    else:
+        inputDataRaw = excel.getDataExcel(file_path=importLogInfo['file_path'], header=header, names=modelColumns, na_values='', encoding='ISO-8859-1')
 
     inputData = inputDataRaw.to_dict('records')
     
@@ -112,24 +123,17 @@ try:
                 temp['result'] = 'success'
                 checkDataInDB = mongodb.getOne(MONGO_COLLECTION=collection, WHERE={'ACC_ID': temp['ACC_ID'], 'CUS_ID': temp['CUS_ID']})
                 if checkDataInDB is not None:
-                    updateDate.append(temp)
+                    mongodb.update(MONGO_COLLECTION=collection, WHERE={'ACC_ID': temp['ACC_ID'], 'CUS_ID': temp['CUS_ID']}, VALUE=temp)
+                    # updateDate.append(temp)
                 else:
-                    insertData.append(temp)
+                    mongodb.insert(MONGO_COLLECTION=collection, insert_data=temp)
+                    # insertData.append(temp)
                 result = True
         logRun.write(str(idx))
     if(len(errorData) > 0):
+        mongodb.update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': importLogId}, VALUE={'status': 0, 'complete_import': time.time()})
         mongodb.batch_insert(common.getSubUser(subUserType, 'ZACCF_result'), errorData)
     else:
-        if len(insertData) > 0:
-            mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertData)
-            mongodb.batch_insert(common.getSubUser(subUserType, 'ZACCF_result'), insert_data=insertData)
-        
-        if len(updateDate) > 0:
-            for updateD in updateDate:
-                mongodb.update(MONGO_COLLECTION=collection, WHERE={'ACC_ID': temp['ACC_ID'], 'CUS_ID': temp['CUS_ID']}, VALUE=updateD)
-            mongodb.batch_insert(common.getSubUser(subUserType, 'ZACCF_result'), insert_data=updateDate)
-    
-    mongodb.update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': importLogId}, VALUE={'status': 1, 'complete_import': time.time()})
-
+        mongodb.update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': importLogId}, VALUE={'status': 1, 'complete_import': time.time()})
 except Exception as e:
     log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')

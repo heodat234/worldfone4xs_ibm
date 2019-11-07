@@ -14,7 +14,7 @@
               </div>
             </div>
         </div>
-        
+
         <h3 class="col-sm-12 text-center" style="margin-bottom: 20px;color: #27ae60">DAILY PAYMENT REPORT</h3>
         <div class="row chart-page" >
           <div class="col-sm-12">
@@ -25,14 +25,14 @@
     <script>
       var Config = Object.assign(Config, {
           grid_name: 'grid',
-          source_name: 'sibs',
+          source_name: 'index',
           columns: [
               {
                   field: "stt",
                   title: "No",
                   width: 50
               },{
-                  field: "acc_number",
+                  field: "account",
                   title: "ACCOUNT NUMBER",
                   width: 100
               },{
@@ -42,10 +42,12 @@
               },{
                   field: "due_date",
                   title: "OVERDUE DATE",
+                  template: dataItem => gridTimestamp(dataItem.due_date),
                   width: 130
               },{
-                  field: "date",
+                  field: "payment_date",
                   title: "PAYMENT DATE",
+                  template: dataItem => gridTimestamp(dataItem.payment_date),
                   width: 130
               },{
                   field: "amt",
@@ -60,7 +62,7 @@
                   title: "PAID INTEREST",
                   width: 130
               },{
-                  field: "Repayment_fees",
+                  field: "RPY_FEE",
                   title: "PAID LATE CHARGE & FEE",
                   width: 130
               },{
@@ -85,7 +87,7 @@
                   width: 130
               }
           ]
-      }); 
+      });
     </script>
     <script>
       var Table = function() {
@@ -99,9 +101,9 @@
                   var dataSource = this.dataSource = new kendo.data.DataSource({
                      serverPaging: true,
                      serverFiltering: true,
-                     pageSize: 20,
+                     pageSize: 10,
                      transport: {
-                        read: ENV.reportApi + "loan/smsdaily_report/" + this.source_name,
+                        read: ENV.reportApi + "loan/daily_payment_report/" + this.source_name,
                         parameterMap: parameterMap
                      },
                      schema: {
@@ -143,11 +145,11 @@
                       return checkedIds;
                   }
 
-                  
+
               }
           }
       }();
-      
+
       Table.grid_name = Config.grid_name;
       Table.source_name = Config.source_name;
       Table.columns = Config.columns;

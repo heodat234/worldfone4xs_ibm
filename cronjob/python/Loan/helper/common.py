@@ -22,7 +22,7 @@ class Common:
     def getFullPath(self, projectName='', path=''):
         return '/var/www/html/' + projectName + '/' + path
 
-    def convertStr(self, value, formatType=''):
+    def convertStr(self, value):
         result = str(value)
         result = self.re.sub(' +', ' ', result)
         result = result.lstrip()
@@ -72,13 +72,13 @@ class Common:
         
         return result
 
-    def convertInt(self, value, formatType=''):
+    def convertInt(self, value):
         return int(value)
 
-    def convertBoolean(self, value, formatType=''):
+    def convertBoolean(self, value):
         return bool(value)
     
-    def convertDouble(self, value, formatType=''):
+    def convertDouble(self, value):
         if value in ['']:
             value = 0
         if isinstance(value, str):

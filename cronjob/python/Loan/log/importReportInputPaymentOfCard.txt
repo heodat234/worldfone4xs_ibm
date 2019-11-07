@@ -4,3 +4,18 @@
 31/10/2019, 16:29:49: 'posting_date'
 31/10/2019, 16:30:01: 'posting_date'
 31/10/2019, 16:30:48: 'posting_date'
+07/11/2019, 12:00:52: 'NoneType' object is not subscriptable
+07/11/2019, 12:13:12: [Errno 2] File b'gl_20191031.csv' does not exist: b'gl_20191031.csv'
+07/11/2019, 12:15:23: [Errno 2] File b'gl_20191031.csv' does not exist: b'gl_20191031.csv'
+07/11/2019, 12:16:03: [Errno 2] File b'gl_20191031.csv' does not exist: b'gl_20191031.csv'
+07/11/2019, 14:39:17: name 'pprint' is not defined
+07/11/2019, 15:02:19: [Errno 2] No such file or directory: '/var/www/html/worldfone4xs_ibm/upload/ftp/loan/gl_20191031.dat' -> '/var/www/html/worldfone4xs_ibm/upload/ftp/loan/gl_20191031.csv'
+07/11/2019, 15:26:57: 'sep'
+07/11/2019, 15:27:54: [Errno 2] File b'/var/www/html/worldfone4xs_ibm/upload/ftp/loan/csv.csv' does not exist: b'/var/www/html/worldfone4xs_ibm/upload/ftp/loan/csv.csv'
+07/11/2019, 16:31:48: 'header'
+07/11/2019, 16:51:33: 'posting_date'
+07/11/2019, 17:04:47: 'decimal_position'
+07/11/2019, 17:08:05: name 'modelFormat' is not defined
+07/11/2019, 17:17:56: name 'inputData' is not defined
+07/11/2019, 17:48:33: invalid literal for int() with base 10: ''
+07/11/2019, 17:49:52: 'int'

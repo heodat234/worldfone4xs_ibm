@@ -74,10 +74,16 @@ try:
             modelFormat[model['field']] = ''
 
     filenameExtension = ftpInfo['filename'].split('.')
-    if(filenameExtension[1] == 'csv'):
-        inputDataRaw = excel.getDataCSV(file_path=importLogInfo['file_path'], sep=ftpInfo['sep'], header=None, names=modelColumns, na_values='', usecols=[1, 3, 4, 8, 11, 12])
+
+    if ftpInfo['header'] == 'None':
+        header = None
     else:
-        inputDataRaw = excel.getDataExcel(file_path=importLogInfo['file_path'], header=None, names=modelColumns, na_values='', usecols=[1, 3, 4, 8, 11, 12])
+        header = [ int(x) for x in ftpInfo['header'] ]
+
+    if(filenameExtension[1] == 'csv'):
+        inputDataRaw = excel.getDataCSV(file_path=importLogInfo['file_path'], sep=ftpInfo['sep'], header=header, names=modelColumns, na_values='', usecols=[1, 3, 4, 8, 11, 12])
+    else:
+        inputDataRaw = excel.getDataExcel(file_path=importLogInfo['file_path'], header=header, names=modelColumns, na_values='', usecols=[1, 3, 4, 8, 11, 12])
 
     inputData = inputDataRaw.to_dict('records')
 

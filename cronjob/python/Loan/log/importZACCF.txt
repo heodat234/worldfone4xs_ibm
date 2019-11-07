@@ -1,1 +1,2 @@
 05/11/2019, 17:32:48: write() argument must be str, not int
+07/11/2019, 10:38:08: document must be an instance of dict, bson.son.SON, bson.raw_bson.RawBSONDocument, or a type that inherits from collections.MutableMapping
