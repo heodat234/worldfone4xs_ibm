@@ -661,7 +661,7 @@ var Detail = function() {
             var filter_appointment = {
                 logic: "and",
                 filters: [
-                    {field: "customer_info.cmnd", operator: "eq", value: dataItemFull.id_no},
+                    {field: "customer_info.id_no", operator: "eq", value: dataItemFull.id_no},
                     {field: "tl_code", operator: "eq", value: Config.extension}
                 ]
             };

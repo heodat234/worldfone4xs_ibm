@@ -42,12 +42,12 @@
               },{
                   field: "due_date",
                   title: "OVERDUE DATE",
-                  template: dataItem => gridTimestamp(dataItem.due_date),
+                  // template: dataItem => gridTimestamp(dataItem.due_date),
                   width: 130
               },{
                   field: "payment_date",
                   title: "PAYMENT DATE",
-                  template: dataItem => gridTimestamp(dataItem.payment_date),
+                  // template: dataItem => gridTimestamp(dataItem.payment_date),
                   width: 130
               },{
                   field: "amt",
@@ -78,7 +78,7 @@
                   title: "PIC",
                   width: 130
               },{
-                  field: "product",
+                  field: "product_name",
                   title: "PRODUCT",
                   width: 130
               },{
@@ -157,7 +157,7 @@
 
       function saveAsExcel() {
         $.ajax({
-          url: ENV.reportApi + "loan/smsdaily_report/saveAsExcel",
+          url: ENV.reportApi + "loan/daily_payment_report/downloadExcel",
           type: 'POST',
           dataType: 'json',
           timeout: 30000

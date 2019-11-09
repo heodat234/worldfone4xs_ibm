@@ -34,7 +34,7 @@ Class Daily_payment_report extends WFF_Controller {
         }
     }
 
-    function saveExport()
+    function saveReport()
     {
       shell_exec('PYTHONIOENCODING=utf-8 python3.6 /var/www/html/worldfone4xs_ibm/cronjob/python/Loan/saveDailyPayment.py  > /dev/null &');
         // $this->crud->delete($this->collection);
@@ -77,5 +77,15 @@ Class Daily_payment_report extends WFF_Controller {
         //     $this->crud->create($this->collection, $value);
         // }
         // print_r($data);
+    }
+
+    function exportExcel()
+    {
+        shell_exec('PYTHONIOENCODING=utf-8 python3.6 /var/www/html/worldfone4xs_ibm/cronjob/python/Loan/exportDailyPayment.py  > /dev/null &');
+    }
+    function downloadExcel()
+    {
+        $file_path = UPLOAD_PATH . "excel/DailyPayment.xlsx";
+        echo json_encode(array("status" => 1, "data" => $file_path));
     }
 }

@@ -25,26 +25,26 @@
     <script>
       var Config = Object.assign(Config, {
           grid_name: 'grid',
-          source_name: 'sibs',
+          collection: 'master_data_report',
           columns: [
               {
-                  field: "contractnr",
+                  field: "account_number",
                   title: "CONTRACTNR",
-                  width: 50
+                  width: 140
               },{
-                  field: "client_name",
+                  field: "cus_name",
                   title: "CLIENT NAME",
-                  width: 100
+                  width: 140
               },{
-                  field: "birth_date",
+                  field: "BIR_DT8",
                   title: "BIRTHDATE",
                   width: 130
               },{
-                  field: "cif",
+                  field: "CUS_ID",
                   title: "CIF",
                   width: 130
               },{
-                  field: "signed_date",
+                  field: "FRELD8",
                   title: "SIGNED DATE",
                   width: 130
               },{
@@ -52,43 +52,43 @@
                   title: "PRODUCT NAME",
                   width: 130
               },{
-                  field: "id_no",
+                  field: "LIC_NO",
                   title: "ID NO",
                   width: 130
               },{
-                  field: "credit_amount",
+                  field: "APPROV_LMT",
                   title: "CREDIT AMOUNT",
                   width: 130
               },{
-                  field: "installment_number",
+                  field: "TERM_ID",
                   title: "INSTALLMENT NUMBER",
                   width: 130
               },{
-                  field: "installment_amount",
+                  field: "RPY_PRD",
                   title: "INSTALMENT AMOUNT",
                   width: 130
               },{
-                  field: "date_first_due",
+                  field: "F_PDT",
                   title: "DATE_FIRST_DUE",
                   width: 130
               },{
-                  field: "date_last_due",
+                  field: "DT_MAT",
                   title: "DATE_LAST_DUE",
                   width: 130
               },{
-                  field: "current_debt",
+                  field: "current_balance",
                   title: "CURRENT_DEBT",
                   width: 130
               },{
-                  field: "current_dpd",
+                  field: "CURRENT_DPD",
                   title: "CURRENT_DPD",
                   width: 130
               },{
-                  field: "phone_number",
+                  field: "MOBILE_NO",
                   title: "PHONE NUMBER",
                   width: 130
               },{
-                  field: "reference_phone",
+                  field: "WRK_REF",
                   title: "REFERENCE PHONE",
                   width: 130
               },{
@@ -116,27 +116,27 @@
                   title: "PROVINCE",
                   width: 130
               },{
-                  field: "principal",
+                  field: "W_ORG",
                   title: "PRINCIPAL",
                   width: 130
               },{
-                  field: "interest",
+                  field: "INT_RATE",
                   title: "INTEREST",
                   width: 130
               },{
-                  field: "dpd",
+                  field: "OVER_DY",
                   title: "DPD",
                   width: 130
               },{
-                  field: "date_handover",
+                  field: "DATE_HANDOVER",
                   title: "DATE HANDOVER",
                   width: 130
               },{
-                  field: "number_plate",
+                  field: "license_plates_no",
                   title: "NUMBER PLATE",
                   width: 130
               },{
-                  field: "company",
+                  field: "COMPANY",
                   title: "COMPANY",
                   width: 130
               }
@@ -150,14 +150,14 @@
               grid: {},
               columns: [],
               grid_name: '',
-              source_name: '',
+              collection: '',
               init: function() {
                   var dataSource = this.dataSource = new kendo.data.DataSource({
                      serverPaging: true,
                      serverFiltering: true,
                      pageSize: 20,
                      transport: {
-                        read: ENV.reportApi + "loan/smsdaily_report/" + this.source_name,
+                        read: ENV.reportApi + "loan/" + this.collection,
                         parameterMap: parameterMap
                      },
                      schema: {
@@ -179,6 +179,7 @@
                   var grid = this.grid = $("#"+this.grid_name).kendoGrid({
                      dataSource: dataSource,
                      zable: true,
+                     resizable: true,
                      pageable: true,
                      sortable: true,
                      scrollable: true,
@@ -205,13 +206,13 @@
       }();
       
       Table.grid_name = Config.grid_name;
-      Table.source_name = Config.source_name;
+      Table.collection = Config.collection;
       Table.columns = Config.columns;
       Table.init();
 
       function saveAsExcel() {
         $.ajax({
-          url: ENV.reportApi + "loan/smsdaily_report/saveAsExcel",
+          url: ENV.reportApi + "loan/"+Config.collection+"/downloadExcel",
           type: 'POST',
           dataType: 'json',
           timeout: 30000

@@ -128,6 +128,14 @@
             width: 32,
             locked: true
         });
+        columns.push({
+            field: "is_potential",
+            title: "Potential",
+            template: function(dataItem) {
+              return '<input type="checkbox"'+ ( dataItem.is_potential ? 'checked="checked"' : "" )+ 'class="chkbx" />';
+            },
+            width: 100
+        });
 
         Table.columns = columns;
         Table.init();
