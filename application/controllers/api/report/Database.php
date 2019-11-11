@@ -177,7 +177,32 @@ Class Database extends WFF_Controller {
 
             $options = array();
             if(!empty($request["name"])) $options["name"] = $request["name"];
+            if(!empty($request["unique"])) $options["unique"] = true;
             $result = $this->mongo_db->add_index($collection, $request["keys"], $options);
+            if(!$result) throw new Exception("Something error");
+            echo json_encode(array("status" => !empty($result[0]["ok"]) ? 1 : 0));
+        } catch (Exception $e) {
+            echo json_encode(array("status" => 0, "message" => $e->getMessage()));
+        }
+    }
+
+    function add_expire_index($database, $collection)
+    {
+        try {
+            $request = json_decode(file_get_contents('php://input'), TRUE);
+            if(empty($request["expireField"])) throw new Exception("Error Processing Request", 1);
+            
+            $indexes = [];
+            $this->load->library("mongo_db");
+            $this->mongo_db->switch_db($database);
+
+            $options = array();
+            if(!empty($request["name"])) $options["name"] = $request["name"];
+            if(!empty($request["isExpireIndex"])) {
+                $indexes[$request["expireField"]] = 1;
+                $options["expireAfterSeconds"] = isset($request["expireAfterSeconds"]) ? $request["expireAfterSeconds"] : 0;
+            }
+            $result = $this->mongo_db->add_index($collection, $indexes, $options);
             if(!$result) throw new Exception("Something error");
             echo json_encode(array("status" => !empty($result[0]["ok"]) ? 1 : 0));
         } catch (Exception $e) {
@@ -215,7 +240,7 @@ Class Database extends WFF_Controller {
             $file_name = "{$db}@{$collection}@{$id}.json";
             $file_path = $path . $file_name;
             if($this->username) {
-                $command = "mongoexport --username {$this->username} --password {$this->password} --authenticationDatabase admin --db $db --collection $collection --query '{\"_id\":ObjectId(\"$id\")}' --out $file_path";
+                $command = "mongoexport --username {$this->username} --password {$this->password} --authenticationDatabase admin --db $db --collection $collection --query '{\"_id\":ObjectId(\"$id\")}' --pretty --out $file_path";
             } else {
                 $command = "mongoexport --db $db --collection $collection --query '{\"_id\":ObjectId(\"$id\")}' --out $file_path";
             }

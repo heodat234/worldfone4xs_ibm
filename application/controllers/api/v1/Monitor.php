@@ -233,11 +233,10 @@ Class Monitor extends CI_Controller {
             $this->crud->select_db($_db);
             $this->load->model("language_model");
             $this->load->library("mongo_private");
-            $exc_extensions = $this->mongo_db->where(
-                array("issysadmin" => TRUE)
-            )->distinct($this->sub."User", "extension");
-            $exc_extensions[] = $this->session->userdata("extension");
-            $match = array("extension" => array('$nin' => $exc_extensions));
+            $extensions = $this->mongo_private->where(
+                array("issysadmin" => FALSE)
+            )->distinct($this->sub . "User", "extension");
+            $match = array("extension" => array('$in' => $extensions));
             $request = json_decode($this->input->get("q"), TRUE);
             $response = $this->crud->read("Activity", $request, ["extension","agentname","directory","class","function","method", "uri", "ajaxs_elapsed_time", "createdAt"], $match);
             foreach ($response["data"] as &$doc) {

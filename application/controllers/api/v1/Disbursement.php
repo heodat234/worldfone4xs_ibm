@@ -149,8 +149,14 @@ Class Disbursement extends WFF_Controller {
     function listFileFTP() {
         try {
             $request = json_decode($this->input->get("q"), TRUE);
-            $file_path = $request['ftp_filepath'];
-            $file_name = basename($file_path);
+            if(!empty($request)) {
+                $file_path = $request['ftp_filepath'];
+                $file_name = basename($file_path);
+            }
+            else {
+                $file_path = '';
+                $file_name = '';
+            }
             echo json_encode(array('data' => array(array('filepath' => $file_path, 'filename' => $file_name)), 'total' => 1));
         }
         catch (Exception $e) {
@@ -160,32 +166,21 @@ Class Disbursement extends WFF_Controller {
 
     function downloadFileFromFTP() {
         try {
-            $ftpInfo = $this->crud->where(array('collection' => $this->$collection))->getOne(set_sub_collection('ftp_config'));
-            $result = $this->ftp_model->downloadFileFromFTP($ftpInfo['locallink'] . $ftpInfo['filename'], $ftpInfo['filename'], FTP_BINARY);
+            $result = array();
+            $ftpInfo = $this->crud->where(array('collection' => $this->collection))->getOne(set_sub_collection('ftp_config'));
+            if(!empty($ftpInfo)) {
+                if (!file_exists(FCPATH . $ftpInfo['locallink'])) {
+                    mkdir(FCPATH . $ftpInfo['locallink'], 0777, true);
+                }
+                $result = $this->ftp_model->downloadFileFromFTP(FCPATH . $ftpInfo['locallink'] . $ftpInfo['filename'], $ftpInfo['ftplink'] . $ftpInfo['filename'], FTP_BINARY);
+            }
+            else {
+                $result['data'] = null;
+            }
             echo json_encode(array("status" => 1, "message" => '', 'data' => $result['data']));
         }
         catch (Exception $e) {
             echo json_encode(array("status" => 0, "message" => $e->getMessage()));
         }
     }
-
-//    function getFileFromFTP() {
-//        try {
-//            $connResult = $this->connectToFTP->connectToFTP();
-//            if($connResult['status'] == 1) {
-//                $connId = $connResult['data'];
-//                $listFTPResult = $this->connectToFTP->listFileInFTP($connId, '.');
-//                if($listFTPResult['status'] == 1) {
-//
-//                }
-//                else echo json_encode(array("status" => 0, "message" => $listFTPResult['message']));
-//            }
-//            else {
-//                echo json_encode(array("status" => 0, "message" => $connResult['message']));
-//            }
-//        }
-//        catch (Exception $e) {
-//            echo json_encode(array("status" => 0, "message" => $e->getMessage()));
-//        }
-//    }
 }

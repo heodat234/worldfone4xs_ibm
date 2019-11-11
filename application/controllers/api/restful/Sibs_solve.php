@@ -20,11 +20,11 @@ Class Sibs_solve extends WFF_Controller {
                 'cif'   => array()
             );
             $request = json_decode($this->input->get("q"), TRUE);
-            $telesaleList = $this->crud->where(array('assign' => $this->session->userdata("extension")))->get(set_sub_collection('Telesalelist'), array('cif', 'assign'));
+            $telesaleList = $this->crud->distinct(set_sub_collection('Telesalelist'), array(), array('cif'), array('assign' => $this->session->userdata("extension")));
             if(!empty($telesaleList)) {
-                $listCIF = array_values(array_unique(array_column($telesaleList, 'cif')));
+                $listCif = $telesaleList['data'];
                 $match['cif'] = array(
-                    '$in'   => $listCIF
+                    '$in'   => $listCif
                 );
             }
             $response = $this->crud->read($this->collection, $request, array(), $match);

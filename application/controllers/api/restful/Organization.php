@@ -10,9 +10,8 @@ Class Organization extends WFF_Controller {
 		parent::__construct();
 		header('Content-type: application/json');
 		$this->load->library("crud");
-		$_db = $this->config->item("_mongo_db");
-		$this->crud->select_db($_db);
-		$this->collection = set_sub_collection($this->collection);
+		$this->sub = set_sub_collection();
+		$this->collection = $this->sub . $this->collection;
 	}
 
 	function read()
@@ -55,6 +54,7 @@ Class Organization extends WFF_Controller {
 		} else {
 			$this->updateParent($data["parent_id"]);
 		}
+		$this->syncToGroup($id);
 		echo json_encode(array("status" => $result ? 1 : 0));
 	}
 
@@ -67,6 +67,16 @@ Class Organization extends WFF_Controller {
 			$this->updateParent($data["parent_id"]);
 		} else $this->updateChild($id);
 		echo json_encode(array("status" => $result ? 1 : 0));
+	}
+
+	function detail($id)
+	{
+		try {
+			$response = $this->crud->where_id($id)->getOne($this->collection);
+			echo json_encode($response);
+		} catch (Exception $e) {
+			echo json_encode(array("status" => 0, "message" => $e->getMessage()));
+		}
 	}
 
 	private function updateChild($id, $parent_id = "")
@@ -94,5 +104,40 @@ Class Organization extends WFF_Controller {
 		$doc = $childData ? array("hasChild" => TRUE) : array("hasChild" => FALSE);
 		$this->crud->where_id($id)->update($this->collection, array('$set' => $doc));
 		return $doc;
+	}
+
+	private function syncToGroup($organization_id)
+	{
+		$data = $this->mongo_db->where_id($organization_id)->getOne($this->collection);
+		if(empty($data["hasChild"]) && !empty($data["members"])) {
+			$data["type"] = "custom";
+			$data["name"] = trim($this->getParentTreeName($organization_id), "/");
+			if(isset($data["group_id"])) {
+				$group = $this->mongo_db->where_id($data["group_id"])->getOne($this->sub . "Group");
+				if($group) {
+					// Da sync truoc day va van con group
+					$this->mongo_db->where_id($data["group_id"])->set($data)->update($this->sub . "Group");
+				} else {
+					// Da sync truoc day nhung ko con group
+					$group = $this->mongo_db->insert($this->sub . "Group", $data);
+					// Update group id
+					$this->mongo_db->where_id($organization_id)->set(array("group_id" => $group["id"]))->update($this->collection);
+				}
+			} else {
+				// Chua tung sync
+				$group = $this->mongo_db->insert($this->sub . "Group", $data);
+				// Update group id
+				$this->mongo_db->where_id($organization_id)->set(array("group_id" => $group["id"]))->update($this->collection);
+			}
+		}
+	}
+
+	private function getParentTreeName($id)
+	{
+		$doc = $this->mongo_db->where_id($id)->getOne($this->collection);
+		if(!$doc) return "";
+		if(empty($doc["name"])) return "";
+		if(empty($doc["parent_id"])) return "";
+		return $this->getParentTreeName($doc["parent_id"]) . "/" . $doc["name"];
 	}
 }

@@ -26,8 +26,13 @@ Class Appointment_log extends WFF_Controller {
         try {
             $this->load->library("crud");
             $data = json_decode(file_get_contents('php://input'), TRUE);
-            $customerInfo = $this->crud->where_id($data['id_no'])->getOne(set_sub_collection("Telesalelist"));
+            $customerInfo = $this->crud->where(array('id_no' => $data['id_no']))->getOne(set_sub_collection("Telesalelist"));
+
+            if(empty($customerInfo)) {
+                $customerInfo = $this->crud->where_id($data['id_no'])->getOne(set_sub_collection("Telesalelist"));
+            }
             $data['customer_info'] = (!empty($customerInfo)) ? $customerInfo : array();
+            $data['id_no'] = $customerInfo['id'];
             if(!empty($data['dealer_location']['location'])) {
                 $data['dealer_location'] = $data['dealer_location']['location'];
             }
@@ -36,6 +41,8 @@ Class Appointment_log extends WFF_Controller {
             $data["created_at"]	= time();
             $data["created_by"]	= $this->session->userdata("extension");
             $result = $this->crud->create($this->collection, $data);
+//            print_r($data);
+//            exit();
             echo json_encode(array("status" => $result ? 1 : 0, "data" => [$result]));
         } catch (Exception $e) {
             echo json_encode(array("status" => 0, "message" => $e->getMessage()));
@@ -209,24 +216,4 @@ Class Appointment_log extends WFF_Controller {
             echo json_encode(array("status" => 0, "message" => $e->getMessage()));
         }
     }
-
-//    function getFileFromFTP() {
-//        try {
-//            $connResult = $this->connectToFTP->connectToFTP();
-//            if($connResult['status'] == 1) {
-//                $connId = $connResult['data'];
-//                $listFTPResult = $this->connectToFTP->listFileInFTP($connId, '.');
-//                if($listFTPResult['status'] == 1) {
-//
-//                }
-//                else echo json_encode(array("status" => 0, "message" => $listFTPResult['message']));
-//            }
-//            else {
-//                echo json_encode(array("status" => 0, "message" => $connResult['message']));
-//            }
-//        }
-//        catch (Exception $e) {
-//            echo json_encode(array("status" => 0, "message" => $e->getMessage()));
-//        }
-//    }
 }

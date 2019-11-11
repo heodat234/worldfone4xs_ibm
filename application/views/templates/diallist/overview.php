@@ -3,11 +3,12 @@
 </div>
 <div id="action-menu">
     <ul>
-    	<a href="javascript:void(0)" data-type="detail" onclick="detailData(this)"><li><i class="fa fa-exclamation-circle text-info"></i><span>Detail</span></li></a>
-    	<a href="javascript:void(0)" data-type="import" onclick="importData(this)"><li><i class="fa fa-download text-success"></i><span>Import</span></li></a>
+    	<a href="javascript:void(0)" data-type="detail" onclick="detailData(this)"><li><i class="fa fa-exclamation-circle text-info"></i><span>@Detail@</span></li></a>
+    	<a href="javascript:void(0)" data-type="import" onclick="importData(this)"><li><i class="fa fa-download text-success"></i><span>@Import@</span></li></a>
+    	<a href="javascript:void(0)" data-type="detail" onclick="assignData(this)"><li><i class="fa fa-check-square-o text-success"></i><span>@Assign@</span></li></a>
     	<li class="devide"></li>
-        <a href="javascript:void(0)" data-type="update" onclick="openForm({title: 'Edit diallist', width: 1000}); editForm(this)"><li><i class="fa fa-pencil-square-o text-warning"></i><span>Edit</span></li></a>
-        <a href="javascript:void(0)" data-type="delete" onclick="deleteDataItem(this)"><li><i class="fa fa-times-circle text-danger"></i><span>Delete</span></li></a>
+        <a href="javascript:void(0)" data-type="update" onclick="openForm({title: 'Edit diallist', width: 1000}); editForm(this)"><li><i class="fa fa-pencil-square-o text-warning"></i><span>@Edit@</span></li></a>
+        <a href="javascript:void(0)" data-type="delete" onclick="deleteDataItem(this)"><li><i class="fa fa-times-circle text-danger"></i><span>@Delete@</span></li></a>
     </ul>
 </div>
 <script>
@@ -32,8 +33,8 @@ var Config = {
             title: "@Mode@",
             width: 100
         },{
-            field: "type",
-            title: "@Type@",
+            field: "group_name",
+            title: "@Group@",
         },{
             field: "count_detail",
             title: "@Total case@",
@@ -125,13 +126,19 @@ var Config = {
 	function importData(ele) {
 		var uid = $(ele).data('uid');
 		var dataItem = Table.dataSource.getByUid(uid);
-		router.navigate(`/import/${dataItem.id}`);
+		router.navigate(`/import_from_basket/${dataItem.id}`);
 	}
 
 	function detailData(ele) {
 		var uid = $(ele).data('uid');
 		var dataItem = Table.dataSource.getByUid(uid);
 		router.navigate(`/detail/${dataItem.id}`);
+	}
+
+	function assignData(ele) {
+		var uid = $(ele).data('uid');
+		var dataItem = Table.dataSource.getByUid(uid);
+		router.navigate(`/assign/${dataItem.id}`);
 	}
 
 	$(document).on("click", ".grid-name", function() {

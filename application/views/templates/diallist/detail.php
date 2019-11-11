@@ -4,13 +4,23 @@
 </div>
 <div id="detail-action-menu" class="action-menu">
     <ul>
-        <a href="javascript:void(0)" data-type="detail" onclick="openForm({title: 'View diallist detail', width: 400}); viewForm(this)"><li><i class="fa fa-pencil-square-o text-info"></i><span>View</span></li></a>
+        <a href="javascript:void(0)" data-type="detail" onclick="openForm({title: '@View@ @case@', width: 400}); viewForm(this)"><li><i class="fa fa-pencil-square-o text-info"></i><span>@View@</span></li></a>
         <li class="devide"></li>
-        <a href="javascript:void(0)" data-type="update" onclick="openForm({title: 'Edit diallist detail', width: 400}); editForm(this)"><li><i class="fa fa-pencil-square-o text-warning"></i><span>Edit</span></li></a>
+        <a href="javascript:void(0)" data-type="update" onclick="openForm({title: '@Edit@ @case@', width: 400}); editForm(this)"><li><i class="fa fa-pencil-square-o text-warning"></i><span>@Edit@</span></li></a>
         <a href="javascript:void(0)" data-type="delete" onclick="deleteDataItem(this)"><li><i class="fa fa-times-circle text-danger"></i><span>Delete</span></li></a>
     </ul>
 </div>
 <script>
+function gridCallResult(data) {
+    var htmlArr = [];
+    if(data) {
+        data.forEach(doc => {
+            htmlArr.push(`<a href="javascript:void(0)" class="label label-${(doc.disposition == "ANSWERED")?'success':'warning'}" 
+                title="${kendo.toString(new Date(doc.starttime * 1000), "dd/MM/yy H:mm:ss")}">${doc.disposition}</a>`);
+        })
+    }
+    return htmlArr.join("<br>");
+}
 var Config = {
     id: '<?= $id ?>',
     crudApi: `${ENV.restApi}`,
@@ -36,6 +46,7 @@ var Config = {
         },{
             field: "phone",
             title: "@Phone@",
+            template: data => gridPhone(data.phone, data.id, "diallist"),
             width: 120,
             locked: true
         },{
@@ -227,65 +238,13 @@ var detailTable = function() {
 
 	async function editForm(ele) {
 		var dataItem = detailTable.dataSource.getByUid($(ele).data("uid")),
-	        dataItemFull = await $.ajax({
-	            url: `${Config.crudApi+Config.collection}/${dataItem.id}`,
-	            error: errorDataSource
-	        }),
 		    formHtml = await $.ajax({
-	    	    url: Config.templateApi + Config.collection + "/form",
+	    	    url: Config.templateApi + Config.collection + "/form?id=" + dataItem.id,
                 data: {dataFields: JSON.stringify(detailTable.diallist.columns)},
 	    	    error: errorDataSource
 	    	});
-        var convert
-		var model = Object.assign({
-			item: dataItemFull,
-            userDataSource: new kendo.data.DataSource({
-                transport: {
-                    read: ENV.restApi + "group/" + detailTable.diallist.group_id
-                },
-                schema: {
-                    data: "members",
-                    parse: function(response) {
-                        console.log(response);
-                        return response;
-                    }
-                }
-            }),
-			save: function() {
-	            $.ajax({
-	                url: `${Config.crudApi+Config.collection}/${dataItem.id}`,
-                    type: "PUT",
-                    contentType: "application/json; charset=utf-8",
-                    data: kendo.stringify(this.item.toJSON()),
-	                error: errorDataSource,
-	                success: function() {
-	                    detailTable.dataSource.read()
-	                }
-	            })
-			}
-		}, Config.observable);
 		kendo.destroy($("#right-form"));
-		$("#right-form").empty();
-		var kendoView = new kendo.View(formHtml, { wrap: false, model: model, evalTemplate: false });
-		kendoView.render($("#right-form"));
-	}
-
-	async function addForm() {
-		var formHtml = await $.ajax({
-		    url: Config.templateApi + Config.collection + "/form",
-		    error: errorDataSource
-		});
-		var model = Object.assign({
-			item: {},
-			save: function() {
-				detailTable.dataSource.add(this.item);
-				detailTable.dataSource.sync().then(() => {detailTable.dataSource.read()});
-			}
-		}, Config.observable);
-		kendo.destroy($("#right-form"));
-		$("#right-form").empty();
-		var kendoView = new kendo.View(formHtml, { wrap: false, model: model, evalTemplate: false });
-		kendoView.render($("#right-form"));
+		$("#right-form").html(formHtml);
 	}
 
 	function deleteDataItem(ele) {

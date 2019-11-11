@@ -191,32 +191,13 @@
             var dataItem = customerDropDown.dataItem();
             this.set('item.cus_name', dataItem.customer_name);
         },
-        // save: function () {
-        //     $.ajax({
-        //         url: ENV.vApi + "appointment_log/create",
-        //         type: "POST",
-        //         data: JSON.stringify(this.item),
-        //         contentType: "application/json; charset=utf-8",
-        //         dataType: 'JSON',
-        //         success: (response) => {
-        //             if(response.status == 1) {
-        //                 notificationAfterRefresh("@Create@ @appointment@ @success@", "success");
-        //                 location.reload();
-        //             }
-        //             else{
-        //                 notification.show("@Create@ @appointment@ @fail@", 'error')
-        //             }
-        //         },
-        //         error: errorDataSource
-        //     });
-        // }
         save: function() {
             var item = this.get('item');
             var appointment_date = new Date(this.item.appointment_date);
             appointment_date.setHours(0, 0, 0, 0);
             item.appointment_date = appointment_date.getTime() / 1000;
             $.ajax({
-                url: ENV.vApi + "appointment_log/create",
+                url: ENV.vApi + "appointment_log_solve/create",
                 data: kendo.stringify(item.toJSON()),
                 error: errorDataSource,
                 contentType: "application/json; charset=utf-8",
@@ -232,8 +213,6 @@
                 var cmnd = this.get('item.id_no');
                 var cmndDD = $("#id-no").data("kendoDropDownList");
                 cmndDD.text(cmnd);
-                this.set('item.id_no', cmndDD.value())
-                // cmndDD.trigger("dataBound");
             }
         }
     };

@@ -198,7 +198,7 @@
 <!-- END Table Styles Header -->
 <div id="allview" class="container-fluid after-breadcrumb">
     <div class="row">
-        <div class="col-sm-4" id="left-col">
+        <div class="col-sm-3" id="left-col">
             <h3>
                 @LIST@
                 <div class="pull-right" style="margin-right: 10px">
@@ -214,7 +214,7 @@
                  data-bind="source: files,
                 events: { select: onSelect, dragend: onDragend, dragstart: onDragstart}"></div>
         </div>
-        <div class="col-sm-8" id="right-col" data-bind="visible: selectedItem.name">
+        <div class="col-sm-9" id="right-col" data-bind="visible: selectedItem.name">
             <h3>@EDIT@</h3>
             <form class="form-horizontal">
                 <div class="form-group">

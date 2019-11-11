@@ -28,7 +28,7 @@
                         <span>Show file</span>
                     </label>
                     <label class="checkbox-inline">
-                        <input type="checkbox" autocomplete="off" data-bind="checked: visibleData">
+                        <input type="checkbox" autocomplete="off" data-bind="checked: visibleData,  events: {change: showDataChange}">
                         <span>Show data</span>
                     </label>
                 </div>
@@ -45,7 +45,7 @@
                         <input data-role="autocomplete" data-placeholder="Search" 
                         data-text-field="name"  data-value-field="name"
                         data-filter="contains" 
-                        data-bind="source: collections, events: {change: searchChange}" style="margin-right: 100px" />
+                        data-bind="source: collections, events: {change: searchChange, select: searchSelect}" style="margin-right: 100px" />
                         <a role="button" class="btn btn-sm btn-alt btn-danger" href="javascript:void(0)" data-bind="click: dropCollection, visible: item.srcCollection"><i class="hi hi-remove-circle"></i> <b>Drop</b></a>
                     </div>
                     <h2><strong>Collection</strong></h2>
@@ -53,7 +53,8 @@
                 <!-- END Web Server Title -->
 
                 <div>
-                    <div data-template="collection-template" data-bind="source: collections"></div>
+                    <div data-template="collection-template" data-bind="source: collections" class="list-group"></div>
+                    <div data-role="pager" data-bind="source: collections"></div>
                 </div>
 
                 <div style="margin-top: 20px" data-bind="visible: item.srcCollection">
@@ -293,7 +294,16 @@ var Table = function() {
                 if(dbname)
                     this.collections.read({db: dbname, file: Number(showFile)});
             },
+            showDataChange: function(e) {
+                var showData = e.currentTarget.checked;
+                var dbname = this.get("dbname");
+                var collectionName = this.get("item.srcCollection");
+                if(showData && dbname && collectionName) {
+                    detailData(dbname, collectionName);
+                }
+            },
             collections: new kendo.data.DataSource({
+                pageSize: 20,
                 transport: {
                     read: ENV.reportApi + "database/collections",
                 },
@@ -303,7 +313,19 @@ var Table = function() {
                 }
             }),
             searchChange: function() {
-                this.set("item.srcCollection", false);
+            },
+            searchSelect: function(e) {
+                var collectionName = e.dataItem.name;
+                this.set("item.srcCollection", collectionName);
+                var collectionData = this.collections.data().toJSON();
+                collectionData.map(doc => {
+                    if(doc.name == collectionName) {
+                        doc.selected = true;
+                    } else doc.selected = false;
+                })
+                this.collections.data(collectionData);
+                if(this.get("visibleData"))
+                    detailData(this.get("dbname"), collectionName);
             },
             selectDatabase: function(e) {
                 $(".btn-database").removeClass("selected");
@@ -351,9 +373,10 @@ var Table = function() {
                     } else doc.selected = false;
                 })
                 this.collections.data(collectionData);
-                detailData(this.get("dbname"), collectionName);
                 this.set("importJsonVisible", false);
                 Table.customColumns = [];
+                if(this.get("visibleData"))
+                    detailData(this.get("dbname"), collectionName);
             },
             restoreCollection: function(e) {
                 var dbname = this.get('dbname');
@@ -434,7 +457,7 @@ var Table = function() {
 
                         var item = this.get("item").toJSON();
                         if(item.fields) {
-                            data = {keys: {}};
+                            data = {keys: {}, unique: item.unique};
                             item.fields.forEach(field => {
                                 data.keys[field] = Boolean(item.sort);
                             })
@@ -444,6 +467,20 @@ var Table = function() {
                                 type: "POST",
                                 contentType: "application/json; charset=utf-8",
                                 data: JSON.stringify(data),
+                                success: (res) => {
+                                    if(res.status) {
+                                        syncDataSource();
+                                        listIndexes(database, collection);
+                                        this.close();
+                                    } else notification.show(res.message, "error");
+                                }
+                            })
+                        } else if(item.isExpireIndex) {
+                            $.ajax({
+                                url: ENV.reportApi + `database/add_expire_index/${database}/${collection}`,
+                                type: "POST",
+                                contentType: "application/json; charset=utf-8",
+                                data: JSON.stringify(item),
                                 success: (res) => {
                                     if(res.status) {
                                         syncDataSource();
@@ -575,6 +612,12 @@ var Table = function() {
                         var docHtmlArr = [];
                         for(var prop in doc.key) {
                             docHtmlArr.push(`<b>${prop}</b>&nbsp;${(doc.key[prop] == 1) ? '<i class="fa fa-sort-alpha-asc"></i>' : '<i class="fa fa-sort-alpha-desc"></i>'}&nbsp;`)
+                            if(doc.unique) {
+                                docHtmlArr.push('<i class="fa fa-thumbs-up text-muted"></i>');
+                            }
+                            if(doc.expireAfterSeconds != undefined) {
+                                docHtmlArr.push(`<span class="text-muted"><i class="fa fa-clock-o"></i> <i>${doc.expireAfterSeconds}s</i></span>`);
+                            }
                         }
                         indexesHtmlArr.push('<span class="label label-info">' + docHtmlArr.join('') + (doc.name != "_id_" ? `<a href="javascript:void(0)" onclick="dropIndex('${database}', '${collection}', '${doc.name}')"><i class="fa fa-times text-danger"></i></a></span>` : "</span>"));
                     })
@@ -706,7 +749,7 @@ var Table = function() {
          data-visible="false"
          data-actions="['Close']"
          data-bind="">
-        <div class="k-edit-form-container" style="width: 360px">
+        <div class="k-edit-form-container" style="width: 480px">
             <div class="k-edit-label" style="width: 20%">
                 <label>Name</label>
             </div>
@@ -714,19 +757,31 @@ var Table = function() {
                 <input class="k-textbox" data-bind="value: item.name" style="width: 100%">
             </div>
             <div class="k-edit-label" style="width: 20%">
-                <label>Fields</label>
+                <label>Expire index</label>
             </div>
             <div class="k-edit-field" style="width: 70%">
+                <div class="onoffswitch" id="expire-index-switch">
+                    <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="expire-switch" data-bind="checked: item.isExpireIndex">
+                    <label class="onoffswitch-label" for="expire-switch">
+                        <span class="onoffswitch-inner"></span>
+                        <span class="onoffswitch-switch"></span>
+                    </label>
+                </div>
+            </div>
+            <div class="k-edit-label" style="width: 20%" data-bind="invisible: item.isExpireIndex">
+                <label>Fields</label>
+            </div>
+            <div class="k-edit-field" style="width: 70%" data-bind="invisible: item.isExpireIndex">
                 <select style="width: 100%"
                 data-role="multiselect"
                 data-value-primitive="true"
                 data-value-field="field" data-text-field="field" 
                 data-bind="value: item.fields, source: fieldOption"></select>
             </div>
-            <div class="k-edit-label" style="width: 20%">
+            <div class="k-edit-label" style="width: 20%" data-bind="invisible: item.isExpireIndex">
                 <label>Sort</label>
             </div>
-            <div class="k-edit-field" style="width: 70%">
+            <div class="k-edit-field" style="width: 70%" data-bind="invisible: item.isExpireIndex">
                 <div class="onoffswitch" id="sort-index-switch">
                     <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="myonoffswitch" data-bind="checked: item.sort">
                     <label class="onoffswitch-label" for="myonoffswitch">
@@ -734,6 +789,30 @@ var Table = function() {
                         <span class="onoffswitch-switch"></span>
                     </label>
                 </div>
+            </div>
+            <div class="k-edit-label" style="width: 20%" data-bind="invisible: item.isExpireIndex">
+                <label>Unique</label>
+            </div>
+            <div class="k-edit-field" style="width: 70%" data-bind="invisible: item.isExpireIndex">
+                <div class="onoffswitch" id="unique-index-switch">
+                    <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="unique-switch" data-bind="checked: item.unique">
+                    <label class="onoffswitch-label" for="unique-switch">
+                        <span class="onoffswitch-inner"></span>
+                        <span class="onoffswitch-switch"></span>
+                    </label>
+                </div>
+            </div>
+            <div class="k-edit-label" style="width: 20%" data-bind="visible: item.isExpireIndex">
+                <label>Field</label>
+            </div>
+            <div class="k-edit-field" style="width: 70%" data-bind="visible: item.isExpireIndex">
+                <input class="k-textbox" data-bind="value: item.expireField" style="width: 100%">
+            </div>
+            <div class="k-edit-label" style="width: 20%" data-bind="visible: item.isExpireIndex">
+                <label>After seconds</label>
+            </div>
+            <div class="k-edit-field" style="width: 70%" data-bind="visible: item.isExpireIndex">
+                <input data-role="numerictextbox" data-bind="value: item.expireAfterSeconds" style="width: 100%">
             </div>
             <div class="k-edit-buttons k-state-default">
                 <a class="k-button k-primary k-scheduler-update" data-bind="click: save">Save</a>
@@ -779,4 +858,8 @@ var Table = function() {
 <style type="text/css">
     #sort-index-switch .onoffswitch-inner:before {content: "ASC";}
     #sort-index-switch .onoffswitch-inner:after {content: "DESC";}
+    #expire-index-switch .onoffswitch-inner:before {content: "YES";}
+    #expire-index-switch .onoffswitch-inner:after {content: "NO";}
+    #unique-index-switch .onoffswitch-inner:before {content: "YES";}
+    #unique-index-switch .onoffswitch-inner:after {content: "NO";}
 </style>

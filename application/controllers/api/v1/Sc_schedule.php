@@ -19,6 +19,25 @@ Class Sc_schedule extends WFF_Controller {
 		$this->collection = set_sub_collection($this->collection);
 	}
 
+//    function importExcel()
+//    {
+//        try {
+//            $request = json_decode(file_get_contents('php://input'), TRUE);
+//            $checkScriptRunning = $this->mongo_db->where(array('collection' => 'Sc_schedule', 'status' => 2))->get(set_sub_collection('Import'));
+//            if(!empty($checkScriptRunning)) {
+//                echo json_encode(array("status" => 0, "message" => '@A file is importing. Please try again later@'));
+//            }
+//            else {
+//                $pythonUrl = FCPATH . 'cronjob/python/Telesales/importSCSchedule.py';
+//                $command = escapeshellcmd("python3.6 " . $pythonUrl . " > /dev/null &");
+//                $output = shell_exec($command);
+//                echo json_encode(array('status' => 2, "message" => "@Importing... Please check import history for more detail@"));
+//            }
+//        } catch (Exception $e) {
+//            echo json_encode(array("status" => 0, "message" => $e->getMessage()));
+//        }
+//    }
+
     function importExcel()
     {
         try {
@@ -39,9 +58,9 @@ Class Sc_schedule extends WFF_Controller {
                     'created_by'    => $this->session->userdata("extension")
                 );
                 $importLogId = $this->crud->create(set_sub_collection('Import'), $importLog);
-                $command = escapeshellcmd("python3.6 /var/www/html/worldfone4xs_ibm/cronjob/python/Telesales/importSCSchedule.py " . $importLogId['id']) . ' > /dev/null &';
+                $pythonCron = FCPATH . 'cronjob/python/Telesales/importSCSchedule.py ';
+                $command = escapeshellcmd("python3.6 " . $pythonCron . $importLogId['id']) . ' > /dev/null &';
                 $output = shell_exec($command);
-//                $checkImport = $this->crud->where_id($importLogId['id'])->where(array('status' => 1))->get(set_sub_collection('Import'));
                 echo json_encode(array('status' => 2, "message" => "@Importing... Please check import history for more detail@"));
             }
         } catch (Exception $e) {
@@ -81,8 +100,14 @@ Class Sc_schedule extends WFF_Controller {
     function listFileFTP() {
         try {
             $request = json_decode($this->input->get("q"), TRUE);
-            $file_path = $request['ftp_filepath'];
-            $file_name = basename($file_path);
+            if(!empty($request)) {
+                $file_path = $request['ftp_filepath'];
+                $file_name = basename($file_path);
+            }
+            else {
+                $file_path = '';
+                $file_name = '';
+            }
             echo json_encode(array('data' => array(array('filepath' => $file_path, 'filename' => $file_name)), 'total' => 1));
         }
         catch (Exception $e) {
@@ -92,8 +117,17 @@ Class Sc_schedule extends WFF_Controller {
 
     function downloadFileFromFTP() {
         try {
-            $ftpInfo = $this->crud->where(array('collection' => $this->$collection))->getOne(set_sub_collection('ftp_config'));
-            $result = $this->ftp_model->downloadFileFromFTP($ftpInfo['locallink'] . $ftpInfo['filename'], $ftpInfo['filename'], FTP_BINARY);
+            $result = array();
+            $ftpInfo = $this->crud->where(array('collection' => $this->collection))->getOne(set_sub_collection('ftp_config'));
+            if(!empty($ftpInfo)) {
+                if (!file_exists(FCPATH . $ftpInfo['locallink'])) {
+                    mkdir(FCPATH . $ftpInfo['locallink'], 0777, true);
+                }
+                $result = $this->ftp_model->downloadFileFromFTP(FCPATH . $ftpInfo['locallink'] . $ftpInfo['filename'], $ftpInfo['ftplink'] . $ftpInfo['filename'], FTP_BINARY);
+            }
+            else {
+                $result['data'] = null;
+            }
             echo json_encode(array("status" => 1, "message" => '', 'data' => $result['data']));
         }
         catch (Exception $e) {
@@ -102,41 +136,44 @@ Class Sc_schedule extends WFF_Controller {
     }
 
     function read() {
-	    try {
-	        $result = array();
+        try {
+            $result = array();
             $request = json_decode($this->input->get("q"), TRUE);
-            $pipeline = array();
-            if(!empty($request['filter']['filters'][0]['filters'])) {
-                $match = array('from_date' => array());
-                foreach ($request['filter']['filters'][0]['filters'] as $key => $value) {
-                    if($value['operator'] == 'gte') {
-                        $match['from_date']['$gte'] = strtotime($value['value']);
-                    }
-                    if($value['operator'] == 'lte') {
-                        $match['from_date']['$lte'] = strtotime($value['value']);
-                    }
-                }
-                $pipeline[] = array(
-                    '$match' => $match
-                );
-            }
-            $pipeline[] = array(
-                '$group'                        => array(
-                    '_id'                       => '$dealer_code',
-                    'schedule'                  => array(
-                        '$push'                 => array(
-                            'dealer_code'       => '$dealer_code',
-                            'sc_code'           => '$sc_code',
-                            'kendoGridField'    => '$kendoGridField'
+            $model = $this->crud->build_model($this->collection);
+            $this->load->library("kendo_aggregate", $model);
+            $this->kendo_aggregate->set_kendo_query($request)->selecting();
+            $this->kendo_aggregate->filtering();
+            if(empty($request['filter'])) {
+                $month = date('m', strtotime('this month'));
+                $starttime = strtotime('21-' . ($month - 1) . '-2019 00:00:00');
+                $endtime = strtotime('20-' . $month . '-2019 23:59:59');
+                $match = array(
+                    '$match'    => array(
+                        'from_date' => array(
+                            '$gte'  => $starttime,
+                            '$lte'  => $endtime
                         )
                     )
+                );
+                $this->kendo_aggregate->adding($match);
+            }
+            $group = array('$group' => array(
+                '_id'                       => '$dealer_code',
+                'schedule'                  => array(
+                    '$push'                 => array(
+                        'sc_code'           => '$sc_code',
+                        'kendoGridField'    => '$kendoGridField'
+                    )
                 )
-            );
-            $pipelineTotal = $pipeline;
-            array_push($pipelineTotal, array('$count' => "total"));
-            array_push($pipeline, array('$skip' => $request['skip']));
-            array_push($pipeline,array('$limit' => $request['take']));
-            $data = $this->crud->aggregate_pipeline($this->collection, $pipeline);
+            ));
+            $this->kendo_aggregate->adding($group);
+            $total_aggregate = $this->kendo_aggregate->get_total_aggregate_group('$dealer_code');
+            $total_result = $this->mongo_db->aggregate_pipeline($this->collection, $total_aggregate);
+            $total = isset($total_result[0]) ? $total_result[0]['total'] : 0;
+            $this->kendo_aggregate->sorting();
+            $this->kendo_aggregate->paging();
+            $data_aggregate = $this->kendo_aggregate->get_data_aggregate();
+            $data = $this->mongo_db->aggregate_pipeline($this->collection, $data_aggregate);
             foreach ($data as $key => &$value) {
                 $listSchedule = array();
                 foreach ($value['schedule'] as $key1 => $value1) {
@@ -145,13 +182,6 @@ Class Sc_schedule extends WFF_Controller {
                 $value = array_merge($value, $listSchedule, array('dealer_code' => $value['_id']));
                 unset($value['schedule']);
                 array_push($result, $value);
-            }
-            $total = $this->crud->aggregate_pipeline($this->collection, $pipelineTotal);
-            if(!empty($total)) {
-                $total = $total[0]['total'];
-            }
-            else {
-                $total = 0;
             }
             echo json_encode(array('data' => $result, 'total' => $total));
         }

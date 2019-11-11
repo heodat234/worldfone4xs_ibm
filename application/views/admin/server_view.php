@@ -29,6 +29,8 @@
     <li>@Server@</li>
     <li id="server-name"></li>
     <li class="pull-right none-breakcrumb">
+    	<a role="button" class="btn btn-sm" onclick="showBeanstalkMonitor()"><i class="fa fa-plug"></i> <b>Check beanstalk</b></a>
+    	<a role="button" class="btn btn-sm" onclick="showPSAUX()"><i class="fa fa-plug"></i> <b>Check process</b></a>
         <a role="button" class="btn btn-sm" onclick="checkMongoTop()"><i class="fa fa-plug"></i> <b>Check mongo top</b></a>
         <a role="button" class="btn btn-sm" onclick="checkService()"><i class="fa fa-plug"></i> <b>Check other services</b></a>
     </li>
@@ -100,6 +102,67 @@
             <!-- END Web Server Block -->
 		</div>
 	</div>
+	<div class="row hidden" id="psaux-contain">
+    	<div class="col-md-12">
+            <!-- Web Server Block -->
+            <div class="block full">
+                <!-- Web Server Title -->
+                <div class="block-title">
+                	<div class="block-options pull-right">
+                		<a role="button" class="btn btn-sm btn-alt btn-warning" href="javascript:void(0)" onclick="toggleIntervalPSAUX(this)"><b>Interval</b></a>
+                    	<a role="button" class="btn btn-sm btn-alt btn-success" href="javascript:void(0)" onclick="showPSAUX()"><b>Clear</b></a>
+                    </div>
+                    <h2><strong>Process list</strong></h2>
+                </div>
+                <!-- END Web Server Title -->
+
+                <div class="block-content">
+                	<div class="row">
+                		<div class="col-sm-4">
+                			<label>Filter: </label>
+                			<input id="psaux-filter" class="k-textbox" style="width: 150px"/>
+                		</div>
+                		<div class="col-sm-4">
+                			<label>Limit: </label>
+                			<input type="number" id="psaux-limit" class="k-textbox" style="width: 100px"/>
+                		</div>
+                		<div class="col-sm-4">
+                			<button class="k-button" onclick="getPSAUX()">GET</button>
+                		</div>
+                	</div>
+                	<div class="row" style="padding-top: 10px">
+                		<div id="psaux-grid"></div>
+                	</div>
+                </div>
+            </div>
+            <!-- END Web Server Block -->
+        </div>
+    </div>
+
+    <div class="row hidden" id="beanstalk-monitor-container">
+    	<div class="col-md-12">
+            <!-- Web Server Block -->
+            <div class="block full">
+                <!-- Web Server Title -->
+                <div class="block-title">
+                	<div class="block-options pull-right">
+                    	<a role="button" class="btn btn-sm btn-alt btn-success" href="javascript:void(0)" onclick="clearBeanstalkMonitor(this)"><b>Clear</b></a>
+                    	<a href="javascript:void(0)" class="btn btn-alt btn-sm btn-primary" data-toggle="block-toggle-fullscreen"><i class="fa fa-desktop"></i></a>
+                    </div>
+                    <h2><strong>Beanstalkd monitor</strong></h2>
+                </div>
+                <!-- END Web Server Title -->
+
+                <div class="block-content">
+                	<div class="row">
+                		<iframe src="" style="border: 0; width: 100%; height: 500px"></iframe>
+                	</div>
+                </div>
+            </div>
+            <!-- END Web Server Block -->
+        </div>
+    </div>
+
 	<div class="row">
         <div class="col-md-6">
             <!-- Web Server Block -->
@@ -216,6 +279,74 @@
 		  var elem = document.getElementById('loadarea');
 		  elem.contentWindow.scrollTo( 0, 999999 );
 		}, 500);
+	}
+
+	function showPSAUX() {
+		$("#psaux-contain").toggleClass("hidden");
+		$("#psaux-limit").val(10);
+	}
+
+	function toggleIntervalPSAUX(ele) {
+		if(window.intervalPSAUX == undefined) {
+			window.intervalPSAUX = setInterval(() => {
+				if($("#psaux-grid").data("kendoGrid"))
+					$("#psaux-grid").data("kendoGrid").dataSource.read();
+			}, 2000);
+		} else {
+			clearInterval(window.intervalPSAUX);
+			window.intervalPSAUX = undefined;
+		}
+	}
+
+	function showBeanstalkMonitor() {
+		$container = $("#beanstalk-monitor-container");
+		$container.find("iframe").attr("src", "/public/other/beanstalk_monitor/");
+		$container.removeClass("hidden");
+	}
+
+	function clearBeanstalkMonitor() {
+		$container = $("#beanstalk-monitor-container");
+		$container.find("iframe").attr("src", "");
+		$container.addClass("hidden");
+	}
+
+	function getPSAUX() {
+		if($("#psaux-grid").data("kendoGrid")) {
+			$("#psaux-grid").data("kendoGrid").destroy();
+		}
+		$("#psaux-grid").kendoGrid({
+			columns: [
+				{field: "USER", title: "USER", width: 90},
+				{field: "PID", title: "PID", width: 90},
+				{field: "CPU", title: "CPU", width: 90},
+				{field: "MEM", title: "MEM", width: 90},
+				{field: "START", title: "START", width: 90},
+				{field: "TIME", title: "TIME", width: 90},
+				{field: "COMMAND", title: "COMMAND"},
+				/*{title: "ACTION", command: ["destroy"], width: 120}*/
+			],
+			dataSource: {
+				pageSize: $("#psaux-limit").val(),
+				transport: {
+					read: {
+						url: ENV.reportApi + "server/psaux",
+						data: {
+							filter: $("#psaux-filter").val(),
+							limit: $("#psaux-limit").val()
+						},
+						global: false
+					}
+				},
+				schema: {
+					data: "data",
+					total: "total"
+				}
+			},
+			pageable: true,
+			sortable: true,
+			filterable: true,
+			resizable: true,
+		})
 	}
 
 	var Server = function() {

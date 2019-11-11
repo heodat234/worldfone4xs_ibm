@@ -77,6 +77,9 @@
 </script>
 <script src="<?= STEL_PATH.'js/table.js' ?>"></script>
 <script type="text/javascript">
+    function girdBoolean(data) {
+        return '<input type="checkbox"'+ ( data ? 'checked="checked"' : "" )+ 'class="chkbx" />';
+    }
     var router = new kendo.Router({routeMissing: function(e) { router.navigate("/") }});
     var telesaleFields = new kendo.data.DataSource({
         serverPaging: true,
@@ -119,6 +122,9 @@
                 case "timestamp":
                     col.template = (dataItem) => gridDate(dataItem[col.field]);
                     break;
+                case "boolean":
+                    col.template = (dataItem) => girdBoolean(dataItem[col.field]);
+                    break;
                 default:
                     break;
             }
@@ -127,14 +133,6 @@
             selectable: true,
             width: 32,
             locked: true
-        });
-        columns.push({
-            field: "is_potential",
-            title: "Potential",
-            template: function(dataItem) {
-              return '<input type="checkbox"'+ ( dataItem.is_potential ? 'checked="checked"' : "" )+ 'class="chkbx" />';
-            },
-            width: 100
         });
 
         Table.columns = columns;

@@ -99,6 +99,9 @@
         }
         return html;
     }
+    function girdBoolean(data) {
+        return '<input type="checkbox"'+ ( data ? 'checked="checked"' : "" )+ 'class="chkbx" />';
+    }
     var router = new kendo.Router({routeMissing: function(e) { router.navigate("/") }});
     var telesaleFields = new kendo.data.DataSource({
         serverPaging: true,
@@ -141,6 +144,9 @@
                 case "timestamp":
                     col.template = (dataItem) => gridDate(dataItem[col.field]);
                     break;
+                case "boolean":
+                    col.template = (dataItem) => girdBoolean(dataItem[col.field]);
+                    break;
                 default:
                     break;
             }
@@ -151,10 +157,12 @@
             locked: true
         });
         // columns.push({
-        //     // Use uid to fix bug data-uid of row undefined
-        //     title: `<a class='btn btn-sm btn-circle btn-action btn-primary' onclick='return deleteDataItemChecked();'><i class='fa fa-times-circle'></i></a>`,
-        //     template: '<a role="button" class="btn btn-sm btn-circle btn-action btn-primary" data-uid="#: uid #"><i class="fa fa-ellipsis-v"></i></a>',
-        //     width: 32
+        //     field: "is_potential",
+        //     title: "Potential",
+        //     template: function(dataItem) {
+        //       return '<input type="checkbox"'+ ( dataItem.is_potential ? 'checked="checked"' : "" )+ 'class="chkbx" />';
+        //     },
+        //     width: 100
         // });
 
         Table.columns = columns;

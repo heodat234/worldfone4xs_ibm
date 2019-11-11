@@ -17,13 +17,6 @@ var Config = {
     parse: function (response) {
         response.data.map(function(doc) {
             doc.starttime = new Date(doc.starttime * 1000);
-            var serviceLv = [];
-            [1,2,3].forEach(level => {
-                var prop = "serviceLv" + level;
-                if(doc[prop])
-                    serviceLv.push((doc[prop] || "").toString());
-            }) 
-            doc.serviceLv = serviceLv.join(" >> ");
             return doc;
         })
         return response;
@@ -63,8 +56,13 @@ var Config = {
         title: "@Customer name@",
         template: function(dataItem) {
             var result = '';
-            if(dataItem.customer.length) {
-                result = dataItem.customer.map(doc => `<span class="grid-name" data-id="${doc._id.$oid}" title="@View detail@">${(doc.name || '').toString()}</span>`).join(" <i class='text-danger'>OR</i> ");
+            if(dataItem.customer) {
+                if(dataItem.customer.length) {
+                    result = dataItem.customer.map(doc => `<a href="${ENV.baseUrl}manage/customer/#/detail/${doc.id}" target="_blank" class="grid-name" data-id="${doc.id}" title="@View detail@">${(doc.name || '').toString()}</a>`).join(" <i class='text-danger'>OR</i> ");
+                    result += `<br><a href="javascript:void(0)" onclick="defineCustomerCdr(this)" class="text-danger"><i>@Define@ @customer@ @of@ @this call@</i></a>`
+                } else {
+                    result = `<a href="${ENV.baseUrl}manage/customer/#/detail/${dataItem.customer.id}" target="_blank" class="grid-name" data-id="${dataItem.customer.id}" title="@View detail@">${(dataItem.customer.name || '').toString()}</a>`;
+                }
             }
             return result
         }

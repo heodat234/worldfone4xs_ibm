@@ -18,9 +18,9 @@ Class Appointment_solve extends WFF_Controller {
         try {
             $match = array();
             $request = json_decode($this->input->get("q"), TRUE);
-            $telesaleList = $this->crud->where(array('assign' => $this->session->userdata("extension")))->get(set_sub_collection('Telesalelist'), array('id_no', 'last_modified', 'assigned_by', 'id'));
+            $telesaleList = $this->crud->distinct(set_sub_collection('Telesalelist'), array(), array('id_no'), array('assign' => $this->session->userdata("extension")));
             if(!empty($telesaleList)) {
-                $listCMND = array_values(array_unique(array_column($telesaleList, 'id_no')));
+                $listCMND = $telesaleList['data'];
                 $match['cmnd'] = array(
                     '$in'   => $listCMND
                 );

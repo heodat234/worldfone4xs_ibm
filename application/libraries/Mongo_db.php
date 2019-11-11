@@ -777,13 +777,28 @@ Class Mongo_db{
 	* Where id
 	* --------------------------------------------------------------------------------
 	*
-	* Get the documents where the value of a _id equal to $x
+	* Get the documents where the value of a _id equal to ObjectId($id)
 	*
 	* @usage : $this->mongo_db->where_id('9dfs12312dsfsd121sde')->get('foobar');
 	*/
 	function where_id($id)
     {
-        $this->wheres = array("_id" => new MongoDB\BSON\ObjectId($id));
+        $this->wheres["_id"] = new MongoDB\BSON\ObjectId($id);
+        return $this;
+    }
+
+    /**
+	* --------------------------------------------------------------------------------
+	* Where object id
+	* --------------------------------------------------------------------------------
+	*
+	* Get the documents where the value of a field equal to ObjectId($id)
+	*
+	* @usage : $this->mongo_db->where_id('other_id', '9dfs12312dsfsd121sde')->get('foobar');
+	*/
+	function where_object_id($field, $id)
+    {
+        $this->wheres[$field] = new MongoDB\BSON\ObjectId($id);
         return $this;
     }
 

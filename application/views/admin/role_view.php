@@ -47,7 +47,8 @@ var Config = {
             var navigatorHTML = await $.get(ENV.baseUrl + "template/nav/from_privileges", {q: JSON.stringify(privileges)});
             this.set("navigatorHTML", navigatorHTML);
             handleNavCheck();
-        }
+        },
+        roleNameOption: () => dataSourceJsonData(["Role","name"])
     },
     model: {
         id: "id",

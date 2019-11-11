@@ -397,9 +397,12 @@
                 var item = this.selectedItem.toJSON();
             	var model = {
                     item: item,
-                    organizationOption: dataSourceDropDownListPrivate("Organization", ["name"], null),
+                    organizationOption: dataSourceDropDownList("Organization", ["name"], null),
+                    leadOption: dataSourceDropDownListPrivate("User", ["extension", "agentname"], {role_name: {$ne: "Agent"}}, function(res) {
+                        res.data.unshift({extension: null, agentname: "@None@"});
+                        return res;
+                    }),
                     userOption: dataSourceDropDownListPrivate("User", ["extension", "agentname"], null, function(res) {
-                    	res.data.unshift({extension: null, agentname: "@None@"});
                     	return res;
                     }),
                     close: function(e) {
@@ -479,7 +482,7 @@
                 data-value-field="extension" data-text-field="agentname"
                 data-template="itemGroupTemplate"
                 data-value-template="itemGroupTemplate"
-                data-bind="value: item.lead, source: userOption">
+                data-bind="value: item.lead, source: leadOption">
             </div>
             <div class="k-edit-label" style="width: 20%" data-bind="invisible: item.hasChild">
                 <label>@Members@</label>

@@ -17,10 +17,9 @@ class Afterlogin_model extends CI_Model {
     {
         $collection = "User";
         $collection = set_sub_collection($collection);
-        $CI =& get_instance();
         $this->mongo_db->switch_db($this->config->item("_mongo_db"));
-        $CI->load->model("pbx_model");
-        $result = $CI->pbx_model->list_agent(0, 0, 0);
+        $this->load->model("pbx_model");
+        $result = $this->pbx_model->list_agent(0, 0, 0);
         if(!empty($result["data"])) {
             $users = $result["data"];
             $extensions = array();
@@ -39,6 +38,12 @@ class Afterlogin_model extends CI_Model {
             $this->mongo_db->where(array("extension" => array('$nin' => $extensions), "active" => TRUE))
             ->update_all($collection, array('$set' => array("active" => FALSE)), []);
         }
+        // Update 01/11/2019
+        $extension = $this->session->userdata("extension");
+        $user = $this->mongo_db->where(array("extension"=>$extension))
+            ->select(["role_name"])->getOne($collection);
+        $this->session->set_userdata("role_name", isset($user["role_name"]) ? $user["role_name"] : "");
+        //
         $this->mongo_db->switch_db();
     }
 
@@ -46,9 +51,8 @@ class Afterlogin_model extends CI_Model {
     {
         $collection = "Group";
         $collection = set_sub_collection($collection);
-        $CI =& get_instance();
-        $CI->load->model("pbx_model");
-        $result = $CI->pbx_model->list_queues();
+        $this->load->model("pbx_model");
+        $result = $this->pbx_model->list_queues();
         if(!empty($result["data"])) {
             $queues = $result["data"];
             foreach ($queues as $queue) {

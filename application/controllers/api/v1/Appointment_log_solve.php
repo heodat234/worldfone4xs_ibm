@@ -26,7 +26,10 @@ Class Appointment_log_solve extends WFF_Controller {
         try {
             $this->load->library("crud");
             $data = json_decode(file_get_contents('php://input'), TRUE);
-            $customerInfo = $this->crud->where_id($data['cmnd'])->getOne(set_sub_collection("Customer"));
+            $customerInfo = $this->crud->where(array('id_no' => $data['id_no']))->getOne(set_sub_collection("Telesalelist"));
+            if(empty($customerInfo)) {
+                $customerInfo = $this->crud->where_id($data['id_no'])->getOne(set_sub_collection("Telesalelist"));
+            }
             $data['customer_info'] = (!empty($customerInfo)) ? $customerInfo : array();
             $data['tl_code'] = $this->session->userdata("extension");
             $data['tl_name'] = $this->session->userdata("agentname");

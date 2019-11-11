@@ -28,8 +28,8 @@
         <li class="pull-right none-breakcrumb" id="top-row">
             <div class="btn-group btn-group-sm">
                 <button href="#/" class="btn btn-alt btn-default" data-bind="click: goTo, css: {active: activeArray[0]}">@Overview@</button>
-                <button href="#/import" data-type="import" class="btn btn-alt btn-default" data-bind="click: goTo, css: {active: activeArray[1]}">@Import@</button>
-                <button href="#/history" class="btn btn-alt btn-default" data-bind="click: goTo, css: {active: activeArray[2]}">@Import history@</button>
+                <button href="#/import" data-type="action/import" class="btn btn-alt btn-default" data-bind="click: goTo, css: {active: activeArray[1]}">@Import@</button>
+                <button href="#/history" data-type="action/importhistory" class="btn btn-alt btn-default" data-bind="click: goTo, css: {active: activeArray[2]}">@Import history@</button>
         </li>
     </ul>
     <?php } ?>

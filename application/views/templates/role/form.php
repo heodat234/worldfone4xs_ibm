@@ -3,7 +3,11 @@
 	    <div class="col-xs-3" style="margin-top: 10px" id="side-form">
 	        <div class="form-group">
 				<label>@Name@</label>
-				<input class="k-textbox" style="width: 100%" data-bind="value: item.name">
+				<input data-role="autocomplete" 
+				data-value-primitive="true"
+				data-text-field="text"
+                data-value-field="value"
+				style="width: 100%" data-bind="value: item.name, source: roleNameOption">
 			</div>
 			<div class="form-group">
 				<label>@Description@</label>

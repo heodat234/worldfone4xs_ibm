@@ -25,6 +25,7 @@ var Config = {
     model: {
         id: "id",
         fields: {
+            type: {type: "string", defaultValue: "string"},
             index: {type: "number"}
         }
     },

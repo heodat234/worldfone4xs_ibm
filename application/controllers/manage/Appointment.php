@@ -44,7 +44,7 @@ class Appointment extends WFF_Controller {
         $this->output->data["css"][] = STEL_PATH . "css/table.css";
         $this->output->data["js"][] = KENDOUI_PATH . "js/jszip.min.js";
         $this->output->data["js"][] = STEL_PATH . "js/tools.js";
-        $this->output->data["js"][] = STEL_PATH . "js/manage/appointment_log.js";
+        $this->output->data["js"][] = STEL_PATH . "js/manage/appointment_log_solve.js";
         $this->load->view('manage/appointment_log_solve_view');
     }
 }

@@ -42,12 +42,8 @@ Class Ftp_model extends CI_Model {
         ini_set("display_errors", 1);
         ini_set("display_startup_errors", 1);
         error_reporting(E_ALL);
-        // try to download a file from server
         $connId = $this->connectToFTP();
-//        $buff = ftp_nlist($connId, "/");
-//        print_r($buff);
-//        print_r($connId);
-//        ftp_put($connId, '/ZACCF.csv', '/var/www/html/worldfone4xs_ibm/upload/csv/ZACCF.csv', FTP_ASCII);
+        unlink($localFilePath);
         if($connId) {
             $handle = fopen($localFilePath, 'w');
             $fget = ftp_fget($connId, $handle, (string)$remoteFilePath,  FTP_BINARY);

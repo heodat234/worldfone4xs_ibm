@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-Class Diallistdetailfield extends CI_Controller {
+Class Diallistdetailfield extends WFF_Controller {
 
 	private $collection = "Model";
 
@@ -18,7 +18,7 @@ Class Diallistdetailfield extends CI_Controller {
 	function read()
 	{
 		$request = json_decode($this->input->get("q"), TRUE);
-		$match = array("collection" => $this->sub."Diallist_detail");
+		$match = array("collection" => $this->sub . "Diallist_detail");
 		$response = $this->crud->read($this->collection, $request, ["index","title","field","type","sub_type"], $match);
 		echo json_encode($response);
 	}
@@ -26,6 +26,7 @@ Class Diallistdetailfield extends CI_Controller {
 	function create()
 	{
 		$data = json_decode(file_get_contents('php://input'), TRUE);
+		$data["collection"] = $this->sub . "Diallist_detail";
 		$result = $this->crud->create($this->collection, $data);
 		echo json_encode(array("status" => $result ? 1 : 0));
 	}

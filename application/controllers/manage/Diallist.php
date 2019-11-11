@@ -19,7 +19,6 @@ class Diallist extends WFF_Controller {
         $this->_build_template();
         $this->output->data["css"][] = STEL_PATH . "css/table.css";
         $this->output->data["js"][] = KENDOUI_PATH . "js/jszip.min.js";
-        $this->output->data["js"][] = STEL_PATH . "js/manage/diallist.js";
         $this->load->view('manage/diallist_view');
     }
 }

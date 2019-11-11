@@ -36,7 +36,7 @@ var asyncChangePassword = async function() {
 		var key = text.slice(1, -1);
 		var item = {
 			key: key,
-			type: typeOption,
+			type: ["CONTENT"],
 			language: language,
 		};
 	} else {

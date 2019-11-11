@@ -45,10 +45,6 @@
                                             return '<div class=\'col-sm-8\'><div class=\'progress\' data-role=\'progressbar\' data-min=\'0\' data-max=\'100\' data-value=\'false\'></div><div class=\'status-upload\'>Loading...</div></div><div style=\'display: none\' class=\'col-sm-4 cancel-upload\'><a href=\'javascript:void(0)\' onclick=\'cancelUpload(this)\'>Cancel</a></div>';
                                         }
                                     },
-                                },{
-                                    // Use uid to fix bug data-uid of row undefined
-                                    'template': '<a role=\'button\' class=\'btn btn-sm btn-circle btn-action\' style=\'background: yellow;\' data-uid=\'#: uid #\'><i class=\'fa fa-ellipsis-v\'></i></a>',
-                                    'width': 50
                                 }]"
              data-bind="source: historyData"></div>
     </div>

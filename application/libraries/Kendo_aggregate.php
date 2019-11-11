@@ -49,6 +49,11 @@ Class Kendo_aggregate {
         $this->_model = $model;
     }
 
+    function set_default($key , $value)
+    {
+        $this->_default[ $key ] = $value;
+    }
+
     function set_kendo_query($kendo_query) 
     {
         $this->_kendo_query = $kendo_query;
@@ -58,6 +63,14 @@ Class Kendo_aggregate {
     function get_total_aggregate() {
         $aggregate = $this->_aggregate;
         $aggregate[] = array('$group' => array('_id' => null, 'total' => array('$sum' => 1)));
+        return $aggregate;
+    }
+
+    function get_total_aggregate_group() {
+        $aggregate = $this->_aggregate;
+//        $aggregate[] = array('$group' => array('_id' => $_id,));
+        $aggregate[] = array('$count' => 'total');
+//        print_r($aggregate);
         return $aggregate;
     }
 
@@ -80,7 +93,7 @@ Class Kendo_aggregate {
         $args = func_get_args();
         foreach($args as $aggregate) 
         {
-            if(is_array($aggregate))
+            if(is_array($aggregate) && $aggregate)
                 $this->_aggregate[] = $aggregate;
         }
         return $this;
@@ -181,7 +194,10 @@ Class Kendo_aggregate {
             $this->_aggregate[] = array('$sort' => $aggSorts);
         } else {
             // Default sorting
-            $this->_aggregate[] = array('$sort' => $this->_default["sort"]);
+            if($this->_default["sort"])
+            {
+                $this->_aggregate[] = array('$sort' => $this->_default["sort"]);
+            }
         }
         return $this;
     }

@@ -99,7 +99,9 @@ Class Server extends WFF_Controller {
             ini_set('max_execution_time', 0);
             $username = $this->config->item("session_mongo_user");
             $password = $this->config->item("session_mongo_password");
-            $handle = popen("mongotop --host 127.0.0.1 -u $username -p $password --authenticationDatabase admin", 'r');
+            if($username)
+                $handle = popen("mongotop --host 127.0.0.1 -u $username -p $password --authenticationDatabase admin", 'r');
+            else $handle = popen("mongotop --host 127.0.0.1", 'r');
             $i = 0;
             $content = "";
             while (!feof($handle) && $i < $time + 1) {
@@ -143,5 +145,36 @@ Class Server extends WFF_Controller {
         } catch(Exception $e) {
             echo $e->getMessage();
         }
+    }
+
+    function psaux() {
+        $filter = $this->input->get("filter");
+        $limit = $this->input->get("limit");
+        $limit = $limit ? $limit : 10;
+        $filter_string = $filter ? 'grep ' . $filter . ' |' : '';
+        $result = shell_exec("ps aux --sort=-pcpu | {$filter_string} head -{$limit}");
+        $data = array();
+        $lines = explode("\n", $result);
+        $data = [];
+        foreach ($lines as $key => $line) {
+            if($line) {
+                $line_explode = array_values(array_filter(explode(" ", $line)));
+                $data[] = array(
+                    "USER"      => $line_explode[0],
+                    "PID"       => $line_explode[1],
+                    "CPU"       => $line_explode[2],
+                    "MEM"       => $line_explode[3],
+                    "VSZ"       => $line_explode[4],
+                    "RSS"       => $line_explode[5],
+                    "TTY"       => $line_explode[6],
+                    "STAT"      => $line_explode[7],
+                    "START"     => isset($line_explode[8]) ? " " . $line_explode[8] : "",
+                    "TIME"      => isset($line_explode[9]) ? " " . $line_explode[9] : "",
+                    "COMMAND"   => (isset($line_explode[10]) ? " " . $line_explode[10] : "") . (isset($line_explode[11]) ? " " . $line_explode[11] : "")
+                );
+            }
+        }
+        $total = (int) shell_exec("pgrep {$filter} | wc -l");
+        echo json_encode(array("data" => $data, "total" => $total));
     }
 }

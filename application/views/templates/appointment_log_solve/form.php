@@ -95,7 +95,7 @@
         dealerDataSource: new kendo.data.DataSource({
             transport: {
                 read: {
-                    url: ENV.restApi + "Dealer",
+                    url: ENV.restApi + "dealer",
                 },
                 parameterMap: parameterMap
             },
@@ -115,7 +115,7 @@
                     filter: [{field: 'location', operator: 'eq', value: location.location}],
                     transport: {
                         read: {
-                            url: ENV.restApi + "Dealer",
+                            url: ENV.restApi + "dealer",
                         },
                         parameterMap: parameterMap
                     },
@@ -138,7 +138,7 @@
             var dealer_code = this.get('item.dealer_code');
             var appointment_date = this.get('item.appointment_date');
             if(dealer_code && appointment_date) {
-                var listDealerCode = $.get(`${ENV.restApi}Sc_schedule`, {
+                var listDealerCode = $.get(`${ENV.restApi}sc_schedule`, {
                     q: JSON.stringify({
                         filter: {
                             logic: 'and',
@@ -160,7 +160,7 @@
                         ],
                         transport: {
                             read: {
-                                url: ENV.restApi + "Sc",
+                                url: ENV.restApi + "sc",
                             },
                             parameterMap: parameterMap
                         },

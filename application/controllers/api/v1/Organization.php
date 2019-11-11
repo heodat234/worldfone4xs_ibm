@@ -10,8 +10,6 @@ Class Organization extends WFF_Controller {
 		parent::__construct();
 		header('Content-type: application/json');
 		$this->load->library("crud");
-		$_db = $this->config->item("_mongo_db");
-		$this->crud->select_db($_db);
 		$this->collection = set_sub_collection($this->collection);
 	}
 

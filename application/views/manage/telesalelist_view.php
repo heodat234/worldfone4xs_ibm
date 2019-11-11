@@ -171,7 +171,7 @@
 
         router.start();
 
-    
+        setTimeout(() => checkPermisssion(), 1);
     }
     async function addForm() {
         var formHtml = await $.ajax({
@@ -210,6 +210,10 @@
         }
         return htmlArr.join("<br>");
     }
+
+    /*window.onload = function() {
+        setTimeout(() => checkPermisssion(), 500);
+    }*/
 </script>
 
 <script id="layout" type="text/x-kendo-template">
@@ -224,9 +228,9 @@
                 <button class="btn btn-alt btn-default" data-bind="css: {active: activeArray[1]}, visible: hasDetail" data-toggle="dropdown" id="btn-detail">@Detail@ (<span data-bind="text: telesaleList.length"></span>) <span class="caret"></span></button>
                 <ul class="dropdown-menu dropdown-custom dropdown-options" data-bind="source: telesaleList" data-template="detail-dropdown-template">
 			    </ul>
-                <button href="#/import" class="btn btn-alt btn-default" data-bind="click: goTo, css: {active: activeArray[2]}">@Import@</button>
+                <button href="#/import" data-type="action/import" class="btn btn-alt btn-default" data-bind="click: goTo, css: {active: activeArray[2]}">@Import@</button>
                 <button class="btn btn-alt btn-default" onclick="openForm({title: '@Add@ @Customer@', width: 700}); addForm(this)">@Create@</button>
-                <button href="#/history" class="btn btn-alt btn-default" data-bind="click: goTo, css: {active: activeArray[3]}">@Import History@</button>
+                <button href="#/history" data-type="action/importhistory" class="btn btn-alt btn-default" data-bind="click: goTo, css: {active: activeArray[3]}">@Import History@</button>
             </div>
         </li>
     </ul>

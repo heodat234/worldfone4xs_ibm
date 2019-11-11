@@ -101,7 +101,6 @@
         locationOption: () => dataSourceDistinct('Dealer', 'location'),
         dealerOption: function() {
             var location = this.get('item.dealer_location');
-            console.log(this.get('item.dealer_location'));
             if(location) {
                 return new kendo.data.DataSource({
                     pageSize: 5,
@@ -196,6 +195,7 @@
             var appointment_date = new Date(this.item.appointment_date);
             appointment_date.setHours(0, 0, 0, 0);
             item.appointment_date = appointment_date.getTime() / 1000;
+            var cmndDD = $("#id-no").data("kendoDropDownList");
             $.ajax({
                 url: ENV.vApi + "appointment_log/create",
                 data: kendo.stringify(item.toJSON()),
@@ -213,7 +213,8 @@
                 var cmnd = this.get('item.id_no');
                 var cmndDD = $("#id-no").data("kendoDropDownList");
                 cmndDD.text(cmnd);
-                this.set('item.id_no', cmndDD.value());
+                // console.log(cmndDD.value());
+                // this.set('item.id_no', cmndDD.value());
             }
         }
     };

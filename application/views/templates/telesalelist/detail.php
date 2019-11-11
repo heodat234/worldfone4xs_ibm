@@ -620,6 +620,14 @@ var Detail = function() {
                                 </div>
                             </div>`);
                             break;
+                        case "boolean":
+                            customerHTMLArray.push(`<div class="form-group">
+                                <label class="col-sm-3 control-label">${doc.title}</label>
+                                <div class="col-sm-9">
+                                    <input type="checkbox" data-bind="checked: item.${doc.field}" class="chkbx" />
+                                </div>
+                            </div>`);
+                            break;
                         default:
                             customerHTMLArray.push(`<div class="form-group">
                                 <label class="col-sm-3 control-label">${doc.title}</label>

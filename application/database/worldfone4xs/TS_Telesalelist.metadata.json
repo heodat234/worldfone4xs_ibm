@@ -1,0 +1,1 @@
+{"options":{},"indexes":[{"v":2,"key":{"_id":1},"name":"_id_","ns":"worldfone4xs.TS_Telesalelist"},{"v":2,"unique":true,"key":{"id_no":1.0},"name":"id_no_1","ns":"worldfone4xs.TS_Telesalelist"},{"v":2,"key":{"mobile_phone_no":1.0},"name":"mobile_phone_no_1","ns":"worldfone4xs.TS_Telesalelist"}]}

@@ -46,7 +46,6 @@ Class Setting extends WFF_Controller {
 	{
 		$this->output->data["css"][] = STEL_PATH . "css/table.css";
 		$this->output->data["js"][] = STEL_PATH . "js/admin/admin.js";
-		$this->output->data["js"][] = STEL_PATH . "js/setting/diallist_detail_field.js";
 		$this->load->view("setting/diallist_detail_field_view");
 	}
 
@@ -96,5 +95,15 @@ Class Setting extends WFF_Controller {
     function organization() {
         $this->output->data["js"][] = STEL_PATH . "js/admin/admin.js";
         $this->load->view("setting/organization_view");
+    }
+
+    function report_off_sys_date() {
+        $this->output->data["js"][] = STEL_PATH . "js/admin/admin.js";
+        $this->load->view("setting/report_off_sys_date_view");
+    }
+
+    function report_due_date() {
+        $this->output->data["js"][] = STEL_PATH . "js/admin/admin.js";
+        $this->load->view("setting/report_due_date_view");
     }
 }

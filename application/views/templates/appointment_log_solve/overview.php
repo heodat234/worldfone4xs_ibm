@@ -33,7 +33,9 @@ var Config = Object.assign(Config, {
     },
     parse(response) {
         response.data.map(function(doc) {
+            console.log(doc);
             doc.appointment_date = doc.appointment_date ? new Date(doc.appointment_date * 1000) : undefined;
+            doc.createdAt = doc.createdAt ? new Date(doc.createdAt * 1000) : undefined;
             return doc;
         });
         return response;
@@ -41,11 +43,11 @@ var Config = Object.assign(Config, {
     scrollable: true,
     columns: [{
         title: "@Created at@",
-        field: "created_at",
+        field: "createdAt",
         headerAttributes: { style: "white-space: normal"},
         width: "110px",
         filterable: false,
-        template: data => gridDate(data.appointment_date),
+        template: data => gridDate(data.createdAt),
     },{
         title: "@Telesale code@",
         field: "tl_code",

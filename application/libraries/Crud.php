@@ -52,7 +52,12 @@ Class Crud {
 
         // Kendo to aggregate
         $Kendo_aggregate = new Kendo_aggregate($model);
-        $Kendo_aggregate->set_kendo_query($kendo_query)->matching($match)->filtering();
+        if (!empty($match)) {
+            $Kendo_aggregate->set_kendo_query($kendo_query)->matching($match)->filtering();
+        }
+        else {
+            $Kendo_aggregate->set_kendo_query($kendo_query)->filtering();
+        }
         // Get total
         $total_aggregate = $Kendo_aggregate->get_total_aggregate();
         $total_result = $this->CI->mongo_db->aggregate_pipeline($collection, $total_aggregate);

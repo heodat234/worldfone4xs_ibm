@@ -137,7 +137,7 @@ function set_sub_collection($collection = "") {
     return $type ? "{$type}_{$collection}" : $collection;
 }
 
-function vn_to_str ($str){
+function vn_to_str ($str, $slug_mode = false){
 	$unicode = array(
 		'a' => 'á|à|ả|ã|ạ|ă|ắ|ặ|ằ|ẳ|ẵ|â|ấ|ầ|ẩ|ẫ|ậ',
 		'd' => 'đ',
@@ -152,14 +152,13 @@ function vn_to_str ($str){
 		'I' => 'Í|Ì|Ỉ|Ĩ|Ị',
 		'O' => 'Ó|Ò|Ỏ|Õ|Ọ|Ô|Ố|Ồ|Ổ|Ỗ|Ộ|Ơ|Ớ|Ờ|Ở|Ỡ|Ợ',
 		'U' => 'Ú|Ù|Ủ|Ũ|Ụ|Ư|Ứ|Ừ|Ử|Ữ|Ự',
-		'Y' => 'Ý|Ỳ|Ỷ|Ỹ|Ỵ',
-		''  => ' '
+		'Y' => 'Ý|Ỳ|Ỷ|Ỹ|Ỵ'
 	);
 	 
 	foreach($unicode as $nonUnicode=>$uni){
 		$str = preg_replace("/($uni)/i", $nonUnicode, $str);
 	}
-	$str = str_replace(' ', '_', $str);
+	if($slug_mode) $str = str_replace(' ', '_', $str);
 	return $str;
 }
 
@@ -187,4 +186,20 @@ function timestampToFormattedString($timestamp, $formattedString = 'Y-m-d\TH:i:s
 function stringDateToFormattedString($stringDate, $formattedString = 'Y-m-d\TH:i:s\Z') {
     $date = date_create($stringDate);
     return date_format($date, $formattedString);
+}
+
+function startsWith($haystack, $needle)
+{
+     $length = strlen($needle);
+     return (substr($haystack, 0, $length) === $needle);
+}
+
+function endsWith($haystack, $needle)
+{
+    $length = strlen($needle);
+    if ($length == 0) {
+        return true;
+    }
+
+    return (substr($haystack, -$length) === $needle);
 }

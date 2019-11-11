@@ -291,7 +291,7 @@ function initReport(dataSourceUser, filter) {
 	                        description: { },
 	                        ownerId: { defaultValue: [ENV.extension] , validation: { required: true }},
 	                        isAllDay: { type: "boolean" },
-	                        shift: { defaultValue: Config.defaultShift ,validation: { required: true }}
+	                        shift: { defaultValue: Config.defaultShift ,validation: { required: true }},
 	                    }
 	                }
 	            }

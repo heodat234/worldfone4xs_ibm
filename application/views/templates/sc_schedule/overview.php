@@ -51,26 +51,14 @@ function createColumn(startDate, endDate) {
         field: 'dealer_code',
         title: "@Dealer code@",
         width: 150,
-        filterable: false,
     }];
     while(startDate <= endDate) {
         startDate.setHours(0, 0, 0, 0);
         var currentColumn = 'sc' + (startDate.getTime() / 1000);
         var title = gridDate(startDate, "dd/MM/yy");
-        // console.log('out: ' + currentColumn)
         columns.push({
             field: currentColumn,
             title: title.toString(),
-            // template: (dataItem) => {
-            //     console.log('in: ' + currentColumn);
-            //     if(typeof dataItem[currentColumn] !== 'undefined' && dataItem[currentColumn] !== null && dataItem[currentColumn] !== '') {
-            //         return gridArray(dataItem[currentColumn]);
-            //     }
-            //     else {
-            //         console.log("TEST");
-            //         return '<span>TEST</span>';
-            //     }
-            // },
             width: 100,
             filterable: false,
         });
@@ -83,8 +71,6 @@ var Config = Object.assign(Config, {
     model: {},
     parse(response) {
         response.data.map(function(doc) {
-            // doc.from_date = new Date(doc.from_date * 1000);
-            // console.log(doc);
             return doc;
         });
         return response;
@@ -94,7 +80,8 @@ var Config = Object.assign(Config, {
         dealer_code: 1
     }],
     scrollable: true,
-    columns: createColumn(defaultStartDate, defaultEndDate)
+    columns: createColumn(defaultStartDate, defaultEndDate),
+    group: [{field: 'dealer_code'}]
 });
 </script>
 

@@ -25,8 +25,19 @@ abstract Class WFF_Controller extends CI_Controller
     function _remap($method, $params = array())
     { 
         $type = $this->session->userdata("type");
-        $type_method = ucwords($method) . "_" . $type;
-        return call_user_func_array(array($this, method_exists($this, $type_method) ? $type_method : $method), $params);
+        $type_method = $type . "_" . $method;
+        // Check type method exists
+        $check_method_exists = "";
+        if(method_exists($this, $type_method)) {
+            $check_method_exists = "type";
+        } elseif(method_exists($this, $method)) {
+            $check_method_exists = "default";
+        }
+        if(!$check_method_exists) {
+            // Not any method exists
+            redirect(base_url("page/error/404"));
+        }
+        return call_user_func_array(array($this, $check_method_exists == "type" ? $type_method : $method), $params);
     }
 
     public function _build_template($only_main_content = NULL) {

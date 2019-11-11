@@ -21,39 +21,7 @@ Class Diallist extends CI_Controller {
 		$this->load->library("crud");
 		$request = json_decode($this->input->get("q"), TRUE);
 
-		$model = $this->crud->build_model($this->collection);
-		$project = array();
-		foreach ($model as $key => $value) {
-			$project[$key] = 1;
-		}
-        // Kendo to aggregate
-        $this->load->library("kendo_aggregate", $model);
-        $lookup = array('$lookup' => array(
-        		"from" => $this->sub_collection,
-			    "localField" => "_id",
-			    "foreignField" => "diallist_id",
-			    "as" => "diallist_detail"
-        	)
-    	);
-    	$project = array(
-    		'$project' => array_merge($project, array(
-    			'count_detail'				=> array('$size' => '$diallist_detail'),
-    			"assigns"	=> array('$reduce' => array(
-		            "input"	=> '$diallist_detail',
-		            "initialValue"	=> [],
-		            "in"	=> array('$setUnion' => array('$$value', array('$split' => [ '$$this.assign', "@" ])))
-		        ))
-    		))
-    	);
-        $this->kendo_aggregate->set_kendo_query($request)->selecting()->adding($lookup, $project)->filtering();
-        // Get total
-        $total_aggregate = $this->kendo_aggregate->get_total_aggregate();//  pre($total_aggregate);
-        $total_result = $this->mongo_db->aggregate_pipeline($this->collection, $total_aggregate);
-        $total = isset($total_result[0]) ? $total_result[0]['total'] : 0;
-        // Get data
-        
-        $data_aggregate = $this->kendo_aggregate->sorting()->paging()->get_data_aggregate();
-        $data = $this->mongo_db->aggregate_pipeline($this->collection, $data_aggregate);
+		$response = $this->crud->read($this->collection, $request);
         // Change foreign_key
         $this->load->library("mongo_private");
         $jsondata_collection = set_sub_collection($this->jsondata_collection);
@@ -71,12 +39,13 @@ Class Diallist extends CI_Controller {
 	        	$dialModeToName[$row["value"]] = $row["text"];
 	        }
 	    }
-        foreach ($data as &$doc) {
+        foreach ($response["data"] as &$doc) {
         	if(isset($doc["type"])) $doc["type"] = isset($dialTypeToName[$doc["type"]]) ? $dialTypeToName[$doc["type"]] : $doc["type"];
         	if(isset($doc["mode"])) $doc["mode"] = isset($dialModeToName[$doc["mode"]]) ? $dialModeToName[$doc["mode"]] : $doc["mode"];
+        	$doc["count_detail"] = $this->mongo_db->where_object_id("diallist_id", $doc["id"])->count($this->sub_collection);
+        	$doc["assigns"] = $this->mongo_db->where_object_id("diallist_id", $doc["id"])->distinct($this->sub_collection, "assign");
         }
         // Result
-        $response = array("data" => $data, "total" => $total);
 		echo json_encode($response);
 	}
 

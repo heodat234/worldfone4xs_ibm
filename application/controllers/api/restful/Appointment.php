@@ -17,7 +17,20 @@ Class Appointment extends WFF_Controller {
     {
         try {
             $request = json_decode($this->input->get("q"), TRUE);
-            $response = $this->crud->read($this->collection, $request);
+            $match = [];
+            if(!in_array("viewall", $this->data["permission"]["actions"])) {
+                $extension = $this->session->userdata("extension");
+                $this->load->model("group_model");
+                $members = $this->group_model->members_from_lead($extension);
+                $telesaleList = $this->crud->distinct(set_sub_collection('Telesalelist'), array(), array('id_no'), array('assign' => array('$in' => $members)));
+                if(!empty($telesaleList)) {
+                    $listCMND = $telesaleList['data'];
+                    $match['cmnd'] = array(
+                        '$in'   => $listCMND
+                    );
+                }
+            }
+            $response = $this->crud->read($this->collection, $request, [], $match);
             echo json_encode($response);
         } catch (Exception $e) {
             echo json_encode(array("status" => 0, "message" => $e->getMessage()));
