@@ -37,7 +37,7 @@ try:
 
    importLogInfo = mongodb.getOne(MONGO_COLLECTION='TS_Import', WHERE={'_id': ObjectId(importLogId)})
 
-   headers = _mongodb.get(MONGO_COLLECTION='Model', WHERE={"collection": 'TS_Datalibrary'}, SELECT=['index', 'field','type'], SORT=([('index', 1)]))
+   headers = _mongodb.get(MONGO_COLLECTION='Model', WHERE={"collection": 'TS_Telesalelist','sub_type':{'$exists': 'true'}}, SELECT=['index', 'field','type'], SORT=([('index', 1)]))
    headers = list(headers)
 
    users = _mongodb.get(MONGO_COLLECTION='TS_User', WHERE=None, SELECT=['extension', 'agentname'], SORT=([('id', 1)]))
@@ -57,7 +57,7 @@ try:
       temp = {}
       checkErr = False
       for idx,header in enumerate(headers):
-         if header['index'] == 23:
+         if header['index'] == 26:
             continue;
          if str(listDataLibrary[key][idx]) == 'nan':
             listDataLibrary[key][idx] = ''
@@ -89,14 +89,16 @@ try:
                errorData.append(err)
                checkErr = True
          if header['type'] == 'phone':
-            value = str(listDataLibrary[key][idx])
+            value = '0'+ str(listDataLibrary[key][idx])
 
-         if header['type'] == 'string':
+         if header['type'] == 'string' and header['field'] != 'id_no':
             try:
                value_int   = int(listDataLibrary[key][idx])
                value       = str(value_int)
             except ValueError:
                value       = str(listDataLibrary[key][idx])
+         if header['type'] == 'string' and header['field'] == 'id_no':
+            value = '0'+ str(listDataLibrary[key][idx])
 
          if header['field'] == 'assign' and value != '':
             value = str(int(listDataLibrary[key][idx]))

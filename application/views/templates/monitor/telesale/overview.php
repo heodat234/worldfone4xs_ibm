@@ -113,7 +113,7 @@
             <span data-bind="text: extension"></span>
         </td>
         <td>
-            <b data-bind="text: agentname"></b>
+            <b data-role="tooltip" title="#: (data.fullname || '') #"><span data-bind="text: agentname"></span></b>
         </td>
         <td style="width: 80px" class="hidden">
             # if(data.extension != ENV.extension && data.currentStatusCode) { #
@@ -303,7 +303,7 @@
                     <b data-bind="text: totalCallOut, css: {text-danger: totalCallOut}"></b>
                 </div>
                 <div class="widget-content-light" style="margin-top: 5px">
-                    <a href="javascript:void(0)" class="themed-color"><b data-bind="text: agentname" style="font-size: 18px"></b></a>
+                    <a href="javascript:void(0)" data-role="tooltip" title="#: (data.fullname || '') #" class="themed-color"><b data-bind="text: agentname" style="font-size: 18px"></b></a>
                     <br>
                     <small data-bind="attr: {data-total-time: total_time}, css: {time-interval: online}">#: kendo.toString(new Date(d.getTime() + data.total_time * 1000), 'H:mm:ss') #</small>
                 </div>

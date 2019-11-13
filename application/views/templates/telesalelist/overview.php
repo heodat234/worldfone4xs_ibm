@@ -13,6 +13,7 @@
         <button class="btn btn-sm btn-primary btn-save" onclick="saveChangeAssign()">@Save@</button>
     </div>
 </div>
+<div class="col-sm-12 filter-mvvm" style="display: none; margin: 10px 0"></div>
 <div class="col-sm-12" style="overflow-y: auto; padding: 0">
 	<div id="grid"></div>
 </div>
@@ -106,9 +107,7 @@
         var columns = telesaleFields.data().toJSON();
         columns.map(col => {
             col.width = 130;
-            if (col.field != 'assign') {
-                col.filterable = false;
-            }
+            
             switch (col.type) {
                 case "name":
                     col.template = (dataItem) => gridName(dataItem[col.field]);

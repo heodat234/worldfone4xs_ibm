@@ -30,7 +30,6 @@ Class Report_due_date extends WFF_Controller {
 	{
 		$data = json_decode(file_get_contents('php://input'), TRUE);
 		$data["createdBy"] = $this->session->userdata("extension");
-		$data["due_date"] = strtotime($data['off_date']);
 		$result = $this->crud->create($this->collection, $data);
 		echo json_encode(array("status" => $result ? 1 : 0, "data" => [$data]));
 	}

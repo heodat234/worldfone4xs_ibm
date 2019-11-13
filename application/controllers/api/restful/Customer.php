@@ -4,7 +4,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 Class Customer extends WFF_Controller {
 
 	private $collection = "Customer";
-   private $sub_collection = "Datalibrary";
 
 	function __construct()
 	{
@@ -12,7 +11,6 @@ Class Customer extends WFF_Controller {
 		header('Content-type: application/json');
 		$this->load->library("crud");
 		$this->collection = set_sub_collection($this->collection);
-      $this->sub_collection = set_sub_collection($this->sub_collection);
 	}
 
 	function read()

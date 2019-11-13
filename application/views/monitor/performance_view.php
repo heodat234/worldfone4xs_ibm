@@ -236,7 +236,7 @@
                 },
                 pageSize: 5,
                 transport: {
-                    read: ENV.reportApi + "appointment",
+                    read: ENV.reportApi + "telesale/appointment",
                     parameterMap: parameterMap
                 },
                 schema: {
@@ -264,7 +264,7 @@
                 },
                 pageSize: 5,
                 transport: {
-                    read: ENV.reportApi + "call_out",
+                    read: ENV.reportApi + "telesale/call_out",
                     parameterMap: parameterMap
                 },
                 schema: {
@@ -291,7 +291,7 @@
                 },
                 pageSize: 5,
                 transport: {
-                    read: ENV.reportApi + "data_library",
+                    read: ENV.reportApi + "telesale/data_library",
                     parameterMap: parameterMap
                 },
                 schema: {
@@ -318,7 +318,7 @@
                 },
                 pageSize: 5,
                 transport: {
-                    read: ENV.reportApi + "sc_deliver",
+                    read: ENV.reportApi + "telesale/sc_deliver",
                     parameterMap: parameterMap
                 },
                 schema: {

@@ -101,6 +101,9 @@ try:
                         row[key] = date[0:2]+'/'+date[2:4]+'/'+date[4:6]
                         modelFormat[cell] = "%d/%m/%y"
 
+                    if cell == 'account_number':
+                        row[key] = str(int(row[key]))
+                    
                     temp[cell] = common.convertDataType(data=row[key], datatype=modelConverters[cell], formatType=modelFormat[cell])
                     result = True
                 except Exception as errorConvertType:

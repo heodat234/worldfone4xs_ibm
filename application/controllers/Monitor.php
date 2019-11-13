@@ -23,6 +23,13 @@ Class Monitor extends WFF_Controller {
 		$this->load->view('monitor/two_view');
 	}
 
+	public function loan()
+	{
+		$this->output->data["css"][] = STEL_PATH . "css/table.css";
+		$this->output->data["js"][] = STEL_PATH . "js/monitor/telesale.js";
+		$this->load->view('monitor/loan_view');
+	}
+
 	public function telesale()
 	{
 		$this->output->data["css"][] = STEL_PATH . "css/table.css";

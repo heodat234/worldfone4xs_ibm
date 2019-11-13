@@ -83,8 +83,8 @@
         crudApi: `${ENV.restApi}`,
         vApi: `${ENV.vApi}`,
         templateApi: `${ENV.templateApi}`,
-        collection: "Lawsuit",
-        collection_import: "Import",
+        collection: "lawsuit",
+        collection_import: "import",
         observable: {},
         model: {
             id: "id",

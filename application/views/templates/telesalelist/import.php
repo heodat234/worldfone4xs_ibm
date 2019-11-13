@@ -84,7 +84,7 @@
         crudApi: `${ENV.restApi}`,
         vApi: `${ENV.vApi}`,
         templateApi: `${ENV.templateApi}`,
-        collection: "Import",
+        collection: "import",
         observable: {},
         model: {
             id: "id",

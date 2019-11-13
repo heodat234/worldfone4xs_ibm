@@ -12,6 +12,7 @@
         <button class="btn btn-sm btn-primary btn-save" onclick="saveChangeAssign()">@Save@</button>
     </div>
 </div>
+<div class="col-sm-12 filter-mvvm" style="display: none; margin: 10px 0"></div>
 <div class="col-sm-12" style="overflow-y: auto; padding: 0">
 	<div id="grid"></div>
 </div>
@@ -63,6 +64,7 @@
                 date_send_data: {type: "date"},
                 date_receive_data: {type: "date"},
                 updatedAt: {type: "date"},
+                first_due_date: {type: "date"},
             }
         },
         parse: function (response) {
@@ -73,6 +75,7 @@
                 doc.date_send_data = doc.date_send_data ? new Date(doc.date_send_data * 1000) : null;
                 doc.date_receive_data = doc.date_receive_data ? new Date(doc.date_receive_data * 1000) : null;
                 doc.updatedAt = doc.updatedAt ? new Date(doc.updatedAt * 1000) : null;
+                doc.first_due_date = doc.first_due_date ? new Date(doc.first_due_date * 1000) : null;
                 return doc;
             })
             return response;
@@ -128,9 +131,6 @@
         var columns = telesaleFields.data().toJSON();
         columns.map(col => {
             col.width = 130;
-            if (col.field != 'assign') {
-                col.filterable = false;
-            }
             switch (col.type) {
                 case "name":
                     col.template = (dataItem) => gridName(dataItem[col.field]);

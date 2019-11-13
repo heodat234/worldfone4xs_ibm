@@ -52,7 +52,7 @@
 var Config = {
     crudApi: `${ENV.restApi}`,
     templateApi: `${ENV.templateApi}`,
-    collection: "Import_history",
+    collection: "import_history",
     filter: {field: "collection", operator: "eq", value: 'Telesalelist'},
     observable: {
     },

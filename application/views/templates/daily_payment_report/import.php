@@ -78,8 +78,8 @@
         crudApi: `${ENV.restApi}`,
         vApi: `${ENV.vApi}`,
         templateApi: `${ENV.templateApi}`,
-        collection: "Payment",
-        collection_import: "Import",
+        collection: "payment",
+        collection_import: "import",
         observable: {},
         model: {
             id: "id",
