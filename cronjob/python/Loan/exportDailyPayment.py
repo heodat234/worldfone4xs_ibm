@@ -20,7 +20,7 @@ now         = datetime.now()
 subUserType = 'LO'
 collection         = common.getSubUser(subUserType, 'Daily_payment_report')
 log         = open("/var/www/html/worldfone4xs_ibm/cronjob/python/Loan/log/exportDailyPayment_log.txt","a")
-fileOutput  = '/var/www/html/worldfone4xs_ibm/upload/excel/DailyPayment.xlsx' 
+fileOutput  = '/var/www/html/worldfone4xs_ibm/upload/loan/export/DailyPayment.xlsx' 
 try:
    data        = []
    insertData  = []

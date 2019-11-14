@@ -154,7 +154,7 @@
         columns.unshift({
             selectable: true,
             width: 32,
-            locked: true
+            // locked: true
         });
         // columns.push({
         //     field: "is_potential",

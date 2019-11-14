@@ -38,7 +38,7 @@ Class Master_data_report extends WFF_Controller {
     }
     function downloadExcel()
     {
-        $file_path = UPLOAD_PATH . "excel/MasterData.xlsx";
+        $file_path = UPLOAD_PATH . "loan/export/MasterData.xlsx";
         echo json_encode(array("status" => 1, "data" => $file_path));
     }
 }

@@ -34,7 +34,8 @@ try:
    insertData  = []
    PaymentData   = []
 
-   
+   now         = datetime.now()
+   log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': Start Import' + '\n')
    # LN3206F
    count = mongodb.count(MONGO_COLLECTION=ln3206_collection)
    quotient = int(count)/10000
@@ -52,9 +53,9 @@ try:
 
    for row in data:
       if 'account' in row.keys():
-         zaccf = mongodb.getOne(MONGO_COLLECTION=zaccf_collection, WHERE={'ACC_ID': str(row['account'])},SELECT=['CUS_NM','rpy_prn','RPY_INT','RPY_FEE','PRODGRP_ID'])
+         zaccf = mongodb.getOne(MONGO_COLLECTION=zaccf_collection, WHERE={'account_number': str(row['account'])},SELECT=['name','rpy_prn','RPY_INT','RPY_FEE','PRODGRP_ID'])
          if zaccf != None:
-            row['name']             = zaccf['CUS_NM']
+            row['name']             = zaccf['name']
             row['paid_principal']   = zaccf['rpy_prn']
             row['paid_interest']    = zaccf['RPY_INT']
             row['RPY_FEE']          = zaccf['RPY_FEE']
@@ -63,12 +64,12 @@ try:
                row['product_name'] = product['name']
             else:
                row['product_name'] = ''
-         else:
-            row['name']             = ''
-            row['paid_principal']   = ''
-            row['paid_interest']    = ''
-            row['RPY_FEE']          = ''
-            row['product_name']     = ''
+         # else:
+         #    row['name']             = ''
+         #    row['paid_principal']   = ''
+         #    row['paid_interest']    = ''
+         #    row['RPY_FEE']          = ''
+         #    row['product_name']     = ''
 
          if len(row['date']) == 5:
             row['date']       = '0'+str(row['date'])
@@ -78,9 +79,11 @@ try:
 
          lnjc05 = mongodb.getOne(MONGO_COLLECTION=lnjc05_collection, WHERE={'account_number': str(row['account'])},SELECT=['due_date','group_id'])
          if lnjc05 != None:
-            row['group']      = lnjc05['group_id']            
-            due_date = datetime.fromtimestamp(lnjc05['due_date'])
-            d2       = due_date.strftime("%d/%m/%y")
+            row['group']      = lnjc05['group_id'] 
+            if len(str(lnjc05['due_date'])) == 5:
+            lnjc05['due_date']       = '0'+str(lnjc05['due_date'])
+            date                 = str(lnjc05['due_date'])
+            d2                   = date[0:2]+'/'+date[2:4]+'/'+date[4:6]
             tdelta   = datetime.strptime(d1, '%d/%m/%y') - datetime.strptime(d2, '%d/%m/%y')
             row['num_of_overdue_day'] = tdelta.days
             row['due_date']   = d2
@@ -164,5 +167,5 @@ try:
    log.write(now_end.strftime("%d/%m/%Y, %H:%M:%S") + ': End Log' + '\n')
    print(111)
 except Exception as e:
-    # pprint(e)
-    log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')
+   pprint(e)
+   log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')

@@ -20,7 +20,7 @@ now         = datetime.now()
 subUserType = 'LO'
 collection         = common.getSubUser(subUserType, 'Master_data_report')
 log         = open("/var/www/html/worldfone4xs_ibm/cronjob/python/Loan/log/exportMasterData_log.txt","a")
-fileOutput  = '/var/www/html/worldfone4xs_ibm/upload/excel/MasterData.xlsx' 
+fileOutput  = '/var/www/html/worldfone4xs_ibm/upload/loan/export/MasterData.xlsx' 
 try:
    data        = []
    insertData  = []
@@ -35,18 +35,18 @@ try:
       for x in range(int(quotient)):
          result = mongodb.get(MONGO_COLLECTION=collection, SORT=([('_id', -1)]),SKIP=int(x*10000), TAKE=int(10000))
          for idx,row in enumerate(result):
-            if row['due_date'] != '':
-               due_date = datetime.fromtimestamp(row['due_date'])
-               row['due_date']       = due_date.strftime("%d-%m-%Y")
+            # if row['due_date'] != '':
+            #    due_date = datetime.fromtimestamp(row['due_date'])
+            #    row['due_date']       = due_date.strftime("%d-%m-%Y")
             
             data.append(row)
 
    if int(mod) > 0:
       result = mongodb.get(MONGO_COLLECTION=collection, SORT=([('_id', -1)]),SKIP=int(int(quotient)*10000), TAKE=int(mod))
       for idx,row in enumerate(result):
-         if row['due_date'] != '':
-            due_date = datetime.fromtimestamp(row['due_date'])
-            row['due_date']       = due_date.strftime("%d-%m-%Y")
+         # if row['due_date'] != '':
+         #    due_date = datetime.fromtimestamp(row['due_date'])
+         #    row['due_date']       = due_date.strftime("%d-%m-%Y")
          
          data.append(row)
 

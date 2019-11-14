@@ -131,7 +131,7 @@
         columns.unshift({
             selectable: true,
             width: 32,
-            locked: true
+            // locked: true
         });
 
         Table.columns = columns;

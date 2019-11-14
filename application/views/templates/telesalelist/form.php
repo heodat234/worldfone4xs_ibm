@@ -21,7 +21,7 @@
 			</div>
 			<div class="form-group" data-field="@Email@">
 				<label>@Customer name@</label>
-				<input class="k-textbox" style="width: 100%" data-bind="value: item.customer_name">
+				<input class="k-textbox" style="width: 100%" data-bind="value: item.name">
 			</div>
 			<div class="form-group" data-field="@Email@">
 				<label>@Date of birth@</label>

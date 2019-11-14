@@ -60,7 +60,7 @@
                                                 <i class="fa fa-linkedin fa-stack-1x"></i>
                                             </span>
                                         </a>
-                                        <span style="margin-left: 31px;" data-bind="text: item.customer_name" class="copy-item"></span>
+                                        <span style="margin-left: 31px;" data-bind="text: item.name" class="copy-item"></span>
                                     </h4>
                                     <i data-bind="text: item.job"></i>
                                     <span data-bind="visible: item.work_location"> at </span>
@@ -69,7 +69,7 @@
                                 </div>
                                 <div class="col-sm-3 text-right" style="padding-top: 8px">
                                     <div class="btn-group">
-                                        <a class="btn btn-alt btn-default btn-sm" data-type="update" onclick="openForm({title: '@Edit@ @Customer@ ' + Detail.model.get('item').customer_name}); editForm()" data-role="tooltip" title="@Edit@">
+                                        <a class="btn btn-alt btn-default btn-sm" data-type="update" onclick="openForm({title: '@Edit@ @Customer@ ' + Detail.model.get('item').name}); editForm()" data-role="tooltip" title="@Edit@">
                                             <i class="fa fa-pencil"></i>
                                         </a>
                                     </div>
@@ -771,11 +771,11 @@ async function editForm(ele) {
             error: errorDataSource
         });
 
-    dataItemFull.exporting_date = new Date((dataItemFull.exporting_date) * 1000 + 86400000);
-    dataItemFull.date_of_birth = new Date((dataItemFull.date_of_birth) * 1000 + 86400000);
-    dataItemFull.first_due_date = new Date((dataItemFull.first_due_date) * 1000 + 86400000);
-    dataItemFull.date_send_data = new Date((dataItemFull.date_send_data) * 1000 + 86400000);
-    dataItemFull.date_receive_data = new Date((dataItemFull.date_receive_data) * 1000 + 86400000);
+    dataItemFull.exporting_date = new Date((dataItemFull.exporting_date) * 1000);
+    dataItemFull.date_of_birth = new Date((dataItemFull.date_of_birth) * 1000);
+    dataItemFull.first_due_date = new Date((dataItemFull.first_due_date) * 1000);
+    dataItemFull.date_send_data = new Date((dataItemFull.date_send_data) * 1000);
+    dataItemFull.date_receive_data = new Date((dataItemFull.date_receive_data) * 1000);
     var model = Object.assign(Config.observable, {
         item: dataItemFull,
         save: function() {

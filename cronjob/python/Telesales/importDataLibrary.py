@@ -99,11 +99,15 @@ try:
          temp['updatedAt']       = int(time.time())
          temp['updatedBy']       = extension
 
-      insertData.append(temp)
+      if checkErr == False:
+         try:
+            mongodb.update(MONGO_COLLECTION=collection, WHERE={'cif':temp['cif']}, VALUE=temp)
+         except Exception as e:
+            now_log         = datetime.now()
+            log.write(now_log.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')
+      # insertData.append(temp)
       
    if len(errorData) <= 0:
-      mongodb.remove_document(collection)
-      resultImport = mongodb.batch_insert(collection, insertData)
       status = 1
    else:
       status = 0
@@ -117,4 +121,4 @@ try:
 
 except Exception as e:
    pprint(e)
-    # log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')
+   log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')

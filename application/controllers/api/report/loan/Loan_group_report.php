@@ -171,16 +171,16 @@ Class Loan_group_report extends WFF_Controller {
             }
             foreach ($data as &$value) {
                 $value['group']      = isset($value['_id'][0]) ? $value['_id'][0] : 0;
-                $value['ratio']      = (int)$value['total_org']/$sum_org;
-                $value['year']       = (string)$now['year'];
-                $value['month']      = $now['month'];
-                $value['weekday']    = $now['weekday'];
-                $value['day']        = date('d/m/Y');
-                $value['weekOfMonth']       = $week;
-                $value['type']        = 'card';
-                $value["createdBy"]   =   $this->session->userdata("extension");
-                unset($value['_id'],$value['total_ob_principal_sale'],$value['total_ob_principal_cash']);
                 if ($value['group'] != 0) {
+                    $value['ratio']      = (int)$value['total_org']/$sum_org;
+                    $value['year']       = (string)$now['year'];
+                    $value['month']      = $now['month'];
+                    $value['weekday']    = $now['weekday'];
+                    $value['day']        = date('d/m/Y');
+                    $value['weekOfMonth']       = $week;
+                    $value['type']        = 'card';
+                    $value["createdBy"]   =   $this->session->userdata("extension");
+                    unset($value['_id'],$value['total_ob_principal_sale'],$value['total_ob_principal_cash']);
                     $result = $this->crud->create($this->collection, $value);
                 }
             }
@@ -322,12 +322,12 @@ Class Loan_group_report extends WFF_Controller {
                 }else if ($doc['group'] == 'G3') {
                     $row += 8;
                 }
-                $worksheetCard->setCellValueExplicit($col . $row, $doc['total_org'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
+                $worksheetCard->setCellValue($col . $row, $doc['total_org']);
                 $colNo      = $this->excel->stringFromColumnIndex($colIndex+1);
                 $colRatio   = $this->excel->stringFromColumnIndex($colIndex+2);
-                $worksheetCard->setCellValueExplicit($colNo . $row, $doc['count_data'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
+                $worksheetCard->setCellValue($colNo . $row, $doc['count_data']);
                 if (isset($doc['ratio'])) {
-                    $worksheetCard->setCellValueExplicit($colRatio . $row, $doc['ratio'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
+                    $worksheetCard->setCellValue($colRatio . $row, $doc['ratio']);
                 }
             }
             
@@ -335,33 +335,12 @@ Class Loan_group_report extends WFF_Controller {
         $file_path = UPLOAD_PATH . "loan/export/" . $filename;
         $objWriter = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($excelWorkbook, $inputFileType);
         $objWriter->save($file_path);
-        echo json_encode(array("status" => 1, "data" => $file_path));
+        return $file_path;
 
 
 
     }
 
-    function test()
-    {
-        $startDay = date('Y-m-1');
-        $getDate = getdate();
-        $month = $getDate['mon'];
-        for ($i=0; $i <= 31; $i++) { 
-            $cenvertedTime = date('Y-m-d',strtotime('+'.$i.' day',strtotime($startDay)));
-            $getNextDate = getdate(strtotime($cenvertedTime));
-            if ($getNextDate['mon'] != $month) {
-                break;
-            }
-            $weekday = $getNextDate['weekday'];
-            $weekOfMonth = $this->weekOfMonth($cenvertedTime);
-            $getColRow  = $this->getColRow($weekOfMonth,$weekday);
-            $col        = $getColRow['col'];
-            $row        = $getColRow['row'];
-            $nextDate = date('d/m/Y',strtotime($cenvertedTime));
-            print_r($getColRow);
-        }
-        
-    }
     function getColRow($weekOfMonth,$weekday)
     {
         $row = $colIndex = 0;
@@ -421,4 +400,10 @@ Class Loan_group_report extends WFF_Controller {
         return $data;
     }
     
+    function downloadExcel()
+    {
+        $file_path = $this->exportExcel();
+        // $file_path = UPLOAD_PATH . "loan/export/CARD_LOAN_GROUP_REPORT_DAILY.xlsx";
+        echo json_encode(array("status" => 1, "data" => $file_path));
+    }
 }

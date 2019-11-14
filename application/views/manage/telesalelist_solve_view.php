@@ -81,7 +81,7 @@
                 var link = ENV.currentUri + '/#/detail_customer/' + telesaleList.id;
                 var check = this.telesaleList.find(obj => obj.id == telesaleList.id);
                 if(!check) {
-                    this.telesaleList.push({id: telesaleList.id, url: link, name: telesaleList.customer_name, active: true})
+                    this.telesaleList.push({id: telesaleList.id, url: link, name: telesaleList.name, active: true})
                 }
                 for (var i = 0; i < this.telesaleList.length; i++) {
                     this.set(`telesaleList[${i}].active`, (this.telesaleList[i].id == telesaleList.id) ? true : false);
@@ -117,7 +117,7 @@
                 return;
             }
             layoutViewModel.addCustomerList(dataItemFull);
-            layoutViewModel.set("breadcrumb", `${dataItemFull.customer_name}`);
+            layoutViewModel.set("breadcrumb", `${dataItemFull.name}`);
             var HTML = await $.get(`${Config.templateApi}telesalelist/detail?id=${id}`);
             var model = {
             }

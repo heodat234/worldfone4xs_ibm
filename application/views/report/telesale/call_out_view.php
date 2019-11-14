@@ -122,6 +122,11 @@
                               width: 150,
                           },
                           {
+                              field: "count_busy",
+                              title: "@Busy@",
+                              width: 150,
+                          },
+                          {
                               field: "count_appointment",
                               title: "@Appointment@",
                               width: 150,
