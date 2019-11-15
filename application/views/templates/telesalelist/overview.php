@@ -58,6 +58,7 @@
                 date_receive_data: {type: "date"},
                 updatedAt: {type: "date"},
                 first_due_date: {type: "date"},
+                is_potential: {type: "boolean"},
             }
         },
         parse: function (response) {
@@ -79,7 +80,7 @@
 <script src="<?= STEL_PATH.'js/table.js' ?>"></script>
 <script type="text/javascript">
     function girdBoolean(data) {
-        return '<input type="checkbox"'+ ( data ? 'checked="checked"' : "" )+ 'class="chkbx" />';
+        return '<input type="checkbox"'+ ( data ? 'checked="checked"' : "" )+ 'class="chkbx" disabled />';
     }
     var router = new kendo.Router({routeMissing: function(e) { router.navigate("/") }});
     var telesaleFields = new kendo.data.DataSource({

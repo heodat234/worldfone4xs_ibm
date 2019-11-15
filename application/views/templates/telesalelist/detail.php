@@ -624,7 +624,7 @@ var Detail = function() {
                             customerHTMLArray.push(`<div class="form-group">
                                 <label class="col-sm-3 control-label">${doc.title}</label>
                                 <div class="col-sm-9">
-                                    <input type="checkbox" data-bind="checked: item.${doc.field}" class="chkbx" />
+                                    <input type="checkbox" data-bind="checked: item.${doc.field}" class="chkbx" disabled />
                                 </div>
                             </div>`);
                             break;

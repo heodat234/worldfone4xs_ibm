@@ -106,6 +106,10 @@
 				<label>@Area PL@</label>
 				<input class="k-textbox " style="width: 100%" data-bind="value: item.area_pl">
 			</div>
+			<div class="form-group" >
+				<label>Potential</label>
+				<input type="checkbox" style="width: 50%" data-bind="checked: item.is_potential" class="chkbx" />
+			</div>
 	    </div>
 	</div>
 	<div class="side-form-bottom">
