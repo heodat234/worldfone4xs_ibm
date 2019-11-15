@@ -38,7 +38,7 @@ Class Daily_all_user_report extends WFF_Controller {
         try {
             $now =getdate();
             $week = $this->weekOfMonth(date('Y-m-d'));
-            
+
             //sibs
             $request = json_decode($this->input->get("q"), TRUE);
             $model = $this->crud->build_model($this->lnjc05_collection);
@@ -51,33 +51,47 @@ Class Daily_all_user_report extends WFF_Controller {
             $group = array(
                '$group' => array(
                   '_id' => '$group_id',
-                  'account_number_arr' => array('$push'=> '$account_number'),
+                  // 'account_number_arr' => array('$push'=> '$account_number'),
+                  'officer_id_arr' => array('$push'=> '$officer_id'),
                   'count_data' => array('$sum'=> 1),
                )
             );
             $this->kendo_aggregate->set_kendo_query($request)->filtering()->adding($group);
-            
+
             $data_aggregate = $this->kendo_aggregate->paging()->get_data_aggregate();
             $data = $this->mongo_db->aggregate_pipeline($this->lnjc05_collection, $data_aggregate);
             $new_data = array();
-            for ($i=0; $i < 4; $i++) { 
-                $new_data[$i]['count'] = 0;
-            }
-            $i = 0;
             foreach ($data as &$value) {
                 $value['group'] = substr($value['_id'], 0,1);
-                if ($group == 'A') {
-                    $value['account_number_arr'] = array_unique($value['account_number_arr']);
-                    // $new_data[$i]['count'] += $value['count_data'];
-                }
+                $new_data[$value['group']]['count'] = 0;
+                $new_data[$value['group']]['account_number_arr'] = array();
+                $new_data[$value['group']]['officer_id_arr'] = array();
+                $new_data[$value['group']]['value'] = array();
+                $value['officer_id_arr'] = array_unique($value['officer_id_arr']);
+
             }
-            print_r($data);
+            foreach ($data as &$value) {
+               $gr = $value['group'];
+               if ($gr == 'A') {
+                  $new_data[$gr]['group'] = $gr;
+                  $new_data[$gr]['count'] += $value['count_data'];
+                  // $new_data[$gr]['account_number_arr'] = array_merge($new_data[$gr]['account_number_arr'],$value['account_number_arr']);
+                  $new_data[$gr]['officer_id_arr'] = array_unique(array_merge($new_data[$gr]['officer_id_arr'],$value['officer_id_arr']));
+               }else {
+                  $new_data[$gr]['group'] = $gr;
+                  $new_data[$gr]['count'] += $value['count_data'];
+                  array_push($new_data[$value['group']]['value'],$value);
+               }
+
+
+            }
+            print_r($new_data);
 
         } catch (Exception $e) {
             echo json_encode(array("status" => 0, "message" => $e->getMessage()));
         }
     }
-    
+
     function exportExcel()
     {
         $startDay = date('Y-m-1');
@@ -97,7 +111,7 @@ Class Daily_all_user_report extends WFF_Controller {
 
         //sibs
         $worksheet = $excelWorkbook->setActiveSheetIndex(0);
-        for ($i=0; $i <= 31; $i++) { 
+        for ($i=0; $i <= 31; $i++) {
             $cenvertedTime = date('Y-m-d',strtotime('+'.$i.' day',strtotime($startDay)));
             $getNextDate = getdate(strtotime($cenvertedTime));
             if ($getNextDate['mon'] != $month) {
@@ -144,13 +158,13 @@ Class Daily_all_user_report extends WFF_Controller {
                     $worksheet->setCellValueExplicit($colRatio . $row, $doc['ratio'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
                 }
             }
-            
+
         }
 
         //card
         $worksheetCard = $excelWorkbook->setActiveSheetIndex(1);
 
-        for ($i=0; $i <= 31; $i++) { 
+        for ($i=0; $i <= 31; $i++) {
             $cenvertedTime = date('Y-m-d',strtotime('+'.$i.' day',strtotime($startDay)));
             $getNextDate = getdate(strtotime($cenvertedTime));
             if ($getNextDate['mon'] != $month) {
@@ -197,7 +211,7 @@ Class Daily_all_user_report extends WFF_Controller {
                     $worksheetCard->setCellValue($colRatio . $row, $doc['ratio']);
                 }
             }
-            
+
         }
         $file_path = UPLOAD_PATH . "loan/export/" . $filename;
         $objWriter = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($excelWorkbook, $inputFileType);
@@ -266,7 +280,7 @@ Class Daily_all_user_report extends WFF_Controller {
         $data = array('col' => $col, 'colIndex' => $colIndex, 'row' => $row );
         return $data;
     }
-    
+
     function downloadExcel()
     {
         $file_path = $this->exportExcel();
