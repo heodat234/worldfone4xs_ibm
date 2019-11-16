@@ -13,6 +13,9 @@ Class Daily_all_user_report extends WFF_Controller {
     private $sbv_collection = "SBV";
     private $collection = "Loan_group_report";
     private $group_collection = "Group_card";
+    private $cdr_collection = "worldfonepbxmanager";
+    private $group_team_collection = "Group";
+    private $user_collection = "User";
 
     function __construct()
     {
@@ -25,6 +28,9 @@ Class Daily_all_user_report extends WFF_Controller {
         $this->sbv_collection = set_sub_collection($this->sbv_collection);
         $this->collection = set_sub_collection($this->collection);
         $this->group_collection = set_sub_collection($this->group_collection);
+        $this->cdr_collection = set_sub_collection($this->cdr_collection);
+        $this->group_team_collection = set_sub_collection($this->group_team_collection);
+        $this->user_collection = set_sub_collection($this->user_collection);
     }
 
     function weekOfMonth($dateString) {
@@ -40,6 +46,10 @@ Class Daily_all_user_report extends WFF_Controller {
             $week = $this->weekOfMonth(date('Y-m-d'));
 
             //sibs
+            $this->mongo_db->switch_db('_worldfone4xs');
+            $users = $this->mongo_db->where(array('active' => true  ))->select(array('extension','agentname'))->get($this->user_collection);
+            $this->mongo_db->switch_db();
+            // var_dump($members);exit;
             $request = json_decode($this->input->get("q"), TRUE);
             $model = $this->crud->build_model($this->lnjc05_collection);
             $this->load->library("kendo_aggregate", $model);
@@ -60,14 +70,27 @@ Class Daily_all_user_report extends WFF_Controller {
 
             $data_aggregate = $this->kendo_aggregate->paging()->get_data_aggregate();
             $data = $this->mongo_db->aggregate_pipeline($this->lnjc05_collection, $data_aggregate);
+
+            $group_officer = array(
+               '$group' => array(
+                  '_id' => '$officer_id',
+                  'phone_arr' => array('$push'=> '$mobile_num'),
+                  'count_data' => array('$sum'=> 1),
+               )
+            );
+            $this->kendo_aggregate->set_kendo_query($request)->filtering()->adding($group_officer);
+
+            $data_aggregate = $this->kendo_aggregate->paging()->get_data_aggregate();
+            $data_officer = $this->mongo_db->aggregate_pipeline($this->lnjc05_collection, $data_aggregate);
+
             $new_data = array();
             foreach ($data as &$value) {
                 $value['group'] = substr($value['_id'], 0,1);
                 $new_data[$value['group']]['count'] = 0;
-                $new_data[$value['group']]['account_number_arr'] = array();
+                // $new_data[$value['group']]['account_number_arr'] = array();
                 $new_data[$value['group']]['officer_id_arr'] = array();
                 $new_data[$value['group']]['value'] = array();
-                $value['officer_id_arr'] = array_unique($value['officer_id_arr']);
+                $value['officer_id_arr'] = $value['officer_id_arr'];
 
             }
             foreach ($data as &$value) {
@@ -76,210 +99,91 @@ Class Daily_all_user_report extends WFF_Controller {
                   $new_data[$gr]['group'] = $gr;
                   $new_data[$gr]['count'] += $value['count_data'];
                   // $new_data[$gr]['account_number_arr'] = array_merge($new_data[$gr]['account_number_arr'],$value['account_number_arr']);
-                  $new_data[$gr]['officer_id_arr'] = array_unique(array_merge($new_data[$gr]['officer_id_arr'],$value['officer_id_arr']));
+                  $new_data[$gr]['officer_id_arr'] = array_merge($new_data[$gr]['officer_id_arr'],$value['officer_id_arr']);
                }else {
                   $new_data[$gr]['group'] = $gr;
                   $new_data[$gr]['count'] += $value['count_data'];
+                  // $new_data[$gr]['officer_id_arr'] = $value['officer_id_arr'];
                   array_push($new_data[$value['group']]['value'],$value);
                }
 
 
             }
-            print_r($new_data);
+            foreach ($new_data as &$value) {
+               if ($value['group'] == 'A') {
+                  $value['teams'] = $this->mongo_db->where(array('name' => array('$regex' => 'SIBS/Group A')  ))->select(array('name','members','lead'))->get($this->group_team_collection);
+                  $value['count_officer'] = array_count_values($value['officer_id_arr']);
+                  // print_r($value['count_officer']);exit;
+                  // // $value['officer_id_arr'] = array_unique($value['officer_id_arr']);
+                  foreach ($value['teams'] as &$team) {
+                     foreach ($value['count_officer'] as $key => $row) {
+                        if ('JIVF00'.$team['lead'] == $key) {
+                           $team['count_acc'] = $row;
+                        }
+                     }
+                     foreach ($team['members'] as $member) {
+                        foreach ($users as $user) {
+                           if ($member == $user['extension']) {
+                              $team[$member]['name'] = $user['agentname'];
+                              $team[$member]['extension'] = $member;
+                              $team[$member]['count_acc'] = round( $team['count_acc']/count($team['members']),2);
+                              $team[$member]['unwork'] = $this->mongo_db->where(array("userextension" => $member, 'disposition' =>array('$ne' => 'ANSWERED')))->count($this->cdr_collection);
+                           }
+                        }
+                     }
+                     unset($team['members']);
+
+                     foreach ($data_officer as $phone) {
+                        if ('JIVF00'.$team['lead'] == $phone['_id']) {
+                           $team['unwork'] = isset($phone['phone_arr']) ? $this->mongo_db->where(array("customernumber" => ['$in' => $phone['phone_arr']]))->count($this->cdr_collection) : 0;
+                        }
+                     }
+                  }
+
+                  unset($value['officer_id_arr'],$value['count_officer'],$value['value']);
+               }else{
+                  unset($value['officer_id_arr']);
+                  foreach ($value['value'] as &$row) {
+                     $row['count_officer'] = array_count_values($row['officer_id_arr']);
+                     unset($row['officer_id_arr']);
+                     // $row['officer_id_arr'] = array_unique($row['officer_id_arr']);
+                     foreach ($row['count_officer'] as $key => $officer) {
+                        foreach ($data_officer as $row_1) {
+                           if ($row_1['_id'] == $key) {
+                              // $value[$key]['account_arr'] = $row['account_arr'];
+                              $value[$key]['extension'] = substr($key,-4);
+                              $value[$key]['count_acc'] = $officer;
+                              $value[$key]['unwork'] = isset($row['account_arr']) ? $this->mongo_db->where(array("_id" => ['$in' => $row_1['account_arr']]))->count($this->cdr_collection) : 0;
+                           }
+                        }
+
+                     }
+                     unset($row['count_officer']);
+                  }
+                  unset($value['value']);
+
+               }
+
+               // foreach ($value['officer_id_arr'] as $officer) {
+               //    foreach ($data_officer as $row) {
+               //       if ($officer == $row['_id']) {
+               //          $value['count_officer'][$officer] = $row['count_data'];
+               //       }
+               //    }
+               // }
+            }
+            print_r($new_data['A']);
 
         } catch (Exception $e) {
             echo json_encode(array("status" => 0, "message" => $e->getMessage()));
         }
     }
 
-    function exportExcel()
-    {
-        $startDay = date('Y-m-1');
-        $getDate = getdate();
-        $month = $getDate['mon'];
-        $response = $this->crud->read($this->collection, array('take' => 1000,'skip' => 0),'', array('month' => $getDate['month'] ));
-        if (isset($response['data'])) {
-            $data = $response['data'];
-        }
-        $filename = "CARD_LOAN_GROUP_REPORT_DAILY.xlsx";
-        $file_template = "CARD_LOAN_GROUP_REPORT_DAILY_TEMPLATE.xlsx";
+   function countOfExtension($countData,$members)
+   {
+      $countMember = count($members);
 
-        //  Tiến hành đọc file excel
-        $inputFileType = \PhpOffice\PhpSpreadsheet\IOFactory::identify(UPLOAD_PATH . "loan/template/" . $file_template);
-        $reader = \PhpOffice\PhpSpreadsheet\IOFactory::createReader($inputFileType);
-        $excelWorkbook = $reader->load(UPLOAD_PATH . "loan/template/" . $file_template);
-
-        //sibs
-        $worksheet = $excelWorkbook->setActiveSheetIndex(0);
-        for ($i=0; $i <= 31; $i++) {
-            $cenvertedTime = date('Y-m-d',strtotime('+'.$i.' day',strtotime($startDay)));
-            $getNextDate = getdate(strtotime($cenvertedTime));
-            if ($getNextDate['mon'] != $month) {
-                break;
-            }
-            $weekday = $getNextDate['weekday'];
-            $weekOfMonth = $this->weekOfMonth($cenvertedTime);
-            $getColRow  = $this->getColRow($weekOfMonth,$weekday);
-            $col        = $getColRow['col'];
-            $row        = $getColRow['row'];
-            $nextDate = date('d/m/Y',strtotime($cenvertedTime));
-            $worksheet->setCellValue($col . $row, $nextDate);
-        }
-        foreach ($data as $doc) {
-            if ($doc['type'] == 'sibs') {
-                $worksheet->setCellValueExplicit("A2", $doc['month'].'-'.$doc['year'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-                $getColRow  = $this->getColRow($doc['weekOfMonth'],$doc['weekday']);
-                $col        = $getColRow['col'];
-                $row        = $getColRow['row'];
-                $colIndex   = $getColRow['colIndex'];
-                $worksheet->setCellValueExplicit($col . $row, $doc['day'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-                if ($doc['group'] == '1') {
-                    $row += 1;
-                }else if ($doc['group'] == '2') {
-                    $row += 2;
-                }else if ($doc['group'] == '3') {
-                    $row += 3;
-                }else if ($doc['group'] == '4') {
-                    $row += 4;
-                }else if ($doc['group'] == '5') {
-                    $row += 5;
-                }else if ($doc['group'] == 'Total') {
-                    $row += 6;
-                }else if ($doc['group'] == 'G2') {
-                    $row += 7;
-                }else if ($doc['group'] == 'G3') {
-                    $row += 8;
-                }
-                $worksheet->setCellValueExplicit($col . $row, $doc['total_org'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
-                $colNo      = $this->excel->stringFromColumnIndex($colIndex+1);
-                $colRatio   = $this->excel->stringFromColumnIndex($colIndex+2);
-                $worksheet->setCellValueExplicit($colNo . $row, $doc['count_data'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
-                if (isset($doc['ratio'])) {
-                    $worksheet->setCellValueExplicit($colRatio . $row, $doc['ratio'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
-                }
-            }
-
-        }
-
-        //card
-        $worksheetCard = $excelWorkbook->setActiveSheetIndex(1);
-
-        for ($i=0; $i <= 31; $i++) {
-            $cenvertedTime = date('Y-m-d',strtotime('+'.$i.' day',strtotime($startDay)));
-            $getNextDate = getdate(strtotime($cenvertedTime));
-            if ($getNextDate['mon'] != $month) {
-                break;
-            }
-            $weekday = $getNextDate['weekday'];
-            $weekOfMonth = $this->weekOfMonth($cenvertedTime);
-            $getColRow  = $this->getColRow($weekOfMonth,$weekday);
-            $col        = $getColRow['col'];
-            $row        = $getColRow['row'];
-            $nextDate = date('d/m/Y',strtotime($cenvertedTime));
-            $worksheetCard->setCellValue($col . $row,$nextDate);
-        }
-        foreach ($data as $doc) {
-            if ($doc['type'] == 'card') {
-                $worksheetCard->setCellValueExplicit("A2", $doc['month'].'-'.$doc['year'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-                $getColRow  = $this->getColRow($doc['weekOfMonth'],$doc['weekday']);
-                $col        = $getColRow['col'];
-                $row        = $getColRow['row'];
-                $colIndex   = $getColRow['colIndex'];
-                $worksheetCard->setCellValueExplicit($col . $row, $doc['day'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-                if ($doc['group'] == '1') {
-                    $row += 1;
-                }else if ($doc['group'] == '2') {
-                    $row += 2;
-                }else if ($doc['group'] == '3') {
-                    $row += 3;
-                }else if ($doc['group'] == '4') {
-                    $row += 4;
-                }else if ($doc['group'] == '5') {
-                    $row += 5;
-                }else if ($doc['group'] == 'Total') {
-                    $row += 6;
-                }else if ($doc['group'] == 'G2') {
-                    $row += 7;
-                }else if ($doc['group'] == 'G3') {
-                    $row += 8;
-                }
-                $worksheetCard->setCellValue($col . $row, $doc['total_org']);
-                $colNo      = $this->excel->stringFromColumnIndex($colIndex+1);
-                $colRatio   = $this->excel->stringFromColumnIndex($colIndex+2);
-                $worksheetCard->setCellValue($colNo . $row, $doc['count_data']);
-                if (isset($doc['ratio'])) {
-                    $worksheetCard->setCellValue($colRatio . $row, $doc['ratio']);
-                }
-            }
-
-        }
-        $file_path = UPLOAD_PATH . "loan/export/" . $filename;
-        $objWriter = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($excelWorkbook, $inputFileType);
-        $objWriter->save($file_path);
-        return $file_path;
-
-
-
-    }
-
-    function getColRow($weekOfMonth,$weekday)
-    {
-        $row = $colIndex = 0;
-        $col = '';
-        switch ($weekOfMonth) {
-            case  1:
-                $row = 4;
-                break;
-            case  2:
-                $row = 13;
-                break;
-            case  3:
-                $row = 22;
-                break;
-            case  4:
-                $row = 31;
-                break;
-            case  5:
-                $row = 40;
-                break;
-            default:
-                break;
-        }
-        switch ($weekday) {
-            case  'Saturday':
-                $col = 'C';
-                $colIndex = 3;
-                break;
-            case  'Sunday':
-                $col = 'F';
-                $colIndex = 6;
-                break;
-            case  'Monday':
-                $col = 'I';
-                $colIndex = 9;
-                break;
-            case  'Tuesday':
-                $col = 'L';
-                $colIndex = 12;
-                break;
-            case  'Wednesday':
-                $col = 'O';
-                $colIndex = 15;
-                break;
-            case  'Thursday':
-                $col = 'R';
-                $colIndex = 18;
-                break;
-            case  'Friday':
-                $col = 'U';
-                $colIndex = 21;
-                break;
-            default:
-                break;
-        }
-        $data = array('col' => $col, 'colIndex' => $colIndex, 'row' => $row );
-        return $data;
-    }
+   }
 
     function downloadExcel()
     {
