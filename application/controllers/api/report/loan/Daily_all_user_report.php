@@ -131,13 +131,13 @@ Class Daily_all_user_report extends WFF_Controller {
                            }
                         }
                      }
-                     unset($team['members']);
 
-                     foreach ($data_officer as $phone) {
-                        if ('JIVF00'.$team['lead'] == $phone['_id']) {
-                           $team['unwork'] = isset($phone['phone_arr']) ? $this->mongo_db->where(array("customernumber" => ['$in' => $phone['phone_arr']]))->count($this->cdr_collection) : 0;
-                        }
-                     }
+                     // foreach ($data_officer as $phone) {
+                     //    if ('JIVF00'.$team['lead'] == $phone['_id']) {
+                     $team['unwork'] = isset($phone['phone_arr']) ? $this->mongo_db->where(array("userextension" => ['$in' => $team['members']]))->count($this->cdr_collection) : 0;
+                     //    }
+                     // }
+                     unset($team['members']);
                   }
 
                   unset($value['officer_id_arr'],$value['count_officer'],$value['value']);
