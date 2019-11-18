@@ -43,15 +43,24 @@
 			        </div>
 			    </div>
 			    <div class="form-group">
-			        <label class="control-label col-sm-4">@Email@</label>
+			        <label class="control-label col-sm-4">@Full name@</label>
 			        <div class="col-sm-8">
-			        	<span data-bind="text: item.email" style="vertical-align: -6px"></span>
+			        	<div class="input-group">
+				        	<span style="vertical-align: -7px" data-bind="text: item.fullname, invisible: enableFullName"></span>
+		                    <input class="k-textbox upper-case-input" name="fullname" data-bind="value: item.fullname, visible: enableFullName" style="width: 100%">
+		                    <div class="input-group-addon btn-default" style="border: 0">
+		                    	<label style="margin-bottom: 0; cursor: pointer">
+		                    		<input type="checkbox" class="hidden" data-bind="checked: enableFullName">
+		                    		<span class="fa fa-pencil"></span>
+		                    	</label>
+		                    </div>
+		                </div>
 			        </div>
 			    </div>
 			    <div class="form-group">
-			        <label class="control-label col-sm-4">@Phone@</label>
+			        <label class="control-label col-sm-4">@Email@</label>
 			        <div class="col-sm-8">
-			        	<span data-bind="text: item.phone" style="vertical-align: -6px"></span>
+			        	<span data-bind="text: item.email" style="vertical-align: -6px"></span>
 			        </div>
 			    </div>
 			</div>
@@ -142,6 +151,7 @@
 </div>
 <style>
 	.preview-avatar {
+		width: 70px;
 		height: 70px;
 		border: 2px solid lightgray;
 		cursor: pointer;

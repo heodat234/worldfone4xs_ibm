@@ -10,6 +10,10 @@
 				<span class="label label-primary" data-bind="text: item.extension"></span>
 			</div>
 			<div class="form-group">
+				<label>@Full name@: </label>
+				<input class="k-textbox" data-bind="value: item.fullname" style="width: 100%">
+			</div>
+			<div class="form-group">
 				<label>@Role@</a>
 				</label>
 				<select data-role="dropdownlist" name="role"
@@ -19,7 +23,7 @@
                       data-bind="value: item.role_id, source: roleOption, events: {cascade: roleCascade}" style="width: 100%">
                       </select>
 			</div>
-			<div class="form-group">
+			<div class="form-group hidden">
 				<label>@Description@</label>
 				<textarea class="k-textbox" style="width: 100%" data-bind="value: item.description"></textarea>
 			</div>

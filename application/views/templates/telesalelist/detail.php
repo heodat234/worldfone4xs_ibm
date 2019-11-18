@@ -612,7 +612,7 @@ var Detail = function() {
                             </div>`);
                             break;
                         case "timestamp":
-                            dataItemFull[doc.field + "Text"] = gridTimestamp(dataItemFull[doc.field]);
+                            dataItemFull[doc.field + "Text"] = gridTimestamp(dataItemFull[doc.field],"dd/MM/yyyy");
                             customerHTMLArray.push(`<div class="form-group">
                                 <label class="col-sm-3 control-label">${doc.title}</label>
                                 <div class="col-sm-9">

@@ -278,7 +278,7 @@ var Config = {
                     serverPaging: true,
                     serverSorting: true,
                     serverGrouping: false,
-                    pageSize: 10,
+                    pageSize: 100,
                     batch: false,
                     schema: {
                         data: "data",

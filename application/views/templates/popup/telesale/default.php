@@ -1,6 +1,6 @@
-ư<div id="all-popup">
+<div id="all-popup">
     <div id="popup-window" data-role="window"
-                     data-title="POPUP TELESALE"
+                     data-title="TELESALE CUSTOMER"
                      data-width="1200"
                      data-actions="['Arrows-no-change', 'Save','Tri-state-indeterminate','Refresh', 'Minimize', 'Maximize', 'Close']"
                      data-position="{'top': 20}"
@@ -14,7 +14,7 @@
                             <i class="fa fa-user"></i><b> OBJECT INFOMATION</b>
                         </li>
                         <li data-bind="visible: detailUrl, click: openDetail">
-                            CUSTOMER DETAIL
+                            <i class="gi gi-vcard"></i><b> CUSTOMER DETAIL</b>
                         </li>
                         <li data-bind="click: openCdr">
                             <i class="fa fa-phone-square"></i><b> CDR</b>
@@ -33,7 +33,7 @@
                                     <div class="form-group">
                                         <label class="control-label col-xs-4">@Type of object@</label>
                                         <div class="col-xs-8">
-                                            <span style="vertical-align: -7px">Other</span>
+                                            <span style="vertical-align: -7px">Customer</span>
                                         </div>
                                     </div>
                                 </div>
@@ -44,10 +44,34 @@
                                         <label class="control-label col-xs-4">@Name@</label>
                                         <div class="col-xs-8">
                                             <div class="input-group">
-                                                <input class="k-textbox upper-case-input" name="customer_name" data-bind="value: item.customer_name, enabled: enableName" style="width: 100%">
-                                                <div class="input-group-addon">
+                                                <span style="vertical-align: -7px" data-bind="text: item.name, invisible: enableName"></span>
+                                                <input class="k-textbox upper-case-input" name="name" data-bind="value: item.name, visible: enableName" style="width: 100%">
+                                                <div class="input-group-addon" style="border: 0">
                                                     <label style="margin-bottom: 0; cursor: pointer">
                                                         <input type="checkbox" class="hidden" data-bind="checked: enableName">
+                                                        <span class="fa fa-pencil"></span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-xs-4">@Nation ID@</label>
+                                        <div class="col-xs-8">
+                                            <div class="input-group">
+                                                <span style="vertical-align: -7px" data-bind="text: item.id_no"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-xs-4">@Birthday@</label>
+                                        <div class="col-xs-8">
+                                            <div class="input-group">
+                                                <span style="vertical-align: -7px" data-format="dd/MM/yyyy" data-bind="text: item.date_of_birth, invisible: enableBirthday"></span>
+                                                <input data-role="datepicker" data-format="dd/MM/yyyy" name="date_of_birth" data-bind="value: item.date_of_birth, visible: enableBirthday" style="width: 100%">
+                                                <div class="input-group-addon" style="border: 0">
+                                                    <label style="margin-bottom: 0; cursor: pointer">
+                                                        <input type="checkbox" class="hidden" data-bind="checked: enableBirthday">
                                                         <span class="fa fa-pencil"></span>
                                                     </label>
                                                 </div>
@@ -58,8 +82,9 @@
                                         <label class="control-label col-xs-4">@Object's Phone@</label>
                                         <div class="col-xs-8">
                                             <div class="input-group">
-                                                <input class="k-textbox" name="phone" data-bind="value: item.phone, enabled: enablePhone" style="width: 100%">
-                                                <div class="input-group-addon">
+                                                <span style="vertical-align: -7px" data-bind="text: item.phone, invisible: enablePhone"></span>
+                                                <input class="k-textbox" name="phone" data-bind="value: item.phone, visible: enablePhone" style="width: 100%">
+                                                <div class="input-group-addon" style="border: 0">
                                                     <label style="margin-bottom: 0; cursor: pointer">
                                                         <input type="checkbox" class="hidden" data-bind="checked: enablePhone">
                                                         <span class="fa fa-pencil"></span>
@@ -70,6 +95,12 @@
                                     </div>
                                 </div>
                                 <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label class="control-label col-xs-4">Potential</label>
+                                        <div class="col-xs-8">
+                                            <div class="checkbox"><label><input type="checkbox" data-bind="checked: item.is_potential"></label></div>
+                                        </div>
+                                    </div>
                                     <div class="form-group">
                                         <label class="control-label col-xs-4">Result</label>
                                         <div class="col-xs-8">
@@ -101,7 +132,90 @@
                                     <div class="form-group" data-bind="visible: followUpChecked">
                                         <label class="control-label col-xs-4">Recall reason</label>
                                         <div class="col-xs-8">
-                                            <input class="k-textbox" name="result" data-bind="value: call.result" style="width: 100%">
+                                            <input class="k-textbox" name="result" data-bind="value: followUp.reCallReason" style="width: 100%">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row title-row">
+                                <div class="col-sm-5">
+                                    <span class="text-primary">LAST LOAN INFORMATION</span>
+                                    <hr class="popup">
+                                </div>
+                                <div class="col-sm-7">
+                                    <span class="text-primary">ESTIMATE PAYMENT</span>
+                                    <hr class="popup">
+                                </div>
+                            </div>
+                            <div class="row form-horizontal">
+                                <div class="col-sm-5">
+                                    <div class="form-group">
+                                        <label class="control-label col-xs-4">Last interest rate</label>
+                                        <div class="col-xs-8">
+                                            <span style="vertical-align: -7px" data-bind="text: item.interest_rate"></span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-xs-4">Last term</label>
+                                        <div class="col-xs-8">
+                                            <span style="vertical-align: -7px" data-bind="text: item.term"></span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-xs-4">Last balance</label>
+                                        <div class="col-xs-8">
+                                            <span data-format="n0" style="vertical-align: -7px" data-bind="text: item.balance"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label class="control-label col-xs-4">Rate <i class="fa fa-info-circle text-info" data-role="tooltip" title="Add on interest / Rate"></i></label>
+                                        <div class="col-xs-8">
+                                            <div class="input-group">
+                                                <input data-role="numerictextbox" data-decimals="6" data-format="p4" data-spinners="false" data-round="4" data-factor="100" data-max="1" data-min="0" name="rate" data-bind="value: rate, events: {change: operandChange}" style="width: 100%">
+                                                <div class="input-group-addon">
+                                                    <b>%</b>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-xs-4">Loan amount</label>
+                                        <div class="col-xs-8">
+                                            <input data-role="numerictextbox" data-format="n0" name="loan_amount" data-bind="value: loan_amount, events: {change: operandChange}" style="width: 100%">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-xs-4">Term</label>
+                                        <div class="col-xs-8">
+                                            <input data-role="numerictextbox" data-format="n0" name="term" data-bind="value: term, events: {change: operandChange}" style="width: 100%">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-3">
+                                    <div class="form-group">
+                                        <label class="control-label col-xs-6">Monthly payment</label>
+                                        <div class="col-xs-6">
+                                            <b class="text-success" data-bind="text: monthlyPayment" data-format="n0" style="line-height: 2.3"></b>
+                                        </div>
+                                        <div class="col-xs-12" style="margin-top: 10px">
+                                            <table style="font-weight: bold; font-size: 14px">
+                                                <tr>
+                                                    <td rowspan="2">
+                                                        <i class="text-danger" data-format="n0" data-bind="text: loan_amount"></i>
+                                                        <span> x&nbsp;</span>
+                                                    </td>
+                                                    <td style="border-bottom: 1px solid black; text-align: center; padding-bottom: 5px">
+                                                        <i class="text-danger" data-bind="text: rate">Rate</i>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="padding-top: 5px">
+                                                        <span>1 - (1 + <i class="text-danger" data-bind="text: rate">Rate</i>)<sup>-<i class="text-danger" data-bind="text: term">Term</i></sup></span>
+                                                    </td>
+                                                </tr>
+                                            </table>
                                         </div>
                                     </div>
                                 </div>
@@ -122,12 +236,12 @@
     </div>
 </div>
 <script type="text/javascript">
-class otherPopup extends Popup {
+class diallistPopup1 extends Popup {
     constructor(dataCall) {
         super(dataCall);
         Object.assign(this, {
             _fieldId : "customernumber",
-            _popupType: "other",
+            _popupType: "default",
             phone: dataCall.customernumber,
             openDetail: function(e) {
                 var $content = $("#customer-detail-content");
@@ -141,40 +255,67 @@ class otherPopup extends Popup {
     async init(fieldId) {
         var fieldIdValue = this._dataCall[this._fieldId];
         /* Lấy dữ liệu */
-        var responseObj = await $.get(ENV.vApi + `popup/get_customer_by_phone`, {_: Date.now(), phone: fieldIdValue});
+        var responseObj = await $.get(ENV.vApi + `popup/get_customer_by_phone`, {phone: fieldIdValue});
 
-        if(!responseObj) {
-            responseObj = {};
-        }
-
-        this.item = responseObj;
-        /* Lấy iframe chi tiết khách hàng */
-        var phone = responseObj.phone;
-        var detailUrl = "";
-        $.get(ENV.vApi + `popup/get_customer_by_phone?_=${Date.now()}&phone=${phone}`).then(res => {
-            if(res.total == 1) {
-                detailUrl = `${ENV.baseUrl}manage/customer?omc=1#/detail/${res.data[0].id}` 
+        if(responseObj.total == 0) {
+            this.item = {};
+            this.open();
+        } else if(responseObj.total == 1) {
+            var customer = responseObj.data[0];
+            if(customer.date_of_birth) customer.date_of_birth = new Date(customer.date_of_birth * 1000);
+            var detailUrl = `${ENV.baseUrl}manage/telesalelist?omc=1#/detail_customer/${customer.id}`;
+            this.item = customer;
+            this.assign({detailUrl: detailUrl}).open();
+        } else {
+            var buttons = {cancel: true};
+            for (var i = 0; i < responseObj.total; i++) {
+                buttons[i] = {text: responseObj.data[i].name};
             }
-            this.assign({detailUrl: detailUrl}).open();
-        }, (err) => {
-            this.assign({detailUrl: detailUrl}).open();
-        })
+            var type = swal({
+                title: "@Choose one@.",
+                text: `@Greater than one customer have this number@.`,
+                icon: "warning",
+                buttons: buttons
+            }).then(async index => {
+                if(index !== null && index !== false) {
+                    var customer = responseObj.data[index];
+                    if(customer.date_of_birth) customer.date_of_birth = new Date(customer.date_of_birth * 1000);
+                    var detailUrl = `${ENV.baseUrl}manage/telesalelist?omc=1#/detail_customer/${customer.id}`;
+                    this.item = customer;
+                    this.assign({detailUrl: detailUrl}).open();
+                } else {
+                    $("#popup-contain").empty();
+                }
+            })
+        }
     }
 }
 
 var callData = <?= json_encode($callData) ?>;
 
-window.popupObservable = new otherPopup(callData);
+window.popupObservable = new diallistPopup1(callData);
 window.popupObservable.assign({
     followUp: {},
-    callCodeOption: dataSourceDropDownList("Call_code", ["text", "value", "type"]),
+    callCodeOption: dataSourceJsonData(["Call", "result"]),
     playRecording: function(e) {
         play(this._dataCall.calluuid);
+    },
+    loan_amount: "Loan amount",
+    rate: "Rate",
+    term: "Term",
+    operandChange: function(e) {
+        var rate = this.get("rate"),
+            loan_amount = this.get("loan_amount"),
+            term = this.get("term");
+        if(typeof rate == "number" && typeof loan_amount == "number" && typeof term == "number") {
+            var monthlyPayment = loan_amount * (rate / (1 - (1 + rate) ** (-term)));
+            this.set("monthlyPayment", Math.round(monthlyPayment));
+        }
     },
     save: function() {
         var data = this.item.toJSON();
         $.ajax({
-            url: ENV.restApi + "diallist_detail/" + (data.id || "").toString(),
+            url: ENV.restApi + "telesalelist/" + (data.id || "").toString(),
             type: "PUT",
             contentType: "application/json; charset=utf-8",
             data: kendo.stringify(data),
@@ -184,11 +325,30 @@ window.popupObservable.assign({
             },
             error: errorDataSource
         })
+        if(this.followUpChecked) {
+            var followUpData = Object.assign(this.get("followUp").toJSON(), {
+                name: data.customer_name,
+                phone: data.mobile_phone_no,
+                id: data.id,
+                collection: "TS_Telesalelist"
+            });
+            $.ajax({
+                url: ENV.restApi + "follow_up",
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                data: kendo.stringify(followUpData),
+                success: (response) => {
+                    if(response.status)
+                        syncDataSource();
+                },
+                error: errorDataSource
+            })
+        }
     },
     openAppointmentForm: async function(option = {}) {
         $rightForm = $("#right-form");
         var formHtml = await $.ajax({
-            url: ENV.templateApi + "appointment_log/formAutoFill",
+            url: ENV.templateApi + "appointment_log_solve/formAutoFill",
             data: {doc: option},
             error: errorDataSource
         });

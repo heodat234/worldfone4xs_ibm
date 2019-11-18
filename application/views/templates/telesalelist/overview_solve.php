@@ -1,6 +1,7 @@
 <div class="col-sm-3" style="margin: 10px 0" id="page-widget"></div>
 <div class="col-sm-9 change-mvvm" style=" margin: 10px 0;">
-    <div class="col-sm-2"><label>Re-Assign</label></div>
+    <div class="col-sm-1"><a role="button" class="btn btn-alt btn-sm btn-primary" data-toggle="dropdown" onclick="removeRow(this)"><i class="fa fa-remove"></i> <b>@Remove@</b></a></div>
+    <div class="col-sm-2" style="text-align: right;margin-top: 6px;"><label>Re-Assign</label></div>
     <div class="col-sm-4" class="form-group">
         <input data-role="dropdownlist"
                data-text-field="agentname"
@@ -65,6 +66,7 @@
                 date_receive_data: {type: "date"},
                 updatedAt: {type: "date"},
                 first_due_date: {type: "date"},
+                starttime_call: {type: "date"},
                 is_potential: {type: "boolean"},
             }
         },
@@ -77,6 +79,7 @@
                 doc.date_receive_data = doc.date_receive_data ? new Date(doc.date_receive_data * 1000) : null;
                 doc.updatedAt = doc.updatedAt ? new Date(doc.updatedAt * 1000) : null;
                 doc.first_due_date = doc.first_due_date ? new Date(doc.first_due_date * 1000) : null;
+                doc.starttime_call = doc.starttime_call ? new Date(doc.starttime_call * 1000) : null;
                 return doc;
             })
             return response;
@@ -130,6 +133,12 @@
     })
     telesaleFields.read().then(function(){
         var columns = telesaleFields.data().toJSON();
+        columns.unshift({
+            field: 'starttime_call',
+            title: "@Nearest Call@",
+            width: 150,
+            type:'timestamp'
+        });
         columns.map(col => {
             col.width = 130;
             switch (col.type) {
@@ -143,7 +152,7 @@
                     col.template = (dataItem) => gridArray(dataItem[col.field]);
                     break;
                 case "timestamp":
-                    col.template = (dataItem) => gridDate(dataItem[col.field]);
+                    col.template = (dataItem) => gridDate(dataItem[col.field],"dd/MM/yyyy");
                     break;
                 case "boolean":
                     col.template = (dataItem) => girdBoolean(dataItem[col.field]);
@@ -157,15 +166,7 @@
             width: 32,
             // locked: true
         });
-        // columns.push({
-        //     field: "is_potential",
-        //     title: "Potential",
-        //     template: function(dataItem) {
-        //       return '<input type="checkbox"'+ ( dataItem.is_potential ? 'checked="checked"' : "" )+ 'class="chkbx" />';
-        //     },
-        //     width: 100
-        // });
-
+        
         Table.columns = columns;
         Table.init();
         Table.grid.bind("change", grid_change);
@@ -238,6 +239,14 @@
             })
         }
             
+    }
+
+    function removeRow() {
+        $('#grid').data("kendoGrid").select().each(function () {
+            Table.grid.removeRow($(this).closest("tr"));
+            Table.dataSource.sync();
+        });
+       
     }
 
     function detailData(ele) {

@@ -36,7 +36,7 @@ var Config = {
         },{
             field: "index",
             title: "#",
-            width: 70
+            width: 50
         },{
             field: "collection",
             title: "Collection",
@@ -48,19 +48,23 @@ var Config = {
         },{
             field: "title",
             title: "Title",
-            width: 160
+            width: 140
         },{
             field: "type",
             title: "Type",
             editor: typeEditor,
-            width: 120
+            width: 100
         },{
             field: "sub_type",
             title: "Sub Type"
         },{
+            field: "description",
+            title: "Description",
+            width: 140
+        },{
             title: `<a class='btn btn-sm btn-circle btn-action' onclick='return deleteDataItemChecked();'><i class='fa fa-times-circle'></i></a>`,
             command: ["edit", "destroy"],
-            width: 200
+            width: 180
         }]
 }; 
 

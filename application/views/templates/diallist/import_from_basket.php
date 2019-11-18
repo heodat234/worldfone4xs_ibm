@@ -12,7 +12,7 @@
 			<div class="alert alert-info" style="cursor: pointer;">
 		    	<h4>@Group@</h4>
 		        <p class="text-right text-muted">
-		        	<img data-bind="attr: {src: item.groupImgUrl}" style="width: 200px">
+		        	<b data-bind="text: item.group_name"></b>
 		        </p>
 		    </div>
 		</div>
@@ -35,12 +35,11 @@
 		     data-bind="source: files, events: {select: fileSelect}"></div>
 		</div>
 		<div class="col-sm-9" data-bind="visible: dataName">
-			<h3>@Data@ - <b data-bind="text: dataName"></b></h3>
+			<h3>@Data@ - <b data-bind="text: dataName"></b> 
+				<i class="fa fa-arrow-right text-success"></i>
+				<button class="k-button" data-bind="click: importAndGoToAssign" style="font-size: 16px">@Import@ @and@ @Assign@</button>
+			</h3>
 			<div id="data-grid"></div>
-		</div>
-
-		<div class="col-sm-12 text-center" style="padding-top: 10px" data-bind="visible: dataName">
-			<button class="k-button" data-bind="click: goToAssign">@Import@ @and@ @Assign@</button>
 		</div>
 	</div>
 </div>
@@ -62,21 +61,26 @@
 	        		detailData(name);
 	        	}
 	        },
-	        goToAssign: function(e) {
-	        	router.navigate("/assign/" + diallist_id);
+	        importAndGoToAssign: function(e) {
+	        	$.get(ENV.vApi + "diallist_detail/insertFromBasket", {collection: this.get("dataName"), diallist_id: diallist_id} , function(res) {
+	        		if(res.status) {
+	        			router.navigate("/assign/" + diallist_id);
+	        		}
+	        	});
 	        }
 		});
 		kendo.bind(".import-view", observable);
 
 		$.get(ENV.restApi + "diallist/" + diallist_id, (diallist) => {
-			diallist.groupImgUrl = ENV.vApi + "group/getImageNameById/" + diallist.group_id;
 			observable.set("item", diallist);
 			layoutViewModel.set("breadcrumb2", diallist.name);
 		})
 	})
 
 	function detailData(collection, columns = []) {
-		var database = "<?= substr($this->config->item("_mongo_db"), 1) ?>";
+		// var database = "<?= substr($this->config->item("_mongo_db"), 1) ?>";
+		var database = "LOAN_campaign_list";
+
         if(Table.grid) {
             Table.grid.destroy();
             Table.grid = false;
@@ -156,7 +160,7 @@
 	                },
 	                sortable: true,
 	                reorderable: true,
-	                scrollable: Boolean(Config.scrollable),
+	                scrollable: true,
 	                columns: this.columns,
 	                filterable: Config.filterable ? Config.filterable : true,
 	                editable: false,

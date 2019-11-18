@@ -19,8 +19,8 @@
                 <!-- END Web Server Title -->
                 <?php $_mongo_db = $this->config->item("_mongo_db"); ?>
                 <div>
-                    <a role="button" class="btn btn-sm btn-alt btn-success btn-database" href="javascript:void(0)" data-name="<?= substr($_mongo_db, 1) ?>" data-bind="click: selectDatabase"><b><?= substr($_mongo_db, 1) ?></b></a>
-                    <a role="button" class="btn btn-sm btn-alt btn-success btn-database" href="javascript:void(0)" data-name="<?= $_mongo_db ?>" data-bind="click: selectDatabase"><b><?= $_mongo_db ?></b></a>
+                    <button class="btn btn-sm btn-alt btn-success btn-database" href="javascript:void(0)" data-name="<?= substr($_mongo_db, 1) ?>" data-bind="click: selectDatabase"><b><?= substr($_mongo_db, 1) ?></b></button>
+                    <button role="button" class="btn btn-sm btn-alt btn-success btn-database" href="javascript:void(0)" data-name="<?= $_mongo_db ?>" data-bind="click: selectDatabase"><b><?= $_mongo_db ?></b></button>
                 </div>
                 <div style="margin-top: 10px">
                     <label class="checkbox-inline">
@@ -36,16 +36,18 @@
             <!-- END Web Server Block -->
         </div>
 
-        <div class="col-md-8">
+        <div class="col-md-8" data-bind="visible: dbname">
             <!-- Web Server Block -->
             <div class="block full">
                 <!-- Web Server Title -->
                 <div class="block-title">
                     <div class="block-options pull-right">
+                        <a role="button" class="btn btn-sm btn-alt btn-success" data-bind="click: createCollection"><i class="fa fa-plus"></i></a>
                         <input data-role="autocomplete" data-placeholder="Search" 
                         data-text-field="name"  data-value-field="name"
-                        data-filter="contains" 
+                        data-filter="contains" style="width: 240px"
                         data-bind="source: collections, events: {change: searchChange, select: searchSelect}" style="margin-right: 100px" />
+                        <a role="button" class="btn btn-sm btn-alt btn-warning" href="javascript:void(0)" data-bind="click: deleteManyCollection, visible: item.srcCollection"><i class="hi hi-remove-circle"></i> <b>Delete many</b></a>
                         <a role="button" class="btn btn-sm btn-alt btn-danger" href="javascript:void(0)" data-bind="click: dropCollection, visible: item.srcCollection"><i class="hi hi-remove-circle"></i> <b>Drop</b></a>
                     </div>
                     <h2><strong>Collection</strong></h2>
@@ -101,14 +103,23 @@
     <div id="add-index-container"></div>
 </div>
 <style type="text/css">
-    a.btn-database.selected, a.btn-collection.selected, a.btn-collection:hover {
+    button.btn-collection {
+        font-size: 14px; 
+        padding: 2px 4px; 
+        line-height: 1.6;
+    }
+    button.btn-database.selected, button.btn-collection.selected, button.btn-collection:hover {
         background-color: #7db831;
         border-color: #7db831;
         color: #ffffff;
     }
 </style>
 <script id="collection-template" type="text/x-kendo-template">
-    <a class="label label-default btn-collection" href="javascript:void(0)" style="font-size: 16px; padding: 2px 4px; line-height: 1.6" data-bind="text: name, click: selectCollection, css: {selected: selected}"></a>
+    <button class="btn btn-default btn-sm btn-alt btn-collection" href="javascript:void(0)"
+     data-bind="click: selectCollection, css: {selected: selected}, attr: {data-collection: name}">
+        # if(data.options.capped) {# <i class="fa fa-balance-scale"></i> #}#
+        <span data-bind="text: name"></span>
+    </button>
 </script>
 
 <script type="text/javascript">
@@ -363,7 +374,7 @@ var Table = function() {
             },
             selectCollection: function(e) {
                 $currentTarget = $(e.currentTarget);
-                var collectionName = $currentTarget.text();
+                var collectionName = $currentTarget.data("collection");
                 var collectionData = this.collections.data().toJSON();
                 this.set("item.srcCollection", collectionName);
                 this.set("item.desCollection", collectionName);
@@ -428,6 +439,31 @@ var Table = function() {
                     }
                 });
             },
+            deleteManyCollection: function(e) {
+                var dbname = this.get('dbname');
+                var item = this.get('item').toJSON();
+                swal({
+                    title: `Delete many in collection ${item.srcCollection}.`,
+                    text: `Please type your condition (Json text) to delete many documents. Empty to delete all.`,
+                    icon: "warning",
+                    content: "input",
+                    buttons: true,
+                    dangerMode: false,
+                })
+                .then((condition) => {
+                    if(condition === null) return;
+                    $.ajax({
+                        url: ENV.reportApi + "database/delete_many/" + dbname,
+                        data: {collection: item.srcCollection, where: condition ? JSON.stringify(condition) : []},
+                        success: (res) => {
+                            if(res.status) {
+                                syncDataSource();
+                                this.collections.read({db: dbname});
+                            } else notification.show("Error", "error");
+                        }
+                    })
+                });
+            },
             openJsDB: function() {
                 openForm({title: "Run js db"});
                 kendo.destroy($("#right-form"));
@@ -447,7 +483,31 @@ var Table = function() {
                     item: {},
                     database: this.get("dbname"),
                     collection: this.get("item.srcCollection"),
-                    fieldOption: Table.columns,
+                    arrayOpen: function(e) {
+                        e.preventDefault();
+                        var widget = e.sender;
+                        widget.input[0].onkeyup = function(ev) {
+                            if(ev.keyCode == 13 && this.value) {
+                                var values = widget.value();
+                                values.push(this.value);
+                                widget.dataSource.data(values);
+                                widget.value(values);
+                                widget.trigger("change");
+                            } else {
+                                // Use for onblur event
+                                window.temp_5dce0f6b1ef2b406222fd053 = this.value;
+                            }
+                        }
+                        widget.input[0].onblur = function(ev) {
+                            if(window.temp_5dce0f6b1ef2b406222fd053) {
+                                var values = widget.value();
+                                values.push(window.temp_5dce0f6b1ef2b406222fd053);
+                                widget.dataSource.data(values);
+                                widget.value(values);
+                                widget.trigger("change");
+                            }
+                        }
+                    },
                     close: function(e) {
                         $("#add-index-popup").data("kendoWindow").close();
                     },
@@ -559,6 +619,38 @@ var Table = function() {
                     },
                 });
             },
+            createCollection: function() {
+                if($("#add-collection-popup").data("kendoWindow")) {
+                    $("#add-collection-popup").data("kendoWindow").destroy();
+                }
+                var model = {
+                    item: {},
+                    database: this.get("dbname"),
+                    collection: this.get("item.srcCollection"),
+                    close: function(e) {
+                        $("#add-collection-popup").data("kendoWindow").close();
+                    },
+                    add: function(e) {
+                        var data = this.get("item").toJSON(),
+                            database = this.get("database");
+                        $.ajax({
+                            url: ENV.reportApi + `database/add_collection/${database}`,
+                            type: "POST",
+                            contentType: "application/json; charset=utf-8",
+                            data: JSON.stringify(data),
+                            success: (res) => {
+                                if(res.status) {
+                                    notification.show("Create success", "success");
+                                    this.close();
+                                } else notification.show(res.message, "error");
+                            }
+                        })
+                    }
+                };
+                var kendoView = new kendo.View("add-collection-template", {model: model, wrap: false});
+                kendoView.render("#add-index-container");
+                $("#add-collection-popup").data("kendoWindow").center().open();
+            }
         }));    
     }
 
@@ -757,7 +849,7 @@ var Table = function() {
                 <input class="k-textbox" data-bind="value: item.name" style="width: 100%">
             </div>
             <div class="k-edit-label" style="width: 20%">
-                <label>Expire index</label>
+                <label>TTL index</label>
             </div>
             <div class="k-edit-field" style="width: 70%">
                 <div class="onoffswitch" id="expire-index-switch">
@@ -772,11 +864,8 @@ var Table = function() {
                 <label>Fields</label>
             </div>
             <div class="k-edit-field" style="width: 70%" data-bind="invisible: item.isExpireIndex">
-                <select style="width: 100%"
-                data-role="multiselect"
-                data-value-primitive="true"
-                data-value-field="field" data-text-field="field" 
-                data-bind="value: item.fields, source: fieldOption"></select>
+                <select style="width: 100%" data-role="multiselect"
+                data-bind="value: item.fields, source: item.fields, events: {open: arrayOpen}"></select>
             </div>
             <div class="k-edit-label" style="width: 20%" data-bind="invisible: item.isExpireIndex">
                 <label>Sort</label>
@@ -846,6 +935,58 @@ var Table = function() {
             </div>
             <div class="k-edit-field" style="width: 70%">
                 <input data-role="dropdownlist" data-bind="value: item.type, source: dataTypeOption" style="width: 100%">
+            </div>
+            <div class="k-edit-buttons k-state-default">
+                <a class="k-button k-primary k-scheduler-update" data-bind="click: add">Add</a>
+                <a class="k-button k-scheduler-cancel" href="#" data-bind="click: close">Cancel</a>
+            </div>
+        </div>
+    </div>
+</script>
+
+<script type="text/x-kendo-template" id="add-collection-template">
+    <div data-role="window" id="add-collection-popup" style="padding: 14px 0"
+         data-title="Create collection"
+         data-visible="false"
+         data-actions="['Close']"
+         data-bind="">
+        <div class="k-edit-form-container" style="width: 360px">
+            <div class="k-edit-label" style="width: 20%">
+                <label>Name</label>
+            </div>
+            <div class="k-edit-field" style="width: 70%">
+                <input class="k-textbox" data-bind="value: item.create" style="width: 100%">
+            </div>
+            <div class="k-edit-label" style="width: 20%">
+                <label>Capped</label>
+            </div>
+            <div class="k-edit-field" style="width: 70%">
+                <div class="onoffswitch">
+                    <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="is-capped-switch" data-bind="checked: item.capped">
+                    <label class="onoffswitch-label" for="is-capped-switch">
+                        <span class="onoffswitch-inner"></span>
+                        <span class="onoffswitch-switch"></span>
+                    </label>
+                </div>
+            </div>
+            <div class="k-edit-label" style="width: 20%" data-bind="visible: item.capped">
+                <label>Size</label>
+            </div>
+            <div class="k-edit-field" style="width: 70%" data-bind="visible: item.capped">
+                <input data-role="numerictextbox" data-bind="value: item.size" style="width: 100%">
+            </div>
+            <div class="k-edit-label" style="width: 20%" data-bind="visible: item.capped">
+                <label>Max</label>
+            </div>
+            <div class="k-edit-field" style="width: 70%" data-bind="visible: item.capped">
+                <input data-role="numerictextbox" data-bind="value: item.max" style="width: 100%">
+            </div>
+            <div class="k-edit-label" style="width: 20%" data-bind="visible: item.capped">
+            </div>
+            <div class="k-edit-field" style="width: 70%" data-bind="visible: item.capped">
+                <a href="https://docs.mongodb.com/manual/core/capped-collections/" target="_blank">
+                    <i class="fa fa-balance-scale"></i> View document
+                </a>
             </div>
             <div class="k-edit-buttons k-state-default">
                 <a class="k-button k-primary k-scheduler-update" data-bind="click: add">Add</a>

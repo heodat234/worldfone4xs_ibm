@@ -44,8 +44,8 @@
                                         <label class="control-label col-xs-4">@Name@</label>
                                         <div class="col-xs-8">
 	                                        <div class="input-group">
-                                                <span style="vertical-align: -7px" data-bind="text: item.customer_name, invisible: enableName"></span>
-						                        <input class="k-textbox upper-case-input" name="customer_name" data-bind="value: item.customer_name, visible: enableName" style="width: 100%">
+                                                <span style="vertical-align: -7px" data-bind="text: item.name, invisible: enableName"></span>
+						                        <input class="k-textbox upper-case-input" name="name" data-bind="value: item.name, visible: enableName" style="width: 100%">
 						                        <div class="input-group-addon" style="border: 0">
 						                        	<label style="margin-bottom: 0; cursor: pointer">
 						                        		<input type="checkbox" class="hidden" data-bind="checked: enableName">
@@ -82,8 +82,8 @@
                                         <label class="control-label col-xs-4">@Object's Phone@</label>
                                         <div class="col-xs-8">
 	                                        <div class="input-group">
-                                                <span style="vertical-align: -7px" data-bind="text: item.mobile_phone_no, invisible: enablePhone"></span>
-						                        <input class="k-textbox" name="mobile_phone_no" data-bind="value: item.mobile_phone_no, visible: enablePhone" style="width: 100%">
+                                                <span style="vertical-align: -7px" data-bind="text: item.phone, invisible: enablePhone"></span>
+						                        <input class="k-textbox" name="phone" data-bind="value: item.phone, visible: enablePhone" style="width: 100%">
 						                        <div class="input-group-addon" style="border: 0">
 						                        	<label style="margin-bottom: 0; cursor: pointer">
 						                        		<input type="checkbox" class="hidden" data-bind="checked: enablePhone">
@@ -132,7 +132,7 @@
                                     <div class="form-group" data-bind="visible: followUpChecked">
                                         <label class="control-label col-xs-4">Recall reason</label>
                                         <div class="col-xs-8">
-                                            <input class="k-textbox" name="result" data-bind="value: call.result" style="width: 100%">
+                                            <input class="k-textbox" name="result" data-bind="value: followUp.reCallReason" style="width: 100%">
                                         </div>
                                     </div>
                                 </div>
@@ -268,16 +268,8 @@ class diallistPopup1 extends Popup {
 
         this.item = responseObj;
         /* Lấy iframe chi tiết khách hàng */
-        var phone = responseObj.mobile_phone_no;
-        var detailUrl = "";
-        $.get(ENV.vApi + `popup/get_telesale_customer_by_phone?_=${Date.now()}&phone=${phone}`).then(res => {
-            if(res.total == 1) {
-                detailUrl = `${ENV.baseUrl}manage/telesalelist?omc=1#/detail_customer/${res.data[0].id}` 
-            }
-            this.assign({detailUrl: detailUrl}).open();
-        }, (err) => {
-            this.assign({detailUrl: detailUrl}).open();
-        })
+        var detailUrl = detailUrl = `${ENV.baseUrl}manage/telesalelist?omc=1#/detail_customer/${responseObj.id}`
+        this.assign({detailUrl: detailUrl}).open();
     }
 }
 
@@ -315,11 +307,30 @@ window.popupObservable.assign({
             },
             error: errorDataSource
         })
+        if(this.followUpChecked) {
+            var followUpData = Object.assign(this.get("followUp").toJSON(), {
+                name: data.customer_name,
+                phone: data.mobile_phone_no,
+                id: data.id,
+                collection: "TS_Telesalelist"
+            });
+            $.ajax({
+                url: ENV.restApi + "follow_up",
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                data: kendo.stringify(followUpData),
+                success: (response) => {
+                    if(response.status)
+                        syncDataSource();
+                },
+                error: errorDataSource
+            })
+        }
     },
     openAppointmentForm: async function(option = {}) {
         $rightForm = $("#right-form");
         var formHtml = await $.ajax({
-            url: ENV.templateApi + "appointment_log/formAutoFill",
+            url: ENV.templateApi + "appointment_log_solve/formAutoFill",
             data: {doc: option},
             error: errorDataSource
         });

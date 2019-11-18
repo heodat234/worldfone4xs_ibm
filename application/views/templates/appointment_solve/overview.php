@@ -80,6 +80,9 @@ var Config = Object.assign(Config, {
         width: "150px",
         headerAttributes: { style: "white-space: normal"},
         filterable: false,
+        template: function(dataItem) {
+            return gridPhone(dataItem['customer_info']['phone'], dataItem['customer_info']['id'], 'customer');
+        }
     },{
         field: "loan_amount",
         title: "@Loan amount@",

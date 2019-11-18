@@ -29,6 +29,7 @@ try:
    # log.write(str(extensions))
    now         = datetime.now()
    log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': Start Log' + '\n')
+
    mongodb.update(MONGO_COLLECTION='TS_Import', WHERE={'_id': ObjectId(importLogId)}, VALUE={'assign': int(-1)})
    assign_log = mongodb.getOne(MONGO_COLLECTION='TS_Assign_log')
    if assign_log == None:
@@ -44,6 +45,8 @@ try:
       array_cmnd = []
  
    for u,extension in enumerate(extensions):
+      user = _mongodb.getOne(MONGO_COLLECTION='TS_User', WHERE={'extension': str(extension)}, SELECT=['extension', 'agentname'])
+      assign_name = user['agentname']
       random  = randoms[u]
       if extension in assign_log.keys():
          array_cmnd = assign_log[extension]
@@ -56,13 +59,13 @@ try:
          for x in range(int(quotient)):
             users = mongodb.get(MONGO_COLLECTION='TS_Telesalelist', WHERE={'id_import': importLogId,'assign': '','id_no': {'$nin' :array_cmnd}},SELECT=['_id', 'id_no'], SORT=([('id', 1)]),SKIP=0, TAKE=int(10000))
             for idx,user in enumerate(users):
-               mongodb.update(MONGO_COLLECTION='TS_Telesalelist', WHERE={'_id': ObjectId(user['_id'])}, VALUE={'updatedAt': int(time.time()),'assign': extension,'createdBy': 'BySystemRandom'})
+               mongodb.update(MONGO_COLLECTION='TS_Telesalelist', WHERE={'_id': ObjectId(user['_id'])}, VALUE={'updatedAt': int(time.time()),'assign': extension,'assign_name': assign_name,'createdBy': 'BySystemRandom'})
                array_cmnd.append(user['id_no'])
       
       if int(mod) > 0:
          users = mongodb.get(MONGO_COLLECTION='TS_Telesalelist', WHERE={'id_import': importLogId,'assign': '','id_no': {'$nin' :array_cmnd}},SELECT=['_id', 'id_no'], SORT=([('id', 1)]),SKIP=0, TAKE=int(mod))
          for idx,user in enumerate(users):
-            mongodb.update(MONGO_COLLECTION='TS_Telesalelist', WHERE={'_id': ObjectId(user['_id'])}, VALUE={'updatedAt': int(time.time()),'assign': extension,'createdBy': 'BySystemRandom'})
+            mongodb.update(MONGO_COLLECTION='TS_Telesalelist', WHERE={'_id': ObjectId(user['_id'])}, VALUE={'updatedAt': int(time.time()),'assign': extension,'assign_name': assign_name,'createdBy': 'BySystemRandom'})
             array_cmnd.append(user['id_no'])
 
       mongodb.update(MONGO_COLLECTION='TS_Assign_log', WHERE={'_id': ObjectId(assign_log['_id'])}, VALUE={extension: array_cmnd})

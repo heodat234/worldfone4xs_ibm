@@ -186,6 +186,9 @@
                             if(data[0][prop]) {
                                 columns.push({field: 'c' + prop.toString(), title: data[0][prop] + ` (${prop})`, width: 140});
                             }
+                            else {
+                                columns.push({field: 'c' + prop.toString(), title: '', width: 140});
+                            }
                         }
                         var grid = $("#data-grid").data("kendoGrid");
                         grid.setOptions({columns: columns});
@@ -197,12 +200,12 @@
                                 continue;
                             }
                             temp.push({
-                                'c0': data[prop][0],
-                                'c1': data[prop][1],
-                                'c2': data[prop][2],
-                                'c3': data[prop][3],
-                                'c4': data[prop][4],
-                                'c5': data[prop][5],
+                                'c0': (data[prop][0]) ? data[prop][0] : 'c0',
+                                'c1': (data[prop][1]) ? data[prop][1] : 'c1',
+                                'c2': (data[prop][2]) ? data[prop][2] : 'c2',
+                                'c3': (data[prop][3]) ? data[prop][3] : 'c3',
+                                'c4': (data[prop][4]) ? data[prop][4] : 'c4',
+                                'c5': (data[prop][5]) ? data[prop][5] : 'c5',
                             });
                         }
 

@@ -156,6 +156,9 @@
 <ul class="breadcrumb breadcrumb-top">
     <li>@Setting@</li>
     <li>@Organization@</li>
+    <li class="pull-right none-breakcrumb">
+        <a role="button" class="btn btn-sm" onclick="getPDF('#diagram', ENV.type + '_Organization')"><i class="fa fa-file-pdf-o"></i> <b>@Export@ PDF</b></a>
+    </li>
 </ul>
 <!-- END Table Styles Header -->
 <div id="allview" class="container-fluid after-breadcrumb">
@@ -177,9 +180,9 @@
         </div>
         <div class="col-sm-9" id="right-col" style="border-left: 1px solid lightgray">
             <h3 class="text-center">@DIAGRAM@</h3>
-        	<div id="diagram" data-role="diagram"
+        	<div id="diagram" data-role="diagram" style="height: 1200px" 
              data-layout='{"type": "tree", "subtype": "tipover", "horizontalSeparation": 30, "verticalSeparation": 30, "underneathHorizontalOffset": 140}'
-             data-zoom="0.75" data-zoom-min="0.5" data-zoom-max="1.5" data-editable="false"   
+             data-zoom="0.5" data-zoom-min="0.05" data-zoom-max="1.5" data-editable="false"   
              data-shape-defaults='{"width": 40, "height": 40, "visual": visualTemplate}'
              data-bind="source: dataSource, events: {select: onDiagramSelect}"></div>
         </div>
@@ -405,6 +408,11 @@
                     userOption: dataSourceDropDownListPrivate("User", ["extension", "agentname"], null, function(res) {
                     	return res;
                     }),
+                    debtGroupOption: new kendo.data.DataSource({
+                        transport: {
+                            read: ENV.vApi + "select/debtGroupDueDate",
+                        }
+                    }),
                     close: function(e) {
                     	$("#form-organization-popup").data("kendoWindow").close();
                     },
@@ -495,6 +503,14 @@
                 data-item-template="itemGroupTemplate"
 				data-tag-template="tagGroupTemplate"
                 data-bind="value: item.members, source: userOption"></select>
+            </div>
+            <div class="k-edit-label" style="width: 20%" data-bind="invisible: item.hasChild">
+                <label>@Debt group@</label>
+            </div>
+            <div class="k-edit-field" style="width: 70%" data-bind="invisible: item.hasChild">
+                <select style="width: 100%" data-role="multiselect"
+                data-value-primitive="true" 
+                data-bind="value: item.debt_groups, source: debtGroupOption"></select>
             </div>
             <div class="k-edit-label" style="width: 20%">
                 <label>@Color@</label>

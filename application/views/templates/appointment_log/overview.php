@@ -12,8 +12,8 @@
 <div id="action-menu">
     <ul>
         <a href="javascript:void(0)" data-type="update" onclick="openForm({title: '@Edit@', width: 500}); editForm(this)"><li><i class="fa fa-pencil-square-o text-warning"></i><span>@Edit@</span></li></a>
-    	<li class="devide"></li>
-        <a href="javascript:void(0)" data-type="delete" onclick="deleteDataItem(this)"><li><i class="fa fa-times-circle text-danger"></i><span>@Delete@</span></li></a>
+    	<!-- <li class="devide"></li>
+        <a href="javascript:void(0)" data-type="delete" onclick="deleteDataItem(this)"><li><i class="fa fa-times-circle text-danger"></i><span>@Delete@</span></li></a> -->
     </ul>
 </div>
 
@@ -34,19 +34,24 @@ var Config = Object.assign(Config, {
     parse(response) {
         response.data.map(function(doc) {
             doc.appointment_date = doc.appointment_date ? new Date(doc.appointment_date * 1000) : undefined;
-            doc.createdAt = doc.createdAt ? new Date(doc.createdAt * 1000) : undefined;
+            doc.created_at = doc.created_at ? new Date(doc.created_at * 1000) : undefined;
             return doc;
         });
         return response;
     },
     scrollable: true,
     columns: [{
+        // Use uid to fix bug data-uid of row undefined
+        title: ``,
+        template: '<a role="button" class="btn btn-sm btn-circle btn-action btn-primary" data-uid="#: uid #"><i class="fa fa-ellipsis-v"></i></a>',
+        width: 40
+    },{
         title: "@Created at@",
-        field: "createdAt",
+        field: "created_at",
         headerAttributes: { style: "white-space: normal"},
         width: "110px",
         filterable: false,
-        template: data => gridDate(data.appointment_date),
+        template: data => gridDate(data.created_at),
     },{
         title: "@Telesale code@",
         field: "tl_code",
@@ -68,17 +73,20 @@ var Config = Object.assign(Config, {
             width: "110px",
             filterable: false
         }, {
-            field: "customer_info.customer_name",
+            field: "customer_info.name",
             title: "@Name@",
             width: "200px",
             headerAttributes: { style: "white-space: normal"},
             filterable: false
         }, {
-            field: "customer_info.mobile_phone_no",
+            field: "customer_info.phone",
             title: "@Phone@",
             width: "150px",
             headerAttributes: { style: "white-space: normal"},
-            filterable: false
+            filterable: false,
+            template: function(dataItem) {
+                return gridPhone(dataItem['customer_info']['phone'], dataItem['customer_info']['id'], 'customer');
+            }
         }]
     },{
         field: "appointment_date",
@@ -181,6 +189,49 @@ var Config = Object.assign(Config, {
 	});
 
     Table.init();
+
+    async function editForm(ele) {
+        var dataItem = Table.dataSource.getByUid($(ele).data("uid")),
+            dataItemFull = await $.ajax({
+                url: `${Config.crudApi+Config.collection}/${dataItem.id}`,
+                error: errorDataSource
+            }),
+            formHtml = await $.ajax({
+                url: Config.templateApi + Config.collection + "/form",
+                error: errorDataSource
+            });
+            dataItemFull['appointment_date'] = (dataItem['appointment_date']) ? kendo.toString(dataItem['appointment_date'], 'dd/MM/yyyy') : '';
+        var model = Object.assign(Config.observable, {
+            item: dataItemFull,
+            save: function() {
+                var item = this.get('item');
+                if(typeof item.appointment_date == 'string') {
+                    appointment_date_raw = item.appointment_date.split('/');
+                    var appointment_date = new Date(appointment_date_raw[2], appointment_date_raw[1] - 1, appointment_date_raw[0]);
+                }
+                else {
+                    var appointment_date = item.appointment_date
+                }
+                appointment_date.setHours(0, 0, 0, 0);
+                item.appointment_date = appointment_date.getTime() / 1000;
+                $.ajax({
+                    url: ENV.vApi + "appointment_log_solve/update/" + dataItemFull['id'],
+                    data: kendo.stringify(this.item.toJSON()),
+                    error: errorDataSource,
+                    contentType: "application/json; charset=utf-8",
+                    type: "PUT",
+                    success: function() {
+                        closeForm();
+                        Table.dataSource.sync().then(() => {Table.dataSource.read()});
+                    }
+                })
+            }
+        });
+        kendo.destroy($("#right-form"));
+        $("#right-form").empty();
+        var kendoView = new kendo.View(formHtml, { wrap: false, model: model, evalTemplate: false });
+        kendoView.render($("#right-form"));
+    }
 </script>
 
 <style>

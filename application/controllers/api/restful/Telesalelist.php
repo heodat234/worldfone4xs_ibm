@@ -4,6 +4,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 Class Telesalelist extends WFF_Controller {
 
 	private $collection = "Telesalelist";
+	private $user_collection = "User";
+	private $call_collection = "worldfonepbxmanager";
 
 	function __construct()
 	{
@@ -11,6 +13,8 @@ Class Telesalelist extends WFF_Controller {
 		header('Content-type: application/json');
 		$this->load->library("crud");
 		$this->collection = set_sub_collection($this->collection);
+		$this->user_collection = set_sub_collection($this->user_collection);
+		$this->call_collection = set_sub_collection($this->call_collection);
 	}
 
 	function read()
@@ -25,6 +29,10 @@ Class Telesalelist extends WFF_Controller {
                 $match = ["assign" => ['$in' => $members]];
             }
 			$response = $this->crud->read($this->collection, $request, [], $match);
+			foreach ($response['data'] as &$value) {
+				$call = $this->mongo_db->where(array('customernumber' => $value['phone']  ))->select(array('starttime'))->order_by(array('starttime' => -1))->getOne($this->call_collection);
+				$value['starttime_call'] = $call['starttime'];
+			}
 			echo json_encode($response);
 		} catch (Exception $e) {
 			echo json_encode(array("status" => 0, "message" => $e->getMessage()));

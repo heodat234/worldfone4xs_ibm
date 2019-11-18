@@ -4,7 +4,21 @@
 ?>
 <div class="container-fluid">
 	<div class="row">
-		<div class="col-xs-12" id="main-form">
+		<div>
+			<div class="col-xs-8">
+				<div class="form-group">
+		            <h4 class="fieldset-legend"><span>@Reference@</span></h4>
+		        </div>
+				<div data-role="grid"
+				data-columns="[
+					{field: 'name', title: '@Name@'},
+					{field: 'relation', title: '@Relationship@'},
+					{field: 'phone', title: '@Phone@'},
+				]"
+				data-bind="source: relationshipDataSource"></div>
+			</div>
+		</div>
+		<div class="col-xs-4" id="main-form">
 		<?php foreach ($dataFields as $fieldDoc) { 
 			switch ($fieldDoc["type"]) {
 				case 'value':
@@ -28,3 +42,28 @@
 		</div>
 	</div>
 </div>
+
+<script type="text/javascript">
+	var diallistDetailId = "<?= $this->input->get('id') ?>";
+	$.ajax({
+        url: `${Config.crudApi+Config.collection}/${diallistDetailId}`,
+        error: errorDataSource
+    }).then(function(dataItemFull) {
+    	var model = Object.assign({
+	        item: dataItemFull,
+	        relationshipDataSource: new kendo.data.DataSource({
+	        	serverFiltering: true,
+	        	filter: {field: "account_number", operator: "eq", value: dataItemFull.account_number},
+	        	transport: {
+	        		read: ENV.restApi + "relationship",
+	        		parameterMap: parameterMap
+	        	},
+	        	schema: {
+	        		data: "data",
+	        		total: "total"
+	        	}
+	        })
+	    }, Config.observable);
+	    kendo.bind($("#right-form"), kendo.observable(model));
+    })
+</script>

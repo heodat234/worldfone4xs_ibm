@@ -1,6 +1,9 @@
 <div class="row" style="margin: 10px 0">
 	<div class="col-sm-2" id="page-widget"></div>
 	<div class="col-sm-9 filter-mvvm" style="display: none"></div>
+    <div class="col-sm-1" style=" margin: 10px 0; float: right;">
+        <a role="button" class="btn btn-sm" onclick="Table.grid.saveAsExcel()"><i class="fa fa-file-excel-o"></i> <b>@Export@</b></a>
+    </div>
 </div>
 <div class="row">
 	<div class="col-sm-12" style="height: 80vh;">
@@ -12,8 +15,8 @@
 <div id="action-menu">
     <ul>
         <a href="javascript:void(0)" data-type="update" onclick="openForm({title: '@Edit@', width: 500}); editForm(this)"><li><i class="fa fa-pencil-square-o text-warning"></i><span>@Edit@</span></li></a>
-    	<li class="devide"></li>
-        <a href="javascript:void(0)" data-type="delete" onclick="deleteDataItem(this)"><li><i class="fa fa-times-circle text-danger"></i><span>@Delete@</span></li></a>
+    	<!-- <li class="devide"></li>
+        <a href="javascript:void(0)" data-type="delete" onclick="deleteDataItem(this)"><li><i class="fa fa-times-circle text-danger"></i><span>@Delete@</span></li></a> -->
     </ul>
 </div>
 
@@ -45,8 +48,11 @@ var Config = Object.assign(Config, {
     scrollable: true,
     sort: [{field: 'created_at', dir: 'desc'}],
     columns: [{
+        selectable: true,
+        width: 32,
+    }, {
         // Use uid to fix bug data-uid of row undefined
-        title: `<a class='btn btn-sm btn-circle btn-action btn-primary' onclick='return deleteDataItemChecked();'><i class='fa fa-times-circle'></i></a>`,
+        title: `<span data-toggle='tooltip' title='@Delete@' data-placement='bottom'><a class='btn btn-sm btn-circle btn-action btn-primary' onclick='return deleteDataItemChecked();'><i class='fa fa-times-circle'></i></a></span>`,
         template: '<a role="button" class="btn btn-sm btn-circle btn-action btn-primary" data-uid="#: uid #"><i class="fa fa-ellipsis-v"></i></a>',
         width: '70px'
     }, {
@@ -54,175 +60,175 @@ var Config = Object.assign(Config, {
         title: "@Dealer code@",
         width: '150px',
         headerAttributes: { style: "white-space: normal"},
-        filterable: false,
+        filterable: true,
     },{
         field: "dealer_name",
         title: "@Dealer name@",
         width: '200px',
         headerAttributes: { style: "white-space: normal"},
-        filterable: false,
+        filterable: true,
     },{
         field: "location",
         title: "@Location@",
         width: '200px',
         headerAttributes: { style: "white-space: normal"},
-        filterable: false,
+        filterable: true,
     },{
         field: "disbursement",
         title: "@Disbursement@",
         width: '200px',
         headerAttributes: { style: "white-space: normal"},
-        filterable: false,
+        filterable: true,
     },{
         field: "cif",
         title: "CIF",
         width: '200px',
         headerAttributes: { style: "white-space: normal"},
-        filterable: false,
+        filterable: true,
     },{
         field: "acc_no",
         title: "@Account number@",
         width: '200px',
         headerAttributes: { style: "white-space: normal"},
-        filterable: false,
+        filterable: true,
     },{
         field: "cus_name",
         title: "@Customer name@",
         width: '200px',
         headerAttributes: { style: "white-space: normal"},
-        filterable: false,
+        filterable: true,
     },{
         field: "released_date",
         title: "@Released date@",
         width: '150px',
         headerAttributes: { style: "white-space: normal"},
-        filterable: false,
+        filterable: true,
     },{
         field: "disbursed_date",
         title: "@Disbursed date@",
         width: '150px',
         headerAttributes: { style: "white-space: normal"},
-        filterable: false,
+        filterable: true,
     },{
         field: "loan_amount",
         title: "@Loan amount@",
         width: '150px',
         headerAttributes: { style: "white-space: normal"},
-        filterable: false,
+        filterable: true,
     },{
         field: "cmnd",
         title: "@ID@",
         width: '150px',
         headerAttributes: { style: "white-space: normal"},
-        filterable: false,
+        filterable: true,
     },{
         field: "issued_date",
         title: "@Issued date@",
         width: '150px',
         headerAttributes: { style: "white-space: normal"},
-        filterable: false,
+        filterable: true,
     },{
         field: "issued_place",
         title: "@Issued place@",
         width: '200px',
         headerAttributes: { style: "white-space: normal"},
-        filterable: false,
+        filterable: true,
     },{
         field: "bank_acc",
         title: "@Bank account@",
         width: '200px',
         headerAttributes: { style: "white-space: normal"},
-        filterable: false,
+        filterable: true,
     },{
         field: "bank_name",
         title: "@Bank name@",
         width: '200px',
         headerAttributes: { style: "white-space: normal"},
-        filterable: false,
+        filterable: true,
     },{
         field: "bank_branch",
         title: "@Branch@",
         width: '200px',
         headerAttributes: { style: "white-space: normal"},
-        filterable: false,
+        filterable: true,
     },{
         field: "province",
         title: "@Province@",
         width: '200px',
         headerAttributes: { style: "white-space: normal"},
-        filterable: false,
+        filterable: true,
     },{
         field: "phone",
         title: "@Phone@",
         width: '150px',
         headerAttributes: { style: "white-space: normal"},
-        filterable: false,
+        filterable: true,
     },{
         field: "old_cus_farmer",
         title: "@Old customer and farmer@",
         width: '150px',
         headerAttributes: { style: "white-space: normal"},
-        filterable: false,
+        filterable: true,
     },{
         field: "new_cus",
         title: "@New customer@",
         width: '150px',
         headerAttributes: { style: "white-space: normal"},
-        filterable: false,
+        filterable: true,
     },{
         field: "tl_name",
         title: "@Telesale name@",
         width: '200px',
         headerAttributes: { style: "white-space: normal"},
-        filterable: false,
+        filterable: true,
     },{
         field: "farmer_collaboration",
         title: "@Farmer collaboration@",
         width: '200px',
         headerAttributes: { style: "white-space: normal"},
-        filterable: false,
+        filterable: true,
     },{
         field: "jivf_staff",
         title: "@JIVF staff@",
         width: '200px',
         headerAttributes: { style: "white-space: normal"},
-        filterable: false,
+        filterable: true,
     },{
         field: "int",
         title: "@Interest@",
         width: '150px',
         headerAttributes: { style: "white-space: normal"},
-        filterable: false,
+        filterable: true,
     },{
         field: "type",
         title: "@Type@",
         width: '150px',
         headerAttributes: { style: "white-space: normal"},
-        filterable: false,
+        filterable: true,
     },{
         field: "check",
         title: "@Check@ (81000)",
         width: '200px',
         headerAttributes: { style: "white-space: normal"},
-        filterable: false,
+        filterable: true,
     },{
         field: "created_at",
         title: "@Created at@",
         width: '150px',
         headerAttributes: { style: "white-space: normal"},
-        filterable: false,
+        filterable: true,
     },{
         field: "updated_at",
         title: "@Last modified@",
         width: '150px',
         headerAttributes: { style: "white-space: normal"},
-        filterable: false,
+        filterable: true,
     },{
         field: "updated_by",
         title: "@Modified by@",
         width: '150px',
         headerAttributes: { style: "white-space: normal"},
-        filterable: false,
+        filterable: true,
     }],
 });
 </script>

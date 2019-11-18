@@ -103,7 +103,7 @@
                     filter: [{field: 'location', operator: 'eq', value: location}],
                     transport: {
                         read: {
-                            url: ENV.restApi + "Dealer",
+                            url: ENV.restApi + "dealer",
                         },
                         parameterMap: parameterMap
                     },
@@ -148,7 +148,7 @@
                         ],
                         transport: {
                             read: {
-                                url: ENV.restApi + "Sc",
+                                url: ENV.restApi + "sc",
                             },
                             parameterMap: parameterMap
                         },
@@ -171,7 +171,7 @@
             serverFiltering: true,
             transport: {
                 read: {
-                    url: ENV.restApi + "Customer",
+                    url: ENV.restApi + "customer",
                 },
                 parameterMap: parameterMap
             },

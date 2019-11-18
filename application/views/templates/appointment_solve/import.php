@@ -141,7 +141,7 @@
         filter: {
             field: "collection",
             operator: "eq",
-            value: (ENV.type ? ENV.type + "_" : "") + "Appointment"
+            value: (ENV.type ? ENV.type + "_" : "") + "appointment"
         },
         sort: {field: "index", dir: "asc"}
     })

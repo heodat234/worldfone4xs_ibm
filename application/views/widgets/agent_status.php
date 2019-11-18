@@ -5,7 +5,7 @@
         <i class="gi gi-ban text-muted" data-bind="visible: item.SUN" style="display: none"></i>
         <i class="gi gi-airplane text-danger" data-bind="visible: item.UNV" style="display: none"></i>
         <i class="gi gi-briefcase text-warning" data-bind="visible: item.ACW" style="display: none"></i>
-        <i class="gi gi-earphone text-primary" data-bind="visible: item.SOC" style="display: none"></i>
+        <i class="gi gi-earphone text-info" data-bind="visible: item.SOC" style="display: none"></i>
         <span class="caret"></span>
         <small data-bind="text: item.substatus"></small>
     </a>

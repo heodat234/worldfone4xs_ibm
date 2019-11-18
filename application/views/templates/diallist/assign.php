@@ -29,7 +29,7 @@
 			data-bind="value: item.members, source: item.members"></select>
 		</div>
 		<div class="col-sm-12 text-center" style="padding-top: 10px">
-			<button class="k-button">@Assign@</button>
+			<button class="k-button" data-bind="click: assign">@Assign@</button>
 		</div>
 	</div>
 </div>
@@ -46,8 +46,22 @@
 	        notAssignedAction: function(e) {
 	        	if(!this.get('statistic.notAssigned')) {
 	        		notification.show("@None of case not assigned@.");
+	        		return;
 	        	}
+	        	this.set("type", "notAssigned");
 	        	this.set("assignText", "@Assign@ @not assigned case@ @for@")
+	        },
+	        assign: function(e) {
+	        	$.ajax({
+	        		url: ENV.vApi + "diallist/assign", 
+	        		type: "POST",
+	        		data: JSON.stringify({type: this.get("type"), members: this.get("item.members"), diallist_id: this.get("item.id")}),
+	        		contentType: "application/json; charset=utf-8", 
+	        		success: function(res) {
+	        			notification.show(res.message, res.status ? "success" : "error");
+	        			router.navigate("/");
+	        		}
+	        	});
 	        }
 		});
 		kendo.bind(".assign-view", assignObservable);

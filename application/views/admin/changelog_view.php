@@ -112,6 +112,10 @@
                     }
                 });
             },
+            downloadFile: function(e) {
+                var filepath = this.get("selectedItem.app_path");
+                location.href = Config.crudApi + Config.collection + "/download?filepath="+encodeURI(filepath);
+            },
             changeVisibleCode: function(e) {
                 this.set("view.visibleCode", e.currentTarget.checked);
             },
@@ -227,6 +231,7 @@
                         <label class="control-label col-sm-2">Path</label>
                         <div class="col-sm-4">
                             <span data-bind="text: selectedItem.app_path" style="line-height: 32px"></span>
+                            <a data-bind="visible: selectedItem.exists, click: downloadFile" href="javascript:void(0)"><i class="fa fa-download text-info" data-bind="invisible: selectedItem.is_dir"></i></a>
                         </div>
                         <label class="control-label col-sm-2">Last access</label>
                         <div class="col-sm-4">

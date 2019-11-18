@@ -184,7 +184,7 @@ var Config = {
 			function detailData(ele) {
 				var uid = $(ele).data('uid');
 				var dataItem = Table.dataSource.getByUid(uid);
-				window.open(ENV.baseUrl + "manage/customer/#/detail/" + dataItem.foreign_id,'_blank','noopener');
+				window.open(ENV.baseUrl + "manage/telesalelist/#/detail_customer/" + dataItem.foreign_id,'_blank','noopener');
 			}
 
 			$(document).on("click", ".grid-name", function() {

@@ -1,4 +1,7 @@
 window.onerror = function(msg, url, linenumber){
+  <?php if(ENVIRONMENT != "production") { ?>
+  if(typeof tacoSpeech != "undefined") tacoSpeech('Hey! You have an error message: <b>'+msg+'</b>.<br>In: <b>'+url+'</b> <br>Line Number: <b>'+linenumber+'</b>', 10000);
+  <?php } else { ?>
   setTimeout(function() {
     swal({
         title: `@Some error occurred@`,
@@ -42,6 +45,7 @@ window.onerror = function(msg, url, linenumber){
     });
     return true;
   }, 3000);
+  <?php } ?>
 }
 
 function actionPhoneRing(ele) {

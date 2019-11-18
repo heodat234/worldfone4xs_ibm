@@ -15,7 +15,7 @@ var Config = {
     id: '<?= $id ?>',
     crudApi: `${ENV.restApi}`,
     templateApi: `${ENV.templateApi}`,
-    collection: "diallist_detail",
+    collection: "sc_schedule_detail",
     observable: {
     },
     model: {

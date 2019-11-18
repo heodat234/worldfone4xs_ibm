@@ -35,50 +35,12 @@ function subtypeEditor(container, options) {
     select.open();
 };  
 
-var Config = {
-    crudApi: `${ENV.restApi}`,
-    templateApi: `${ENV.templateApi}`,
-    collection: "diallistdetailfield",
-    observable: {
-    },
-    model: {
-        id: "id",
-        fields: {
-        	index: {type: "number"},
-        	collection: {defaultValue: "Diallist_detail"}
-        }
-    },
-    columns: [{
-            field: "index",
-            title: "#",
-            width: 70
-        },{
-            field: "title",
-            title: "Title",
-            width: 220
-        },{
-            field: "field",
-            title: "Field",
-            width: 220
-        },{
-            field: "type",
-            title: "Type",
-            editor: typeEditor
-        },{
-            field: "sub_type",
-            title: "Diallist type",
-            editor: subtypeEditor
-        },{
-            command: ["edit", "destroy"],
-            width: 200
-        }]
-}; 
-
 var Table = {
     dataSource: {},
     grid: {},
-    columns: Config.columns,
+    columns: [],
     init: function() {
+        this.columns = Config.columns;
         var dataSource = this.dataSource = new kendo.data.DataSource({
             serverFiltering: true,
             serverPaging: true,
@@ -208,8 +170,8 @@ var Table = {
 
 <!-- Table Styles Header -->
 <ul class="breadcrumb breadcrumb-top">
-    <li>Setting</li>
-    <li>Diallist detail field</li>
+    <li>@Setting@</li>
+    <li>@Diallist detail field@</li>
 </ul>
 <!-- END Table Styles Header -->
 
@@ -224,7 +186,49 @@ var Table = {
 </div>
 
 <script>
-    window.onload = function() {
+    $.get(ENV.vApi + "select/jsondata", {tags: ["Diallist","type"]}, function(res) {
+        if(!res.data) return;
+        window.Config = {
+            crudApi: `${ENV.restApi}`,
+            templateApi: `${ENV.templateApi}`,
+            collection: "diallistdetailfield",
+            observable: {
+            },
+            model: {
+                id: "id",
+                fields: {
+                    index: {type: "number"},
+                    collection: {defaultValue: "Diallist_detail"},
+                    type: {defaultValue: "string"}
+                }
+            },
+            columns: [{
+                    field: "index",
+                    title: "#",
+                    width: 70
+                },{
+                    field: "title",
+                    title: "@Title@",
+                    width: 220
+                },{
+                    field: "field",
+                    title: "@Field@",
+                    width: 220
+                },{
+                    field: "type",
+                    title: "@Type@",
+                    editor: typeEditor
+                },{
+                    field: "sub_type",
+                    title: "@Diallist type@",
+                    editor: subtypeEditor,
+                    template: '<img style="height: 16px" src="api/v1/image_text/getDiallistTypeName/#: data.sub_type #">',
+                    values: res.data 
+                },{
+                    command: ["edit", "destroy"],
+                    width: 200
+                }]
+        }; 
         Table.init();
-    }
+    });
 </script>

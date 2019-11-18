@@ -127,6 +127,11 @@
                               width: 150,
                           },
                           {
+                              field: "count_fail",
+                              title: "@Fail@",
+                              width: 150,
+                          },
+                          {
                               field: "count_appointment",
                               title: "@Appointment@",
                               width: 150,

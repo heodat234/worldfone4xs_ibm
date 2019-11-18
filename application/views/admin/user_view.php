@@ -110,8 +110,8 @@ var Config = {
             template: data => gridTimestamp(data.lastpingtime, "dd/MM/yy H:mm:ss"),
             width: 150
         },{
-            field: "description",
-            title: "@Description@"
+            field: "fullname",
+            title: "@Full name@"
         },{
             command: [{name: "edit", text: "@Edit@", click: editRole}],
             width: 120

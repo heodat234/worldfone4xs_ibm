@@ -92,7 +92,7 @@
 				</div>
 				<div class="form-group text-center">
 					<button data-role="button" data-bind="click: save">@Save@</button>
-					<button data-role="button" class="btn-primary" data-bind="click: saveAndGoToAssign">@Save@ @and@ @Import@</button>
+					<button data-role="button" class="btn-primary" data-bind="click: saveAndGoToImport">@Save@ @and@ @Import@</button>
 				</div>
 			</div>
 		</div>
@@ -149,8 +149,11 @@
 			},
 			groupOption: dataSourceDropDownList("Group", ["name", "members"], {members: {$exists: true}, type: "custom"}),
 			groupCascade: function(e) {
-				if(e.sender.dataItem())
+				if(e.sender.dataItem()) {
 					this.set("item.members", e.sender.dataItem().members);
+					this.set("item.group_name", e.sender.dataItem().name);
+					this.set("item.group_id", e.sender.dataItem().id);
+				}
 			},
 			save: function() {
 				var data = this.item.toJSON();
@@ -168,7 +171,7 @@
 					error: errorDataSource
 				})
 			},
-			saveAndGoToAssign: function() {
+			saveAndGoToImport: function() {
 				var data = this.item.toJSON();
 				$.ajax({
 					url: `${ENV.restApi}diallist`,
@@ -179,24 +182,7 @@
 						if(response.status) {
 							syncDataSource();
 							var id = response.data.id;
-							router.navigate(`/assign/${id}`);
-						}
-					},
-					error: errorDataSource
-				})
-			},
-			saveAndImport: function() {
-				var data = this.item.toJSON();
-				$.ajax({
-					url: `${ENV.restApi}diallist`,
-					type: "POST",
-					contentType: "application/json; charset=utf-8",
-					data: JSON.stringify(data),
-					success: function(response) {
-						if(response.status) {
-							syncDataSource();
-							var id = response.data.id;
-							router.navigate(`/import/${id}`);
+							router.navigate(`/import_from_basket/${id}`);
 						}
 					},
 					error: errorDataSource

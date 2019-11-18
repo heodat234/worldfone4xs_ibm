@@ -57,7 +57,7 @@ try:
       temp = {}
       checkErr = False
       for idx,header in enumerate(headers):
-         if header['index'] == 26:
+         if header['index'] == 26 or header['index'] == 27:
             continue;
          if str(listDataLibrary[key][idx]) == 'nan':
             listDataLibrary[key][idx] = ''
@@ -106,6 +106,7 @@ try:
             checkUser = False
             for user in users:
                if user['extension'] == value:
+                  temp['assign_name']  = user['agentname']
                   arr[user['extension']] = arr[user['extension']] + 1
                   checkUser = True
                   # cmnd = str(int(listDataLibrary[key][6]))

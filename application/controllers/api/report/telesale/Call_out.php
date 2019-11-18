@@ -59,7 +59,7 @@ Class Call_out extends WFF_Controller {
           $data_aggregate = $this->kendo_aggregate->paging()->get_data_aggregate();
           $data = $this->mongo_db->aggregate_pipeline($this->collection, $data_aggregate);
           foreach ($data as &$value) {      
-            $value['count_success'] = $value['count_dont_pickup']  = $value['count_busy'] = 0;
+            $value['count_success'] = $value['count_dont_pickup']  = $value['count_busy'] = $value['count_fail'] = 0;
             $arr = array_count_values($value['disposition']);
             if (isset($arr['ANSWERED'])) {
               $value['count_success'] = $arr['ANSWERED'];
@@ -69,6 +69,9 @@ Class Call_out extends WFF_Controller {
             }
             if (isset($arr['BUSY'])) {
               $value['count_busy'] = $arr['BUSY'];
+            }
+            if (isset($arr['FAILED'])) {
+              $value['count_fail'] = $arr['FAILED'];
             }
             foreach ($value['dialid_arr'] as &$dialid) {
                 $dialid = new MongoDB\BSON\ObjectId($dialid);

@@ -325,7 +325,7 @@ window.popupObservable.init();
 async function addForm(option = {}) {
     $rightForm = $("#right-form");
     var formHtml = await $.ajax({
-        url: ENV.templateApi + "appointment_log/formAutoFill",
+        url: ENV.templateApi + "appointment_log_solve/formAutoFill",
         data: {doc: option},
         error: errorDataSource
     });

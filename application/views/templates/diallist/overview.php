@@ -7,7 +7,7 @@
     	<a href="javascript:void(0)" data-type="import" onclick="importData(this)"><li><i class="fa fa-download text-success"></i><span>@Import@</span></li></a>
     	<a href="javascript:void(0)" data-type="detail" onclick="assignData(this)"><li><i class="fa fa-check-square-o text-success"></i><span>@Assign@</span></li></a>
     	<li class="devide"></li>
-        <a href="javascript:void(0)" data-type="update" onclick="openForm({title: 'Edit diallist', width: 1000}); editForm(this)"><li><i class="fa fa-pencil-square-o text-warning"></i><span>@Edit@</span></li></a>
+        <a href="javascript:void(0)" data-type="update" onclick="openForm({title: '@Edit@ @campaign@', width: 400}); editForm(this)"><li><i class="fa fa-pencil-square-o text-warning"></i><span>@Edit@</span></li></a>
         <a href="javascript:void(0)" data-type="delete" onclick="deleteDataItem(this)"><li><i class="fa fa-times-circle text-danger"></i><span>@Delete@</span></li></a>
     </ul>
 </div>
@@ -26,7 +26,7 @@ var Config = {
     columns: [{
             field: "name",
             title: "@Name@",
-            template: dataItem => gridName(dataItem.name),
+            template: dataItem => gridNameDiallist(dataItem),
             width: 300
         },{
             field: "mode",
@@ -69,15 +69,21 @@ var Config = {
 	    	    error: errorDataSource
 	    	});
 		var model = Object.assign({
-			item: dataItemFull,
+			item: {name: dataItemFull.name},
 			save: function() {
 	            $.ajax({
 	                url: `${Config.crudApi+Config.collection}/${dataItem.id}`,
-	                data: this.item.toJSON(),
+	                data: JSON.stringify(this.item.toJSON()),
 	                error: errorDataSource,
+                    contentType: "application/json; charset=utf-8",
 	                type: "PUT",
-	                success: function() {
-	                    Table.dataSource.read()
+	                success: function(res) {
+	                	if(res.status) {
+	                    	Table.dataSource.read();
+	                    	closeForm()
+	                	} else {
+	                		notification.show(res.message, "success");
+	                	}
 	                }
 	            })
 			}
@@ -139,6 +145,10 @@ var Config = {
 		var uid = $(ele).data('uid');
 		var dataItem = Table.dataSource.getByUid(uid);
 		router.navigate(`/assign/${dataItem.id}`);
+	}
+
+	function gridNameDiallist(data, href = "javascript:void(0)") {
+	    return (data.runStatus ? '<i class="fa fa-cog fa-spin text-warning"></i> ' : '') + `<a href="${href}"><span class="grid-name">${data.name}</span></a>`;
 	}
 
 	$(document).on("click", ".grid-name", function() {

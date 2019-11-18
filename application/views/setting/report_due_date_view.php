@@ -15,7 +15,7 @@ var Config = {
     parse: function(res) {
     	res.data.map(doc => {
     		doc.createdAt = new Date(doc.createdAt * 1000);
-    		doc.off_date = new Date(doc.off_date * 1000);
+    		doc.due_date = new Date(doc.due_date * 1000);
     	})
     	return res;
     },
@@ -25,7 +25,6 @@ var Config = {
             title: "@Due date@",
             format: "{0: dd/MM/yyyy}",
             editor: function(container, options) {
-                var dateString = kendo.toString(options.model.date, "dd/MM/yyyy" );
                 $('<input id="off-date" data-text-field="' + options.field + '" data-value-field="' + options.field + '" data-bind="value:' + options.field + '" data-format="' + options.format + '"/>')
                     .appendTo(container)
                     .kendoDatePicker({});
@@ -34,16 +33,25 @@ var Config = {
             field: "debt_group",
             title: "@Debt group@",
             editor: function(container, options) {
-                $('<input id="off-date" data-text-field="' + options.field + '" data-value-field="' + options.field + '" data-bind="value:' + options.field + '" data-format="' + options.format + '"/>')
+                console.log(options);
+                $('<input id="due-date" data-text-field="text" data-value-field="value" data-bind="value:' + options.field + '" data-format="' + options.format + '"/>')
                     .appendTo(container)
                     .kendoDropDownList({
-                        autoBind: false,
                         filter: "contains",
-                        dataTextField: "group",
-                        dataValueField: "id",
-                        template: '<span class="k-state-default"></span><span class="k-state-default"><span style="text-transform: uppercase">#: data.type #</span> <span >#: data.group #</span ></span>',
-                        valueTemplate: '<span class="k-state-default"></span><span class="k-state-default"><span style="text-transform: uppercase">#: data.type #</span> <span >#: data.group #</span ></span>',
-                        dataSource: dataSourceDropDownList('Debt_group', [], null, res => res, 1000),
+                        dataSource: dataSourceJsonData(['debt', 'duedate']),
+                        optionLabel: "@Choose@ @debt group@"
+                    });
+            },
+        },{
+            field: "for_month",
+            title: "@For month@",
+            editor: function(container, options) {
+                console.log(options);
+                $('<input id="due-date" data-text-field="text" data-value-field="value" data-bind="value:' + options.field + '" data-format="' + options.format + '"/>')
+                    .appendTo(container)
+                    .kendoDropDownList({
+                        filter: "contains",
+                        dataSource: dataSourceJsonData(['month', 'ofyear']),
                         optionLabel: "@Choose@ @debt group@"
                     });
             },
@@ -113,19 +121,19 @@ var Table = {
                 },
                 update: {
                     url: function(data) {
-                        return Config.crudApi + Config.collection + "/" + data.id;
+                        return `${ENV.vApi}` + Config.collection + '/update/' + data.id;
                     },
                     type: "PUT",
                     contentType: "application/json; charset=utf-8"
                 },
                 create: {
-                    url: Config.crudApi + Config.collection,
+                    url: `${ENV.vApi}` + Config.collection + '/create',
                     type: "POST",
                     contentType: "application/json; charset=utf-8"
                 },
                 destroy: {
                     url: function(data) {
-                        return Config.crudApi + Config.collection + "/" + data.id;
+                        return Config.crudApi + Config.collection + '/' + data.id;
                     },
                     type: "DELETE"
                 },

@@ -46,7 +46,7 @@
     <!-- Bottom of HTML include modal, copyright.. -->
     <?php if(isset($page_footer)) echo $page_footer ?>
 
-    <!-- Output test -->
-    <?php if(isset($modal_output_test)) echo $modal_output_test ?>
+    <!-- Output custom module -->
+    <?php if(isset($page_module)) echo $page_module ?>
     </body>
 </html>
