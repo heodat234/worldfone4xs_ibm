@@ -1,2 +1,7 @@
 05/11/2019, 17:32:48: write() argument must be str, not int
 07/11/2019, 10:38:08: document must be an instance of dict, bson.son.SON, bson.raw_bson.RawBSONDocument, or a type that inherits from collections.MutableMapping
+08/11/2019, 11:56:55: 'utf-8' codec can't decode byte 0xf3 in position 6553: invalid continuation byte
+08/11/2019, 14:09:38: name 'Pool' is not defined
+08/11/2019, 14:10:57: name 'imap' is not defined
+08/11/2019, 14:16:00: processModel() missing 1 required positional argument: 'model'
+12/11/2019, 09:24:19: [Errno 13] Permission denied: '/var/www/html/worldfone4xs_ibm/upload/ftp/loan/ZACCF.csv'

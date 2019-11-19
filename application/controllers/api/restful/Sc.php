@@ -42,6 +42,7 @@ Class Sc extends WFF_Controller {
         try {
             $this->load->library("crud");
             $data = json_decode(file_get_contents('php://input'), TRUE);
+            $data['name']       = $data['sc_name'];
             $data["created_at"]	= time();
             $data["created_by"]	= $this->session->userdata("extension");
             $result = $this->crud->create($this->collection, $data);
@@ -55,6 +56,7 @@ Class Sc extends WFF_Controller {
     {
         try {
             $data = json_decode(file_get_contents('php://input'), TRUE);
+            $data['name']       = $data['sc_name'];
             $data["updated_by"]  =   $this->session->userdata("extension");
             $data['updated_at'] = time();
             $result = $this->crud->where_id($id)->update($this->collection, array('$set' => $data));

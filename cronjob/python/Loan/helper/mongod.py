@@ -63,3 +63,7 @@ class Mongodb:
     def count(self, MONGO_COLLECTION='', WHERE=None):
         collection = self.db[MONGO_COLLECTION]
         return collection.find(WHERE).count()
+
+    def aggregate_pipeline(self, MONGO_COLLECTION='', aggregate_pipeline=[]):
+        collection = self.db[MONGO_COLLECTION]
+        return collection.aggregate(aggregate_pipeline)

@@ -8,14 +8,16 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Reader;
 Class Daily_all_user_report extends WFF_Controller {
 
+    private $collection = "Daily_all_user_report";
     private $lnjc05_collection = "LNJC05";
     private $zaccf_collection = "ZACCF";
     private $sbv_collection = "SBV";
-    private $collection = "Loan_group_report";
     private $group_collection = "Group_card";
     private $cdr_collection = "worldfonepbxmanager";
     private $group_team_collection = "Group";
     private $user_collection = "User";
+    private $ln3206_collection = "LN3206F";
+    private $duedate_collection = "Report_due_date";
 
     function __construct()
     {
@@ -31,6 +33,8 @@ Class Daily_all_user_report extends WFF_Controller {
         $this->cdr_collection = set_sub_collection($this->cdr_collection);
         $this->group_team_collection = set_sub_collection($this->group_team_collection);
         $this->user_collection = set_sub_collection($this->user_collection);
+        $this->ln3206_collection = set_sub_collection($this->ln3206_collection);
+        $this->duedate_collection = set_sub_collection($this->duedate_collection);
     }
 
     function weekOfMonth($dateString) {
@@ -42,9 +46,12 @@ Class Daily_all_user_report extends WFF_Controller {
     function save()
     {
         try {
-            $now =getdate();
-            $week = $this->weekOfMonth(date('Y-m-d'));
+            $now = getdate();
+            $month = '9';
+            $date = $now[0];
+            $due_date = $this->mongo_db->where(array('due_date_add_1' => $date  ))->select(array('due_date'))->getOne($this->duedate_collection);
 
+            // var_dump($month);exit;
             //sibs
             $this->mongo_db->switch_db('_worldfone4xs');
             $users = $this->mongo_db->where(array('active' => true  ))->select(array('extension','agentname'))->get($this->user_collection);
@@ -61,7 +68,6 @@ Class Daily_all_user_report extends WFF_Controller {
             $group = array(
                '$group' => array(
                   '_id' => '$group_id',
-                  'officer_id_arr' => array('$push'=> '$officer_id'),
                   'count_data' => array('$sum'=> 1),
                )
             );
@@ -72,7 +78,7 @@ Class Daily_all_user_report extends WFF_Controller {
             $group_officer = array(
                '$group' => array(
                   '_id' => '$officer_id',
-                  'phone_arr' => array('$push'=> '$mobile_num'),
+                  'account_arr' => array('$push'=> '$account_number'),
                   'count_data' => array('$sum'=> 1),
                )
             );
@@ -83,173 +89,389 @@ Class Daily_all_user_report extends WFF_Controller {
 
             $new_data = array();
             foreach ($data as &$value) {
-                $value['group'] = substr($value['_id'], 0,1);
-                $new_data[$value['group']]['count'] = 0;
-                $new_data[$value['group']]['officer_id_arr'] = array();
-                $new_data[$value['group']]['value'] = array();
-                $value['officer_id_arr'] = $value['officer_id_arr'];
-
-            }
-            foreach ($data as &$value) {
-               $gr = $value['group'];
+               $gr = substr($value['_id'], 0,1);
                if ($gr == 'A') {
-                  $new_data[$gr]['group'] = $gr;
-                  $new_data[$gr]['count'] += $value['count_data'];
-                  $new_data[$gr]['officer_id_arr'] = array_merge($new_data[$gr]['officer_id_arr'],$value['officer_id_arr']);
+                  $new_data[$gr][0]['group'] = $gr;
                }else {
-                  $new_data[$gr]['group'] = $gr;
-                  $new_data[$gr]['count'] += $value['count_data'];
-                  array_push($new_data[$value['group']]['value'],$value);
+                  $new_data[$gr][0]['group'] = $gr;
+                  array_push($new_data[$gr],$value);
                }
 
-
             }
-            foreach ($new_data as &$value) {
-               if ($value['group'] == 'A') {
-                  $value['teams'] = $this->mongo_db->where(array('name' => array('$regex' => 'SIBS/Group A')  ))->select(array('name','members','lead'))->get($this->group_team_collection);
-                  $value['count_officer'] = array_count_values($value['officer_id_arr']);
-                  $team['unwork'] = isset($phone['phone_arr']) ? $this->mongo_db->where(array("userextension" => ['$in' => $team['members']]))->count($this->cdr_collection) : 0;
-                  foreach ($value['teams'] as &$team) {
-                     foreach ($value['count_officer'] as $key => $row) {
-                        if ('JIVF00'.$team['lead'] == $key) {
-                           $team['count_acc'] = $row;
-                        }
+            $insertData = [];
+            foreach ($new_data as $key => &$value) {
+               if ($key == 'A') {
+                  $teams = $this->mongo_db->where(array('name' => array('$regex' => 'SIBS/Group A')  ))->select(array('name','members','lead'))->get($this->group_team_collection);
+                  $i = 1;
+                  foreach ($teams as &$row) {
+                     $temp = [];
+                     $temp['name']    = $row['name'];
+                     $temp['group']   = $key;
+                     $temp['team']    = $i;
+                     $temp['team_lead']  = true;
+                     $temp['date']       = $date;
+
+                     if ($due_date ==null) {
+                        $debt_groups = substr($row['debt_groups'][0], 1,2);
+                        $due_date = $this->mongo_db->where(array('for_month' => (string)$month,'debt_group' => (string)$debt_groups  ))->select(array('due_date','due_date_add_1'))->getOne($this->duedate_collection);
+                        $due_date_add_1 = $due_date['due_date_add_1'];
+                        $result = $this->mongo_db->where(array('date' => $due_date_add_1,'extension' => $row['lead']  ))->select(array('count_data'))->getOne($this->collection);
+
+                        $temp['count_data'] = $result['count_data'];
+                        $temp['unwork'] = $this->mongo_db->where(array("userextension" => $row['lead'], 'disposition' =>array('$ne' => 'ANSWERED'), 'starttime' =>array( '$gte'=> $due_date_add_1, '$lte'=> $date)))->count($this->cdr_collection);
+                        $match_cdr = array(
+                          '$match' => array(
+                              '$and' => array(
+                                 array('starttime'=> array( '$gte'=> $due_date_add_1, '$lte'=> $date)),
+                                 array('userextension' => $member)
+                              )
+                           )
+                        );
+                     }else{
+                        $duedate = (string)(int)date('dmy',$due_date['due_date']);
+                        $temp['count_data'] = $this->mongo_db->where(array("officer_id" => 'JIVF00'.$row['lead'], 'due_date' => $duedate ))->count($this->lnjc05_collection);
+                        $temp['unwork'] = isset($phone['phone_arr']) ? $this->mongo_db->where(array("userextension" => ['$in' => $row['members']],  'disposition' =>array('$ne' => 'ANSWERED'), , 'starttime' =>array( '$gte'=> $date) ))->count($this->cdr_collection) : 0;
+                        $match_cdr = array(
+                          '$match' => array(
+                              '$and' => array(
+                                 array('starttime'=> array( '$gte'=> $date)),
+                                 array('userextension' => ['$in' => $row['members']])
+                              )
+                           )
+                        );
                      }
-                     foreach ($team['members'] as $member) {
-                        foreach ($users as $user) {
-                           if ($member == $user['extension']) {
-                              $team[$member]['name'] = $user['agentname'];
-                              $team[$member]['extension'] = $member;
-                              $team[$member]['count_acc'] = round( $team['count_acc']/count($team['members']),2);
-                              $team[$member]['unwork'] = $this->mongo_db->where(array("userextension" => $member, 'disposition' =>array('$ne' => 'ANSWERED')))->count($this->cdr_collection);
+                     
+                     $temp['talk_time'] = $temp['total_call'] = $temp['total_amount'] = $temp['count_spin'] = $temp['spin_amount'] = $temp['count_conn'] = $temp['conn_amount'] = $temp['count_paid'] = $temp['paid_amount'] = 0;
 
-                              $model = $this->crud->build_model($this->cdr_collection);
-                              $this->load->library("kendo_aggregate", $model);
-                              $this->kendo_aggregate->set_default("sort", null);
+                     
 
-                              $match_cdr = array(
-                                '$match' => array(
-                                    '$and' => array(
-                                       // array('createdAt'=> array( '$gte'=> $start, '$lte'=> $end))
-                                       array('userextension' => '911')
-                                    )
-                                 )
+                     
+                     $group_cdr = array(
+                        '$group' => array(
+                           '_id' => null,
+                           'talk_time' => array('$sum'=> '$billduration'),
+                           'total_call' =>array('$sum' => 1),
+                           'customernumber' => array('$push'=> '$customernumber'),
+                           'disposition_arr' => array('$push'=> '$disposition'),
+                        )
+                     );
+                     $this->kendo_aggregate->set_kendo_query($request)->filtering()->adding($match_cdr,$group_cdr);
+                     $data_aggregate = $this->kendo_aggregate->paging()->get_data_aggregate();
+                     $data_cdr = $this->mongo_db->aggregate_pipeline($this->cdr_collection, $data_aggregate);
+                     if (isset($data_cdr[0])) 
+                     {
+                        $temp['talk_time'] = $data_cdr[0]['talk_time'];
+
+                        //contact
+                        $temp['total_call'] = $data_cdr[0]['total_call'];
+                        $arr_unique_phone = array_values(array_unique($data_cdr[0]['customernumber']));
+                        $match_ct = array(
+                          '$match' => array('mobile_num' => ['$in' => $arr_unique_phone])
+                        );
+                        $group_ct = array(
+                           '$group' => array(
+                              '_id' => null,
+                              'total_amount' => array('$sum'=> '$current_balance'),
+                           )
+                        );
+                        $this->kendo_aggregate->set_kendo_query($request)->filtering()->adding($match_ct,$group_ct);
+                        $data_aggregate = $this->kendo_aggregate->paging()->get_data_aggregate();
+                        $data_ct = $this->mongo_db->aggregate_pipeline($this->lnjc05_collection, $data_aggregate);
+                        $temp['total_amount'] = isset($data_ct[0]) ? $data_ct[0]['total_amount'] : 0;
+
+                        //spin
+                        $count_spin = 0;
+                        $arr_spin = [];
+                        $arr_count_phone = array_count_values($data_cdr[0]['customernumber']);
+                        foreach ($arr_count_phone as $key_phone => $value_phone) {
+                           if ($value_phone > 1) {
+                              $count_spin ++;
+                              array_push($arr_spin, $key_phone);
+                           }
+                        }
+                        $temp['count_spin'] = $count_spin;
+                        $match_spin = array(
+                          '$match' => array('mobile_num' => ['$in' => $arr_spin])
+                        );
+                        $group_spin = array(
+                           '$group' => array(
+                              '_id' => null,
+                              'spin_amount' => array('$sum'=> '$current_balance'),
+                           )
+                        );
+                        $this->kendo_aggregate->set_kendo_query($request)->filtering()->adding($match_spin,$group_spin);
+                        $data_aggregate = $this->kendo_aggregate->paging()->get_data_aggregate();
+                        $data_ct = $this->mongo_db->aggregate_pipeline($this->lnjc05_collection, $data_aggregate);
+                        $temp['spin_amount'] = isset($data_ct[0]) ? $data_ct[0]['spin_amount'] : 0;
+
+                        //connected
+                        $count_ans = 0;
+                        $answer_arr = [];
+                        foreach ($data_cdr[0]['disposition_arr'] as $key_dis => $disposition) {
+                           if ($disposition == 'ANSWERED') {
+                              $count_ans ++;
+                              array_push($answer_arr, $data_cdr[0]['customernumber'][$key_dis]);
+                           }
+                        }
+                        $temp['count_conn'] = $count_ans;
+                        $match_conn = array(
+                           '$match' => array('mobile_num' => ['$in' => array_values(array_unique($answer_arr))])
+                        );
+                        $group_conn = array(
+                           '$group' => array(
+                              '_id' => null,
+                              'conn_amount' => array('$sum'=> '$current_balance'),
+                           )
+                        );
+                        $this->kendo_aggregate->set_kendo_query($request)->filtering()->adding($match_conn,$group_conn);
+                        $data_aggregate = $this->kendo_aggregate->paging()->get_data_aggregate();
+                        $data_conn = $this->mongo_db->aggregate_pipeline($this->lnjc05_collection, $data_aggregate);
+                        $temp['conn_amount'] = isset($data_conn[0]) ? $data_conn[0]['conn_amount'] : 0;
+
+                        //paid
+                        foreach ($data_officer as $office) {
+                           if ($office['_id'] == 'JIVF00'.$row['lead']) {
+                              $match_paid = array(
+                                '$match' => array('account_number' => ['$in' => $office['account_arr']])
                               );
-                              $group_cdr = array(
+                              $group_paid = array(
                                  '$group' => array(
                                     '_id' => null,
-                                    'talk_time' => array('$sum'=> '$billduration'),
-                                    'total_call' =>array('$sum' => 1),
-                                    'customernumber' => array('$push'=> '$customernumber'),
-                                    'disposition_arr' => array('$push'=> '$disposition'),
+                                    'paid_amount' => array('$sum'=> '$amt'),
+                                    'count_paid'  => array('$sum' => 1)
                                  )
                               );
-                              $this->kendo_aggregate->set_kendo_query($request)->filtering()->adding($match_cdr,$group_cdr);
+                              $this->kendo_aggregate->set_kendo_query($request)->filtering()->adding($match_paid,$group_paid);
                               $data_aggregate = $this->kendo_aggregate->paging()->get_data_aggregate();
-                              $data_cdr = $this->mongo_db->aggregate_pipeline($this->cdr_collection, $data_aggregate);
-                              
-                              $count_spin = $count_ans = 0;
-                              $arr_spin = $answer_arr = [];
-                              if (isset($data_cdr[0])) {
-                                 //contract
-                                 $team[$member]['talk_time'] = $data_cdr[0]['talk_time'];
-                                 $team[$member]['total_call'] = $data_cdr[0]['total_call'];
+                              $data_paid = $this->mongo_db->aggregate_pipeline($this->ln3206_collection, $data_aggregate);
+                              $temp['count_paid'] = isset($data_paid[0]) ? $data_paid[0]['count_paid'] : 0;
+                              $temp['paid_amount'] = isset($data_paid[0]) ? $data_paid[0]['paid_amount'] : 0;
 
-                                 $arr_unique_phone = array_values(array_unique($data_cdr[0]['customernumber']));
-                                 $match_ct = array(
-                                   '$match' => array('mobile_num' => ['$in' => $arr_unique_phone])
-                                 );
-                                 $group_ct = array(
-                                    '$group' => array(
-                                       '_id' => null,
-                                       'total_amount' => array('$sum'=> '$current_balance'),
-                                    )
-                                 );
-                                 $this->kendo_aggregate->set_kendo_query($request)->filtering()->adding($match_ct,$group_ct);
-                                 $data_aggregate = $this->kendo_aggregate->paging()->get_data_aggregate();
-                                 $data_ct = $this->mongo_db->aggregate_pipeline($this->lnjc05_collection, $data_aggregate);
-                                 $team[$member]['total_amount'] = isset($data_ct[0]) ? $data_ct[0]['total_amount'] : 0;
-
-                                 //spin
-                                 $arr_count_phone = array_count_values($data_cdr[0]['customernumber']);
-                                 foreach ($arr_count_phone as $key_phone => $value_phone) {
-                                    if ($value_phone > 1) {
-                                       $count_spin ++;
-                                       array_push($arr_spin, $key_phone);
-                                    }
-                                 }
-                                 $team[$member]['count_spin'] = $count_spin;
-                                 $match_spin = array(
-                                   '$match' => array('mobile_num' => ['$in' => $arr_spin])
-                                 );
-                                 $group_spin = array(
-                                    '$group' => array(
-                                       '_id' => null,
-                                       'spin_amount' => array('$sum'=> '$current_balance'),
-                                    )
-                                 );
-                                 $this->kendo_aggregate->set_kendo_query($request)->filtering()->adding($match_spin,$group_spin);
-                                 $data_aggregate = $this->kendo_aggregate->paging()->get_data_aggregate();
-                                 $data_ct = $this->mongo_db->aggregate_pipeline($this->lnjc05_collection, $data_aggregate);
-                                 $team[$member]['spin_amount'] = isset($data_ct[0]) ? $data_ct[0]['spin_amount'] : 0;
-
-                                 //connected
-                                 foreach ($data_cdr[0]['disposition_arr'] as $key_dis => $disposition) {
-                                    if ($disposition == 'ANSWERED') {
-                                       $count_ans ++;
-                                       array_push($answer_arr, $data_cdr[0]['customernumber'][$key_dis]);
-                                    }
-                                 }
-                                 $team[$member]['count_conn'] = $count_ans;
-                                 $match_conn = array(
-                                   '$match' => array('mobile_num' => ['$in' => array_values(array_unique($answer_arr))])
-                                 );
-                                 $group_conn = array(
-                                    '$group' => array(
-                                       '_id' => null,
-                                       'conn_amount' => array('$sum'=> '$current_balance'),
-                                    )
-                                 );
-                                 $this->kendo_aggregate->set_kendo_query($request)->filtering()->adding($match_conn,$group_conn);
-                                 $data_aggregate = $this->kendo_aggregate->paging()->get_data_aggregate();
-                                 $data_conn = $this->mongo_db->aggregate_pipeline($this->lnjc05_collection, $data_aggregate);
-                                 $team[$member]['conn_amount'] = isset($data_conn[0]) ? $data_conn[0]['conn_amount'] : 0;
-                              }
-                              
-                              
                            }
                         }
-                     }                     
-                     unset($team['members']);
-                  }
-
-                  unset($value['officer_id_arr'],$value['count_officer'],$value['value']);
-               }else{
-                  unset($value['officer_id_arr']);
-                  foreach ($value['value'] as &$row) {
-                     $row['count_officer'] = array_count_values($row['officer_id_arr']);
-                     unset($row['officer_id_arr']);
-                     // $row['officer_id_arr'] = array_unique($row['officer_id_arr']);
-                     foreach ($row['count_officer'] as $key => $officer) {
-                        foreach ($data_officer as $row_1) {
-                           if ($row_1['_id'] == $key) {
-                              // $value[$key]['account_arr'] = $row['account_arr'];
-                              $value[$key]['extension'] = substr($key,-4);
-                              $value[$key]['count_acc'] = $officer;
-                              $value[$key]['unwork'] = isset($row['account_arr']) ? $this->mongo_db->where(array("_id" => ['$in' => $row_1['account_arr']]))->count($this->cdr_collection) : 0;
-                           }
-                        }
-
                      }
-                     unset($row['count_officer']);
-                  }
-                  unset($value['value']);
+                     array_push($insertData, $temp);
 
+                     $temp_member = [];
+                     $count_member = count($row['members']);
+                     foreach ($row['members'] as $member) {
+                        foreach ($users as $user) {
+                           if ($member == $user['extension']) {
+                              $temp_member['name'] = $user['agentname'];
+                           }
+                        }
+                        $temp_member['extension'] = $member;
+                        $temp_member['group'] = $key;
+                        $temp_member['team'] = $i;
+                        $temp_member['date'] = $date;
+                        $temp_member['unwork'] = round($temp['unwork']/$count_member,2);
+                        $temp_member['talk_time'] = round($temp['talk_time']/$count_member,2);
+                        $temp_member['total_call'] = round($temp['total_call']/$count_member,2);
+                        $temp_member['total_amount'] = round($temp['total_amount']/$count_member,2);
+                        $temp_member['count_spin'] = round($temp['count_spin']/$count_member,2);
+                        $temp_member['spin_amount'] = round($temp['spin_amount']/$count_member,2);
+                        $temp_member['count_conn'] = round($temp['count_conn']/$count_member,2);
+                        $temp_member['conn_amount'] = round($temp['conn_amount']/$count_member,2);
+                        $temp_member['count_paid'] = round($temp['count_paid']/$count_member,2);
+                        $temp_member['paid_amount'] = round($temp['paid_amount']/$count_member,2);
+                        array_push($insertData, $temp_member);
+                     }
+                     $i++;
+                     
+                  }
+              
+
+               }else{
+                  $i = 1;
+                  foreach ($value as &$row) {
+                     if (isset($row['_id'])) {
+                        $temp = [];
+                        $team = $this->mongo_db->where(array('debt_groups' => $row['_id'] ))->select(array('name','members','lead','debt_groups'))->getOne($this->group_team_collection);
+
+                        $temp['name']       = $row['_id'];
+                        $temp['group']      = $key;
+                        $temp['team']       = $i;
+                        $temp['team_lead']  = true;
+                        $temp['date']       = $date;
+                        // $temp['count_data'] = $row['count_data'];
+                        $temp['unwork'] = $temp['talk_time'] = $temp['total_call'] = $temp['total_amount'] = $temp['count_spin'] = $temp['spin_amount'] = $temp['count_conn'] = $temp['conn_amount'] = $temp['count_paid'] = $temp['paid_amount'] = 0;
+                        foreach ($team['members'] as $member) {
+                           $temp_member = [];
+                           foreach ($users as $user) {
+                              if ($member == $user['extension']) {
+                                 $temp_member['name']   = $user['agentname'];
+                                 $temp_member['extension']   = $member;
+                                 $temp_member['group']  = $key;
+                                 $temp_member['team']   = $i;
+                                 $temp_member['date']   = $date;
+                                 if ($member == '0340') {
+                                    $member_jc05 = 'JIVF00P340';
+                                 }else{
+                                    $member_jc05 = 'JIVF00'.$member;
+                                 }
+
+                                 if ($due_date == null) {
+                                    $debt_groups = substr($team['debt_groups'][0], 1,2);
+                                    $due_date = $this->mongo_db->where(array('for_month' => (string)$month,'debt_group' => (string)$debt_groups  ))->select(array('due_date','due_date_add_1'))->getOne($this->duedate_collection);
+                                    $due_date_add_1 = $due_date['due_date_add_1'];
+                                    $result = $this->mongo_db->where(array('date' => $due_date_add_1,'extension' => $member  ))->select(array('count_data'))->getOne($this->collection);
+
+                                    $temp_member['count_data'] = $result['count_data'];
+                                    $temp_member['unwork'] = $this->mongo_db->where(array("userextension" => $member, 'disposition' =>array('$ne' => 'ANSWERED'), 'starttime' =>array( '$gte'=> $due_date_add_1, '$lte'=> $date)))->count($this->cdr_collection);
+                                    $match_cdr = array(
+                                      '$match' => array(
+                                          '$and' => array(
+                                             array('starttime'=> array( '$gte'=> $due_date_add_1, '$lte'=> $date)),
+                                             array('userextension' => $member)
+                                          )
+                                       )
+                                    );
+
+                                 }else{
+                                    $duedate = (string)(int)date('dmy',$due_date['due_date']);
+                                    $temp_member['count_data'] = $this->mongo_db->where(array("officer_id" => $member_jc05, 'due_date' => $duedate ))->count($this->lnjc05_collection);
+                                    $temp_member['unwork'] = $this->mongo_db->where(array("userextension" => $member, 'disposition' =>array('$ne' => 'ANSWERED'),'starttime' => array('$gte' => $date) ))->count($this->cdr_collection);
+                                 }
+
+                                 $model = $this->crud->build_model($this->cdr_collection);
+                                 $this->load->library("kendo_aggregate", $model);
+                                 $this->kendo_aggregate->set_default("sort", null);
+
+                                 
+                                 $group_cdr = array(
+                                    '$group' => array(
+                                       '_id' => null,
+                                       'talk_time' => array('$sum'=> '$billduration'),
+                                       'total_call' =>array('$sum' => 1),
+                                       'customernumber' => array('$push'=> '$customernumber'),
+                                       'disposition_arr' => array('$push'=> '$disposition'),
+                                    )
+                                 );
+                                 $this->kendo_aggregate->set_kendo_query($request)->filtering()->adding($match_cdr,$group_cdr);
+                                 $data_aggregate = $this->kendo_aggregate->paging()->get_data_aggregate();
+                                 $data_cdr = $this->mongo_db->aggregate_pipeline($this->cdr_collection, $data_aggregate);
+                                 
+                                 $count_spin = $count_ans = 0;
+                                 $arr_spin = $answer_arr = [];
+                                 if (isset($data_cdr[0])) {
+                                    //contract
+                                    $temp_member['talk_time']    = $data_cdr[0]['talk_time'];
+                                    $temp_member['total_call']   = $data_cdr[0]['total_call'];
+
+                                    $arr_unique_phone = array_values(array_unique($data_cdr[0]['customernumber']));
+                                    $match_ct = array(
+                                      '$match' => array('mobile_num' => ['$in' => $arr_unique_phone])
+                                    );
+                                    $group_ct = array(
+                                       '$group' => array(
+                                          '_id' => null,
+                                          'total_amount' => array('$sum'=> '$current_balance'),
+                                       )
+                                    );
+                                    $this->kendo_aggregate->set_kendo_query($request)->filtering()->adding($match_ct,$group_ct);
+                                    $data_aggregate = $this->kendo_aggregate->paging()->get_data_aggregate();
+                                    $data_ct = $this->mongo_db->aggregate_pipeline($this->lnjc05_collection, $data_aggregate);
+                                    $temp_member['total_amount'] = isset($data_ct[0]) ? $data_ct[0]['total_amount'] : 0;
+
+                                    //spin
+                                    $arr_count_phone = array_count_values($data_cdr[0]['customernumber']);
+                                    foreach ($arr_count_phone as $key_phone => $value_phone) {
+                                       if ($value_phone > 1) {
+                                          $count_spin ++;
+                                          array_push($arr_spin, $key_phone);
+                                       }
+                                    }
+                                    $temp_member['count_spin'] = $count_spin;
+                                    $match_spin = array(
+                                      '$match' => array('mobile_num' => ['$in' => $arr_spin])
+                                    );
+                                    $group_spin = array(
+                                       '$group' => array(
+                                          '_id' => null,
+                                          'spin_amount' => array('$sum'=> '$current_balance'),
+                                       )
+                                    );
+                                    $this->kendo_aggregate->set_kendo_query($request)->filtering()->adding($match_spin,$group_spin);
+                                    $data_aggregate = $this->kendo_aggregate->paging()->get_data_aggregate();
+                                    $data_ct = $this->mongo_db->aggregate_pipeline($this->lnjc05_collection, $data_aggregate);
+                                    $temp_member['spin_amount'] = isset($data_ct[0]) ? $data_ct[0]['spin_amount'] : 0;
+
+                                    //connected
+                                    foreach ($data_cdr[0]['disposition_arr'] as $key_dis => $disposition) {
+                                       if ($disposition == 'ANSWERED') {
+                                          $count_ans ++;
+                                          array_push($answer_arr, $data_cdr[0]['customernumber'][$key_dis]);
+                                       }
+                                    }
+                                    $temp_member['count_conn'] = $count_ans;
+                                    $match_conn = array(
+                                      '$match' => array('mobile_num' => ['$in' => array_values(array_unique($answer_arr))])
+                                    );
+                                    $group_conn = array(
+                                       '$group' => array(
+                                          '_id' => null,
+                                          'conn_amount' => array('$sum'=> '$current_balance'),
+                                       )
+                                    );
+                                    $this->kendo_aggregate->set_kendo_query($request)->filtering()->adding($match_conn,$group_conn);
+                                    $data_aggregate = $this->kendo_aggregate->paging()->get_data_aggregate();
+                                    $data_conn = $this->mongo_db->aggregate_pipeline($this->lnjc05_collection, $data_aggregate);
+                                    $temp_member['conn_amount'] = isset($data_conn[0]) ? $data_conn[0]['conn_amount'] : 0;
+
+                                    //paid
+                                    foreach ($data_officer as $office) {
+                                       if ($office['_id'] == $member_jc05) {
+                                          $match_paid = array(
+                                            '$match' => array('account_number' => ['$in' => $office['account_arr']])
+                                          );
+                                          $group_paid = array(
+                                             '$group' => array(
+                                                '_id' => null,
+                                                'paid_amount' => array('$sum'=> '$amt'),
+                                                'count_paid'  => array('$sum' => 1)
+                                             )
+                                          );
+                                          $this->kendo_aggregate->set_kendo_query($request)->filtering()->adding($match_paid,$group_paid);
+                                          $data_aggregate = $this->kendo_aggregate->paging()->get_data_aggregate();
+                                          $data_paid = $this->mongo_db->aggregate_pipeline($this->ln3206_collection, $data_aggregate);
+                                          $temp_member['count_paid'] = isset($data_paid[0]) ? $data_paid[0]['count_paid'] : 0;
+                                          $temp_member['paid_amount'] = isset($data_paid[0]) ? $data_paid[0]['paid_amount'] : 0;
+
+                                          $temp['count_paid'] += $temp_member['count_paid'];
+                                          $temp['paid_amount'] += $temp_member['paid_amount'];
+                                       }
+                                    }
+
+                                    //team
+                                    $temp['count_data'] += $temp_member['count_data'];
+                                    $temp['unwork'] += $temp_member['unwork'];
+                                    $temp['talk_time'] += $temp_member['talk_time'];
+                                    $temp['total_call'] += $temp_member['total_call'];
+                                    $temp['total_amount'] += $temp_member['total_amount'];
+                                    $temp['conn_amount'] += $temp_member['conn_amount'];
+                                    $temp['count_conn'] += $temp_member['count_conn'];
+                                    $temp['spin_amount'] += $temp_member['spin_amount'];
+                                    $temp['count_spin'] += $temp_member['count_spin'];
+                                    
+                                 }
+                                 
+                              }
+                             
+                           }
+                           array_push($insertData, $temp_member);
+                        }
+                        $i++;
+                        array_push($insertData, $temp);
+                     }
+                  }
+                  
                }
 
                
             }
-            print_r($new_data['A']);
+            if (count($insertData) > 0) {
+               $this->mongo_db->batch_insert($this->collection,$insertData);
+            }
 
         } catch (Exception $e) {
             echo json_encode(array("status" => 0, "message" => $e->getMessage()));

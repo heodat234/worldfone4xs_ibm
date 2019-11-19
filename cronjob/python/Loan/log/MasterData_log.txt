@@ -1,0 +1,41 @@
+08/11/2019, 11:57:26: name 'd1' is not defined
+08/11/2019, 11:58:08: End Log
+08/11/2019, 11:58:52: End Log
+08/11/2019, 11:59:17: name 'd1' is not defined
+08/11/2019, 12:00:22: End Log
+08/11/2019, 13:48:39: End Log
+08/11/2019, 13:51:51: End Log
+08/11/2019, 13:53:03: End Log
+08/11/2019, 14:11:41: time data '12112019' does not match format '%d/%m/%Y'
+08/11/2019, 14:12:04: End Log
+08/11/2019, 14:16:39: End Log
+08/11/2019, 14:50:23: End Log
+08/11/2019, 15:31:35: name 'add' is not defined
+09/11/2019, 13:55:26: 'str' object has no attribute 'strftime'
+09/11/2019, 13:55:52: 'str' object has no attribute 'strftime'
+09/11/2019, 13:56:28: time data '22/04/2019' does not match format '%d-%m-%y'
+09/11/2019, 13:57:20: unsupported operand type(s) for -: 'datetime.datetime' and 'str'
+09/11/2019, 13:57:35: unconverted data remains: 19
+09/11/2019, 13:58:12: 'str' object has no attribute 'strftime'
+09/11/2019, 14:02:07: unconverted data remains: 19
+09/11/2019, 14:17:18: name 'row' is not defined
+09/11/2019, 14:17:35: time data '30-04-19' does not match format '%d/%m/%Y'
+09/11/2019, 14:17:55: time data '30-04-19' does not match format '%d/%m/%y'
+09/11/2019, 14:18:41: name 'row' is not defined
+09/11/2019, 14:19:14: time data '30/04/19' does not match format '%d/%m/%Y'
+09/11/2019, 14:19:35: time data '30/04/19' does not match format '%d/%m/%Y'
+09/11/2019, 14:19:52: unconverted data remains: 19
+09/11/2019, 14:34:04: 'overdue'
+09/11/2019, 15:36:37: name 'zaccf' is not defined
+09/11/2019, 15:37:17: 'overdue_date'
+09/11/2019, 15:37:20: 'overdue_date'
+09/11/2019, 15:38:51: 'name'
+09/11/2019, 15:50:23: End Log
+09/11/2019, 15:52:09: 'overdue'
+09/11/2019, 16:40:44: End Log
+14/11/2019, 14:07:40: End Log
+14/11/2019, 15:36:00: End Log
+14/11/2019, 15:47:53: time data '12/12/18' does not match format '%d-%m-%y'
+14/11/2019, 15:48:23: time data '12/12/18' does not match format '%d-%m-%y'
+14/11/2019, 15:51:25: End Log
+14/11/2019, 16:46:26: End Log

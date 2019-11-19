@@ -77,6 +77,7 @@ Class Sc extends WFF_Controller {
                             $result = false;
                         }
                         else {
+                            $doc["name"] =        $doc['sc_name'];
                             $checkExist = $this->crud->where(array('sc_code' => (string)$doc['sc_code']))->getOne($this->collection, array('sc_code', 'update_import_id'));
                             if(!empty($checkExist)) {
                                 $updateImportId = (!empty($checkExist['update_import_id'])) ? $checkExist['update_import_id'] : array();

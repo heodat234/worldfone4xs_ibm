@@ -1,0 +1,14 @@
+09/11/2019, 12:34:34: unconverted data remains: 19
+
+09/11/2019, 12:38:22: unconverted data remains: 19
+
+09/11/2019, 12:40:00: unconverted data remains: 19
+
+09/11/2019, 12:46:41: unconverted data remains: 19
+
+09/11/2019, 12:47:53: unconverted data remains: 
+
+09/11/2019, 12:50:12: 'data' is an invalid keyword argument for this function
+09/11/2019, 12:54:01: pprint() missing 1 required positional argument: 'object'
+09/11/2019, 12:54:42: time data '"1' does not match format '%d/%m/%Y'
+09/11/2019, 12:56:04: time data '"1' does not match format '%d/%m/%Y'

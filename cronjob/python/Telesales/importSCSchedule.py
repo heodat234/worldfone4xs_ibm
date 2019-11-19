@@ -50,24 +50,26 @@ try:
             countRow = countRow + 1
             if idx == 0:
                 continue
-            if not isinstance(ngayTrucs[idx], str):
-                temp['result']      = 'error'
-                temp['error_cell']  = xl_rowcol_to_cell(key, idx)
-                temp['type']        = 'text'
-                temp['error_mesg']  = 'Dòng ngày trực xin vui lòng chọn kiểu text'
-                result = False
-            else:
-                temp['result']      = 'success'
-                temp['from_date']   = int(time.mktime(time.strptime(ngayTrucs[idx], "%d/%m/%Y")))
-                result = True
+
             temp['import_id']       = str(importLogInfo['_id'])
             temp['created_by']      = importLogInfo['created_by']
             temp['created_at']      = time.time()
-            temp['dealer_code']     = listLichLamViec[0]
-            temp['sc_code']         = list(value.split(';'))
-            scField                 = 'sc' + str(temp['from_date'])
-            temp['kendoGridField']  = scField
+            try:
+                temp['from_date']   = int(time.mktime(time.strptime(ngayTrucs[idx], "%d/%m/%Y")))
+            except Exception as e:
+                temp['result']      = 'error'
+                temp['error_cell']  = xl_rowcol_to_cell(0, idx)
+                temp['type']        = 'text'
+                temp['error_mesg']  = 'Dòng ngày trực xin vui lòng chọn kiểu text'
+                result = False
+
             if result == True:
+                temp['dealer_code']     = listLichLamViec[0]
+                temp['sc_code']         = list(value.split(';'))
+                scField                 = 'sc' + str(temp['from_date'])
+                temp['kendoGridField']  = scField
+                temp['result']      = 'success'
+                temp['from_date']   = int(time.mktime(time.strptime(ngayTrucs[idx], "%d/%m/%Y")))
                 insertData.append(temp)
                 resultData.append(temp)
             else:
@@ -75,10 +77,11 @@ try:
                 resultData.append(temp)
     if len(errorData) > 0:
         resultImport = mongodb.batch_insert(common.getSubUser(subUserType, 'Sc_schedule_result'), errorData)
+        mongodb.update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': ObjectId(importLogId)}, VALUE={'status': 0, 'complete_import': time.time()})
     else:
         resultImport = mongodb.batch_insert(collection, insertData)
         resultImport = mongodb.batch_insert(common.getSubUser(subUserType, 'Sc_schedule_result'), resultData)
-    mongodb.update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': ObjectId(importLogId)}, VALUE={'status': 1, 'complete_import': time.time()})
+        mongodb.update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': ObjectId(importLogId)}, VALUE={'status': 1, 'complete_import': time.time()})
 except Exception as e:
     pprint(e)
     log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')
