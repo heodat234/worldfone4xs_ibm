@@ -48,7 +48,7 @@
       
       function saveAsExcel() {
         $.ajax({
-          url: ENV.reportApi + "loan/loan_group_report/downloadExcel",
+          url: ENV.reportApi + "loan/daily_all_user_report/downloadExcel",
           type: 'POST',
           dataType: 'json',
           timeout: 30000

@@ -38,6 +38,7 @@ try:
    resultData  = []
    errorData   = []
 
+
    # SIBS
    count = mongodb.count(MONGO_COLLECTION=lnjc05_collection)
    quotient = int(count)/10000
@@ -103,12 +104,10 @@ try:
             row['current_add']    = row['address']
 
          today    = datetime.now()
-         if len(str(row['due_date'])) == 5:
-            row['due_date']       = '0'+str(row['due_date'])
-         date                 = str(row['due_date'])
-         d2                   = date[0:2]+'-'+date[2:4]+'-'+date[4:6]
          FMT      = '%d-%m-%y'
          d1       = today.strftime(FMT)
+         date_time = datetime.fromtimestamp(row['due_date'])
+         d2       = date_time.strftime(FMT)
          tdelta   = datetime.strptime(d1, FMT) - datetime.strptime(d2, FMT)
          row['CURRENT_DPD'] = tdelta.days
          
@@ -298,12 +297,10 @@ try:
             SELECT=['due_date'])
          if lnjc05 != None:
             today    = datetime.now()
-            if len(str(lnjc05['due_date'])) == 5:
-               lnjc05['due_date']       = '0'+str(lnjc05['due_date'])
-            date                 = str(lnjc05['due_date'])
-            d2                   = date[0:2]+'-'+date[2:4]+'-'+date[4:6]
+            date_time = datetime.fromtimestamp(lnjc05['due_date'])
             FMT      = '%d-%m-%y'
             d1       = today.strftime(FMT)
+            d2       = date_time.strftime(FMT)
             tdelta   = datetime.strptime(d1, FMT) - datetime.strptime(d2, FMT)
             temp['CURRENT_DPD'] = tdelta.days
          

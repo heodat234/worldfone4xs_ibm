@@ -80,10 +80,8 @@ try:
          lnjc05 = mongodb.getOne(MONGO_COLLECTION=lnjc05_collection, WHERE={'account_number': str(row['account'])},SELECT=['due_date','group_id'])
          if lnjc05 != None:
             row['group']      = lnjc05['group_id'] 
-            if len(str(lnjc05['due_date'])) == 5:
-            lnjc05['due_date']       = '0'+str(lnjc05['due_date'])
-            date                 = str(lnjc05['due_date'])
-            d2                   = date[0:2]+'/'+date[2:4]+'/'+date[4:6]
+            date_time = datetime.fromtimestamp(lnjc05['due_date'])
+            d2       = date_time.strftime('%d/%m/%y')
             tdelta   = datetime.strptime(d1, '%d/%m/%y') - datetime.strptime(d2, '%d/%m/%y')
             row['num_of_overdue_day'] = tdelta.days
             row['due_date']   = d2
