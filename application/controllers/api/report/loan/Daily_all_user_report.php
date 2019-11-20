@@ -54,8 +54,8 @@ Class Daily_all_user_report extends WFF_Controller {
             $this->mongo_db->switch_db('_worldfone4xs');
             $users = $this->mongo_db->where(array('active' => true  ))->select(array('extension','agentname'))->get($this->user_collection);
             $this->mongo_db->switch_db();
-            
-            
+
+
             $model = $this->crud->build_model($this->lnjc05_collection);
             $this->load->library("kendo_aggregate", $model);
             $this->kendo_aggregate->set_default("sort", null);
@@ -80,7 +80,7 @@ Class Daily_all_user_report extends WFF_Controller {
                   )
                )
             );
-   
+
             $group_officer = array(
                '$group' => array(
                   '_id' => '$officer_id',
@@ -118,7 +118,7 @@ Class Daily_all_user_report extends WFF_Controller {
                      $temp['date']       = $date;
                      $temp['extension']  = $row['lead'];
                      if ($due_date != null) {
-                        
+
                         $duedate = $due_date['due_date'];
                         $temp['due_date']          = $duedate;
                         $temp['count_data'] = $this->mongo_db->where(array("officer_id" => 'JIVF00'.$row['lead'], 'due_date' => array( '$gte'=> $duedate) ))->count($this->lnjc05_collection);
@@ -131,9 +131,9 @@ Class Daily_all_user_report extends WFF_Controller {
                               )
                            )
                         );
-                        
+
                      }else {
-                        
+
                         $result = $this->mongo_db->where(array('due_date' => ['$exists' => true],'team_lead' => ['$exists' => true],'extension' => $row['lead']  ))->select(array('count_data','due_date'))->order_by(array('date'=> -1))->getOne($this->collection);
                         $due_date_add_1     = isset($result['due_date']) ? $result['due_date'] : $date;
                         $temp['count_data'] = isset($result['count_data']) ? $result['count_data'] : 0;
@@ -146,11 +146,11 @@ Class Daily_all_user_report extends WFF_Controller {
                               )
                            )
                         );
-                        
+
                      }
-                     
+
                      $temp['talk_time'] = $temp['total_call'] = $temp['total_amount'] = $temp['count_spin'] = $temp['spin_amount'] = $temp['count_conn'] = $temp['conn_amount'] = $temp['count_paid'] = $temp['paid_amount'] = $temp['ptp_amount'] = $temp['count_ptp'] = $temp['paid_amount_promise'] = $temp['count_paid_promise'] = 0;
-                     
+
                      $group_cdr = array(
                         '$group' => array(
                            '_id' => null,
@@ -163,14 +163,14 @@ Class Daily_all_user_report extends WFF_Controller {
                      $this->kendo_aggregate->set_kendo_query($request)->filtering()->adding($match_cdr,$group_cdr);
                      $data_aggregate = $this->kendo_aggregate->paging()->get_data_aggregate();
                      $data_cdr = $this->mongo_db->aggregate_pipeline($this->cdr_collection, $data_aggregate);
-                     if (isset($data_cdr[0])) 
+                     if (isset($data_cdr[0]))
                      {
                         $temp['talk_time'] = $data_cdr[0]['talk_time'];
 
                         //contact
                         $temp['total_call'] = $data_cdr[0]['total_call'];
                         $arr_unique_phone = array_values(array_unique($data_cdr[0]['customernumber']));
-                        
+
                         if (isset($duedate)) {
                            $match_ct = array(
                               '$match' => array(
@@ -211,7 +211,7 @@ Class Daily_all_user_report extends WFF_Controller {
                               array_push($arr_spin, $key_phone);
                            }
                         }
-                        
+
                         if (isset($duedate)) {
                            $match_spin = array(
                               '$match' => array(
@@ -231,7 +231,7 @@ Class Daily_all_user_report extends WFF_Controller {
                               )
                            );
                         }
-                        
+
                         $group_spin = array(
                            '$group' => array(
                               '_id' => null,
@@ -253,7 +253,7 @@ Class Daily_all_user_report extends WFF_Controller {
                               array_push($answer_arr, $data_cdr[0]['customernumber'][$key_dis]);
                            }
                         }
-                        
+
                         if (isset($duedate)) {
                            $match_conn = array(
                               '$match' => array(
@@ -307,7 +307,7 @@ Class Daily_all_user_report extends WFF_Controller {
                               )
                            );
                         }
-                        
+
                         $group_ptp = array(
                            '$group' => array(
                               '_id' => null,
@@ -318,7 +318,7 @@ Class Daily_all_user_report extends WFF_Controller {
                         $this->kendo_aggregate->set_kendo_query($request)->filtering()->adding($match_ptp,$group_ptp);
                         $data_aggregate = $this->kendo_aggregate->paging()->get_data_aggregate();
                         $data_ptp = $this->mongo_db->aggregate_pipeline($this->diallist_detail_collection, $data_aggregate);
-                        
+
                         $account_ptp_arr   = isset($data_ptp[0]) ? array_values(array_unique($data_ptp[0]['account_arr'])) : array();
                         if (isset($duedate)) {
                            $match_ptp_1 = array(
@@ -371,7 +371,7 @@ Class Daily_all_user_report extends WFF_Controller {
                               )
                            );
                         }
-                        
+
                         $group_paid_promise = array(
                            '$group' => array(
                               '_id' => null,
@@ -473,9 +473,9 @@ Class Daily_all_user_report extends WFF_Controller {
                         array_push($insertData, $temp_member);
                      }
                      $i++;
-                     
+
                   }
-              
+
 
                }
                else{
@@ -522,7 +522,7 @@ Class Daily_all_user_report extends WFF_Controller {
                                        )
                                     );
                                  }else {
-                                    
+
                                     $result = $this->mongo_db->where(array('due_date' => ['$exists' => true],'extension' => $member  ))->select(array('count_data','due_date'))->order_by(array('date'=> -1))->getOne($this->collection);
                                     $due_date_add_1            = isset($result['due_date']) ? $result['due_date'] : $date;
                                     $temp_member['count_data'] = isset($result['count_data']) ? $result['count_data'] : 0;
@@ -554,7 +554,7 @@ Class Daily_all_user_report extends WFF_Controller {
                                  $this->kendo_aggregate->set_kendo_query($request)->filtering()->adding($match_cdr,$group_cdr);
                                  $data_aggregate = $this->kendo_aggregate->paging()->get_data_aggregate();
                                  $data_cdr = $this->mongo_db->aggregate_pipeline($this->cdr_collection, $data_aggregate);
-                                 
+
                                  $count_spin = $count_ans = 0;
                                  $arr_spin = $answer_arr = [];
                                  if (isset($data_cdr[0])) {
@@ -601,7 +601,7 @@ Class Daily_all_user_report extends WFF_Controller {
                                           array_push($arr_spin, $key_phone);
                                        }
                                     }
-                                    
+
                                     if (isset($duedate)) {
                                        $match_spin = array(
                                           '$match' => array(
@@ -640,7 +640,7 @@ Class Daily_all_user_report extends WFF_Controller {
                                           array_push($answer_arr, $data_cdr[0]['customernumber'][$key_dis]);
                                        }
                                     }
-                                    
+
                                     if (isset($duedate)) {
                                        $match_conn = array(
                                           '$match' => array(
@@ -660,7 +660,7 @@ Class Daily_all_user_report extends WFF_Controller {
                                           )
                                        );
                                     }
-                                    
+
                                     $group_conn = array(
                                        '$group' => array(
                                           '_id' => null,
@@ -695,7 +695,7 @@ Class Daily_all_user_report extends WFF_Controller {
                                           )
                                        );
                                     }
-                                    
+
                                     $group_ptp = array(
                                        '$group' => array(
                                           '_id' => null,
@@ -706,7 +706,7 @@ Class Daily_all_user_report extends WFF_Controller {
                                     $this->kendo_aggregate->set_kendo_query($request)->filtering()->adding($match_ptp,$group_ptp);
                                     $data_aggregate = $this->kendo_aggregate->paging()->get_data_aggregate();
                                     $data_ptp = $this->mongo_db->aggregate_pipeline($this->diallist_detail_collection, $data_aggregate);
-                                    
+
                                     $account_ptp_arr   = isset($data_ptp[0]) ? array_values(array_unique($data_ptp[0]['account_arr'])) : array();
                                     if (isset($duedate)) {
                                        $match_ptp_1 = array(
@@ -759,7 +759,7 @@ Class Daily_all_user_report extends WFF_Controller {
                                           )
                                        );
                                     }
-                                    
+
                                     $group_paid_promise = array(
                                        '$group' => array(
                                           '_id' => null,
@@ -796,7 +796,7 @@ Class Daily_all_user_report extends WFF_Controller {
                                                 )
                                              );
                                           }
-                                          
+
                                           $group_paid = array(
                                              '$group' => array(
                                                 '_id' => null,
@@ -848,9 +848,9 @@ Class Daily_all_user_report extends WFF_Controller {
                                     $temp['collect_ratio_acc'] += $temp_member['collect_ratio_acc'];
                                     $temp['collect_ratio_amt'] += $temp_member['collect_ratio_amt'];
                                  }
-                                 
+
                               }
-                             
+
                            }
                            array_push($insertData, $temp_member);
                         }
@@ -858,10 +858,10 @@ Class Daily_all_user_report extends WFF_Controller {
                         array_push($insertData, $temp);
                      }
                   }
-                  
+
                }
 
-               
+
             }
             if (count($insertData) > 0) {
                // print_r($insertData);
@@ -876,6 +876,31 @@ Class Daily_all_user_report extends WFF_Controller {
 
    function exportExcel()
    {
+      $now = date('d/m/Y');
+      $now = getdate();
+      $today = $now['mday'].'-'.$now['month'].'-'.$now['year'];
+      $date = strtotime("$today");
+      $data = $this->mongo_db->where(array('date' => 1569862800  ))->get($this->collection);
+      // if($data) {
+      //     $row = 4;
+      //     foreach ($data as $value) {
+      //       if ($value['group'] == 'A') {
+      //          if (isset($value['team_lead'])) {
+      //             $team = $value['team'];
+      //          }
+      //          var_dump($value);
+      //          // $worksheet->setCellValue("B".$row, $value['group_id']);
+      //          $row++;
+      //       }
+
+
+      //     }
+      // }
+      // // var_dump($data);
+      // exit;
+
+
+
       $filename = "DAILY ALL USER REPORT.xlsx";
       $spreadsheet = new Spreadsheet();
       $spreadsheet->getProperties()
@@ -895,34 +920,88 @@ Class Daily_all_user_report extends WFF_Controller {
       $worksheet->setCellValue("A1", "No");
       $worksheet->getColumnDimension('A')->setAutoSize(true);
       $worksheet->setCellValue("B1", "Date");
-      $worksheet->getColumnDimension('B')->setAutoSize(true);
-      $worksheet->mergeCells('C1:Y1');
-      $worksheet->setCellValue("C1", "20/11/2019");
-      $worksheet->mergeCells('A2:B3');
-      $worksheet->setCellValue("A2", "A GROUP");
-      $worksheet->mergeCells('C2:C3');
-      $worksheet->setCellValue("C2", "Total handled accounts");
-      $worksheet->mergeCells('D2:D3');
-      $worksheet->setCellValue("D2", "Unwork accounts");
+      $worksheet->mergeCells('C1:Y1')->setCellValue("C1", $now['mday'].'-'.$now['mon'].'-'.$now['year']);
+      $style = array('font' => array('bold' => true), 'alignment' => array('horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER));
+      $worksheet->getStyle("C1")->applyFromArray($style);
+
+      $worksheet->mergeCells('A2:B3')->setCellValue("A2", "A GROUP");
+      $worksheet->mergeCells('C2:C3')->setCellValue("C2", "Total handled accounts");
+      $worksheet->mergeCells('D2:D3')->setCellValue("D2", "Unwork accounts");
+      $worksheet->mergeCells('E2:E3')->setCellValue("E2", "Talk time (minutes)");
+      $worksheet->mergeCells('F2:G2')->setCellValue("F2", "Contacted");
+      $worksheet->setCellValue("F3", "No.of accounts");
+      $worksheet->setCellValue("G3", "No.of amount");
+      $worksheet->mergeCells('H2:I2')->setCellValue("H2", "Spin");
+      $worksheet->setCellValue("H3", "No.of accounts");
+      $worksheet->setCellValue("I3", "No.of amount");
+      $worksheet->mergeCells('J2:K2')->setCellValue("J2", "Promise to pay");
+      $worksheet->setCellValue("J3", "No.of accounts");
+      $worksheet->setCellValue("K3", "No.of amount");
+      $worksheet->mergeCells('L2:M2')->setCellValue("L2", "Connected");
+      $worksheet->setCellValue("L3", "No.of accounts");
+      $worksheet->setCellValue("M3", "No.of amount");
+      $worksheet->mergeCells('N2:Q2')->setCellValue("N2", "Paid");
+      $worksheet->setCellValue("N3", "No.of accounts");
+      $worksheet->setCellValue("O3", "Actual Amount received");
+      $worksheet->setCellValue("P3", "No.of accounts (keep promise to pay)");
+      $worksheet->setCellValue("Q3", "Actual Amount received (keep promise to pay)");
+      $worksheet->setCellValue("R2", "Spin rate");
+      $worksheet->setCellValue("R3", "Account");
+      $worksheet->mergeCells('S2:V2')->setCellValue("S2", "PTP rate");
+      $worksheet->setCellValue("S3", "PTP rate (Promised accounts)");
+      $worksheet->setCellValue("T3", "PTP rate (PromisedAmount)");
+      $worksheet->setCellValue("U3", "PTP rate (total paid accounts)");
+      $worksheet->setCellValue("V3", "PTP rate (total paid amount)");
+      $worksheet->setCellValue("W2", "Connected rate");
+      $worksheet->setCellValue("W3", "Account");
+      $worksheet->mergeCells('X2:Y2')->setCellValue("X2", "Collected ratio");
+      $worksheet->setCellValue("X3", "Account");
+      $worksheet->setCellValue("Y3", "Amount");
 
       $worksheet->getStyle("A2:Y3")->getFill()
       ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
       ->getStartColor()->setRGB('FFFF00');
       $style = array('font' => array('bold' => true), 'alignment' => array('horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER));
       $worksheet->getStyle("A2:Y3")->applyFromArray($style);
-      // if($data) {
-      //     $row = 2;
-      //     foreach ($data as $value) {
-      //         $worksheet->setCellValue("A".$row, $row - 1);
-      //         $worksheet->setCellValue("B".$row, $value['group_id']);
-      //         $worksheet->setCellValueExplicit('C' . $row, $value['account_number'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-      //         $worksheet->setCellValue("D".$row, $value['mobile_num']);
-      //         $worksheet->setCellValue("E".$row, $value['cus_name']);
-      //         $worksheet->setCellValue("F".$row, number_format($value['overdue_amount_this_month']));
-      //         $worksheet->setCellValue("G".$row, date('d/m/Y'));
-      //         $row++;
-      //     }
-      // }
+      if($data) {
+          $row = 4;
+          foreach ($data as $value) {
+            if ($value['group'] == 'A') {
+               if (isset($value['team_lead'])) {
+                  $worksheet->getStyle("A"."$row".":Y"."$row")->getFill()
+                     ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                     ->getStartColor()->setRGB('FF9966');
+               }
+               $worksheet->setCellValue("B".$row, $value['name']);
+               $worksheet->setCellValue("C".$row, $value['count_data']);
+               $worksheet->setCellValue("D".$row, $value['unwork']);
+               $worksheet->setCellValue("E".$row, isset($value['talk_time']) ? $value['talk_time'] : 0);
+               $worksheet->setCellValue("F".$row, isset($value['total_call']) ? $value['total_call'] : 0);
+               $worksheet->setCellValue("G".$row, isset($value['total_amount']) ? $value['total_amount'] : 0);
+               $worksheet->setCellValue("H".$row, isset($value['count_spin']) ? $value['count_spin'] : 0);
+               $worksheet->setCellValue("I".$row, isset($value['spin_amount']) ? $value['spin_amount'] : 0);
+               $worksheet->setCellValue("J".$row, isset($value['count_ptp']) ? $value['count_ptp'] : 0);
+               $worksheet->setCellValue("K".$row, isset($value['ptp_amount']) ? $value['ptp_amount'] : 0);
+               $worksheet->setCellValue("L".$row, isset($value['count_conn']) ? $value['count_conn'] : 0);
+               $worksheet->setCellValue("M".$row, isset($value['conn_amount']) ? $value['conn_amount'] : 0);
+               $worksheet->setCellValue("N".$row, isset($value['count_paid']) ? $value['count_paid'] : 0);
+               $worksheet->setCellValue("O".$row, isset($value['paid_amount']) ? $value['paid_amount'] : 0);
+               $worksheet->setCellValue("P".$row, isset($value['count_paid_promise']) ? $value['count_paid_promise'] : 0);
+               $worksheet->setCellValue("Q".$row, isset($value['paid_amount_promise']) ? $value['paid_amount_promise'] : 0);
+               $worksheet->setCellValue("R".$row, isset($value['spin_rate']) ? $value['spin_rate'] : 0);
+               $worksheet->setCellValue("S".$row, isset($value['ptp_rate_acc']) ? $value['ptp_rate_acc'] : 0);
+               $worksheet->setCellValue("T".$row, isset($value['ptp_rate_amt']) ? $value['ptp_rate_amt'] : 0);
+               $worksheet->setCellValue("U".$row, isset($value['paid_rate_acc']) ? $value['paid_rate_acc'] : 0);
+               $worksheet->setCellValue("V".$row, isset($value['paid_rate_amt']) ? $value['paid_rate_amt'] : 0);
+               $worksheet->setCellValue("W".$row, isset($value['conn_rate']) ? $value['conn_rate'] : 0);
+               $worksheet->setCellValue("X".$row, isset($value['collect_ratio_acc']) ? $value['collect_ratio_acc'] : 0);
+               $worksheet->setCellValue("Y".$row, isset($value['collect_ratio_amt']) ? $value['collect_ratio_amt'] : 0);
+               $row++;
+            }
+
+
+          }
+      }
       $styleArray = array(
           'allborders' => array(
               'outline' => array(
@@ -931,8 +1010,16 @@ Class Daily_all_user_report extends WFF_Controller {
               ),
           ),
       );
+      $styleArray = array(
+         'borders' => array(
+             'allborders' => array(
+                 'style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                 'color' => array('argb' => 'FFFF0000'),
+             )
+         )
+     );
       $worksheet->getStyle("A1:Y30")->applyFromArray($styleArray);
-      
+
       $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
       $file_path = UPLOAD_PATH . "loan/export/" . $filename;
       $writer->save($file_path);
