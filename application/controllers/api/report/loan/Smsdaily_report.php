@@ -9,7 +9,7 @@ use PhpOffice\PhpSpreadsheet\Reader;
 Class Smsdaily_report extends WFF_Controller {
 
     private $collection = "LNJC05";
-    private $card_collection = "List_of_account_in_collection";
+    private $card_collection = "Account";
     private $model_collection = "Model";
 
     function __construct()
@@ -54,6 +54,7 @@ Class Smsdaily_report extends WFF_Controller {
     function saveAsExcel()
     {
         try {
+            //sibs
             $request    = array("take" => 1, "skip" => 0);
             $response = $this->crud->read($this->collection, $request);
             $total = $response['total'];
@@ -82,7 +83,29 @@ Class Smsdaily_report extends WFF_Controller {
                 }
             }
 
+            //card
+            $request_card    = array("take" => 1, "skip" => 0);
+            $response_card = $this->crud->read($this->card_collection, $request_card);
+            $total_card = $response_card['total'];
 
+            $limit = 1000;
+            $count = (int)($total_card/$limit);
+            $data_card = array();
+
+            for ($i=0; $i < $count; $i++) { 
+                $request_card    = array("take" => $limit, "skip" => $i*$limit);
+                $response_card = $this->crud->read($this->card_collection, $request_card,['mobile_num','cus_name','overdue_amt','current_bal','account_number']);
+                foreach ($response_card['data'] as &$value) {
+                    array_push($data_card, $value);
+                }
+            }
+            if (($total_card%$limit) > 0) {
+                $request_card    = array("take" => $limit, "skip" => $count*$limit);
+                $response_card = $this->crud->read($this->card_collection, $request_card,['mobile_num','cus_name','overdue_amt','current_bal','account_number']);
+                foreach ($response_card['data'] as &$value) {
+                    array_push($data_card, $value);
+                }
+            }
 
             $filename = "SMS DAILY SMS REPORT.xlsx";
             $spreadsheet = new Spreadsheet();
@@ -133,9 +156,52 @@ Class Smsdaily_report extends WFF_Controller {
                     $row++;
                 }
             }
+
+            //card
+            // $spreadsheet->
+            $worksheet_card = $spreadsheet->createSheet(1);
+            $worksheet_card->setTitle('SMS CARD');
+            $fieldToCol = array();
+            // Title row
+            $worksheet_card->setCellValue("A1", "NO");
+            $worksheet_card->getColumnDimension('A')->setAutoSize(true);
+            $worksheet_card->setCellValue("B1", "GROUP");
+            $worksheet_card->getColumnDimension('B')->setAutoSize(true);
+            $worksheet_card->setCellValue("C1", "ACCOUNT NUMBER");
+            $worksheet_card->getColumnDimension('C')->setAutoSize(true);
+            $worksheet_card->setCellValue("D1", "PHONE");
+            $worksheet_card->getColumnDimension('D')->setAutoSize(true);
+            $worksheet_card->setCellValue("E1", "NAME");
+            $worksheet_card->getColumnDimension('E')->setAutoSize(true);
+            $worksheet_card->setCellValue("F1", "OS");
+            $worksheet_card->getColumnDimension('F')->setAutoSize(true);
+            $worksheet_card->setCellValue("G1", "AMOUNT");
+            $worksheet_card->getColumnDimension('G')->setAutoSize(true);
+            $worksheet_card->setCellValue("H1", "SENDING DATE");
+            $worksheet_card->getColumnDimension('H')->setAutoSize(true);
+
+            $worksheet_card->getStyle("A1:G1")->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setRGB('FFFF00');
+            $style = array('font' => array('bold' => true), 'alignment' => array('horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER));
+            $worksheet_card->getStyle("A1:G1")->applyFromArray($style);
+            if($data_card) {
+                $row = 2;
+                foreach ($data_card as $value) {
+                    $worksheet_card->setCellValue("A".$row, $row - 1);
+                    $worksheet_card->setCellValue("B".$row, 'GROUP');
+                    $worksheet_card->setCellValueExplicit('C' . $row, $value['account_number'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+                    $worksheet_card->setCellValue("D".$row, $value['mobile_num']);
+                    $worksheet_card->setCellValue("E".$row, $value['cus_name']);
+                    $worksheet_card->setCellValue("F".$row, $value['overdue_amt']);
+                    $worksheet_card->setCellValue("G".$row, $value['current_bal']);
+                    $worksheet_card->setCellValue("H".$row, date('d/m/Y'));
+                    $row++;
+                }
+            }
             
             $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
-            $file_path = UPLOAD_PATH . "excel/" . $filename;
+            $file_path = UPLOAD_PATH . "loan/export/" . $filename;
             $writer->save($file_path);
             echo json_encode(array("status" => 1, "data" => $file_path));
         } catch (Exception $e) {

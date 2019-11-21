@@ -208,7 +208,7 @@
             filter: {
                 field: "collection",
                 operator: "eq",
-                value: (ENV.type ? ENV.type + "_" : "") + "List_of_account_in_collection"
+                value: (ENV.type ? ENV.type + "_" : "") + "Account"
             },
             page: 1,
             sort: {field: "index", dir: "asc"}
