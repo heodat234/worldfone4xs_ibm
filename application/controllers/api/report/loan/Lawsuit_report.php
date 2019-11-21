@@ -44,9 +44,8 @@ Class Lawsuit_report extends WFF_Controller {
                         array('created_at'=> array( '$gte'=> $start, '$lte'=> $end))
                      )               
                  );
-            $response = $this->crud->read($this->collection, array(),'',$match);
+            $response = $this->crud->read($this->collection, array(),'');
             $data = $response['data'];
-
             $request = array (
               'take' => 50,
               'skip' => 0,
@@ -61,16 +60,16 @@ Class Lawsuit_report extends WFF_Controller {
             }
             // $this->excel->write($data,$model);
 
-            $filename = "export.xlsx";
+            $filename = "Lawsuit.xlsx";
             $file_template = "templateLawsuit.xlsx";
 
             //  Tiến hành đọc file excel
-            $inputFileType = \PhpOffice\PhpSpreadsheet\IOFactory::identify(UPLOAD_PATH . "excel/" . $file_template);
+            $inputFileType = \PhpOffice\PhpSpreadsheet\IOFactory::identify(UPLOAD_PATH . "loan/template/" . $file_template);
             /**  Create a new Reader of the type that has been identified  **/
             $reader = \PhpOffice\PhpSpreadsheet\IOFactory::createReader($inputFileType);
 
             // loads the whole workbook into a PHP object
-            $excelWorkbook = $reader->load(UPLOAD_PATH . "excel/" . $file_template);
+            $excelWorkbook = $reader->load(UPLOAD_PATH . "loan/template/" . $file_template);
 
             // makes the sheet 'data' available as an object
             $worksheet = $excelWorkbook->setActiveSheetIndex(0);
@@ -132,7 +131,7 @@ Class Lawsuit_report extends WFF_Controller {
                 }
             }
             
-            $file_path = UPLOAD_PATH . "excel/" . $filename;
+            $file_path = UPLOAD_PATH . "loan/export/" . $filename;
             $objWriter = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($excelWorkbook, $inputFileType);
             $objWriter->save($file_path);
             echo json_encode(array("status" => 1, "data" => $file_path));

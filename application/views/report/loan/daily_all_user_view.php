@@ -123,7 +123,7 @@
 <script id="layout" type="text/x-kendo-template">
     <ul class="breadcrumb breadcrumb-top">
         <li>@Report@</li>
-        <li>Daily Payment Report</li>
+        <li>Daily All User Report</li>
         <li data-bind="text: breadcrumb"></li>
         <li class="pull-right none-breakcrumb" id="top-row">
         	<div class="btn-group btn-group-sm">
