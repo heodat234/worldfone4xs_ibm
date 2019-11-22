@@ -25,7 +25,7 @@ zaccf_collection   = common.getSubUser(subUserType, 'ZACCF')
 product_collection   = common.getSubUser(subUserType, 'Product')
 sbv_collection       = common.getSubUser(subUserType, 'SBV')
 group_collection     = common.getSubUser(subUserType, 'Group_card')
-account_collection   = common.getSubUser(subUserType, 'Account')
+account_collection   = common.getSubUser(subUserType, 'List_of_account_in_collection')
 payment_of_card_collection  = common.getSubUser(subUserType, 'Report_input_payment_of_card')
 log         = open("/var/www/html/worldfone4xs_ibm/cronjob/python/Loan/log/DailyPayment_log.txt","a")
 
@@ -141,10 +141,12 @@ try:
          if group != None:
             row['group'] = group['group']
 
-         account = mongodb.getOne(MONGO_COLLECTION=account_collection, WHERE={'account_number': str(row['account'])},SELECT=['overdue'])
+         account = mongodb.getOne(MONGO_COLLECTION=account_collection, WHERE={'account_no': str(row['account'])},SELECT=['overdue_date'])
          if account != None:
-            row['due_date']   = account['overdue']
-            d2       = account['overdue']
+            date_time   = datetime.fromtimestamp(account['overdue_date'])
+            d2          = date_time.strftime('%d/%m/%y')
+            row['due_date']   = d2
+            # d2       = account['overdue']
             tdelta   = datetime.strptime(d1, '%d/%m/%y') - datetime.strptime(d2, '%d/%m/%Y')
             row['num_of_overdue_day'] = tdelta.days
          

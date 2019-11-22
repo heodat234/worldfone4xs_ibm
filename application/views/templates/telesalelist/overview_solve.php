@@ -1,6 +1,6 @@
 <div class="col-sm-3" style="margin: 10px 0" id="page-widget"></div>
 <div class="col-sm-9 change-mvvm" style=" margin: 10px 0;">
-    <div class="col-sm-1"><a role="button" class="btn btn-alt btn-sm btn-primary" data-toggle="dropdown" onclick="removeRow(this)"><i class="fa fa-remove"></i> <b>@Remove@</b></a></div>
+    <div class="col-sm-1"><a role="button" data-type="action/delete" class="btn btn-alt btn-sm btn-primary" data-toggle="dropdown" onclick="removeRow(this)"><i class="fa fa-remove"></i> <b>@Remove@</b></a></div>
     <div class="col-sm-2" style="text-align: right;margin-top: 6px;"><label>Re-Assign</label></div>
     <div class="col-sm-4" class="form-group">
         <input data-role="dropdownlist"
@@ -10,7 +10,7 @@
                     data-bind="source: userListData" style="width: 100%" id="changeAssign">
     </div>
     <div class="col-sm-1">
-        <button class="btn btn-sm btn-primary btn-save" onclick="saveChangeAssign()">@Save@</button>
+        <button class="btn btn-sm btn-primary btn-save" data-type="action/reAssign" onclick="saveChangeAssign()">@Save@</button>
     </div>
 </div>
 <div class="col-sm-12 filter-mvvm" style="display: none; margin: 10px 0"></div>

@@ -1,9 +1,17 @@
 <?php $id = $this->input->get("id") ?>
 <div class="col-sm-2" style="margin: 10px 0" id="page-widget"></div>
+<div class="col-sm-10 change-remove" style=" margin: 10px 0;">
+    <div class="col-sm-1"><a role="button" data-type="action/delete" class="btn btn-alt btn-sm btn-primary" data-toggle="dropdown" onclick="removeRow(this)"><i class="fa fa-remove"></i> <b>@Remove@</b></a></div>
+</div>
 <div class="col-sm-12 filter-mvvm" style="display: none; margin: 10px 0"></div>
 <div class="col-sm-12" style="overflow-y: auto; padding: 0">
 	<div id="grid"></div>
 </div>
+<style type="text/css">
+    .change-remove {
+        display: none;
+    }
+</style>
 <script>
     var Config = {
         filter: '<?= $id ?>' != '' ? {field: "id_import", operator: "eq", value: '<?= $id ?>'} : null,
@@ -100,10 +108,44 @@
                     break;
             }
         });
-        
+        columns.unshift({
+            selectable: true,
+            width: 32,
+        });
         Table.columns = columns;
         Table.init();
+        Table.grid.bind("change", grid_change);
     })
+
+    // $( document ).ready(function() {
+    //     $('.change-remove').hide();
+    // });
+    var select = [];
+    
+    function grid_change(arg) {
+        var selectUid = this.selectedKeyNames();
+        if (selectUid.length > 0) {
+            //hiên Re-Assign
+            select = [];
+            $('.change-remove').show();
+            for(var i in selectUid){
+                var item = Table.dataSource.getByUid(selectUid[i]);
+                select.push(item.id);
+            }
+        }else{
+            //an Re-Assign
+            $('.change-remove').hide();
+        }
+        // console.log(this.selectedKeyNames());
+    }
+
+    function removeRow() {
+        $('#grid').data("kendoGrid").select().each(function () {
+            Table.grid.removeRow($(this).closest("tr"));
+            Table.dataSource.sync();
+        });
+       
+    }
 
     function detailData(ele) {
         var uid = $(ele).data('uid');
