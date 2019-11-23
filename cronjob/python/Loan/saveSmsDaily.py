@@ -80,7 +80,7 @@ try:
    for key,row in enumerate(PaymentData):
       temp = {}
       if 'account_number' in row.keys():
-         group = mongodb.getOne(MONGO_COLLECTION=group_collection,WHERE={'account_no':str(row['account_number'])},SELECT=['group'])
+         group = mongodb.getOne(MONGO_COLLECTION=group_collection,WHERE={'account_number':str(row['account_number'])},SELECT=['group'])
          temp['type']            = 'card'
          temp['stt']             = key
          temp['account_number']  = row['account_number']

@@ -141,7 +141,7 @@ try:
          if group != None:
             row['group'] = group['group']
 
-         account = mongodb.getOne(MONGO_COLLECTION=account_collection, WHERE={'account_no': str(row['account'])},SELECT=['overdue_date'])
+         account = mongodb.getOne(MONGO_COLLECTION=account_collection, WHERE={'account_number': str(row['account'])},SELECT=['overdue_date'])
          if account != None:
             date_time   = datetime.fromtimestamp(account['overdue_date'])
             d2          = date_time.strftime('%d/%m/%y')
