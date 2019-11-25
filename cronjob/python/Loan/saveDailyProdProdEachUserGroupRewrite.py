@@ -78,6 +78,77 @@ try:
     listGroupProductRaw = _mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Jsondata'), WHERE={'tags': ['group', 'debt', 'product']})
     listGroupProduct = listGroupProductRaw['data']
 
+    for debtGroupCell in list(listDebtGroup):
+        if debtGroupCell[0:1] is not 'F':
+            dueDayOfMonth = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_due_date'), WHERE={'for_month': str(month), 'debt_group': debtGroupCell[1:3]})
+            for groupProduct in list(listGroupProduct):
+                groupInfoByDueDate = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Group'), WHERE={'debt_groups': debtGroupCell, 'name': {"$regex": groupProduct['text'] + '.*'}})
+                for groupCell in list(groupInfoByDueDate):
+                    today_col = {
+                        'total': 0,
+                        'balance_total': 0
+                    }
+                    temp = {}
+                    if todayTimeStamp < dueDayOfMonth['due_date_add_1']:
+                        dueDayLastMonth = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_due_date'), WHERE={'for_month': str(month - 1), 'debt_group': debtGroupCell[1:3]})
+                        temp['due_date'] = dueDayLastMonth['due_date'] if dueDayLastMonth is not None else ''
+                        #Lay gia tri no vao ngay due date + 1#
+                        incidenceInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Amt_due_date_one'), WHERE={'for_month': str(month - 1), 'team_id': str(groupCell['_id'])})
+                        #Lay gia tri no vao ngay due date + 1#
+                    else:
+                        temp['due_date'] = dueDayOfMonth['due_date']
+
+                    temp['debt_group'] = debtGroupCell[0:1]
+                    temp['due_date_code'] = debtGroupCell[1:3]
+                    temp['product'] = groupProduct['text']
+                    temp['team'] = groupCell['name']
+                    temp['team_id'] = str(groupCell['_id'])
+                    temp['inci'] = incidenceInfo['debt_acc_no']
+                    temp['inci_amt'] = incidenceInfo['current_balance_total']
+                    temp['today_rem_amt'] = 0
+                    for key, value in mainProduct.items():
+                        today_col[key] = 0
+                        today_col['balance_' + key]
+
+                        temp['inci_' + key] = incidenceInfo['debt_acc_' + key]
+                        temp['inci_amt_' + key] = incidenceInfo['current_balance_' + key]
+
+                        temp['today_rem_' + key] = 0
+                        temp['today_rem_amt_' + key] = 0
+
+                    if groupProduct == 'SIBS':
+                        yesterdayReportData = mongodb.getOne(MONGO_COLLECTION=collection, WHERE={'team_id': str(groupCell['_id']), 'created_at': {'$gte': (starttime - 86400), '$lte': (endtime - 86400)}})
+                        
+                        lead = ['JIVF00' + groupCell['lead']] if 'lead' in groupCell.keys() else []
+                        member = ('JIVF00' + s for s in groupCell['members']) if 'members' in groupCell.keys() else []
+                        officerIdRaw = list(lead) + list(member)
+                        officerId = list(dict.fromkeys(officerIdRaw))
+
+                        lnjc05Info = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'LNJC05'), WHERE={'createdAt': {'$gte': starttime, '$lte': endtime}, 'group_id': debtGroupCell, 'officer_id': {'$in': officerId}})
+                        temp['today_rem'] = len(lnjc05Info)
+                        temp['col'] = temp['inci'] - temp['rem']
+                        temp['col_amt'] = temp['inci_amt'] - temp['rem_amt']
+                        
+                        for lnjc05 in lnjc05Info:
+                            zaccfInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'ZACCF'), WHERE={'account_number': lnjc05['account_number']})
+                            ln3206fInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'LN3206F'), WHERE={'account_number': lnjc05['account_number']})
+                            
+                            if ln3206fInfo is not None:
+                                today_col['total'] += 1
+                                today_col[zaccfInfo['PRODGRP_ID']] += 1
+                                today_col['balance_total'] += lnjc05['current_balance']
+                                today_col['balance_' + zaccfInfo['PRODGRP_ID']] += lnjc05['current_balance']
+                            
+                            # temp['col'] = yesterdayReportData['col'] + 
+                            
+                            temp['rem_' + zaccfInfo['PRODGRP_ID']] += 1
+
+                            temp['today_rem_amt'] += float(lnjc05['current_balance'])
+                            temp['today_rem_amt_' + zaccfInfo['PRODGRP_ID']] += float(lnjc05['current_balance'])
+
+                            temp['col_' + zaccfInfo['PRODGRP_ID']] = temp['inci_' + zaccfInfo['PRODGRP_ID']] - temp['rem_' + zaccfInfo['PRODGRP_ID']]
+                            temp['col_amt'] = temp['inci_amt'] - temp['rem_amt']
+    
     for groupProduct in list(listGroupProduct):
         if groupProduct == 'SIBS':
             for debtGroupCell in list(listDebtGroup):

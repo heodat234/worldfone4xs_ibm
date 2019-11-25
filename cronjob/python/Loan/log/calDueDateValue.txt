@@ -1,0 +1,6 @@
+25/11/2019, 09:39:43: name 'collectionName' is not defined
+25/11/2019, 09:41:46: must be str, not int
+25/11/2019, 09:45:34: must be str, not int
+25/11/2019, 09:48:02: batch op errors occurred
+25/11/2019, 09:49:59: batch op errors occurred
+25/11/2019, 09:52:38: batch op errors occurred

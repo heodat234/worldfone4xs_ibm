@@ -7,8 +7,9 @@ import calendar
 import time
 import sys
 import os
+import csv
+import json
 from pprint import pprint
-from excel import Excel
 from datetime import datetime
 from datetime import date
 from bson import ObjectId
@@ -40,16 +41,16 @@ try:
 
     ftpInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'ftp_config'), WHERE={'collection': collection})
     ftpConfig = config.ftp_config()
-    ftpLocalUrl = base_url + ftpInfo['locallink'] + ftpInfo['filename']
+    ftpLocalUrl = common.getDownloadFolder() + ftpInfo['filename']
 
     try:
         sys.argv[1]
         importLogId = str(sys.argv[1])
         importLogInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': ObjectId(sys.argv[1])})
     except Exception as SysArgvError:
-        ftp.connect(host=ftpConfig['host'], username=ftpConfig['username'], password=ftpConfig['password'])
-        ftp.downLoadFile(ftpLocalUrl, ftpInfo['filename'])
-        ftp.close()
+        # ftp.connect(host=ftpConfig['host'], username=ftpConfig['username'], password=ftpConfig['password'])
+        # ftp.downLoadFile(ftpLocalUrl, ftpInfo['filename'])
+        # ftp.close()
 
         importLogInfo = {
             'collection'    : collection, 
@@ -62,37 +63,43 @@ try:
         }
         importLogId = mongodb.insert(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), insert_data=importLogInfo) 
 
-    modelInfo = _mongodb.get(MONGO_COLLECTION='Model', WHERE={'collection': collection, 'sub_type': {'$ne': None}}, SORT=[('index', 1)])
-    
-    for model in modelInfo:
+    models = _mongodb.get(MONGO_COLLECTION='Model', WHERE={'collection': collection, 'sub_type': {'$ne': None}}, SORT=[('index', 1)], SELECT=['index', 'collection', 'field', 'type', 'sub_type'], TAKE=1000)
+    for model in models:
         modelColumns.append(model['field'])
-        if(model['type'] == 'timestamp'):
-            modelFormat[model['field']] = "%d/%m/%y"
-        else:
-            modelFormat[model['field']] = ""
         modelConverters[model['field']] = model['type']
+        if model['sub_type'] is not None:
+            subtype = json.loads(model['sub_type'])
+            if 'format' in subtype.keys():
+                modelFormat[model['field']] = subtype['format']
+            else:
+                modelFormat[model['field']] = ''
+        else:
+            modelFormat[model['field']] = ''
+        pprint(modelColumns)
 
     with open(importLogInfo['file_path'], 'r', newline='\n', encoding='ISO-8859-1') as fin:
-        for line in fin:
-            row = line.split()
+        csv_reader = csv.reader(fin, delimiter=',', quotechar='"')
+        for row in csv_reader:
             if len(row) > 1:
                 if isinstance(row[1], str) and len(row[1]) > 12 and row[1].isdigit():
+                    pprint(row)
                     temp = {}
-                    temp[modelColumns[0]] = common.convertDataType(data=row[1], datatype=modelConverters[modelColumns[0]], formatType=modelFormat[modelColumns[0]])
-                    temp[modelColumns[1]] = common.convertDataType(data=row[2], datatype=modelConverters[modelColumns[1]], formatType=modelFormat[modelColumns[1]])
-                    temp[modelColumns[-1]] = common.convertDataType(data=row[-1], datatype=modelConverters[modelColumns[-1]], formatType=modelFormat[modelColumns[-1]])
-                    temp[modelColumns[-2]] = common.convertDataType(data=row[-2], datatype=modelConverters[modelColumns[-2]], formatType=modelFormat[modelColumns[-2]])
-                    temp[modelColumns[-3]] = common.convertDataType(data=row[-3], datatype=modelConverters[modelColumns[-3]], formatType=modelFormat[modelColumns[-3]])
-                    temp[modelColumns[-4]] = common.convertDataType(data=row[-4], datatype=modelConverters[modelColumns[-4]], formatType=modelFormat[modelColumns[-4]])
-                    temp[modelColumns[-5]] = common.convertDataType(data=row[-5], datatype=modelConverters[modelColumns[-5]], formatType=modelFormat[modelColumns[-5]])
-                    temp[modelColumns[-6]] = common.convertDataType(data=row[-6], datatype=modelConverters[modelColumns[-6]], formatType=modelFormat[modelColumns[-6]])
-                    listName = row[3:-7]
-                    temp[modelColumns[2]] = ' '.join(listName)
-                    checkAccount = mongodb.getOne(MONGO_COLLECTION=collection, WHERE={'account_no': temp['account_no']})
+                    temp[modelColumns[0]] = common.convertDataType(data=row[1], datatype=modelConverters[modelColumns[0]], formatType=modelFormat[modelColumns[0]]) if row[1] not in [None, ''] else ''
+                    temp[modelColumns[1]] = common.convertDataType(data=row[2], datatype=modelConverters[modelColumns[1]], formatType=modelFormat[modelColumns[1]]) if row[2] not in [None, ''] else ''
+                    temp[modelColumns[2]] = common.convertDataType(data=row[3], datatype=modelConverters[modelColumns[2]], formatType=modelFormat[modelColumns[2]]) if row[3] not in [None, ''] else ''
+                    temp[modelColumns[3]] = common.convertDataType(data=row[4], datatype=modelConverters[modelColumns[3]], formatType=modelFormat[modelColumns[3]]) if row[4] not in [None, ''] else ''
+                    temp[modelColumns[4]] = common.convertDataType(data=row[5], datatype=modelConverters[modelColumns[4]], formatType=modelFormat[modelColumns[4]]) if row[5] not in [None, ''] else ''
+                    temp[modelColumns[5]] = common.convertDataType(data=row[6], datatype=modelConverters[modelColumns[5]], formatType=modelFormat[modelColumns[5]]) if row[6] not in [None, ''] else ''
+                    temp[modelColumns[6]] = common.convertDataType(data=row[7], datatype=modelConverters[modelColumns[6]], formatType=modelFormat[modelColumns[6]]) if row[7] not in [None, ''] else 0
+                    temp[modelColumns[7]] = common.convertDataType(data=row[8], datatype=modelConverters[modelColumns[7]], formatType=modelFormat[modelColumns[7]]) if row[8] not in [None, ''] else 0
+                    temp[modelColumns[8]] = common.convertDataType(data=row[9], datatype=modelConverters[modelColumns[8]], formatType=modelFormat[modelColumns[8]]) if row[9] not in [None, ''] else ''
+                    
+                    checkAccount = mongodb.getOne(MONGO_COLLECTION=collection, WHERE={'account_number': temp['account_number']})
                     if(checkAccount is None):
                         temp['import_id'] = str(importLogId)
                         temp['created_by'] = 'system'
-                        temp['created_at'] = time.time()
+                        temp['created_at'] = int(time.mktime(time.strptime(str('31/10/2019' + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
+                        # temp['created_at'] = time.time()
                         insertData.append(temp)
                     else:
                         temp['updated_import_id'] = str(importLogId)
@@ -100,6 +107,8 @@ try:
                         temp['updated_at'] = time.time()
                         updateData.append(temp)
     
+    # pprint(insertData)
+    # pprint(insertData)
     if(len(insertData) > 0):
         mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertData)
         mongodb.batch_insert(MONGO_COLLECTION=common.getSubUser(subUserType, 'List_of_account_in_collection_result'), insert_data=insertData)

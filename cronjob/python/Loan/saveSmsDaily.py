@@ -20,7 +20,7 @@ subUserType = 'LO'
 collection         = common.getSubUser(subUserType, 'Sms_daily_report')
 lnjc05_collection  = common.getSubUser(subUserType, 'LNJC05')
 group_collection     = common.getSubUser(subUserType, 'Group_card')
-account_collection   = common.getSubUser(subUserType, 'Account')
+account_collection   = common.getSubUser(subUserType, 'List_of_account_in_collection')
 log         = open("/var/www/html/worldfone4xs_ibm/cronjob/python/Loan/log/SMSDaily_log.txt","a")
 
 try:
@@ -68,12 +68,12 @@ try:
    quotient = int(count)/10000
    mod = int(count)%10000
    for x in range(int(quotient)):
-      result = mongodb.get(MONGO_COLLECTION=account_collection, SELECT=['mobile_num','cus_name','overdue_amt','current_bal','account_number'],SORT=([('_id', -1)]),SKIP=int(x*10000), TAKE=int(10000))
+      result = mongodb.get(MONGO_COLLECTION=account_collection, SELECT=['phone','cus_name','overdue_amt','current_bal','account_number'],SORT=([('_id', -1)]),SKIP=int(x*10000), TAKE=int(10000))
       for idx,row in enumerate(result):
          PaymentData.append(row)
 
    if int(mod) > 0:
-      result = mongodb.get(MONGO_COLLECTION=account_collection,SELECT=['mobile_num','cus_name','overdue_amt','current_bal','account_number'], SORT=([('_id', -1)]),SKIP=int(int(quotient)*10000), TAKE=int(mod))
+      result = mongodb.get(MONGO_COLLECTION=account_collection,SELECT=['phone','cus_name','overdue_amt','current_bal','account_number'], SORT=([('_id', -1)]),SKIP=int(int(quotient)*10000), TAKE=int(mod))
       for idx,row in enumerate(result):
          PaymentData.append(row)
 
@@ -88,7 +88,7 @@ try:
             temp['group']        = group['group']
          else:
             temp['group']        = ''
-         temp['phone']           = row['mobile_num']
+         temp['phone']           = row['phone']
          temp['name']            = row['cus_name']
          temp['os']              = row['overdue_amt']
          temp['amount']          = row['current_bal']

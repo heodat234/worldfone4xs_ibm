@@ -86,7 +86,7 @@ Class Test extends CI_Controller {
 
       // $output = shell_exec('PYTHONIOENCODING=utf-8 python3.6 /var/www/html/worldfone4xs_ibm/cronjob/python/Loan/importLNJC05F.py  2>&1');
       // $output = shell_exec('PYTHONIOENCODING=utf-8 python3.6 /var/www/html/python/testReadCSV.py ' . $filePath . " 2>&1");
-      $output = shell_exec('python3.6 /var/www/html/worldfone4xs_ibm/cronjob/python/Loan/updateGroupCard.py  2>&1');
+      $output = shell_exec('python3.6 /var/www/html/worldfone4xs_ibm/cronjob/python/Loan/importLawsuit.py  2>&1');
       echo $output;
    }
 

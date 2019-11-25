@@ -40,16 +40,16 @@ try:
 
     ftpInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'ftp_config'), WHERE={'collection': collection})
     ftpConfig = config.ftp_config()
-    ftpLocalUrl = base_url + ftpInfo['locallink'] + ftpInfo['filename']
+    ftpLocalUrl = common.getDownloadFolder() + ftpInfo['filename']
 
     try:
         sys.argv[1]
         importLogId = str(sys.argv[1])
         importLogInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': ObjectId(sys.argv[1])})
     except Exception as SysArgvError:
-        ftp.connect(host=ftpConfig['host'], username=ftpConfig['username'], password=ftpConfig['password'])
-        ftp.downLoadFile(ftpLocalUrl, ftpInfo['filename'])
-        ftp.close()
+        # ftp.connect(host=ftpConfig['host'], username=ftpConfig['username'], password=ftpConfig['password'])
+        # ftp.downLoadFile(ftpLocalUrl, ftpInfo['filename'])
+        # ftp.close()
 
         importLogInfo = {
             'collection'    : collection, 
@@ -58,6 +58,7 @@ try:
             'file_path'     : ftpLocalUrl, 
             'source'        : 'ftp',
             'status'        : 2,
+            'command'       : 'python3.6 ' + base_url + "cronjob/python/Loan/importReportInputPaymentOfCard.py > /dev/null &",
             'created_by'    : 'system'
         }
         importLogId = mongodb.insert(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), insert_data=importLogInfo) 
@@ -133,7 +134,7 @@ try:
         if len(insertData) > 0:
             mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertData)
             mongodb.batch_insert(common.getSubUser(subUserType, 'Report_input_payment_of_card_result'), insert_data=insertData)
-            mongodb.update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': importLogId}, VALUE={'status': 1, 'complete_import': time.time()})
+        mongodb.update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': importLogId}, VALUE={'status': 1, 'complete_import': time.time()})
     logCheckTime.write('\n')
     logCheckTime.write(str(time.time()))
 except Exception as e:

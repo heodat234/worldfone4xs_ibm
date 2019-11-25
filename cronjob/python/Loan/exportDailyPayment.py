@@ -50,7 +50,7 @@ try:
          data.append(row)
 
 
-   df = pd.DataFrame(data, columns= ['account','name','due_date','payment_date','amt','paid_principal','paid_interest','RPY_FEE','group','num_of_overdue_day','pic','product_name','note'])
+   df = pd.DataFrame(data, columns= ['account_number','name','due_date','payment_date','amt','paid_principal','paid_interest','RPY_FEE','group','num_of_overdue_day','pic','product_name','note'])
    df.to_excel(fileOutput,sheet_name='Daily',header=['AC NUMBER','NAME','OVERDUE DATE','PAYMENT DATE','AMOUNT','PAID PRINCIPAL','PAID INTEREST','PAID LATE CHARGE & FEE','GROUP','NUMBER OF OVERDUE DAYS','PIC','PRODUCT','NOTE']) 
    
    now_end         = datetime.now()

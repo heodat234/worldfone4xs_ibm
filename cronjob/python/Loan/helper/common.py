@@ -6,11 +6,17 @@ class Common:
         import calendar, time
         import sys
         import re
+        import json
         from pprint import pprint
+        from datetime import date, timedelta
         self.pprint = pprint
         self.calendar = calendar
         self.time = time
         self.re = re
+        self.json = json
+        self.date = date
+        self.download_folder = '/data/upload_file/'
+        self.base_url = '/var/www/html/worldfone4xs_ibm/'
 
     def getSubUser(self, type, collection):
         typeList = {
@@ -72,7 +78,6 @@ class Common:
     '''
     def convertTimestamp(self, value, formatString="%d/%m/%Y"):
         result = int(self.time.mktime(self.time.strptime(str(value), formatString)))
-        
         return result
 
     def convertInt(self, value, formatType=''):
@@ -110,3 +115,14 @@ class Common:
             'name'          : self.convertDefault
         }
         return switcher[datatype](data, formatType)
+
+    def getDownloadFolder(self):
+        with open(self.base_url + 'system/config/wffdata.json') as f:
+            sysConfig = self.json.load(f)
+        
+        if sysConfig['wff_env'] in ['UAT', 'DEV']:
+            serverfolder = 'YYYYMMDD/'
+        else:
+            today = self.date.today()
+            serverfolder = today.strftime("%Y%m%d")
+        return self.download_folder + serverfolder + '/'

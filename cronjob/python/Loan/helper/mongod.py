@@ -8,8 +8,19 @@ class Mongodb:
         self.bson = bson
         self.pymongo = pymongo
         connection = self.pymongo.MongoClient('127.0.0.1', 27017)
+        self.connection = connection
         self.MONGODB = MONGODB
         self.db = connection[self.MONGODB]
+
+    def create_db(self, DB_NAME=''):
+        dblist = self.connection.list_database_names()
+        if DB_NAME not in dblist:
+            self.connection[DB_NAME]
+
+    def create_col(self, COL_NAME=''):
+        collist = self.db.list_collection_names()
+        if COL_NAME not in collist:
+            self.db[COL_NAME]
 
     def get(self, MONGO_COLLECTION='', WHERE=None, SELECT=None, SORT=[("$natural", 1)], SKIP=0, TAKE=30):
         collection = self.db[MONGO_COLLECTION]

@@ -18,3 +18,19 @@
 06/11/2019, 17:09:35: No sheet named <'Sheet1'>
 06/11/2019, 17:10:56: No sheet named <'Sheet1'>
 06/11/2019, 17:11:34: header must be integer or list of integers
+23/11/2019, 11:40:33: 550 Failed to open file.
+23/11/2019, 11:41:57: 550 Failed to open file.
+23/11/2019, 11:44:00: 550 Failed to open file.
+23/11/2019, 11:49:52: downLoadFile() got an unexpected keyword argument 'serverfolder'
+23/11/2019, 11:53:48: [Errno 2] No such file or directory: ''
+23/11/2019, 11:54:59: [Errno 2] No such file or directory: ''
+23/11/2019, 11:55:17: [Errno 2] No such file or directory: ''
+23/11/2019, 12:04:07: [Errno 2] No such file or directory: ''
+23/11/2019, 12:05:09: [Errno 2] No such file or directory: ''
+23/11/2019, 12:05:42: [Errno 2] No such file or directory: ''
+23/11/2019, 12:06:05: [Errno 2] No such file or directory: ''
+23/11/2019, 12:06:27: File size is 0 bytes
+23/11/2019, 12:07:00: [Errno 2] No such file or directory: ''
+23/11/2019, 12:31:36: downLoadFile() got an unexpected keyword argument 'serverfolder'
+25/11/2019, 10:36:16: [Errno 2] No such file or directory: '/data/upload_file/20191125/COLLATERAL INFORMATION.xlsx'
+25/11/2019, 10:36:36: No sheet named <'Sheet1'>

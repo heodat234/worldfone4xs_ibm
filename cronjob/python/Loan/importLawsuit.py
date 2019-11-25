@@ -23,11 +23,10 @@ _mongodb    = Mongodb("_worldfone4xs")
 excel       = Excel()
 common      = Common()
 now         = datetime.now()
+subUserType = 'LO'
+collection = common.getSubUser(subUserType, 'Lawsuit')
 
 try:
-   importLogId = sys.argv[1]
-   collection  = sys.argv[2]
-   extension   = sys.argv[3]
    insertData  = []
    resultData  = []
    errorData   = []
@@ -35,82 +34,91 @@ try:
    now         = datetime.now()
    log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': Start Import' + '\n')
 
-   importLogInfo = mongodb.getOne(MONGO_COLLECTION='LO_Import', WHERE={'_id': ObjectId(importLogId)})
-   headers = _mongodb.get(MONGO_COLLECTION='Model', WHERE={"collection": collection,'sub_type':{'$exists': 'true'}}, SELECT=['index', 'field','type'], SORT=([('index', 1)]),TAKE=50)
-   headers = list(headers)
-   headers.insert(0, { 'field': 'stt', 'type': 'int'})
-   # print(headers)
-   file_path = importLogInfo['file_path']
-   data = excel.getDataExcel(file_path=file_path,active_sheet='Sheet2', header=0, skiprows=[1], dtype=str)
-   dataLawsuit = data.values
-   # print(dataLawsuit)
-   for key,listCol in enumerate(dataLawsuit):
-      temp = {}
-      value = ''
-      for idx,header in enumerate(headers):
-         if header['field'] == 'stt':
-            continue
-         if str(dataLawsuit[key][idx]) == 'nan':
-            dataLawsuit[key][idx] = ''
-         if header['type'] == 'int':
-            try:
-               value = int(dataLawsuit[key][idx])
-            except ValueError:
-               err = {}
-               err['cell'] =  xl_rowcol_to_cell(key, idx)
-               err['type'] = 'int';
-               errorData.append(err);
-         if header['type'] == 'double':
-            try:
-               if dataLawsuit[key][idx] == '0':
-                  value = 0
-               else:
-                  value = float(dataLawsuit[key][idx])
-            except ValueError:
-               err = {}
-               err['cell'] =  xl_rowcol_to_cell(key, idx)
-               err['type'] = 'double';
-               errorData.append(err);
-         if header['type'] == 'timestamp' and str(dataLawsuit[key][idx]) != '':
-            err = {}
-            try:
-               dt = parse(dataLawsuit[key][idx])
-               value = int(dt.timestamp())
-            except Exception as e:
-               err['cell'] =  xl_rowcol_to_cell(key, idx)
-               err['type'] = 'date'
-               errorData.append(err)
-         if header['type'] == 'timestamp' and str(dataLawsuit[key][idx]) == '':
-            value = ''
-         if header['type'] == 'phone':
-            value = str(dataLawsuit[key][idx])
+   ftpInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'ftp_config'), WHERE={'collection': collection})
 
-         if header['type'] == 'string':
-            try:
-               value_int   = int(dataLawsuit[key][idx])
-               value       = str(value_int)
-            except ValueError:
-               value       = str(dataLawsuit[key][idx])
-            
-         
-         temp[header['field']]   = value
-         temp['import_id']       = importLogId
+   ftpConfig = config.ftp_config()
+   ftpLocalUrl = common.getDownloadFolder() + ftpInfo['filename']
 
-         temp['created_at']       = int(time.time())
-         temp['created_by']       = extension
+   try:
+      sys.argv[1]
+      importLogId = str(sys.argv[1])
+      importLogInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': ObjectId(sys.argv[1])})
+   except Exception as SysArgvError:
+      importLogInfo = {
+         'collection'    : collection, 
+         'begin_import'  : time.time(),
+         'file_name'     : ftpInfo['filename'],
+         'file_path'     : ftpLocalUrl, 
+         'source'        : 'ftp',
+         'status'        : 2,
+         'command'       : 'python3.6 ' + base_url + "cronjob/python/Loan/importLawsuit.py > /dev/null &",
+         'created_by'    : 'system'
+      }
+      importLogId = mongodb.insert(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), insert_data=importLogInfo) 
+    
+   models = _mongodb.get(MONGO_COLLECTION='Model', WHERE={"collection": collection,'sub_type':{'$exists': 'true'}}, SELECT=['index', 'field','type'], SORT=([('index', 1)]),TAKE=50)
+   for model in models:
+      modelColumns.append(model['field'])
+      modelConverters[model['field']] = model['type']
+      subtype = json.loads(model['sub_type'])
+      if 'format' in subtype.keys():
+         modelFormat[model['field']] = subtype['format']
+      else:
+         modelFormat[model['field']] = ''
+    
+   filenameExtension = ftpInfo['filename'].split('.')
 
-      insertData.append(temp)
-      
-   if len(errorData) <= 0:
-      # mongodb.remove_document(collection)
-      resultImport = mongodb.batch_insert(collection, insertData)
-      status = 1
+   if ftpInfo['header'] == 'None':
+     header = None
    else:
-      status = 0
-      log.write( str(errorData) + '\n')
-      
-   mongodb.update(MONGO_COLLECTION='LO_Import', WHERE={'_id': ObjectId(importLogId)}, VALUE={'complete_import': time.time(),'status': status,'error': errorData})
+     header = [ int(x) for x in ftpInfo['header'] ]
 
+   if(filenameExtension[1] == 'csv'):
+     inputDataRaw = excel.getDataCSV(file_path=importLogInfo['file_path'], dtype='object', sep=ftpInfo['sep'], header=header, names=modelColumns)
+   else:
+     inputDataRaw = excel.getDataExcel(file_path=importLogInfo['file_path'], dtype='object', active_sheet=ftpInfo['sheet'], header=header, names=modelColumns, na_values='')
+
+   inputData = inputDataRaw.to_dict('records')
+   # pprint(inputData)
+    
+   insertData = []
+   updateDate = []
+   errorData = []
+
+   temp = {}
+   countList = 0
+   for idx, row in enumerate(inputData):
+      temp = {}
+      if row['LIC_NO'] not in ['', None] and row['ACCTNO'] not in ['', None]:
+         for cell in row:
+            try:
+               temp[cell] = common.convertDataType(data=row[cell], datatype=modelConverters[cell], formatType=modelFormat[cell])
+               result = True
+            except Exception as errorConvertType:
+               temp['error_cell'] = modelPosition[cell] + str(idx + 1)
+               temp['type'] = modelConverters[cell]
+               temp['error_mesg'] = 'Sai kiểu dữ liệu nhập'
+               temp['result'] = 'error'
+               result = False
+         temp['created_by'] = 'system'
+         temp['created_at'] = time.time()
+         temp['import_id'] = str(importLogId)
+         if(result == False):
+            errorData.append(temp)
+         else:
+            temp['result'] = 'success'
+            insertData.append(temp)
+            result = True
+
+   if(len(errorData) > 0):
+      mongodb.batch_insert(common.getSubUser(subUserType, 'Lawsuit_result'), errorData)
+      mongodb.update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': importLogId}, VALUE={'status': 0, 'complete_import': time.time()})
+   else:
+      if len(insertData) > 0:
+         mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertData)
+         mongodb.batch_insert(common.getSubUser(subUserType, 'Lawsuit_result'), insert_data=insertData)
+      mongodb.update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': importLogId}, VALUE={'status': 1, 'complete_import': time.time()})
+   
    now_end         = datetime.now()
    log.write(now_end.strftime("%d/%m/%Y, %H:%M:%S") + ': End Import' + '\n')
    pprint({'status': status})

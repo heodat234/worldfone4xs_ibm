@@ -40,16 +40,17 @@ try:
 
     ftpInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'ftp_config'), WHERE={'collection': collection})
     ftpConfig = config.ftp_config()
-    ftpLocalUrl = base_url + ftpInfo['locallink'] + ftpInfo['filename']
+    ftpLocalUrl = common.getDownloadFolder() + ftpInfo['filename']
 
     try:
         sys.argv[1]
         importLogId = str(sys.argv[1])
         importLogInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': ObjectId(sys.argv[1])})
     except Exception as SysArgvError:
-        ftp.connect(host=ftpConfig['host'], username=ftpConfig['username'], password=ftpConfig['password'])
-        ftp.downLoadFile(ftpLocalUrl, ftpInfo['filename'])
-        ftp.close()
+        # ftp.connect(host=ftpConfig['host'], username=ftpConfig['username'], password=ftpConfig['password'])
+        # ftp.downLoadFile(serverfolder='/testFTP', filename=ftpInfo['filename'], local_path=ftpLocalUrl)
+        # # ftp.downLoadFile(ftpLocalUrl, ftpInfo['filename'])
+        # ftp.close()
 
         importLogInfo = {
             'collection'    : collection, 
@@ -58,9 +59,10 @@ try:
             'file_path'     : ftpLocalUrl, 
             'source'        : 'ftp',
             'status'        : 2,
+            'command'       : 'python3.6 ' + base_url + "cronjob/python/Loan/importCollateralInfo.py > /dev/null &",
             'created_by'    : 'system'
         }
-        importLogId = mongodb.insert(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), insert_data=importLogInfo) 
+        importLogId = mongodb.insert(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), insert_data=importLogInfo)
     
     models = _mongodb.get(MONGO_COLLECTION='Model', WHERE={'collection': collection}, SORT=[('index', 1)], SELECT=['index', 'collection', 'field', 'type', 'sub_type'], TAKE=1000)
 
@@ -86,6 +88,7 @@ try:
         inputDataRaw = excel.getDataExcel(file_path=importLogInfo['file_path'], active_sheet=ftpInfo['sheet'], header=header, names=modelColumns, na_values='')
 
     inputData = inputDataRaw.to_dict('records')
+    
     
     insertData = []
     updateDate = []
@@ -124,5 +127,7 @@ try:
             mongodb.remove_document(MONGO_COLLECTION=collection)
             mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertData)
             mongodb.batch_insert(common.getSubUser(subUserType, 'Collateral_info_result'), insert_data=insertData)
+        mongodb.update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': importLogId}, VALUE={'status': 1, 'complete_import': time.time()})
 except Exception as e:
     log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')
+    pprint(str(e))

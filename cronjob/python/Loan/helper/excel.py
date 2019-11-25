@@ -15,8 +15,8 @@ class Excel:
         data.fillna('', inplace=True)
         return data
 
-    def getDataCSV(self, file_path, sep=',', lineterminator='\r', header=None, names=None, index_col=None, usecols=None, dtype=None, converters=None, skiprows=None, na_values=None, encoding=None, engine=None, keep_default_na=False, low_memory=True):
-        data = self.pd.read_csv(file_path, sep=sep, header=header, names=names, index_col=index_col, usecols=usecols, dtype=dtype, converters=converters, skiprows=skiprows, na_values=na_values, encoding = encoding, engine = engine, keep_default_na=keep_default_na, low_memory=low_memory)
+    def getDataCSV(self, file_path, sep=',', lineterminator='\r', header=None, names=None, index_col=None, usecols=None, dtype=None, converters=None, skiprows=None, na_values=None, encoding=None, engine=None, keep_default_na=False, low_memory=True, quotechar='"'):
+        data = self.pd.read_csv(file_path, sep=sep, header=header, names=names, index_col=index_col, usecols=usecols, dtype=dtype, converters=converters, skiprows=skiprows, na_values=na_values, encoding = encoding, engine = engine, keep_default_na=keep_default_na, low_memory=low_memory, quotechar=quotechar)
         data.dropna(how="all", inplace=True)
         data.fillna('', inplace=True)
         return data
