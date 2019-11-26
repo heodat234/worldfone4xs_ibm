@@ -28,6 +28,8 @@ investigation_collection  = common.getSubUser(subUserType, 'Investigation_file')
 sbv_collection            = common.getSubUser(subUserType, 'SBV')
 trialBalance_collection   = common.getSubUser(subUserType, 'Trial_balance_report')
 wo_monthly_collection     = common.getSubUser(subUserType, 'WO_monthly')
+diallist_collection       = common.getSubUser(subUserType, 'Diallist_detail')
+user_collection           = common.getSubUser(subUserType, 'User')
 
 log         = open("/var/www/html/worldfone4xs_ibm/cronjob/python/Loan/log/MasterData_log.txt","a")
 
@@ -37,6 +39,7 @@ try:
    insertData  = []
    resultData  = []
    errorData   = []
+   users = _mongodb.get(MONGO_COLLECTION=user_collection, SELECT=['extension','agentname'],SORT=([('_id', -1)]),SKIP=0, TAKE=200)
 
 
    # SIBS
@@ -45,12 +48,12 @@ try:
    mod = int(count)%10000
    if quotient != 0:
       for x in range(int(quotient)):
-         result = mongodb.get(MONGO_COLLECTION=lnjc05_collection, SELECT=['account_number','cus_name','current_balance','due_date','address'],SORT=([('_id', -1)]),SKIP=int(x*10000), TAKE=int(10000))
+         result = mongodb.get(MONGO_COLLECTION=lnjc05_collection, SELECT=['account_number','cus_name','current_balance','due_date','address','officer_name'],SORT=([('_id', -1)]),SKIP=int(x*10000), TAKE=int(10000))
          for idx,row in enumerate(result):
             data.append(row)
 
    if int(mod) > 0:
-      result = mongodb.get(MONGO_COLLECTION=lnjc05_collection,SELECT=['account_number','cus_name','current_balance','due_date','address'], SORT=([('_id', -1)]),SKIP=int(int(quotient)*10000), TAKE=int(mod))
+      result = mongodb.get(MONGO_COLLECTION=lnjc05_collection,SELECT=['account_number','cus_name','current_balance','due_date','address','officer_name'], SORT=([('_id', -1)]),SKIP=int(int(quotient)*10000), TAKE=int(mod))
       for idx,row in enumerate(result):
          data.append(row)
 
@@ -87,7 +90,9 @@ try:
             row['pernament_add']          = customer['PERNAMENT_ADDRESS']      
             row['pernament_district']     = customer['PERNAMENT_DISTRICT']      
             row['pernament_province']     = customer['PERNAMENT_PROVINCE']          
-         
+         else:
+            row['COMPANY']          = ''
+
          investigation = mongodb.getOne(MONGO_COLLECTION=investigation_collection, WHERE={'contract_no': str(row['account_number'])},SELECT=['license_plates_no'])
          if investigation != None:
             row['license_plates_no']    = investigation['license_plates_no']
@@ -111,7 +116,17 @@ try:
          tdelta   = datetime.strptime(d1, FMT) - datetime.strptime(d2, FMT)
          row['CURRENT_DPD'] = tdelta.days
          
+         diallist = mongodb.getOne(MONGO_COLLECTION=diallist_collection, WHERE={'account_number': str(row['account_number'])},
+            SELECT=['assign'])
+         if diallist != None:
+            if row['COMPANY'] == '':
+               for user in list(users):
+                  if user['extension'] == diallist['assign']:
+                     row['COMPANY']          = user['agentname']
+                     break
+
          row.pop('_id')
+         row.pop('officer_name')
          row.pop('due_date')
          insertData.append(row)
 
@@ -159,7 +174,9 @@ try:
             row['pernament_add']          = customer['PERNAMENT_ADDRESS']      
             row['pernament_district']     = customer['PERNAMENT_DISTRICT']      
             row['pernament_province']     = customer['PERNAMENT_PROVINCE']          
-         
+         else:
+            row['COMPANY']          = ''
+
          investigation = mongodb.getOne(MONGO_COLLECTION=investigation_collection, WHERE={'contract_no': str(row['account_number'])},SELECT=['license_plates_no'])
          if investigation != None:
             row['license_plates_no']    = investigation['license_plates_no']
@@ -182,6 +199,15 @@ try:
          if zaccf != None:
             row['WRK_REF']          = zaccf['WRK_REF']+'; '+zaccf['WRK_REF1']+'; '+zaccf['WRK_REF2']+'; '+zaccf['WRK_REF3']+'; '+zaccf['WRK_REF4']+'; '+zaccf['WRK_REF5']
          
+         diallist = mongodb.getOne(MONGO_COLLECTION=diallist_collection, WHERE={'account_no': str(row['account_number'])},
+            SELECT=['assign'])
+         if diallist != None:
+            if row['COMPANY'] == '':
+               for user in list(users):
+                  if user['extension'] == diallist['assign']:
+                     row['COMPANY']          = user['agentname']
+                     break
+         
          today    = datetime.now()
          FMT      = '%d/%m/%Y'
          d1       = today.strftime(FMT)
@@ -193,8 +219,8 @@ try:
 
          row['MOBILE_NO']      = row['phone']
          row.pop('_id')
-         row.pop('overdue')
-         row.pop('mobile_num')
+         row.pop('overdue_date')
+         row.pop('phone')
          insertData.append(row)
       # break
 
@@ -218,14 +244,14 @@ try:
       temp = {}
       if 'ACCTNO' in row.keys():
          sbv = mongodb.getOne(MONGO_COLLECTION=sbv_collection, WHERE={'contract_no': str(row['ACCTNO'])},
-            SELECT=['cif_birth_date','cus_name','cus_no','open_date','card_type','license_no','approved_limit','ob_principal_sale','ob_principal_cash','interest_rate','overdue_days_no'])
+            SELECT=['cif_birth_date','name','cus_no','open_date','card_type','license_no','approved_limit','ob_principal_sale','ob_principal_cash','interest_rate','overdue_days_no'])
          if sbv != None:
             temp['BIR_DT8']          = str(sbv['cif_birth_date'])
             temp['CUS_ID']           = sbv['cus_no']
             temp['FRELD8']           = sbv['open_date']
             temp['LIC_NO']           = sbv['license_no']
             temp['APPROV_LMT']       = sbv['approved_limit']
-            temp['cus_name']         = sbv['cus_name']
+            temp['cus_name']         = sbv['name']
             temp['W_ORG']            = float(sbv['ob_principal_sale']) + float(sbv['ob_principal_cash'])
             temp['INT_RATE']         = sbv['interest_rate']
             temp['OVER_DY']          = sbv['overdue_days_no']
@@ -266,7 +292,9 @@ try:
             temp['pernament_add']          = customer['PERNAMENT_ADDRESS']      
             temp['pernament_district']     = customer['PERNAMENT_DISTRICT']      
             temp['pernament_province']     = customer['PERNAMENT_PROVINCE']          
-         
+         else:
+            temp['COMPANY']          = ''
+
          investigation = mongodb.getOne(MONGO_COLLECTION=investigation_collection, WHERE={'contract_no': str(row['ACCTNO'])},
             SELECT=['license_plates_no'])
          if investigation != None:
@@ -308,7 +336,15 @@ try:
             tdelta   = datetime.strptime(d1, FMT) - datetime.strptime(d2, FMT)
             temp['CURRENT_DPD'] = tdelta.days
          
-         
+         diallist = mongodb.getOne(MONGO_COLLECTION=diallist_collection, WHERE={'account_no': str(row['ACCTNO'])},
+            SELECT=['assign'])
+         if diallist != None:
+            if row['COMPANY'] == '':
+               for user in list(users):
+                  if user['extension'] == diallist['assign']:
+                     row['COMPANY']          = user['agentname']
+                     break
+
          temp['current_balance']    = float(row['WO9711']) + float(row['WO9712'])+ float(row['WO9713'])
          
          temp['account_number'] = row['ACCTNO']

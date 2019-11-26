@@ -14,7 +14,8 @@
               </div>
             </div>
         </div>
-        
+        <div class="col-sm-2" style="margin: 10px 0" id="page-widget"></div>
+        <div class="col-sm-12 filter-mvvm" style="display: none; margin: 10px 0"></div>
         <h3 class="col-sm-12 text-center" style="margin-bottom: 20px;color: #27ae60">MASTER DATA</h3>
         <div class="row chart-page" >
           <div class="col-sm-12">

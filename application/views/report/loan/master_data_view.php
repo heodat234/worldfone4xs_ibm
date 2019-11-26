@@ -86,7 +86,9 @@
             });
             var HTML = await $.get(`${Config.templateApi}master_data_report/overview`);
             var kendoView = new kendo.View(HTML, { model: overViewModel, template: false, wrap: false });
-            layout.showIn("#bottom-row", kendoView);        
+            layout.showIn("#bottom-row", kendoView);   
+            var widget = await $.get(`${Config.templateApi}master_data_report/widget`);
+            $("#page-widget").html(widget);     
         });
 
         router.route("/import", async function() {
