@@ -2,7 +2,7 @@
 <div class="col-sm-12 statistic-view">
     <div class="row">
         <div class="col-sm-3" style="margin-top: 10px">
-            <div class="alert alert-success" style="cursor: pointer;" data-bind="click: import">
+            <div class="alert alert-success" style="cursor: pointer;">
                 <h4>@Total@</h4>
                 <p class="text-right">
                     <span data-bind="text: diallist.total"></span>
@@ -48,7 +48,8 @@
 </div>
 <div id="detail-action-menu" class="action-menu">
     <ul>
-        <a href="javascript:void(0)" data-type="detail" onclick="openForm({title: '@View@ @case@', width: 900}); viewForm(this)"><li><i class="fa fa-pencil-square-o text-info"></i><span>@View@</span></li></a>
+        <a href="javascript:void(0)" data-type="detail" onclick="customerDetail(this)" class="hidden"><li><i class="fa fa-list text-info"></i><span>@View@ @customer@</span></li></a>
+        <a href="javascript:void(0)" data-type="detail" onclick="openForm({title: '@View@ @case@', width: 900}); viewForm(this)"><li><i class="fa fa-television text-info"></i><span>@View@</span></li></a>
         <li class="devide"></li>
         <a href="javascript:void(0)" data-type="update" onclick="openForm({title: '@Edit@ @case@', width: 400}); editForm(this)"><li><i class="fa fa-pencil-square-o text-warning"></i><span>@Edit@</span></li></a>
         <a href="javascript:void(0)" data-type="delete" onclick="deleteDataItem(this)"><li><i class="fa fa-times-circle text-danger"></i><span>Delete</span></li></a>
@@ -60,7 +61,7 @@ function gridCallResult(data) {
     if(data) {
         data.forEach(doc => {
             htmlArr.push(`<a href="javascript:void(0)" class="label label-${(doc.disposition == "ANSWERED")?'success':'warning'}" 
-                title="${kendo.toString(new Date(doc.starttime * 1000), "dd/MM/yy H:mm:ss")} | ${doc.userextension} -> ${doc.customernumber}">${doc.disposition}</a>`);
+                title="${kendo.toString(new Date(doc.starttime * 1000), "dd/MM/yy H:mm:ss")} | ${doc.userextension} - ${doc.customernumber}">${doc.disposition}</a>`);
         })
     }
     return htmlArr.join("<br>");
@@ -90,22 +91,17 @@ var Config = {
         },{
             field: "phone",
             title: "@Main phone@",
-            template: data => gridPhone(data.phone, data.id, "manual"),
+            template: data => gridPhoneDialId(data.phone, data.id, "manual"),
             width: 110,
             locked: true
         },{
             field: "other_phones",
             title: "@Other phones@",
-            template: data => gridPhone(data.other_phones, data.id, "manual"),
+            template: data => gridPhoneDialId(data.other_phones, data.id, "manual"),
             width: 110,
             locked: true
         },{
-            field: "assign",
-            title: "@Assign@",
-            width: 110,
-            locked: true
-        },{
-            field: "callCode",
+            field: "action_code",
             title: "@Call code@",
             width: 110,
             locked: true
@@ -119,7 +115,7 @@ var Config = {
             // Use uid to fix bug data-uid of row undefined
             title: `<a class='btn btn-sm btn-circle btn-action' onclick='return deleteDataItemChecked();'><i class='fa fa-times-circle'></i></a>`,
             template: '<a role="button" class="btn btn-sm btn-circle btn-action" title="#: id #" data-uid="#: uid #"><i class="fa fa-ellipsis-v"></i></a>',
-            width: 32,
+            width: 36,
             locked: true
         }]
 }; 
@@ -174,14 +170,76 @@ var detailTable = function() {
                 error: errorDataSource
             });
 
-            var dataItemFull = this.diallist = await $.get(`${ENV.restApi}diallist/${Config.id}`);
+            var diallistDetailModel = this.diallist = await $.get(`${ENV.restApi}model`, {q: JSON.stringify({
+                filter: {
+                    logic: "and",
+                    filters: [
+                        {field: "collection", operator: "eq", value: ENV.type + "_Diallist_detail"},
+                        {field: "sub_type", operator: "isnotempty", value: ""},
+                        {field: "sub_type", operator: "isnotnull", value: ""}
+                    ]
+                },
+                sort: [{field: "index", dir: "asc"}]
+            })});
 
-            dataItemFull.columns.map((col, idx) => {
+            diallistDetailColumns = diallistDetailModel.data;
+
+            diallistDetailColumns.map((col, idx) => {
                 col.width = 150;
-                col.template = data => gridLongText(data[col.field], 20);
+                switch(col.type) {
+                    case "array": case "arrayPhone":
+                        col.template = data => gridArray(data[col.field]);
+                        break;
+                    case "timestamp":
+                        col.template = data => gridTimestamp(data[col.field]);
+                        break;
+                    case "int": case "double":
+                        col.template = data => gridInterger(data[col.field]);
+                        break;
+                    default:
+                        col.template = data => gridLongText(data[col.field], 20);
+                        break;
+                }
             });
 
-            this.columns = this.columns.concat(dataItemFull.columns);
+            this.columns = this.columns.concat(diallistDetailColumns);
+
+            this.columns.push({
+                field: "assign",
+                title: "@Assign@",
+                template: data => (convertExtensionToAgentname[data.assign] || ""),
+                filterable: {
+                    ui: function(element) {
+                        let dataSource = new kendo.data.DataSource({
+                            transport: {
+                                read: ENV.restApi + "diallist/" + Config.id,
+                            },
+                            schema: {
+                                parse: function(res) {
+                                    var memberOption = [];
+                                    res.members.forEach(extension => {
+                                        memberOption.push({text: convertExtensionToAgentname[extension], value: extension});
+                                    })
+                                    return memberOption;
+                                }
+                            }
+                        });
+                        element.kendoDropDownList({
+                            dataSource: dataSource,
+                            filter: "contains",
+                            dataTextField: "text",
+                            dataValueField: "value",
+                            optionLabel: "-- @Select@ --"
+                        });
+                    },
+                    operators: {
+                      string: {
+                        eq: '@Equal to@',
+                      }
+                    }
+                },
+                width: 110
+            })
 
             var grid = this.grid = $(`#grid-${Config.id}`).kendoGrid({
                 dataSource: dataSource,
@@ -267,6 +325,11 @@ var detailTable = function() {
     }
 }();
 
+function customerDetail(ele) {
+    var dataItem = detailTable.dataSource.getByUid($(ele).data("uid"));
+    window.open(ENV.vApi + "redirect/fromPhoneToCustomerDetail/" + dataItem.phone);
+}
+
 async function viewForm(ele) {
     var dataItem = detailTable.dataSource.getByUid($(ele).data("uid")),
         formHtml = await $.ajax({
@@ -344,17 +407,17 @@ async function updateStatistic() {
         diallist.is_auto = Boolean(diallist.mode == "auto");
     var statisticObservable = kendo.observable({
         diallist: diallist,
-        import: function(e) {
-            router.navigate("/import_from_basket/" + Config.id);
-        },
         runStatusChange: function(e) {
             $.ajax({
                 url: ENV.restApi + "diallist/" + Config.id,
                 type: "PUT",
                 contentType: "application/json; charset=utf-8",
                 data: JSON.stringify({runStatus: e.currentTarget.checked}),
-                success: function(response) {
+                success: (response) => {
                     if(response.status) {
+                        if(e.currentTarget.checked) {
+                            $.get(ENV.vApi + "dial_queue/createDialQueue/" + Config.id);
+                        }
                         notification.show("@Change status@ @success@", "success");
                         updateStatistic();
                     } else notification.show("@Change status@ @error@", "error");
@@ -365,6 +428,7 @@ async function updateStatistic() {
     });
     kendo.bind($(".statistic-view"), statisticObservable);
 }
+
 </script>
 
 <style type="text/css">

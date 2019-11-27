@@ -34,10 +34,11 @@
 		     data-spritecssclass-field="type"
 		     data-bind="source: files, events: {select: fileSelect}"></div>
 		</div>
-		<div class="col-sm-9" data-bind="visible: dataName">
+		<div class="col-sm-9" data-bind="visible: dataName" style="height: 500px; overflow-y: scroll;">
 			<h3>@Data@ - <b data-bind="text: dataName"></b> 
 				<i class="fa fa-arrow-right text-success"></i>
-				<button class="k-button" data-bind="click: importAndGoToAssign" style="font-size: 16px">@Import@ @and@ @Assign@</button>
+				<button class="k-button" data-bind="click: import, visible: visibleAuto" style="font-size: 16px">@Import@</button>
+				<button class="k-button" data-bind="click: importAndGoToAssign, invisible: visibleAuto" style="font-size: 16px">@Import@ @and@ @Assign@</button>
 			</h3>
 			<div id="data-grid"></div>
 		</div>
@@ -46,7 +47,7 @@
 
 <script type="text/javascript">
 	var diallist_id = "<?= $this->input->get('id') ?>";
-	Config.crudApi = ENV.reportApi + "database";
+	Config.crudApi = ENV.vApi + "database";
 
 	$.get(ENV.vApi + "diallist/listDataBasket", function(res) {
 		var observable = kendo.observable({
@@ -61,6 +62,13 @@
 	        		detailData(name);
 	        	}
 	        },
+	        import: function(e) {
+	        	$.get(ENV.vApi + "diallist_detail/insertFromBasket", {collection: this.get("dataName"), diallist_id: diallist_id} , function(res) {
+	        		if(res.status) {
+	        			router.navigate("/detail/" + diallist_id);
+	        		}
+	        	});
+	        },
 	        importAndGoToAssign: function(e) {
 	        	$.get(ENV.vApi + "diallist_detail/insertFromBasket", {collection: this.get("dataName"), diallist_id: diallist_id} , function(res) {
 	        		if(res.status) {
@@ -72,6 +80,7 @@
 		kendo.bind(".import-view", observable);
 
 		$.get(ENV.restApi + "diallist/" + diallist_id, (diallist) => {
+			observable.set("visibleAuto", Boolean(diallist.mode == "auto"));
 			observable.set("item", diallist);
 			layoutViewModel.set("breadcrumb2", diallist.name);
 		})

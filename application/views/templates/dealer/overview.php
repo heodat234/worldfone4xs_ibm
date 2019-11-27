@@ -38,6 +38,9 @@ var Config = Object.assign(Config, {
         return response;
     },
     columns: [{
+        selectable: true,
+        width: 32,
+    },{
         title: "@No.@",
         template: "#= ++record #",
     },{
@@ -66,7 +69,7 @@ var Config = Object.assign(Config, {
     },{
         // Use uid to fix bug data-uid of row undefined
         title: `<a class='btn btn-sm btn-circle btn-action btn-primary' onclick='return deleteDataItemChecked();'><i class='fa fa-times-circle'></i></a>`,
-        template: '<a role="button" class="btn btn-sm btn-circle btn-action btn-primary" data-uid="#: uid #"><i class="fa fa-ellipsis-v"></i></a>',
+        template: `<a role="button" class="btn btn-sm btn-circle btn-action btn-primary" data-uid="#: uid #"><i class="fa fa-ellipsis-v"></i></a>`,
         width: 20
     }],
 });

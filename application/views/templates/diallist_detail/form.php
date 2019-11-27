@@ -1,6 +1,9 @@
 <?php
-	$dataFieldsJSON = $this->input->get("dataFields");
-	$dataFields = $dataFieldsJSON ? json_decode($dataFieldsJSON, TRUE) : [];
+	$this->load->library("mongo_private");
+	$dataFields = $this->mongo_private->where(["collection"=>getCT("Diallist_detail"), "sub_type"=>['$exists'=>TRUE,'$nin'=>['',null]]])->get("Model");
+	foreach ($dataFields as &$doc) {
+		$doc["title"] = !empty($doc["title"]) ? $doc["title"] : $doc["field"];
+	}
 ?>
 <div class="container-fluid">
 	<div class="row">
@@ -9,6 +12,10 @@
 				<label>@Assign@</label>
 				<input data-role="dropdownlist" style="width: 100%" name="assign"
 				data-value-primitive="true" data-bind='value: item.assign, source: userDataSource'>
+			</div>
+			<div class='form-group'>
+				<label>@Main phone@</label>
+				<input class="k-textbox" style="width: 100%" name="phone" data-bind='value: item.phone'>
 			</div>
 			<?php foreach ($dataFields as $fieldDoc) { 
 				switch ($fieldDoc["type"]) {
@@ -23,8 +30,8 @@
 					case 'timestamp':
 						echo "
 						<div class='form-group'>
-							<label>{$fieldDoc['title']} <i class='fa fa-phone-square text-success'></i></label>
-							<input class='k-textbox' style='width: 100%' data-bind='value: item.{$fieldDoc['field']}'>
+							<label>{$fieldDoc['title']}</label>
+							<input data-role='datepicker' data-format='dd/MM/yyyy' style='width: 100%' data-bind='value: item.{$fieldDoc['field']}'>
 						</div>";
 						break;
 					
@@ -58,11 +65,13 @@ var Form = {
 	        error: errorDataSource
 	    });
 
+	    var diallist = await $.get(ENV.restApi + "diallist/" + Config.id);
+
 	    var model = Object.assign({}, {
 			item: dataItemFull,
 	        userDataSource: new kendo.data.DataSource({
 	            transport: {
-	                read: ENV.restApi + "group/" + detailTable.diallist.group_id
+	                read: ENV.restApi + "group/" + diallist.group_id
 	            },
 	            schema: {
 	                data: "members",

@@ -5,7 +5,7 @@
     <ul>
     	<a href="javascript:void(0)" data-type="detail" onclick="detailData(this)"><li><i class="fa fa-exclamation-circle text-info"></i><span>@Detail@</span></li></a>
     	<a href="javascript:void(0)" data-type="import" onclick="importData(this)"><li><i class="fa fa-download text-success"></i><span>@Import@</span></li></a>
-    	<a href="javascript:void(0)" data-type="detail" onclick="assignData(this)"><li><i class="fa fa-check-square-o text-success"></i><span>@Assign@</span></li></a>
+    	<a href="javascript:void(0)" data-type="import" onclick="assignData(this)"><li><i class="fa fa-check-square-o text-success"></i><span>@Assign@</span></li></a>
     	<li class="devide"></li>
         <a href="javascript:void(0)" data-type="update" onclick="openForm({title: '@Edit@ @campaign@', width: 400}); editForm(this)"><li><i class="fa fa-pencil-square-o text-warning"></i><span>@Edit@</span></li></a>
         <a href="javascript:void(0)" data-type="delete" onclick="deleteDataItem(this)"><li><i class="fa fa-times-circle text-danger"></i><span>@Delete@</span></li></a>
@@ -69,7 +69,8 @@ var Config = {
 	    	    error: errorDataSource
 	    	});
 		var model = Object.assign({
-			item: {name: dataItemFull.name},
+			item: {name: dataItemFull.name, mode: dataItemFull.mode},
+			modeOption: dataSourceJsonData(["Diallist","mode"]),
 			save: function() {
 	            $.ajax({
 	                url: `${Config.crudApi+Config.collection}/${dataItem.id}`,
@@ -144,6 +145,10 @@ var Config = {
 	function assignData(ele) {
 		var uid = $(ele).data('uid');
 		var dataItem = Table.dataSource.getByUid(uid);
+		if(dataItem.mode == "auto") {
+			notification.show("Can't assign in diallist mode auto");
+			return;
+		}
 		router.navigate(`/assign/${dataItem.id}`);
 	}
 

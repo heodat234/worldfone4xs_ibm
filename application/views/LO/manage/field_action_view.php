@@ -5,6 +5,7 @@ var Config = {
     collection: "field_action",
     observable: {
     },
+    scrollable: true,
     model: {
         id: "id",
         fields: {
@@ -48,7 +49,7 @@ var Config = {
     		title: "@Result Code@"
     	},
     	{
-    		field: "result",
+    		field: "result_desc",
     		title: "@Result@",
     	},
     	{
@@ -291,6 +292,9 @@ var Table = function() {
 </div>
 <script type="text/javascript">
 	window.onload = function() {
+       <?php if(!empty($filter)) { ?>
+        Config.filter = <?= $filter ?>;
+    <?php } ?>
 		Table.init();
 	}
 </script>

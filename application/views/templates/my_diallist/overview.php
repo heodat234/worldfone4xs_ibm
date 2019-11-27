@@ -21,19 +21,22 @@ var Config = {
     columns: [{
             field: "name",
             title: "@Name@",
-            template: dataItem => gridName(dataItem.name),
+            template: dataItem => gridNameDiallist(dataItem),
             width: 300
         },{
             field: "mode",
             title: "@Mode@",
             width: 100
         },{
-            field: "type",
-            title: "@Type@",
+            field: "group_name",
+            title: "@Group@",
         },{
-            field: "assigns",
-            title: "@Assigns@",
-            template: "#= gridArray(assigns) #"
+            field: "createdAt",
+            title: "@Create at@",
+            template: dataItem => gridTimestamp(dataItem.createdAt)
+        },{
+            field: "createdBy",
+            title: "@Create by@"
         },{
             // Use uid to fix bug data-uid of row undefined
             template: '<a role="button" class="btn btn-sm btn-circle btn-action" data-uid="#: uid #"><i class="fa fa-ellipsis-v"></i></a>',
@@ -118,6 +121,10 @@ var Config = {
 		var uid = $(ele).data('uid');
 		var dataItem = Table.dataSource.getByUid(uid);
 		router.navigate(`/detail/${dataItem.id}`);
+	}
+
+	function gridNameDiallist(data, href = "javascript:void(0)") {
+	    return (data.runStatus ? '<i class="fa fa-cog fa-spin text-warning"></i> ' : '') + `<a href="${href}"><span class="grid-name">${data.name}</span></a>`;
 	}
 
 	$(document).on("click", ".grid-name", function() {

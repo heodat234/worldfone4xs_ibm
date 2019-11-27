@@ -17,7 +17,6 @@ var Config = {
             if(window.modules.length) {
                 privileges.push({module_id: window.modules[0].value, view: true, create: true, update: true, delete: true, actions: window.modules[0].actions || []});
                 this.set("item.privileges", privileges);
-                console.log(privileges);
                 this.getNavigator(privileges);
             }
         },

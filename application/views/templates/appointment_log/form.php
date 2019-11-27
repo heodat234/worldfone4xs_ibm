@@ -62,7 +62,7 @@
                 <input id="customer-info" data-role="dropdownlist"
                        data-value-primitive="true"
                        data-text-field="id_no"
-                       data-value-field="id"
+                       data-value-field="id_no"
                        data-filter="contains"
                        data-bind="value: item.id_no, source: customerOption, events:{change: onChangeCMND}" style="width: 100%"
                        required validationMessage="Empty!!!"/>

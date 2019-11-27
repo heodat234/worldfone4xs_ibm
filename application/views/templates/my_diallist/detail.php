@@ -1,13 +1,23 @@
 <?php $id = $this->input->get("id") ?>
 <div class="col-sm-12" style="overflow-y: auto; padding: 0">
-	<div id="grid-<?= $id ?>"></div>
+    <div id="grid-<?= $id ?>"></div>
 </div>
 <div id="detail-action-menu" class="action-menu">
     <ul>
-        <a href="javascript:void(0)" data-type="detail" onclick="openForm({title: 'View diallist detail', width: 400}); viewForm(this)"><li><i class="fa fa-pencil-square-o text-info"></i><span>View</span></li></a>
+        <a href="javascript:void(0)" data-type="detail" onclick="openForm({title: '@View@ @case@', width: 900}); viewForm(this)"><li><i class="fa fa-television text-info"></i><span>@View@</span></li></a>
     </ul>
 </div>
 <script>
+function gridCallResult(data) {
+    var htmlArr = [];
+    if(data) {
+        data.forEach(doc => {
+            htmlArr.push(`<a href="javascript:void(0)" class="label label-${(doc.disposition == "ANSWERED")?'success':'warning'}" 
+                title="${kendo.toString(new Date(doc.starttime * 1000), "dd/MM/yy H:mm:ss")} | ${doc.userextension} - ${doc.customernumber}">${doc.disposition}</a>`);
+        })
+    }
+    return htmlArr.join("<br>");
+}
 var Config = {
     id: '<?= $id ?>',
     crudApi: `${ENV.restApi}`,
@@ -22,41 +32,38 @@ var Config = {
         }
     },
     columns: [{
-            selectable: true,
-            width: 32,
-            locked: true
-        },{
             field: "index",
             title: "#",
             width: 50,
             locked: true
         },{
             field: "phone",
-            title: "@Phone@",
-            template: diallistDetail => gridPhoneDiallist(diallistDetail.phone, diallistDetail.id),
-            width: 120,
+            title: "@Main phone@",
+            template: data => gridPhoneDialId(data.phone, data.id, "manual"),
+            width: 110,
             locked: true
         },{
-            field: "assign",
-            title: "@Assign@",
-            width: 120,
+            field: "other_phones",
+            title: "@Other phones@",
+            template: data => gridPhoneDialId(data.other_phones, data.id, "manual"),
+            width: 110,
             locked: true
         },{
-            field: "call_code",
+            field: "action_code",
             title: "@Call code@",
-            width: 120,
+            width: 110,
             locked: true
         },{
             field: "callResult",
-            title: "@Results@",
+            title: "@Calls@",
             template: diallistDetail => gridCallResult(diallistDetail.callResult),
             width: 120,
             locked: true
         },{
             // Use uid to fix bug data-uid of row undefined
-            title: `<a class='btn btn-sm btn-circle btn-action' onclick='return deleteDataItemChecked();'><i class='fa fa-times-circle'></i></a>`,
-            template: '<a role="button" class="btn btn-sm btn-circle btn-action" data-uid="#: uid #"><i class="fa fa-ellipsis-v"></i></a>',
-            width: 32,
+            title: ``,
+            template: '<a role="button" class="btn btn-sm btn-circle btn-action" title="#: id #" data-uid="#: uid #"><i class="fa fa-ellipsis-v"></i></a>',
+            width: 36,
             locked: true
         }]
 }; 
@@ -111,40 +118,36 @@ var detailTable = function() {
                 error: errorDataSource
             });
 
-            var dataItemFull = this.diallist = await $.get(`${ENV.restApi}diallist/${Config.id}`);
+            var diallistDetailModel = this.diallist = await $.get(`${ENV.restApi}model`, {q: JSON.stringify({filter: {
+                    logic: "and",
+                    filters: [
+                        {field: "collection", operator: "eq", value: ENV.type + "_Diallist_detail"},
+                        {field: "sub_type", operator: "isnotempty", value: ""}
+                    ]
+                }})});
 
+            diallistDetailColumns = diallistDetailModel.data;
 
-            dataItemFull.columns.map(col => {
-                if(dataItemFull.mode == "1") {
-                    col.width = 150;
-                    switch (col.type) {
-                        case "phone": case "arrayPhone":
-                            col.template = diallistDetail => gridPhoneDiallist(diallistDetail[col.field], diallistDetail.id);
-                            break;
-                        default:
-                            break;
-                    }
-                } else {
-                    col.width = 150;
-                }
+            diallistDetailColumns.map((col, idx) => {
+                col.width = 150;
+                col.template = data => gridLongText(data[col.field], 20);
             });
 
-            
-
-            this.columns = this.columns.concat(dataItemFull.columns);
+            this.columns = this.columns.concat(diallistDetailColumns);
 
             var grid = this.grid = $(`#grid-${Config.id}`).kendoGrid({
                 dataSource: dataSource,
                 resizable: true,
                 pageable: {
                     refresh: true,
-                    pageSizes: true
+                    pageSizes: true,
+                    input: true
                 },
                 sortable: true,
                 scrollable: true,
                 height: '80vh',
                 columns: this.columns,
-                filterable: true,
+                filterable: KENDO.filterable,
                 editable: false
             }).data("kendoGrid");
 
@@ -215,25 +218,31 @@ var detailTable = function() {
         }
     }
 }();
-    async function viewForm(ele) {
-        var dataItem = detailTable.dataSource.getByUid($(ele).data("uid")),
-            dataItemFull = await $.ajax({
-                url: `${Config.crudApi+Config.collection}/${dataItem.id}`,
-                error: errorDataSource
-            }),
-            formHtml = await $.ajax({
-                url: Config.templateApi + Config.collection + "/view",
-                data: {dataFields: JSON.stringify(detailTable.diallist.columns)},
-                error: errorDataSource
-            });
-        var model = Object.assign({
-            item: dataItemFull
-        }, Config.observable);
-        kendo.destroy($("#right-form"));
-        $("#right-form").empty();
-        var kendoView = new kendo.View(formHtml, { wrap: false, model: model, evalTemplate: false });
-        kendoView.render($("#right-form"));
-    }
 
-	detailTable.init();
+async function viewForm(ele) {
+    var dataItem = detailTable.dataSource.getByUid($(ele).data("uid")),
+        formHtml = await $.ajax({
+            url: Config.templateApi + Config.collection + "/view",
+            data: {dataFields: JSON.stringify(detailTable.diallist.columns), id: dataItem.id},
+            error: errorDataSource
+        });
+    $("#right-form").empty();
+    var kendoView = new kendo.View(formHtml);
+    kendoView.render($("#right-form"));
+}
+
+detailTable.init().then(() => {
+    setTimeout(() => refreshGridInterval(), 5000);
+});
+
+function refreshGridInterval() {
+    detailTable.dataSource.read();
+    setTimeout(() => refreshGridInterval(), 5000);
+}
 </script>
+
+<style type="text/css">
+    #run-status-switch {width: 110px}
+    #run-status-switch .onoffswitch-inner:before {content: "RUNNING";}
+    #run-status-switch .onoffswitch-inner:after {content: "STOP";}
+</style>

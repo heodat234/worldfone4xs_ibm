@@ -117,7 +117,7 @@
 <script id="collection-template" type="text/x-kendo-template">
     <button class="btn btn-default btn-sm btn-alt btn-collection" href="javascript:void(0)"
      data-bind="click: selectCollection, css: {selected: selected}, attr: {data-collection: name}">
-        # if(data.options.capped) {# <i class="fa fa-balance-scale"></i> #}#
+        # if(data.options && data.options.capped) {# <i class="fa fa-balance-scale"></i> #}#
         <span data-bind="text: name"></span>
     </button>
 </script>

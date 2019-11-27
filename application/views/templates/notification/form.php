@@ -6,7 +6,11 @@
 				<input class="k-textbox" style="width: 100%" data-bind="value: item.title">
 			</div>
 			<div class="form-group">
-	            <div class="checkbox"><label><input type="checkbox" data-bind="checked: item.active"> <span>@Active@</span></label></div>
+	            <div class="checkbox">
+	            	<label><input type="checkbox" data-bind="checked: item.active"> <span>@Active@</span></label>
+	            	<label data-bind="visible: item.active">@Notify at@</label>
+	            	<input data-role="datetimepicker" data-bind="value: item.notifyDate, visible: item.active"/>
+	            </div>
 	        </div>
 			<div class="form-group">
 				<label>@Content@</label>

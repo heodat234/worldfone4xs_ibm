@@ -2,9 +2,10 @@
 var Config = {
     crudApi: `${ENV.restApi}`,
     templateApi: `${ENV.templateApi}`,
-    collection: "import_file",
+    collection: "import_history",
     observable: {
     },
+    scrollable: true,
     model: {
         id: "id",
         fields: {
@@ -14,33 +15,27 @@ var Config = {
     },
     columns: [{
             selectable: true,
-            width: 32,
-            locked: true
-        },{
-            title: "@Created at@",
-            template: data => gridTimestamp(data.modify_time),
-            width: 140
+            width: 32
         },{
             field: "file_name",
-            title: "@File name@",
-            width: 180
+            title: "@File name@"
         },{
-            field: "exists",
-            title: "@Exists@",
-            template: data => gridBoolean(data.exists),
-            width: 80
+            field: "begin_import",
+            title: "@Import at@",
+            template: data => gridTimestamp(data.begin_import),
+            width: 140
         },{
-            field: "last_import_time",
-            title: "@Last import time@",
-            template: data => gridTimestamp(data.last_import_time),
-            width: 80
+            field: "status",
+            title: "@Result@",
+            values: [{text: "@Failed@", value: 0},{text: "@Success@", value: 1},{text: "@Processing@", value: 2}],
+            width: 140
         },{
             field: "description",
             title: "@Description@",
         },{
             // Use uid to fix bug data-uid of row undefined
-            template: `<a role="button" class="k-button" href="javascript:void(0)" data-type="import" onclick="importFile(this)"><i class="fa fa-upload text-danger"></i>&nbsp;@Import@</a>`,
-            width: 100
+            template: `<a role="button" class="k-button" href="javascript:void(0)" data-type="import" onclick="importFile(this)"><i class="fa fa-upload text-danger"></i>&nbsp;@Reimport@</a>`,
+            width: 140
         }]
 }; 
 </script>
@@ -52,7 +47,6 @@ var Config = {
     <li>@Upload file@</li>
     <li class="pull-right none-breakcrumb">
         <div class="input-group-btn column-widget">
-            <a role="button" class="btn btn-sm btn-success btn-alt" onclick="uploadMany()"><i class="fa fa-upload"></i> <b>@Import@ @selected file@</b></a>
             <a role="button" class="btn btn-sm btn-success btn-alt dropdown-toggle" data-toggle="dropdown" onclick="editColumns(this)"><i class="fa fa-calculator"></i> <b>@Edit Columns@</b></a>
             <ul class="dropdown-menu dropdown-menu-right" style="width: 300px">
                 <li class="dropdown-header text-center">@Choose columns will show@</li>
@@ -80,7 +74,22 @@ window.onload = function() {
     Table.init();
 }
 
-function uploadMany() {
-
+function importFile(ele) {
+    swal({
+        title: "@Are you sure@?",
+        text: "@Reimport this file@!",
+        icon: "warning",
+        buttons: true,
+        dangerMode: true,
+    })
+    .then((sure) => {
+        if (sure) {
+            var uid = $(ele).closest("tr").data('uid');
+            var dataItem = Table.dataSource.getByUid(uid);
+            $.get(ENV.vApi + "import/reImport/" + dataItem.id, function(res) {
+                notification.show(res.message, res.status ? "success" : "error")
+            })
+        }
+    });
 }
 </script>

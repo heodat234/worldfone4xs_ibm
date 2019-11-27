@@ -3,6 +3,7 @@ var Config = {
     crudApi: `${ENV.vApi}`,
     templateApi: `${ENV.templateApi}`,
     collection: "cdr",
+    scrollable: true,
     observable: {
     },
     model: {
@@ -58,14 +59,15 @@ var Config = {
             var result = '';
             if(dataItem.customer) {
                 if(dataItem.customer.length) {
-                    result = dataItem.customer.map(doc => `<a href="${ENV.baseUrl}manage/customer/#/detail/${doc.id}" target="_blank" class="grid-name" data-id="${doc.id}" title="@View detail@">${(doc.name || '').toString()}</a>`).join(" <i class='text-danger'>OR</i> ");
+                    result = dataItem.customer.map(doc => `<a href="${ENV.baseUrl}manage/telesalelist/solve/#/detail_customer/${doc.id}" target="_blank" class="grid-name" data-id="${doc.id}" title="@View detail@">${(doc.name || '').toString()}</a>`).join(" <i class='text-danger'>OR</i> ");
                     result += `<br><a href="javascript:void(0)" onclick="defineCustomerCdr(this)" class="text-danger"><i>@Define@ @customer@ @of@ @this call@</i></a>`
                 } else {
-                    result = `<a href="${ENV.baseUrl}manage/customer/#/detail/${dataItem.customer.id}" target="_blank" class="grid-name" data-id="${dataItem.customer.id}" title="@View detail@">${(dataItem.customer.name || '').toString()}</a>`;
+                    result = `<a href="${ENV.baseUrl}manage/telesalelist/solve/#/detail_customer/${dataItem.customer.id}" target="_blank" class="grid-name" data-id="${dataItem.customer.id}" title="@View detail@">${(dataItem.customer.name || '').toString()}</a>`;
                 }
             }
             return result
-        }
+        },
+        width: 200
     },{
         field: "customernumber",
         title: "@Phone number@",
@@ -96,9 +98,20 @@ var Config = {
         title: "@Call duration@",
         width: 120
     },{
+        field: "customer.note",
+        title: "@Note@",
+        width: 120,
+        template: function(dataItem) {
+            var result = '';
+            if(dataItem.customer) {
+                result = dataItem.customer.note;
+            }
+            return result
+        }
+    },{
         // Use uid to fix bug data-uid of row undefined
         template: '<a role="button" class="btn btn-sm btn-circle btn-action btn-primary" data-uid="#: uid #"><i class="fa fa-ellipsis-v"></i></a>',
-        width: 20
+        width: 36
     }],
     filterable: KENDO.filterable,
     reorderable: true
@@ -131,11 +144,11 @@ function repopupAction(ele) {
     rePopup(calluuid);
 }
 
-$(document).on("click", ".grid-name", function() {
-    var id = $(this).data("id"),
-        url = ENV.baseUrl + "manage/customer/#/detail/" + id;
-    window.open(url,'_blank','noopener');
-})
+// $(document).on("click", ".grid-name", function() {
+//     var id = $(this).data("id"),
+//         url = ENV.baseUrl + "manage/customer/#/detail/" + id;
+//     window.open(url,'_blank','noopener');
+// })
 
 window.onload = function() {
     <?php if(!empty($filter)) { ?>

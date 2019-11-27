@@ -58,10 +58,10 @@ var Config = {
             var result = '';
             if(dataItem.customer) {
                 if(dataItem.customer.length) {
-                    result = dataItem.customer.map(doc => `<a href="${ENV.baseUrl}manage/customer/#/detail/${doc.id}" target="_blank" class="grid-name" data-id="${doc.id}" title="@View detail@">${(doc.name || '').toString()}</a>`).join(" <i class='text-danger'>OR</i> ");
+                    result = dataItem.customer.map(doc => `<a href="${ENV.baseUrl}manage/telesalelist/#/detail_customer/${doc.id}" target="_blank" class="grid-name" data-id="${doc.id}" title="@View detail@">${(doc.name || '').toString()}</a>`).join(" <i class='text-danger'>OR</i> ");
                     result += `<br><a href="javascript:void(0)" onclick="defineCustomerCdr(this)" class="text-danger"><i>@Define@ @customer@ @of@ @this call@</i></a>`
                 } else {
-                    result = `<a href="${ENV.baseUrl}manage/customer/#/detail/${dataItem.customer.id}" target="_blank" class="grid-name" data-id="${dataItem.customer.id}" title="@View detail@">${(dataItem.customer.name || '').toString()}</a>`;
+                    result = `<a href="${ENV.baseUrl}manage/telesalelist/#/detail_customer/${dataItem.customer.id}" target="_blank" class="grid-name" data-id="${dataItem.customer.id}" title="@View detail@">${(dataItem.customer.name || '').toString()}</a>`;
                 }
             }
             return result
@@ -133,7 +133,7 @@ function repopupAction(ele) {
 
 $(document).on("click", ".grid-name", function() {
     var id = $(this).data("id"),
-        url = ENV.baseUrl + "manage/customer/#/detail/" + id;
+        url = ENV.baseUrl + "manage/telesalelist/#/detail_customer/" + id;
     window.open(url,'_blank','noopener');
 })
 

@@ -3,8 +3,10 @@ var Config = {
     crudApi: `${ENV.vApi}`,
     templateApi: `${ENV.templateApi}`,
     collection: "payment_history",
+    collection2: "temporary_payment",
     observable: {
     },
+    scrollable: true,
     model: {
         id: "id",
         fields: {
@@ -62,6 +64,39 @@ var Config = {
     		title: "@Time appear in queue@"
     	}
     ],
+
+    columns2: [
+        {
+            field: "type",
+            title: "@Type@"
+        },
+        {
+            field: "account_number",
+            title: "@Account number@"
+        },
+        {
+            field: "due_date",
+            title: "@Due date@",
+            format: "{0: dd/MM/yy}",
+        },
+        {
+            field: "payment_amount",
+            title: "@Paid amount@"
+        },
+        {
+            field: "overdue_amount",
+            title: "@Overdue amount@"
+        },
+        {
+            field: "remain_amount",
+            title: "@Remain amount@"
+        },
+        {
+            field: "payment_date",
+            title: "@Payment date@",
+            format: "{0: dd/MM/yy}",
+        },
+    ],
     filterable: KENDO.filterable
 }; 
 </script>
@@ -103,9 +138,12 @@ var Table = function() {
     }
     return {
         dataSource: {},
+        dataSource2: {},
         grid: {},
         columns: Config.columns,
+        columns2: Config.columns2,
         gridOptions: {},
+        gridOptions2: {},
         init: function() {
             var dataSource = this.dataSource = new kendo.data.DataSource({
                 serverFiltering: true,
@@ -127,6 +165,33 @@ var Table = function() {
                 transport: {
                     read: {
                         url: Config.crudApi + Config.collection + "/read"
+                    },
+                    parameterMap: parameterMap
+                },
+                sync: syncDataSource,
+                error: errorDataSource
+            });
+
+            var dataSource2 = this.dataSource2 = new kendo.data.DataSource({
+                serverFiltering: true,
+                serverPaging: true,
+                serverSorting: true,
+                serverGrouping: false,
+                filter: Config.filter ? Config.filter : null,
+                sort: Config.sort ? Config.sort : null,
+                page: Config.page ? Config.page : null,
+                pageSize: 10,
+                batch: false,
+                schema: {
+                    data: "data",
+                    total: "total",
+                    groups: "groups",
+                    model: Config.model,
+                    parse: Config.parse ? Config.parse : res => res
+                },
+                transport: {
+                    read: {
+                        url: Config.crudApi + Config.collection2 + "/read"
                     },
                     parameterMap: parameterMap
                 },
@@ -178,13 +243,44 @@ var Table = function() {
                     setTimeout(() => {
                         sessionStorage.setItem("columns_" + ENV.currentUri, JSON.stringify(e.sender.columns));
                     }, 100);
-                },
-                dataBinding: function() {
-                    record = (dataSource.page() -1) * dataSource.pageSize();
                 }
             }, Config.gridOptions);
 
+            this.gridOptions2 = Object.assign({
+                dataSource: dataSource2,
+                excel: {allPages: true},
+                excelExport: function(e) {
+                  var sheet = e.workbook.sheets[0];
+
+                  for (var rowIndex = 1; rowIndex < sheet.rows.length; rowIndex++) {
+                    var row = sheet.rows[rowIndex];
+                    for (var cellIndex = 0; cellIndex < row.cells.length; cellIndex ++) {
+                        if(row.cells[cellIndex].value instanceof Date) {
+                            row.cells[cellIndex].format = "dd-MM-yy hh:mm:ss"
+                        }
+                    }
+                  }
+                },
+                resizable: true,
+                pageable: {
+                    refresh: true,
+                    pageSizes: [5, 10, 20, 50, 100],
+                    input: true,
+                    messages: KENDO.pageableMessages ? KENDO.pageableMessages : {}
+                },
+                sortable: true,
+                reorderable: Boolean(Config.reorderable),
+                scrollable: Boolean(Config.scrollable),
+                columns: this.columns2,
+                filterable: Config.filterable ? Config.filterable : true,
+                editable: false,
+                noRecords: {
+                    template: `<h2 class='text-danger'>${KENDO.noRecords}</h2>`
+                }
+            }, Config.gridOptions2);
+
             var grid = this.grid = $("#grid").kendoGrid(this.gridOptions).data("kendoGrid");
+            var temporary_payment_grid = this.grid = $("#temporary_payment_grid").kendoGrid(this.gridOptions2).data("kendoGrid");
 
             grid.selectedKeyNames = function() {
                 var items = this.select(),
@@ -276,8 +372,11 @@ var Table = function() {
 
 <div class="container-fluid">
     <div class="row">
-        <div class="col-sm-12" style="height: 80vh; overflow-y: auto; padding: 0">
+        <div class="col-sm-12" style=" overflow-y: auto; padding: 0">
 		    <!-- Table Styles Content -->
+            <div style="padding: 10px; font-weight: bold">Temporary Payment</div>
+            <div id="temporary_payment_grid"></div>
+            <hr>
 		    <div id="grid"></div>
 		    <!-- END Table Styles Content -->
 		</div>
@@ -292,6 +391,9 @@ var Table = function() {
 </div>
 <script type="text/javascript">
 	window.onload = function() {
+       <?php if(!empty($filter)) { ?>
+        Config.filter = <?= $filter ?>;
+    <?php } ?>
 		Table.init();
 	}
 </script>

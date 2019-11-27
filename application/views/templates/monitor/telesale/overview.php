@@ -26,7 +26,7 @@
                         <th style="width: 45px; text-align: center"><i class="gi gi-ban text-muted"></i></th>
                         <th style="width: 45px; text-align: center"><i class="gi gi-headset text-success"></i></th>
                         <th style="width: 45px; text-align: center"><i class="gi gi-briefcase text-warning"></i></th>
-                        <th style="width: 45px; text-align: center"><i class="gi gi-earphone text-primary"></i></th>
+                        <th style="width: 45px; text-align: center"><i class="gi gi-earphone text-info"></i></th>
                         <th style="width: 45px; text-align: center"><i class="gi gi-airplane text-danger"></i></th>
                         <th style="width: 45px;">@Total@</th>
                         <th style="width: 150px">@Action@</th>
@@ -178,7 +178,7 @@
                 <span data-bind="attr: {data-total-time: currentCallStatus.total_time}" #if(online){#class="label label label-success time-interval"#}#>#if(currentCallStatus.total_time){##: kendo.toString(new Date(d.getTime() + currentCallStatus.total_time * 1000), 'H:mm:ss') ##}#</span>
             #   break;
                 case "s2":#
-                <i class="gi gi-earphone text-primary"></i>
+                <i class="gi gi-earphone text-info"></i>
                 <span data-bind="attr: {data-total-time: currentCallStatus.total_time}" #if(online){#class="label label label-primary time-interval"#}#>#if(currentCallStatus.total_time){##: kendo.toString(new Date(d.getTime() + currentCallStatus.total_time * 1000), 'H:mm:ss') ##}#</span>
             #   break;
                 case "s4":#
@@ -237,7 +237,7 @@
 
                 # break;
                 case 2: #
-                <i class="gi gi-earphone text-primary"></i>
+                <i class="gi gi-earphone text-info"></i>
                 
                 # break;
                 case 3: # 

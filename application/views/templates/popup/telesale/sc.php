@@ -173,7 +173,14 @@ window.popupObservable.assign({
                     syncDataSource();
             },
             error: errorDataSource
-        })
+        });
+        $.ajax({
+            url: ENV.vApi + "cdr/" + this._dataCall.calluuid,
+            type: "PUT",
+            contentType: "application/json; charset=utf-8",
+            data: kendo.stringify({customer: data}),
+            error: errorDataSource
+        });
     },
     openCdr: function(e) {
         var filter = JSON.stringify({

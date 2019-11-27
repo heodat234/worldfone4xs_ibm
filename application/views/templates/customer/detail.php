@@ -16,6 +16,18 @@
                 <li>
                     @LOG@
                 </li>
+                <li data-bind="click: openPaymentHistory">
+                    PAYMENT HISTORY
+                </li>
+                <li data-bind="click: openFieldAction">
+                    FIELD ACTION
+                </li>
+                <li data-bind="click: openLawSuit">
+                    LAWSUIT
+                </li>
+                <li data-bind="click: openCrossSell">
+                    CROSS-SELL
+                </li>
             </ul>
             <div>
                 <div class="container-fluid">
@@ -33,14 +45,6 @@
                                            data-async="{ saveUrl: 'api/v1/upload/avatar/customer', autoUpload: true }"
                                            data-bind="events: { success: uploadSuccessAvatar }">
                                         </div>
-                                    </a>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-sm-12 text-center">
-                                    <p><b>@Customer signature@</b></p>
-                                    <a id="customer-sign-link" target="_blank" data-toggle="lightbox-image" title="@Customer signature@">
-                                        <img id="customer-sign-img" style="width: 100%">
                                     </a>
                                 </div>
                             </div>
@@ -97,10 +101,10 @@
                                         <a class="btn btn-alt btn-default btn-sm" data-type="update" onclick="openForm({title: '@Edit@ @Customer@ ' + Detail.model.get('item').name}); editForm()" data-role="tooltip" title="@Edit@">
                                             <i class="fa fa-pencil"></i>
                                         </a>
-                                        <a class="btn btn-alt btn-default btn-sm" href="javascript:void(0)" onclick="openForm({title: '@Send email@ @to@ ' + Detail.model.get('item').name, width: 850}); emailFormDetail(this)" data-role="tooltip" title="@Send email@">
+                                        <a class="btn btn-alt btn-default btn-sm hidden" href="javascript:void(0)" onclick="openForm({title: '@Send email@ @to@ ' + Detail.model.get('item').name, width: 850}); emailFormDetail(this)" data-role="tooltip" title="@Send email@">
                                             <i class="fa fa-envelope"></i>
                                         </a>
-                                        <a class="btn btn-alt btn-default btn-sm" href="javascript:void(0)" onclick="openForm({title: '@Send SMS@ @to@ ' + Detail.model.get('item').name, width: 500}); smsFormDetail(this)" data-role="tooltip" title="@Send SMS@">
+                                        <a class="btn btn-alt btn-default btn-sm hidden" href="javascript:void(0)" onclick="openForm({title: '@Send SMS@ @to@ ' + Detail.model.get('item').name, width: 500}); smsFormDetail(this)" data-role="tooltip" title="@Send SMS@">
                                             <i class="fa fa-commenting"></i>
                                         </a>
                                     </div>
@@ -114,132 +118,8 @@
                     </div>
                 </div>
             </div>
-            <!-- <div>
-                <div class="container-fluid">
-                    <div class="row">
-                        <div class="col-sm-12">
-                            <div class="timeline block-content-full">
-                                <a data-role="button" class="pull-right" style="margin-top: 14px" data-bind="click: createTicket">@Create@ @ticket@</a>
-                                <h3 class="timeline-header">@Ticket@ @timeline@</h3>
-                                You can remove the class .timeline-hover if you don't want each event to be highlighted on mouse hover
-                                <ul class="timeline-list timeline-hover" data-template="ticket-timeline-template" data-bind="source: caseData">
-                                </ul>
-                                <div class="text-center">
-                                    <a href="javascript:void(0)" data-bind="click: viewMoreTicket">@Show more@</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div> -->
             <div>
                 <div class="container-fluid">
-                    <div class="row" style="margin-bottom: 10px">
-                        <div class="panel panel-primary">
-                            <div class="panel-heading">@APPOINTMENT HISTORY@</div>
-                            <div class="panel-body" style="padding: 0">
-                                <div data-role="grid"
-                                    data-pageable="{refresh: true}"
-                                    data-no-records="{
-                                        template: `<h2 class='text-danger'>@NO DATA@</h2>`
-                                    }"
-                                    data-columns='[
-                                        {
-                                            title: "@Created at@",
-                                            field: "created_at",
-                                            headerAttributes: { style: "white-space: normal"},
-                                            width: "110px",
-                                            filterable: false,
-                                            template: data => gridDate(data.appointment_date),
-                                        },{
-                                            title: "@Telesale code@",
-                                            field: "tl_code",
-                                            headerAttributes: { style: "white-space: normal"},
-                                            width: "110px",
-                                            filterable: false
-                                        },{
-                                            field: "tl_name",
-                                            title: "@Telesale name@",
-                                            headerAttributes: { style: "white-space: normal"},
-                                            width: "110px",
-                                            filterable: false
-                                        },{
-                                            title: "@Customer@",
-                                            columns: [{
-                                                field: "customer_info.cmnd",
-                                                title: "@National ID@",
-                                                headerAttributes: { style: "white-space: normal"},
-                                                width: "110px",
-                                                filterable: false
-                                            }, {
-                                                field: "customer_info.name",
-                                                title: "@Name@",
-                                                width: "200px",
-                                                headerAttributes: { style: "white-space: normal"},
-                                                filterable: false
-                                            }, {
-                                                field: "customer_info.phone",
-                                                title: "@Phone@",
-                                                width: "150px",
-                                                headerAttributes: { style: "white-space: normal"},
-                                                filterable: false
-                                            }]
-                                        },{
-                                            field: "appointment_date",
-                                            title: "@Appointment date@",
-                                            headerAttributes: { style: "white-space: normal"},
-                                            width: "150px",
-                                            template: data => gridDate(data.appointment_date, "dd/MM/yyyy"),
-                                            filterable: false
-                                        },{
-                                            title: "@Loan Counter@",
-                                            columns: [{
-                                                field: "dealer_code",
-                                                title: "@Code@",
-                                                headerAttributes: { style: "white-space: normal"},
-                                                width: "100px",
-                                                filterable: false
-                                            }, {
-                                                field: "dealer_name",
-                                                title: "@Name@",
-                                                headerAttributes: { style: "white-space: normal"},
-                                                width: "200px",
-                                                filterable: false
-                                            }, {
-                                                field: "dealer_address",
-                                                title: "@Address@",
-                                                headerAttributes: { style: "white-space: normal"},
-                                                width: "250px",
-                                                filterable: false
-                                            }]
-                                        },{
-                                            title: "SC",
-                                            columns: [{
-                                                field: "sc_code",
-                                                title: "@Code@",
-                                                headerAttributes: { style: "white-space: normal"},
-                                                width: "100px",
-                                                filterable: false
-                                            }, {
-                                                field: "sc_name",
-                                                title: "@Name@",
-                                                headerAttributes: { style: "white-space: normal"},
-                                                width: "200px",
-                                                filterable: false
-                                            }, {
-                                                field: "sc_phone",
-                                                title: "@Phone@",
-                                                headerAttributes: { style: "white-space: normal"},
-                                                width: "150px",
-                                                filterable: false
-                                            }]
-                                        }
-                                        ]'
-                                  data-bind="source: appointment_log"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <hr>
                     <div class="row" style="margin-bottom: 10px">
                         <div class="panel panel-warning">
                             <div class="panel-heading">@CALL HISTORY@</div>
@@ -267,60 +147,289 @@
                             </div>
                         </div>
                     </div>
-                    <hr>
-
-                    <div class="row hidden">
-                        <div class="panel panel-info">
-                            <div class="panel-heading">@CONVERSATION HISTORY@</div>
-                            <div class="panel-body" style="padding: 0">
-                                <div
-                                    data-pageable="{refresh: true}"
-                                    data-no-records="{
-                                        template: `<h2 class='text-danger'>@NO DATA@</h2>`
-                                    }"
-                                    data-columns="[
-                                        {
-                                            field: 'source',
-                                            title: '@Source@',
-                                            width: 120,
-                                        },
-                                        {
-                                            field: 'to.username',
-                                            title: '@Customer name@',
-                                            width: 150,
-                                        },
-                                        {
-                                            field: 'page_name',
-                                            title: '@FanPage Name@',
-                                            width: 160,
-                                        },
-                                        {
-                                            field: 'from.id',
-                                            title: '@Agent@',
-                                            width: 120,
-                                        },
-                                        {
-                                            field: 'date_added',
-                                            title: '@Time open conversation@',
-                                            width: 160,
-                                        },
-                                        {
-                                            field: 'close_time',
-                                            title: '@Time close conversation@',
-                                            width: 160,
-                                        },
-                                        {
-                                            template: detailChatView,
-                                            title: '@Detail@',
-                                            width: 160,
-                                        },
-                                        ]"
-                                  data-nobind="source: conversationData"></div>
+                    <div class="row title-row main-product-container">
+                        <span class="text-primary">MAIN PRODUCT</span>
+                        <span data-bind="text: mainProductOptionLength"></span>
+                        <hr class="popup">
+                    </div>
+                    <div class="row form-horizontal main-product-container">
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label class="control-label col-xs-4">Contract No. <span id="main-product-count"></span></label>
+                                <div class="col-xs-8">
+                                    <input data-role="dropdownlist" name="contractNo"
+                                        data-value-primitive="true"
+                                        data-text-field="account_number"
+                                        data-value-field="account_number"                  
+                                        data-bind="value: mainProduct.account_number, source: mainProductOption, events: {change: mainProductChange}" 
+                                        style="width: 100%"/>
+                                </div>
                             </div>
+                            <div class="form-group">
+                                <label class="control-label col-xs-4">Product name</label>
+                                <div class="col-xs-8">
+                                    <p class="form-control-static" data-bind="text: mainProduct.product_name"></p>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-xs-4">Monthly amount</label>
+                                <div class="col-xs-8">
+                                    <p class="form-control-static" data-bind="text: mainProduct.RPY_PRD"></p>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-xs-4">Maturity Date</label>
+                                <div class="col-xs-8">
+                                    <p class="form-control-static" data-bind="text: mainProduct.DT_MAT"></p>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-xs-4">Last Payment Date</label>
+                                <div class="col-xs-8">
+                                    <p class="form-control-static" data-bind="text: mainProduct.last_payment_date"></p>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-xs-4">Debt group</label>
+                                <div class="col-xs-8">
+                                    <p class="form-control-static" data-bind="text: mainProduct.debt_group"></p>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-xs-4">First/Last payment default</label>
+                                <div class="col-xs-8">
+                                    <p class="form-control-static" data-bind="text: mainProduct.first_last_payment_default"></p>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-xs-4">Interest rate</label>
+                                <div class="col-xs-8">
+                                    <p class="form-control-static" data-bind="text: mainProduct.interst_rate"></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label class="control-label col-xs-4">Due date</label>
+                                <div class="col-xs-8">
+                                    <p class="form-control-static" data-bind="text: mainProduct.due_date"></p>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-xs-4">Last action code</label>
+                                <div class="col-xs-8">
+                                    <p class="form-control-static" data-bind="text: mainProduct.lastActionCode"></p>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-xs-4">Overdue amount</label>
+                                <div class="col-xs-8">
+                                    <p class="form-control-static" data-bind="text: mainProduct.overdue_amount"></p>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-xs-4">Approved Limit</label>
+                                <div class="col-xs-8">
+                                    <p class="form-control-static" data-bind="text: mainProduct.approved_limit"></p>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-xs-4">Last payment amount</label>
+                                <div class="col-xs-8">
+                                    <p class="form-control-static" data-bind="text: mainProduct.last_payment_amount"></p>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-xs-4">Term</label>
+                                <div class="col-xs-8">
+                                    <p class="form-control-static" data-bind="text: mainProduct.term"></p>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-xs-4">Sales (Code name)</label>
+                                <div class="col-xs-8">
+                                    <p class="form-control-static" data-bind="text: mainProduct.sale_consultant"></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label class="control-label col-xs-4">No. of Overdue days</label>
+                                <div class="col-xs-8">
+                                    <p class="form-control-static" data-bind="text: mainProduct.no_of_overdue_date"></p>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-xs-4">Last action code date</label>
+                                <div class="col-xs-8">
+                                    <p class="form-control-static" data-bind="text: mainProduct.lastActionCodeDate"></p>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-xs-4">Outstanding balance</label>
+                                <div class="col-xs-8">
+                                    <p class="form-control-static" data-bind="text: mainProduct.outstanding_balance"></p>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-xs-4">Advance money</label>
+                                <div class="col-xs-8">
+                                    <p class="form-control-static" data-bind="text: mainProduct.advance_money"></p>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-xs-4">Name of store</label>
+                                <div class="col-xs-8">
+                                    <p class="form-control-static" data-bind="text: mainProduct.name_of_store"></p>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-xs-4">Principal Amount</label>
+                                <div class="col-xs-8">
+                                    <p class="form-control-static" data-bind="text: mainProduct.principal_amount"></p>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-xs-4">Staff in Charge</label>
+                                <div class="col-xs-8">
+                                    <p class="form-control-static" data-bind="text: mainProduct.staffInCharge"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row title-row card-container">
+                        <span class="text-primary">CARD INFORMATION</span>
+                        <hr class="popup">
+                    </div>
+                    <div class="row form-horizontal card-container">
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label class="control-label col-xs-4">Contract No. <span id="card-count"></span></label>
+                                <div class="col-xs-8">
+                                    <input data-role="dropdownlist" name="contract_no"
+                                        data-value-primitive="true"
+                                        data-text-field="contract_no"
+                                        data-value-field="contract_no"                  
+                                        data-bind="value: card.account_number, source: cardOption, events: {change: cardChange}" 
+                                        style="width: 100%"/>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-xs-4">Interest Rate</label>
+                                <div class="col-xs-8">
+                                    <p class="form-control-static" data-bind="text: card.interest_rate"></p>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-xs-4">Approved Limit</label>
+                                <div class="col-xs-8">
+                                    <p class="form-control-static" data-bind="text: card.approved_limit"></p>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-xs-4">Open Date / First released date</label>
+                                <div class="col-xs-8">
+                                    <p class="form-control-static" data-bind="text: card.first_released_date"></p>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-xs-4">Last Payment Date</label>
+                                <div class="col-xs-8">
+                                    <p class="form-control-static" data-bind="text: card.last_payment_date"></p>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-xs-4">Principal Amount</label>
+                                <div class="col-xs-8">
+                                    <p class="form-control-static" data-bind="text: card.principal_amount"></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                         <div class="form-group">
+                            <label class="control-label col-xs-4">Due date</label>
+                            <div class="col-xs-8">
+                                <p class="form-control-static" data-bind="text: card.due_date"></p>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-xs-4">Last action code</label>
+                            <div class="col-xs-8">
+                                <p class="form-control-static" data-bind="text: card.last_action_code"></p>
+                            </div>
+                        </div>
+                            <div class="form-group">
+                                <label class="control-label col-xs-4">Overdue Amount</label>
+                                <div class="col-xs-8">
+                                    <p class="form-control-static" data-bind="text: card.overdue_amount"></p>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-xs-4">Expired Date</label>
+                                <div class="col-xs-8">
+                                    <p class="form-control-static" data-bind="text: card.expiry_date"></p>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-xs-4">Last payment amount</label>
+                                <div class="col-xs-8">
+                                    <p class="form-control-static" data-bind="text: card.last_payment_amount"></p>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-xs-4">Debt Group</label>
+                                <div class="col-xs-8">
+                                    <p class="form-control-static" data-bind="text: card.debt_group"></p>
+                                </div>
+                            </div>
+                        
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label class="control-label col-xs-4">No of Overdue days</label>
+                                <div class="col-xs-8">
+                                    <p class="form-control-static" data-bind="text: card.no_of_overdue_date"></p>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-xs-4">Last action code date</label>
+                                <div class="col-xs-8">
+                                    <p class="form-control-static" data-bind="text: card.last_action_code_date"></p>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-xs-4">Outstanding balance</label>
+                                <div class="col-xs-8">
+                                    <p class="form-control-static" data-bind="text: card.outstanding_balance"></p>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-xs-4">Staff in charge</label>
+                                <div class="col-xs-8">
+                                    <p class="form-control-static" data-bind="text: card.staff_in_charge"></p>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-xs-4">Time moving to higher debt group</label>
+                                <div class="col-xs-8">
+                                    <p class="form-control-static" data-bind="text: card.time_moving"></p>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-xs-4">Sale (Code - Name)</label>
+                                <div class="col-xs-8">
+                                    <p class="form-control-static" data-bind="text: card.sale_consultant"></p>
+                                </div>
+                            </div>
+                        
                         </div>
                     </div>
                 </div>
             </div>
+            <div style="padding: 0; overflow-x: hidden; overflow-y: hidden; min-height: 100%" id="payment_history-content"></div>
+            <div style="padding: 0; overflow-x: hidden; overflow-y: hidden; min-height: 100%" id="field_action-content"></div>
+            <div style="padding: 0; overflow-x: hidden; overflow-y: hidden; min-height: 100%" id="lawsuit-content"></div>
+            <div style="padding: 0; overflow-x: hidden; overflow-y: hidden; min-height: 100%" id="cross_sell-content"></div>
         </div>
     </div>
 
@@ -399,15 +508,6 @@
     </li>
 </script>
 
-<script type="text/x-kendo-template" id="account-template">
-    <div class="col-md-4">
-        <h3>#= templateAccountType(data) #</h3>
-        <div>
-            #= templateAccountList(data) #
-        </div>
-    </div>
-</script>
-
 <script type="text/x-kendo-template" id="timeline-template">
     <li data-bind="css: {active: active}, attr: {data-id: id}">
         <a href="javascript:void(0)" #if(data.active){#data-bind="click: deactive"#}#>
@@ -462,84 +562,6 @@
 var Config = Object.assign(Config, {
     id: '<?= $this->input->get("id") ?>'
 });
-
-function detailChatView(data) {
-    return '<a role="button" target="_blank" class="btn btn-sm btn-action" href="'+ENV.baseUrl+'app/chatdetail?room_id='+data.id+'" >Chi tiết chat</a>'
-}
-
-function templateAccountType(data) {
-    var values = {
-        ListAccountCasa : "@TKTT@",
-        ListAccountSaving : "@TKTK@",
-        ListAccountLoan : "@KUV@",
-    }
-    return (values[data.type] || "").toString()
-}
-
-function templateAccountList(data) {
-    var arrHTML = [];
-    arrHTML.push(`<ul class="list-group" style="margin-bottom: 0">`);
-    switch (data.type) {
-        case "ListAccountCasa":
-            if(data.list.length) {
-                data.list.forEach((account, index) => {
-                    arrHTML.push(`<li class="list-group-item list-group-item-action list-group-item-${HELPER.bsColors[index%5]}">
-                        <ul class="none-style-type">
-                            <li><label>@Branchname@:</label> ${account.AccountBranchName}</li>
-                            <li><label>@Account no@:</label> ${account.AccountNumber}</li>
-                            <li><label>@Account class@:</label> ${account.Account_class}</li>
-                            <li><label>@Account Branch@:</label> ${account.AccountBranch}</li>
-                            <li><label>@Working Balance@:</label> ${kendo.toString(Number(account.WorkingBalance), "n0")}</li>
-                            <li><label>@AvailableAmount@:</label> ${kendo.toString(Number(account.AvailableAmount), "n0")}</li>
-                            <li><label>@Currency@:</label> ${account.Currency}</li>
-                            <li><label>@Account Open Date@:</label> ${account.Ac_Open_Date}</li>
-                            <li><label>@Account Status@:</label> ${account.AccStatus}</li>
-                        </ul>
-                    </li>`);
-                })
-            }
-            break;
-        case "ListAccountSaving":
-            if(data.list.length) {
-                data.list.forEach((account, index) => {
-                    arrHTML.push(`<li class="list-group-item list-group-item-action list-group-item-${HELPER.bsColors[index%5]}">
-                        <ul class="none-style-type">
-                            <li><label>@Branchname@:</label> ${account.AccountBranchName}</li>
-                            <li><label>@Account no@:</label> ${account.AccountNumber}</li>
-                            <li><label>@Account class@:</label> ${account.Account_class}</li>
-                            <li><label>@Account Branch@:</label> ${account.AccountBranch}</li>
-                            <li><label>@Working Balance@:</label> ${kendo.toString(Number(account.WorkingBalance), "n0")}</li>
-                            <li><label>@AvailableAmount@:</label> ${kendo.toString(Number(account.AvailableAmount), "n0")}</li>
-                            <li><label>@Currency@:</label> ${account.Currency}</li>
-                            <li><label>@Account Open Date@:</label> ${account.Ac_Open_Date}</li>
-                            <li><label>@Account Status@:</label> ${account.AccStatus}</li>
-                        </ul>
-                    </li>`);
-                })
-            }
-            break;
-        case "ListAccountLoan":
-            if(data.list.length) {
-                data.list.forEach((account, index) => {
-                    arrHTML.push(`<li class="list-group-item list-group-item-action list-group-item-${HELPER.bsColors[index%5]}">
-                        <ul class="none-style-type">
-                            <li><label>@Branchname@:</label> ${account.AccountBranchName}</li>
-                            <li><label>@Account no@:</label> ${account.AccountNumber}</li>
-                            <li><label>@Account Branch@:</label> ${account.AccountBranch}</li>
-                            <li><label>@AmountFinanced@:</label> ${kendo.toString(Number(account.AmountFinanced), "n0")}</li>
-                            <li><label>@Currency@:</label> ${account.Currency}</li>
-                            <li><label>@Account Status@:</label> ${account.AccStatus}</li>
-                        </ul>
-                    </li>`);
-                })
-            }
-            break;
-        default:
-            break;
-    }
-    arrHTML.push(`</ul>`);
-    return arrHTML.join("");
-}
 
 function tplRecording(data) {
     return `<a role="button" class="btn btn-sm btn-circle btn-action" data-uid="${data.uid}"><i class="fa fa-ellipsis-v"></i></a>`
@@ -791,97 +813,62 @@ var Detail = function() {
                 })
             }
         },
-        accountData: [],
-        openAccount: function() {
-            $.ajax({
-                url: ENV.namaApi + "core/getInfoAccount",
-                data: {q: JSON.stringify({cif: this.item.cif})},
-                success: response => {
-                    if(response.data) {
-                        this.set("accountData", response.data);
-                        console.log(response.data);
-                    }
-                },
-                error: errorDataSource
-            })
+        mainProduct: {},
+        card: {},
+        mainProductChange: function(e) {
+            this.set("mainProduct", e.sender.dataItem());
         },
-        openCard: function() {
-            this.cardTransactionData.filter({field: "cif", operator: "eq", value: this.get("item.cif")})
+        cardChange: function(e) {
+            this.set("card", e.sender.dataItem());
         },
-        appointment_log: new kendo.data.DataSource({
-            serverFiltering: true,
-            serverPaging: true,
-            serverSorting: true,
-            // filter: {field: "cmnd", operator: "eq", value: "5d81d7c71ef2b43aff4326ac"},
-            pageSize: 5,
-            transport: {
-                read: ENV.restApi + "appointment_log",
-                parameterMap: parameterMap
-            },
-            schema: {
-                data: "data",
-                total: "total",
-                parse: function(response) {
-                    response.data.map(doc =>  {
-                        doc.createdAtText = gridTimestamp(doc.createdAt);
-                        doc.customerFormat = doc.customerFormat ? doc.customerFormat.join(", ") : "";
-                    })
-                    return response
-                }
-            },
-            error: errorDataSource
-        }),
-        viewMoreTicket: function(e) {
-            this.caseData.pageSize(this.caseData.pageSize() + 2);
+        openPaymentHistory: function(e) { 
+            var filter = JSON.stringify({
+                logic: "and",
+                filters: [
+                    {field: "account_number", operator: "eq", value: this.item.account_number}
+                ]
+            });
+            var query = httpBuildQuery({filter: filter, omc: 1});
+            var $content = $("#payment_history-content");
+            if(!$content.find("iframe").length)
+                $content.append(`<iframe src='${ENV.baseUrl}manage/data/payment_history?${query}' style="width: 100%; height: 500px; border: 0"></iframe>`);
         },
-        cardTransactionData: new kendo.data.DataSource({
-            serverFiltering: true,
-            serverPaging: true,
-            serverSorting: true,
-            pageSize: 2,
-            transport: {
-                read: ENV.restApi + "card_transaction",
-                parameterMap: parameterMap
-            },
-            schema: {
-                data: "data",
-                total: "total"
-            },
-            error: errorDataSource
-        }),
-        conversationData: new kendo.data.DataSource({
-            serverFiltering: true,
-            serverPaging: true,
-            serverSorting: true,
-            pageSize: 5,
-            transport: {
-                read: {
-                    url: ENV.vApi + "conversation/read",
-                    data:{ id: Config.id},
-                },
-                parameterMap: parameterMap
-            },
-            schema: {
-                data: "data",
-                total: "total",
-                parse: function(response) {
-                    response.data.map(doc =>  {
-                        doc.close_time = gridTimestamp(doc.close_time);
-                        doc.date_added = gridTimestamp(doc.date_added);
-                    })
-                    return response
-                }
-            },
-            error: errorDataSource
-        }),
-        openTicketDetail: function(e) {
-            $currentTarget = $(e.currentTarget);
-            window.open("manage/ticket/solve/#/detail/" + $currentTarget.data("id"),'_blank','noopener');
+        openFieldAction: function(e) { 
+            var filter = JSON.stringify({
+                logic: "and",
+                filters: [
+                    {field: "contract_no", operator: "eq", value: this.item.account_number}
+                ]
+            });
+            var query = httpBuildQuery({filter: filter, omc: 1});
+            var $content = $("#field_action-content");
+            if(!$content.find("iframe").length)
+                $content.append(`<iframe src='${ENV.baseUrl}manage/data/field_action?${query}' style="width: 100%; height: 500px; border: 0"></iframe>`);
         },
-        createTicket: function() {
-            openForm({title: "@Create@ @ticket@", width: 700});
-            ticketForm({sender_id: Config.id, sender_name: this.get("item.name")});
-        }
+        openLawSuit: function(e) { 
+            var filter = JSON.stringify({
+                logic: "and",
+                filters: [
+                    {field: "contract_no", operator: "eq", value: this.item.account_number}
+                ]
+            });
+            var query = httpBuildQuery({filter: filter, omc: 1});
+            var $content = $("#lawsuit-content");
+            if(!$content.find("iframe").length)
+                $content.append(`<iframe src='${ENV.baseUrl}manage/data/lawsuit_history?${query}' style="width: 100%; height: 500px; border: 0"></iframe>`);
+        },
+        openCrossSell: function(e) { 
+            var filter = JSON.stringify({
+                logic: "and",
+                filters: [
+                    {field: "contract_no", operator: "eq", value: this.item.account_number}
+                ]
+            });
+            var query = httpBuildQuery({filter: filter, omc: 1});
+            var $content = $("#cross_sell-content");
+            if(!$content.find("iframe").length)
+                $content.append(`<iframe src='${ENV.baseUrl}manage/data/cross_sell?${query}' style="width: 100%; height: 500px; border: 0"></iframe>`);
+        },
     });
     var model = kendo.observable(observable);
     return {
@@ -894,8 +881,8 @@ var Detail = function() {
             });
 
             var dataItemFull = await $.get(`${ENV.restApi}customer/${Config.id}`);
-            dataItemFull.phoneHTML = gridPhone(dataItemFull.phone);
-            dataItemFull.other_phonesHTML = gridPhone(dataItemFull.other_phones);
+            dataItemFull.phoneHTML = gridPhone(dataItemFull.phone, dataItemFull.id, "customer");
+            dataItemFull.other_phonesHTML = gridPhone(dataItemFull.other_phones, dataItemFull.id, "customer");
             dataItemFull.createdAtText = gridTimestamp(dataItemFull.createdAt);
             dataItemFull.updatedAtText = gridTimestamp(dataItemFull.updatedAt);
            
@@ -908,7 +895,7 @@ var Detail = function() {
                 if(doc.field != "name") {
                     switch(doc.type) {
                         case "phone": case "arrayPhone":
-                            dataItemFull[doc.field + "HTML"] = gridPhone(dataItemFull[doc.field]);
+                            dataItemFull[doc.field + "HTML"] = gridPhone(dataItemFull[doc.field], dataItemFull.id, "customer");
                             customerHTMLArray.push(`<div class="form-group">
                                 <label class="col-sm-3 control-label">${doc.title}</label>
                                 <div class="col-sm-9">
@@ -929,7 +916,7 @@ var Detail = function() {
                             customerHTMLArray.push(`<div class="form-group">
                                 <label class="col-sm-3 control-label">${doc.title}</label>
                                 <div class="col-sm-9">
-                                    <p class="form-control-static copy-item" data-bind="text: item.${doc.field}"></p>
+                                    <p class="form-control-static" data-bind="text: item.${doc.field}"></p>
                                 </div>
                             </div>`);
                             break;
@@ -937,22 +924,8 @@ var Detail = function() {
                 }
             });
 
-            
-
             $("#customer-detail-view").html(customerHTMLArray.join(''));
             this.model.set("item", dataItemFull);
-
-            // Sig_code
-            if(dataItemFull.cif) {
-                $.get(ENV.namaApi + "core/getInfoListSignature",
-                    {q: JSON.stringify({cif: dataItemFull.cif})},
-                    function(response) {
-                        if(response.status && response.doc) {
-                            $("#customer-sign-img").attr("src", "data:image/png;base64, " + response.doc.Sig_code);
-                            $("#customer-sign-link").attr("href", "data:image/png;base64, " + response.doc.Sig_code);
-                        } else $("#customer-sign-link").html(`<i>@No data@</i>`);
-                })
-            }
 
             // CDR
             var filter = {
@@ -967,15 +940,6 @@ var Detail = function() {
                 })
             }
             this.model.callHistory.filter(filter);
-
-            var filter_appointment = {
-                logic: "or",
-                filters: [
-                    {field: "cmnd", operator: "eq", value: dataItemFull.cmnd}
-                ]
-            };
-            this.model.appointment_log.filter(filter_appointment);
-
 
             var interactiveFilters = [{
                 logic: "and",
@@ -1008,12 +972,48 @@ var Detail = function() {
                 logic: "or",
                 filters: interactiveFilters
             });
+
+            this.model.mainProductOption = new kendo.data.DataSource({
+                serverFiltering: true,
+                filter: {field: "CUS_ID", operator: "eq", value: dataItemFull.LIC_NO},
+                transport: {
+                    read: ENV.restApi + "main_product",
+                    parameterMap: parameterMap
+                },
+                schema: {
+                    data: "data",
+                    total: "total",
+                    parse: function(res) {
+                        $("#main-product-count").html('<span class="text-danger">(' + res.total + ')</span>');
+                        if(!res.total) $(".main-product-container").addClass("hidden");
+                        return res;
+                    }
+                }
+            })
+
+            this.model.cardOption = new kendo.data.DataSource({
+                serverFiltering: true,
+                filter: {field: "license_no", operator: "eq", value: dataItemFull.LIC_NO},
+                transport: {
+                    read: ENV.restApi + "card",
+                    parameterMap: parameterMap
+                },
+                schema: {
+                    data: "data",
+                    total: "total",
+                    parse: function(res) {
+                        $("#card-count").html('<span class="text-danger">(' + res.total + ')</span>');
+                        if(!res.total) $(".card-container").addClass("hidden");
+                        return res;
+                    }
+                }
+            })
+
             return dataItemFull;
         },
         init: function() {
-            this.read().then(() => {
+            this.read().then((dataItemFull) => {
                 kendo.bind($("#detail"), this.model);
-
                 /*
                  * Right Click Menu
                  */

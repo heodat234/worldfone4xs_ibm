@@ -29,7 +29,7 @@ function subtypeEditor(container, options) {
                 return res;
             }),
             select: function(e) {
-                options.model.set("type", e.dataItem.value);
+                options.model.set("sub_type", e.dataItem.value);
             }
         }).data("kendoDropDownList");
     select.open();

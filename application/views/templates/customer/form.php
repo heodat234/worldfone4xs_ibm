@@ -7,13 +7,13 @@
 	        </div>
 	        <ul class="sidebar-nav">
 	        	<li><a class="" data-id="basic-information" data-bind="click: scrollTo" href="javascript:void(0)">@Basic Information@</a></li>
-<!--	        	<li><a class="" data-id="additional-information" data-bind="click: scrollTo" href="javascript:void(0)">@Additional Information@</a></li>-->
+	        	<li><a class="" data-id="additional-information" data-bind="click: scrollTo" href="javascript:void(0)">@Additional Information@</a></li>
 	        	<li><a class="" data-id="social-information" data-bind="click: scrollTo" href="javascript:void(0)">@Social Information@</a></li>
 	        </ul>
 	    </div>
 		<div id="main-form" style="width: 65%" data-width="65%">
-	        <div class="form-group" id="basic-information" data-field="@Name@ | @Main phone@ | @Address@ | @Email@ | @Description@">
-	            <h4 class="fieldset-legend"><span>@Basic Information@</span></h4>
+	        <div class="form-group" id="basic-information" data-field="@Name@ | @Main phone@ | @Email@">
+	            <h4 class="fieldset-legend text-muted"><span>@Basic Information@</span></h4>
 	        </div>
 			<div class="form-group" data-field="@Name@">
 				<label>@Name@</label>
@@ -27,33 +27,44 @@
 				<label>@Email@</label>
 				<input class="k-textbox" style="width: 100%" data-bind="value: item.email">
 			</div>
-<!--			<div class="form-group" id="additional-information" data-field="@Other phones@ | @Job@ | @Work Location@">-->
-<!--	            <h4 class="fieldset-legend"><span>@Additional Information@</span></h4>-->
-<!--	        </div>-->
-<!--	        <div class="form-group" data-field="@Other phones@">-->
-<!--				<label>@Other phones@</label>-->
-<!--				<select data-role="multiselect" name="other_phones"-->
-<!--                    data-value-primitive="true"                  -->
-<!--                    data-bind="value: item.other_phones, source: item.other_phones, events: {open: otherPhonesOpen}" -->
-<!--                    style="width: 100%"></select>-->
-<!--			</div>-->
-<!--			<div class="form-group" data-field="@Other emails@">-->
-<!--				<label>@Other emails@</label>-->
-<!--				<select data-role="multiselect" name="other_emails"-->
-<!--                    data-value-primitive="true"                  -->
-<!--                    data-bind="value: item.other_emails, source: item.other_emails, events: {open: otherPhonesOpen}" -->
-<!--                    style="width: 100%"></select>-->
-<!--			</div>-->
-<!--			<div class="form-group" data-field="@Job@">-->
-<!--				<label>@Job@</label>-->
-<!--				<input class="k-textbox" style="width: 100%" data-bind="value: item.job">-->
-<!--			</div>-->
-<!--			<div class="form-group" data-field="@Work Location@">-->
-<!--				<label>@Work Location@</label>-->
-<!--				<input class="k-textbox" style="width: 100%" data-bind="value: item.work_location">-->
-<!--			</div>-->
+			<?php $this->load->library("mongo_private"); 
+			$customerFields = $this->mongo_private->where(["collection"=>getCT('Customer')])->get("Model"); 
+			$titles = array_column($customerFields, "title"); ?>
+			<div class="form-group" id="additional-information" data-field="<?= implode(' | ', $titles) ?>">
+	            <h4 class="fieldset-legend text-muted"><span>@Additional Information@</span></h4>
+	        </div>
+	        <?php
+	        foreach ($customerFields as $fieldDoc) {
+	        	if(in_array($fieldDoc["field"], ["name","phone","email","createdAt"])) continue;
+	        	switch ($fieldDoc["type"]) {
+	        		case 'timestamp':
+						echo "
+						<div class='form-group' data-field='{$fieldDoc['title']}'>
+							<label>{$fieldDoc['title']}</label>
+							<input data-role='datepicker' style='width: 100%' data-bind='value: item.{$fieldDoc['field']}'>
+						</div>";
+						break;
+
+					case 'arrayPhone': case 'array':
+						echo "
+						<div class='form-group' data-field='{$fieldDoc['title']}'>
+							<label>{$fieldDoc['title']}</label>
+							<select data-role='multiselect' style='width: 100%' data-bind='value: item.{$fieldDoc['field']}, source: item.{$fieldDoc['field']}'></select>
+						</div>";
+						break;
+					
+					default:
+						echo "
+						<div class='form-group' data-field='{$fieldDoc['title']}'>
+							<label>{$fieldDoc['title']}</label>
+							<input class='k-textbox' style='width: 100%' data-bind='value: item.{$fieldDoc['field']}'>
+						</div>";
+						break;
+	        	}
+	        } 
+	        ?>
 			<div class="form-group" id="social-information" data-field="Facebook | Twitter | Linkedin">
-	            <h4 class="fieldset-legend"><span>@Social Information@</span></h4>
+	            <h4 class="fieldset-legend text-muted"><span>@Social Information@</span></h4>
 	        </div>
 			<div class="form-group" data-field="Facebook">
 				<label>Facebook</label>

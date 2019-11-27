@@ -35,6 +35,7 @@ var Config = Object.assign(Config, {
         response.data.map(function(doc) {
             doc.appointment_date = doc.appointment_date ? new Date(doc.appointment_date * 1000) : undefined;
             doc.created_at = doc.created_at ? new Date(doc.created_at * 1000) : undefined;
+            doc.customer_info = (typeof doc.customer_info !== 'undefined') ? doc.customer_info : {};
             return doc;
         });
         return response;
@@ -87,6 +88,12 @@ var Config = Object.assign(Config, {
             template: function(dataItem) {
                 return gridPhone(dataItem['customer_info']['phone'], dataItem['customer_info']['id'], 'customer');
             }
+        }, {
+            field: "customer_info.note",
+            title: "@Note@",
+            width: "200px",
+            headerAttributes: { style: "white-space: normal"},
+            filterable: false
         }]
     },{
         field: "appointment_date",
@@ -141,7 +148,7 @@ var Config = Object.assign(Config, {
 });
 </script>
 
-<script src="<?= STEL_PATH.'js/table.js' ?>"></script>
+<script src="<?= STEL_PATH.'js/tablev1.js' ?>"></script>
 
 <script type="text/javascript">
 	function deleteDataItemChecked() {
@@ -193,7 +200,7 @@ var Config = Object.assign(Config, {
     async function editForm(ele) {
         var dataItem = Table.dataSource.getByUid($(ele).data("uid")),
             dataItemFull = await $.ajax({
-                url: `${Config.crudApi+Config.collection}/${dataItem.id}`,
+                url: `${Config.crudApi+Config.collection}/detail/${dataItem.id}`,
                 error: errorDataSource
             }),
             formHtml = await $.ajax({

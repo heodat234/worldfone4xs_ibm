@@ -6,7 +6,11 @@ var Config = {
     observable: {
     },
     model: {
-        id: "id"
+        id: "id",
+        fields: {
+            auto_delete_misscall: {type: "boolean"},
+            auto_delete_followup: {type: "boolean"},
+        }
     },
     parse: function (response) {
         return response;
@@ -26,6 +30,14 @@ var Config = {
             field: "typename",
             title: "Type Name",
             width: 140
+        },{
+            field: "auto_delete_misscall",
+            title: "Auto delete misscall",
+            width: 100
+        },{
+            field: "auto_delete_followup",
+            title: "Auto delete followup",
+            width: 100
         },{
             command: ["edit", "destroy"],
             width: 200

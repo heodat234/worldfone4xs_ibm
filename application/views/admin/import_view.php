@@ -32,8 +32,8 @@ var Config = {
             field: "file_run",
             title: "File run"
         },{
-            field: "description",
-            title: "Description",
+            field: "command",
+            title: "Command",
         },{
         	field: "modify_time",
             title: "Modify time",

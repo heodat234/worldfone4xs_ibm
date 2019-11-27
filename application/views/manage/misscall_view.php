@@ -58,6 +58,17 @@ var Config = {
             field: "assign",
             title: "@Assign@",
             width: 140
+        }, {
+            field: "assignBy",
+            title: "@Assign by@",
+            width: 140
+        }, {
+            field: "assignAt",
+            title: "@Assign at@",
+            width: 140,
+            template: function(dataItem) {
+                return (kendo.toString(new Date(dataItem.assignAt), "dd/MM/yy H:mm:ss") ||  "").toString();
+            }
         }]
 }; 
 function assignExtension() {
@@ -77,13 +88,15 @@ function assignExtension() {
         })
         .then((ext) => {
             if (ext !== null && ext !== false) {
+                var date = new Date();
+                var timestamp = date.getTime();
                 checkIds.forEach(uid => {
                     var dataItem = Table.dataSource.getByUid(uid);
                     $.ajax({
                         url: Config.crudApi + "misscall/" + dataItem.id,
                         type: "PUT",
                         contentType: "application/json; charset=utf-8",
-                        data: JSON.stringify({assign: ext}),
+                        data: JSON.stringify({assign: ext, assignBy: '<?=@$this->session->userdata("extension")?>', assignAt: timestamp}),
                         success: syncDataSource,
                         error: errorDataSource
                     })

@@ -34,7 +34,7 @@ Class Daily_payment_report extends WFF_Controller {
         }
     }
 
-    function saveReport()
+    function save()
     {
       shell_exec('PYTHONIOENCODING=utf-8 python3.6 /var/www/html/worldfone4xs_ibm/cronjob/python/Loan/saveDailyPayment.py  > /dev/null &');
         // $this->crud->delete($this->collection);

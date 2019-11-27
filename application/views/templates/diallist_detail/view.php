@@ -1,6 +1,9 @@
 <?php
-	$dataFieldsJSON = $this->input->get("dataFields");
-	$dataFields = $dataFieldsJSON ? json_decode($dataFieldsJSON, TRUE) : [];
+	$this->load->library("mongo_private");
+	$dataFields = $this->mongo_private->where(["collection"=>getCT("Diallist_detail"), "sub_type"=>['$exists'=>TRUE,'$nin'=>['',null]]])->get("Model");
+	foreach ($dataFields as &$doc) {
+		$doc["title"] = !empty($doc["title"]) ? $doc["title"] : $doc["field"];
+	}
 ?>
 <div class="container-fluid">
 	<div class="row">
@@ -21,8 +24,12 @@
 		<div class="col-xs-4" id="main-form">
 		<?php foreach ($dataFields as $fieldDoc) { 
 			switch ($fieldDoc["type"]) {
-				case 'value':
-					# code...
+				case 'timestamp':
+					echo "
+					<div class='form-group'>
+						<label>{$fieldDoc['title']}</label>
+						<span data-format='dd/MM/yyyy' style='width: 100%' data-bind='text: item.{$fieldDoc['field']}'></span>
+					</div>";
 					break;
 				
 				default:

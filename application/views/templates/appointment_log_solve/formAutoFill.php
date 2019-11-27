@@ -62,9 +62,9 @@
                 <input id="customer-info" data-role="dropdownlist"
                        data-value-primitive="true"
                        data-text-field="id_no"
-                       data-value-field="id"
+                       data-value-field="id_no"
                        data-filter="contains"
-                       data-bind="value: item.id_no, source: customerOption, events:{change: onChangeCMND, dataBound: onDataBoundCMND}" style="width: 100%"
+                       data-bind="value: item.id_no, source: customerOption, events:{change: onChangeCMND}" style="width: 100%"
                        required validationMessage="Empty!!!"/>
             </div>
             <div class="form-group">
@@ -87,6 +87,7 @@
     if(popupOption) {
         popupOption.name = popupOption.name;
     }
+    console.log(popupOption);
     appointmentObservable = {
         listScBySchedule: [],
         getSCBySchedule: function() {
@@ -208,20 +209,42 @@
             this.set('item.sc_phone', dataItem.phone);
             this.set('item.sc_name', dataItem.sc_name);
         },
-        customerOption: new kendo.data.DataSource({
-            pageSize: 5,
-            serverFiltering: true,
-            transport: {
-                read: {
-                    url: ENV.vApi + "telesalelist/read",
-                },
-                parameterMap: parameterMap
-            },
-            schema: {
-                data: "data",
-                total: "total"
-            },
-        }),
+        customerOption: function() {
+            if(this.get('item.id_no')) {
+                return new kendo.data.DataSource({
+                    pageSize: 5,
+                    serverFiltering: true,
+                    filter: [{field: 'id_no', operator: 'eq', value: this.get('item.id_no')}],
+                    transport: {
+                        read: {
+                            url: ENV.vApi + "telesalelist/read",
+                        },
+                        parameterMap: parameterMap
+                    },
+                    schema: {
+                        data: "data",
+                        total: "total"
+                    },
+                });
+            }
+            else {
+                return new kendo.data.DataSource({
+                    pageSize: 5,
+                    serverFiltering: true,
+                    transport: {
+                        read: {
+                            url: ENV.vApi + "telesalelist/read",
+                        },
+                        parameterMap: parameterMap
+                    },
+                    schema: {
+                        data: "data",
+                        total: "total"
+                    },
+                });
+            }
+            
+        },
         onChangeCMND: function() {
             var customerDropDown = $("#customer-info").data("kendoDropDownList");
             var dataItem = customerDropDown.dataItem();
@@ -244,13 +267,13 @@
                 }
             });
         },
-        onDataBoundCMND: function(e) {
-            if(this.get('item.id_no')) {
-                var cmnd = this.get('item.id_no');
-                var cmndDD = $("#customer-info").data("kendoDropDownList");
-                cmndDD.text(cmnd);
-            }
-        }
+        // onDataBoundCMND: function(e) {
+        //     if(this.get('item.id_no')) {
+        //         var cmnd = this.get('item.id_no');
+        //         var cmndDD = $("#customer-info").data("kendoDropDownList").dataSource;
+        //         // cmndDD.filter({field: 'id_no', operator: 'eq', value: this.get('item.id_no')});
+        //     }
+        // }
     };
     kendo.bind("#right-form", kendo.observable(appointmentObservable));
     $(document).ready(function() {

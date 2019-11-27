@@ -5,7 +5,7 @@
 <div class="row">
 	<div class="col-sm-12" style="height: 80vh;">
 	    <!-- Table Styles Content -->
-	    <div id="grid"></div>
+	    <div id="grid_1"></div>
 	    <!-- END Table Styles Content -->
 	</div>
 </div>
@@ -33,6 +33,7 @@ var Config = Object.assign(Config, {
     },
     parse(response) {
         response.data.map(function(doc) {
+            doc.customer_info = (typeof doc.customer_info != 'undefined' && doc.customer_info) ? doc.customer_info : {};
             return doc;
         });
         return response;
@@ -40,12 +41,12 @@ var Config = Object.assign(Config, {
     scrollable: true,
     columns: [{
         title: "@Telesale code@",
-        field: "tl_code",
+        field: "customer_info.assign",
         width: "150px",
         headerAttributes: { style: "white-space: normal"},
         filterable: false,
     },{
-        field: "tl_name",
+        field: "customer_info.assign_name",
         title: "@Telesale name@",
         width: "200px",
         headerAttributes: { style: "white-space: normal"},
@@ -69,7 +70,7 @@ var Config = Object.assign(Config, {
         headerAttributes: { style: "white-space: normal"},
         filterable: false,
     },{
-        field: "cus_name",
+        field: "customer_info.name",
         title: "@Customer name@",
         width: "200px",
         headerAttributes: { style: "white-space: normal"},
@@ -81,8 +82,14 @@ var Config = Object.assign(Config, {
         headerAttributes: { style: "white-space: normal"},
         filterable: false,
         template: function(dataItem) {
-            return gridPhone(dataItem['customer_info']['phone'], dataItem['customer_info']['id'], 'customer');
+            return (typeof dataItem['customer_info'] !== 'undefined' && dataItem['customer_info'] && typeof dataItem['customer_info']['phone'] !== 'undefined' && typeof dataItem['customer_info']['id'] !==' undefined') ? gridPhone(dataItem['customer_info']['phone'], dataItem['customer_info']['id'], 'customer') : '<span></span>';
         }
+    },{
+        field: "customer_info.note",
+        title: "@Customer note@",
+        width: "200px",
+        headerAttributes: { style: "white-space: normal"},
+        filterable: false,
     },{
         field: "loan_amount",
         title: "@Loan amount@",
@@ -158,7 +165,7 @@ var Config = Object.assign(Config, {
 });
 </script>
 
-<script src="<?= STEL_PATH.'js/table.js' ?>"></script>
+<script src="<?= STEL_PATH.'js/tablev3.js' ?>"></script>
 
 <script type="text/javascript">
 	function deleteDataItemChecked() {

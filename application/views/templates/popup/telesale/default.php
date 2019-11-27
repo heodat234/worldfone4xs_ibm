@@ -324,7 +324,14 @@ window.popupObservable.assign({
                     syncDataSource();
             },
             error: errorDataSource
-        })
+        });
+        $.ajax({
+            url: ENV.vApi + "cdr/" + this._dataCall.calluuid,
+            type: "PUT",
+            contentType: "application/json; charset=utf-8",
+            data: kendo.stringify({customer: data}),
+            error: errorDataSource
+        });
         if(this.followUpChecked) {
             var followUpData = Object.assign(this.get("followUp").toJSON(), {
                 name: data.customer_name,

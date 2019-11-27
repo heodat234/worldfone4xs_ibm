@@ -22,8 +22,8 @@
                 <label>@Location@</label>
                 <input data-role="dropdownlist"
                        data-value-primitive="true"
-                       data-text-field="text"
-                       data-value-field="value"
+                       data-text-field="location"
+                       data-value-field="location"
                        data-filter="contains"
                        data-bind="value: item.location, source: locationOption" style="width: 100%"/>
             </div>
@@ -51,7 +51,7 @@
     }
 
     Config.observable = Object.assign(Config.observable, {
-        locationOption: () => dataSourceJsonData(["SC", "Dealer", "location"]),
+        locationOption: () => dataSourceDistinct('Dealer', 'location'),
     });
 
     $(document).ready(function() {

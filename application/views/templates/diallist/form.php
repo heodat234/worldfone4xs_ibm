@@ -5,6 +5,13 @@
 				<label>@Name@ @campaign@</label>
 				<input class="k-textbox" style="width: 100%" name="name" data-bind='value: item.name'>
 			</div>
+			<div class='form-group'>
+				<label>@Mode@</label>
+				<input data-role="dropdownlist" style="width: 100%"
+					data-value-primitive="true"
+					data-text-field="text" data-value-field="value"
+					data-bind="value: item.mode, source: modeOption">
+			</div>
 		</div>
 	</div>
 	<div class="row side-form-bottom">

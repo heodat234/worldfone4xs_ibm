@@ -45,9 +45,9 @@
                         success: (res) => {
                             if(res.total) {
                                 res.data.map((doc, index) => {
-                                    doc.createdAtDate = new Date(doc.createdAt * 1000);
-                                    doc.createdAtText = gridDate(doc.createdAtDate);
-                                    doc.createdAtFrom = time_since(doc.createdAtDate);
+                                    doc.notifyDate = new Date(doc.notifyDate);
+                                    doc.createdAtText = gridDate(doc.notifyDate);
+                                    doc.createdAtFrom = time_since(doc.notifyDate);
                                     if(index % 2 != 0)
                                         doc.odd = true;
                                 });

@@ -11,7 +11,7 @@
                 <div id="popup-tabstrip" data-role="tabstrip" style="margin-top: 2px">
                     <ul>
                         <li class="k-state-active">
-                            <i class="fa fa-user"></i><b> OBJECT INFOMATION</b>
+                            <i class="fa fa-user"></i><b> OBJECT INFOMATION 1</b>
                         </li>
                         <li data-bind="visible: detailUrl, click: openDetail">
                             <i class="gi gi-vcard"></i><b> CUSTOMER DETAIL</b>
@@ -267,6 +267,23 @@ class diallistPopup1 extends Popup {
         if(responseObj.date_of_birth) responseObj.date_of_birth = new Date(responseObj.date_of_birth * 1000);
 
         this.item = responseObj;
+
+        if(responseObj.es_pay && responseObj.es_pay.rate && typeof responseObj.es_pay.rate == 'number') {
+            this.rate = responseObj.es_pay.rate;
+        }
+
+        if(responseObj.es_pay && responseObj.es_pay.loan_amount && typeof responseObj.es_pay.loan_amount == 'number') {
+            this.loan_amount = responseObj.es_pay.loan_amount;
+        }
+
+        if(responseObj.es_pay && responseObj.es_pay.term && typeof responseObj.es_pay.term == 'number') {
+            this.term = responseObj.es_pay.term;
+        }
+
+        if(responseObj.es_pay && responseObj.es_pay.monthlyPayment && typeof responseObj.es_pay.monthlyPayment == 'number') {
+            this.monthlyPayment = responseObj.es_pay.monthlyPayment;
+        }
+
         /* Lấy iframe chi tiết khách hàng */
         var detailUrl = detailUrl = `${ENV.baseUrl}manage/telesalelist?omc=1#/detail_customer/${responseObj.id}`
         this.assign({detailUrl: detailUrl}).open();
@@ -296,8 +313,17 @@ window.popupObservable.assign({
     },
     save: function() {
         var data = this.item.toJSON();
+        var es_pay = {
+            'rate'              : (this.rate) ? this.rate : 0,
+            'loan_amount'       : (this.loan_amount) ? this.loan_amount : 0,
+            'term'              : (this.term) ? this.term : 0,
+            'monthlyPayment'    : (this.rate && this.loan_amount && this.term) ? this.monthlyPayment : 0
+        };
+        data['es_pay'] = es_pay;
+        console.log(this.item.toJSON());
+
         $.ajax({
-            url: ENV.restApi + "telesalelist/" + (data.id || "").toString(),
+            url: ENV.restApi + "telesalelist_solve/" + (data.id || "").toString(),
             type: "PUT",
             contentType: "application/json; charset=utf-8",
             data: kendo.stringify(data),
@@ -307,10 +333,17 @@ window.popupObservable.assign({
             },
             error: errorDataSource
         })
+        $.ajax({
+            url: ENV.vApi + "cdr/" + this._dataCall.calluuid,
+            type: "PUT",
+            contentType: "application/json; charset=utf-8",
+            data: kendo.stringify({customer: data}),
+            error: errorDataSource
+        })
         if(this.followUpChecked) {
             var followUpData = Object.assign(this.get("followUp").toJSON(), {
-                name: data.customer_name,
-                phone: data.mobile_phone_no,
+                name: data.name,
+                phone: data.phone,
                 id: data.id,
                 collection: "TS_Telesalelist"
             });

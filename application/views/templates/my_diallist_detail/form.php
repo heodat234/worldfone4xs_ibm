@@ -1,6 +1,9 @@
 <?php
-	$dataFieldsJSON = $this->input->get("dataFields");
-	$dataFields = $dataFieldsJSON ? json_decode($dataFieldsJSON, TRUE) : [];
+	$this->load->library("mongo_private");
+	$dataFields = $this->mongo_private->where(["collection"=>getCT("Diallist_detail"), "sub_type"=>['$exists'=>TRUE,'$nin'=>['',null]]])->get("Model");
+	foreach ($dataFields as &$doc) {
+		$doc["title"] = !empty($doc["title"]) ? $doc["title"] : $doc["field"];
+	}
 ?>
 <div class="container-fluid">
 	<div class="row">

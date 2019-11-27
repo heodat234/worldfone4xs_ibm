@@ -33,14 +33,21 @@
 var Config = Object.assign(Config, {
     model: {
         id: "id",
+        fields: {
+            released_date: {type: "date"},
+            disbursed_date: {type: "date"},
+            issued_date: {type: "date"},
+            created_at: {type: "date"},
+            updated_at: {type: "date"},
+        }
     },
     parse(response) {
         response.data.map(function(doc) {
-            doc.released_date = doc.released_date ? gridDate(new Date(doc.released_date * 1000), 'dd/MM/yyyy') : undefined;
-            doc.disbursed_date = doc.disbursed_date ? gridDate(new Date(doc.disbursed_date * 1000), 'dd/MM/yyyy') : undefined;
-            doc.issued_date = doc.issued_date ? gridDate(new Date(doc.issued_date * 1000), 'dd/MM/yyyy') : undefined;
-            doc.created_at = doc.created_at ? gridDate(new Date(doc.created_at * 1000)) : undefined;
-            doc.updated_at = doc.updated_at ? gridDate(new Date(doc.updated_at * 1000)) : undefined;
+            doc.released_date = doc.released_date ? new Date(doc.released_date * 1000) : undefined;
+            doc.disbursed_date = doc.disbursed_date ? new Date(doc.disbursed_date * 1000) : undefined;
+            doc.issued_date = doc.issued_date ? new Date(doc.issued_date * 1000) : undefined;
+            doc.created_at = doc.created_at ? new Date(doc.created_at * 1000) : undefined;
+            doc.updated_at = doc.updated_at ? new Date(doc.updated_at * 1000) : undefined;
             return doc;
         });
         return response;
@@ -52,9 +59,9 @@ var Config = Object.assign(Config, {
         width: 32,
     }, {
         // Use uid to fix bug data-uid of row undefined
-        title: `<span data-toggle='tooltip' title='@Delete@' data-placement='bottom'><a class='btn btn-sm btn-circle btn-action btn-primary' onclick='return deleteDataItemChecked();'><i class='fa fa-times-circle'></i></a></span>`,
-        template: '<a role="button" class="btn btn-sm btn-circle btn-action btn-primary" data-uid="#: uid #"><i class="fa fa-ellipsis-v"></i></a>',
-        width: '70px'
+        title: `<a data-type='action/delete_all' class='btn btn-sm btn-circle btn-action btn-primary' onclick='return deleteDataItemChecked();'><i class='fa fa-times-circle'></i></a>`,
+        template: `<a data-type='action/delete_all' role="button" class="btn btn-sm btn-circle btn-action btn-primary" data-uid="#: uid #"><i class="fa fa-ellipsis-v"></i></a>`,
+        width: 48
     }, {
         field: "dealer_code",
         title: "@Dealer code@",
@@ -102,12 +109,14 @@ var Config = Object.assign(Config, {
         title: "@Released date@",
         width: '150px',
         headerAttributes: { style: "white-space: normal"},
+        format: "{0: dd/MM/yy HH:mm}",
         filterable: true,
     },{
         field: "disbursed_date",
         title: "@Disbursed date@",
         width: '150px',
         headerAttributes: { style: "white-space: normal"},
+        format: "{0: dd/MM/yy HH:mm}",
         filterable: true,
     },{
         field: "loan_amount",
@@ -126,6 +135,7 @@ var Config = Object.assign(Config, {
         title: "@Issued date@",
         width: '150px',
         headerAttributes: { style: "white-space: normal"},
+        format: "{0: dd/MM/yy HH:mm}",
         filterable: true,
     },{
         field: "issued_place",
@@ -216,12 +226,14 @@ var Config = Object.assign(Config, {
         title: "@Created at@",
         width: '150px',
         headerAttributes: { style: "white-space: normal"},
+        format: "{0: dd/MM/yy HH:mm}",
         filterable: true,
     },{
         field: "updated_at",
         title: "@Last modified@",
         width: '150px',
         headerAttributes: { style: "white-space: normal"},
+        format: "{0: dd/MM/yy HH:mm}",
         filterable: true,
     },{
         field: "updated_by",

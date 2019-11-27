@@ -3,6 +3,7 @@ var Config = {
     crudApi: `${ENV.vApi}`,
     templateApi: `${ENV.templateApi}`,
     collection: "cdr",
+    scrollable: true,
     observable: {
     },
     model: {
@@ -26,12 +27,13 @@ var Config = {
         title: "@Direction@",
         template: dataItem => templateDirection(dataItem),
         filterable: {
-            ui: (element) => selectFilter(element, (ENV.type ? ENV.type + "_" : "") + "worldfonepbxmanager", "direction"),
-            operators: {
-              string: {
-                eq: '@Equal to@',
-              }
-            }
+            // ui: (element) => selectFilter(element, (ENV.type ? ENV.type + "_" : "") + "worldfonepbxmanager", "direction"),
+            // operators: {
+            //   string: {
+            //     eq: '@Equal to@',
+            //   }
+            // }
+            ui: directionFilter,
         },
         width: 100
     },{
@@ -66,7 +68,8 @@ var Config = {
                 }
             }
             return result
-        }
+        },
+        width: 200
     },{
         field: "customernumber",
         title: "@Phone number@",
@@ -76,15 +79,20 @@ var Config = {
         field: "disposition",
         title: "@Result@",
         filterable: {
-            ui: (element) => selectFilter(element, (ENV.type ? ENV.type + "_" : "") + "worldfonepbxmanager", "disposition"),
-            operators: {
-              string: {
-                eq: '@Equal to@',
-              }
-            }
+            // ui: (element) => selectFilter(element, (ENV.type ? ENV.type + "_" : "") + "worldfonepbxmanager", "disposition"),
+            // operators: {
+            //   string: {
+            //     eq: '@Equal to@',
+            //   }
+            // }
+            ui: dispostionFilter,
         },
         template: dataItem => templateDisposition(dataItem),
         width: 120
+    },{
+        field: "debt_account",
+        title: "Debt account",
+        width: 150
     },{
         field: "action_code",
         title: "@Action code@",
@@ -100,12 +108,47 @@ var Config = {
     },{
         // Use uid to fix bug data-uid of row undefined
         template: '<a role="button" class="btn btn-sm btn-circle btn-action btn-primary" data-uid="#: uid #"><i class="fa fa-ellipsis-v"></i></a>',
-        width: 20
+        width: 36
     }],
     filterable: KENDO.filterable,
     reorderable: true
 }; 
 
+function defineCustomerCdr(ele) {
+    var uid = $(ele).closest("tr").data("uid"),
+        dataItem = Table.dataSource.getByUid(uid),
+        customers = dataItem.customer,
+        calluuid = dataItem.calluuid;
+
+    var buttons = {cancel: true};
+    for (var i = 0; i < customers.length; i++) {
+        buttons[i] = {text: customers[i].name};
+    }
+
+    var type = swal({
+        title: "@Choose one@.",
+        text: `@Greater than one customer have this number@.`,
+        icon: "warning",
+        buttons: buttons
+    }).then(index => {
+        if(index !== null && index !== false) {
+            var customer = customers[index].toJSON();
+            $.ajax({
+                url: ENV.vApi + "cdr/update/" + calluuid,
+                data: JSON.stringify({customer: customer}),
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                success: function(res) {
+                    if(res.status) {
+                        notification.show("@Success@", "success");
+                        Table.dataSource.read();
+                    } else notification.show("@No success@", "error");
+                },
+                error: errorDataSource
+            })
+        }
+    })
+}
 
 function playAction(ele) {
     var uid = $(ele).data("uid"),
@@ -125,6 +168,36 @@ function downloadAction(ele) {
     if(callduration) 
         downloadRecord(calluuid);
     else notification.show("No recording", "warning");
+}
+
+function directionFilter(element) {
+    element.kendoDropDownList({
+        dataSource: {
+            data: [
+                {direction:"inbound", text: "Inbound"},
+                {direction:"outbound", text: "Outbound"},
+            ]
+        },
+        dataTextField: "text",
+        dataValueField: "direction",
+        optionLabel: "-- Chọn --"
+    });
+}
+
+function dispostionFilter(element) {
+    element.kendoDropDownList({
+        dataSource: {
+            data: [
+                {disposition:"ANSWERED", text: "ANSWERED"},
+                {disposition:"NO ANSWER", text: "NO ANSWER"},
+                {disposition:"BUSY", text: "BUSY"},
+                {disposition:"FAILED", text: "FAILED"},
+            ]
+        },
+        dataTextField: "text",
+        dataValueField: "disposition",
+        optionLabel: "-- Chọn --"
+    });
 }
 
 function repopupAction(ele) {

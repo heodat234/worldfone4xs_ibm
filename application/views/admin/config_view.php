@@ -42,14 +42,6 @@
 						    </label>
 				        </div>
 				    </div>
-				    <div class="form-group">
-				        <label class="control-label col-sm-3">Record event</label>
-				        <div class="col-sm-3">
-				        	<label class="switch switch-primary">
-						        <input type="checkbox" data-bind="checked: item.record_event"><span></span>
-						    </label>
-				        </div>
-				    </div>
 				</div>
 				<div class="col-md-6">
 				    <div class="form-group">
@@ -81,32 +73,28 @@
 				</div>
 			</form>
 		</div>
-		<div class="row hidden" style="margin: 0 10px">
-			<h4 class="fieldset-legend" style="margin: 0 0 20px"><span style="font-weight: 500; line-height: 1">FOR DISPLAY DATA</span></h4>
+		<div class="row" style="margin: 0 10px">
+			<h4 class="fieldset-legend" style="margin: 0 0 20px"><span style="font-weight: 500; line-height: 1">TOOL</span></h4>
 		</div>
-		<div class="row hidden" style="margin: 10px 30px 0 60px">
+		<div class="row" style="margin: 10px 30px 0 60px">
 			<form class="form-horizontal">
 				<div class="col-md-6">
-				    <div class="form-group">
-				        <label class="control-label col-sm-3">Show customer</label>
-				        <div class="col-sm-9">
-				        	<input data-role="dropdownlist"
-							data-text-field="text"
-							data-value-field="value"
-		                    data-value-primitive="true"                 
-		                    data-bind="value: item.show_customer, source: showCustomerOption" style="width: 100%">
+					<div class="form-group">
+				        <label class="control-label col-sm-6">Record event from pbx</label>
+				        <div class="col-sm-6">
+				        	<label class="switch switch-primary">
+						        <input type="checkbox" data-bind="checked: item.record_event"><span></span>
+						    </label>
 				        </div>
 				    </div>
 				</div>
 				<div class="col-md-6">
-				    <div class="form-group">
-				        <label class="control-label col-sm-3">Show CDR</label>
-				        <div class="col-sm-9">
-				        	<input data-role="dropdownlist"
-							data-text-field="text"
-							data-value-field="value"
-		                    data-value-primitive="true"                 
-		                    data-bind="value: item.show_cdr, source: showCDROption" style="width: 100%">
+					<div class="form-group">
+				        <label class="control-label col-sm-6">Auto add api to navigator</label>
+				        <div class="col-sm-6">
+				        	<label class="switch switch-primary">
+						        <input type="checkbox" data-bind="checked: item.auto_add_api"><span></span>
+						    </label>
 				        </div>
 				    </div>
 				</div>
@@ -292,8 +280,6 @@
 			kendo.bind($("#page-content"), kendo.observable({
 				item: item,
 				envOption: ["DEV","UAT","LIVE"],
-				showCustomerOption: [{text: "All", value: "ALL"}, {text: "Only created by agent", value: "ONLY"}],
-				showCDROption: [{text: "All", value: "ALL"}, {text: "Only created by agent", value: "ONLY"}],
 				phoneTypeOption: [
 					{text: "Other", value: ""},
 					{text: "Zoiper", value: "zoiper"},

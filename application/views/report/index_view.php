@@ -16,13 +16,6 @@ var Config = {
     parse: function (response) {
         response.data.map(function(doc) {
             doc.starttime = new Date(doc.starttime * 1000);
-            var serviceLv = [];
-            [1,2,3].forEach(level => {
-            	var prop = "serviceLv" + level;
-            	if(doc[prop])
-            		serviceLv.push((doc[prop] || "").toString());
-            }) 
-            doc.serviceLv = serviceLv.join(" => ");
             return doc;
         })
         return response;
@@ -47,10 +40,6 @@ var Config = {
         field: "agentname",
         title: "@Agent name@",
         width: 100
-    },{
-        field: "serviceLv",
-        title: "Service level",
-        width: 140
     },{
         field: "customer.name",
         title: "@Customer name@",

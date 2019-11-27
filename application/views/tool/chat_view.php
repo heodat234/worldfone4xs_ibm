@@ -48,14 +48,14 @@
 		                	<li data-bind="visible: room_id">
 		                        <a href="javascript:void(0)" data-bind="click: togglePinRoom"><i class="gi gi-pushpin text-info"></i></i><span>@Pin@ / @Unpin@</span></a>
 		                    </li>
-		                    <li>
+		                    <li data-type="create">
 		                        <a href="javascript:void(0)" data-bind="click: addChatGroup"><i class="gi gi-conversation text-success"></i><span>@Create@ @group@ chat</span></a>
 		                    </li>
 		                    <li class="divider"></li>
 		                    <li>
 		                        <a href="javascript:void(0)" data-bind="click: filterChatRoom"><i class="fa fa-filter text-warning"></i><span>@Filter@</span></a>
 		                    </li>
-		                    <li data-bind="visible: isGroup">
+		                    <li  data-type="update" data-bind="visible: isGroup">
 		                        <a href="javascript:void(0)" data-bind="click: editChatGroup"><i class="fa fa-pencil text-warning"></i><span>@Edit@ @group@</span></a>
 		                    </li>
 		                    <li data-bind="visible: room_id" class="hidden">
@@ -403,7 +403,7 @@
             		members.push({value: ext, text: `${ext} (${convertExtensionToAgentname[ext]})`});
             	}
                 var model = {
-                    item: {type: "group"},
+                    item: {type: "group", members: [ENV.extension]},
                     memberOption: members,
                     uploadAvatar: function() {
 						$("#upload-avatar").click();

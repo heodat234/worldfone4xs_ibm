@@ -10,7 +10,7 @@
 </style>
 <script>
     var Config = {
-        crudApi: `${ENV.restApi}`,
+        crudApi: `${ENV.vApi}`,
         templateApi: `${ENV.templateApi}`,
         collection: "appointment_log_solve",
         observable: {

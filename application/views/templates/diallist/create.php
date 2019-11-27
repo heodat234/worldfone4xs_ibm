@@ -12,7 +12,7 @@
 						data-bind="value: item.name">
 					</div>
 				</div>
-				<div class="form-group">
+				<!-- <div class="form-group">
 					<label class="control-label col-xs-4">@Team@</label>
 					<div class="col-xs-8">
 						<input id="team-select" data-role="dropdownlist" style="width: 100%"
@@ -20,7 +20,7 @@
 						data-text-field="text" data-value-field="text" 
 						data-bind="value: item.team, source: teamOption, events: {change: teamChange}">
 					</div>
-				</div>
+				</div> -->
 				<div class="form-group">
 					<label class="control-label col-xs-4">@Campaign target@ (%)</label>
 					<div class="col-xs-8">
@@ -126,12 +126,18 @@
     <div class="member-element"><span style="background-image: url('/api/v1/avatar/agent/#: data #')"></span><span><b>#: data #</b></span></div>
 </script>
 
+<style type="text/css">
+	.member-element {
+		width: 64px;
+	}
+</style>
+
 <script type="text/javascript">
 	$.get(ENV.vApi + "diallist/diallistdetailfield/1", function(res) {
 		var model = {
-			item: {columns: res.data, target: 90},
+			item: {columns: res.data, target: 90, mode: "manual"},
 			modeOption: dataSourceJsonData(["Diallist","mode"]),
-			teamOption: dataSourceJsonData(["Collection","team"]),
+			/*teamOption: dataSourceJsonData(["Collection","team"]),
 			teamChange: function(e) {
 				let value = e.sender.value();
 				this.groupOption.filter({field: "name", operator: "contains", value: value});
@@ -146,7 +152,7 @@
 					this.set("visibleMinOutstanding", false);
 					this.set("item.minOutstanding", undefined);
 				}
-			},
+			},*/
 			groupOption: dataSourceDropDownList("Group", ["name", "members"], {members: {$exists: true}, type: "custom"}),
 			groupCascade: function(e) {
 				if(e.sender.dataItem()) {
@@ -155,6 +161,16 @@
 					this.set("item.group_id", e.sender.dataItem().id);
 				}
 			},
+			membersOption: new kendo.data.DataSource({
+                transport: {
+                    read: ENV.vApi + "select/queuemembers",
+                    parameterMap: parameterMap
+                },
+                schema: {
+                    data: "data",
+                    total: "total"
+                }
+            }),
 			save: function() {
 				var data = this.item.toJSON();
 				$.ajax({
