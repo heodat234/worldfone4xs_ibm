@@ -119,7 +119,7 @@ Class Daily_all_user_report extends WFF_Controller {
             //    }
 
             // }
-            
+
             // foreach ($new_data as $key => &$value) {
             //    if ($key == 'A') {
             //       $teams = $this->mongo_db->where(array('name' => array('$regex' => 'SIBS/Group A')  ))->select(array('name','members','lead'))->get($this->group_team_collection);
@@ -454,7 +454,7 @@ Class Daily_all_user_report extends WFF_Controller {
             //                $temp_member['conn_amount'] = isset($data_conn[0]) ? $data_conn[0]['conn_amount'] : 0;
 
 
-                           
+
             //                //temp
             //                $temp['unwork']         += $temp_member['unwork'];
             //                $temp['talk_time']      += $temp_member['talk_time'];
@@ -485,7 +485,7 @@ Class Daily_all_user_report extends WFF_Controller {
             //             array_push($member_arr, $temp_member);
 
             //          }
-                     
+
 
             //          $temp['spin_rate']     = ($temp['total_call'] != 0) ? round($temp['count_spin']/$temp['total_call'],2): 0;
             //          $temp['ptp_rate_acc']  = ($temp['total_call'] != 0) ? round($temp['count_ptp']/$temp['total_call'],2) : 0;
@@ -498,7 +498,7 @@ Class Daily_all_user_report extends WFF_Controller {
 
             //          array_push($insertData, $temp);
             //          $insertData = array_merge($insertData, $member_arr);
-                     
+
             //          $i++;
 
             //       }
@@ -944,7 +944,7 @@ Class Daily_all_user_report extends WFF_Controller {
             // $this->kendo_aggregate->set_kendo_query($request)->filtering()->adding($match_officer,$group_officer);
             // $data_aggregate = $this->kendo_aggregate->paging()->get_data_aggregate();
             // $data_officer = $this->mongo_db->aggregate_pipeline($this->lnjc05_collection, $data_aggregate);
-            
+
             $new_data = array();
             foreach ($data as &$value) {
                $gr = substr($value['_id'], 0,1);
@@ -956,7 +956,7 @@ Class Daily_all_user_report extends WFF_Controller {
                }
 
             }
-            
+
             foreach ($new_data as $key => &$value) {
                if ($key == 'A') {
                   $teams = $this->mongo_db->where(array('name' => array('$regex' => 'Card/Group A')  ))->select(array('name','members','lead'))->get($this->group_team_collection);
@@ -969,49 +969,34 @@ Class Daily_all_user_report extends WFF_Controller {
                      $temp['team_lead']  = true;
                      $temp['date']       = $date;
                      $temp['extension']  = $row['lead'];
+                     $diallist = $this->mongo_db->where(array('group_id' => $row['id'], 'createdAt' => array('$gte' =>$date) ))->select(array('name','members'))->getOne($this->diallist_collection);
+                     $diallist_id = new MongoDB\BSON\ObjectId($diallist['id']);
                      if ($due_date != null) {
                         $duedate            = $due_date['due_date'];
                         $temp['due_date']   = $duedate;
-                        $temp['count_data'] = $this->mongo_db->where(array("assign" => $row['lead'], 'overdue_date' => array( '$gte'=> $duedate) ))->count($this->diallist_detail_collection);
-                        $match_ptp = array(
-                           '$match' => array(
-                              '$and' => array(
-                                 // array('createdAt'=> array( '$gte'=> $date)),
-                                 array('assign'=> $row['lead']),
-                                 array('$or' => [ array( 'action_code'=>  'BPTP'), array('action_code'=>  'PTP Today')])
-                              )
-                           )
-                        );
-                        $match_ptp_1 = array(
-                           '$match' => array(
-                              array('diallist.createdAt'=> array( '$gte'=> $date))
-                           )
-                        );
+
+                        $temp['count_data'] = $this->mongo_db->where(array("diallist_id" => $diallist_id ))->count($this->diallist_detail_collection);
+
 
                      }else {
-
                         $result = $this->mongo_db->where(array('due_date' => ['$exists' => true],'team_lead' => ['$exists' => true],'extension' => $row['lead']  ))->select(array('count_data','due_date'))->order_by(array('date'=> -1))->getOne($this->collection);
                         $due_date_add_1     = isset($result['due_date']) ? $result['due_date'] : $date;
                         $temp['count_data'] = isset($result['count_data']) ? $result['count_data'] : 0;
-                        $match_ptp = array(
-                           '$match' => array(
-                              '$and' => array(
-                                 // array('createdAt'=> array('$gte'=> $due_date_add_1, '$lte'=> $date)),
-                                 array('assign'=> $row['lead']),
-                                 array('$or' => [ array( 'action_code'=>  'BPTP'), array('action_code'=>  'PTP Today')])
-                              )
-                           )
-                        );
-                        $match_ptp_1 = array(
-                           '$match' => array(
-                              array('diallist.createdAt'=> array('$gte'=> $due_date_add_1, '$lte'=> $date))
-                           )
-                        );
                      }
 
                      $temp['unwork'] = $temp['talk_time'] = $temp['total_call'] = $temp['total_amount'] = $temp['count_spin'] = $temp['spin_amount'] = $temp['count_conn'] = $temp['conn_amount'] = $temp['count_paid'] = $temp['paid_amount'] = $temp['ptp_amount'] = $temp['count_ptp'] = $temp['paid_amount_promise'] = $temp['count_paid_promise'] = 0;
 
                      //promise to pay
+                     $match_ptp = array(
+                        '$match' => array(
+                           '$and' => array(
+                              // array('createdAt'=> array( '$gte'=> $date)),
+                              array("diallist_id" => $diallist_id ),
+                              // array('assign'=> $row['lead']),
+                              array('$or' => [ array( 'action_code'=>  'BPTP'), array('action_code'=>  'PTP Today')])
+                           )
+                        )
+                     );
                      $group_ptp = array(
                         '$group' => array(
                            '_id' => null,
@@ -1019,46 +1004,41 @@ Class Daily_all_user_report extends WFF_Controller {
                            'count_ptp' => array('$sum'=> 1)
                         )
                      );
-                     $lookup = array('$lookup' => array(
-                          "from" => $this->diallist_collection,
-                          "localField" => '$diallist_id',
-                          "foreignField" => '$_id',
-                          "as" => "diallist"
-                          )
-                     );
-                     $this->kendo_aggregate->set_kendo_query($request)->filtering()->adding($match_ptp,$lookup,$match_ptp_1,$group_ptp);
+
+                     $this->kendo_aggregate->set_kendo_query($request)->filtering()->adding($match_ptp,$group_ptp);
                      $data_aggregate = $this->kendo_aggregate->paging()->get_data_aggregate();
                      $data_ptp = $this->mongo_db->aggregate_pipeline($this->diallist_detail_collection, $data_aggregate);
 
                      $account_ptp_arr   = isset($data_ptp[0]) ? array_values(array_unique($data_ptp[0]['account_arr'])) : array();
-                     if ($duedate != null) {
-                        $match_ptp_1 = array(
-                           '$match' => array(
-                              '$and' => array(
-                                 array('due_date'=> array( '$gte'=> $date)),
-                                 array('account_number' => ['$in' => $account_ptp_arr])
-                              )
+                     // if ($duedate != null) {
+                     //    $match_ptp_1 = array(
+                     //       '$match' => array(
+                     //          '$and' => array(
+                     //             array('due_date'=> array( '$gte'=> $date)),
+                     //             array('account_number' => ['$in' => $account_ptp_arr])
+                     //          )
+                     //       )
+                     //    );
+                     // }else{
+
+                     // }
+                     $match_ptp_1 = array(
+                        '$match' => array(
+                           '$and' => array(
+                              // array('due_date'=> array('$gte'=> $due_date_add_1, '$lte'=> $date)),
+                              array('account_number' => ['$in' => $account_ptp_arr])
                            )
-                        );
-                     }else{
-                        $match_ptp_1 = array(
-                           '$match' => array(
-                              '$and' => array(
-                                 array('due_date'=> array('$gte'=> $due_date_add_1, '$lte'=> $date)),
-                                 array('account_number' => ['$in' => $account_ptp_arr])
-                              )
-                           )
-                        );
-                     }
+                        )
+                     );
                      $group_ptp_1 = array(
                         '$group' => array(
                            '_id' => null,
-                           'ptp_amount' => array('$sum'=> '$current_balance'),
+                           'ptp_amount' => array('$sum'=> '$cur_bal'),
                         )
                      );
                      $this->kendo_aggregate->set_kendo_query($request)->filtering()->adding($match_ptp_1,$group_ptp_1);
                      $data_aggregate = $this->kendo_aggregate->paging()->get_data_aggregate();
-                     $data_ptp_1 = $this->mongo_db->aggregate_pipeline($this->lnjc05_collection, $data_aggregate);
+                     $data_ptp_1 = $this->mongo_db->aggregate_pipeline($this->account_collection, $data_aggregate);
                      $temp['count_ptp']    = isset($data_ptp[0]) ? $data_ptp[0]['count_ptp'] : 0;
                      $temp['ptp_amount']   = isset($data_ptp_1[0]) ? $data_ptp_1[0]['ptp_amount'] : 0;
 
@@ -1307,7 +1287,7 @@ Class Daily_all_user_report extends WFF_Controller {
                            $temp_member['conn_amount'] = isset($data_conn[0]) ? $data_conn[0]['conn_amount'] : 0;
 
 
-                           
+
                            //temp
                            $temp['unwork']         += $temp_member['unwork'];
                            $temp['talk_time']      += $temp_member['talk_time'];
@@ -1338,7 +1318,7 @@ Class Daily_all_user_report extends WFF_Controller {
                         array_push($member_arr, $temp_member);
 
                      }
-                     
+
 
                      $temp['spin_rate']     = ($temp['total_call'] != 0) ? round($temp['count_spin']/$temp['total_call'],2): 0;
                      $temp['ptp_rate_acc']  = ($temp['total_call'] != 0) ? round($temp['count_ptp']/$temp['total_call'],2) : 0;
@@ -1351,403 +1331,403 @@ Class Daily_all_user_report extends WFF_Controller {
 
                      array_push($insertData, $temp);
                      $insertData = array_merge($insertData, $member_arr);
-                     
+
                      $i++;
 
                   }
 
 
                }
-               else{
-                  $i = 1;
-                  foreach ($value as &$row) {
-                     if (isset($row['_id'])) {
-                        $temp = [];
-                        $team = $this->mongo_db->where(array('debt_groups' => $row['_id'] ,'name' => array('$regex' => 'Card')))->select(array('name','members','lead','debt_groups'))->getOne($this->group_team_collection);
+               // else{
+               //    $i = 1;
+               //    foreach ($value as &$row) {
+               //       if (isset($row['_id'])) {
+               //          $temp = [];
+               //          $team = $this->mongo_db->where(array('debt_groups' => $row['_id'] ,'name' => array('$regex' => 'Card')))->select(array('name','members','lead','debt_groups'))->getOne($this->group_team_collection);
 
-                        $temp['name']       = $row['_id'].' (Card)';
-                        $temp['group']      = $key;
-                        $temp['team']       = $i;
-                        $temp['team_lead']  = true;
-                        $temp['date']       = $date;
-                        $temp['count_data'] = $temp['unwork'] = $temp['talk_time'] = $temp['total_call'] = $temp['total_amount'] = $temp['count_spin'] = $temp['spin_amount'] = $temp['count_conn'] = $temp['conn_amount'] = $temp['count_paid'] = $temp['paid_amount'] = $temp['ptp_amount'] = $temp['count_ptp'] = $temp['count_paid_promise'] = $temp['paid_amount_promise'] = 0;
-                        $member_arr = [];
-                        foreach ($team['members'] as $member) {
-                           $temp_member = [];
-                           foreach ($users as $user) {
-                              if ($member == $user['extension']) {
-                                 $temp_member['name']   = $user['agentname'];
-                                 $temp_member['extension']   = $member;
-                                 $temp_member['group']  = $key;
-                                 $temp_member['team']   = $i;
-                                 $temp_member['date']   = $date;
+               //          $temp['name']       = $row['_id'].' (Card)';
+               //          $temp['group']      = $key;
+               //          $temp['team']       = $i;
+               //          $temp['team_lead']  = true;
+               //          $temp['date']       = $date;
+               //          $temp['count_data'] = $temp['unwork'] = $temp['talk_time'] = $temp['total_call'] = $temp['total_amount'] = $temp['count_spin'] = $temp['spin_amount'] = $temp['count_conn'] = $temp['conn_amount'] = $temp['count_paid'] = $temp['paid_amount'] = $temp['ptp_amount'] = $temp['count_ptp'] = $temp['count_paid_promise'] = $temp['paid_amount_promise'] = 0;
+               //          $member_arr = [];
+               //          foreach ($team['members'] as $member) {
+               //             $temp_member = [];
+               //             foreach ($users as $user) {
+               //                if ($member == $user['extension']) {
+               //                   $temp_member['name']   = $user['agentname'];
+               //                   $temp_member['extension']   = $member;
+               //                   $temp_member['group']  = $key;
+               //                   $temp_member['team']   = $i;
+               //                   $temp_member['date']   = $date;
 
-                                 $temp_member['count_data'] = $temp_member['unwork'] = $temp_member['talk_time'] = $temp_member['total_call'] = $temp_member['total_amount'] = $temp_member['count_spin'] = $temp_member['spin_amount'] = $temp_member['count_conn'] = $temp_member['conn_amount'] = $temp_member['count_paid'] = $temp_member['paid_amount'] = $temp_member['ptp_amount'] = $temp_member['count_ptp'] = $temp_member['count_paid_promise'] = $temp_member['paid_amount_promise'] = 0;
+               //                   $temp_member['count_data'] = $temp_member['unwork'] = $temp_member['talk_time'] = $temp_member['total_call'] = $temp_member['total_amount'] = $temp_member['count_spin'] = $temp_member['spin_amount'] = $temp_member['count_conn'] = $temp_member['conn_amount'] = $temp_member['count_paid'] = $temp_member['paid_amount'] = $temp_member['ptp_amount'] = $temp_member['count_ptp'] = $temp_member['count_paid_promise'] = $temp_member['paid_amount_promise'] = 0;
 
-                                 $debt_group = substr($team['debt_groups'][0], 1,2);
-                                 if ($due_date != null && $due_date['debt_group'] == $debt_group) {
-                                    $duedate = $due_date['due_date'];
-                                    $temp_member['due_date']   = $duedate;
-                                    $temp['due_date']          = $duedate;
+               //                   $debt_group = substr($team['debt_groups'][0], 1,2);
+               //                   if ($due_date != null && $due_date['debt_group'] == $debt_group) {
+               //                      $duedate = $due_date['due_date'];
+               //                      $temp_member['due_date']   = $duedate;
+               //                      $temp['due_date']          = $duedate;
 
-                                    $temp_member['count_data'] = $this->mongo_db->where(array("assign" => $member, 'overdue_date' => $duedate ))->count($this->diallist_detail_collection);
-                                    $temp_member['unwork'] = $this->mongo_db->where(array("userextension" => $member, 'disposition' =>array('$ne' => 'ANSWERED'),'starttime' => array('$gte' => $date) ))->count($this->cdr_collection);
-                                    $match_cdr = array(
-                                      '$match' => array(
-                                          '$and' => array(
-                                             array('starttime'=> array( '$gte'=> $date)),
-                                             array('userextension' => $member)
-                                          )
-                                       )
-                                    );
-                                 }else {
+               //                      $temp_member['count_data'] = $this->mongo_db->where(array("assign" => $member, 'overdue_date' => $duedate ))->count($this->diallist_detail_collection);
+               //                      $temp_member['unwork'] = $this->mongo_db->where(array("userextension" => $member, 'disposition' =>array('$ne' => 'ANSWERED'),'starttime' => array('$gte' => $date) ))->count($this->cdr_collection);
+               //                      $match_cdr = array(
+               //                        '$match' => array(
+               //                            '$and' => array(
+               //                               array('starttime'=> array( '$gte'=> $date)),
+               //                               array('userextension' => $member)
+               //                            )
+               //                         )
+               //                      );
+               //                   }else {
 
-                                    $result = $this->mongo_db->where(array('due_date' => ['$exists' => true],'extension' => $member  ))->select(array('count_data','due_date'))->order_by(array('date'=> -1))->getOne($this->collection);
-                                    $due_date_add_1            = isset($result['due_date']) ? $result['due_date'] : $date;
-                                    $temp_member['count_data'] = isset($result['count_data']) ? $result['count_data'] : 0;
-                                    $temp_member['unwork']     = $this->mongo_db->where(array("userextension" => $member, 'disposition' =>array('$ne' => 'ANSWERED'), 'starttime' =>array( '$gte'=> $due_date_add_1, '$lte'=> $date)))->count($this->cdr_collection);
-                                    $match_cdr = array(
-                                      '$match' => array(
-                                          '$and' => array(
-                                             array('starttime'=> array( '$gte'=> $due_date_add_1, '$lte'=> $date)),
-                                             array('userextension' => $member)
-                                          )
-                                       )
-                                    );
+               //                      $result = $this->mongo_db->where(array('due_date' => ['$exists' => true],'extension' => $member  ))->select(array('count_data','due_date'))->order_by(array('date'=> -1))->getOne($this->collection);
+               //                      $due_date_add_1            = isset($result['due_date']) ? $result['due_date'] : $date;
+               //                      $temp_member['count_data'] = isset($result['count_data']) ? $result['count_data'] : 0;
+               //                      $temp_member['unwork']     = $this->mongo_db->where(array("userextension" => $member, 'disposition' =>array('$ne' => 'ANSWERED'), 'starttime' =>array( '$gte'=> $due_date_add_1, '$lte'=> $date)))->count($this->cdr_collection);
+               //                      $match_cdr = array(
+               //                        '$match' => array(
+               //                            '$and' => array(
+               //                               array('starttime'=> array( '$gte'=> $due_date_add_1, '$lte'=> $date)),
+               //                               array('userextension' => $member)
+               //                            )
+               //                         )
+               //                      );
 
-                                 }
+               //                   }
 
-                                 $model = $this->crud->build_model($this->cdr_collection);
-                                 $this->load->library("kendo_aggregate", $model);
-                                 $this->kendo_aggregate->set_default("sort", null);
+               //                   $model = $this->crud->build_model($this->cdr_collection);
+               //                   $this->load->library("kendo_aggregate", $model);
+               //                   $this->kendo_aggregate->set_default("sort", null);
 
-                                 $group_cdr = array(
-                                    '$group' => array(
-                                       '_id' => null,
-                                       'talk_time' => array('$sum'=> '$billduration'),
-                                       'total_call' =>array('$sum' => 1),
-                                       'customernumber' => array('$push'=> '$customernumber'),
-                                       'disposition_arr' => array('$push'=> '$disposition'),
-                                    )
-                                 );
-                                 $this->kendo_aggregate->set_kendo_query($request)->filtering()->adding($match_cdr,$group_cdr);
-                                 $data_aggregate = $this->kendo_aggregate->paging()->get_data_aggregate();
-                                 $data_cdr = $this->mongo_db->aggregate_pipeline($this->cdr_collection, $data_aggregate);
+               //                   $group_cdr = array(
+               //                      '$group' => array(
+               //                         '_id' => null,
+               //                         'talk_time' => array('$sum'=> '$billduration'),
+               //                         'total_call' =>array('$sum' => 1),
+               //                         'customernumber' => array('$push'=> '$customernumber'),
+               //                         'disposition_arr' => array('$push'=> '$disposition'),
+               //                      )
+               //                   );
+               //                   $this->kendo_aggregate->set_kendo_query($request)->filtering()->adding($match_cdr,$group_cdr);
+               //                   $data_aggregate = $this->kendo_aggregate->paging()->get_data_aggregate();
+               //                   $data_cdr = $this->mongo_db->aggregate_pipeline($this->cdr_collection, $data_aggregate);
 
-                                 $count_spin = $count_ans = 0;
-                                 $arr_spin = $answer_arr = [];
-                                 if (isset($data_cdr[0])) {
-                                    //contract
-                                    $temp_member['talk_time']    = $data_cdr[0]['talk_time'];
-                                    $temp_member['total_call']   = $data_cdr[0]['total_call'];
+               //                   $count_spin = $count_ans = 0;
+               //                   $arr_spin = $answer_arr = [];
+               //                   if (isset($data_cdr[0])) {
+               //                      //contract
+               //                      $temp_member['talk_time']    = $data_cdr[0]['talk_time'];
+               //                      $temp_member['total_call']   = $data_cdr[0]['total_call'];
 
-                                    $arr_unique_phone = array_values(array_unique($data_cdr[0]['customernumber']));
-                                    if (isset($duedate)) {
-                                       $match_ct = array(
-                                          '$match' => array(
-                                             '$and' => array(
-                                                array('overdue_date'=> array( '$gte'=> $date)),
-                                                array('phone' => ['$in' => $arr_unique_phone])
-                                             )
-                                          )
-                                       );
-                                    }else{
-                                       $match_ct = array(
-                                          '$match' => array(
-                                             '$and' => array(
-                                                array('overdue_date'=> array('$gte'=> $due_date_add_1, '$lte'=> $date)),
-                                                array('phone' => ['$in' => $arr_unique_phone])
-                                             )
-                                          )
-                                       );
-                                    }
-                                    $group_ct = array(
-                                       '$group' => array(
-                                          '_id' => null,
-                                          'total_amount' => array('$sum'=> '$cur_bal'),
-                                       )
-                                    );
-                                    $this->kendo_aggregate->set_kendo_query($request)->filtering()->adding($match_ct,$group_ct);
-                                    $data_aggregate = $this->kendo_aggregate->paging()->get_data_aggregate();
-                                    $data_ct = $this->mongo_db->aggregate_pipeline($this->account_collection, $data_aggregate);
-                                    $temp_member['total_amount'] = isset($data_ct[0]) ? $data_ct[0]['total_amount'] : 0;
+               //                      $arr_unique_phone = array_values(array_unique($data_cdr[0]['customernumber']));
+               //                      if (isset($duedate)) {
+               //                         $match_ct = array(
+               //                            '$match' => array(
+               //                               '$and' => array(
+               //                                  array('overdue_date'=> array( '$gte'=> $date)),
+               //                                  array('phone' => ['$in' => $arr_unique_phone])
+               //                               )
+               //                            )
+               //                         );
+               //                      }else{
+               //                         $match_ct = array(
+               //                            '$match' => array(
+               //                               '$and' => array(
+               //                                  array('overdue_date'=> array('$gte'=> $due_date_add_1, '$lte'=> $date)),
+               //                                  array('phone' => ['$in' => $arr_unique_phone])
+               //                               )
+               //                            )
+               //                         );
+               //                      }
+               //                      $group_ct = array(
+               //                         '$group' => array(
+               //                            '_id' => null,
+               //                            'total_amount' => array('$sum'=> '$cur_bal'),
+               //                         )
+               //                      );
+               //                      $this->kendo_aggregate->set_kendo_query($request)->filtering()->adding($match_ct,$group_ct);
+               //                      $data_aggregate = $this->kendo_aggregate->paging()->get_data_aggregate();
+               //                      $data_ct = $this->mongo_db->aggregate_pipeline($this->account_collection, $data_aggregate);
+               //                      $temp_member['total_amount'] = isset($data_ct[0]) ? $data_ct[0]['total_amount'] : 0;
 
-                                    //spin
-                                    $arr_count_phone = array_count_values($data_cdr[0]['customernumber']);
-                                    foreach ($arr_count_phone as $key_phone => $value_phone) {
-                                       if ($value_phone > 1) {
-                                          $count_spin ++;
-                                          array_push($arr_spin, $key_phone);
-                                       }
-                                    }
+               //                      //spin
+               //                      $arr_count_phone = array_count_values($data_cdr[0]['customernumber']);
+               //                      foreach ($arr_count_phone as $key_phone => $value_phone) {
+               //                         if ($value_phone > 1) {
+               //                            $count_spin ++;
+               //                            array_push($arr_spin, $key_phone);
+               //                         }
+               //                      }
 
-                                    if (isset($duedate)) {
-                                       $match_spin = array(
-                                          '$match' => array(
-                                             '$and' => array(
-                                                array('overdue_date'=> array( '$gte'=> $date)),
-                                                array('phone' => ['$in' => $arr_spin])
-                                             )
-                                          )
-                                       );
-                                    }else{
-                                       $match_spin = array(
-                                          '$match' => array(
-                                             '$and' => array(
-                                                array('overdue_date'=> array('$gte'=> $due_date_add_1, '$lte'=> $date)),
-                                                array('phone' => ['$in' => $arr_spin])
-                                             )
-                                          )
-                                       );
-                                    }
-                                    $group_spin = array(
-                                       '$group' => array(
-                                          '_id' => null,
-                                          'spin_amount' => array('$sum'=> '$cur_bal'),
-                                       )
-                                    );
-                                    $this->kendo_aggregate->set_kendo_query($request)->filtering()->adding($match_spin,$group_spin);
-                                    $data_aggregate = $this->kendo_aggregate->paging()->get_data_aggregate();
-                                    $data_ct = $this->mongo_db->aggregate_pipeline($this->account_collection, $data_aggregate);
-                                    $temp_member['count_spin']    = $count_spin;
-                                    $temp_member['spin_amount']   = isset($data_ct[0]) ? $data_ct[0]['spin_amount'] : 0;
+               //                      if (isset($duedate)) {
+               //                         $match_spin = array(
+               //                            '$match' => array(
+               //                               '$and' => array(
+               //                                  array('overdue_date'=> array( '$gte'=> $date)),
+               //                                  array('phone' => ['$in' => $arr_spin])
+               //                               )
+               //                            )
+               //                         );
+               //                      }else{
+               //                         $match_spin = array(
+               //                            '$match' => array(
+               //                               '$and' => array(
+               //                                  array('overdue_date'=> array('$gte'=> $due_date_add_1, '$lte'=> $date)),
+               //                                  array('phone' => ['$in' => $arr_spin])
+               //                               )
+               //                            )
+               //                         );
+               //                      }
+               //                      $group_spin = array(
+               //                         '$group' => array(
+               //                            '_id' => null,
+               //                            'spin_amount' => array('$sum'=> '$cur_bal'),
+               //                         )
+               //                      );
+               //                      $this->kendo_aggregate->set_kendo_query($request)->filtering()->adding($match_spin,$group_spin);
+               //                      $data_aggregate = $this->kendo_aggregate->paging()->get_data_aggregate();
+               //                      $data_ct = $this->mongo_db->aggregate_pipeline($this->account_collection, $data_aggregate);
+               //                      $temp_member['count_spin']    = $count_spin;
+               //                      $temp_member['spin_amount']   = isset($data_ct[0]) ? $data_ct[0]['spin_amount'] : 0;
 
-                                    //connected
-                                    foreach ($data_cdr[0]['disposition_arr'] as $key_dis => $disposition) {
-                                       if ($disposition == 'ANSWERED') {
-                                          $count_ans ++;
-                                          array_push($answer_arr, $data_cdr[0]['customernumber'][$key_dis]);
-                                       }
-                                    }
+               //                      //connected
+               //                      foreach ($data_cdr[0]['disposition_arr'] as $key_dis => $disposition) {
+               //                         if ($disposition == 'ANSWERED') {
+               //                            $count_ans ++;
+               //                            array_push($answer_arr, $data_cdr[0]['customernumber'][$key_dis]);
+               //                         }
+               //                      }
 
-                                    if (isset($duedate)) {
-                                       $match_conn = array(
-                                          '$match' => array(
-                                             '$and' => array(
-                                                array('overdue_date'=> array( '$gte'=> $date)),
-                                                array('phone' => ['$in' => array_values(array_unique($answer_arr))])
-                                             )
-                                          )
-                                       );
-                                    }else{
-                                       $match_conn = array(
-                                          '$match' => array(
-                                             '$and' => array(
-                                                array('overdue_date'=> array('$gte'=> $due_date_add_1, '$lte'=> $date)),
-                                                array('phone' => ['$in' => array_values(array_unique($answer_arr))])
-                                             )
-                                          )
-                                       );
-                                    }
+               //                      if (isset($duedate)) {
+               //                         $match_conn = array(
+               //                            '$match' => array(
+               //                               '$and' => array(
+               //                                  array('overdue_date'=> array( '$gte'=> $date)),
+               //                                  array('phone' => ['$in' => array_values(array_unique($answer_arr))])
+               //                               )
+               //                            )
+               //                         );
+               //                      }else{
+               //                         $match_conn = array(
+               //                            '$match' => array(
+               //                               '$and' => array(
+               //                                  array('overdue_date'=> array('$gte'=> $due_date_add_1, '$lte'=> $date)),
+               //                                  array('phone' => ['$in' => array_values(array_unique($answer_arr))])
+               //                               )
+               //                            )
+               //                         );
+               //                      }
 
-                                    $group_conn = array(
-                                       '$group' => array(
-                                          '_id' => null,
-                                          'conn_amount' => array('$sum'=> '$cur_bal'),
-                                       )
-                                    );
-                                    $this->kendo_aggregate->set_kendo_query($request)->filtering()->adding($match_conn,$group_conn);
-                                    $data_aggregate = $this->kendo_aggregate->paging()->get_data_aggregate();
-                                    $data_conn = $this->mongo_db->aggregate_pipeline($this->account_collection, $data_aggregate);
-                                    $temp_member['count_conn']    = $count_ans;
-                                    $temp_member['conn_amount']   = isset($data_conn[0]) ? $data_conn[0]['conn_amount'] : 0;
+               //                      $group_conn = array(
+               //                         '$group' => array(
+               //                            '_id' => null,
+               //                            'conn_amount' => array('$sum'=> '$cur_bal'),
+               //                         )
+               //                      );
+               //                      $this->kendo_aggregate->set_kendo_query($request)->filtering()->adding($match_conn,$group_conn);
+               //                      $data_aggregate = $this->kendo_aggregate->paging()->get_data_aggregate();
+               //                      $data_conn = $this->mongo_db->aggregate_pipeline($this->account_collection, $data_aggregate);
+               //                      $temp_member['count_conn']    = $count_ans;
+               //                      $temp_member['conn_amount']   = isset($data_conn[0]) ? $data_conn[0]['conn_amount'] : 0;
 
-                                    //promise to pay
-                                    if (isset($duedate)) {
-                                       $match_ptp = array(
-                                          '$match' => array(
-                                             '$and' => array(
-                                                array('createdAt'=> array( '$gte'=> $date)),
-                                                array('officer_id'=> $member),
-                                                array('$or' => [ array( 'action_code'=>  'BPTP'), array('action_code'=>  'PTP Today')])
-                                             )
-                                          )
-                                       );
-                                    }else{
-                                       $match_ptp = array(
-                                          '$match' => array(
-                                             '$and' => array(
-                                                array('createdAt'=> array('$gte'=> $due_date_add_1, '$lte'=> $date)),
-                                                array('assign'=> $member),
-                                                array('$or' => [ array( 'action_code'=>  'BPTP'), array('action_code'=>  'PTP Today')])
-                                             )
-                                          )
-                                       );
-                                    }
+               //                      //promise to pay
+               //                      if (isset($duedate)) {
+               //                         $match_ptp = array(
+               //                            '$match' => array(
+               //                               '$and' => array(
+               //                                  array('createdAt'=> array( '$gte'=> $date)),
+               //                                  array('officer_id'=> $member),
+               //                                  array('$or' => [ array( 'action_code'=>  'BPTP'), array('action_code'=>  'PTP Today')])
+               //                               )
+               //                            )
+               //                         );
+               //                      }else{
+               //                         $match_ptp = array(
+               //                            '$match' => array(
+               //                               '$and' => array(
+               //                                  array('createdAt'=> array('$gte'=> $due_date_add_1, '$lte'=> $date)),
+               //                                  array('assign'=> $member),
+               //                                  array('$or' => [ array( 'action_code'=>  'BPTP'), array('action_code'=>  'PTP Today')])
+               //                               )
+               //                            )
+               //                         );
+               //                      }
 
-                                    $group_ptp = array(
-                                       '$group' => array(
-                                          '_id' => null,
-                                          'account_arr' => array('$push'=> '$account_number'),
-                                          'count_ptp' => array('$sum'=> 1)
-                                       )
-                                    );
-                                    $this->kendo_aggregate->set_kendo_query($request)->filtering()->adding($match_ptp,$group_ptp);
-                                    $data_aggregate = $this->kendo_aggregate->paging()->get_data_aggregate();
-                                    $data_ptp = $this->mongo_db->aggregate_pipeline($this->diallist_detail_collection, $data_aggregate);
+               //                      $group_ptp = array(
+               //                         '$group' => array(
+               //                            '_id' => null,
+               //                            'account_arr' => array('$push'=> '$account_number'),
+               //                            'count_ptp' => array('$sum'=> 1)
+               //                         )
+               //                      );
+               //                      $this->kendo_aggregate->set_kendo_query($request)->filtering()->adding($match_ptp,$group_ptp);
+               //                      $data_aggregate = $this->kendo_aggregate->paging()->get_data_aggregate();
+               //                      $data_ptp = $this->mongo_db->aggregate_pipeline($this->diallist_detail_collection, $data_aggregate);
 
-                                    $account_ptp_arr   = isset($data_ptp[0]) ? array_values(array_unique($data_ptp[0]['account_arr'])) : array();
-                                    if (isset($duedate)) {
-                                       $match_ptp_1 = array(
-                                          '$match' => array(
-                                             '$and' => array(
-                                                array('overdue_date'=> array( '$gte'=> $date)),
-                                                array('account_number' => ['$in' => $account_ptp_arr])
-                                             )
-                                          )
-                                       );
-                                    }else{
-                                       $match_ptp_1 = array(
-                                          '$match' => array(
-                                             '$and' => array(
-                                                array('overdue_date'=> array('$gte'=> $due_date_add_1, '$lte'=> $date)),
-                                                array('account_number' => ['$in' => $account_ptp_arr])
-                                             )
-                                          )
-                                       );
-                                    }
-                                    $group_ptp_1 = array(
-                                       '$group' => array(
-                                          '_id' => null,
-                                          'ptp_amount' => array('$sum'=> '$cur_bal'),
-                                       )
-                                    );
-                                    $this->kendo_aggregate->set_kendo_query($request)->filtering()->adding($match_ptp_1,$group_ptp_1);
-                                    $data_aggregate = $this->kendo_aggregate->paging()->get_data_aggregate();
-                                    $data_ptp_1 = $this->mongo_db->aggregate_pipeline($this->account_collection, $data_aggregate);
-                                    $temp_member['count_ptp']    = isset($data_conn[0]) ? $data_conn[0]['count_ptp'] : 0;
-                                    $temp_member['ptp_amount']   = isset($data_ptp_1[0]) ? $data_ptp_1[0]['ptp_amount'] : 0;
+               //                      $account_ptp_arr   = isset($data_ptp[0]) ? array_values(array_unique($data_ptp[0]['account_arr'])) : array();
+               //                      if (isset($duedate)) {
+               //                         $match_ptp_1 = array(
+               //                            '$match' => array(
+               //                               '$and' => array(
+               //                                  array('overdue_date'=> array( '$gte'=> $date)),
+               //                                  array('account_number' => ['$in' => $account_ptp_arr])
+               //                               )
+               //                            )
+               //                         );
+               //                      }else{
+               //                         $match_ptp_1 = array(
+               //                            '$match' => array(
+               //                               '$and' => array(
+               //                                  array('overdue_date'=> array('$gte'=> $due_date_add_1, '$lte'=> $date)),
+               //                                  array('account_number' => ['$in' => $account_ptp_arr])
+               //                               )
+               //                            )
+               //                         );
+               //                      }
+               //                      $group_ptp_1 = array(
+               //                         '$group' => array(
+               //                            '_id' => null,
+               //                            'ptp_amount' => array('$sum'=> '$cur_bal'),
+               //                         )
+               //                      );
+               //                      $this->kendo_aggregate->set_kendo_query($request)->filtering()->adding($match_ptp_1,$group_ptp_1);
+               //                      $data_aggregate = $this->kendo_aggregate->paging()->get_data_aggregate();
+               //                      $data_ptp_1 = $this->mongo_db->aggregate_pipeline($this->account_collection, $data_aggregate);
+               //                      $temp_member['count_ptp']    = isset($data_conn[0]) ? $data_conn[0]['count_ptp'] : 0;
+               //                      $temp_member['ptp_amount']   = isset($data_ptp_1[0]) ? $data_ptp_1[0]['ptp_amount'] : 0;
 
-                                    //paid keep promise to pay
-                                    if (isset($duedate)) {
-                                       $match_paid_promise = array(
-                                          '$match' => array(
-                                             '$and' => array(
-                                                array('created_at'=> array( '$gte'=> $date)),
-                                                array('account_number' => ['$in' => $account_ptp_arr])
-                                             )
-                                          )
-                                       );
-                                    }else{
-                                       $match_paid_promise = array(
-                                          '$match' => array(
-                                             '$and' => array(
-                                                array('created_at'=> array('$gte'=> $due_date_add_1, '$lte'=> $date)),
-                                                array('account_number' => ['$in' => $account_ptp_arr])
-                                             )
-                                          )
-                                       );
-                                    }
+               //                      //paid keep promise to pay
+               //                      if (isset($duedate)) {
+               //                         $match_paid_promise = array(
+               //                            '$match' => array(
+               //                               '$and' => array(
+               //                                  array('created_at'=> array( '$gte'=> $date)),
+               //                                  array('account_number' => ['$in' => $account_ptp_arr])
+               //                               )
+               //                            )
+               //                         );
+               //                      }else{
+               //                         $match_paid_promise = array(
+               //                            '$match' => array(
+               //                               '$and' => array(
+               //                                  array('created_at'=> array('$gte'=> $due_date_add_1, '$lte'=> $date)),
+               //                                  array('account_number' => ['$in' => $account_ptp_arr])
+               //                               )
+               //                            )
+               //                         );
+               //                      }
 
-                                    $group_paid_promise = array(
-                                       '$group' => array(
-                                          '_id' => null,
-                                          'paid_amount_promise' => array('$sum'=> '$amount'),
-                                          'count_paid_promise'  => array('$sum' => 1)
-                                       )
-                                    );
-                                    $this->kendo_aggregate->set_kendo_query($request)->filtering()->adding($match_paid_promise,$group_paid_promise);
-                                    $data_aggregate = $this->kendo_aggregate->paging()->get_data_aggregate();
-                                    $data_paid_promise = $this->mongo_db->aggregate_pipeline($this->gl_collection, $data_aggregate);
-                                    $temp_member['count_paid_promise'] = isset($data_paid_promise[0]) ? $data_paid_promise[0]['count_paid_promise'] : 0;
-                                    $temp_member['paid_amount_promise'] = isset($data_paid_promise[0]) ? $data_paid_promise[0]['paid_amount_promise'] : 0;
-
-
-                                    //paid
-                                    foreach ($data_officer as $office) {
-                                       if ($office['_id'] == $member_jc05) {
-                                          if (isset($duedate)) {
-                                             $match_paid = array(
-                                                '$match' => array(
-                                                   '$and' => array(
-                                                      array('created_at'=> array( '$gte'=> $date)),
-                                                      array('account_number' => ['$in' => $office['account_arr']])
-                                                   )
-                                                )
-                                             );
-                                          }else{
-                                             $match_paid = array(
-                                                '$match' => array(
-                                                   '$and' => array(
-                                                      array('created_at'=> array('$gte'=> $due_date_add_1, '$lte'=> $date)),
-                                                      array('account_number' => ['$in' => $office['account_arr']])
-                                                   )
-                                                )
-                                             );
-                                          }
-
-                                          $group_paid = array(
-                                             '$group' => array(
-                                                '_id' => null,
-                                                'paid_amount' => array('$sum'=> '$amount'),
-                                                'count_paid'  => array('$sum' => 1)
-                                             )
-                                          );
-                                          $this->kendo_aggregate->set_kendo_query($request)->filtering()->adding($match_paid,$group_paid);
-                                          $data_aggregate = $this->kendo_aggregate->paging()->get_data_aggregate();
-                                          $data_paid = $this->mongo_db->aggregate_pipeline($this->gl_collection, $data_aggregate);
-                                          $temp_member['count_paid'] = isset($data_paid[0]) ? $data_paid[0]['count_paid'] : 0;
-                                          $temp_member['paid_amount'] = isset($data_paid[0]) ? $data_paid[0]['paid_amount'] : 0;
-
-                                          $temp['count_paid'] += $temp_member['count_paid'];
-                                          $temp['paid_amount'] += $temp_member['paid_amount'];
-                                       }
-                                    }
+               //                      $group_paid_promise = array(
+               //                         '$group' => array(
+               //                            '_id' => null,
+               //                            'paid_amount_promise' => array('$sum'=> '$amount'),
+               //                            'count_paid_promise'  => array('$sum' => 1)
+               //                         )
+               //                      );
+               //                      $this->kendo_aggregate->set_kendo_query($request)->filtering()->adding($match_paid_promise,$group_paid_promise);
+               //                      $data_aggregate = $this->kendo_aggregate->paging()->get_data_aggregate();
+               //                      $data_paid_promise = $this->mongo_db->aggregate_pipeline($this->gl_collection, $data_aggregate);
+               //                      $temp_member['count_paid_promise'] = isset($data_paid_promise[0]) ? $data_paid_promise[0]['count_paid_promise'] : 0;
+               //                      $temp_member['paid_amount_promise'] = isset($data_paid_promise[0]) ? $data_paid_promise[0]['paid_amount_promise'] : 0;
 
 
-                                    //team
-                                    $temp['count_data']     += $temp_member['count_data'];
-                                    $temp['unwork']         += $temp_member['unwork'];
-                                    $temp['talk_time']      += $temp_member['talk_time'];
-                                    $temp['total_call']     += $temp_member['total_call'];
-                                    $temp['total_amount']   += $temp_member['total_amount'];
-                                    $temp['conn_amount']    += $temp_member['conn_amount'];
-                                    $temp['count_conn']     += $temp_member['count_conn'];
-                                    $temp['spin_amount']    += $temp_member['spin_amount'];
-                                    $temp['count_spin']     += $temp_member['count_spin'];
-                                    $temp['count_ptp']      += $temp_member['count_ptp'];
-                                    $temp['ptp_amount']     += $temp_member['ptp_amount'];
-                                    $temp['count_paid_promise']     += $temp_member['count_paid_promise'];
-                                    $temp['paid_amount_promise']     += $temp_member['count_paid_promise'];
+               //                      //paid
+               //                      foreach ($data_officer as $office) {
+               //                         if ($office['_id'] == $member_jc05) {
+               //                            if (isset($duedate)) {
+               //                               $match_paid = array(
+               //                                  '$match' => array(
+               //                                     '$and' => array(
+               //                                        array('created_at'=> array( '$gte'=> $date)),
+               //                                        array('account_number' => ['$in' => $office['account_arr']])
+               //                                     )
+               //                                  )
+               //                               );
+               //                            }else{
+               //                               $match_paid = array(
+               //                                  '$match' => array(
+               //                                     '$and' => array(
+               //                                        array('created_at'=> array('$gte'=> $due_date_add_1, '$lte'=> $date)),
+               //                                        array('account_number' => ['$in' => $office['account_arr']])
+               //                                     )
+               //                                  )
+               //                               );
+               //                            }
 
-                                    $temp['spin_rate']      += $temp_member['spin_rate'];
-                                    $temp['ptp_rate_acc']   += $temp_member['ptp_rate_acc'];
-                                    $temp['ptp_rate_amt']   += $temp_member['ptp_rate_amt'];
-                                    $temp['paid_rate_acc']  += $temp_member['paid_rate_acc'];
-                                    $temp['paid_rate_amt']  += $temp_member['paid_rate_amt'];
-                                    $temp['conn_rate']      += $temp_member['conn_rate'];
-                                    $temp['collect_ratio_acc'] += $temp_member['collect_ratio_acc'];
-                                    $temp['collect_ratio_amt'] += $temp_member['collect_ratio_amt'];
-                                 }
+               //                            $group_paid = array(
+               //                               '$group' => array(
+               //                                  '_id' => null,
+               //                                  'paid_amount' => array('$sum'=> '$amount'),
+               //                                  'count_paid'  => array('$sum' => 1)
+               //                               )
+               //                            );
+               //                            $this->kendo_aggregate->set_kendo_query($request)->filtering()->adding($match_paid,$group_paid);
+               //                            $data_aggregate = $this->kendo_aggregate->paging()->get_data_aggregate();
+               //                            $data_paid = $this->mongo_db->aggregate_pipeline($this->gl_collection, $data_aggregate);
+               //                            $temp_member['count_paid'] = isset($data_paid[0]) ? $data_paid[0]['count_paid'] : 0;
+               //                            $temp_member['paid_amount'] = isset($data_paid[0]) ? $data_paid[0]['paid_amount'] : 0;
 
-                              }
+               //                            $temp['count_paid'] += $temp_member['count_paid'];
+               //                            $temp['paid_amount'] += $temp_member['paid_amount'];
+               //                         }
+               //                      }
 
-                           }
-                          $temp_member['spin_rate']     = ($temp_member['total_call'] != 0) ? round($temp_member['count_spin']/$temp_member['total_call'],2): 0;
-                          $temp_member['ptp_rate_acc']  = ($temp_member['total_call'] != 0) ? round($temp_member['count_ptp']/$temp_member['total_call'],2) : 0;
-                          $temp_member['ptp_rate_amt']  = ($temp_member['total_amount'] != 0) ? round($temp_member['ptp_amount']/$temp_member['total_amount'],2) : 0;
-                          $temp_member['paid_rate_acc'] = ($temp_member['count_ptp'] != 0) ? round($temp_member['count_paid_promise']/$temp_member['count_ptp'],2) : 0;
-                          $temp_member['paid_rate_amt'] = ($temp_member['ptp_amount'] != 0) ? round($temp_member['paid_amount_promise']/$temp_member['ptp_amount'],2) : 0;
-                          $temp_member['conn_rate']     = ($temp_member['total_call'] != 0) ? round($temp_member['count_conn']/$temp_member['total_call'],2) : 0;
-                          $temp_member['collect_ratio_acc'] = ($temp_member['total_call'] != 0) ? round($temp_member['count_paid']/$temp_member['total_call'],2) : 0;
-                          $temp_member['collect_ratio_amt'] = ($temp_member['total_amount'] != 0) ? round($temp_member['paid_amount']/$temp_member['total_amount'],2) : 0;
-                           array_push($member_arr, $temp_member);
-                        }
-                        $i++;
-                        $temp['spin_rate']     = ($temp['total_call'] != 0) ? round($temp['count_spin']/$temp['total_call'],2): 0;
-                         $temp['ptp_rate_acc']  = ($temp['total_call'] != 0) ? round($temp['count_ptp']/$temp['total_call'],2) : 0;
-                         $temp['ptp_rate_amt']  = ($temp['total_amount'] != 0) ? round($temp['ptp_amount']/$temp['total_amount'],2) : 0;
-                         $temp['paid_rate_acc'] = ($temp['count_ptp'] != 0) ? round($temp['count_paid_promise']/$temp['count_ptp'],2) : 0;
-                         $temp['paid_rate_amt'] = ($temp['ptp_amount'] != 0) ? round($temp['paid_amount_promise']/$temp['ptp_amount'],2) : 0;
-                         $temp['conn_rate']     = ($temp['total_call'] != 0) ? round($temp['count_conn']/$temp['total_call'],2) : 0;
-                         $temp['collect_ratio_acc'] = ($temp['total_call'] != 0) ? round($temp['count_paid']/$temp['total_call'],2) : 0;
-                         $temp['collect_ratio_amt'] = ($temp['total_amount'] != 0) ? round($temp['paid_amount']/$temp['total_amount'],2) : 0;
-                        array_push($insertData, $temp);
-                        $insertData = array_merge($insertData, $member_arr);
-                     }
-                  }
 
-               }
+               //                      //team
+               //                      $temp['count_data']     += $temp_member['count_data'];
+               //                      $temp['unwork']         += $temp_member['unwork'];
+               //                      $temp['talk_time']      += $temp_member['talk_time'];
+               //                      $temp['total_call']     += $temp_member['total_call'];
+               //                      $temp['total_amount']   += $temp_member['total_amount'];
+               //                      $temp['conn_amount']    += $temp_member['conn_amount'];
+               //                      $temp['count_conn']     += $temp_member['count_conn'];
+               //                      $temp['spin_amount']    += $temp_member['spin_amount'];
+               //                      $temp['count_spin']     += $temp_member['count_spin'];
+               //                      $temp['count_ptp']      += $temp_member['count_ptp'];
+               //                      $temp['ptp_amount']     += $temp_member['ptp_amount'];
+               //                      $temp['count_paid_promise']     += $temp_member['count_paid_promise'];
+               //                      $temp['paid_amount_promise']     += $temp_member['count_paid_promise'];
+
+               //                      $temp['spin_rate']      += $temp_member['spin_rate'];
+               //                      $temp['ptp_rate_acc']   += $temp_member['ptp_rate_acc'];
+               //                      $temp['ptp_rate_amt']   += $temp_member['ptp_rate_amt'];
+               //                      $temp['paid_rate_acc']  += $temp_member['paid_rate_acc'];
+               //                      $temp['paid_rate_amt']  += $temp_member['paid_rate_amt'];
+               //                      $temp['conn_rate']      += $temp_member['conn_rate'];
+               //                      $temp['collect_ratio_acc'] += $temp_member['collect_ratio_acc'];
+               //                      $temp['collect_ratio_amt'] += $temp_member['collect_ratio_amt'];
+               //                   }
+
+               //                }
+
+               //             }
+               //            $temp_member['spin_rate']     = ($temp_member['total_call'] != 0) ? round($temp_member['count_spin']/$temp_member['total_call'],2): 0;
+               //            $temp_member['ptp_rate_acc']  = ($temp_member['total_call'] != 0) ? round($temp_member['count_ptp']/$temp_member['total_call'],2) : 0;
+               //            $temp_member['ptp_rate_amt']  = ($temp_member['total_amount'] != 0) ? round($temp_member['ptp_amount']/$temp_member['total_amount'],2) : 0;
+               //            $temp_member['paid_rate_acc'] = ($temp_member['count_ptp'] != 0) ? round($temp_member['count_paid_promise']/$temp_member['count_ptp'],2) : 0;
+               //            $temp_member['paid_rate_amt'] = ($temp_member['ptp_amount'] != 0) ? round($temp_member['paid_amount_promise']/$temp_member['ptp_amount'],2) : 0;
+               //            $temp_member['conn_rate']     = ($temp_member['total_call'] != 0) ? round($temp_member['count_conn']/$temp_member['total_call'],2) : 0;
+               //            $temp_member['collect_ratio_acc'] = ($temp_member['total_call'] != 0) ? round($temp_member['count_paid']/$temp_member['total_call'],2) : 0;
+               //            $temp_member['collect_ratio_amt'] = ($temp_member['total_amount'] != 0) ? round($temp_member['paid_amount']/$temp_member['total_amount'],2) : 0;
+               //             array_push($member_arr, $temp_member);
+               //          }
+               //          $i++;
+               //          $temp['spin_rate']     = ($temp['total_call'] != 0) ? round($temp['count_spin']/$temp['total_call'],2): 0;
+               //           $temp['ptp_rate_acc']  = ($temp['total_call'] != 0) ? round($temp['count_ptp']/$temp['total_call'],2) : 0;
+               //           $temp['ptp_rate_amt']  = ($temp['total_amount'] != 0) ? round($temp['ptp_amount']/$temp['total_amount'],2) : 0;
+               //           $temp['paid_rate_acc'] = ($temp['count_ptp'] != 0) ? round($temp['count_paid_promise']/$temp['count_ptp'],2) : 0;
+               //           $temp['paid_rate_amt'] = ($temp['ptp_amount'] != 0) ? round($temp['paid_amount_promise']/$temp['ptp_amount'],2) : 0;
+               //           $temp['conn_rate']     = ($temp['total_call'] != 0) ? round($temp['count_conn']/$temp['total_call'],2) : 0;
+               //           $temp['collect_ratio_acc'] = ($temp['total_call'] != 0) ? round($temp['count_paid']/$temp['total_call'],2) : 0;
+               //           $temp['collect_ratio_amt'] = ($temp['total_amount'] != 0) ? round($temp['paid_amount']/$temp['total_amount'],2) : 0;
+               //          array_push($insertData, $temp);
+               //          $insertData = array_merge($insertData, $member_arr);
+               //       }
+               //    }
+
+               // }
 
 
             }
@@ -1778,7 +1758,7 @@ Class Daily_all_user_report extends WFF_Controller {
             //       $temp['unwork']   = isset($member['members']) ? $this->mongo_db->where(array("userextension" => $member,  'disposition' =>array('$ne' => 'ANSWERED'), 'starttime' =>array( '$gte'=> $date) ))->count($this->cdr_collection) : 0;
 
             //       $temp['talk_time'] = $temp['total_call'] = $temp['total_amount'] = $temp['count_spin'] = $temp['spin_amount'] = $temp['count_conn'] = $temp['conn_amount'] = $temp['count_paid'] = $temp['paid_amount'] = $temp['ptp_amount'] = $temp['count_ptp'] = $temp['paid_amount_promise'] = $temp['count_paid_promise'] = 0;
-                  
+
             //       $model = $this->crud->build_model($this->wo_all_collection);
             //       $this->load->library("kendo_aggregate", $model);
             //       $this->kendo_aggregate->set_default("sort", null);
@@ -2021,7 +2001,7 @@ Class Daily_all_user_report extends WFF_Controller {
             //          $account_ptp_payment = isset($data_ptp_payment[0]) ? $data_ptp_payment[0]['account_arr'] : array();
             //          $arr_diff = array_diff($account_ptp_all, $account_ptp_payment);
 
-            //          $temp['count_paid_promise'] = count($arr_diff);  
+            //          $temp['count_paid_promise'] = count($arr_diff);
             //          $temp['paid_amount_promise'] += isset($data_ptp_payment[0]) ? $data_ptp_payment[0]['paid_payment'] : 0;
 
 
@@ -2082,7 +2062,7 @@ Class Daily_all_user_report extends WFF_Controller {
             //          $account_arr_payment = isset($data_paid_payment[0]) ? $data_paid_payment[0]['account_arr'] : array();
             //          $arr_diff = array_diff($account_arr_all, $account_arr_payment);
 
-            //          $temp['paid_amount'] = count($arr_diff);  
+            //          $temp['paid_amount'] = count($arr_diff);
             //          $temp['paid_amount'] += isset($data_paid_payment[0]) ? $data_paid_payment[0]['paid_payment'] : 0;
 
 
@@ -2098,7 +2078,7 @@ Class Daily_all_user_report extends WFF_Controller {
             //       array_push($insertData, $temp);
             //       // print_r($temp);exit;
             //    }
-               
+
 
             // }
             // else{
@@ -2137,7 +2117,7 @@ Class Daily_all_user_report extends WFF_Controller {
             //       $first_due = $data[0]['created_at'];
 
             //       $temp['count_data']  = $data[0]['count_data'];
-                  
+
             //       $match_cdr = array(
             //         '$match' => array(
             //             '$and' => array(
@@ -2348,7 +2328,7 @@ Class Daily_all_user_report extends WFF_Controller {
             //          $temp['count_paid'] = isset($data_paid[0]) ? count($data_paid[0]['account_arr']) : 0;
             //          $temp['paid_amount'] = isset($data_paid[0]) ? $data_paid[0]['pay_9711_promise'] + $data_paid[0]['pay_9712_promise'] + $data_paid[0]['pay_9713_promise'] : 0;
 
-                      
+
             //       }
             //       $temp['spin_rate']         = ($temp['total_call'] != 0) ? round($temp['count_spin']/$temp['total_call'],2): 0;
             //       $temp['ptp_rate_acc']      = ($temp['total_call'] != 0) ? round($temp['count_ptp']/$temp['total_call'],2) : 0;
@@ -2408,8 +2388,8 @@ Class Daily_all_user_report extends WFF_Controller {
       $style = array('font' => array('bold' => true), 'alignment' => array('horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER));
       $worksheet->getStyle("C1")->applyFromArray($style);
 
-      
-      
+
+
       if($data) {
          $rowGroupA = $rowGroupB =$rowGroupC = $rowGroupD = $rowGroupE = 0;
          foreach ($data as $value) {
