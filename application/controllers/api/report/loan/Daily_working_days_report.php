@@ -1,13 +1,14 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-Class Daily_assignment_report extends WFF_Controller {
+Class Daily_working_days_report extends WFF_Controller {
 
-    private $collection             = "Daily_assignment_report";
+    private $collection             = "Daily_working_days_report";
     private $ln3206_collection      = "LN3206F";
     private $zaccf_collection       = "ZACCF";
     private $lnjc05_collection      = "LNJC05";
-    private $product_collection     = "Product";
+    private $group_team_collection     = "Group";
+    private $jsonData_collection     = "Jsondata";
 
     function __construct()
     {
@@ -19,7 +20,8 @@ Class Daily_assignment_report extends WFF_Controller {
         $this->ln3206_collection    = set_sub_collection($this->ln3206_collection);
         $this->zaccf_collection     = set_sub_collection($this->zaccf_collection);
         $this->lnjc05_collection    = set_sub_collection($this->lnjc05_collection);
-
+        $this->group_team_collection      = set_sub_collection($this->group_team_collection);
+        $this->jsonData_collection      = set_sub_collection($this->jsonData_collection);
     }
 
     function index()
@@ -36,7 +38,10 @@ Class Daily_assignment_report extends WFF_Controller {
 
     function save()
     {
-      shell_exec('PYTHONIOENCODING=utf-8 python3.6 /var/www/html/worldfone4xs_ibm/cronjob/python/Loan/saveDailyAssignment.py  > /dev/null &');
+        $this->mongo_db->switch_db('_worldfone4xs');
+        $groupProducts = $this->mongo_db->where(array('tags'=> ['group', 'debt', 'product'] ))->get($this->jsonData_collection);
+        $this->mongo_db->switch_db();
+        print_r($groupProducts);
     }
 
     // function exportExcel()

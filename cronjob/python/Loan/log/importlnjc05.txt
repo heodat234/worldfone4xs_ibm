@@ -1,0 +1,17 @@
+25/11/2019, 16:24:51: Expecting property name enclosed in double quotes: line 1 column 14 (char 13)
+25/11/2019, 16:36:19: Expecting property name enclosed in double quotes: line 1 column 14 (char 13)
+25/11/2019, 16:38:39: Expecting property name enclosed in double quotes: line 1 column 14 (char 13)
+25/11/2019, 16:39:40: Expecting property name enclosed in double quotes: line 1 column 14 (char 13)
+25/11/2019, 16:39:56: 'sub_type'
+25/11/2019, 16:40:33: 'sub_type'
+25/11/2019, 16:41:48: 'sub_type'
+25/11/2019, 16:42:39: name 'sub_type' is not defined
+25/11/2019, 16:42:52: list index out of range
+25/11/2019, 16:55:10: batch op errors occurred
+25/11/2019, 17:15:57: list index out of range
+25/11/2019, 17:16:04: list index out of range
+26/11/2019, 23:42:07: name 'logDbName' is not defined
+26/11/2019, 23:43:10: must be str, not int
+26/11/2019, 23:43:53: [Errno 2] No such file or directory: '/data/upload_file/20191122/LNJC05F'
+26/11/2019, 23:44:38: name 'result' is not defined
+26/11/2019, 23:49:43: name 'result' is not defined

@@ -19,3 +19,21 @@
 07/11/2019, 17:17:56: name 'inputData' is not defined
 07/11/2019, 17:48:33: invalid literal for int() with base 10: ''
 07/11/2019, 17:49:52: 'int'
+25/11/2019, 14:05:21: [Errno 2] No such file or directory: '/var/www/html/worldfone4xs_ibm/upload/ftp/loan/gl_20191031.dat' -> '/var/www/html/worldfone4xs_ibm/upload/ftp/loan/gl_20191031.csv'
+25/11/2019, 14:06:26: [Errno 2] No such file or directory: '/var/www/html/worldfone4xs_ibm/upload/ftp/loan/gl_20191031.dat' -> '/var/www/html/worldfone4xs_ibm/upload/ftp/loan/gl_20191031.csv'
+25/11/2019, 14:08:34: [Errno 2] No such file or directory: '/var/www/html/worldfone4xs_ibm/upload/ftp/loan/gl_20191120.dat' -> '/var/www/html/worldfone4xs_ibm/upload/ftp/loan/gl_20191120.csv'
+25/11/2019, 14:29:44: list index out of range
+25/11/2019, 14:30:28: list index out of range
+25/11/2019, 14:30:58: list index out of range
+25/11/2019, 14:33:20: list index out of range
+25/11/2019, 14:33:47: list index out of range
+25/11/2019, 14:38:04: list indices must be integers or slices, not str
+25/11/2019, 14:38:39: list indices must be integers or slices, not str
+25/11/2019, 14:38:55: ' '
+25/11/2019, 14:39:08: list indices must be integers or slices, not str
+25/11/2019, 14:39:19: list indices must be integers or slices, not str
+25/11/2019, 14:39:41: not enough values to unpack (expected 2, got 1)
+25/11/2019, 14:40:03: list indices must be integers or slices, not str
+25/11/2019, 14:41:08: list index out of range
+25/11/2019, 14:43:59: list index out of range
+25/11/2019, 14:48:13: list index out of range

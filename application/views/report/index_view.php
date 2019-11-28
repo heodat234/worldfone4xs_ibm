@@ -45,8 +45,8 @@ var Config = {
         title: "@Customer name@",
         template: function(dataItem) {
             var result = '';
-            if(dataItem.customer.length) {
-                result = dataItem.customer.map(doc => `<span class="grid-name" data-id="${doc._id.$oid}" title="@View detail@">${(doc.name || '').toString()}</span>`).join(" <i class='text-danger'>OR</i> ");
+            if(typeof dataItem.customer != 'undefined' && dataItem.customer.length) {
+                result = dataItem.customer.map(doc => `<span class="grid-name" data-id="${doc._id.$ }" title="@View detail@">${(doc.name || '').toString()}</span>`).join(" <i class='text-danger'>OR</i> ");
             }
             return result
         }

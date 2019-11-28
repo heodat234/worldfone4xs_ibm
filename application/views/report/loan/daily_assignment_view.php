@@ -5,7 +5,7 @@
         <li>Daily Assignment Report</li>
         <li class="pull-right none-breakcrumb" id="top-row">
             <div class="btn-group btn-group-sm">
-                <a role="button" class="btn btn-sm" onclick="saveAsExcel()"><i class="fa fa-file-excel-o"></i> <b>@Export@</b></a>
+                <a role="button" class="btn btn-sm" onclick="Table.grid.saveAsExcel()"><i class="fa fa-file-excel-o"></i> <b>@Export@</b></a>
             </div>
         </li>
     </ul>
@@ -54,20 +54,28 @@
                      serverFiltering: true,
                      pageSize: 5,
                      transport: {
-                        read: ENV.reportApi + "telesale/appointment",
+                        read: ENV.reportApi + "loan/daily_assignment_report",
                         parameterMap: parameterMap
                      },
                      schema: {
                         data: "data",
                         total: "total",
-                        parse: function(response) {
-                           response.data.map(doc => {
-                              doc.code = doc._id.code;
-                           });
-                           return response;
-                        }
-                     }
-                  });
+                        model: {
+                            id: "id",
+                            fields: {
+                                overdue_date: {type: "date"},
+                                
+                            }
+                        },
+                        parse: function (response) {
+                            response.data.map(function(doc) {
+                                doc.overdue_date = doc.overdue_date ? new Date(doc.overdue_date * 1000) : null;
+                                return doc;
+                            })
+                            return response;
+                        },
+                      }
+                    });
 
                   var grid = this.grid = $("#grid").kendoGrid({
                      dataSource: dataSource,
@@ -89,44 +97,481 @@
                      scrollable: true,
                      columns: [
                           {
-                              field: "name",
-                              title: "@Telesale name@",
+                              field: "export_date",
+                              title: "Report date",
                               width: 150,
                           },{
-                              field: "code",
-                              title: "@Telesale code@",
+                              field: "index",
+                              title: "No",
                               width: 150,
 
                           },{
-                              field: "team",
-                              title: "@Team@",
+                              field: "group_id",
+                              title: "Group",
                               width: 120,
                           },
                           {
-                              field: "count_appointment",
-                              title: "@Appointment@",
+                              field: "account_number",
+                              title: "Account number",
                               width: 150,
                           },
                           {
-                              field: "count_applied",
-                              title: "@Customer Applied@",
+                              field: "name",
+                              title: "Customer name",
                               width: 150,
                           },
                           {
-                              field: "count_approve",
-                              title: "@Customer Approve@",
+                              field: "overdue_date",
+                              title: "Overdue date",
+                              width: 150,
+                              template: dataItem => gridDate(dataItem.overdue_date)
+                          },
+                          {
+                              field: "loan_overdue_amount",
+                              title: "Overdue amount",
                               width: 150,
                           },
                           {
-                              field: "count_reject",
-                              title: "@Customer Reject@",
+                              field: "current_balance",
+                              title: "Outstanding balance",
                               width: 150,
                           },
                           {
-                              field: "count_release",
-                              title: "@Customer Release@",
+                              field: "outstanding_principal",
+                              title: "Outstanding principal",
                               width: 150,
                           },
+                          {
+                              field: "assign",
+                              title: "Staff in charge",
+                              width: 150,
+                          },
+                          {
+                              field: "chief",
+                              title: "Chief",
+                              width: 150,
+                          },
+                          {
+                              field: "contacted",
+                              title: "Contacted number",
+                              width: 150,
+                          },
+                          {
+                              field: "product_id",
+                              title: "Product type",
+                              width: 150,
+                          },
+                          {
+                              field: "action_code",
+                              title: "Action code",
+                              width: 150,
+                          },
+                          {
+                              field: "action_code",
+                              title: "Action code",
+                              width: 150,
+                          },
+                          {
+                            title : "Tháng",
+                            width : 150,
+                            field : "created_date"
+                          },
+                          {
+                            title : "Số hợp đồng",
+                            width : 150,
+                            field : "so_hopdong"
+                          },
+                          {
+                            title : "Tên Khách hàng",
+                            width : 150,
+                            field : "ten_khachhang"
+                          },
+                          {
+                            title : "Địa điểm (Quận/Huyện)",
+                            width : 150,
+                            field : "quanhuyen"
+                          },
+                          {
+                            title : "Địa điểm (Tỉnh/Thành)",
+                            width : 150,
+                            field : "tinhthanh"
+                          },
+                          {
+                            title : "Người được ủy quyền",
+                            width : 150,
+                            field : "nguoiduoc_uyquyen"
+                          },
+                          {
+                            title : "Nợ gốc Hợp đồng",
+                            width : 150,
+                            field : "nogoc_hopdong"
+                          },
+                          {
+                            title : "Lãi Hợp đồng",
+                            width : 150,
+                            field : "lai_hopdong"
+                          },
+                          {
+                            title : "Tổng cộng Hợp đồng",
+                            width : 150,
+                            field : "tongcong_hopdong"
+                          },
+                          {
+                            title : "Tiền hàng tháng Hợp đồng",
+                            width : 150,
+                            field : "tienhangthang_hopdong"
+                          },
+                          {
+                            title : "Nợ gốc Số tiền đã thanh toán",
+                            width : 150,
+                            field : "nogoc_sotiendathanhtoan"
+                          },
+                          {
+                            title : "Lãi Số tiền đã thanh toán",
+                            width : 150,
+                            field : "lai_sotiendathanhtoan"
+                          },
+                          {
+                            title : "Phạt Số tiền đã thanh toán",
+                            width : 150,
+                            field : "phat_sotiendathanhtoan"
+                          },
+                          {
+                            width : 150,
+                            field : "tongcong_dunokhoikien",
+                            title : "Tổng cộng Số tiền đã thanh toán"
+                          },
+                          {
+                            width : 150,
+                            field : "nogoc_dunokhoikien",
+                            title : "Nợ gốc Dư nợ khởi kiện"
+                          },
+                          {
+                            width : 150,
+                            field : "lai_dunokhoikien",
+                            title : "Lãi Dư nợ khởi kiện"
+                          },
+                          {
+                            width : 150,
+                            title : "Phạt Dư nợ khởi kiện",
+                            field : "phat_dunokhoikien"
+                          },
+                          {
+                            width : 150,
+                            field : "phitattoan_dunokhoikien",
+                            title : "Phí tất toán Dư nợ khởi kiện"
+                          },
+                          {
+                            width : 150,
+                            title : "Tổng cộng Dư nợ khởi kiện",
+                            field : "tongcong_dunokhoikien"
+                          },
+                          {
+                            width : 150,
+                            title : "Tên cửa hàng",
+                            field : "ten_cuahang"
+                          },
+                          {
+                            width : 150,
+                            title : "Địa chỉ cửa hàng",
+                            field : "diachi_cuahang"
+                          },
+                          {
+                            width : 150,
+                            title : "Tạm ứng án phí (dự tính)",
+                            field : "tamung_anphi"
+                          },
+                          {
+                            width : 150,
+                            title : "Phương thức nộp",
+                            field : "phuongthuc_nop"
+                          },
+                          {
+                            width : 150,
+                            title : "Ngày gởi FC",
+                            field : "ngay_guifc"
+                          },
+                          {
+                            width : 150,
+                            title : "Ngày nộp đơn (Submiting date)",
+                            field : "ngay_nopdon_submitingdate"
+                          },
+                          {
+                            width : 150,
+                            title : "Ngày nộp TƯAP",
+                            field : "ngay_nop_tuap"
+                          },
+                          {
+                            width : 150,
+                            title : "Ngày nhận thông báo thụ lý",
+                            field : "ngay_nhanthongbao_thuly"
+                          },
+                          {
+                            width : 150,
+                            title : "Ngày hòa giải lần 1",
+                            field : "ngay_hoagiai1"
+                          },
+                          {
+                            width : 150,
+                            title : "Ngày hòa giải lần 2",
+                            field : "ngay_hoagiai2"
+                          },
+                          {
+                            title : "Ngày hòa giải lần 3",
+                            width : 150,
+                            field : "ngay_hoagiai3"
+                          },
+                          {
+                            title : "Ngày xét xử sơ thẩm",
+                            width : 150,
+                            field : "ngay_xetxu_sotham"
+                          },
+                          {
+                            title : "Kháng cáo",
+                            width : 150,
+                            field : "khangcao"
+                          },
+                          {
+                            title : "Ngày xét xử phúc thẩm",
+                            width : 150,
+                            field : "ngay_xetxu_phuctham"
+                          },
+                          {
+                            title : "Theo dõi",
+                            width : 150,
+                            field : "theo_doi"
+                          },
+                          {
+                            field : "phuonghuong_giaiquyet",
+                            title : "Phương hướng giải quyết",
+                            width : 150,
+                          },
+                          {
+                            field : "tinhtrang_khoikien",
+                            title : "Tình trạng khởi kiện",
+                            width : 150,
+                          },
+                          {
+                            field : "ngay_tamung_anphi",
+                            title : "Ngày tạm ứng án phí",
+                            width : 150,
+                          },
+                          {
+                            title : "Số tiền tạm ứng",
+                            field : "sotien_tamung",
+                            width : 150,
+                          },
+                          {
+                            title : "Chưa được hoàn trả án phí sau khi rút đơn",
+                            width : 150,
+                            field : "chuaduoc_hoantra_anphi_saukhirutdon"
+                          },
+                          {
+                            title : "Đã được hoàn trả tiền án phí",
+                            width : 150,
+                            field : "daduoc_hoantra_tienanphi"
+                          },
+                          {
+                            title : "Ngày được hoàn trả án phí",
+                            width : 150,
+                            field : "ngay_duochoantra_anphi"
+                          },
+                          {
+                            field : "thamphan",
+                            title : "Thẩm phán",
+                            width : 150,
+                          },
+                          {
+                            title : "Ngày gửi HS về nhà KH",
+                            width : 150,
+                            field : "ngay_guihosovenha_kh"
+                          },
+                          {
+                            title : "Số bill gửi HS về nhà KH",
+                            width : 150,
+                            field : "sobill_guihosovenha_kh"
+                          },
+                          {
+                            title : "Ngày nộp đơn",
+                            width : 150,
+                            field : "ngay_nopdon"
+                          },
+                          {
+                            title : "Số bill nộp đơn",
+                            width : 150,
+                            field : "sobill_nopdon"
+                          },
+                          {
+                            title : "Số tiền hứa trả",
+                            width : 150,
+                            field : "promised_amount"
+                          },
+                          {
+                            title : "Người hứa trả",
+                            width : 150,
+                            field : "promised_person"
+                          },
+                          {
+                            title : "Nguyên nhân không trả",
+                            width : 150,
+                            field : "reason_nonpayment"
+                          },
+                          {
+                            field : "promised_date",
+                            title : "Ngày hứa trả",
+                            width : 150,
+                          },
+                          {
+                            field : "raaStatus",
+                            title : "@Status@",
+                            width : 150,
+                          },
+                          {
+                            field : "ngay_gui_thu_thong_bao",
+                            title : "Ngày gửi thư thông báo định giá tài sản (nếu có)",
+                            width : 150
+                          },
+                          {
+                            field : "ngay_dau_gia",
+                            title : "Ngày đấu giá",
+                            width : 150
+                          },
+                          {
+                            field : "sum_tien_con_lai_chuyen_ve_tkkh",
+                            title : "Tổng số tiền còn lại chuyển về TK KH",
+                            width : 150,
+                          },
+                          {
+                            field : "ngay_trutien_giamdunogoc",
+                            title : "Ngày trừ tiền để giảm dư nợ gốc sau khi xử lý tài sản",
+                            width : 150
+                          },
+                          {
+                            field : "gia_ban",
+                            title : "Giá bán",
+                            width : 150,
+                          },
+                          {
+                            title : "Ngày gửi thư thông báo hoàn tất xử lý và bán lại Tài sản thu hồi",
+                            width : 150,
+                            field : "ngay_guithuthongbao_hoantat_vaban_taisan"
+                          },
+                          {
+                            title : "Chi phí thẩm định giá",
+                            width : 150,
+                            field : "chiphi_thamdinhgia"
+                          },
+                          {
+                            title : "Ngày tiền về TK KH đợt 1",
+                            width : 150,
+                            field : "ngaytienve_tkkh_dot1"
+                          },
+                          {
+                            title : "Ngày yêu cầu IT xóa các bill và giữ lại 1 kỳ bill cuối",
+                            width : 150,
+                            field : "ngayyeucau_itxoabill"
+                          },
+                          {
+                            title : "Người thu hồi",
+                            width : 150,
+                            field : "nguoi_thuhoi"
+                          },
+                          {
+                            field : "hinhthuc_xuly_ts",
+                            title : "Hình thức xử lý TS",
+                            width : 150,
+                          },
+                          {
+                            field : "chiphi_daugia",
+                            title : "Chi phí đấu giá",
+                            width : 150,
+                          },
+                          {
+                            field : "ngaytrutien_dethanhtoanquahan",
+                            title : "Ngày trừ tiền để thanh toán quá hạn sau khi xử lý tài sản",
+                            width : 150
+                          },
+                          {
+                            title : "Số tiền kỳ bill cuối cùng",
+                            width : 150,
+                            field : "sotien_kybill_cuoicung"
+                          },
+                          {
+                            title : "Ngày gửi thư thông báo hoàn tất thu hồi TS (nếu có)",
+                            width : 150,
+                            field : "ngayguithu_thongbaohoantat_thuhoi_ts"
+                          },
+                          {
+                            title : "Ngày gửi thư thông báo xử lý TS thông qua đấu giá",
+                            width : 150,
+                            field : "ngayguithu_thongbao_xulydaugia"
+                          },
+                          {
+                            title : "Chi phí khác",
+                            width : 150,
+                            field : "chiphi_khac"
+                          },
+                          {
+                            title : "Ngày tiền về TK KH đợt cuối (nếu có)",
+                            width : 150,
+                            field : "ngaytienve_tkkh_dotcuoi"
+                          },
+                          {
+                            field : "ngaydenhan_kybill_cuoicung",
+                            title : "Ngày đến hạn của kỳ bill cuối cùng",
+                            width : 150
+                          },
+                          {
+                            field : "death_info",
+                            title : "Giấy báo tử - Ngày cấp",
+                            width : 150
+                          },
+                          {
+                            field : "contact_person",
+                            title : "Người liên hệ",
+                            width : 150
+                          },
+                          {
+                            field : "reason_die",
+                            title : "Nguyên nhân chết",
+                            width : 150
+                          },
+                          {
+                            field : "contact_person_phone",
+                            title : "Số ĐT người thân",
+                            width : 150
+                          },
+                          {
+                            field : "payment_amount",
+                            title : "Payment amount",
+                            width : 150
+                          },
+                          {
+                            field : "payment_date",
+                            title : "Payment date",
+                            width : 150
+                          },
+                          {
+                            field : "payment_person",
+                            title : "Payment person",
+                            width : 150
+                          },
+                          {
+                            field : "channel",
+                            title : "Channel",
+                            width : 150
+                          },
+                          {
+                            field : "promised_person_phone",
+                            title : "Promised person phone",
+                            width : 150
+                          },
+                          {
+                            field : "fc_name",
+                            title : "FC name",
+                            width : 150
+                          },
+                          
 
                      ],
                       noRecords: {
@@ -145,68 +590,12 @@
                       return checkedIds;
                   }
 
-                  /*
-                   * Right Click Menu
-                   */
-                  var menu = $("#action-menu");
-                  if(!menu.length) return;
-
-                  $("html").on("click", function() {menu.hide()});
-
-                  $(document).on("click", "#grid tr[role=row] a.btn-action", function(e){
-                      let btna = $(e.target);
-                      let row = $(e.target).closest("tr");
-                      e.pageX -= 20;
-                      showMenu(e, row, btna);
-                  });
-
-                  function showMenu(e, that,btna) {
-                      //hide menu if already shown
-                      menu.hide();
-
-                      //Get id value of document
-                      var uid = $(that).data('uid');
-                      var fltnumber = btna.data('flt');
-                      var date = btna.data('date');
-                      if(uid)
-                      {
-                          menu.find("a").data('uid',uid);
-                          menu.find("a").data('fltnumber',fltnumber);
-                          menu.find("a").data('date',date);
-                          menu.find("a").data('dpt',btna.data('dpt'));
-                          menu.find("a").data('arv',btna.data('arv'));
-                          //get x and y values of the click event
-                          var pageX = e.pageX;
-                          var pageY = e.pageY;
-
-                          //position menu div near mouse cliked area
-                          menu.css({top: pageY , left: pageX});
-
-                          var mwidth = menu.width();
-                          var mheight = menu.height();
-                          var screenWidth = $(window).width();
-                          var screenHeight = $(window).height();
-
-                          //if window is scrolled
-                          var scrTop = $(window).scrollTop();
-
-                          //if the menu is close to right edge of the window
-                          if(pageX+mwidth > screenWidth){
-                          menu.css({left:pageX-mwidth});
-                          }
-                          //if the menu is close to bottom edge of the window
-                          if(pageY+mheight > screenHeight+scrTop){
-                          menu.css({top:pageY-mheight});
-                          }
-                          //finally show the menu
-                          menu.show();
-                      }
-                  }
+                  
               }
           }
       }();
       window.onload = function() {
-         // Table.init();
+         Table.init();
          var dateRange = 30;
          var nowDate = new Date();
          var date =  new Date(),
@@ -269,7 +658,7 @@
                this.asyncSearch();
             },
              asyncSearch: async function() {
-               var field = "created_at";
+               var field = "createdAt";
                var fromDateTime = new Date(this.fromDateTime.getTime() - timeZoneOffset).toISOString();
                 var toDateTime = new Date(this.toDateTime.getTime() - timeZoneOffset).toISOString();
 

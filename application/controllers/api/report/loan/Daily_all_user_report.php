@@ -288,7 +288,7 @@ Class Daily_all_user_report extends WFF_Controller {
                         $match_paid = array(
                            '$match' => array(
                               '$and' => array(
-                                 array('created_at'=> array('$gte'=> $due_date_add_1, '$lte'=> $date)),
+                                 array('created_at'=> array('$gte'=> $start_date, '$lte'=> $date)),
                                  array('account_number' => ['$in' => $account_arr_start])
                               )
                            )
@@ -1186,7 +1186,7 @@ Class Daily_all_user_report extends WFF_Controller {
                         $match_paid = array(
                            '$match' => array(
                               '$and' => array(
-                                 array('created_at'=> array('$gte'=> $due_date_add_1, '$lte'=> $date)),
+                                 array('created_at'=> array('$gte'=> $start_date, '$lte'=> $date)),
                                  array('account_number' => ['$in' => $account_diallist])
                               )
                            )
@@ -1769,7 +1769,7 @@ Class Daily_all_user_report extends WFF_Controller {
                                        $match_paid_promise = array(
                                           '$match' => array(
                                              '$and' => array(
-                                                array('created_at'=> array('$gte'=> $due_date_add_1, '$lte'=> $date)),
+                                                array('created_at'=> array('$gte'=> $start_date, '$lte'=> $date)),
                                                 array('account_number' => ['$in' => $account_ptp_arr])
                                              )
                                           )

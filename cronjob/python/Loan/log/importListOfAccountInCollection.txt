@@ -3,3 +3,4 @@
 22/11/2019, 22:19:03: 'sub_type'
 22/11/2019, 22:19:30: 'sub_type'
 22/11/2019, 22:20:42: 'sub_type'
+25/11/2019, 23:13:19: [Errno 2] No such file or directory: '/data/upload_file/20191120/LIST_OF_ACCOUNT_IN_COLLECTION_20191031.csv'

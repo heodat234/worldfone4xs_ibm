@@ -1,7 +1,6 @@
 #!/usr/bin/python3.6
 # -*- coding: utf-8 -*-
 
-import re
 import ftplib
 import calendar
 import time
@@ -26,10 +25,10 @@ config = Config()
 ftp = Ftp()
 common = Common()
 base_url = config.base_url()
-log = open(base_url + "cronjob/python/Loan/log/importReportReleaseSale.txt","a")
+log = open(base_url + "cronjob/python/Loan/log/importlnjc05.txt","a")
 now = datetime.now()
 subUserType = 'LO'
-collection = common.getSubUser(subUserType, 'Report_release_sale')
+collection = common.getSubUser(subUserType, 'LNJC05')
 
 try:
     modelColumns = []
@@ -44,7 +43,6 @@ try:
     errorData = []
 
     ftpInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'ftp_config'), WHERE={'collection': collection})
-
     ftpConfig = config.ftp_config()
     ftpLocalUrl = common.getDownloadFolder() + ftpInfo['filename']
 
@@ -64,13 +62,14 @@ try:
             'file_path'     : ftpLocalUrl, 
             'source'        : 'ftp',
             'status'        : 2,
-            'command'       : 'python3.6 ' + base_url + "cronjob/python/Loan/importReportReleaseSale.py > /dev/null &",
+            'command'       : 'python3.6 ' + base_url + "cronjob/python/Loan/importLNJC05.py > /dev/null &",
             'created_by'    : 'system'
         }
-        importLogId = mongodb.insert(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), insert_data=importLogInfo) 
-    
-    models = _mongodb.get(MONGO_COLLECTION='Model', WHERE={'collection': collection}, SORT=[('index', 1)], SELECT=['index', 'collection', 'field', 'type', 'sub_type'], TAKE=1000)
-    
+        importLogId = mongodb.insert(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), insert_data=importLogInfo)
+
+    models = _mongodb.get(MONGO_COLLECTION='Model', WHERE={'collection': collection}, SORT=[('index', 1)], SELECT=['index', 'collection', 'field', 'type', 'sub_type'])
+    # pprint(list(models))
+
     for model in models:
         modelColumns.append(model['field'])
         modelConverters[model['field']] = model['type']
@@ -90,13 +89,18 @@ try:
             else:
                 modelPosition[model['field']] = ''
                 modelPosition1.append('')
-    
+
     filenameExtension = ftpInfo['filename'].split('.')
 
+    if len(filenameExtension) < 2:
+        filenameExtension.append('txt')
+    
     if ftpInfo['header'] == 'None':
         header = None
     else:
         header = [ int(x) for x in ftpInfo['header'] ]
+
+    # mongodb.remove_document(MONGO_COLLECTION=collection)
 
     if filenameExtension[1] in ['csv', 'xlsx']:
         if(filenameExtension[1] == 'csv'):
@@ -131,9 +135,9 @@ try:
     else:
         with open(importLogInfo['file_path'], 'r', newline='\n', encoding='ISO-8859-1') as fin:
             csv_reader = csv.reader(fin, delimiter=';', quotechar='"')
-            for idx, row in enumerate(fin):
-                temp = {}
+            for idx, row in enumerate(csv_reader):
                 if len(row) > 5:
+                    temp = {}
                     for keyCell, cell in enumerate(row):
                         if keyCell <= len(modelColumns) - 1:
                             try:
@@ -155,50 +159,17 @@ try:
                         insertData.append(temp)
                         result = True
 
-    # if(filenameExtension[1] == 'csv'):
-    #     inputDataRaw = excel.getDataCSV(file_path=importLogInfo['file_path'], dtype='object', sep=ftpInfo['sep'], header=header, names=modelColumns)
+    pprint(insertData)
+
+    # if(len(errorData) > 0):
+    #     mongodb.batch_insert(common.getSubUser(subUserType, 'LNJC05_result'), errorData)
+    #     mongodb.update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': importLogId}, VALUE={'status': 0, 'complete_import': time.time()})
     # else:
-    #     inputDataRaw = excel.getDataExcel(file_path=importLogInfo['file_path'], dtype='object', active_sheet=ftpInfo['sheet'], header=header, names=modelColumns, na_values='')
+    #     if len(insertData) > 0:
+    #         mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertData)
+    #         mongodb.batch_insert(common.getSubUser(subUserType, 'LNJC05_result'), insert_data=insertData)
+    #     mongodb.update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': importLogId}, VALUE={'status': 1, 'complete_import': time.time()})
 
-    # inputData = inputDataRaw.to_dict('records')
-    
-    # insertData = []
-    # updateDate = []
-    # errorData = []
-
-    # temp = {}
-    # countList = 0
-    # for idx, row in enumerate(inputData):
-    #     temp = {}
-    #     if row['acc_no'] not in ['', None]:
-    #         for cell in row:
-    #             try:
-    #                 temp[cell] = common.convertDataType(data=row[cell], datatype=modelConverters[cell], formatType=modelFormat[cell])
-    #                 result = True
-    #             except Exception as errorConvertType:
-    #                 temp['error_cell'] = modelPosition[cell] + str(idx + 1)
-    #                 temp['type'] = modelConverters[cell]
-    #                 temp['error_mesg'] = 'Sai kiểu dữ liệu nhập'
-    #                 temp['result'] = 'error'
-    #                 result = False
-    #         temp['created_by'] = 'system'
-    #         temp['created_at'] = time.time()
-    #         temp['import_id'] = str(importLogId)
-            
-    #         if(result == False):
-    #             errorData.append(temp)
-    #         else:
-    #             temp['result'] = 'success'
-    #             insertData.append(temp)
-    #             result = True
-
-    if(len(errorData) > 0):
-        mongodb.batch_insert(common.getSubUser(subUserType, 'Report_release_sale_result'), errorData)
-        mongodb.update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': importLogId}, VALUE={'status': 0, 'complete_import': time.time()})
-    else:
-        if len(insertData) > 0:
-            mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertData)
-            mongodb.batch_insert(common.getSubUser(subUserType, 'Report_release_sale_result'), insert_data=insertData)
-        mongodb.update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': importLogId}, VALUE={'status': 1, 'complete_import': time.time()})
 except Exception as e:
     log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')
+    pprint(str(e))

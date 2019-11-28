@@ -37,7 +37,7 @@ try:
     listDebtGroup = []
     
     # today = date.today()
-    today = datetime.strptime('12/10/2019', "%d/%m/%Y").date()
+    today = datetime.strptime('20/11/2019', "%d/%m/%Y").date()
 
     day = today.day
     month = today.month
@@ -84,18 +84,22 @@ try:
             for groupProduct in list(listGroupProduct):
                 groupInfoByDueDate = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Group'), WHERE={'debt_groups': debtGroupCell, 'name': {"$regex": groupProduct['text'] + '.*'}})
                 for groupCell in list(groupInfoByDueDate):
-                    today_col = {
-                        'total': 0,
-                        'balance_total': 0
+                    temp = {
+                        'col'           : 0,
+                        'col_amt'       : 0,
+                        'rem'           : 0,
+                        'rem_amt'       : 0,
+                        'flow_rate'     : 0,
+                        'flow_rate_amt' : 0
                     }
-                    temp = {}
                     if todayTimeStamp < dueDayOfMonth['due_date_add_1']:
                         dueDayLastMonth = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_due_date'), WHERE={'for_month': str(month - 1), 'debt_group': debtGroupCell[1:3]})
                         temp['due_date'] = dueDayLastMonth['due_date'] if dueDayLastMonth is not None else ''
                         #Lay gia tri no vao ngay due date + 1#
-                        incidenceInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Amt_due_date_one'), WHERE={'for_month': str(month - 1), 'team_id': str(groupCell['_id'])})
+                        incidenceInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Due_date_next_date'), WHERE={'for_month': str(month - 1), 'team_id': str(groupCell['_id'])})
                         #Lay gia tri no vao ngay due date + 1#
                     else:
+                        incidenceInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Due_date_next_date'), WHERE={'for_month': str(month), 'team_id': str(groupCell['_id'])})
                         temp['due_date'] = dueDayOfMonth['due_date']
 
                     temp['debt_group'] = debtGroupCell[0:1]
@@ -103,136 +107,152 @@ try:
                     temp['product'] = groupProduct['text']
                     temp['team'] = groupCell['name']
                     temp['team_id'] = str(groupCell['_id'])
-                    temp['inci'] = incidenceInfo['debt_acc_no']
-                    temp['inci_amt'] = incidenceInfo['current_balance_total']
-                    temp['today_rem_amt'] = 0
+                    
+                    if incidenceInfo is not None:
+                        temp['inci'] = incidenceInfo['debt_acc_no'] if 'debt_acc_no' in incidenceInfo.keys() else 0
+                        temp['inci_amt'] = incidenceInfo['current_balance_total'] if 'current_balance_total' in incidenceInfo.keys() else 0
+                    else:
+                        temp['inci'] = 0
+                        temp['inci_amt'] = 0
+                    
                     for key, value in mainProduct.items():
-                        today_col[key] = 0
-                        today_col['balance_' + key]
+                        temp['col_' + key] = 0
+                        temp['col_amt_' + key] = 0
 
-                        temp['inci_' + key] = incidenceInfo['debt_acc_' + key]
-                        temp['inci_amt_' + key] = incidenceInfo['current_balance_' + key]
+                        if incidenceInfo is not None:
+                            temp['inci_' + key] = incidenceInfo['debt_acc_' + key] if ('debt_acc_' + key) in incidenceInfo.keys() else 0
+                            temp['inci_amt_' + key] = incidenceInfo['current_balance_' + key] if ('current_balance_' + key) in incidenceInfo.keys() else 0
+                        else:
+                            temp['inci_' + key] = 0
+                            temp['inci_amt_' + key] = 0
 
-                        temp['today_rem_' + key] = 0
-                        temp['today_rem_amt_' + key] = 0
+                        temp['rem_' + key] = 0
+                        temp['rem_amt_' + key] = 0
+                        temp['flow_rate_' + key] = 0
+                        temp['flow_rate_amt_' + key] = 0
 
-                    if groupProduct == 'SIBS':
+                    if groupProduct['value'] == 'SIBS':
                         yesterdayReportData = mongodb.getOne(MONGO_COLLECTION=collection, WHERE={'team_id': str(groupCell['_id']), 'created_at': {'$gte': (starttime - 86400), '$lte': (endtime - 86400)}})
                         
+                        dueDateOneData = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Due_date_next_date_SIBS'), WHERE={'debt_group': debtGroupCell[0:1], 'due_date_code': debtGroupCell[1:3], 'for_month': str(month)})
+
                         lead = ['JIVF00' + groupCell['lead']] if 'lead' in groupCell.keys() else []
                         member = ('JIVF00' + s for s in groupCell['members']) if 'members' in groupCell.keys() else []
                         officerIdRaw = list(lead) + list(member)
                         officerId = list(dict.fromkeys(officerIdRaw))
 
-                        lnjc05Info = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'LNJC05'), WHERE={'createdAt': {'$gte': starttime, '$lte': endtime}, 'group_id': debtGroupCell, 'officer_id': {'$in': officerId}})
-                        temp['today_rem'] = len(lnjc05Info)
-                        temp['col'] = temp['inci'] - temp['rem']
-                        temp['col_amt'] = temp['inci_amt'] - temp['rem_amt']
-                        
+                        lnjc05Info = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'LNJC05'), WHERE={'group_id': debtGroupCell, 'officer_id': {'$in': officerId}})
                         for lnjc05 in lnjc05Info:
                             zaccfInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'ZACCF'), WHERE={'account_number': lnjc05['account_number']})
                             ln3206fInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'LN3206F'), WHERE={'account_number': lnjc05['account_number']})
-                            
                             if ln3206fInfo is not None:
-                                today_col['total'] += 1
-                                today_col[zaccfInfo['PRODGRP_ID']] += 1
-                                today_col['balance_total'] += lnjc05['current_balance']
-                                today_col['balance_' + zaccfInfo['PRODGRP_ID']] += lnjc05['current_balance']
+                                temp['col'] += 1
+                                temp['col_amt'] += lnjc05['current_balance']
+                                if zaccfInfo is not None:
+                                    temp['col_' + zaccfInfo['PRODGRP_ID']] += 1
+                                    temp['col_amt_' + zaccfInfo['PRODGRP_ID']] += lnjc05['current_balance']
                             
-                            # temp['col'] = yesterdayReportData['col'] + 
+                            temp['rem'] = temp['inci'] - temp['col']
+                            temp['rem_amt'] = temp['inci_amt'] - temp['col_amt']
+                            temp['flow_rate'] = temp['rem'] / temp['inci'] if temp['inci'] != 0 else 0
+                            temp['flow_rate_amt'] = temp['rem_amt'] / temp['inci_amt'] if temp['inci_amt'] != 0 else 0
+                            if zaccfInfo is not None:
+                                temp['rem_' + zaccfInfo['PRODGRP_ID']] = temp['inci_' + zaccfInfo['PRODGRP_ID']] - temp['col_' + zaccfInfo['PRODGRP_ID']]
+                                temp['rem_amt_' + zaccfInfo['PRODGRP_ID']] = temp['inci_amt_' + zaccfInfo['PRODGRP_ID']] - temp['col_amt_' + zaccfInfo['PRODGRP_ID']]
+                                temp['flow_rate_' + zaccfInfo['PRODGRP_ID']] = temp['rem_' + zaccfInfo['PRODGRP_ID']] / temp['inci_' + zaccfInfo['PRODGRP_ID']] if temp['inci_' + zaccfInfo['PRODGRP_ID']] != 0 else 0
+                                temp['flow_rate_amt_' + zaccfInfo['PRODGRP_ID']] = temp['rem_amt_' + zaccfInfo['PRODGRP_ID']] / temp['inci_amt_' + zaccfInfo['PRODGRP_ID']] if temp['inci_amt_' + zaccfInfo['PRODGRP_ID']] != 0 else 0
                             
-                            temp['rem_' + zaccfInfo['PRODGRP_ID']] += 1
-
-                            temp['today_rem_amt'] += float(lnjc05['current_balance'])
-                            temp['today_rem_amt_' + zaccfInfo['PRODGRP_ID']] += float(lnjc05['current_balance'])
-
-                            temp['col_' + zaccfInfo['PRODGRP_ID']] = temp['inci_' + zaccfInfo['PRODGRP_ID']] - temp['rem_' + zaccfInfo['PRODGRP_ID']]
-                            temp['col_amt'] = temp['inci_amt'] - temp['rem_amt']
+                    mongodb.insert(MONGO_COLLECTION=collection, insert_data=temp)
+                    # log.write(json.dumps(temp))
+                    # pprint(temp)
     
-    for groupProduct in list(listGroupProduct):
-        if groupProduct == 'SIBS':
-            for debtGroupCell in list(listDebtGroup):
-                dueDayOfMonth = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_due_date'), WHERE={'for_month': str(month), 'debt_group': debtGroupCell[1:3]})
-                groupInfoByDueDate = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Group'), WHERE={'debt_groups': debtGroupCell, 'name': {"$regex": groupProduct['text'] + '.*'}})
-                for groupCell in list(groupInfoByDueDate):
-                    temp = {}
-                    if todayTimeStamp < dueDayOfMonth['due_date_add_1']:
-                        dueDayLastMonth = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_due_date'), WHERE={'for_month': str(month - 1), 'debt_group': debtGroupCell[1:3]})
-                        temp['due_date'] = dueDayLastMonth['due_date'] if dueDayLastMonth is not None else ''
-                        pprint(dueDayLastMonth)
-                    else:
-                        temp['due_date'] = dueDayOfMonth['due_date']
-                    temp['debt_group'] = debtGroupCell[0:1]
-                    temp['due_date_code'] = debtGroupCell[1:3]
-                    temp['product'] = groupProduct['text']
-                    temp['team'] = groupCell['name']
-                    temp['team_id'] = str(groupCell['_id'])
-                    temp['inci'] = 0
-                    temp['inci_amt'] = 0
-                    temp['col'] = 0
-                    temp['col_amt'] = 0
-                    temp['today_rem'] = 0
-                    temp['today_rem_amt'] = 0
+    # for groupProduct in list(listGroupProduct):
+    #     if groupProduct == 'SIBS':
+    #         for debtGroupCell in list(listDebtGroup):
+    #             dueDayOfMonth = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_due_date'), WHERE={'for_month': str(month), 'debt_group': debtGroupCell[1:3]})
+    #             groupInfoByDueDate = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Group'), WHERE={'debt_groups': debtGroupCell, 'name': {"$regex": groupProduct['text'] + '.*'}})
+    #             for groupCell in list(groupInfoByDueDate):
+    #                 temp = {}
+    #                 if todayTimeStamp < dueDayOfMonth['due_date_add_1']:
+    #                     dueDayLastMonth = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_due_date'), WHERE={'for_month': str(month - 1), 'debt_group': debtGroupCell[1:3]})
+    #                     temp['due_date'] = dueDayLastMonth['due_date'] if dueDayLastMonth is not None else ''
+    #                     pprint(dueDayLastMonth)
+    #                 else:
+    #                     temp['due_date'] = dueDayOfMonth['due_date']
+    #                 temp['debt_group'] = debtGroupCell[0:1]
+    #                 temp['due_date_code'] = debtGroupCell[1:3]
+    #                 temp['product'] = groupProduct['text']
+    #                 temp['team'] = groupCell['name']
+    #                 temp['team_id'] = str(groupCell['_id'])
+    #                 temp['inci'] = 0
+    #                 temp['inci_amt'] = 0
+    #                 temp['col'] = 0
+    #                 temp['col_amt'] = 0
+    #                 temp['today_rem'] = 0
+    #                 temp['today_rem_amt'] = 0
 
-                    for key, value in mainProduct.items():
-                        temp['inci_' + key] = 0
-                        temp['inci_amt_' + key] = 0
-                        temp['col_' + key] = 0
-                        temp['col_amt_' + key] = 0
-                        temp['today_rem_' + key] = 0
-                        temp['today_rem_amt_' + key] = 0
+    #                 for key, value in mainProduct.items():
+    #                     temp['inci_' + key] = 0
+    #                     temp['inci_amt_' + key] = 0
+    #                     temp['col_' + key] = 0
+    #                     temp['col_amt_' + key] = 0
+    #                     temp['today_rem_' + key] = 0
+    #                     temp['today_rem_amt_' + key] = 0
 
-                    lead = ['JIVF00' + groupCell['lead']] if 'lead' in groupCell.keys() else []
-                    member = ('JIVF00' + s for s in groupCell['members']) if 'members' in groupCell.keys() else []
-                    officerIdRaw = list(lead) + list(member)
-                    officerId = list(dict.fromkeys(officerIdRaw))
+    #                 lead = ['JIVF00' + groupCell['lead']] if 'lead' in groupCell.keys() else []
+    #                 member = ('JIVF00' + s for s in groupCell['members']) if 'members' in groupCell.keys() else []
+    #                 officerIdRaw = list(lead) + list(member)
+    #                 officerId = list(dict.fromkeys(officerIdRaw))
 
-                    lnjc05Info = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'LNJC05'), WHERE={'createdAt': {'$gte': starttime, '$lte': endtime}, 'group_id': debtGroupCell, 'officer_id': {'$in': officerId}})
-                    lnjc05InfoYesterday = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'LNJC05'), WHERE={'createdAt': {'$gte': (starttime - 86400), '$lte': (endtime - 86400)}, 'group_id': debtGroupCell, 'officer_id': officerId})
-                    lnjc05InfoYesterday = dict(lnjc05InfoYesterday)               
-                    for lnjc05 in lnjc05Info:
-                        zaccfInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'ZACCF'), WHERE={'account_number': lnjc05['account_number']})
-                        if zaccfInfo is not None:
-                            temp['today_rem'] += 1
-                            temp['today_rem_amt'] += float(lnjc05['current_balance'])
-                            temp['today_rem_' + zaccfInfo['PRODGRP_ID']] += 1
-                            temp['today_rem_amt_' + zaccfInfo['PRODGRP_ID']] += float(lnjc05['current_balance'])
+    #                 lnjc05Info = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'LNJC05'), WHERE={'createdAt': {'$gte': starttime, '$lte': endtime}, 'group_id': debtGroupCell, 'officer_id': {'$in': officerId}})
+    #                 lnjc05InfoYesterday = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'LNJC05'), WHERE={'createdAt': {'$gte': (starttime - 86400), '$lte': (endtime - 86400)}, 'group_id': debtGroupCell, 'officer_id': officerId})
+    #                 lnjc05InfoYesterday = dict(lnjc05InfoYesterday)               
+    #                 for lnjc05 in lnjc05Info:
+    #                     zaccfInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'ZACCF'), WHERE={'account_number': lnjc05['account_number']})
+    #                     if zaccfInfo is not None:
+    #                         temp['today_rem'] += 1
+    #                         temp['today_rem_amt'] += float(lnjc05['current_balance'])
+    #                         temp['today_rem_' + zaccfInfo['PRODGRP_ID']] += 1
+    #                         temp['today_rem_amt_' + zaccfInfo['PRODGRP_ID']] += float(lnjc05['current_balance'])
                             
-                    if todayTimeStamp == dueDayOfMonth['due_date_add_1']:
-                        temp['inci'] = temp['today_rem']
-                        temp['inci_amt'] = temp['today_rem_amt']
-                        temp['col'] = temp['inci'] - temp['today_rem']
-                        temp['col_amt'] = temp['inci_amt'] - temp['today_rem_amt']
-                        for key, value in mainProduct.items():
-                            temp['inci_' + key] = temp['today_rem_' + key]
-                            temp['inci_amt_' + key] = temp['today_rem_amt_' + key]
-                            temp['col_' + key] = temp['inci_' + key] - temp['today_rem_' + key]
-                            temp['col_amt_' + key] = temp['inci_amt_' + key] - temp['today_rem_amt_' + key]
-                    else:
-                        temp['inci'] = lnjc05InfoYesterday['inci'] if 'inci' in lnjc05InfoYesterday.keys() else 0
-                        temp['inci_amt'] = lnjc05InfoYesterday['inci_amt'] if 'inci_amt' in lnjc05InfoYesterday.keys() else 0
-                        temp['col'] = temp['inci'] - temp['today_rem']
-                        temp['col_amt'] = temp['inci_amt'] - temp['today_rem_amt']
-                        for key, value in mainProduct.items():
-                            temp['inci_' + key] = lnjc05InfoYesterday['inci_' + key] if ('inci_' + key) in lnjc05InfoYesterday.keys() else 0
-                            temp['inci_amt_' + key] = lnjc05InfoYesterday['inci_amt_' + key] if ('inci_amt_' + key) in lnjc05InfoYesterday.keys() else 0
-                            temp['col_' + key] = temp['inci_' + key] - temp['today_rem_' + key]
-                            temp['col_amt_' + key] = temp['inci_amt_' + key] - temp['today_rem_amt_' + key]
+    #                 if todayTimeStamp == dueDayOfMonth['due_date_add_1']:
+    #                     temp['inci'] = temp['today_rem']
+    #                     temp['inci_amt'] = temp['today_rem_amt']
+    #                     temp['col'] = temp['inci'] - temp['today_rem']
+    #                     temp['col_amt'] = temp['inci_amt'] - temp['today_rem_amt']
+    #                     for key, value in mainProduct.items():
+    #                         temp['inci_' + key] = temp['today_rem_' + key]
+    #                         temp['inci_amt_' + key] = temp['today_rem_amt_' + key]
+    #                         temp['col_' + key] = temp['inci_' + key] - temp['today_rem_' + key]
+    #                         temp['col_amt_' + key] = temp['inci_amt_' + key] - temp['today_rem_amt_' + key]
+    #                 else:
+    #                     temp['inci'] = lnjc05InfoYesterday['inci'] if 'inci' in lnjc05InfoYesterday.keys() else 0
+    #                     temp['inci_amt'] = lnjc05InfoYesterday['inci_amt'] if 'inci_amt' in lnjc05InfoYesterday.keys() else 0
+    #                     temp['col'] = temp['inci'] - temp['today_rem']
+    #                     temp['col_amt'] = temp['inci_amt'] - temp['today_rem_amt']
+    #                     for key, value in mainProduct.items():
+    #                         temp['inci_' + key] = lnjc05InfoYesterday['inci_' + key] if ('inci_' + key) in lnjc05InfoYesterday.keys() else 0
+    #                         temp['inci_amt_' + key] = lnjc05InfoYesterday['inci_amt_' + key] if ('inci_amt_' + key) in lnjc05InfoYesterday.keys() else 0
+    #                         temp['col_' + key] = temp['inci_' + key] - temp['today_rem_' + key]
+    #                         temp['col_amt_' + key] = temp['inci_amt_' + key] - temp['today_rem_amt_' + key]
                     
-                    temp['flow_rate'] = temp['today_rem'] / temp['inci'] if temp['inci'] != 0 else 0
-                    temp['col_rate'] = temp['today_rem'] / temp['col'] if temp['col'] != 0 else 0
-                    temp['flow_rate_amt'] = temp['today_rem_amt'] / temp['inci_amt'] if temp['inci_amt'] != 0 else 0
-                    temp['col_rate_amt'] = temp['today_rem_amt'] / temp['col_amt'] if temp['col_amt'] != 0 else 0
-                    temp['created_at'] = todayTimeStamp
-                    temp['created_by'] = 'system'
+    #                 temp['flow_rate'] = temp['today_rem'] / temp['inci'] if temp['inci'] != 0 else 0
+    #                 temp['col_rate'] = temp['today_rem'] / temp['col'] if temp['col'] != 0 else 0
+    #                 temp['flow_rate_amt'] = temp['today_rem_amt'] / temp['inci_amt'] if temp['inci_amt'] != 0 else 0
+    #                 temp['col_rate_amt'] = temp['today_rem_amt'] / temp['col_amt'] if temp['col_amt'] != 0 else 0
+    #                 temp['created_at'] = todayTimeStamp
+    #                 temp['created_by'] = 'system'
+    #                 pprint(temp)
                     # mongodb.insert(MONGO_COLLECTION=collection, insert_data=temp)
                     # log.write(json.dumps(temp))
                     # log.write('\n')
                     # log.write('\n')
-        else:
-            listAcc = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Account'), WHERE={'updated_at': {'$gte': starttime, '$lte': endtime}})
-            for acc in listAcc:
-                pprint(acc)
+                    
+        
+        # else:
+        #     listAcc = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Account'), WHERE={'updated_at': {'$gte': starttime, '$lte': endtime}})
+        #     for acc in listAcc:
+        #         pprint(acc)
 
     # tempWO = {
     #     'debt_group'        : 'F',
@@ -258,6 +278,6 @@ try:
     #     groupInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Group_card'), WHERE={'account_no': account['account_number']})
         # pprint(dict(groupInfo)
 except Exception as e:
-    log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')
+    # log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')
     pprint(str(e))
         

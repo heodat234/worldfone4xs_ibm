@@ -22,11 +22,11 @@ class Mongodb:
         if COL_NAME not in collist:
             self.db[COL_NAME]
 
-    def get(self, MONGO_COLLECTION='', WHERE=None, SELECT=None, SORT=[("$natural", 1)], SKIP=0, TAKE=30):
+    def get(self, MONGO_COLLECTION='', WHERE=None, SELECT=None, SORT=[("$natural", 1)], SKIP=0, TAKE=0):
         collection = self.db[MONGO_COLLECTION]
         return collection.find(WHERE, SELECT).sort(SORT).skip(SKIP).limit(TAKE)
 
-    def getOne(self, MONGO_COLLECTION='', WHERE=None, SELECT=None, SORT=[("$natural", 1)], SKIP=0, TAKE=30):
+    def getOne(self, MONGO_COLLECTION='', WHERE=None, SELECT=None, SORT=[("$natural", 1)], SKIP=0, TAKE=0):
         collection = self.db[MONGO_COLLECTION]
         return collection.find_one(WHERE, SELECT)
 

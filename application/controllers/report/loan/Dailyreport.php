@@ -59,4 +59,11 @@ Class Dailyreport extends WFF_Controller {
         $this->output->data["js"][] = STEL_PATH . "js/admin/admin.js";
         $this->load->view('report/loan/daily_assignment_view');
     }
+    public function dailyWorkingDays()
+    {
+        $this->output->data["css"][] = STEL_PATH . "css/table.css";
+        $this->output->data["js"][] = STEL_PATH . "js/tools.js";
+        $this->output->data["js"][] = STEL_PATH . "js/admin/admin.js";
+        $this->load->view('report/loan/daily_working_days_view');
+    }
 }

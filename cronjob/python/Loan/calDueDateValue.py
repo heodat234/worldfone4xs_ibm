@@ -30,14 +30,14 @@ base_url = config.base_url()
 log = open(base_url + "cronjob/python/Loan/log/calDueDateValue.txt","a")
 now = datetime.now()
 subUserType = 'LO'
-collection = common.getSubUser(subUserType, 'Daily_prod_prod_each_user_group')
+collection = common.getSubUser(subUserType, 'Due_date_one_value')
 try:
     insertData = []
     updateData = []
     listDebtGroup = []
     
     # today = date.today()
-    today = datetime.strptime('12/10/2019', "%d/%m/%Y").date()
+    today = datetime.strptime('13/11/2019', "%d/%m/%Y").date()
 
     day = today.day
     month = today.month
@@ -70,16 +70,15 @@ try:
 
     lnjc05InfoFull = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'LNJC05'))
     lnjc05ColName = 'LNJC05_' + str(year) + str(month) + str(day)
-    # mongodbReport.create_col(COL_NAME=lnjc05ColName)
-    # mongodbReport.batch_insert(MONGO_COLLECTION=lnjc05ColName, insert_data=lnjc05InfoFull)
+    mongodbReport.create_col(COL_NAME=lnjc05ColName)
+    mongodbReport.remove_document(MONGO_COLLECTION=lnjc05ColName)
+    mongodbReport.batch_insert(MONGO_COLLECTION=lnjc05ColName, insert_data=lnjc05InfoFull)
 
     listOfAccFull = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'List_of_account_in_collection'))
     listOfAccColName = 'List_of_account_in_collection_' + str(year) + str(month) + str(day)
-    # mongodbReport.create_col(COL_NAME=listOfAccColName)
-    # mongodbReport.batch_insert(MONGO_COLLECTION=listOfAccColName, insert_data=listOfAccFull)
-
-    pprint(list(listOfAccFull))
-    sys.exit()
+    mongodbReport.create_col(COL_NAME=listOfAccColName)
+    mongodbReport.remove_document(MONGO_COLLECTION=listOfAccColName)
+    mongodbReport.batch_insert(MONGO_COLLECTION=listOfAccColName, insert_data=listOfAccFull)
 
     mainProduct = {}
     mainProductRaw = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Product'))
@@ -106,38 +105,40 @@ try:
                     groupInfoByDueDate = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Group'), WHERE={'debt_groups': debtGroupCell, 'name': {"$regex": groupProduct['text'] + '.*'}})
                     for groupCell in list(groupInfoByDueDate):
                         temp = {
-                            'due_date'      : todayTimeStamp - 86400,
-                            'due_date_one'  : todayTimeStamp,
-                            'debt_group'    : debtGroupCell[0:1],
-                            'due_date_code' : debtGroupCell[1:3],
-                            'team_id'       : str(groupCell['_id'])
+                            'due_date'              : todayTimeStamp - 86400,
+                            'due_date_one'          : todayTimeStamp,
+                            'debt_group'            : debtGroupCell[0:1],
+                            'due_date_code'         : debtGroupCell[1:3],
+                            'team_id'               : str(groupCell['_id']),
+                            'debt_acc_no'           : 0,
+                            'current_balance_total' : 0,
                         }
-
-                        lnjc05Info = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'LNJC05'))
                         
                         for key, value in mainProduct.items():
                             temp['debt_acc_' + key] = 0
                             temp['current_balance_' + key] = 0
 
-                        if groupProduct == 'SIBS':
+                        if groupProduct['value'] == 'SIBS':
                             lead = ['JIVF00' + groupCell['lead']] if 'lead' in groupCell.keys() else []
                             member = ('JIVF00' + s for s in groupCell['members']) if 'members' in groupCell.keys() else []
                             officerIdRaw = list(lead) + list(member)
                             officerId = list(dict.fromkeys(officerIdRaw))
 
-                            lnjc05Info = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'LNJC05'), WHERE={'group_id': debtGroupCell, 'officer_id': {'$in': officerId}})                            
+                            lnjc05Info = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'LNJC05'), WHERE={'group_id': debtGroupCell, 'officer_id': {'$in': officerId}})
                             for lnjc05 in lnjc05Info:
                                 zaccfInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'ZACCF'), WHERE={'account_number': lnjc05['account_number']})
                                 temp['debt_acc_no'] += 1
-                                temp['debt_acc_' + zaccfInfo['PRODGRP_ID']] += 1
-                                
                                 temp['current_balance_total'] += float(lnjc05['current_balance'])
-                                temp['current_balance_' + zaccfInfo['PRODGRP_ID']] += float(lnjc05['current_balance'])
-
+                                if zaccfInfo is not None:
+                                    temp['debt_acc_' + zaccfInfo['PRODGRP_ID']] += 1
+                                    temp['current_balance_' + zaccfInfo['PRODGRP_ID']] += float(lnjc05['current_balance'])
                         
-                        # mongodb.insert(MONGO_COLLECTION=common.getSubUser(subUserType, 'Due_date_next_date_SIBS'), insert_data=temp)
+                        temp['created_at'] = time.time()
+                        temp['created_by'] = 'system'
+                        temp['for_month'] = str(month)
+                        mongodb.insert(MONGO_COLLECTION=common.getSubUser(subUserType, 'Due_date_next_date'), insert_data=temp)
     
-    
+    pprint("DONE")
 except Exception as e:
     log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')
     pprint(str(e))

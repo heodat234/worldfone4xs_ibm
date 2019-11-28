@@ -8,13 +8,14 @@ class Common:
         import re
         import json
         from pprint import pprint
-        from datetime import date, timedelta
+        from datetime import date, timedelta, datetime
         self.pprint = pprint
         self.calendar = calendar
         self.time = time
         self.re = re
         self.json = json
         self.date = date
+        self.datetime = datetime
         self.download_folder = '/data/upload_file/'
         self.base_url = '/var/www/html/worldfone4xs_ibm/'
 
@@ -77,6 +78,9 @@ class Common:
     %% - a literal % character
     '''
     def convertTimestamp(self, value, formatString="%d/%m/%Y"):
+        if formatString in ["%d/%m/%Y", "%d/%m/%y", "%d-%m-%Y", "%d-%m-%y", "%d%m%Y", "%d%m%y"]:
+            if len(str(value)) < 6:
+                value = '0' + str(value)
         result = int(self.time.mktime(self.time.strptime(str(value), formatString)))
         return result
 
@@ -121,7 +125,9 @@ class Common:
             sysConfig = self.json.load(f)
         
         if sysConfig['wff_env'] in ['UAT', 'DEV']:
-            serverfolder = 'YYYYMMDD/'
+            # serverfolder = 'YYYYMMDD'
+            today = self.datetime.strptime('20/11/2019', "%d/%m/%Y").date()
+            serverfolder = today.strftime("%Y%m%d")
         else:
             today = self.date.today()
             serverfolder = today.strftime("%Y%m%d")
