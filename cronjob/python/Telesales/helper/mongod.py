@@ -8,14 +8,25 @@ class Mongodb:
         self.bson = bson
         self.pymongo = pymongo
         connection = self.pymongo.MongoClient('127.0.0.1', 27017)
+        self.connection = connection
         self.MONGODB = MONGODB
         self.db = connection[self.MONGODB]
 
-    def get(self, MONGO_COLLECTION='', WHERE=None, SELECT=None, SORT=[("$natural", 1)], SKIP=0, TAKE=30):
+    def create_db(self, DB_NAME=''):
+        dblist = self.connection.list_database_names()
+        if DB_NAME not in dblist:
+            self.connection[DB_NAME]
+
+    def create_col(self, COL_NAME=''):
+        collist = self.db.list_collection_names()
+        if COL_NAME not in collist:
+            self.db[COL_NAME]
+
+    def get(self, MONGO_COLLECTION='', WHERE=None, SELECT=None, SORT=[("$natural", 1)], SKIP=0, TAKE=0):
         collection = self.db[MONGO_COLLECTION]
         return collection.find(WHERE, SELECT).sort(SORT).skip(SKIP).limit(TAKE)
 
-    def getOne(self, MONGO_COLLECTION='', WHERE=None, SELECT=None, SORT=[("$natural", 1)], SKIP=0, TAKE=30):
+    def getOne(self, MONGO_COLLECTION='', WHERE=None, SELECT=None, SORT=[("$natural", 1)], SKIP=0, TAKE=0):
         collection = self.db[MONGO_COLLECTION]
         return collection.find_one(WHERE, SELECT)
 
@@ -63,3 +74,7 @@ class Mongodb:
     def count(self, MONGO_COLLECTION='', WHERE=None):
         collection = self.db[MONGO_COLLECTION]
         return collection.find(WHERE).count()
+
+    def aggregate_pipeline(self, MONGO_COLLECTION='', aggregate_pipeline=[]):
+        collection = self.db[MONGO_COLLECTION]
+        return collection.aggregate(aggregate_pipeline)

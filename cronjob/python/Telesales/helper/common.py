@@ -5,10 +5,19 @@ class Common:
     def __init__(self):
         import calendar, time
         import sys
+        import re
+        import json
         from pprint import pprint
+        from datetime import date, timedelta, datetime
         self.pprint = pprint
         self.calendar = calendar
         self.time = time
+        self.re = re
+        self.json = json
+        self.date = date
+        self.datetime = datetime
+        self.download_folder = '/data/upload_file/'
+        self.base_url = '/var/www/html/worldfone4xs_ibm/'
 
     def getSubUser(self, type, collection):
         typeList = {
@@ -21,7 +30,14 @@ class Common:
         return '/var/www/html/' + projectName + '/' + path
 
     def convertStr(self, value, formatType=''):
-        return str(value)
+        try: 
+            result = str(value)
+            result = self.re.sub(' +', ' ', result)
+            result = result.lstrip()
+            result = result.rstrip()
+            return str(result)
+        except Exception as e:
+            str(e)
 
     '''
     %a - abbreviated weekday name
@@ -40,6 +56,7 @@ class Common:
     %I - hour, using a 12-hour clock (01 to 12)
     %j - day of the year (001 to 366)
     %m - month (01 to 12)
+    %m1- month (1 to 12)
     %M - minute
     %n - newline character
     %p - either am or pm according to the given time value
@@ -61,7 +78,11 @@ class Common:
     %% - a literal % character
     '''
     def convertTimestamp(self, value, formatString="%d/%m/%Y"):
-        return int(self.time.mktime(self.time.strptime(str(value), formatString)))
+        if formatString in ["%d/%m/%Y", "%d/%m/%y", "%d-%m-%Y", "%d-%m-%y", "%d%m%Y", "%d%m%y"]:
+            if len(str(value)) < 6:
+                value = '0' + str(value)
+        result = int(self.time.mktime(self.time.strptime(str(value), formatString)))
+        return result
 
     def convertInt(self, value, formatType=''):
         return int(value)
@@ -70,11 +91,14 @@ class Common:
         return bool(value)
     
     def convertDouble(self, value, formatType=''):
-        if value in ['']:
-            value = 0
-        if isinstance(value, str):
-            value = value.replace(',', '')
-        return float(value)
+        try:
+            if value in ['']:
+                value = 0
+            if isinstance(value, str):
+                value = value.replace(',', '')
+            return float(value)
+        except Exception as e:
+            str(e)
 
     def convertDefault(self, value, formatType=''):
         return value
@@ -95,4 +119,16 @@ class Common:
             'name'          : self.convertDefault
         }
         return switcher[datatype](data, formatType)
+
+    def getDownloadFolder(self):
+        with open(self.base_url + 'system/config/wffdata.json') as f:
+            sysConfig = self.json.load(f)
         
+        if sysConfig['wff_env'] in ['UAT', 'DEV']:
+            # serverfolder = 'YYYYMMDD'
+            today = self.datetime.strptime('20/11/2019', "%d/%m/%Y").date()
+            serverfolder = today.strftime("%Y%m%d")
+        else:
+            today = self.date.today()
+            serverfolder = today.strftime("%Y%m%d")
+        return self.download_folder + serverfolder + '/'

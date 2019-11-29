@@ -160,7 +160,7 @@
     }
     async function addForm() {
         var formHtml = await $.ajax({
-            url: Config.templateApi + "telesalelist/form",
+            url: Config.templateApi + "data_library/form",
             error: errorDataSource
         });
         var model = Object.assign(Config.observable, {

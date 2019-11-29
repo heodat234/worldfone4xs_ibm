@@ -1,0 +1,112 @@
+28/11/2019, 11:00:09: Start Import
+28/11/2019, 11:00:10: End Log
+28/11/2019, 11:02:29: Start Import
+28/11/2019, 11:02:29: name 'row' is not defined
+28/11/2019, 11:02:39: Start Import
+28/11/2019, 11:02:39: object of type 'CommandCursor' has no len()
+28/11/2019, 11:04:08: Start Import
+28/11/2019, 11:04:08: 'CommandCursor' object has no attribute 'count'
+28/11/2019, 11:18:58: Start Import
+28/11/2019, 11:18:58: End Log
+28/11/2019, 11:21:37: Start Import
+28/11/2019, 11:21:37: 'list' object has no attribute 'keys'
+28/11/2019, 11:22:36: Start Import
+28/11/2019, 11:22:36: the JSON object must be str, bytes or bytearray, not 'list'
+28/11/2019, 11:22:51: Start Import
+28/11/2019, 11:22:51: 'list' object has no attribute 'keys'
+28/11/2019, 11:23:31: Start Import
+28/11/2019, 11:23:31: End Log
+28/11/2019, 11:25:30: Start Import
+28/11/2019, 11:25:30: list indices must be integers or slices, not str
+28/11/2019, 11:26:10: Start Import
+28/11/2019, 11:26:10: the JSON object must be str, bytes or bytearray, not 'list'
+28/11/2019, 11:26:27: Start Import
+28/11/2019, 11:26:27: End Log
+28/11/2019, 11:29:09: Start Import
+28/11/2019, 11:29:09: list indices must be integers or slices, not str
+28/11/2019, 11:30:31: Start Import
+28/11/2019, 11:30:31: 'list' object has no attribute 'keys'
+28/11/2019, 11:31:15: Start Import
+28/11/2019, 11:31:15: End Log
+28/11/2019, 11:35:21: Start Import
+28/11/2019, 11:35:21: End Log
+28/11/2019, 11:36:30: Start Import
+28/11/2019, 11:36:30: End Log
+28/11/2019, 11:38:21: Start Import
+28/11/2019, 11:38:21: list indices must be integers or slices, not str
+28/11/2019, 11:38:53: Start Import
+28/11/2019, 11:38:53: list indices must be integers or slices, not str
+28/11/2019, 11:40:27: Start Import
+28/11/2019, 11:40:27: list indices must be integers or slices, not str
+28/11/2019, 11:49:55: Start Import
+28/11/2019, 11:49:55: End Log
+28/11/2019, 11:49:36: Start Import
+28/11/2019, 11:50:07: End Log
+28/11/2019, 11:50:24: Start Import
+28/11/2019, 11:50:24: End Log
+28/11/2019, 11:50:39: Start Import
+28/11/2019, 11:50:40: End Log
+28/11/2019, 11:50:51: Start Import
+28/11/2019, 11:51:38: End Log
+28/11/2019, 11:58:26: Start Import
+28/11/2019, 11:58:26: End Log
+28/11/2019, 12:31:08: Start Import
+28/11/2019, 12:36:24: Start Import
+28/11/2019, 12:36:25: End Log
+28/11/2019, 12:39:43: Start Import
+28/11/2019, 12:39:43: End Log
+28/11/2019, 12:40:21: Start Import
+28/11/2019, 12:40:21: End Log
+28/11/2019, 12:40:46: Start Import
+28/11/2019, 12:40:46: End Log
+28/11/2019, 12:42:52: Start Import
+28/11/2019, 12:42:52: End Log
+28/11/2019, 12:43:33: Start Import
+28/11/2019, 12:43:33: End Log
+28/11/2019, 12:44:01: Start Import
+28/11/2019, 12:44:01: End Log
+28/11/2019, 14:09:00: Start Import
+28/11/2019, 14:09:29: Start Import
+28/11/2019, 14:11:57: Start Import
+28/11/2019, 14:11:57: End Log
+28/11/2019, 14:58:10: Start Import
+28/11/2019, 14:58:10: End Log
+28/11/2019, 14:59:31: Start Import
+28/11/2019, 14:59:31: End Log
+28/11/2019, 15:23:25: Start Import
+28/11/2019, 15:23:25: name 'true' is not defined
+28/11/2019, 15:23:38: Start Import
+28/11/2019, 15:23:38: name 'account_number' is not defined
+28/11/2019, 15:23:55: Start Import
+28/11/2019, 15:23:55: 'cif_birth_date'
+28/11/2019, 15:24:10: Start Import
+28/11/2019, 15:24:10: 'card_type'
+28/11/2019, 15:24:45: Start Import
+28/11/2019, 15:24:45: 'NoneType' object is not iterable
+28/11/2019, 15:26:25: Start Import
+28/11/2019, 15:26:25: End Log
+28/11/2019, 15:26:53: Start Import
+28/11/2019, 15:26:53: End Log
+28/11/2019, 15:27:33: Start Import
+28/11/2019, 15:27:34: End Log
+28/11/2019, 15:32:41: Start Import
+28/11/2019, 15:32:42: End Log
+28/11/2019, 15:33:07: Start Import
+28/11/2019, 15:33:07: 'NoneType' object is not iterable
+28/11/2019, 15:33:41: Start Import
+28/11/2019, 15:33:41: End Log
+28/11/2019, 15:34:05: Start Import
+28/11/2019, 15:34:05: End Log
+28/11/2019, 15:34:38: Start Import
+28/11/2019, 15:34:38: End Log
+28/11/2019, 16:03:46: Start Import
+28/11/2019, 16:03:46: time data '2018-09-12 00:00:00' does not match format '%d/%m/%Y'
+28/11/2019, 16:04:54: Start Import
+28/11/2019, 16:04:54: unconverted data remains:  00:00:00
+28/11/2019, 16:06:00: Start Import
+28/11/2019, 16:06:00: End Log
+28/11/2019, 16:07:08: Start Import
+28/11/2019, 16:08:04: Start Import
+28/11/2019, 16:08:06: End Log
+28/11/2019, 16:09:29: Start Import
+28/11/2019, 16:10:58: End Log

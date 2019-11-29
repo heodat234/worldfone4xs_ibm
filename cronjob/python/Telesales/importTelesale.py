@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 import sys
 import os
-# sys.path.insert(1, '/var/www/html/worldfone4xs_ibm/cronjob/python')
 import calendar
 import time
 import ntpath
@@ -15,43 +14,59 @@ from bson import ObjectId
 from helper.common import Common
 from helper.mongod import Mongodb
 from helper.excel import Excel
+from helper.jaccs import Config
 from dateutil.parser import parse
 
 mongodb     = Mongodb("worldfone4xs")
 _mongodb    = Mongodb("_worldfone4xs")
 excel       = Excel()
 common      = Common()
+config      = Config()
+base_url    = config.base_url()
+subUserType = 'TS'
+collection  = common.getSubUser(subUserType, 'Telesalelist')
+log         = open("/var/www/html/worldfone4xs_ibm/cronjob/python/Telesales/log/importTelesale.txt","a+")
 now         = datetime.now()
-log         = open("/var/www/html/worldfone4xs_ibm/cronjob/python/Telesales/importTelesale.txt","a+")
-
+log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': Start Import' + '\n')
 try:
-   importLogId = sys.argv[1]
-   collection  = sys.argv[2]
-   extension   = sys.argv[3]
+   ftpInfo     = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'ftp_config'), WHERE={'collection': collection})
+   ftpConfig   = config.ftp_config()
+   ftpLocalUrl = common.getDownloadFolder() + ftpInfo['filename']
+
+   try:
+      sys.argv[1]
+      importLogId = str(sys.argv[1])
+      importLogInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': ObjectId(importLogId)})
+   except Exception as SysArgvError:
+      importLogInfo = {
+         'collection'    : collection, 
+         'begin_import'  : time.time(),
+         'file_name'     : ftpInfo['filename'],
+         'file_path'     : ftpLocalUrl, 
+         'source'        : 'ftp',
+         'status'        : 2,
+         'command'       : 'python3.6 ' + base_url + "cronjob/python/Loan/importTelesale.py > /dev/null &",
+         'created_by'    : 'system'
+      }
+      importLogId = mongodb.insert(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), insert_data=importLogInfo) 
+    
+
    insertData  = []
    resultData  = []
    errorData   = []
 
-   now         = datetime.now()
-   log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': Start Import' + '\n')
-
-   importLogInfo = mongodb.getOne(MONGO_COLLECTION='TS_Import', WHERE={'_id': ObjectId(importLogId)})
-
-   headers = _mongodb.get(MONGO_COLLECTION='Model', WHERE={"collection": 'TS_Telesalelist','sub_type':{'$exists': 'true'}}, SELECT=['index', 'field','type'], SORT=([('index', 1)]))
+   headers = _mongodb.get(MONGO_COLLECTION='Model', WHERE={"collection": collection,'sub_type':{'$exists': 'true'}}, SELECT=['index', 'field','type'], SORT=([('index', 1)]))
    headers = list(headers)
 
-   users = _mongodb.get(MONGO_COLLECTION='TS_User', WHERE=None, SELECT=['extension', 'agentname'], SORT=([('id', 1)]))
-   users = list(users)
-   arr = {} 
-   random = {}
-   # arrayCMND = {}
+   users    = _mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'User'), WHERE=None, SELECT=['extension', 'agentname'], SORT=([('id', 1)]))
+   users    = list(users)
+   arr      = {} 
+   random   = {}
    for user in users:
       arr[user['extension']] = 0
       random[user['extension']] = 0
-      # arrayCMND[user['extension']] = []
 
-   file_path = importLogInfo['file_path']
-   dataLibrary = excel.getDataCSV(file_path=file_path,header=0, names=None, index_col=None, usecols=None, dtype=None, converters=None, skiprows=None, na_values=None, encoding='latin-1')
+   dataLibrary = excel.getDataCSV(file_path=importLogInfo['file_path'],header=0, names=None, index_col=None, usecols=None, dtype=None, converters=None, skiprows=None, na_values=None, encoding='latin-1')
    listDataLibrary = dataLibrary.values
    for key,listCol in enumerate(listDataLibrary):
       temp = {}
@@ -89,7 +104,8 @@ try:
                errorData.append(err)
                checkErr = True
          if header['type'] == 'phone':
-            value = '0'+ str(listDataLibrary[key][idx])
+            value_int   = int(listDataLibrary[key][idx])
+            value       = '0'+ str(value_int)
 
          if header['type'] == 'string' and header['field'] != 'id_no':
             try:
@@ -98,7 +114,8 @@ try:
             except ValueError:
                value       = str(listDataLibrary[key][idx])
          if header['type'] == 'string' and header['field'] == 'id_no':
-            value = '0'+ str(listDataLibrary[key][idx])
+            value_int   = int(listDataLibrary[key][idx])
+            value       = '0'+ str(value_int)
 
          if header['field'] == 'assign' and value != '':
             value = str(int(listDataLibrary[key][idx]))
@@ -109,8 +126,6 @@ try:
                   temp['assign_name']  = user['agentname']
                   arr[user['extension']] = arr[user['extension']] + 1
                   checkUser = True
-                  # cmnd = str(int(listDataLibrary[key][6]))
-                  # arrayCMND[user['extension']].append(cmnd)
             if checkUser == False:
                value = ''
          if header['field'] == 'assign' and value == '':
@@ -121,7 +136,7 @@ try:
 
          temp['createdAt']       = int(time.time())
          temp['updatedAt']       = int(time.time())
-         temp['updatedBy']       = extension
+         temp['updatedBy']       = 'system'
 
       if checkErr == False:
          try:
@@ -145,4 +160,5 @@ try:
    pprint({'status': status})
 
 except Exception as e:
+   print(e)
    log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')

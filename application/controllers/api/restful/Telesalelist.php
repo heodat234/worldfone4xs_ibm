@@ -54,6 +54,10 @@ Class Telesalelist extends WFF_Controller {
 		try {
 			$data = json_decode(file_get_contents('php://input'), TRUE);
 			$data["createdBy"]	=	$this->session->userdata("extension");
+			$this->mongo_db->switch_db('_worldfone4xs');
+			$user = $this->crud->where(array('extension' => $data['assign']))->getOne($this->user_collection);
+			$this->mongo_db->switch_db();
+			$data['assign_name'] = $user['agentname'];
 			$result = $this->crud->create($this->collection, $data);
 			echo json_encode(array("status" => $result ? 1 : 0, "data" => [$result]));
 		} catch (Exception $e) {

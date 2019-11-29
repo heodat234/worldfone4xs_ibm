@@ -16,12 +16,15 @@ from xlsxwriter.utility import xl_rowcol_to_cell
 from pprint import pprint
 from bson import ObjectId
 from common import Common
+from helper.jaccs import Config
 from dateutil.parser import parse
 
 mongodb     = Mongodb("worldfone4xs")
 _mongodb    = Mongodb("_worldfone4xs")
 excel       = Excel()
 common      = Common()
+config      = Config()
+base_url    = config.base_url()
 now         = datetime.now()
 subUserType = 'LO'
 collection = common.getSubUser(subUserType, 'Lawsuit')

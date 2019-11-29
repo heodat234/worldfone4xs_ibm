@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 import sys
 import os
-# sys.path.insert(1, '/var/www/html/worldfone4xs_ibm/cronjob/python')
 import calendar
 import time
 import ntpath
@@ -15,27 +14,47 @@ from bson import ObjectId
 from helper.common import Common
 from helper.mongod import Mongodb
 from helper.excel import Excel
+from helper.jaccs import Config
 from dateutil.parser import parse
 
 mongodb     = Mongodb("worldfone4xs")
 _mongodb    = Mongodb("_worldfone4xs")
 excel       = Excel()
 common      = Common()
+config      = Config()
+base_url    = config.base_url()
+subUserType = 'TS'
+collection  = common.getSubUser(subUserType, 'Datalibrary')
 now         = datetime.now()
-log         = open("/var/www/html/worldfone4xs_ibm/cronjob/python/Telesales/importDataLibrary.txt","a")
-
+log         = open("/var/www/html/worldfone4xs_ibm/cronjob/python/Telesales/log/importDataLibrary.txt","a")
+now         = datetime.now()
+log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': Start Import' + '\n')
 try:
-   importLogId = sys.argv[1]
-   collection  = sys.argv[2]
-   extension   = sys.argv[3]
+   ftpInfo     = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'ftp_config'), WHERE={'collection': collection})
+   ftpConfig   = config.ftp_config()
+   ftpLocalUrl = common.getDownloadFolder() + ftpInfo['filename']
+
+   try:
+      sys.argv[1]
+      importLogId = str(sys.argv[1])
+      importLogInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': ObjectId(importLogId)})
+   except Exception as SysArgvError:
+      importLogInfo = {
+         'collection'    : collection, 
+         'begin_import'  : time.time(),
+         'file_name'     : ftpInfo['filename'],
+         'file_path'     : ftpLocalUrl, 
+         'source'        : 'ftp',
+         'status'        : 2,
+         'command'       : 'python3.6 ' + base_url + "cronjob/python/Loan/importDataLibrary.py > /dev/null &",
+         'created_by'    : 'system'
+      }
+      importLogId = mongodb.insert(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), insert_data=importLogInfo) 
+    
    insertData  = []
    resultData  = []
    errorData   = []
 
-   now         = datetime.now()
-   log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': Start Import' + '\n')
-
-   importLogInfo = mongodb.getOne(MONGO_COLLECTION='TS_Import', WHERE={'_id': ObjectId(importLogId)})
    headers = _mongodb.get(MONGO_COLLECTION='Model', WHERE={"collection": collection}, SELECT=['index', 'field','type'], SORT=([('index', 1)]))
    headers = list(headers)
 
@@ -45,7 +64,6 @@ try:
    for key,listCol in enumerate(listDataLibrary):
       temp = {}
       checkErr = False
-      # log.write(str(key) + '\n')
       for idx,header in enumerate(headers):
          if str(listDataLibrary[key][idx]) == 'nan':
             listDataLibrary[key][idx] = ''
@@ -77,15 +95,19 @@ try:
                errorData.append(err)
                checkErr = True
          if header['type'] == 'phone':
-            value = str(listDataLibrary[key][idx])
+            value_int   = int(listDataLibrary[key][idx])
+            value       = '0'+ str(value_int)
 
-         if header['type'] == 'string':
+         if header['type'] == 'string' and header['field'] != 'id_no':
             try:
                value_int   = int(listDataLibrary[key][idx])
                value       = str(value_int)
             except ValueError:
                value       = str(listDataLibrary[key][idx])
-            
+         if header['type'] == 'string' and header['field'] == 'id_no':
+            value_int   = int(listDataLibrary[key][idx])
+            value       = '0'+ str(value_int)
+ 
          if header['field'] == 'assign' and value != '':
             value = str(listDataLibrary[key][idx])
             temp['createdBy']  = 'Byfixed-Import'
@@ -105,7 +127,6 @@ try:
          except Exception as e:
             now_log         = datetime.now()
             log.write(now_log.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')
-      # insertData.append(temp)
       
    if len(errorData) <= 0:
       status = 1
