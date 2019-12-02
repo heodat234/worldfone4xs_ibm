@@ -3,7 +3,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 Class Daily_working_days_report extends WFF_Controller {
 
-    private $collection             = "Daily_working_days_report";
+    private $collection             = "Daily_prod_working_days_report";
     private $ln3206_collection      = "LN3206F";
     private $zaccf_collection       = "ZACCF";
     private $lnjc05_collection      = "LNJC05";
@@ -44,10 +44,40 @@ Class Daily_working_days_report extends WFF_Controller {
         print_r($groupProducts);
     }
 
-    // function exportExcel()
-    // {
-    //     shell_exec('PYTHONIOENCODING=utf-8 python3.6 /var/www/html/worldfone4xs_ibm/cronjob/python/Loan/exportDailyAssignment.py  > /dev/null &');
-    // }
+    function exportExcel()
+    {
+        $now = getdate();
+        $month = $now['mon'];
+        // var_dump($month);exit;
+        $request = json_decode($this->input->get("q"), TRUE);
+        $model = $this->crud->build_model($this->collection);
+        $this->load->library("kendo_aggregate", $model);
+        $this->kendo_aggregate->set_default("sort", null);
+
+        $match_officer = array(
+           '$match' => array(
+              '$and' => array(
+                 array('month'=> array( '$gte'=> '11')),
+              )
+           )
+        );
+
+        $group_officer = array(
+           '$group' => array(
+              '_id' => array('team_id' =>'$team_id','debt_group' => '$debt_group', 'product' => '$product','due_date_code' => '$due_date_code'),
+              'team' => array('$last'=> '$team'),
+              'product' => array('$last'=> '$product'),
+              'debt_group' => array('$last'=> '$debt_group'),
+              'col' => array('$push'=> '$col'),
+              'count_data' => array('$sum'=> 1),
+           )
+        );
+        $this->kendo_aggregate->set_kendo_query($request)->filtering()->adding($match_officer,$group_officer);
+        $data_aggregate = $this->kendo_aggregate->paging()->get_data_aggregate();
+        $data = $this->mongo_db->aggregate_pipeline($this->collection, $data_aggregate);
+        var_dump($data);
+
+    }
     // function downloadExcel()
     // {
     //   $this->exportExcel();

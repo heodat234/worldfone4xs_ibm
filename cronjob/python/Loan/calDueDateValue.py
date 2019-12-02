@@ -107,11 +107,13 @@ try:
                         temp = {
                             'due_date'              : todayTimeStamp - 86400,
                             'due_date_one'          : todayTimeStamp,
+                            'product'               : groupProduct['value'],
                             'debt_group'            : debtGroupCell[0:1],
                             'due_date_code'         : debtGroupCell[1:3],
                             'team_id'               : str(groupCell['_id']),
                             'debt_acc_no'           : 0,
                             'current_balance_total' : 0,
+                            'acc_arr'               : []
                         }
                         
                         for key, value in mainProduct.items():
@@ -133,6 +135,36 @@ try:
                                     temp['debt_acc_' + zaccfInfo['PRODGRP_ID']] += 1
                                     temp['current_balance_' + zaccfInfo['PRODGRP_ID']] += float(lnjc05['current_balance'])
                         
+                        if groupProduct['value'] == 'Card':
+                            member = ( s for s in groupCell['members']) if 'members' in groupCell.keys() else []
+                            assign = list(dict.fromkeys(list(member)))
+                            # diallistDetail = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Diallist_detail'), WHERE={'createdAt':{'$gte': todayTimeStamp}, 'assign': {'$in': assign}})
+                            aggregate_diallist = [
+                                {
+                                    "$match":
+                                    {
+                                        "createdAt": {'$gte': todayTimeStamp},
+                                        "assign": {'$in' : assign}
+                                    }
+                                },{
+                                    "$group":
+                                    {
+                                        "_id": 'null',
+                                        "total_amt": {'$sum': '$cur_bal'},
+                                        "total_acc": {'$sum': 1},
+                                        "acc_arr": {'$push' : '$account_number'}
+                                    }
+                                }
+                            ]
+                            diallistDetail = mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'Diallist_detail'),aggregate_pipeline=aggregate_diallist)
+                            for diallist in diallistDetail:
+                                temp['debt_acc_no'] = diallist['total_acc']
+                                temp['current_balance_total'] = diallist['total_amt']
+                                temp['debt_acc_301'] = diallist['total_acc']
+                                temp['current_balance_301'] = diallist['total_amt']
+                                temp['acc_arr'] = diallist['acc_arr']
+
+
                         temp['created_at'] = time.time()
                         temp['created_by'] = 'system'
                         temp['for_month'] = str(month)

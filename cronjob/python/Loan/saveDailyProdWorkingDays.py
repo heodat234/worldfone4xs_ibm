@@ -37,7 +37,7 @@ try:
     listDebtGroup = []
     
     # today = date.today()
-    today = datetime.strptime('20/11/2019', "%d/%m/%Y").date()
+    today = datetime.strptime('21/11/2019', "%d/%m/%Y").date()
 
     day = today.day
     month = today.month
@@ -78,6 +78,11 @@ try:
     listGroupProductRaw = _mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Jsondata'), WHERE={'tags': ['group', 'debt', 'product']})
     listGroupProduct = listGroupProductRaw['data']
 
+    if int(month) != 1:
+        oldMonth = int(month) - 1
+    else:
+        oldMonth = 12
+
     for debtGroupCell in list(listDebtGroup):
         if debtGroupCell[0:1] is not 'F':
             dueDayOfMonth = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_due_date'), WHERE={'for_month': str(month), 'debt_group': debtGroupCell[1:3]})
@@ -85,6 +90,49 @@ try:
 
             for groupProduct in list(listGroupProduct):
                 groupInfoByDueDate = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Group'), WHERE={'debt_groups': debtGroupCell, 'name': {"$regex": groupProduct['text'] + '.*'}})
+                tempTotal = {
+                    'col'           : 0,
+                    'col_end_day'   : 0,
+                    'paid_acc'      : 0,
+                    'ratio_acc'     : 0,
+                    'total_amt'     : 0,
+                    'amt_end_day'   : 0,
+                    'paid_amt'      : 0,
+                    'ratio_amt'     : 0,
+                    'pay_amt'       : 0,
+                    'month'         : str(month),
+                    'tar_acc'       : 0,
+                    'tar_amt'       : 0,
+                    'debt_group'    : debtGroupCell[0:1],
+                    'due_date_code' : debtGroupCell[1:3],
+                    'product'       : groupProduct['text'],
+                    'team'          : 'TOTAL',
+                    'team_id'       : 'total'
+                }
+                ytd = {
+                    'amt_end_day'   : 0,
+                    'col_end_day'   : 0
+                }
+                tempOldTotal = {
+                    'col'           : 0,
+                    'col_end_day'   : 0,
+                    'paid_acc'      : 0,
+                    'ratio_acc'     : 0,
+                    'total_amt'     : 0,
+                    'amt_end_day'   : 0,
+                    'paid_amt'      : 0,
+                    'ratio_amt'     : 0,
+                    'pay_amt'       : 0,
+                    'month'         : str(oldMonth),
+                    'tar_acc'       : 0,
+                    'tar_amt'       : 0,
+                    'debt_group'    : debtGroupCell[0:1],
+                    'due_date_code' : debtGroupCell[1:3],
+                    'product'       : groupProduct['text'],
+                    'team'          : 'TOTAL',
+                    'team_id'       : 'total'
+                }
+                checkOldReport = 'false'
                 for groupCell in list(groupInfoByDueDate):
                     temp = {
                         'col'           : 0,
@@ -164,13 +212,9 @@ try:
                                 temp['tar_amt'] = (diallist['target']*detail['total_amt'])/100
 
                         # oldReport
-                        if int(month) != 1:
-                            oldMonth = int(month) - 1
-                        else:
-                            oldMonth = 12
-
                         oldYesterdayReportData = mongodb.get(MONGO_COLLECTION=collection, WHERE={'team_id': str(groupCell['_id']),'due_date_code':debtGroupCell[1:3],'month': str(oldMonth)},SORT=[('createdAt',-1)],SKIP=0,TAKE=1)
                         if oldYesterdayReportData != None:
+                            checkOldReport = 'true'
                             for oldReport in oldYesterdayReportData:
                                 temp_old = {
                                     'col'           : 0,
@@ -231,6 +275,15 @@ try:
                                 temp_old['createdBy'] = 'system'
                                 mongodb.insert(MONGO_COLLECTION=collection, insert_data=temp_old)
 
+                                tempOldTotal['tar_acc']    += temp_old['tar_acc']
+                                tempOldTotal['tar_amt']    += temp_old['tar_amt']
+                                tempOldTotal['col']        += temp_old['col']
+                                tempOldTotal['total_amt']  += temp_old['total_amt']
+                                tempOldTotal['paid_acc']   += temp_old['paid_acc']
+                                tempOldTotal['paid_amt']   += temp_old['paid_amt']
+                                tempOldTotal['pay_amt']    += temp_old['pay_amt']
+
+
                     
                     if groupProduct['value'] == 'SIBS':
                         lead = ['JIVF00' + groupCell['lead']] if 'lead' in groupCell.keys() else []
@@ -259,7 +312,7 @@ try:
                             temp['col']         = lnjc05['total_acc']
                             temp['total_amt']   = lnjc05['total_amt']
                             temp['acc_arr']     = lnjc05['acc_arr']
-                            
+
                         temp['paid_acc']     = temp['tar_acc'] - temp['col']
                         temp['ratio_acc']    = temp['paid_acc']/temp['tar_acc'] if temp['tar_acc'] != 0 else 0
                         temp['paid_amt']     = temp['tar_amt'] - temp['total_amt']
@@ -269,6 +322,9 @@ try:
                             for yesterday in yesterdayReportData:
                                 yesterday['col_end_day']  = yesterday['col'] - temp['col']
                                 yesterday['amt_end_day']  = yesterday['total_amt'] - temp['total_amt']
+
+                                ytd['col_end_day'] += yesterday['col_end_day']
+                                ytd['amt_end_day'] += yesterday['amt_end_day']
                                 mongodb.update(MONGO_COLLECTION=collection, WHERE={'_id': ObjectId(yesterday['_id'])},VALUE=yesterday)
                                 aggregate_3206 = [
                                     {
@@ -287,18 +343,40 @@ try:
                                 ln3206fInfo = mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'LN3206F'),aggregate_pipeline=aggregate_3206)
                                 for ln3206 in ln3206fInfo:
                                     temp['pay_amt']         = lnjc05['pay_amt']
+
+                        tempTotal['tar_acc']    += temp['tar_acc']
+                        tempTotal['tar_amt']    += temp['tar_amt']
+                        tempTotal['col']        += temp['col']
+                        tempTotal['total_amt']  += temp['total_amt']
+                        tempTotal['paid_acc']   += temp['paid_acc']
+                        tempTotal['paid_amt']   += temp['paid_amt']
+                        tempTotal['pay_amt']    += temp['pay_amt']
                             
                     temp['createdAt'] = time.time()
                     temp['createdBy'] = 'system'
+                    insertData.append(temp)
                     # print(repr(temp))
-                    mongodb.insert(MONGO_COLLECTION=collection, insert_data=temp)
-            #     break    
+                    # mongodb.insert(MONGO_COLLECTION=collection, insert_data=temp)
+
+                tempTotal['ratio_acc']   = tempTotal['paid_acc']/tempTotal['tar_acc'] if tempTotal['tar_acc'] != 0 else 0
+                tempTotal['ratio_amt']   = tempTotal['paid_amt']/tempTotal['tar_amt'] if tempTotal['tar_amt'] != 0 else 0
+                insertData.append(tempTotal)
+                yesterdayTotalData = mongodb.get(MONGO_COLLECTION=collection, WHERE={'team_id': 'total','product': groupProduct['text'],'due_date_code':debtGroupCell[1:3],'month': str(month)},SORT=[('createdAt',-1)],SKIP=0,TAKE=1)
+                if yesterdayTotalData != None:
+                    for yesterdayTotal in yesterdayTotalData: 
+                        mongodb.update(MONGO_COLLECTION=collection, WHERE={'_id': ObjectId(yesterdayTotal['_id'])},VALUE=ytd)
+
+                if checkOldReport == 'true':
+                    tempOldTotal['col_end_day'] = tempOldTotal['col']
+                    tempOldTotal['amt_end_day'] = tempOldTotal['amt_end_day']
+                    tempOldTotal['ratio_acc']   = tempOldTotal['paid_acc']/tempOldTotal['tar_acc'] if tempOldTotal['tar_acc'] != 0 else 0
+                    tempOldTotal['ratio_amt']   = tempOldTotal['paid_amt']/tempOldTotal['tar_amt'] if tempOldTotal['tar_amt'] != 0 else 0
+                    mongodb.insert(MONGO_COLLECTION=collection, insert_data=tempOldTotal)
+                # break    
             # break
         # break 
-                    # mongodb.insert(MONGO_COLLECTION=collection, insert_data=temp)
-                    # log.write(json.dumps(temp))
-                    # pprint(temp)
-    
+                  
+    print(insertData)
     # for groupProduct in list(listGroupProduct):
     #     if groupProduct == 'SIBS':
     #         for debtGroupCell in list(listDebtGroup):
@@ -409,6 +487,8 @@ try:
     # for account in listAccount:
     #     temp = {}
     #     groupInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Group_card'), WHERE={'account_no': account['account_number']})
+    if len(insertData) > 0:
+        mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertData)   
         # pprint(dict(groupInfo)
 except Exception as e:
     # log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')

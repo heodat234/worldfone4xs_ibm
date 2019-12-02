@@ -111,9 +111,11 @@ try:
                     if incidenceInfo is not None:
                         temp['inci'] = incidenceInfo['debt_acc_no'] if 'debt_acc_no' in incidenceInfo.keys() else 0
                         temp['inci_amt'] = incidenceInfo['current_balance_total'] if 'current_balance_total' in incidenceInfo.keys() else 0
+                        acc_arr = incidenceInfo['acc_arr'] if 'acc_arr' in incidenceInfo.keys() else []
                     else:
                         temp['inci'] = 0
                         temp['inci_amt'] = 0
+                        acc_arr = []
                     
                     for key, value in mainProduct.items():
                         temp['col_' + key] = 0
@@ -161,7 +163,36 @@ try:
                                 temp['rem_amt_' + zaccfInfo['PRODGRP_ID']] = temp['inci_amt_' + zaccfInfo['PRODGRP_ID']] - temp['col_amt_' + zaccfInfo['PRODGRP_ID']]
                                 temp['flow_rate_' + zaccfInfo['PRODGRP_ID']] = temp['rem_' + zaccfInfo['PRODGRP_ID']] / temp['inci_' + zaccfInfo['PRODGRP_ID']] if temp['inci_' + zaccfInfo['PRODGRP_ID']] != 0 else 0
                                 temp['flow_rate_amt_' + zaccfInfo['PRODGRP_ID']] = temp['rem_amt_' + zaccfInfo['PRODGRP_ID']] / temp['inci_amt_' + zaccfInfo['PRODGRP_ID']] if temp['inci_amt_' + zaccfInfo['PRODGRP_ID']] != 0 else 0
+                    
+                    if groupProduct['value'] == 'Card':
+                        yesterdayReportData = mongodb.getOne(MONGO_COLLECTION=collection, WHERE={'team_id': str(groupCell['_id']), 'created_at': {'$gte': (starttime - 86400), '$lte': (endtime - 86400)}})
+                        
+                        # dueDateOneData = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Due_date_next_date_SIBS'), WHERE={'debt_group': debtGroupCell[0:1], 'due_date_code': debtGroupCell[1:3], 'for_month': str(month)})
+
+                        # member = ( s for s in groupCell['members']) if 'members' in groupCell.keys() else []
+                        # assign = list(dict.fromkeys(list(member)))
+
+                        listOfAccount = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'List_of_account_in_collection'), WHERE={ 'account_number': {'$in': acc_arr}})
+                        for account in listOfAccount:
+                            # zaccfInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'ZACCF'), WHERE={'account_number': lnjc05['account_number']})
+                            # ln3206fInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'LN3206F'), WHERE={'account_number': lnjc05['account_number']})
+                            # if ln3206fInfo is not None:
+                            temp['col'] += 1
+                            temp['col_amt'] += account['cur_bal']
+                                # if zaccfInfo is not None:
+                            temp['col_301'] += 1
+                            temp['col_amt_301'] += account['cur_bal']
                             
+                            temp['rem'] = temp['inci'] - temp['col']
+                            temp['rem_amt'] = temp['inci_amt'] - temp['col_amt']
+                            temp['flow_rate'] = temp['rem'] / temp['inci'] if temp['inci'] != 0 else 0
+                            temp['flow_rate_amt'] = temp['rem_amt'] / temp['inci_amt'] if temp['inci_amt'] != 0 else 0
+                            # if zaccfInfo is not None:
+                            temp['rem_301'] = temp['inci_301'] - temp['col_301']
+                            temp['rem_amt_301'] = temp['inci_amt_301'] - temp['col_amt_301']
+                            temp['flow_rate_301'] = temp['rem_301'] / temp['inci_301'] if temp['inci_301'] != 0 else 0
+                            temp['flow_rate_amt_301'] = temp['rem_amt_301'] / temp['inci_amt_301'] if temp['inci_amt_301'] != 0 else 0
+                       
                     mongodb.insert(MONGO_COLLECTION=collection, insert_data=temp)
                     # log.write(json.dumps(temp))
                     # pprint(temp)

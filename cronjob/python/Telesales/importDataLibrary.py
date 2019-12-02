@@ -30,15 +30,15 @@ log         = open("/var/www/html/worldfone4xs_ibm/cronjob/python/Telesales/log/
 now         = datetime.now()
 log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': Start Import' + '\n')
 try:
-   ftpInfo     = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'ftp_config'), WHERE={'collection': collection})
-   ftpConfig   = config.ftp_config()
-   ftpLocalUrl = common.getDownloadFolder() + ftpInfo['filename']
 
    try:
       sys.argv[1]
       importLogId = str(sys.argv[1])
       importLogInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': ObjectId(importLogId)})
    except Exception as SysArgvError:
+      ftpInfo     = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'ftp_config'), WHERE={'collection': collection})
+      ftpConfig   = config.ftp_config()
+      ftpLocalUrl = common.getDownloadFolder() + ftpInfo['filename']
       importLogInfo = {
          'collection'    : collection, 
          'begin_import'  : time.time(),

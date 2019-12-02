@@ -83,26 +83,49 @@ async function createColumn() {
     }]
 
     product.map(function(prod) {
-        numberIncColumn.push({
-            field: 'inci_' + prod.code,
-            title: prod.name,
-            width: 100
-        });
-        amountIncColumn.push({
-            field: 'inci_amt_' + prod.code,
-            title: prod.name,
-            width: 100
-        });
-        numberColColumn.push({
-            field: 'col_' + prod.code,
-            title: prod.name,
-            width: 100
-        });
-        amountColColumn.push({
-            field: 'col_amt_' + prod.code,
-            title: prod.name,
-            width: 100
-        });
+        if (prod.code == '301') {
+            numberIncColumn.push({
+                field: 'inci_' + prod.code,
+                title: 'Card (301+302)',
+                width: 100
+            });
+            amountIncColumn.push({
+                field: 'inci_amt_' + prod.code,
+                title: 'Card (301+302)',
+                width: 100
+            });
+            numberColColumn.push({
+                field: 'col_' + prod.code,
+                title: 'Card (301+302)',
+                width: 100
+            });
+            amountColColumn.push({
+                field: 'col_amt_' + prod.code,
+                title: 'Card (301+302)',
+                width: 100
+            });
+        }else if (prod.code != '302') {
+            numberIncColumn.push({
+                field: 'inci_' + prod.code,
+                title: prod.name,
+                width: 100
+            });
+            amountIncColumn.push({
+                field: 'inci_amt_' + prod.code,
+                title: prod.name,
+                width: 100
+            });
+            numberColColumn.push({
+                field: 'col_' + prod.code,
+                title: prod.name,
+                width: 100
+            });
+            amountColColumn.push({
+                field: 'col_amt_' + prod.code,
+                title: prod.name,
+                width: 100
+            });
+        }
         return prod;
     });
 

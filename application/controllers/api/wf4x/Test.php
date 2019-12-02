@@ -81,12 +81,12 @@ Class Test extends CI_Controller {
    {
       ini_set('max_execution_time', '300');
       $collection = 'TS_Telesalelist';
-      $idImport = "5dbba3691ef2b4495631c50c";
+      $idImport = "5de4d415cd490f037d227000";
       $extension = '999';
 
       // $output = shell_exec('PYTHONIOENCODING=utf-8 python3.6 /var/www/html/worldfone4xs_ibm/cronjob/python/Loan/importLNJC05F.py  2>&1');
-      // $output = shell_exec('PYTHONIOENCODING=utf-8 python3.6 /var/www/html/python/testReadCSV.py ' . $filePath . " 2>&1");
-      $output = shell_exec('python3.6 /var/www/html/worldfone4xs_ibm/cronjob/python/Loan/saveDailyProdWorkingDays.py  2>&1');
+      // $output = shell_exec('PYTHONIOENCODING=utf-8 python3.6 /var/www/html/worldfone4xs_ibm/cronjob/python/Telesales/importTelesale.py ' . $idImport . " 2>&1");
+      $output = shell_exec('python3.6 /var/www/html/worldfone4xs_ibm/cronjob/python/Loan/saveDailyProdProdEachUserGroupRewrite.py  2>&1');
       echo $output;
    }
 

@@ -120,10 +120,11 @@ try:
             SELECT=['assign'])
          if diallist != None:
             if row['COMPANY'] == '':
-               for user in list(users):
-                  if user['extension'] == diallist['assign']:
-                     row['COMPANY']          = user['agentname']
-                     break
+               if 'assign' in diallist.keys():
+                  for user in list(users):
+                     if user['extension'] == diallist['assign']:
+                        row['COMPANY']          = user['agentname']
+                        break
 
          row.pop('_id')
          row.pop('officer_name')
@@ -203,10 +204,11 @@ try:
             SELECT=['assign'])
          if diallist != None:
             if row['COMPANY'] == '':
-               for user in list(users):
-                  if user['extension'] == diallist['assign']:
-                     row['COMPANY']          = user['agentname']
-                     break
+               if 'assign' in diallist.keys():
+                  for user in list(users):
+                     if user['extension'] == diallist['assign']:
+                        row['COMPANY']          = user['agentname']
+                        break
          
          today    = datetime.now()
          FMT      = '%d/%m/%Y'
@@ -340,10 +342,11 @@ try:
             SELECT=['assign'])
          if diallist != None:
             if row['COMPANY'] == '':
-               for user in list(users):
-                  if user['extension'] == diallist['assign']:
-                     row['COMPANY']          = user['agentname']
-                     break
+               if 'assign' in diallist.keys():
+                  for user in list(users):
+                     if user['extension'] == diallist['assign']:
+                        row['COMPANY']          = user['agentname']
+                        break
 
          temp['current_balance']    = float(row['WO9711']) + float(row['WO9712'])+ float(row['WO9713'])
          

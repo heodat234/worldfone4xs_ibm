@@ -29,15 +29,16 @@ log         = open("/var/www/html/worldfone4xs_ibm/cronjob/python/Telesales/log/
 now         = datetime.now()
 log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': Start Import' + '\n')
 try:
-   ftpInfo     = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'ftp_config'), WHERE={'collection': collection})
-   ftpConfig   = config.ftp_config()
-   ftpLocalUrl = common.getDownloadFolder() + ftpInfo['filename']
+   
 
    try:
       sys.argv[1]
       importLogId = str(sys.argv[1])
       importLogInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': ObjectId(importLogId)})
    except Exception as SysArgvError:
+      ftpInfo     = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'ftp_config'), WHERE={'collection': collection})
+      ftpConfig   = config.ftp_config()
+      ftpLocalUrl = common.getDownloadFolder() + ftpInfo['filename']
       importLogInfo = {
          'collection'    : collection, 
          'begin_import'  : time.time(),
@@ -45,7 +46,7 @@ try:
          'file_path'     : ftpLocalUrl, 
          'source'        : 'ftp',
          'status'        : 2,
-         'command'       : 'python3.6 ' + base_url + "cronjob/python/Loan/importTelesale.py > /dev/null &",
+         'command'       : 'python3.6 ' + base_url + "cronjob/python/Telesales/importTelesale.py > /dev/null &",
          'created_by'    : 'system'
       }
       importLogId = mongodb.insert(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), insert_data=importLogInfo) 
@@ -66,7 +67,7 @@ try:
       arr[user['extension']] = 0
       random[user['extension']] = 0
 
-   dataLibrary = excel.getDataCSV(file_path=importLogInfo['file_path'],header=0, names=None, index_col=None, usecols=None, dtype=None, converters=None, skiprows=None, na_values=None, encoding='latin-1')
+   dataLibrary = excel.getDataCSV(file_path=importLogInfo['file_path'],header=0, names=None, index_col=None, usecols=None, dtype=None, converters=None, skiprows=None, na_values=None, encoding='utf-8')
    listDataLibrary = dataLibrary.values
    for key,listCol in enumerate(listDataLibrary):
       temp = {}
@@ -118,16 +119,23 @@ try:
             value       = '0'+ str(value_int)
 
          if header['field'] == 'assign' and value != '':
-            value = str(int(listDataLibrary[key][idx]))
-            temp['createdBy']  = 'Byfixed-Import'
-            checkUser = False
-            for user in users:
-               if user['extension'] == value:
-                  temp['assign_name']  = user['agentname']
-                  arr[user['extension']] = arr[user['extension']] + 1
-                  checkUser = True
-            if checkUser == False:
-               value = ''
+            try:
+               value = str(int(listDataLibrary[key][idx]))
+               temp['createdBy']  = 'Byfixed-Import'
+               checkUser = False
+               for user in users:
+                  if user['extension'] == value:
+                     temp['assign_name']  = user['agentname']
+                     arr[user['extension']] = arr[user['extension']] + 1
+                     checkUser = True
+               if checkUser == False:
+                  value = ''
+            except ValueError:
+               err['cell'] =  xl_rowcol_to_cell(key, idx)
+               err['type'] = 'int'
+               errorData.append(err)
+               checkErr = True
+            
          if header['field'] == 'assign' and value == '':
             temp['createdBy']  = ''
 
