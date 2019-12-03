@@ -40,7 +40,7 @@
     </div>
     <div id="action-menu">
         <ul>
-            
+
         </ul>
     </div>
     <script>
@@ -64,7 +64,7 @@
                             id: "id",
                             fields: {
                                 overdue_date: {type: "date"},
-                                
+
                             }
                         },
                         parse: function (response) {
@@ -159,11 +159,6 @@
                           {
                               field: "product_id",
                               title: "Product type",
-                              width: 150,
-                          },
-                          {
-                              field: "action_code",
-                              title: "Action code",
                               width: 150,
                           },
                           {
@@ -571,7 +566,7 @@
                             title : "FC name",
                             width : 150
                           },
-                          
+
 
                      ],
                       noRecords: {
@@ -590,7 +585,7 @@
                       return checkedIds;
                   }
 
-                  
+
               }
           }
       }();
@@ -677,7 +672,7 @@
          kendo.bind($(".mvvm"), observable);
       };
 
-      
+
     </script>
     <script>
         function saveAsExcel() {
