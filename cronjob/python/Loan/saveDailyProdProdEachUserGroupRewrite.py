@@ -196,7 +196,21 @@ try:
                     mongodb.insert(MONGO_COLLECTION=collection, insert_data=temp)
                     # log.write(json.dumps(temp))
                     # pprint(temp)
-    
+        
+        else:
+            groupInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Group'), WHERE={'name': {"$regex": 'WO'}})
+            temp = {
+                'col'           : 0,
+                'col_amt'       : 0,
+                'rem'           : 0,
+                'rem_amt'       : 0,
+                'flow_rate'     : 0,
+                'flow_rate_amt' : 0
+            }
+            temp['debt_group'] = 'F'
+            temp['product'] = 'F'
+            temp['team'] = 'SIBS - CARD'
+            temp['team_id'] = str(groupInfo['_id'])
     # for groupProduct in list(listGroupProduct):
     #     if groupProduct == 'SIBS':
     #         for debtGroupCell in list(listDebtGroup):

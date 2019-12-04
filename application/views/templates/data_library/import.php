@@ -6,9 +6,9 @@
 	            <li class="k-state-active">
 	                CSV
 	            </li>
-	            <li>
+	            <!-- <li>
 	                FTP
-	            </li>
+	            </li> -->
 	        </ul>
 	        <div>
 	            <div class="container-fluid">
@@ -20,11 +20,11 @@
 	                </div>
 	            </div>
 	        </div>
-	        <div>
+	        <!-- <div>
 	            <div class="container-fluid">
 	                <div id="grid-3"></div>
 	            </div>
-	        </div>
+	        </div> -->
 	    </div>
 	</div>
     <div data-bind="visible: visibleData">

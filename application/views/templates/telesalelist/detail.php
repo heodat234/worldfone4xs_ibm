@@ -580,16 +580,17 @@ var Detail = function() {
             var customerHTMLArray = [];
 
             var dataItemFull = await $.get(`${ENV.restApi}${Config.collection}/${Config.id}`);
-            dataItemFull.phoneHTML = gridPhone(dataItemFull.phone);
-            dataItemFull.other_phonesHTML = gridPhone(dataItemFull.other_phones);
-            dataItemFull.createdAtText = gridTimestamp(dataItemFull.createdAt);
-            dataItemFull.updatedAtText = gridTimestamp(dataItemFull.updatedAt);
-            dataItemFull.date_of_birthText = gridTimestamp(dataItemFull.date_of_birth);
-            dataItemFull.date_receive_dataText = gridTimestamp(dataItemFull.date_receive_data);
-            dataItemFull.date_send_dataText = gridTimestamp(dataItemFull.date_send_data);
-            dataItemFull.exporting_dateText = gridTimestamp(dataItemFull.exporting_date);
-            dataItemFull.first_due_dateText = gridTimestamp(dataItemFull.first_due_date);
-
+            
+            // dataItemFull.phoneHTML = gridPhone(dataItemFull.phone);
+            // dataItemFull.other_phonesHTML = gridPhone(dataItemFull.other_phones);
+            // dataItemFull.createdAtText = gridTimestamp(dataItemFull.createdAt);
+            // dataItemFull.updatedAtText = gridTimestamp(dataItemFull.updatedAt);
+            // dataItemFull.date_of_birthText = gridTimestamp(dataItemFull.date_of_birth);
+            // dataItemFull.date_receive_dataText = gridTimestamp(dataItemFull.date_receive_data);
+            // dataItemFull.date_send_dataText = gridTimestamp(dataItemFull.date_send_data);
+            // dataItemFull.exporting_dateText = gridDate('2019-11-25',"dd/MM/yyyy");
+            // dataItemFull.first_due_dateText = gridTimestamp(dataItemFull.first_due_date);
+            // console.log(kendo.toString(new Date('2019-11-25'), "dd/MM/yyyy"));
 
             var customerModel = await $.get(`${ENV.vApi}model/read`, {
                 q: JSON.stringify({filter: {field: "collection", operator: "eq", value: (ENV.type ? ENV.type + "_" : "") + "Telesalelist"}, sort: {field: "index", dir: "asc"}, take: 30,skip:0})
@@ -612,7 +613,7 @@ var Detail = function() {
                             </div>`);
                             break;
                         case "timestamp":
-                            dataItemFull[doc.field + "Text"] = gridTimestamp(dataItemFull[doc.field],"dd/MM/yyyy");
+                            dataItemFull[doc.field + "Text"] = gridDate(new Date(dataItemFull[doc.field]),"dd/MM/yyyy");
                             customerHTMLArray.push(`<div class="form-group">
                                 <label class="col-sm-3 control-label">${doc.title}</label>
                                 <div class="col-sm-9">
@@ -771,11 +772,11 @@ async function editForm(ele) {
             error: errorDataSource
         });
 
-    dataItemFull.exporting_date = new Date((dataItemFull.exporting_date) * 1000);
-    dataItemFull.date_of_birth = new Date((dataItemFull.date_of_birth) * 1000);
-    dataItemFull.first_due_date = new Date((dataItemFull.first_due_date) * 1000);
-    dataItemFull.date_send_data = new Date((dataItemFull.date_send_data) * 1000);
-    dataItemFull.date_receive_data = new Date((dataItemFull.date_receive_data) * 1000);
+    dataItemFull.exporting_date = new Date((dataItemFull.exporting_date));
+    dataItemFull.date_of_birth = new Date(dataItemFull.date_of_birth);
+    dataItemFull.first_due_date = new Date(dataItemFull.first_due_date);
+    dataItemFull.date_send_data = new Date(dataItemFull.date_send_data);
+    dataItemFull.date_receive_data = new Date(dataItemFull.date_receive_data);
     var model = Object.assign(Config.observable, {
         item: dataItemFull,
         save: function() {

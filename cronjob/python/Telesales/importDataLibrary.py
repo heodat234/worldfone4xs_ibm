@@ -26,9 +26,9 @@ base_url    = config.base_url()
 subUserType = 'TS'
 collection  = common.getSubUser(subUserType, 'Datalibrary')
 now         = datetime.now()
-log         = open("/var/www/html/worldfone4xs_ibm/cronjob/python/Telesales/log/importDataLibrary.txt","a")
+# log         = open(base_url + "cronjob/python/Telesales/importDataLibrary.txt","a")
 now         = datetime.now()
-log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': Start Import' + '\n')
+# log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': Start Import' + '\n')
 try:
 
    try:
@@ -46,7 +46,7 @@ try:
          'file_path'     : ftpLocalUrl, 
          'source'        : 'ftp',
          'status'        : 2,
-         'command'       : 'python3.6 ' + base_url + "cronjob/python/Loan/importDataLibrary.py > /dev/null &",
+         'command'       : '/usr/local/bin/python3.6 ' + base_url + "cronjob/python/Loan/importDataLibrary.py > /dev/null &",
          'created_by'    : 'system'
       }
       importLogId = mongodb.insert(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), insert_data=importLogInfo) 
@@ -65,6 +65,8 @@ try:
       temp = {}
       checkErr = False
       for idx,header in enumerate(headers):
+         if header['index'] == 23:
+            continue;
          if str(listDataLibrary[key][idx]) == 'nan':
             listDataLibrary[key][idx] = ''
          if header['type'] == 'int':
@@ -95,8 +97,14 @@ try:
                errorData.append(err)
                checkErr = True
          if header['type'] == 'phone':
-            value_int   = int(listDataLibrary[key][idx])
-            value       = '0'+ str(value_int)
+            try:
+               value_int   = int(listDataLibrary[key][idx])
+               value       = '0'+ str(value_int)
+            except Exception as e:
+               err['cell'] =  xl_rowcol_to_cell(key, idx)
+               err['type'] = 'phone'
+               errorData.append(err)
+               checkErr = True
 
          if header['type'] == 'string' and header['field'] != 'id_no':
             try:
@@ -105,8 +113,11 @@ try:
             except ValueError:
                value       = str(listDataLibrary[key][idx])
          if header['type'] == 'string' and header['field'] == 'id_no':
-            value_int   = int(listDataLibrary[key][idx])
-            value       = '0'+ str(value_int)
+            try:
+               value_int   = int(listDataLibrary[key][idx])
+               value       = '0'+ str(value_int)
+            except ValueError:
+               value       = str(listDataLibrary[key][idx])
  
          if header['field'] == 'assign' and value != '':
             value = str(listDataLibrary[key][idx])
@@ -119,27 +130,27 @@ try:
 
          temp['createdAt']       = int(time.time())
          temp['updatedAt']       = int(time.time())
-         temp['updatedBy']       = extension
+         temp['updatedBy']       = 'system'
 
       if checkErr == False:
          try:
             mongodb.update(MONGO_COLLECTION=collection, WHERE={'cif':temp['cif']}, VALUE=temp)
          except Exception as e:
             now_log         = datetime.now()
-            log.write(now_log.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')
+            # log.write(now_log.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')
       
    if len(errorData) <= 0:
       status = 1
    else:
       status = 0
-      log.write( str(errorData) + '\n')
+      # log.write( str(errorData) + '\n')
       
    mongodb.update(MONGO_COLLECTION='TS_Import', WHERE={'_id': ObjectId(importLogId)}, VALUE={'complete_import': time.time(),'status': status,'error': errorData})
 
    now_end         = datetime.now()
-   log.write(now_end.strftime("%d/%m/%Y, %H:%M:%S") + ': End Import' + '\n')
+   # log.write(now_end.strftime("%d/%m/%Y, %H:%M:%S") + ': End Import' + '\n')
    pprint({'status': status})
 
 except Exception as e:
    pprint(e)
-   log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')
+   # log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')
