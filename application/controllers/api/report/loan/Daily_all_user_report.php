@@ -134,16 +134,11 @@ Class Daily_all_user_report extends WFF_Controller {
                      if ($due_date != null) {
                         $duedate = $due_date['due_date'];
                         $temp['due_date']          = $duedate;
-
-                        // $diallist = $this->mongo_db->where(array('group_id' => $row['id'], 'createdAt' => $date ))->select(array('name','members'))->getOne($this->diallist_collection);
-                        // $diallist_id = new MongoDB\BSON\ObjectId($diallist['id']);
-
                         $temp['count_data'] = $this->mongo_db->where(array("officer_id" => 'JIVF00'.$row['lead'] ))->count($this->lnjc05_collection);
                         $match_ptp = array(
                            '$match' => array(
                               '$and' => array(
                                  array('createdAt'=> array( '$gte'=> $date)),
-                                 // array('diallist_id' => $diallist_id),
                                  array('officer_id'=> 'JIVF00'.$row['lead']),
                                  array('$or' => [ array( 'action_code'=>  'BPTP'), array('action_code'=>  'PTP Today')])
                               )
@@ -561,8 +556,6 @@ Class Daily_all_user_report extends WFF_Controller {
                      if (isset($row['_id'])) {
                         $temp = [];
                         $team = $this->mongo_db->where(array('debt_groups' => $row['_id'] ,'name' => array('$regex' => 'SIBS')))->select(array('name','members','lead','debt_groups'))->getOne($this->group_team_collection);
-                        // $diallist = $this->mongo_db->where(array('group_id' => $team['id'], 'createdAt' => array('$gte' =>$date) ))->select(array('name','members'))->getOne($this->diallist_collection);
-                        // $diallist_id = new MongoDB\BSON\ObjectId($diallist['id']);
 
                         $temp['name']       = $row['_id']. ' (SIBS)';
                         $temp['group']      = $key;
@@ -1049,8 +1042,6 @@ Class Daily_all_user_report extends WFF_Controller {
                      $temp['team_lead']  = true;
                      $temp['date']       = $date;
                      $temp['extension']  = $row['lead'];
-                     // $diallist = $this->mongo_db->where(array('group_id' => $row['id'], 'createdAt' => array('$gte' =>$date) ))->select(array('name','members'))->getOne($this->diallist_collection);
-                     // $diallist_id = new MongoDB\BSON\ObjectId($diallist['id']);
                      if ($due_date != null) {
                         $duedate            = $due_date['due_date'];
                         $temp['due_date']   = $duedate;
@@ -1059,7 +1050,6 @@ Class Daily_all_user_report extends WFF_Controller {
                            '$match' => array(
                               '$and' => array(
                                  array('createdAt'=> array( '$gte'=> $date)),
-                                 // array("diallist_id" => $diallist_id ),
                                  array('assign'=> $row['lead']),
                                  array('$or' => [ array( 'action_code'=>  'BPTP'), array('action_code'=>  'PTP Today')])
                               )
@@ -1085,7 +1075,6 @@ Class Daily_all_user_report extends WFF_Controller {
                      $temp['unwork'] = $temp['talk_time'] = $temp['total_call'] = $temp['total_amount'] = $temp['count_spin'] = $temp['spin_amount'] = $temp['count_conn'] = $temp['conn_amount'] = $temp['count_paid'] = $temp['paid_amount'] = $temp['ptp_amount'] = $temp['count_ptp'] = $temp['paid_amount_promise'] = $temp['count_paid_promise'] = 0;
 
                      //promise to pay
-
                      $group_ptp = array(
                         '$group' => array(
                            '_id' => null,
@@ -1458,8 +1447,6 @@ Class Daily_all_user_report extends WFF_Controller {
                      if (isset($row['_id'])) {
                         $temp = [];
                         $team = $this->mongo_db->where(array('debt_groups' => $row['_id'] ,'name' => array('$regex' => 'Card')))->select(array('name','members','lead','debt_groups'))->getOne($this->group_team_collection);
-                        // $diallist = $this->mongo_db->where(array('group_id' => $team['id'], 'createdAt' => array('$gte' =>$date) ))->select(array('name','members'))->getOne($this->diallist_collection);
-                        // $diallist_id = new MongoDB\BSON\ObjectId($diallist['id']);
 
                         $temp['name']       = $row['_id'].' (Card)';
                         $temp['group']      = $key;
@@ -1698,7 +1685,6 @@ Class Daily_all_user_report extends WFF_Controller {
                                        '$match' => array(
                                           '$and' => array(
                                              array('createdAt'=> array( '$gte'=> $start_date)),
-                                             // array('diallist_id'=> $diallist_id),
                                              array('assign'=> $member),
                                              array('$or' => [ array( 'action_code'=>  'BPTP'), array('action_code'=>  'PTP Today')])
                                           )
@@ -1794,7 +1780,6 @@ Class Daily_all_user_report extends WFF_Controller {
                                     $match_diallist = array(
                                        '$match' => array(
                                           '$and' => array(
-                                             // array("diallist_id" => $diallist_id ),
                                              array('createdAt' => array('$gte' => $start_date)),
                                              array("assign" => $member ),
                                           )
@@ -1847,7 +1832,6 @@ Class Daily_all_user_report extends WFF_Controller {
 
                                     $temp['count_paid'] += $temp_member['count_paid'];
                                     $temp['paid_amount'] += $temp_member['paid_amount'];
-
 
                                     //team
                                     $temp['count_data']     += $temp_member['count_data'];
@@ -1905,7 +1889,6 @@ Class Daily_all_user_report extends WFF_Controller {
 
 
             }
-
 
 
 
@@ -2539,7 +2522,6 @@ Class Daily_all_user_report extends WFF_Controller {
       // $date = strtotime("$today");
       $date = 1569862800;
       $data = $this->mongo_db->where(array('date' => $date  ))->get($this->collection);
-
 
       $filename = "DAILY ALL USER REPORT.xlsx";
       $spreadsheet = new Spreadsheet();
