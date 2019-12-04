@@ -171,64 +171,87 @@ try:
                         temp['for_month'] = str(month)
                         mongodb.insert(MONGO_COLLECTION=common.getSubUser(subUserType, 'Due_date_next_date'), insert_data=temp)
         
-        else:
-            groupInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Group'), WHERE={'name': {"$regex": 'WO'}})
-            temp = {
-                'due_date'              : 0,
-                'product'               : 'WO',
-                'debt_group'            : 'F',
-                'due_date_code'         : 1,
-                'team_id'               : str(groupInfo['_id']),
-                'debt_acc_no'           : 0,
-                'current_balance_total' : 0,
-                'acc_arr'               : []
+    groupInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Group'), WHERE={'name': {"$regex": 'WO'},'debt_groups' : {'$exists': 'true'}})
+    temp = {
+        'due_date'              : 0,
+        'product'               : 'WO',
+        'debt_group'            : 'F',
+        'due_date_code'         : 1,
+        'team_id'               : str(groupInfo['_id']),
+        'debt_acc_no'           : 0,
+        'current_balance_total' : 0,
+        'acc_arr'               : []
+    }
+    aggregate_monthly = [
+        {
+            '$project': 
+            {
+               'ACCTNO' : 1,
+               'created_at' : 1,
+               'pay_payment': {'$sum' : [ '$WO9711', '$WO9712' ,'$WO9713'] }
             }
-            aggregate_diallist = [
-                {
-                    '$project': 
-                    {
-                       'account_number' : 1,
-                       'created_at' : 1,
-                       'pay_payment': {'$sum' : [ '$WO9711', '$WO9712' ,'$WO9713'] }
-                    }
-                },{
-                    "$group":
-                    {
-                        "_id": 'null',
-                        "total_amt": {'$sum': '$pay_payment'},
-                        "total_acc": {'$sum': 1},
-                        "acc_arr": {'$push' : '$account_number'},
-                        "created_at": {'$last' : '$created_at'}
-                    }
-                }
-            ]
-            woMonthly = mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'WO_monthly'),aggregate_pipeline=aggregate_diallist)
-            for wo_row in woMonthly:
-                temp['due_date'] = wo_row['created_at']
-                temp['debt_acc_no'] = wo_row['total_acc']
-                temp['current_balance_total'] = wo_row['total_amt']
-                temp['acc_arr'] = diallist['acc_arr']
+        },{
+            "$group":
+            {
+                "_id": 'null',
+                "total_amt": {'$sum': '$pay_payment'},
+                "total_acc": {'$sum': 1},
+                "acc_arr": {'$push' : '$ACCTNO'},
+                "created_at": {'$last' : '$created_at'}
+            }
+        }
+    ]
+    woMonthly = mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'WO_monthly'),aggregate_pipeline=aggregate_monthly)
+    for wo_row in woMonthly:
+        temp['due_date'] = wo_row['created_at']
+        temp['debt_acc_no'] = wo_row['total_acc']
+        temp['current_balance_total'] = wo_row['total_amt']
+        # temp['acc_arr'] = wo_row['acc_arr']
 
-            for key, value in mainProduct.items():
-                temp['debt_acc_' + key] = 0
-                temp['current_balance_' + key] = 0
+    for key, value in mainProduct.items():
+        temp['debt_acc_' + key] = 0
+        temp['current_balance_' + key] = 0
 
-            lnjc05Info = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'LNJC05'), WHERE={ 'account_number': {'$in': temp['acc_arr']}})
-            for lnjc05 in lnjc05Info:
-                zaccfInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'ZACCF'), WHERE={'account_number': lnjc05['account_number']})
-                if zaccfInfo is not None:
-                    temp['debt_acc_' + zaccfInfo['PRODGRP_ID']] += 1
-                    temp['current_balance_' + zaccfInfo['PRODGRP_ID']] += float(lnjc05['current_balance'])
 
-            listAccount = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'List_of_account_in_collection'), WHERE={ 'account_number': {'$in': temp['acc_arr']}})
-            for account in listAccount:
-                temp['debt_acc_301'] += 1
-                temp['current_balance_301'] += account['cur_bal']
+    aggregate_payment_prod = [
+        {
+            '$project': 
+            {
+                'PROD_ID' : 1,
+                'pay_payment': {'$sum' : [ '$WO9711', '$WO9712' ,'$WO9713'] },
+            }
+        },{
+            "$group":
+            {
+                "_id": '$PROD_ID',
+                "total_amt": {'$sum': '$pay_payment'},
+                "total_acc": {'$sum': 1},
+            }
+        }
+    ]
+    woMonthlyProd = mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'WO_monthly'),aggregate_pipeline=aggregate_payment_prod)
+    if woMonthlyProd != None:
+        for woRowProd in woMonthlyProd:
+            temp['debt_acc_' + woRowProd['_id']] = woRowProd['total_acc']
+            temp['current_balance_' + woRowProd['_id']] = float(woRowProd['total_amt'])
 
-            temp['created_at'] = time.time()
-            temp['created_by'] = 'system'
-            temp['for_month'] = str(month)
-            mongodb.insert(MONGO_COLLECTION=common.getSubUser(subUserType, 'Due_date_next_date'), insert_data=temp)
+
+    # lnjc05Info = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'LNJC05'), WHERE={ 'account_number': {'$in': temp['acc_arr']}})
+    # for lnjc05 in lnjc05Info:
+    #     zaccfInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'ZACCF'), WHERE={'account_number': lnjc05['account_number']})
+    #     if zaccfInfo is not None:
+    #         temp['debt_acc_' + zaccfInfo['PRODGRP_ID']] += 1
+    #         temp['current_balance_' + zaccfInfo['PRODGRP_ID']] += float(lnjc05['current_balance'])
+
+    # listAccount = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'List_of_account_in_collection'), WHERE={ 'account_number': {'$in': temp['acc_arr']}})
+    # for account in listAccount:
+    #     temp['debt_acc_301'] += 1
+    #     temp['current_balance_301'] += account['cur_bal']
+
+    temp['created_at'] = time.time()
+    temp['created_by'] = 'system'
+    temp['for_month'] = str(month)
+    mongodb.insert(MONGO_COLLECTION=common.getSubUser(subUserType, 'Due_date_next_date'), insert_data=temp)
 
     pprint("DONE")
 except Exception as e:

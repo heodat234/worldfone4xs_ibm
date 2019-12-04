@@ -43,15 +43,15 @@ async function createColumn() {
     }, {
         title: 'Target',
         columns: [{
-            field: 'percentage',
+            field: 'tar_per',
             title: 'Percentage',
             width: 100
         }, {
-            field: 'amt',
+            field: 'tar_amt',
             title: 'Amount',
             width: 80
         }, {
-            field: 'gap',
+            field: 'tar_gap',
             title: "GAP (amount)",
             width: 80
         }]
@@ -185,6 +185,10 @@ var Config = {
         response.data.map(function(doc) {
             // doc.due_date = new date(doc.due_date * 1000)
             doc.due_date = doc.due_date ? new Date(doc.due_date * 1000) : undefined;
+            doc.inci_301     = doc.inci_301 + doc.inci_302
+            doc.inci_amt_301 = doc.inci_amt_301 + doc.inci_amt_302
+            doc.col_301      = doc.col_301 + doc.col_302
+            doc.col_amt_301  = doc.col_amt_301 + doc.col_amt_302
             return doc;
         })
         return response;

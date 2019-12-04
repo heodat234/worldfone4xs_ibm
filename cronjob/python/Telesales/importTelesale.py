@@ -40,7 +40,7 @@ try:
       ftpConfig   = config.ftp_config()
       ftpLocalUrl = common.getDownloadFolder() + ftpInfo['filename']
       importLogInfo = {
-         'collection'    : collection, 
+         'collection'    : 'Telesalelist', 
          'begin_import'  : time.time(),
          'file_name'     : ftpInfo['filename'],
          'file_path'     : ftpLocalUrl, 
@@ -67,7 +67,14 @@ try:
       arr[user['extension']] = 0
       random[user['extension']] = 0
 
-   dataLibrary = excel.getDataCSV(file_path=importLogInfo['file_path'],header=0, names=None, index_col=None, usecols=None, dtype=None, converters=None, skiprows=None, na_values=None, encoding='utf-8')
+   # fileName = importLogInfo['file_name']
+   # filenameExtension = fileName.split('.')
+   dataLibrary = excel.getDataCSV(file_path=importLogInfo['file_path'],header=0, names=None, index_col=None, usecols=None, dtype=object, converters=None, skiprows=None, na_values=None, encoding='utf-8')
+   # if(filenameExtension[1] == 'csv'):
+   #    dataLibrary = excel.getDataCSV(file_path=importLogInfo['file_path'], dtype=object, sep='\t', lineterminator='\r', header=None, names=None, na_values='')
+   # else:
+   #    dataLibrary = excel.getDataExcel(file_path=importLogInfo['file_path'], header=0, names=None, na_values='')
+
    listDataLibrary = dataLibrary.values
    for key,listCol in enumerate(listDataLibrary):
       temp = {}
@@ -86,14 +93,16 @@ try:
                err['type'] = 'int';
                errorData.append(err);
                checkErr = True
-         if not isinstance(listDataLibrary[key][idx], float) and header['type'] == 'double':
-            err = {}
-            err['cell'] =  xl_rowcol_to_cell(key, idx)
-            err['type'] = 'double';
-            errorData.append(err);
-            checkErr = True
-         else:
-            value = listDataLibrary[key][idx]
+         if header['type'] == 'double':
+            try:
+               value = float(listDataLibrary[key][idx])
+            except Exception as e:
+               err = {}
+               err['cell'] =  xl_rowcol_to_cell(key, idx)
+               err['type'] = 'double';
+               errorData.append(err);
+               checkErr = True
+            
          if header['type'] == 'timestamp' and str(listDataLibrary[key][idx]) != '':
             err = {}
             try:
@@ -113,7 +122,8 @@ try:
                err['type'] = 'phone'
                errorData.append(err)
                checkErr = True
-            
+         if header['type'] == 'name':
+            value   = str(listDataLibrary[key][idx])
 
          if header['type'] == 'string' and header['field'] != 'id_no':
             try:

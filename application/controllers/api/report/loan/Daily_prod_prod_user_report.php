@@ -62,7 +62,7 @@ Class Daily_prod_prod_user_report extends WFF_Controller {
     function exportExcel() {
         $request = json_decode($this->input->get("q"), TRUE);
         $request = array();
-        $data = $this->crud->where($request)->order_by(array('debt_group' => 'asc', 'due_date_code' => 'asc', 'product' => 'desc', 'team' => 'asc'))->get($this->collection);
+        $data = $this->crud->where($request)->order_by(array('debt_group' => 'asc', 'due_date_code' => 'asc', 'due_date' => 'asc', 'product' => 'desc', 'team' => 'asc'))->get($this->collection);
         $product = $this->crud->order_by(array('code' => 'asc'))->get(set_sub_collection('Product'));
         $groupProduct = $this->mongo_private->where(array('tags' => array('group', 'debt', 'product')))->getOne(set_sub_collection("Jsondata"));
 
@@ -247,12 +247,15 @@ Class Daily_prod_prod_user_report extends WFF_Controller {
 
         $start_due_date = 3;
         $due_date = $data[0]['due_date'];
+        $due_date_1 = date('d/m/Y',  $data[0]['due_date']);
 
+        // print_r($data);
         foreach($data as $key => $value) {
+            
             if($prod_row != $value['product']) {
                 $due_date_val = new DateTime("@$due_date");
                 $worksheet->mergeCells('D' . $start_row_prod . ':D' . ($start_row - 1));
-                $worksheet->setCellValue('D' . $start_row_prod, $due_date_val->format('d-m-Y'));
+                $worksheet->setCellValue('D' . $start_row_prod, $due_date_1);
 
                 $worksheet->mergeCells('C' . $start_row_prod . ':C' . ($start_row));
                 $worksheet->setCellValue('C' . $start_row_prod, $prod_row);
@@ -294,6 +297,7 @@ Class Daily_prod_prod_user_report extends WFF_Controller {
                 $start_row += 1;
 
                 $prod_row = $value['product'];
+                $due_date_1 = date('d/m/Y',  $value['due_date']);
                 $start_row_prod = $start_row;
                 $countTeamInGroup = 0;
             }
@@ -343,7 +347,6 @@ Class Daily_prod_prod_user_report extends WFF_Controller {
                         $worksheet->mergeCells('B' . ($start_row + $gProdKey) . ':E' . ($start_row + $gProdKey));
                         $worksheet->setCellValue('B' . ($start_row + $gProdKey), $gProdValue['text']);
                         $debtProdTotalGroup = $debtProdTotal[$gProdValue['text']];
-                        // print_r($debtProdTotalGroup);exit;
 
                         $worksheet->setCellValue('F' . $rowGroup, (!empty($debtProdTotalGroup['tar_per']) ? $debtProdTotalGroup['tar_per'] : 0));
                         $worksheet->setCellValue('G' . $rowGroup, (!empty($debtProdTotalGroup['tar_amt']) ? $debtProdTotalGroup['tar_amt'] : 0));
@@ -403,33 +406,6 @@ Class Daily_prod_prod_user_report extends WFF_Controller {
                     $totalValue = 0;
                 }
 
-                // foreach($groupProduct['data'] as $keyGroupProd => &$valueGroupProd) {
-                //     $worksheet->setCellValue('F' . ($start_row + $valueGroupProd), (!empty($debtProdTotal[$valueGroupProd['text']]['tar_per']) ? $debtProdTotal[$valueGroupProd['text']]['tar_per'] : 0));
-                //     $worksheet->setCellValue('G' . ($start_row + $valueGroupProd), (!empty($debtProdTotal[$valueGroupProd['text']]['tar_amt']) ? $debtProdTotal[$valueGroupProd['text']]['tar_amt'] : 0));
-                //     $worksheet->setCellValue('H' . ($start_row + $valueGroupProd), (!empty($debtProdTotal[$valueGroupProd['text']]['tar_gap']) ? $debtProdTotal[$valueGroupProd['text']]['tar_gap'] : 0));
-                //     $worksheet->setCellValue('I' . ($start_row + $valueGroupProd), (!empty($debtProdTotal[$valueGroupProd['text']]['inci']) ? $debtProdTotal[$valueGroupProd['text']]['inci'] : 0));
-                //     foreach($product as $keyprod => $valprod) {
-                //         $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + $keyprod) . ($start_row + $valueGroupProd), (!empty($debtProdTotal[$valueGroupProd['text']]['inci_' . $valprod['code']]) ? $debtProdTotal[$valueGroupProd['text']]['inci_' . $valprod['code']] : 0));
-                //         $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + 1 + count($product) + $keyprod) . ($start_row + $valueGroupProd), (!empty($debtProdTotal[$valueGroupProd['text']]['col_' . $valprod['code']]) ? $debtProdTotal[$valueGroupProd['text']]['col_' . $valprod['code']] : 0));
-            
-                //         $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + $keyprod) . ($start_row + $valueGroupProd), (!empty($debtProdTotal[$valueGroupProd['text']]['inci_amt_' . $valprod['code']]) ? $debtProdTotal[$valueGroupProd['text']]['inci_amt_' . $valprod['code']] : 0));
-                //         $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + 1 + count($product) + $keyprod) . ($start_row + $valueGroupProd), (!empty($debtProdTotal[$valueGroupProd['text']]['col_amt_' . $valprod['code']]) ? $debtProdTotal[$valueGroupProd['text']]['col_amt_' . $valprod['code']] : 0));
-                //     }
-
-                //     $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + count($product) + $keyprod + 2) . ($start_row + $valueGroupProd), (!empty($debtProdTotal[$valueGroupProd['text']]['today_rem']) ? $debtProdTotal[$valueGroupProd['text']]['today_rem'] : 0));
-                //     $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + count($product) + $keyprod + 3) . ($start_row + $valueGroupProd), (!empty($debtProdTotal[$valueGroupProd['text']]['flow_rate']) ? $debtProdTotal[$valueGroupProd['text']]['flow_rate'] : 0));
-                //     $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + count($product) + $keyprod + 4) . ($start_row + $valueGroupProd), (!empty($debtProdTotal[$valueGroupProd['text']]['col_rate']) ? $debtProdTotal[$valueGroupProd['text']]['col_rate'] : 0));
-
-                //     $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + count($product) + $keyprod + 2) . ($start_row + $valueGroupProd), (!empty($debtProdTotal[$valueGroupProd['text']]['today_rem_amt']) ? $debtProdTotal[$valueGroupProd['text']]['today_rem_amt'] : 0));
-                //     $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + count($product) + $keyprod + 3) . ($start_row + $valueGroupProd), (!empty($debtProdTotal[$valueGroupProd['text']]['flow_rate_amt']) ? $debtProdTotal[$valueGroupProd['text']]['flow_rate_amt'] : 0));
-                //     $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + count($product) + $keyprod + 4) . ($start_row + $valueGroupProd), (!empty($debtProdTotal[$valueGroupProd['text']]['col_rate_amt']) ? $debtProdTotal[$valueGroupProd['text']]['col_rate_amt'] : 0));
-                // }
-
-                // foreach($groupProduct['data'] as $gProdKey => $gProdValue) {
-                //     foreach($debtProdTotal as $keyTotal => &$totalValue) {
-                //         $debtProdTotal[$gProdValue['text']] +=  $value[$keyTotal];
-                //     }
-                // }
 
                 $start_row += (count($groupProduct['data']) + 1);
                 $start_row_prod += (count($groupProduct['data']) + 1);
@@ -439,147 +415,6 @@ Class Daily_prod_prod_user_report extends WFF_Controller {
                 $start_row_debt_group = $start_row;
             }
     
-            if ($key == (count($data) - 1)) {
-                $due_date_val = new DateTime("@$due_date");
-                if(!empty($groupProduct['data'])) {
-                    $rowGroup = $start_row + 3;
-                    foreach($groupProduct['data'] as $gProdKey => $gProdValue) {
-                        $worksheet->mergeCells('B' . ($start_row + $gProdKey + 3) . ':E' . ($start_row + $gProdKey + 3));
-                        $worksheet->setCellValue('B' . ($start_row + $gProdKey + 3), $gProdValue['text']);
-                        $debtProdTotalGroup = $debtProdTotal[$gProdValue['text']];
-                        // print_r($debtProdTotalGroup);exit;
-
-                        $worksheet->setCellValue('F' . $rowGroup, (!empty($debtProdTotalGroup['tar_per']) ? $debtProdTotalGroup['tar_per'] : 0));
-                        $worksheet->setCellValue('G' . $rowGroup, (!empty($debtProdTotalGroup['tar_amt']) ? $debtProdTotalGroup['tar_amt'] : 0));
-                        $worksheet->setCellValue('H' . $rowGroup, (!empty($debtProdTotalGroup['tar_gap']) ? $debtProdTotalGroup['tar_gap'] : 0));
-                        $worksheet->setCellValue('I' . $rowGroup, (!empty($debtProdTotalGroup['inci']) ? $debtProdTotalGroup['inci'] : 0));
-                        foreach($product as $keyprod => $valprod) {
-                            $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + $keyprod) . $rowGroup, (!empty($debtProdTotalGroup['inci_' . $valprod['code']]) ? $debtProdTotalGroup['inci_' . $valprod['code']] : 0));
-                            $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + 1 + count($product) + $keyprod) . $rowGroup, (!empty($debtProdTotalGroup['col_' . $valprod['code']]) ? $debtProdTotalGroup['col_' . $valprod['code']] : 0));
-                
-                            $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + $keyprod) . $rowGroup, (!empty($debtProdTotalGroup['inci_amt_' . $valprod['code']]) ? $debtProdTotalGroup['inci_amt_' . $valprod['code']] : 0));
-                            $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + 1 + count($product) + $keyprod) . $rowGroup, (!empty($debtProdTotalGroup['col_amt_' . $valprod['code']]) ? $debtProdTotalGroup['col_amt_' . $valprod['code']] : 0));
-                        }
-
-                        $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + count($product) + $keyprod + 2) . $rowGroup, (!empty($debtProdTotalGroup['today_rem']) ? $debtProdTotalGroup['today_rem'] : 0));
-                        $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + count($product) + $keyprod + 3) . $rowGroup, (!empty($debtProdTotalGroup['flow_rate']) ? $debtProdTotalGroup['flow_rate'] : 0));
-                        $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + count($product) + $keyprod + 4) . $rowGroup, (!empty($debtProdTotalGroup['col_rate']) ? $debtProdTotalGroup['col_rate'] : 0));
-
-                        $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + count($product) + $keyprod + 2) . $rowGroup, (!empty($debtProdTotalGroup['today_rem_amt']) ? $debtProdTotalGroup['today_rem_amt'] : 0));
-                        $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + count($product) + $keyprod + 3) . $rowGroup, (!empty($debtProdTotalGroup['flow_rate_amt']) ? $debtProdTotalGroup['flow_rate_amt'] : 0));
-                        $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + count($product) + $keyprod + 4) . $rowGroup, (!empty($debtProdTotalGroup['col_rate_amt']) ? $debtProdTotalGroup['col_rate_amt'] : 0));
-
-                        foreach($debtProdTotal[$gProdValue['text']] as $totalKey => &$totalValue) {
-                            $totalValue = 0;
-                        }
-                        $rowGroup += 1;
-                    }
-
-                    $worksheet->mergeCells('B' . ($start_row + count($groupProduct['data']) + 3) . ':E' . ($start_row + count($groupProduct['data']) + 3));
-                    $worksheet->setCellValue('B' . ($start_row + count($groupProduct['data']) + 3), 'D-Total');
-                }
-
-                // if(!empty($groupProduct['data'])) {
-                //     foreach($groupProduct['data'] as $gProdKey => $gProdValue) {
-                //         $worksheet->mergeCells('B' . ($start_row + $gProdKey + 3) . ':E' . ($start_row + $gProdKey + 3));
-                //         $worksheet->setCellValue('B' . ($start_row + $gProdKey + 3), $gProdValue['text']);
-                //     }
-
-                //     $worksheet->mergeCells('B' . ($start_row + count($groupProduct['data']) + 3) . ':E' . ($start_row + count($groupProduct['data']) + 3));
-                //     $worksheet->setCellValue('B' . ($start_row + count($groupProduct['data']) + 3), 'D-Total');
-                // }
-
-                $worksheet->mergeCells('A' . $start_row_debt_group . ':A' . ($start_row + 5));
-                $worksheet->setCellValue('A' . $start_row_debt_group, $debt_group);
-                $worksheet->getStyle('A' . $start_row_debt_group)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('FFE699');
-    
-                $worksheet->mergeCells('B' . $start_row_due_date_code . ':B' . ($start_row + 1));
-                $worksheet->setCellValue('B' . $start_row_due_date_code, $due_date_code);
-    
-                $worksheet->mergeCells('C' . $start_row_prod . ':C' . ($start_row + 1));
-                $worksheet->setCellValue('C' . $start_row_prod, $prod_row);
-
-                $worksheet->mergeCells('B' . ($start_row + 2) . ':E' . ($start_row + 2));
-                $worksheet->setCellValue('B' . ($start_row + 2), 'TOTAL');
-    
-                $worksheet->mergeCells('D' . $start_row_prod . ':D' . ($start_row));
-                $worksheet->setCellValue('D' . $start_row_prod, $due_date_val->format('d-m-Y'));
-
-                $worksheet->mergeCells('D' . ($start_row + 1) . ':E' . ($start_row + 1));
-                $worksheet->setCellValue('D' . ($start_row + 1), 'TOTAL');
-
-                $worksheet->setCellValue('F' . ($start_row + 1), (!empty($total['tar_per']) ? $total['tar_per'] : 0));
-                $worksheet->setCellValue('G' . ($start_row + 1), (!empty($total['tar_amt']) ? $total['tar_amt'] : 0));
-                $worksheet->setCellValue('H' . ($start_row + 1), (!empty($total['tar_gap']) ? $total['tar_gap'] : 0));
-                $worksheet->setCellValue('I' . ($start_row + 1), (!empty($total['inci']) ? $total['inci'] : 0));
-                foreach($product as $keyprod => $valprod) {
-                    $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + $keyprod) . ($start_row + 1), (!empty($total['inci_' . $valprod['code']]) ? $totla['inci_' . $valprod['code']] : 0));
-                    $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + 1 + count($product) + $keyprod) . ($start_row + 1), (!empty($total['col_' . $valprod['code']]) ? $total['col_' . $valprod['code']] : 0));
-        
-                    $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + $keyprod) . ($start_row + 1), (!empty($total['inci_amt_' . $valprod['code']]) ? $total['inci_amt_' . $valprod['code']] : 0));
-                    $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + 1 + count($product) + $keyprod) . ($start_row + 1), (!empty($total['col_amt_' . $valprod['code']]) ? $total['col_amt_' . $valprod['code']] : 0));
-                }
-
-                $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + count($product) + $keyprod + 2) . ($start_row + 1), (!empty($total['today_rem']) ? $total['today_rem'] : 0));
-                $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + count($product) + $keyprod + 3) . ($start_row + 1), (!empty($total['flow_rate']) ? $total['flow_rate'] : 0));
-                $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + count($product) + $keyprod + 4) . ($start_row + 1), (!empty($total['col_rate']) ? $total['col_rate'] : 0));
-
-                $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + count($product) + $keyprod + 2) . ($start_row + 1), (!empty($total['today_rem_amt']) ? $total['today_rem_amt'] : 0));
-                $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + count($product) + $keyprod + 3) . ($start_row + 1), (!empty($total['flow_rate_amt']) ? $total['flow_rate_amt'] : 0));
-                $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + count($product) + $keyprod + 4) . ($start_row + 1), (!empty($total['col_rate_amt']) ? $total['col_rate_amt'] : 0));
-
-                foreach($totalData as $totalKey => &$totalValue) {
-                    $totalValue = 0;
-                }
-
-                $worksheet->setCellValue('F' . ($start_row + 2), (!empty($dueDateCodeTotal['tar_per']) ? $dueDateCodeTotal['tar_per'] : 0));
-                $worksheet->setCellValue('G' . ($start_row + 2), (!empty($dueDateCodeTotal['tar_amt']) ? $dueDateCodeTotal['tar_amt'] : 0));
-                $worksheet->setCellValue('H' . ($start_row + 2), (!empty($dueDateCodeTotal['tar_gap']) ? $dueDateCodeTotal['tar_gap'] : 0));
-                $worksheet->setCellValue('I' . ($start_row + 2), (!empty($dueDateCodeTotal['inci']) ? $dueDateCodeTotal['inci'] : 0));
-                foreach($product as $keyprod => $valprod) {
-                    $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + $keyprod) . ($start_row + 2), (!empty($dueDateCodeTotal['inci_' . $valprod['code']]) ? $dueDateCodeTotal['inci_' . $valprod['code']] : 0));
-                    $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + 1 + count($product) + $keyprod) . ($start_row + 2), (!empty($dueDateCodeTotal['col_' . $valprod['code']]) ? $dueDateCodeTotal['col_' . $valprod['code']] : 0));
-        
-                    $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + $keyprod) . ($start_row + 2), (!empty($dueDateCodeTotal['inci_amt_' . $valprod['code']]) ? $dueDateCodeTotal['inci_amt_' . $valprod['code']] : 0));
-                    $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + 1 + count($product) + $keyprod) . ($start_row + 2), (!empty($dueDateCodeTotal['col_amt_' . $valprod['code']]) ? $dueDateCodeTotal['col_amt_' . $valprod['code']] : 0));
-                }
-
-                $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + count($product) + $keyprod + 2) . ($start_row + 2), (!empty($dueDateCodeTotal['today_rem']) ? $dueDateCodeTotal['today_rem'] : 0));
-                $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + count($product) + $keyprod + 3) . ($start_row + 2), (!empty($dueDateCodeTotal['flow_rate']) ? $dueDateCodeTotal['flow_rate'] : 0));
-                $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + count($product) + $keyprod + 4) . ($start_row + 2), (!empty($dueDateCodeTotal['col_rate']) ? $dueDateCodeTotal['col_rate'] : 0));
-
-                $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + count($product) + $keyprod + 2) . ($start_row + 2), (!empty($dueDateCodeTotal['today_rem_amt']) ? $dueDateCodeTotal['today_rem_amt'] : 0));
-                $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + count($product) + $keyprod + 3) . ($start_row + 2), (!empty($dueDateCodeTotal['flow_rate_amt']) ? $dueDateCodeTotal['flow_rate_amt'] : 0));
-                $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + count($product) + $keyprod + 4) . ($start_row + 2), (!empty($dueDateCodeTotal['col_rate_amt']) ? $dueDateCodeTotal['col_rate_amt'] : 0));
-
-                foreach($totalData as $totalKey => &$totalValue) {
-                    $totalValue = 0;
-                }
-
-                $worksheet->setCellValue('F' . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['tar_per']) ? $debtGroupTotal['tar_per'] : 0));
-                $worksheet->setCellValue('G' . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['tar_amt']) ? $debtGroupTotal['tar_amt'] : 0));
-                $worksheet->setCellValue('H' . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['tar_gap']) ? $debtGroupTotal['tar_gap'] : 0));
-                $worksheet->setCellValue('I' . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['inci']) ? $debtGroupTotal['inci'] : 0));
-                foreach($product as $keyprod => $valprod) {
-                    $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + $keyprod) . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['inci_' . $valprod['code']]) ? $debtGroupTotal['inci_' . $valprod['code']] : 0));
-                    $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + 1 + count($product) + $keyprod) . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['col_' . $valprod['code']]) ? $debtGroupTotal['col_' . $valprod['code']] : 0));
-        
-                    $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + $keyprod) . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['inci_amt_' . $valprod['code']]) ? $debtGroupTotal['inci_amt_' . $valprod['code']] : 0));
-                    $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + 1 + count($product) + $keyprod) . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['col_amt_' . $valprod['code']]) ? $debtGroupTotal['col_amt_' . $valprod['code']] : 0));
-                }
-
-                $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + count($product) + $keyprod + 2) . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['today_rem']) ? $debtGroupTotal['today_rem'] : 0));
-                $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + count($product) + $keyprod + 3) . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['flow_rate']) ? $debtGroupTotal['flow_rate'] : 0));
-                $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + count($product) + $keyprod + 4) . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['col_rate']) ? $debtGroupTotal['col_rate'] : 0));
-
-                $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + count($product) + $keyprod + 2) . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['today_rem_amt']) ? $debtGroupTotal['today_rem_amt'] : 0));
-                $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + count($product) + $keyprod + 3) . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['flow_rate_amt']) ? $debtGroupTotal['flow_rate_amt'] : 0));
-                $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + count($product) + $keyprod + 4) . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['col_rate_amt']) ? $debtGroupTotal['col_rate_amt'] : 0));
-
-                foreach($debtGroupTotal as $totalKey => &$totalValue) {
-                    $totalValue = 0;
-                }
-            }
 
             $worksheet->setCellValue('E' . $start_row, $value['team']);
             $worksheet->setCellValue('F' . $start_row, (!empty($value['tar_per']) ? $value['tar_per'] : 0));
@@ -627,12 +462,178 @@ Class Daily_prod_prod_user_report extends WFF_Controller {
                 
             }
 
+            if ($key == (count($data) - 1)) {
+                $due_date_val = new DateTime("@$due_date");
+                if ($value['debt_group'] != 'F') {
+                    if(!empty($groupProduct['data'])) {
+                        $rowGroup = $start_row + 3;
+                        foreach($groupProduct['data'] as $gProdKey => $gProdValue) {
+                            $worksheet->mergeCells('B' . ($start_row + $gProdKey + 3) . ':E' . ($start_row + $gProdKey + 3));
+                            $worksheet->setCellValue('B' . ($start_row + $gProdKey + 3), $gProdValue['text']);
+                            $debtProdTotalGroup = $debtProdTotal[$gProdValue['text']];
+
+                            $worksheet->setCellValue('F' . $rowGroup, (!empty($debtProdTotalGroup['tar_per']) ? $debtProdTotalGroup['tar_per'] : 0));
+                            $worksheet->setCellValue('G' . $rowGroup, (!empty($debtProdTotalGroup['tar_amt']) ? $debtProdTotalGroup['tar_amt'] : 0));
+                            $worksheet->setCellValue('H' . $rowGroup, (!empty($debtProdTotalGroup['tar_gap']) ? $debtProdTotalGroup['tar_gap'] : 0));
+                            $worksheet->setCellValue('I' . $rowGroup, (!empty($debtProdTotalGroup['inci']) ? $debtProdTotalGroup['inci'] : 0));
+                            foreach($product as $keyprod => $valprod) {
+                                $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + $keyprod) . $rowGroup, (!empty($debtProdTotalGroup['inci_' . $valprod['code']]) ? $debtProdTotalGroup['inci_' . $valprod['code']] : 0));
+                                $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + 1 + count($product) + $keyprod) . $rowGroup, (!empty($debtProdTotalGroup['col_' . $valprod['code']]) ? $debtProdTotalGroup['col_' . $valprod['code']] : 0));
+                    
+                                $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + $keyprod) . $rowGroup, (!empty($debtProdTotalGroup['inci_amt_' . $valprod['code']]) ? $debtProdTotalGroup['inci_amt_' . $valprod['code']] : 0));
+                                $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + 1 + count($product) + $keyprod) . $rowGroup, (!empty($debtProdTotalGroup['col_amt_' . $valprod['code']]) ? $debtProdTotalGroup['col_amt_' . $valprod['code']] : 0));
+                            }
+
+                            $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + count($product) + $keyprod + 2) . $rowGroup, (!empty($debtProdTotalGroup['today_rem']) ? $debtProdTotalGroup['today_rem'] : 0));
+                            $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + count($product) + $keyprod + 3) . $rowGroup, (!empty($debtProdTotalGroup['flow_rate']) ? $debtProdTotalGroup['flow_rate'] : 0));
+                            $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + count($product) + $keyprod + 4) . $rowGroup, (!empty($debtProdTotalGroup['col_rate']) ? $debtProdTotalGroup['col_rate'] : 0));
+
+                            $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + count($product) + $keyprod + 2) . $rowGroup, (!empty($debtProdTotalGroup['today_rem_amt']) ? $debtProdTotalGroup['today_rem_amt'] : 0));
+                            $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + count($product) + $keyprod + 3) . $rowGroup, (!empty($debtProdTotalGroup['flow_rate_amt']) ? $debtProdTotalGroup['flow_rate_amt'] : 0));
+                            $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + count($product) + $keyprod + 4) . $rowGroup, (!empty($debtProdTotalGroup['col_rate_amt']) ? $debtProdTotalGroup['col_rate_amt'] : 0));
+
+                            foreach($debtProdTotal[$gProdValue['text']] as $totalKey => &$totalValue) {
+                                $totalValue = 0;
+                            }
+                            $rowGroup += 1;
+                        }
+
+                        $worksheet->mergeCells('B' . ($start_row + count($groupProduct['data']) + 3) . ':E' . ($start_row + count($groupProduct['data']) + 3));
+                        $worksheet->setCellValue('B' . ($start_row + count($groupProduct['data']) + 3), 'D-Total');
+                    }
+
+                    $worksheet->mergeCells('A' . $start_row_debt_group . ':A' . ($start_row + 5));
+                    $worksheet->setCellValue('A' . $start_row_debt_group, $debt_group);
+                    $worksheet->getStyle('A' . $start_row_debt_group)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('FFE699');
+        
+                    $worksheet->mergeCells('B' . $start_row_due_date_code . ':B' . ($start_row + 1));
+                    $worksheet->setCellValue('B' . $start_row_due_date_code, $due_date_code);
+        
+                    $worksheet->mergeCells('C' . $start_row_prod . ':C' . ($start_row + 1));
+                    $worksheet->setCellValue('C' . $start_row_prod, $prod_row);
+
+                    $worksheet->mergeCells('B' . ($start_row + 2) . ':E' . ($start_row + 2));
+                    $worksheet->setCellValue('B' . ($start_row + 2), 'TOTAL');
+        
+                    $worksheet->mergeCells('D' . $start_row_prod . ':D' . ($start_row));
+                    $worksheet->setCellValue('D' . $start_row_prod, $due_date_1);
+
+                    $worksheet->mergeCells('D' . ($start_row + 1) . ':E' . ($start_row + 1));
+                    $worksheet->setCellValue('D' . ($start_row + 1), 'TOTAL');
+
+                    $worksheet->setCellValue('F' . ($start_row + 1), (!empty($total['tar_per']) ? $total['tar_per'] : 0));
+                    $worksheet->setCellValue('G' . ($start_row + 1), (!empty($total['tar_amt']) ? $total['tar_amt'] : 0));
+                    $worksheet->setCellValue('H' . ($start_row + 1), (!empty($total['tar_gap']) ? $total['tar_gap'] : 0));
+                    $worksheet->setCellValue('I' . ($start_row + 1), (!empty($total['inci']) ? $total['inci'] : 0));
+                    foreach($product as $keyprod => $valprod) {
+                        $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + $keyprod) . ($start_row + 1), (!empty($total['inci_' . $valprod['code']]) ? $totla['inci_' . $valprod['code']] : 0));
+                        $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + 1 + count($product) + $keyprod) . ($start_row + 1), (!empty($total['col_' . $valprod['code']]) ? $total['col_' . $valprod['code']] : 0));
+            
+                        $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + $keyprod) . ($start_row + 1), (!empty($total['inci_amt_' . $valprod['code']]) ? $total['inci_amt_' . $valprod['code']] : 0));
+                        $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + 1 + count($product) + $keyprod) . ($start_row + 1), (!empty($total['col_amt_' . $valprod['code']]) ? $total['col_amt_' . $valprod['code']] : 0));
+                    }
+
+                    $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + count($product) + $keyprod + 2) . ($start_row + 1), (!empty($total['today_rem']) ? $total['today_rem'] : 0));
+                    $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + count($product) + $keyprod + 3) . ($start_row + 1), (!empty($total['flow_rate']) ? $total['flow_rate'] : 0));
+                    $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + count($product) + $keyprod + 4) . ($start_row + 1), (!empty($total['col_rate']) ? $total['col_rate'] : 0));
+
+                    $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + count($product) + $keyprod + 2) . ($start_row + 1), (!empty($total['today_rem_amt']) ? $total['today_rem_amt'] : 0));
+                    $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + count($product) + $keyprod + 3) . ($start_row + 1), (!empty($total['flow_rate_amt']) ? $total['flow_rate_amt'] : 0));
+                    $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + count($product) + $keyprod + 4) . ($start_row + 1), (!empty($total['col_rate_amt']) ? $total['col_rate_amt'] : 0));
+
+                    foreach($totalData as $totalKey => &$totalValue) {
+                        $totalValue = 0;
+                    }
+
+                    $worksheet->setCellValue('F' . ($start_row + 2), (!empty($dueDateCodeTotal['tar_per']) ? $dueDateCodeTotal['tar_per'] : 0));
+                    $worksheet->setCellValue('G' . ($start_row + 2), (!empty($dueDateCodeTotal['tar_amt']) ? $dueDateCodeTotal['tar_amt'] : 0));
+                    $worksheet->setCellValue('H' . ($start_row + 2), (!empty($dueDateCodeTotal['tar_gap']) ? $dueDateCodeTotal['tar_gap'] : 0));
+                    $worksheet->setCellValue('I' . ($start_row + 2), (!empty($dueDateCodeTotal['inci']) ? $dueDateCodeTotal['inci'] : 0));
+                    foreach($product as $keyprod => $valprod) {
+                        $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + $keyprod) . ($start_row + 2), (!empty($dueDateCodeTotal['inci_' . $valprod['code']]) ? $dueDateCodeTotal['inci_' . $valprod['code']] : 0));
+                        $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + 1 + count($product) + $keyprod) . ($start_row + 2), (!empty($dueDateCodeTotal['col_' . $valprod['code']]) ? $dueDateCodeTotal['col_' . $valprod['code']] : 0));
+            
+                        $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + $keyprod) . ($start_row + 2), (!empty($dueDateCodeTotal['inci_amt_' . $valprod['code']]) ? $dueDateCodeTotal['inci_amt_' . $valprod['code']] : 0));
+                        $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + 1 + count($product) + $keyprod) . ($start_row + 2), (!empty($dueDateCodeTotal['col_amt_' . $valprod['code']]) ? $dueDateCodeTotal['col_amt_' . $valprod['code']] : 0));
+                    }
+
+                    $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + count($product) + $keyprod + 2) . ($start_row + 2), (!empty($dueDateCodeTotal['today_rem']) ? $dueDateCodeTotal['today_rem'] : 0));
+                    $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + count($product) + $keyprod + 3) . ($start_row + 2), (!empty($dueDateCodeTotal['flow_rate']) ? $dueDateCodeTotal['flow_rate'] : 0));
+                    $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + count($product) + $keyprod + 4) . ($start_row + 2), (!empty($dueDateCodeTotal['col_rate']) ? $dueDateCodeTotal['col_rate'] : 0));
+
+                    $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + count($product) + $keyprod + 2) . ($start_row + 2), (!empty($dueDateCodeTotal['today_rem_amt']) ? $dueDateCodeTotal['today_rem_amt'] : 0));
+                    $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + count($product) + $keyprod + 3) . ($start_row + 2), (!empty($dueDateCodeTotal['flow_rate_amt']) ? $dueDateCodeTotal['flow_rate_amt'] : 0));
+                    $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + count($product) + $keyprod + 4) . ($start_row + 2), (!empty($dueDateCodeTotal['col_rate_amt']) ? $dueDateCodeTotal['col_rate_amt'] : 0));
+
+                    foreach($totalData as $totalKey => &$totalValue) {
+                        $totalValue = 0;
+                    }
+
+                    $worksheet->setCellValue('F' . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['tar_per']) ? $debtGroupTotal['tar_per'] : 0));
+                    $worksheet->setCellValue('G' . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['tar_amt']) ? $debtGroupTotal['tar_amt'] : 0));
+                    $worksheet->setCellValue('H' . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['tar_gap']) ? $debtGroupTotal['tar_gap'] : 0));
+                    $worksheet->setCellValue('I' . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['inci']) ? $debtGroupTotal['inci'] : 0));
+                    foreach($product as $keyprod => $valprod) {
+                        $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + $keyprod) . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['inci_' . $valprod['code']]) ? $debtGroupTotal['inci_' . $valprod['code']] : 0));
+                        $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + 1 + count($product) + $keyprod) . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['col_' . $valprod['code']]) ? $debtGroupTotal['col_' . $valprod['code']] : 0));
+            
+                        $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + $keyprod) . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['inci_amt_' . $valprod['code']]) ? $debtGroupTotal['inci_amt_' . $valprod['code']] : 0));
+                        $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + 1 + count($product) + $keyprod) . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['col_amt_' . $valprod['code']]) ? $debtGroupTotal['col_amt_' . $valprod['code']] : 0));
+                    }
+
+                    $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + count($product) + $keyprod + 2) . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['today_rem']) ? $debtGroupTotal['today_rem'] : 0));
+                    $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + count($product) + $keyprod + 3) . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['flow_rate']) ? $debtGroupTotal['flow_rate'] : 0));
+                    $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + count($product) + $keyprod + 4) . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['col_rate']) ? $debtGroupTotal['col_rate'] : 0));
+
+                    $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + count($product) + $keyprod + 2) . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['today_rem_amt']) ? $debtGroupTotal['today_rem_amt'] : 0));
+                    $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + count($product) + $keyprod + 3) . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['flow_rate_amt']) ? $debtGroupTotal['flow_rate_amt'] : 0));
+                    $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + count($product) + $keyprod + 4) . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['col_rate_amt']) ? $debtGroupTotal['col_rate_amt'] : 0));
+
+                    foreach($debtGroupTotal as $totalKey => &$totalValue) {
+                        $totalValue = 0;
+                    }
+                }
+                else{
+                    $worksheet->mergeCells('B' . ($start_row + 1) . ':E' . ($start_row + 1 ));
+                    $worksheet->setCellValue('B' . ($start_row + 1 ), 'F-Total');
+                    $worksheet->mergeCells('A' . $start_row_debt_group . ':A' . ($start_row + 1 ));
+                    $worksheet->setCellValue('A' . $start_row_debt_group, $debt_group);
+                    $worksheet->getStyle('A' . $start_row_debt_group)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('FFE699');
+                    $worksheet->mergeCells('B' . $start_row_prod . ':D' . $start_row );
+                    $worksheet->setCellValue('B' . $start_row_prod, $prod_row);
+
+                    $worksheet->setCellValue('F' . ($start_row + 1 ), (!empty($dueDateCodeTotal['tar_per']) ? $dueDateCodeTotal['tar_per'] : 0));
+                    $worksheet->setCellValue('G' . ($start_row + 1 ), (!empty($dueDateCodeTotal['tar_amt']) ? $dueDateCodeTotal['tar_amt'] : 0));
+                    $worksheet->setCellValue('H' . ($start_row + 1 ), (!empty($dueDateCodeTotal['tar_gap']) ? $dueDateCodeTotal['tar_gap'] : 0));
+                    $worksheet->setCellValue('I' . ($start_row + 1 ), (!empty($dueDateCodeTotal['inci']) ? $dueDateCodeTotal['inci'] : 0));
+                    foreach($product as $keyprod => $valprod) {
+                        $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + $keyprod) . ($start_row + 1 ), (!empty($dueDateCodeTotal['inci_' . $valprod['code']]) ? $dueDateCodeTotal['inci_' . $valprod['code']] : 0));
+                        $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + 1 + count($product) + $keyprod) . ($start_row + 1 ), (!empty($dueDateCodeTotal['col_' . $valprod['code']]) ? $dueDateCodeTotal['col_' . $valprod['code']] : 0));
+            
+                        $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + $keyprod) . ($start_row + 1 ), (!empty($dueDateCodeTotal['inci_amt_' . $valprod['code']]) ? $dueDateCodeTotal['inci_amt_' . $valprod['code']] : 0));
+                        $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + 1 + count($product) + $keyprod) . ($start_row + 1 ), (!empty($dueDateCodeTotal['col_amt_' . $valprod['code']]) ? $dueDateCodeTotal['col_amt_' . $valprod['code']] : 0));
+                    }
+
+                    $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + count($product) + $keyprod + 2) . ($start_row + 1 ), (!empty($dueDateCodeTotal['today_rem']) ? $dueDateCodeTotal['today_rem'] : 0));
+                    $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + count($product) + $keyprod ) . ($start_row + 1 ), (!empty($dueDateCodeTotal['flow_rate']) ? $dueDateCodeTotal['flow_rate'] : 0));
+                    $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + count($product) + $keyprod + 4) . ($start_row + 1 ), (!empty($dueDateCodeTotal['col_rate']) ? $dueDateCodeTotal['col_rate'] : 0));
+
+                    $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + count($product) + $keyprod + 2) . ($start_row + 1 ), (!empty($dueDateCodeTotal['today_rem_amt']) ? $dueDateCodeTotal['today_rem_amt'] : 0));
+                    $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + count($product) + $keyprod ) . ($start_row + 1 ), (!empty($dueDateCodeTotal['flow_rate_amt']) ? $dueDateCodeTotal['flow_rate_amt'] : 0));
+                    $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + count($product) + $keyprod + 4) . ($start_row + 1 ), (!empty($dueDateCodeTotal['col_rate_amt']) ? $dueDateCodeTotal['col_rate_amt'] : 0));
+
+                    
+                    foreach($dueDateCodeTotal as $totalKey => &$totalValue) {
+                        $totalValue = 0;
+                    }
+                }
+            }
             $start_row += 1;
 
         }
 
-
-        $worksheet->getStyle("A1:BY107")->getBorders()
+        $maxCell = $worksheet->getHighestRowAndColumn();
+        $worksheet->getStyle("A1:BY".$maxCell['row'])->getBorders()
         ->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
         $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
     	$file_path = UPLOAD_PATH . "loan/export/" . 'export.xlsx';
