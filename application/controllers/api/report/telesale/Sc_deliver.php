@@ -28,13 +28,22 @@ Class Sc_deliver extends WFF_Controller {
             $this->load->library("kendo_aggregate", $model);
             $this->kendo_aggregate->set_default("sort", null);
 
-            if ($config['issupervisor'] || $config['isadmin']) {
-               $match = array();
-            }
-            else if(!$config['issupervisor'] && !$config['isadmin']){
-               $match = array(
-                  '$match' => array('assign' => array('$eq' => $config['extension']))
-               );
+            // if ($config['issupervisor'] || $config['isadmin']) {
+            //    $match = array();
+            // }
+            // else if(!$config['issupervisor'] && !$config['isadmin']){
+            //    $match = array(
+            //       '$match' => array('assign' => array('$eq' => $config['extension']))
+            //    );
+            // }
+            $match = array();
+            if(!in_array("viewall", $this->data["permission"]["actions"])) {
+                $extension = $this->session->userdata("extension");
+                $this->load->model("group_model");
+                $members = $this->group_model->members_from_lead($extension);
+                $match = array(
+                  '$match' => array('assign' => ['$in' => $members])
+                );
             }
             $group = array(
                '$group' => array(

@@ -163,7 +163,7 @@ Class Changelog extends WFF_Controller {
 				break;
 
 			case '':
-				$icon = "gi gi-folder_open text-info";
+				$icon = "gi gi-file text-info";
 				break;
 
 			default:
@@ -223,6 +223,20 @@ Class Changelog extends WFF_Controller {
 			if(!$result) throw new Exception("Can't chmod", 1);
 			
 			echo json_encode(array("status" => 1));
+		} catch(Exception $e) {
+			echo json_encode(array("status" => 0, "message" => $e->getMessage()));
+		}
+	}
+
+	function download()
+	{
+		try {
+			$this->load->helper('download');
+			$filepath = $this->input->get('filepath');
+			if(is_dir(FCPATH . $filepath))
+				throw new Exception(FCPATH . $filepath . " is not file", 1);
+				
+			force_download($filepath, NULL);
 		} catch(Exception $e) {
 			echo json_encode(array("status" => 0, "message" => $e->getMessage()));
 		}

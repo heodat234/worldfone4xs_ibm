@@ -17,7 +17,7 @@ Class Appointment_log_solve extends WFF_Controller {
     {
         try {
             $request = json_decode($this->input->get("q"), TRUE);
-            $response = $this->crud->read($this->collection, $request, array('tl_code', 'tl_name', 'customer_info', 'appointment_date', 'dealer_code', 'dealer_name', 'dealer_address', 'sc_code', 'sc_name', 'sc_phone', 'createdAt'), array('tl_code' => $this->session->userdata("extension")));
+            $response = $this->crud->read($this->collection, $request, array('tl_code', 'tl_name', 'customer_info', 'appointment_date', 'dealer_code', 'dealer_name', 'dealer_address', 'sc_code', 'sc_name', 'sc_phone', 'created_at'), array('tl_code' => $this->session->userdata("extension")));
             echo json_encode($response);
         } catch (Exception $e) {
             echo json_encode(array("status" => 0, "message" => $e->getMessage()));

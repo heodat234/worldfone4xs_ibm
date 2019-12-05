@@ -64,6 +64,16 @@ Class Cdr extends WFF_Controller {
             $response = $this->crud->read($this->collection, $request, [], $match);
 
             foreach ($response["data"] as &$doc) {
+                if(isset($doc["dialid"]) && empty($doc["customer"])) {
+                    $diallistDetail = $this->mongo_db->where_id($doc["dialid"])->getOne($this->sub . "Diallist_detail");
+                    if($diallistDetail) {
+                        if(isset($diallistDetail["cus_name"]) && empty($diallistDetail["name"])) 
+                            $diallistDetail["name"] = $diallistDetail["cus_name"];
+                        $this->mongo_db->where_id($doc["id"])->set(array("customer" => $diallistDetail))
+                            ->update($this->collection);
+                        $doc["customer"] = $diallistDetail;
+                    }
+                }
                 if(!empty($doc["customernumber"]) && empty($doc["customer"])) {
                     $phone = $doc["customernumber"];
                     $customers = $this->mongo_db->where_or(array("phone" => $phone, "other_phones" => $phone))->get($this->sub . "Customer");

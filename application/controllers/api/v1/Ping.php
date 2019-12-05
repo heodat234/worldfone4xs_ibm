@@ -50,13 +50,6 @@ Class Ping extends CI_Controller {
         	$chat_status = $this->get_chat_status();
         	$this->echoEvent("chat_status", json_encode($chat_status));
      	}  
-
-        /*if($time % 2 == 0 && $this->events["chat_notifications"]) {
-        	// Chat
-        	$chat_notifications = $this->get_chat_notifications();
-        	$this->echoEvent("chat_notifications", 
-        		json_encode(array("data" => $chat_notifications, "total" => count($chat_notifications))));
-        }*/
     	
     	if($time % 2 == 0 && $this->events["wait_in_queue"]) {
     		// Wait in queue
@@ -103,7 +96,12 @@ Class Ping extends CI_Controller {
 	private function getFollowUp()
 	{
 		$this->load->library("mongo_db");
-		$count = $this->mongo_db->count(set_sub_collection("Follow_up"));
+		$match = [];
+        $extension = $this->session->userdata("extension");
+        $this->load->model("group_model");
+        $members = $this->group_model->members_from_lead($extension);
+        $match = ["createdBy" => ['$in' => $members]];
+		$count = $this->mongo_db->where($match)->count(set_sub_collection("Follow_up"));
 		return array("class" => "gi gi-pushpin", "count" => $count);
 	}
 
@@ -129,13 +127,15 @@ Class Ping extends CI_Controller {
         $total = $this->mongo_db->where(array(
         	"active" 			=> true, 
         	"to" 				=> $extension, 
-        	"read.extension" 	=> array('$ne' => $extension)
+        	"read.extension" 	=> array('$ne' => $extension),
+        	"notifyDate"		=> array('$lt' => $this->mongo_db->date())
         ))->count("{$this->sub}Notification");
         return array("total" => $total);
     }
 
 	private function last_agent_status() { 
-		$this->load->model("agentstatus_model");
+		$type = $this->session->userdata("type");
+		$this->load->model(getCT("agentstatus_model", "/"), "agentstatus_model");
 		try {	
 			$agentStatus = $this->agentstatus_model->getOne([], ["_id", "my_session_id","endtime"]); 		
 
@@ -166,7 +166,8 @@ Class Ping extends CI_Controller {
     }
 
     private function agentstatus_log() {
-    	$this->load->model("agentstatus_model");
+    	$type = $this->session->userdata("type");
+		$this->load->model(getCT("agentstatus_model", "/"), "agentstatus_model");
     	if( !$this->agentstatus_model->getOne(["_id"]) )
             $this->agentstatus_model->start();
 		else $this->agentstatus_model->update([]);

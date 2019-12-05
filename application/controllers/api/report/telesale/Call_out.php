@@ -27,18 +27,33 @@ Class Call_out extends WFF_Controller {
           $this->load->library("kendo_aggregate", $model);
           $this->kendo_aggregate->set_default("sort", null);
 
-          if ($config['issupervisor'] || $config['isadmin']) {
-             $match = array('$match' => array('direction'=> 'outbound'));
-          }
-          else if(!$config['issupervisor'] && !$config['isadmin']){
-            $match = array(
-              '$match' => array(
-                 '$and' => array(
-                    array('direction'=> 'outbound'),
-                    array('userextension' => array('$eq' => $config['extension'])),
-                 )
-              )
-            );
+          // if ($config['issupervisor'] || $config['isadmin']) {
+          //    $match = array('$match' => array('direction'=> 'outbound'));
+          // }
+          // else if(!$config['issupervisor'] && !$config['isadmin']){
+          //   $match = array(
+          //     '$match' => array(
+          //        '$and' => array(
+          //           array('direction'=> 'outbound'),
+          //           array('userextension' => array('$eq' => $config['extension'])),
+          //        )
+          //     )
+          //   );
+          // }
+          // PERMISSION
+          $match = array('$match' => array('direction'=> 'outbound'));
+          if(!in_array("viewall", $this->data["permission"]["actions"])) {
+              $extension = $this->session->userdata("extension");
+              $this->load->model("group_model");
+              $members = $this->group_model->members_from_lead($extension);
+              $match = array(
+                '$match' => array(
+                   '$and' => array(
+                      array('direction'=> 'outbound'),
+                      array('userextension' => ['$in' => $members])
+                   )
+                )
+              );
           }
           $group = array(
              '$group' => array(

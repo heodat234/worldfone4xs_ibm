@@ -65,8 +65,8 @@ Class Disbursement extends WFF_Controller {
                         $doc['dealer_code'] = (string)$doc['dealer_code'];
                         $doc['cif'] = (string)$doc['cif'];
                         $doc['acc_no'] = (string)((int)$doc['acc_no']);
-                        $doc['released_date'] = strtotime($doc['released_date']);
-                        $doc['disbursed_date'] = strtotime($doc['disbursed_date']);
+                        $doc['released_date'] = ($doc['released_date'] - 25569) * 86400;
+                        $doc['disbursed_date'] = ($doc['disbursed_date'] - 25569) * 86400;
                         $doc['loan_amount'] = (double)$doc['loan_amount'];
                         $doc['issued_date'] = (string)$doc['issued_date'];
                         $issuedDate = explode(" ", $doc['issued_date']);
@@ -149,15 +149,23 @@ Class Disbursement extends WFF_Controller {
     function listFileFTP() {
         try {
             $request = json_decode($this->input->get("q"), TRUE);
-            if(!empty($request)) {
-                $file_path = $request['ftp_filepath'];
-                $file_name = basename($file_path);
+            $file_path = '/data/upload_file/';
+            if (in_array(ENVIRONMENT, array('UAT', 'development'))) {
+                $today = strtotime("2019-11-20 00:00:00");
             }
             else {
-                $file_path = '';
-                $file_name = '';
+                $today = strtotime('today 00:00:00');
             }
-            echo json_encode(array('data' => array(array('filepath' => $file_path, 'filename' => $file_name)), 'total' => 1));
+            $todayFile = date('Ymd', $today);
+            $file_path = $file_path . $todayFile . '/';
+            $file_name = 'File giai ngan.csv';
+            $existFile = file_exists($file_path . $file_name);
+            if($existFile) {
+                echo json_encode(array('data' => array(array('filepath' => $file_path . $file_name, 'filename' => $file_name)), 'total' => 1));
+            }
+            else {
+                echo json_encode(array('data' => array(array('filepath' => $file_path . $file_name, 'filename' => '')), 'total' => 0));
+            }
         }
         catch (Exception $e) {
             echo json_encode(array("status" => 0, "message" => $e->getMessage()));
@@ -180,6 +188,67 @@ Class Disbursement extends WFF_Controller {
             echo json_encode(array("status" => 1, "message" => '', 'data' => $result['data']));
         }
         catch (Exception $e) {
+            echo json_encode(array("status" => 0, "message" => $e->getMessage()));
+        }
+    }
+
+    function read()
+    {
+        try {
+            $request = json_decode($this->input->get("q"), TRUE);
+            $response = $this->crud->read($this->collection, $request);
+            echo json_encode($response);
+        } catch (Exception $e) {
+            echo json_encode(array("status" => 0, "message" => $e->getMessage()));
+        }
+    }
+
+    function detail($id)
+    {
+        try {
+            $response = $this->crud->where_id($id)->getOne($this->collection);
+            echo json_encode($response);
+        } catch (Exception $e) {
+            echo json_encode(array("status" => 0, "message" => $e->getMessage()));
+        }
+    }
+
+    function create()
+    {
+        ini_set("display_errors", 1);
+        ini_set("display_startup_errors", 1);
+        error_reporting(E_ALL);
+        try {
+            $this->load->library("crud");
+            $data = json_decode(file_get_contents('php://input'), TRUE);
+            $data["created_at"]	= time();
+            $data["created_by"]	= $this->session->userdata("extension");
+            $result = $this->crud->create($this->collection, $data);
+            echo json_encode(array("status" => $result ? 1 : 0, "data" => [$result]));
+        } catch (Exception $e) {
+            echo json_encode(array("status" => 0, "message" => $e->getMessage()));
+        }
+    }
+
+    function update($id)
+    {
+        try {
+            $data = json_decode(file_get_contents('php://input'), TRUE);
+            $data["updated_by"]  = $this->session->userdata("extension");
+            $data["updated_at"]  = date('m/d/Y h:i:s a', time());
+            $result = $this->crud->where_id($id)->update($this->collection, array('$set' => $data));
+            echo json_encode(array("status" => $result ? 1 : 0, "data" => []));
+        } catch (Exception $e) {
+            echo json_encode(array("status" => 0, "message" => $e->getMessage()));
+        }
+    }
+
+    function delete($id)
+    {
+        try {
+            $result = $this->crud->where_id($id)->delete($this->collection, TRUE);
+            echo json_encode(array("status" => $result ? 1 : 0, "data" => []));
+        } catch (Exception $e) {
             echo json_encode(array("status" => 0, "message" => $e->getMessage()));
         }
     }

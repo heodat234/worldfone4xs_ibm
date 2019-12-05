@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-Class Monitor extends CI_Controller {
+Class Monitor extends WFF_Controller {
 
     private $collection = "worldfonepbxmanager";
     private $sub = "";
@@ -11,7 +11,7 @@ Class Monitor extends CI_Controller {
         parent::__construct();
         header('Content-type: application/json');
         $this->load->library("mongo_db");
-        $this->sub = set_sub_collection("");
+        $this->sub = set_sub_collection();
         $this->collection = $this->sub . $this->collection;
     }
 
@@ -22,14 +22,22 @@ Class Monitor extends CI_Controller {
         $this->load->model("agentstatus_model");
         $this->load->model("agentsign_model");
         $this->load->model("call_model");
+        $match = ["active" => TRUE];
+        if(!in_array("viewall", $this->data["permission"]["actions"])) {
+            $extension = $this->session->userdata("extension");
+            $this->load->model("group_model");
+            $members = $this->group_model->members_from_lead($extension);
+            $match["extension"] = ['$in' => $members];
+        }
         $this->crud->select_db($this->config->item("_mongo_db"));
-        $result = $this->crud->read("{$this->sub}User", $request, ["extension", "agentname", "favorite", "avatar"],  array("active" => TRUE));
+        $result = $this->crud->read("{$this->sub}User", $request, ["extension", "agentname", "favorite", "avatar", "fullname"],  $match);
         $this->crud->select_db();
         foreach ($result["data"] as $index => &$doc) {
             $doc["status"] = $this->agentstatus_model->get_today_by_extension($doc["extension"]);
             $doc["totalCurrentUser"] = $this->agentsign_model->count_current_by_extension($doc["extension"]);
             $doc["totalCallIn"] = $this->call_model->get_total_today_by_extension($doc["extension"], array("direction" => "inbound"));
             $doc["totalCallOut"] = $this->call_model->get_total_today_by_extension($doc["extension"], array("direction" => "outbound"));
+            $doc["currentCall"] = $this->call_model->get_current_call($doc["extension"]);
         }
         $result["time"] = time();
         echo json_encode($result);
@@ -229,12 +237,10 @@ Class Monitor extends CI_Controller {
     {
         try {
             $this->load->library("crud");
-            $_db = $this->config->item("_mongo_db");
-            $this->crud->select_db($_db);
             $this->load->model("language_model");
             $this->load->library("mongo_private");
             $extensions = $this->mongo_private->where(
-                array("issysadmin" => FALSE)
+                array("issysadmin" => ['$ne' => TRUE])
             )->distinct($this->sub . "User", "extension");
             $match = array("extension" => array('$in' => $extensions));
             $request = json_decode($this->input->get("q"), TRUE);
@@ -251,7 +257,7 @@ Class Monitor extends CI_Controller {
                 } 
                 else 
                 {
-                    $navDoc = $this->mongo_db->where(array(
+                    $navDoc = $this->mongo_private->where(array(
                         "uri" => array('$in' => [$doc["uri"], $doc["uri"]."/"]), 
                         "visible" => TRUE
                     ))->getOne($this->sub . "Navigator");
@@ -270,12 +276,9 @@ Class Monitor extends CI_Controller {
     {
         try {
             $id = $this->input->get("id");
-
             $this->load->library("crud");
-            $_db = $this->config->item("_mongo_db");
-            $this->crud->select_db($_db);
             $this->load->model("language_model");
-            $activityDoc = $this->mongo_db->where_id($id)->select(["ajaxs.directory","ajaxs.class","ajaxs.function","ajaxs.method","ajaxs.uri","ajaxs.createdAt"])->getOne("Activity_log");
+            $activityDoc = $this->mongo_db->where_id($id)->select(["ajaxs.directory","ajaxs.class","ajaxs.function","ajaxs.method","ajaxs.uri","ajaxs.createdAt"])->getOne("Activity");
             $data = !empty($activityDoc["ajaxs"]) ? $activityDoc["ajaxs"] : [];
             $responseData = array();
             foreach ($data as &$ajax) {
@@ -304,5 +307,32 @@ Class Monitor extends CI_Controller {
         } catch (Exception $e) {
             echo json_encode(array("status" => 0, "message" => $e->getMessage()));
         }
+    }
+    
+    function spy() {
+        try {
+            $request = json_decode(file_get_contents('php://input'), TRUE);
+            $extension = $this->session->userdata("extension");
+            $spied_extension = !empty($request["spied_extension"]) ? $request["spied_extension"] : "";
+            $mode = !empty($request["mode"]) ? $request["mode"] : "spy";
+
+            $this->load->model("pbx_model");
+            $this->load->model("language_model");
+            $this->load->model("agentstatus_model");
+            $responseArr = $this->pbx_model->spy($extension, $spied_extension, $mode);
+            $this->agentstatus_model->update(array("substatus" => $mode . " " . $spied_extension));
+            if($responseArr != 200) throw new Exception("@Action@ @error@ " . json_encode($responseArr));
+            $message = $this->language_model->translate("@Action@ @success@", "NOTIFICATION");
+            echo json_encode(array("status" => 1, "message" => $message));
+        } catch (Exception $e) {
+            $message = $this->language_model->translate($e->getMessage(), "NOTIFICATION");
+            echo json_encode(array("status" => 0, "message" => $message));
+        }
+    }
+
+    function get_call_in_queue() {
+        $this->load->model("call_model");
+        $data = $this->call_model->get_call_in_queue();
+        echo json_encode(array("data" => $data, "total" => count($data), "time" => time()));
     }
 }

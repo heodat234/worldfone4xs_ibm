@@ -26,7 +26,7 @@ Class Organization extends WFF_Controller {
 	function readLevel($parent_id = null)
 	{
 		$where = !$parent_id ? array("parent_id" => array('$exists' => false)) : array("parent_id" => new MongoDB\BSON\ObjectId($parent_id));
-		$data = $this->mongo_db->where($where)->select(["name","hasChild","color","parent_id","members","lead"])->get($this->collection);
+		$data = $this->mongo_db->where($where)->select(["name","hasChild","color","parent_id","members","lead","debt_groups"])->get($this->collection);
 		if($data) {
 			foreach ($data as &$doc) {
 				if(!empty($doc["hasChild"])) {

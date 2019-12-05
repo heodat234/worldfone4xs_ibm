@@ -1,14 +1,13 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-include "./application/third_party/beanstalk_console/public/index.php";
-
 Class Test extends WFF_Controller {
 
 
 	function __construct()
 	{
 		parent::__construct();
+		//var_dump($this->config->item("abc"));
 	}
 
 	function index($id = "")
@@ -17,9 +16,27 @@ Class Test extends WFF_Controller {
 		$connectId = $this->ftp_model->connectToFTP();
 		pre($this->ftp_model->listFileInFTP($connectId));*/
 		//shell_exec("/usr/bin/php ".FCPATH."cronjob/LOAN/importAccounts.php");
-		shell_exec("/usr/bin/php ".FCPATH."cronjob/LOAN/importSIBS.php");
+		//shell_exec("/usr/bin/php ".FCPATH."cronjob/LOAN/importSIBS.php");
 		/*$result = exec("kill -9 4910");
 		pre($result);*/
+		/*$this->load->library("mongo_db");
+		$this->mongo_db->switch_db("_worldfone4xs");
+		$model = $this->mongo_db->where(array("collection" => "LO_LNJC05"))->like("sub_type", "import")->order_by(array("index" => 1))->get("Model");
+		pre($model);*/
+		/*$this->load->model("pbx_model");
+		$result = $this->pbx_model->list_agent_state("911");
+		pre($result);
+		$result = $this->pbx_model->make_call_3("9999","0968495645","5dddfc021ef2b4638d24e11f","auto", "queue");
+		var_dump($result);*/
+		$this->session->set_userdata("agentname", "tri_dung_huynh");
+		// $data = $this->mongo_db->command(["listDatabases" => 1, "nameOnly" => TRUE]);
+		// pre($data);
+	}
+
+	function import()
+	{
+		shell_exec("/usr/bin/php ".FCPATH."cronjob/LOAN/createPaymentHistory.php");
+		echo "DONE";
 	}
 
 	function update()

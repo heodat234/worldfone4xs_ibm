@@ -18,7 +18,7 @@ Class Model extends CI_Controller {
 	function read()
 	{
 		$request = json_decode($this->input->get("q"), TRUE);
-		$response = $this->crud->read($this->collection, $request, ["index", "collection","field", "title", "type","sub_type"]);
+		$response = $this->crud->read($this->collection, $request, ["index", "collection","field", "title", "type","sub_type","description"]);
 		echo json_encode($response);
 	}
 

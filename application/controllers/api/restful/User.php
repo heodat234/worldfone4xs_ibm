@@ -19,7 +19,7 @@ Class User extends CI_Controller {
 	function read()
 	{
 		$request = json_decode($this->input->get("q"), TRUE);
-		$response = $this->crud->read($this->collection, $request);
+		$response = $this->crud->read($this->collection, $request, [], ["active"=>TRUE]);
 		echo json_encode($response);
 	}
 

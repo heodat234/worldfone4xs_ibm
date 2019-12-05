@@ -54,7 +54,7 @@ Class Chat extends CI_Controller {
 					$doc["last_message"] = strlen($last_msg) > 16 ? substr($last_msg, 0, 16) . "..." : $last_msg;
 				}
     			if(isset($doc["last_time"])) {
-    				$last_timestamp = $doc["last_time"]->toDateTime()->getTimestamp();
+    				$last_timestamp = strtotime($doc["last_time"]);
     				$doc["last_time"] = date($last_timestamp > $todayMidnight ? "H:i" : "d/m/y", $last_timestamp);
     			}
     			$doc["unread_count"] = $this->mongo_db->where(array('user_id' => array('$ne' => $extension), 'read.extension' => array('$ne' => $extension)))->count("Message_" . $doc["id"]);
@@ -69,6 +69,8 @@ Class Chat extends CI_Controller {
     	try {
     		$request = json_decode(file_get_contents('php://input'), TRUE);
     		if(empty($request["members"]) || !is_array($request["members"])) throw new Exception("Error Processing Request", 1);
+    		$extension = $this->session->userdata("extension");
+    		if(!in_array($extension, $request["members"])) throw new Exception("You must be a member in chat group which you create!", 1);
     		
     		sort($request["members"]);
     		$request["pin"] = false;
@@ -141,7 +143,7 @@ Class Chat extends CI_Controller {
 			$extension = $this->session->userdata("extension");
 			$response = $this->crud->read($collection, $request);
 			foreach ($response["data"] as &$doc) {
-				$doc["timestamp"] = date("c", $doc["time"]->toDateTime()->getTimestamp());
+				$doc["timestamp"] = $doc["time"];
 				$this->crud->where_id($doc["id"])->update($collection, 
 					['$push' => ['read' => ["extension" => $extension, "createdAt" => $date]]]
 				);

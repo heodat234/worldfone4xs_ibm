@@ -15,3 +15,4 @@
 26/11/2019, 23:43:53: [Errno 2] No such file or directory: '/data/upload_file/20191122/LNJC05F'
 26/11/2019, 23:44:38: name 'result' is not defined
 26/11/2019, 23:49:43: name 'result' is not defined
+29/11/2019, 17:40:46: [Errno 2] No such file or directory: '/data/upload_file/20191120/Temporary payment report.xlsx'

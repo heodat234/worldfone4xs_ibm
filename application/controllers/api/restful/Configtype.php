@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-Class Configtype extends CI_Controller {
+Class Configtype extends WFF_Controller {
 
 	private $collection = "ConfigType";
 
@@ -9,6 +9,7 @@ Class Configtype extends CI_Controller {
 	{
 		parent::__construct();
 		header('Content-type: application/json');
+		if(!$this->session->userdata("issysadmin")) exit();
 		$this->load->library("crud");
 		$this->load->config("_mongo");
 		$_db = $this->config->item("_mongo_db");

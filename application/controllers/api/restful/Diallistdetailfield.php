@@ -27,6 +27,7 @@ Class Diallistdetailfield extends WFF_Controller {
 	{
 		$data = json_decode(file_get_contents('php://input'), TRUE);
 		$data["collection"] = $this->sub . "Diallist_detail";
+
 		$result = $this->crud->create($this->collection, $data);
 		echo json_encode(array("status" => $result ? 1 : 0));
 	}
@@ -34,6 +35,7 @@ Class Diallistdetailfield extends WFF_Controller {
 	function update($id)
 	{
 		$data = json_decode(file_get_contents('php://input'), TRUE);
+
 		$result = $this->crud->where_id($id)->update($this->collection, array('$set' => $data));
 		echo json_encode(array("status" => $result ? 1 : 0));
 	}

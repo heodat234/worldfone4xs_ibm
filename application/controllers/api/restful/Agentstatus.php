@@ -3,7 +3,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 Class Agentstatus extends WFF_Controller {
 
-	private $collection = "Agent_status";
+	private $collection = "Agent_status_log";
 	private $asc_collection = "Agent_status_code";
 
 	function __construct()

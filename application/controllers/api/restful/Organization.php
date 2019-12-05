@@ -87,9 +87,7 @@ Class Organization extends WFF_Controller {
 			if($parent_id) {
 				$newData = array(
 					"parent_id" => $parent_id, 
-					"only_admin" => !empty($currentData["only_admin"])
 				);
-				if(isset($currentData["module_id"])) $newData["module_id"] = $currentData["module_id"];
 				$this->crud->where_id($doc["id"])->update($this->collection, array('$set' => $newData));
 			} else {
 				$this->crud->where_id($doc["id"])->update($this->collection, array('$unset' => array("parent_id" => 1)));

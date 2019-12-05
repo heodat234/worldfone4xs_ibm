@@ -11,6 +11,7 @@ Class Appointment extends WFF_Controller {
         header('Content-type: application/json');
         $this->load->library("crud");
         $this->collection = set_sub_collection($this->collection);
+        $this->permission = $this->data["permission"];
     }
     function index()
     {
@@ -23,14 +24,26 @@ Class Appointment extends WFF_Controller {
         $this->load->library("kendo_aggregate", $model);
         $this->kendo_aggregate->set_default("sort", null);
 
-        if ($config['issupervisor'] || $config['isadmin']) {
-           $match = array();
+        // PERMISSION
+        $match = array();
+        if(!in_array("viewall", $this->data["permission"]["actions"])) {
+            $extension = $this->session->userdata("extension");
+            $this->load->model("group_model");
+            $members = $this->group_model->members_from_lead($extension);
+            // $match["userextension"] = ['$in' => $members];
+            $match = array(
+              '$match' => array('tl_code' => ['$in' => $members])
+            );
         }
-        else if(!$config['issupervisor'] && !$config['isadmin']){
-           $match = array(
-              '$match' => array('assign' => array('$eq' => $config['extension']))
-           );
-        }
+
+        // if ($config['issupervisor'] || $config['isadmin']) {
+        //    $match = array();
+        // }
+        // else if(!$config['issupervisor'] && !$config['isadmin']){
+        //    $match = array(
+        //       '$match' => array('assign' => array('$eq' => $config['extension']))
+        //    );
+        // }
         $group = array(
            '$group' => array(
               '_id' => array('code'=>'$tl_code'),

@@ -15,7 +15,7 @@ Class Config extends WFF_Controller {
 	{
 		try {
 			$config = array();
-			$configFields = array("wff_version","wff_env","wff_unique_login","wff_time_cache", "phone_type", "brand_title", "brand_logo", "loader_layer", "wff_auth_redirect", "record_activity", "use_worker", "record_event","login_logout_ipphone", "short_key_ipphone", "ip_sip_server", "login_background_img", "login_background_color", "login_background_img_url", "login_brand_img");
+			$configFields = array("wff_version","wff_env","wff_unique_login","wff_time_cache", "phone_type", "brand_title", "brand_logo", "loader_layer", "wff_auth_redirect", "record_activity", "use_worker", "record_event","login_logout_ipphone", "short_key_ipphone", "ip_sip_server", "login_background_img", "login_background_color", "login_background_img_url", "login_brand_img", "auto_add_api");
 			foreach ($configFields as $value) {
 				$config[$value] = $this->config->item($value);
 			}
@@ -36,10 +36,9 @@ Class Config extends WFF_Controller {
 				"wff_auth_redirect" => isset($data["wff_auth_redirect"]) ? $data["wff_auth_redirect"] : TRUE,
 				"record_activity" => isset($data["record_activity"]) ? $data["record_activity"] : TRUE,
 				"record_event" => isset($data["record_event"]) ? $data["record_event"] : TRUE,
+				"auto_add_api" => isset($data["auto_add_api"]) ? $data["auto_add_api"] : TRUE,
 				"use_worker" => isset($data["use_worker"]) ? $data["use_worker"] : TRUE,
 				"wff_time_cache" => isset($data["wff_time_cache"]) ? (int) $data["wff_time_cache"] : 60,
-				"show_customer" => isset($data["show_customer"]) ? $data["show_customer"] : "ALL",
-				"show_cdr" => isset($data["show_cdr"]) ? $data["show_cdr"] : "ALL",
 				"phone_type" => isset($data["phone_type"]) ? $data["phone_type"] : "",
 				"brand_title" => isset($data["brand_title"]) ? $data["brand_title"] : "",
 				"brand_logo" => isset($data["brand_logo"]) ? $data["brand_logo"] : "",
@@ -57,7 +56,24 @@ Class Config extends WFF_Controller {
 			$content = json_encode($config, JSON_PRETTY_PRINT);
 			$result = fwrite($fd, $content);
 			fclose($fd);
-			//$result = $this->crud->update($this->collection, $data);
+			// Set CI_ENV
+			$wffENVtoENV = array(
+				"DEV" => "development",
+				"UAT" => "testing",
+				"LIVE"=> "production"
+			);
+			
+			if(isset($wffENVtoENV[ $config["wff_env"] ])) {
+				$CI_ENV = $wffENVtoENV[ $config["wff_env"] ];
+				if(ENVIRONMENT !== $CI_ENV) {
+					$htaccess_file = FCPATH . ".htaccess";
+					$content = file_get_contents($htaccess_file);
+					$content = preg_replace('/SetEnv CI_ENV (' . implode("|", array_values($wffENVtoENV)) .')/', "SetEnv CI_ENV {$CI_ENV}", $content);
+					$fd = fopen($htaccess_file, 'w');
+					$result = fwrite($fd, $content);
+					fclose($fd);
+				}
+			}
 			echo json_encode(array("status" => $result ? 1 : 0));
 		} catch (Exception $e) {
 			echo json_encode(array("status" => 0, "message" => $e->getMessage()));

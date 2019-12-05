@@ -45,7 +45,9 @@ Class Database extends WFF_Controller {
     function backup_db($db)
     {
         $time = time();
-        $command = 'mongo '.$this->username.':'.$this->password.'@localhost:27017 --eval \'db.copyDatabase("'.$db.'", "'.$db.'_'.$time.'")\'';
+        if($this->username)
+            $command = 'mongo '.$this->username.':'.$this->password.'@localhost:27017 --eval \'db.copyDatabase("'.$db.'", "'.$db.'_'.$time.'")\'';
+        else $command = 'mongo --eval \'db.copyDatabase("'.$db.'", "'.$db.'_'.$time.'")\'';
         $output = exec($command);
         return $output;
     }
@@ -66,6 +68,15 @@ Class Database extends WFF_Controller {
         }
         $result = exec($command);
         echo json_encode(array("status" => 1, "message" => "Restore success $db $desCollection"));
+    }
+
+    function show()
+    {
+        if($this->username)
+            $command = 'mongo '.$this->username.':'.$this->password.'@localhost:27017 --eval \'db.adminCommand({listDatabases:1})\'';
+        else $command = 'mongo --eval \'db.adminCommand({listDatabases:1})\'';
+        $output = exec($command);
+        return $output;
     }
 
     function collections()
@@ -210,6 +221,24 @@ Class Database extends WFF_Controller {
         }
     }
 
+    function add_collection($database)
+    {
+        try {
+            $request = json_decode(file_get_contents('php://input'), TRUE);
+            
+            if(!$database || !isset($request["create"])) throw new Exception("Error Processing Request", 1);
+
+            $this->load->library("mongo_db");
+            $this->mongo_db->switch_db($database);
+
+            $result = $this->mongo_db->command($request, FALSE);
+
+            echo json_encode(array("status" => !empty($result[0]["ok"]) ? 1 : 0));
+        } catch (Exception $e) {
+            echo json_encode(array("status" => 0, "message" => $e->getMessage()));
+        }
+    }
+
     function drop_collection($database)
     {
         try {
@@ -222,6 +251,24 @@ Class Database extends WFF_Controller {
             $result = $this->mongo_db->drop_collection($collection);
 
             echo json_encode(array("status" => !empty($result[0]["ok"]) ? 1 : 0));
+        } catch (Exception $e) {
+            echo json_encode(array("status" => 0, "message" => $e->getMessage()));
+        }
+    }
+
+    function delete_many($database)
+    {
+        try {
+            $collection = $this->input->get("collection");
+            $where = $this->input->get("where");
+            if(!$database || !$collection) throw new Exception("Error Processing Request", 1);
+            
+            $this->load->library("mongo_db");
+            $this->mongo_db->switch_db($database);
+
+            $result = $this->mongo_db->where($where)->delete_all($collection);
+
+            echo json_encode(array("status" => !empty($result) ? 1 : 0));
         } catch (Exception $e) {
             echo json_encode(array("status" => 0, "message" => $e->getMessage()));
         }

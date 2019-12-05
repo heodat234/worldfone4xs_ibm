@@ -16,6 +16,8 @@ from helper.mongod import Mongodb
 from helper.excel import Excel
 from helper.jaccs import Config
 from dateutil.parser import parse
+import os.path
+from os import path
 
 mongodb     = Mongodb("worldfone4xs")
 _mongodb    = Mongodb("_worldfone4xs")
@@ -39,6 +41,10 @@ try:
       ftpInfo     = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'ftp_config'), WHERE={'collection': collection})
       ftpConfig   = config.ftp_config()
       ftpLocalUrl = common.getDownloadFolder() + ftpInfo['filename']
+
+      if path.exists(ftpLocalUrl) == False:
+         sys.exit()
+
       importLogInfo = {
          'collection'    : 'Telesalelist', 
          'begin_import'  : time.time(),

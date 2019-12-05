@@ -6,7 +6,7 @@ Class ExcecuteExcel extends CI_Controller {
     function __construct()
     {
         parent::__construct();
-        header('Content-type: application/json');
+        header('Content-type: application/json; charset=UTF-8');
         $this->load->library("Excel");
     }
 

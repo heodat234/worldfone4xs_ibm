@@ -41,6 +41,8 @@ try:
     converters = {}
     insertData = []
     errorData = []
+    total = 0
+    complete = 0
     # today = date.today()
     today = datetime.strptime('20/11/2019', "%d/%m/%Y").date()
     day = today.day
@@ -113,6 +115,7 @@ try:
             inputDataRaw = excel.getDataExcel(file_path=importLogInfo['file_path'], header=None, names=modelColumns, na_values='')
             inputData = inputDataRaw.to_dict('records')
             for idx, row in enumerate(inputData):
+                total += 1
                 result = True
                 temp = {}
                 if row['account_number'] not in ['', None]:
@@ -133,11 +136,13 @@ try:
                     else:
                         insertData.append(temp)
                         result = True
+                        complete += 1
 
     else:
         with open(importLogInfo['file_path'], 'r', newline='\n', encoding='ISO-8859-1') as fin:
             csv_reader = csv.reader(fin, delimiter=';', quotechar='"')
             for idx, row in enumerate(csv_reader):
+                total += 1
                 result = True
                 temp = {}
                 if len(row) > 5:
@@ -159,6 +164,7 @@ try:
                     else:
                         insertData.append(temp)
                         result = True
+                        complete += 1
 
     if(len(errorData) > 0):
         mongodbresult.remove_document(MONGO_COLLECTION=common.getSubUser(subUserType, ('LN3206F_' + str(year) + str(month) + str(day))))

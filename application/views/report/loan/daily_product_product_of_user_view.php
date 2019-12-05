@@ -372,8 +372,8 @@ function saveAsExcel() {
 <div id="page-content">
     <!-- Table Styles Header -->
     <ul class="breadcrumb breadcrumb-top">
-        <li>@Quality control@</li>
-        <li>CDR</li>
+        <li>@Report@</li>
+        <li>Daily productivity Report - Product of each user and group</li>
         <li class="pull-right none-breakcrumb">
             <a role="button" class="btn btn-sm" data-field="starttime" onclick="customFilter(this, Table.dataSource)"><i class="fa fa-filter"></i> <b>@Custom Filter@</b></a>
             <div class="input-group-btn column-widget">

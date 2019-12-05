@@ -12,8 +12,9 @@ Class Diallist extends CI_Controller {
 		parent::__construct();
 		header('Content-type: application/json');
 		$this->load->library("crud");
-		$this->collection = set_sub_collection($this->collection);
-		$this->sub_collection = set_sub_collection($this->sub_collection);
+		$this->sub = set_sub_collection();
+		$this->collection = $this->sub . $this->collection;
+		$this->sub_collection = $this->sub . $this->sub_collection;
 	}
 
 	function read()
@@ -41,9 +42,11 @@ Class Diallist extends CI_Controller {
 	    }
         foreach ($response["data"] as &$doc) {
         	if(isset($doc["type"])) $doc["type"] = isset($dialTypeToName[$doc["type"]]) ? $dialTypeToName[$doc["type"]] : $doc["type"];
-        	if(isset($doc["mode"])) $doc["mode"] = isset($dialModeToName[$doc["mode"]]) ? $dialModeToName[$doc["mode"]] : $doc["mode"];
         	$doc["count_detail"] = $this->mongo_db->where_object_id("diallist_id", $doc["id"])->count($this->sub_collection);
         	$doc["assigns"] = $this->mongo_db->where_object_id("diallist_id", $doc["id"])->distinct($this->sub_collection, "assign");
+        	$this->mongo_db->where_id($doc["id"])
+        	->set("count_detail", $doc["count_detail"])
+        	->set("assigns", $doc["assigns"])->update($this->collection);
         }
         // Result
 		echo json_encode($response);
@@ -75,10 +78,10 @@ Class Diallist extends CI_Controller {
 
 	function delete($id)
 	{
-		$permanent = TRUE;
-		$result = $this->crud->where_id($id)->delete($this->collection, $permanent);
+		$result = $this->crud->where_id($id)->delete($this->collection);
 		if($result) {
-			$this->crud->where_object_id("diallist_id", $id)->delete_all($this->sub_collection, $permanent);
+			$this->mongo_db->where_object_id("diallist_id", $id)->delete_all($this->sub_collection);
+			$this->mongo_db->where("diallist_id", $id)->delete_all($this->sub . "Dial_queue");
 		}
 		echo json_encode(array("status" => $result ? 1 : 0, "data" => []));
 	}

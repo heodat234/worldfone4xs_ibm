@@ -59,7 +59,12 @@ Class Sc_schedule extends WFF_Controller {
                 );
                 $importLogId = $this->crud->create(set_sub_collection('Import'), $importLog);
                 $pythonCron = FCPATH . 'cronjob/python/Telesales/importSCSchedule.py ';
-                $command = escapeshellcmd("python3.6 " . $pythonCron . $importLogId['id']) . ' > /dev/null &';
+                if (in_array(ENVIRONMENT, array('UAT', 'development'))) {
+                    $command = escapeshellcmd("python3.6 " . $pythonCron . $importLogId['id']) . ' > /dev/null &';
+                }
+                else {
+                    $command = escapeshellcmd("/usr/local/bin/python3.6 " . $pythonCron . $importLogId['id']) . ' > /dev/null &';
+                }
                 $output = shell_exec($command);
                 echo json_encode(array('status' => 2, "message" => "@Importing... Please check import history for more detail@"));
             }
@@ -90,7 +95,7 @@ Class Sc_schedule extends WFF_Controller {
     function importHistoryDetail() {
         try {
             $request = json_decode($this->input->get("q"), TRUE);
-            $response = $this->crud->read(set_sub_collection('Scschedule_import_result'), $request);
+            $response = $this->crud->read(set_sub_collection('Sc_schedule_result'), $request);
             echo json_encode($response);
         } catch (Exception $e) {
             echo json_encode(array("status" => 0, "message" => $e->getMessage()));
@@ -100,15 +105,23 @@ Class Sc_schedule extends WFF_Controller {
     function listFileFTP() {
         try {
             $request = json_decode($this->input->get("q"), TRUE);
-            if(!empty($request)) {
-                $file_path = $request['ftp_filepath'];
-                $file_name = basename($file_path);
+            $file_path = '/data/upload_file/';
+            if (in_array(ENVIRONMENT, array('UAT', 'development'))) {
+                $today = strtotime("2019-11-20 00:00:00");
             }
             else {
-                $file_path = '';
-                $file_name = '';
+                $today = strtotime('today 00:00:00');
             }
-            echo json_encode(array('data' => array(array('filepath' => $file_path, 'filename' => $file_name)), 'total' => 1));
+            $todayFile = date('Ymd', $today);
+            $file_path = $file_path . $todayFile . '/';
+            $file_name = 'Lich_lam_viec_SC.xlsx';
+            $existFile = file_exists($file_path . $file_name);
+            if($existFile) {
+                echo json_encode(array('data' => array(array('filepath' => $file_path . $file_name, 'filename' => $file_name)), 'total' => 1));
+            }
+            else {
+                echo json_encode(array('data' => array(array('filepath' => $file_path . $file_name, 'filename' => '')), 'total' => 0));
+            }
         }
         catch (Exception $e) {
             echo json_encode(array("status" => 0, "message" => $e->getMessage()));
@@ -167,7 +180,7 @@ Class Sc_schedule extends WFF_Controller {
                 )
             ));
             $this->kendo_aggregate->adding($group);
-            $total_aggregate = $this->kendo_aggregate->get_total_aggregate_group('$dealer_code');
+            $total_aggregate = $this->kendo_aggregate->get_total_aggregate();
             $total_result = $this->mongo_db->aggregate_pipeline($this->collection, $total_aggregate);
             $total = isset($total_result[0]) ? $total_result[0]['total'] : 0;
             $this->kendo_aggregate->sorting();

@@ -15,7 +15,7 @@ Class My_diallist_detail extends WFF_Controller {
 
 	function read()
 	{
-		$request = $_GET;
+		$request = json_decode($this->input->get("q"), TRUE);
 		$extension = $this->session->userdata("extension");
 		$match = array("assign" => $extension);
 		$response = $this->crud->read($this->collection, $request, [], $match);

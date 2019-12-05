@@ -213,4 +213,28 @@ Class Select extends WFF_Controller {
 		}
 		echo json_encode($data);
 	}
+
+	function debtGroupDueDate() {
+		ini_set("display_errors", 1);
+		ini_set("display_startup_errors", 1);
+		error_reporting(E_ALL);
+		$data = array();
+		$this->load->library("mongo_private");
+		$debtGroupRaw = $this->mongo_private->where(array('tags' => array('debt', 'group')))->getOne($this->sub . "Jsondata");
+		$dueDateRaw = $this->mongo_private->where(array('tags' => array('debt', 'duedate')))->getOne($this->sub . "Jsondata");
+		if(!empty($debtGroupRaw['data']) && !empty($dueDateRaw['data'])) {
+			$tempDebtGroupRaw = $debtGroupRaw['data'];
+			$tempDueDateRaw = $dueDateRaw['data'];
+			$debtGroup = array_column($tempDebtGroupRaw, 'text');
+			$dueDate = array_column($tempDueDateRaw, 'text');
+			asort($debtGroup);
+			asort($dueDate);
+			foreach($debtGroup as $group) {
+				foreach($dueDate as $duedate) {
+					array_push($data, $group . $duedate);
+				}
+			}
+		}
+		echo json_encode($data);
+	}
 }

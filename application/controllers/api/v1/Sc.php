@@ -160,15 +160,23 @@ Class Sc extends WFF_Controller {
     function listFileFTP() {
         try {
             $request = json_decode($this->input->get("q"), TRUE);
-            if(!empty($request)) {
-                $file_path = $request['ftp_filepath'];
-                $file_name = basename($file_path);
+            $file_path = '/data/upload_file/';
+            if (in_array(ENVIRONMENT, array('UAT', 'development'))) {
+                $today = strtotime("2019-11-20 00:00:00");
             }
             else {
-                $file_path = '';
-                $file_name = '';
+                $today = strtotime('today 00:00:00');
             }
-            echo json_encode(array('data' => array(array('filepath' => $file_path, 'filename' => $file_name)), 'total' => 1));
+            $todayFile = date('Ymd', $today);
+            $file_path = $file_path . $todayFile . '/';
+            $file_name = 'DANH SACH SC.csv';
+            $existFile = file_exists($file_path . $file_name);
+            if($existFile) {
+                echo json_encode(array('data' => array(array('filepath' => $file_path . $file_name, 'filename' => $file_name)), 'total' => 1));
+            }
+            else {
+                echo json_encode(array('data' => array(array('filepath' => $file_path . $file_name, 'filename' => '')), 'total' => 0));
+            }
         }
         catch (Exception $e) {
             echo json_encode(array("status" => 0, "message" => $e->getMessage()));

@@ -45,6 +45,13 @@ Class Dailyreport extends WFF_Controller {
         $this->output->data["js"][] = STEL_PATH . "js/admin/admin.js";
         $this->load->view('report/loan/daily_product_of_user_group_view');
     }
+     public function dailyProductOfEachGroup()
+    {
+        $this->output->data["css"][] = STEL_PATH . "css/table.css";
+        $this->output->data["js"][] = STEL_PATH . "js/tools.js";
+        $this->output->data["js"][] = STEL_PATH . "js/admin/admin.js";
+        $this->load->view('report/loan/daily_product_of_each_group_view');
+    }
     public function dailyAllUser()
     {
         $this->output->data["css"][] = STEL_PATH . "css/table.css";

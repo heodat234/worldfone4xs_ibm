@@ -5,6 +5,7 @@ Class My_diallist extends WFF_Controller {
 
 	private $collection = "Diallist";
 	private $sub_collection = "Diallist_detail";
+	private $jsondata_collection = "Jsondata";
 
 	function __construct()
 	{
@@ -18,65 +19,31 @@ Class My_diallist extends WFF_Controller {
 	function read()
 	{
 		$this->load->library("crud");
-		$request = $_REQUEST;;
+		$request = json_decode($this->input->get("q"), TRUE);
 		$extension = $this->session->userdata("extension");
-		$model = $this->crud->build_model($this->collection);
-        // Kendo to aggregate
-        $this->load->library("kendo_aggregate", $model);
-        $lookup = array('$lookup' => array(
-        		"from" => $this->sub_collection,
-			    "localField" => "_id",
-			    "foreignField" => "diallist_id",
-			    "as" => "diallist_detail"
-        	)
-    	);
-    	$project = array(
-    		'$project' => array(
-    			'name'						=> 1,
-    			'type'						=> 1,
-    			'mode'						=> 1,
-    			"assigns"	=> array('$reduce' => array(
-		            "input"	=> '$diallist_detail',
-		            "initialValue"	=> [],
-		            "in"	=> array('$setUnion' => array('$$value', array('$split' => [ '$$this.assign', "@" ])))
-		        ))
-    		)
-    	);
-    	$match = array(
-    		'$match' => array(
-    			"assigns"	=> $extension
-    		)
-    	);
-        $this->kendo_aggregate->set_kendo_query($request)->adding($lookup, $project, $match)->filtering();
-        // Get total
-        $total_aggregate = $this->kendo_aggregate->get_total_aggregate();//  pre($total_aggregate);
-        $total_result = $this->mongo_db->aggregate_pipeline($this->collection, $total_aggregate);
-        $total = isset($total_result[0]) ? $total_result[0]['total'] : 0;
-        // Get data
-        
-        $data_aggregate = $this->kendo_aggregate->sorting()->paging()->get_data_aggregate();
-        $data = $this->mongo_db->aggregate_pipeline($this->collection, $data_aggregate);
+
+		$response = $this->crud->read($this->collection, $request, [], ["members" => $extension]);
         // Change foreign_key
-        $dialTypeOption = $this->mongo_db->where(array("tags" => ["Diallist", "type"]))->getOne("Jsondata");
+        $this->load->library("mongo_private");
+        $jsondata_collection = set_sub_collection($this->jsondata_collection);
+        $dialTypeOption = $this->mongo_private->where(array("tags" => ["Diallist", "type"]))->getOne($jsondata_collection);
         $dialTypeToName = array();
         if($dialTypeOption) {
 	        foreach ($dialTypeOption["data"] as $row) {
-	        	$dialTypeToName[$row->value] = $row->text;
-	        }
-        }
-        $dialModeOption = $this->mongo_db->where(array("tags" => ["Diallist", "mode"]))->getOne("Jsondata");
-        $dialModeToName = array();
-        if($dialModeToName) {
-	        foreach ($dialModeOption["data"] as $row) {
-	        	$dialModeToName[$row->value] = $row->text;
+	        	$dialTypeToName[$row["value"]] = $row["text"];
 	        }
     	}
-        foreach ($data as &$doc) {
+        $dialModeOption = $this->mongo_private->where(array("tags" => ["Diallist", "mode"]))->getOne($jsondata_collection);
+        $dialModeToName = array();
+        if($dialModeOption) {
+	        foreach ($dialModeOption["data"] as $row) {
+	        	$dialModeToName[$row["value"]] = $row["text"];
+	        }
+	    }
+        foreach ($response["data"] as &$doc) {
         	if(isset($doc["type"])) $doc["type"] = isset($dialTypeToName[$doc["type"]]) ? $dialTypeToName[$doc["type"]] : $doc["type"];
-        	if(isset($doc["mode"])) $doc["mode"] = isset($dialModeToName[$doc["mode"]]) ? $dialModeToName[$doc["mode"]] : $doc["mode"];
         }
         // Result
-        $response = array("data" => $data, "total" => $total);
 		echo json_encode($response);
 	}
 
@@ -84,29 +51,5 @@ Class My_diallist extends WFF_Controller {
 	{
 		$response = $this->crud->where_id($id)->getOne($this->collection);
 		echo json_encode($response);
-	}
-
-	function create()
-	{
-		$data = $_POST;
-		$result = $this->crud->create($this->collection, $data);
-		echo json_encode(array("status" => $result ? 1 : 0, "data" => $result));
-	}
-
-	function update($id)
-	{
-		$data = $_POST;
-		$result = $this->crud->where_id($id)->update($this->collection, array('$set' => $data));
-		echo json_encode(array("status" => $result ? 1 : 0));
-	}
-
-	function delete($id)
-	{
-		$permanent = TRUE;
-		$result = $this->crud->where_id($id)->delete($this->collection, $permanent);
-		if($result) {
-			$this->crud->where_object_id("diallist_id", $id)->delete_all($this->sub_collection, $permanent);
-		}
-		echo json_encode(array("status" => $result ? 1 : 0));
 	}
 }

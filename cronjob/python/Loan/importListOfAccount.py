@@ -43,6 +43,8 @@ try:
     converters = {}
     insertData = []
     errorData = []
+    total = 0
+    complete = 0
     # today = date.today()
     today = datetime.strptime('20/11/2019', "%d/%m/%Y").date()
     day = today.day
@@ -106,10 +108,10 @@ try:
 
     with open(importLogInfo['file_path'], 'r', newline='\n', encoding='ISO-8859-1') as fin:
         csv_reader = csv.reader(fin, delimiter=',', quotechar='"')
-        pprint(csv_reader)
         for row in csv_reader:
             if len(row) > 1:
                 if isinstance(row[1], str) and len(row[1]) > 12 and row[1].isdigit():
+                    total += 1
                     result = True
                     temp = {}
                     try:
@@ -136,6 +138,7 @@ try:
                     else:
                         insertData.append(temp)
                         result = True
+                        complete += 1
                     
     if(len(errorData) > 0):
         mongodbresult.remove_document(MONGO_COLLECTION=common.getSubUser(subUserType, ('LIST_OF_ACCOUNT_IN_COLLECTION_' + str(year) + str(month) + str(day))))

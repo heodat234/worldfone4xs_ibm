@@ -16,6 +16,8 @@ from helper.mongod import Mongodb
 from helper.excel import Excel
 from helper.jaccs import Config
 from dateutil.parser import parse
+import os.path
+from os import path
 
 mongodb     = Mongodb("worldfone4xs")
 _mongodb    = Mongodb("_worldfone4xs")
@@ -39,8 +41,12 @@ try:
       ftpInfo     = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'ftp_config'), WHERE={'collection': collection})
       ftpConfig   = config.ftp_config()
       ftpLocalUrl = common.getDownloadFolder() + ftpInfo['filename']
+
+      if path.exists(ftpLocalUrl) == False:
+         sys.exit()
+
       importLogInfo = {
-         'collection'    : collection, 
+         'collection'    : 'Datalibrary', 
          'begin_import'  : time.time(),
          'file_name'     : ftpInfo['filename'],
          'file_path'     : ftpLocalUrl, 
@@ -78,14 +84,16 @@ try:
                err['type'] = 'int';
                errorData.append(err);
                checkErr = True
-         if not isinstance(listDataLibrary[key][idx], float) and header['type'] == 'double':
-            err = {}
-            err['cell'] =  xl_rowcol_to_cell(key, idx)
-            err['type'] = 'double';
-            errorData.append(err);
-            checkErr = True
-         else:
-            value = listDataLibrary[key][idx]
+         if header['type'] == 'double':
+            try:
+               value = float(listDataLibrary[key][idx])
+            except Exception as e:
+               err = {}
+               err['cell'] =  xl_rowcol_to_cell(key, idx)
+               err['type'] = 'double';
+               errorData.append(err);
+               checkErr = True
+
          if header['type'] == 'timestamp' and str(listDataLibrary[key][idx]) != '':
             err = {}
             try:
@@ -106,6 +114,9 @@ try:
                errorData.append(err)
                checkErr = True
 
+         if header['type'] == 'name':
+            value   = str(listDataLibrary[key][idx])
+
          if header['type'] == 'string' and header['field'] != 'id_no':
             try:
                value_int   = int(listDataLibrary[key][idx])
@@ -113,11 +124,7 @@ try:
             except ValueError:
                value       = str(listDataLibrary[key][idx])
          if header['type'] == 'string' and header['field'] == 'id_no':
-            try:
-               value_int   = int(listDataLibrary[key][idx])
-               value       = '0'+ str(value_int)
-            except ValueError:
-               value       = str(listDataLibrary[key][idx])
+            value       = str(listDataLibrary[key][idx])
  
          if header['field'] == 'assign' and value != '':
             value = str(listDataLibrary[key][idx])

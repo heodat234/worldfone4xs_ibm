@@ -42,6 +42,8 @@ try:
     converters = {}
     insertData = []
     errorData = []
+    total = 0
+    complete = 0
     # today = date.today()
     today = datetime.strptime('20/11/2019', "%d/%m/%Y").date()
     day = today.day
@@ -109,6 +111,7 @@ try:
         for idx, row in enumerate(csv_reader):
                 if len(row) > 5:
                     if isinstance(row[1], str) and len(row[1]) > 12 and row[1].isdigit():
+                        total += 1
                         result = True
                         temp = {}
                         for keyCell, cell in enumerate(row):
@@ -129,6 +132,7 @@ try:
                         else:
                             insertData.append(temp)
                             result = True
+                            complete += 1
         
     pprint(insertData)
     if(len(errorData) > 0):

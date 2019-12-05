@@ -10,7 +10,8 @@ Class Follow_up extends WFF_Controller {
 		parent::__construct();
 		header('Content-type: application/json');
 		$this->load->library("crud");
-		$this->collection = set_sub_collection($this->collection);
+		$this->sub = set_sub_collection();
+		$this->collection = $this->sub . $this->collection;
 	}
 
 	function read()

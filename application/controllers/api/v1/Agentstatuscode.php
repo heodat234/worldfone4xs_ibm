@@ -30,8 +30,6 @@ Class Agentstatuscode extends CI_Controller {
 			$this->load->library("mongo_db");
 			$response = $this->mongo_db->where("value", (int) $value)->select([],["_id"])->getOne($this->collection);
 
-			$response = $this->language_model->translate($response, "NOTIFICATION", "", "", "");
-
 			echo json_encode($response);
 		} catch (Exception $e) {
 			echo json_encode(array("status" => 0, "message" => $e->getMessage()));

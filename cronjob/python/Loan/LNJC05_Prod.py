@@ -107,30 +107,30 @@ try:
             inputDataRaw = excel.getDataCSV(file_path=importLogInfo['file_path'], dtype=object, sep=ftpInfo['sep'], header=header, names=modelColumns, na_values='')
         else:
             inputDataRaw = excel.getDataExcel(file_path=importLogInfo['file_path'], header=header, names=modelColumns, na_values='')
-            inputData = inputDataRaw.to_dict('records')
+        inputData = inputDataRaw.to_dict('records')
+        temp = {}
+        for idx, row in enumerate(inputData):
             temp = {}
-            for idx, row in enumerate(inputData):
-                temp = {}
-                if row['account_number'] not in ['', None]:
-                    for cell in row:
-                        try:
-                            temp[cell] = common.convertDataType(data=row[cell], datatype=modelConverters[cell], formatType=modelFormat[cell])
-                            result = True
-                        except Exception as errorConvertType:
-                            temp['error_cell'] = modelPosition[cell] + str(idx + 1)
-                            temp['type'] = modelConverters[cell]
-                            temp['error_mesg'] = 'Sai kiểu dữ liệu nhập'
-                            temp['result'] = 'error'
-                            result = False
-                    temp['created_by'] = 'system'
-                    temp['created_at'] = time.time()
-                    temp['import_id'] = str(importLogId)
-                    if(result == False):
-                        errorData.append(temp)
-                    else:
-                        temp['result'] = 'success'
-                        insertData.append(temp)
+            if row['account_number'] not in ['', None]:
+                for cell in row:
+                    try:
+                        temp[cell] = common.convertDataType(data=row[cell], datatype=modelConverters[cell], formatType=modelFormat[cell])
                         result = True
+                    except Exception as errorConvertType:
+                        temp['error_cell'] = modelPosition[cell] + str(idx + 1)
+                        temp['type'] = modelConverters[cell]
+                        temp['error_mesg'] = 'Sai kiểu dữ liệu nhập'
+                        temp['result'] = 'error'
+                        result = False
+                temp['created_by'] = 'system'
+                temp['created_at'] = time.time()
+                temp['import_id'] = str(importLogId)
+                if(result == False):
+                    errorData.append(temp)
+                else:
+                    temp['result'] = 'success'
+                    insertData.append(temp)
+                    result = True
 
     else:
         with open(importLogInfo['file_path'], 'r', newline='\n', encoding='ISO-8859-1') as fin:

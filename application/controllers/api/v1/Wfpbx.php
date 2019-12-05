@@ -84,7 +84,8 @@ Class Wfpbx extends WFF_Controller {
 			$response = $this->pbx_model->$method($queuename, $extension);
 			if(empty($response['status'])) throw new Exception("No success. Status pbx empty");
 			if($response['status'] != "200") throw new Exception("No success. Reason: ". json_encode($response));
-			if($response['data']['aqmstatus'] != ($action == "add" ? "ADDED" : "REMOVED")) 
+			$actions = $action == "add" ? ["ADDED"] : ["REMOVED","NOTINQUEUE"];
+			if(!in_array($response['data']['aqmstatus'], $actions)) 
 				throw new Exception("No success. Reason: ". $response['data']['aqmstatus']);
 			$action = ucfirst($action);
 			$message = $this->language_model->translate("@Success@", "NOTIFICATION");
@@ -130,7 +131,7 @@ Class Wfpbx extends WFF_Controller {
     		$request = json_decode(file_get_contents('php://input'), TRUE);
     		$calluuid = !empty($request["calluuid"]) ? $request["calluuid"] : "";
     		$responseArr = $this->pbx_model->hangup($calluuid);
-    		if($responseArr != 200) throw new Exception("@Hangup@ @error@");
+    		if($responseArr != 200) throw new Exception("@Hangup@ @error@: " . $responseArr);
     		$message = $this->language_model->translate("@Hangup@ @success@", "NOTIFICATION");
     		echo json_encode(array("status" => 1, "message" => $message));
     	} catch (Exception $e) {
@@ -145,7 +146,7 @@ Class Wfpbx extends WFF_Controller {
     		$calluuid = !empty($request["calluuid"]) ? $request["calluuid"] : "";
     		$extension = !empty($request["extension"]) ? $request["extension"] : "";
     		$responseArr = $this->pbx_model->transfer($calluuid, $extension);
-    		if($responseArr != 200) throw new Exception("@Transfer@ @error@");
+    		if($responseArr != 200) throw new Exception("@Transfer@ @error@: " . $responseArr);
     		$message = $this->language_model->translate("@Transfer@ @success@", "NOTIFICATION");
     		echo json_encode(array("status" => 1, "message" => $message));
     	} catch (Exception $e) {
