@@ -35,7 +35,7 @@ try:
     insertData = []
     updateData = []
     listDebtGroup = []
-    
+
     # today = date.today()
     today = datetime.strptime('20/11/2019', "%d/%m/%Y").date()
 
@@ -103,7 +103,7 @@ try:
         tempTotalCard = tempTotalSibs
         tempTotal = tempTotalSibs
         tempTotalCard['product'] = 'Card'
-        tempTotal['product'] = debtGroupCell[0:1] + 'Total'
+        tempTotal['product'] = debtGroupCell[0:1] + ' - Total'
 
         if debtGroupCell[0:1] is not 'F':
             dueDayOfMonth = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_due_date'), WHERE={'for_month': str(month), 'debt_group': debtGroupCell[1:3]})
@@ -148,174 +148,174 @@ try:
                 acc_arr = []
                 if incidenceInfo is not None:
                     for inc in incidenceInfo:
-                        temp['inci'] += inc['debt_acc_no'] 
+                        temp['inci'] += inc['debt_acc_no']
                         temp['inci_amt'] += inc['current_balance_total']
                         temp['inci_ob_principal'] += inc['ob_principal_total']
-                        acc_arr_1 = list(incidenceInfo['acc_arr']) if 'acc_arr' in incidenceInfo.keys() else []
+                        acc_arr_1 = inc['acc_arr'] if 'acc_arr' in inc.keys() else []
                         acc_arr += acc_arr_1
-                    
-                
-                # if groupProduct['value'] == 'SIBS':                        
-                #     # dueDateOneData = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Due_date_next_date_SIBS'), WHERE={'debt_group': debtGroupCell[0:1], 'due_date_code': debtGroupCell[1:3], 'for_month': str(month)})
-                #     # acc_arr = []
-                #     lnjc05Info = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'LNJC05'), WHERE={'group_id': debtGroupCell  })
-                #     for lnjc05 in lnjc05Info:
-                #         col_today += 1
-                #         amt_today += lnjc05['current_balance']
-                #         ob_principal_today += lnjc05['outstanding_principal']
-                #         # acc_arr.append(lnjc05['account_number'])
-                        
-                #     aggregate_ln3206 = [
-                #         {
-                #             "$match":
-                #             {
-                #                 "created_at": {'$gte': temp['due_date'],'$lte': todayTimeStamp},
-                #                 "account_number": {'$in' : acc_arr}
-                #             }
-                #         },{
-                #             "$group":
-                #             {
-                #                 "_id": 'null',
-                #                 "total_amt": {'$sum': '$amt'},
-                #             }
-                #         }
-                #     ]
-                #     ln3206fInfo = mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'LN3206F'),aggregate_pipeline=aggregate_ln3206)
-                #     if ln3206fInfo is not None:
-                #         for ln3206 in ln3206fInfo:
-                #             temp['amt'] = ln3206['total_amt']
-
-                #     temp['col']         = temp['inci'] - col_today
-                #     temp['col_amt']     = temp['inci_amt'] - amt_today
-                #     temp['col_prici']   = temp['inci_ob_principal'] - ob_principal_today
-                #     temp['rem']         = temp['inci'] - temp['col']
-                #     temp['rem_amt']     = temp['inci_amt'] - temp['col_amt']
-
-                #     temp['flow_rate']       = temp['rem'] / temp['inci'] if temp['inci'] != 0 else 0
-                #     temp['flow_rate_amt']   = temp['rem_amt'] / temp['inci_amt'] if temp['inci_amt'] != 0 else 0
-                #     temp['col_rate']        = temp['col'] / temp['inci'] if temp['inci'] != 0 else 0
-
-                #     temp['actual_ratio']    = temp['amt'] / temp['inci_amt'] if temp['inci_amt'] != 0 else 0
-                #     temp['princi_ratio']    = temp['col_prici'] / temp['inci_ob_principal'] if temp['inci_ob_principal'] != 0 else 0
-                #     temp['amt_ratio']       = temp['col_amt'] / temp['inci_amt'] if temp['inci_amt'] != 0 else 0
-                    
-                #     tempTotalSibs['inci']               += temp['inci']
-                #     tempTotalSibs['inci_amt']           += temp['inci_amt']
-                #     tempTotalSibs['inci_ob_principal']  += temp['inci_ob_principal']
-                #     tempTotalSibs['amt']                += temp['amt']
-                #     tempTotalSibs['col_amt']            += temp['col_amt']
-                #     tempTotalSibs['col_prici']          += temp['col_prici']
-                #     tempTotalSibs['rem']                += temp['rem']
-                #     tempTotalSibs['rem_amt']            += temp['rem_amt']
-                #     tempTotalSibs['flow_rate']          += temp['flow_rate']
-                #     tempTotalSibs['flow_rate_amt']      += temp['flow_rate_amt']
-                #     tempTotalSibs['col_rate']           += temp['col_rate']
-                #     tempTotalSibs['actual_ratio']       += temp['actual_ratio']
-                #     tempTotalSibs['princi_ratio']       += temp['princi_ratio']
-                #     tempTotalSibs['amt_ratio']          += temp['amt_ratio']
 
 
-                # if groupProduct['value'] == 'Card':
-                #     aggregate_group = [
-                #         {
-                #             "$match":
-                #             {
-                #                 "due_date": {'$gte': todayTimeStamp},
-                #                 "group": debtGroupCell
-                #             }
-                #         },{
-                #             "$group":
-                #             {
-                #                 "_id": 'null',
-                #                 "total_acc": {'$sum': 1},
-                #                 "acc_arr": {'$push' : '$account_number'}
-                #             }
-                #         }
-                #     ]
-                #     accountByGroup = mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'Group_card'),aggregate_pipeline=aggregate_group)
-                #     if accountByGroup is not None:
-                #         for account in accountByGroup:
-                #             acc_arr = account['acc_arr']
-                #     else:
-                #         acc_arr : []
+                if groupProduct['value'] == 'SIBS':
+                    # dueDateOneData = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Due_date_next_date_SIBS'), WHERE={'debt_group': debtGroupCell[0:1], 'due_date_code': debtGroupCell[1:3], 'for_month': str(month)})
+                    # acc_arr = []
+                    lnjc05Info = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'LNJC05'), WHERE={'group_id': debtGroupCell  })
+                    for lnjc05 in lnjc05Info:
+                        col_today += 1
+                        amt_today += lnjc05['current_balance']
+                        ob_principal_today += lnjc05['outstanding_principal']
+                        # acc_arr.append(lnjc05['account_number'])
 
-                #     listOfAccount = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'List_of_account_in_collection'), WHERE={ 'account_number': {'$in': acc_arr}})
-                #     for account in listOfAccount:
-                #         col_today += 1
-                #         amt_today += account['cur_bal']
+                    aggregate_ln3206 = [
+                        {
+                            "$match":
+                            {
+                                "created_at": {'$gte': temp['due_date'],'$lte': todayTimeStamp},
+                                "account_number": {'$in' : acc_arr}
+                            }
+                        },{
+                            "$group":
+                            {
+                                "_id": 'null',
+                                "total_amt": {'$sum': '$amt'},
+                            }
+                        }
+                    ]
+                    ln3206fInfo = mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'LN3206F'),aggregate_pipeline=aggregate_ln3206)
+                    if ln3206fInfo is not None:
+                        for ln3206 in ln3206fInfo:
+                            temp['amt'] = ln3206['total_amt']
 
-                #     aggregate_sbv = [
-                #         {
-                #             "$match":
-                #             {
-                #                 "created_at": {'$gte': temp['due_date'], '$lte': todayTimeStamp},
-                #                 "contract_no": {'$in' : acc_arr }
-                #             }
-                #         },{
-                #             "$group":
-                #             {
-                #                 "_id": 'null',
-                #                 "sale_total": {'$sum': 'ob_principal_sale'},
-                #                 "cash_total": {'$sum': 'ob_principal_cash'},
-                #             }
-                #         }
-                #     ]
-                #     sbvInfo = mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'SBV'),aggregate_pipeline=aggregate_sbv)
-                #     if sbvInfo is not None:
-                #         for sbv in sbvInfo:
-                #             ob_principal_today = float(sbv['sale_total']) + float(sbv['cash_total'])
+                    temp['col']         = temp['inci'] - col_today
+                    temp['col_amt']     = temp['inci_amt'] - amt_today
+                    temp['col_prici']   = temp['inci_ob_principal'] - ob_principal_today
+                    temp['rem']         = temp['inci'] - temp['col']
+                    temp['rem_amt']     = temp['inci_amt'] - temp['col_amt']
 
-                #     aggregate_gl = [
-                #         {
-                #             "$match":
-                #             {
-                #                 "created_at": {'$gte': temp['due_date'],'$lte': todayTimeStamp},
-                #                 "account_number": {'$in' : acc_arr}
-                #             }
-                #         },{
-                #             "$group":
-                #             {
-                #                 "_id": 'null',
-                #                 "total_amt": {'$sum': '$amount'},
-                #             }
-                #         }
-                #     ]
-                #     glInfo = mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_input_payment_of_card'),aggregate_pipeline=aggregate_gl)
-                #     if glInfo is not None:
-                #         for gl in glInfo:
-                #             temp['amt'] = gl['total_amt']
+                    temp['flow_rate']       = temp['rem'] / temp['inci'] if temp['inci'] != 0 else 0
+                    temp['flow_rate_amt']   = temp['rem_amt'] / temp['inci_amt'] if temp['inci_amt'] != 0 else 0
+                    temp['col_rate']        = temp['col'] / temp['inci'] if temp['inci'] != 0 else 0
+
+                    temp['actual_ratio']    = temp['amt'] / temp['inci_amt'] if temp['inci_amt'] != 0 else 0
+                    temp['princi_ratio']    = temp['col_prici'] / temp['inci_ob_principal'] if temp['inci_ob_principal'] != 0 else 0
+                    temp['amt_ratio']       = temp['col_amt'] / temp['inci_amt'] if temp['inci_amt'] != 0 else 0
+
+                    tempTotalSibs['inci']               += temp['inci']
+                    tempTotalSibs['inci_amt']           += temp['inci_amt']
+                    tempTotalSibs['inci_ob_principal']  += temp['inci_ob_principal']
+                    tempTotalSibs['amt']                += temp['amt']
+                    tempTotalSibs['col_amt']            += temp['col_amt']
+                    tempTotalSibs['col_prici']          += temp['col_prici']
+                    tempTotalSibs['rem']                += temp['rem']
+                    tempTotalSibs['rem_amt']            += temp['rem_amt']
+                    tempTotalSibs['flow_rate']          += temp['flow_rate']
+                    tempTotalSibs['flow_rate_amt']      += temp['flow_rate_amt']
+                    tempTotalSibs['col_rate']           += temp['col_rate']
+                    tempTotalSibs['actual_ratio']       += temp['actual_ratio']
+                    tempTotalSibs['princi_ratio']       += temp['princi_ratio']
+                    tempTotalSibs['amt_ratio']          += temp['amt_ratio']
 
 
-                #     temp['col']         = temp['inci'] - col_today
-                #     temp['col_amt']     = temp['inci_amt'] - amt_today
-                #     temp['col_prici']   = temp['inci_ob_principal'] - ob_principal_today
-                #     temp['rem']         = temp['inci'] - temp['col']
-                #     temp['rem_amt']     = temp['inci_amt'] - temp['col_amt']
+                if groupProduct['value'] == 'Card':
+                    aggregate_group = [
+                        {
+                            "$match":
+                            {
+                                "due_date": {'$gte': todayTimeStamp},
+                                "group": debtGroupCell
+                            }
+                        },{
+                            "$group":
+                            {
+                                "_id": 'null',
+                                "total_acc": {'$sum': 1},
+                                "acc_arr": {'$push' : '$account_number'}
+                            }
+                        }
+                    ]
+                    accountByGroup = mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'Group_card'),aggregate_pipeline=aggregate_group)
+                    if accountByGroup is not None:
+                        for account in accountByGroup:
+                            acc_arr = account['acc_arr']
+                    else:
+                        acc_arr : []
 
-                #     temp['flow_rate']       = temp['rem'] / temp['inci'] if temp['inci'] != 0 else 0
-                #     temp['flow_rate_amt']   = temp['rem_amt'] / temp['inci_amt'] if temp['inci_amt'] != 0 else 0
-                #     temp['col_rate']        = temp['col'] / temp['inci'] if temp['inci'] != 0 else 0
+                    listOfAccount = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'List_of_account_in_collection'), WHERE={ 'account_number': {'$in': acc_arr}})
+                    for account in listOfAccount:
+                        col_today += 1
+                        amt_today += account['cur_bal']
 
-                #     temp['actual_ratio']    = temp['amt'] / temp['inci_amt'] if temp['inci_amt'] != 0 else 0
-                #     temp['princi_ratio']    = temp['col_prici'] / temp['inci_ob_principal'] if temp['inci_ob_principal'] != 0 else 0
-                #     temp['amt_ratio']       = temp['col_amt'] / temp['inci_amt'] if temp['inci_amt'] != 0 else 0
+                    aggregate_sbv = [
+                        {
+                            "$match":
+                            {
+                                "created_at": {'$gte': temp['due_date'], '$lte': todayTimeStamp},
+                                "contract_no": {'$in' : acc_arr }
+                            }
+                        },{
+                            "$group":
+                            {
+                                "_id": 'null',
+                                "sale_total": {'$sum': 'ob_principal_sale'},
+                                "cash_total": {'$sum': 'ob_principal_cash'},
+                            }
+                        }
+                    ]
+                    sbvInfo = mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'SBV'),aggregate_pipeline=aggregate_sbv)
+                    if sbvInfo is not None:
+                        for sbv in sbvInfo:
+                            ob_principal_today = float(sbv['sale_total']) + float(sbv['cash_total'])
 
-                #     tempTotalCard['inci']               += temp['inci']
-                #     tempTotalCard['inci_amt']           += temp['inci_amt']
-                #     tempTotalCard['inci_ob_principal']  += temp['inci_ob_principal']
-                #     tempTotalCard['amt']                += temp['amt']
-                #     tempTotalCard['col_amt']            += temp['col_amt']
-                #     tempTotalCard['col_prici']          += temp['col_prici']
-                #     tempTotalCard['rem']                += temp['rem']
-                #     tempTotalCard['rem_amt']            += temp['rem_amt']
-                #     tempTotalCard['flow_rate']          += temp['flow_rate']
-                #     tempTotalCard['flow_rate_amt']      += temp['flow_rate_amt']
-                #     tempTotalCard['col_rate']           += temp['col_rate']
-                #     tempTotalCard['actual_ratio']       += temp['actual_ratio']
-                #     tempTotalCard['princi_ratio']       += temp['princi_ratio']
-                #     tempTotalCard['amt_ratio']          += temp['amt_ratio']
+                    aggregate_gl = [
+                        {
+                            "$match":
+                            {
+                                "created_at": {'$gte': temp['due_date'],'$lte': todayTimeStamp},
+                                "account_number": {'$in' : acc_arr}
+                            }
+                        },{
+                            "$group":
+                            {
+                                "_id": 'null',
+                                "total_amt": {'$sum': '$amount'},
+                            }
+                        }
+                    ]
+                    glInfo = mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_input_payment_of_card'),aggregate_pipeline=aggregate_gl)
+                    if glInfo is not None:
+                        for gl in glInfo:
+                            temp['amt'] = gl['total_amt']
 
-                
+
+                    temp['col']         = temp['inci'] - col_today
+                    temp['col_amt']     = temp['inci_amt'] - amt_today
+                    temp['col_prici']   = temp['inci_ob_principal'] - ob_principal_today
+                    temp['rem']         = temp['inci'] - temp['col']
+                    temp['rem_amt']     = temp['inci_amt'] - temp['col_amt']
+
+                    temp['flow_rate']       = temp['rem'] / temp['inci'] if temp['inci'] != 0 else 0
+                    temp['flow_rate_amt']   = temp['rem_amt'] / temp['inci_amt'] if temp['inci_amt'] != 0 else 0
+                    temp['col_rate']        = temp['col'] / temp['inci'] if temp['inci'] != 0 else 0
+
+                    temp['actual_ratio']    = temp['amt'] / temp['inci_amt'] if temp['inci_amt'] != 0 else 0
+                    temp['princi_ratio']    = temp['col_prici'] / temp['inci_ob_principal'] if temp['inci_ob_principal'] != 0 else 0
+                    temp['amt_ratio']       = temp['col_amt'] / temp['inci_amt'] if temp['inci_amt'] != 0 else 0
+
+                    tempTotalCard['inci']               += temp['inci']
+                    tempTotalCard['inci_amt']           += temp['inci_amt']
+                    tempTotalCard['inci_ob_principal']  += temp['inci_ob_principal']
+                    tempTotalCard['amt']                += temp['amt']
+                    tempTotalCard['col_amt']            += temp['col_amt']
+                    tempTotalCard['col_prici']          += temp['col_prici']
+                    tempTotalCard['rem']                += temp['rem']
+                    tempTotalCard['rem_amt']            += temp['rem_amt']
+                    tempTotalCard['flow_rate']          += temp['flow_rate']
+                    tempTotalCard['flow_rate_amt']      += temp['flow_rate_amt']
+                    tempTotalCard['col_rate']           += temp['col_rate']
+                    tempTotalCard['actual_ratio']       += temp['actual_ratio']
+                    tempTotalCard['princi_ratio']       += temp['princi_ratio']
+                    tempTotalCard['amt_ratio']          += temp['amt_ratio']
+
+
                 tempTotal['inci']               += temp['inci']
                 tempTotal['inci_amt']           += temp['inci_amt']
                 tempTotal['inci_ob_principal']  += temp['inci_ob_principal']
@@ -335,11 +335,22 @@ try:
                 temp['createdAt'] = time.time()
                 temp['createdBy'] = 'system'
                 temp['for_month'] = str(month)
+                tempTotalSibs['createdAt'] = time.time()
+                tempTotalSibs['createdBy'] = 'system'
+                tempTotalSibs['for_month'] = str(month)
+                tempTotalCard['createdAt'] = time.time()
+                tempTotalCard['createdBy'] = 'system'
+                tempTotalCard['for_month'] = str(month)
+                tempTotal['createdAt'] = time.time()
+                tempTotal['createdBy'] = 'system'
+                tempTotal['for_month'] = str(month)
                 # mongodb.insert(MONGO_COLLECTION=collection, insert_data=temp)
                 # log.write(json.dumps(temp))
                 pprint(temp)
-        
 
+        mongodb.insert(MONGO_COLLECTION=collection, insert_data=tempTotalSibs)
+        mongodb.insert(MONGO_COLLECTION=collection, insert_data=tempTotalCard)
+        mongodb.insert(MONGO_COLLECTION=collection, insert_data=tempTotal)
     # wo
     # groupInfo = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Group'), WHERE={'name': {"$regex": 'WO'},'debt_groups' : {'$exists': 'true'}})
     # for groupCell in groupInfo:
@@ -365,7 +376,7 @@ try:
     #     else:
     #         temp['inci']        = 0
     #         temp['inci_amt']    = 0
-        
+
     #     for key, value in mainProduct.items():
     #         temp['col_' + key]  = 0
     #         temp['col_amt_' + key] = 0
@@ -410,7 +421,7 @@ try:
     #                 'ACCTNO': {'$in' : acc_payment },
     #             }
     #         },{
-    #             '$project': 
+    #             '$project':
     #             {
     #                'pay_payment': {'$sum' : [ '$WO9711', '$WO9712' ,'$WO9713'] },
     #             }
@@ -440,7 +451,7 @@ try:
     #                 'ACCTNO': {'$in' : acc_payment },
     #             }
     #         },{
-    #             '$project': 
+    #             '$project':
     #             {
     #                 'PROD_ID' : 1,
     #                 'pay_payment': {'$sum' : [ '$WO9711', '$WO9712' ,'$WO9713'] },
@@ -471,9 +482,8 @@ try:
     #     temp['tar_gap'] = temp['tar_amt'] - temp['rem_amt']
     #     temp['tar_per'] = temp['tar_gap']/temp['tar_amt'] if temp['tar_amt'] != 0 else 0
     #     mongodb.insert(MONGO_COLLECTION=collection, insert_data=temp)
-    #     # print(temp)
-   
+    print('DONE')
+
 except Exception as e:
     # log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')
     pprint(str(e))
-        

@@ -37,12 +37,12 @@ Class Daily_prod_prod_user_report extends WFF_Controller {
     function readExcel()
     {
         try {
-            
+
             $filename = "export.xlsx";
             $file_template = "templateLawsuit.xlsx";
 
             $rowDataRaw = $this->excel->read(UPLOAD_PATH . "excel/" . $filename, 50, 1);
-            
+
             echo json_encode($rowDataRaw);
             // var_dump($response);
         } catch (Exception $e) {
@@ -62,10 +62,10 @@ Class Daily_prod_prod_user_report extends WFF_Controller {
     function exportExcel() {
         $request = json_decode($this->input->get("q"), TRUE);
         $request = array();
-        $data = $this->crud->where($request)->order_by(array('debt_group' => 'asc', 'due_date_code' => 'asc', 'due_date' => 'asc', 'product' => 'desc', 'team' => 'asc'))->get($this->collection);
+        $data = $this->crud->where($request)->order_by(array('debt_group' => 'asc', 'due_date_code' => 'asc', 'due_date' => 'asc'))->get($this->collection);
         $product = $this->crud->order_by(array('code' => 'asc'))->get(set_sub_collection('Product'));
         $groupProduct = $this->mongo_private->where(array('tags' => array('group', 'debt', 'product')))->getOne(set_sub_collection("Jsondata"));
-
+        print_r($data);exit;
         $spreadsheet = new Spreadsheet();
     	$spreadsheet->getProperties()
 	    ->setCreator("South Telecom")
@@ -75,7 +75,7 @@ Class Daily_prod_prod_user_report extends WFF_Controller {
 	    ->setDescription("Office 2007 XLSX, generated using PHP classes.")
 	    ->setKeywords("office 2007 openxml php")
         ->setCategory("Report");
-        
+
         $style = array(
             'alignment'     => array('horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER),
             'allborders'    => array(
@@ -88,13 +88,13 @@ Class Daily_prod_prod_user_report extends WFF_Controller {
 
         $worksheet->getParent()->getDefaultStyle()->applyFromArray($style);
         $worksheet->getDefaultColumnDimension()->setWidth(12);
-        
+
         $worksheet->mergeCells('A1:C1');
         $worksheet->setCellValue('A1', 'number.os');
         $worksheet->getStyle("A1")->getFill()
             ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
             ->getStartColor()->setRGB('DDEBF7');
-        
+
         $worksheet->getStyle("A1")->applyFromArray($style);
 
         $worksheet->mergeCells('F1:H1');
@@ -131,7 +131,7 @@ Class Daily_prod_prod_user_report extends WFF_Controller {
         $worksheet->getStyle("E1:E2")->getFill()
             ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
             ->getStartColor()->setRGB('FFFF00');
-        
+
         $worksheet->setCellValue('I2', 'Incidence');
         $worksheet->getStyle("I2")->getFill()
         ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
@@ -147,12 +147,12 @@ Class Daily_prod_prod_user_report extends WFF_Controller {
         $worksheet->getStyle($this->stringFromColumnIndex($startAmt) . '1')->getFill()
             ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
             ->getStartColor()->setRGB('DDEBF7');
-        
+
         $worksheet->setCellValue($this->stringFromColumnIndex($startAmt) . '2', 'Total outstanding balance Incidence');
         $worksheet->getStyle($this->stringFromColumnIndex($startAmt) . '2')->getFill()
         ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
         ->getStartColor()->setRGB('F4B084');
-        
+
         $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + count($product) + 1) . '2', 'Total Collected amount (actual collected amount)');
         $worksheet->getStyle($this->stringFromColumnIndex($startAmt + count($product) + 1) . '2')->getFill()
         ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
@@ -189,12 +189,12 @@ Class Daily_prod_prod_user_report extends WFF_Controller {
             $worksheet->getStyle($this->stringFromColumnIndex($startAmt + 1 + $keyprod) . '2')->getFill()
             ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
             ->getStartColor()->setRGB('DDEBF7');
-            
+
             $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + 2 + count($product) + $keyprod) . '2', $valprod['name'] . ' (' . $valprod['code'] . ')');
             $worksheet->getStyle($this->stringFromColumnIndex($startAmt + 2 + count($product) + $keyprod) . '2')->getFill()
             ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
             ->getStartColor()->setRGB('DDEBF7');
-            
+
             $totalData['inci_' .  $valprod['code']] = 0;
             $totalData['col_' .  $valprod['code']] = 0;
             $totalData['inci_amt_' .  $valprod['code']] = 0;
@@ -233,7 +233,7 @@ Class Daily_prod_prod_user_report extends WFF_Controller {
         );
 
         $worksheet->getStyle("A1:" . $this->stringFromColumnIndex($startAmt + count($product) + $keyprod + 4) . '2')->applyFromArray($headerStyle);
-        
+
         $start_row = 3;
 
         $start_row_debt_group = 3;
@@ -251,7 +251,7 @@ Class Daily_prod_prod_user_report extends WFF_Controller {
 
         // print_r($data);
         foreach($data as $key => $value) {
-            
+
             if($prod_row != $value['product']) {
                 $due_date_val = new DateTime("@$due_date");
                 $worksheet->mergeCells('D' . $start_row_prod . ':D' . ($start_row - 1));
@@ -270,7 +270,7 @@ Class Daily_prod_prod_user_report extends WFF_Controller {
                 foreach($product as $keyprod => $valprod) {
                     $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + $keyprod) . $start_row, (!empty($totalData['inci_' . $valprod['code']]) ? $totalData['inci_' . $valprod['code']] : 0));
                     $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + 1 + count($product) + $keyprod) . $start_row, (!empty($totalData['col_' . $valprod['code']]) ? $totalData['col_' . $valprod['code']] : 0));
-        
+
                     $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + $keyprod + 1) . $start_row, (!empty($totalData['inci_amt_' . $valprod['code']]) ? $totalData['inci_amt_' . $valprod['code']] : 0));
                     $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + 2 + count($product) + $keyprod) . $start_row, (!empty($totalData['col_amt_' . $valprod['code']]) ? $totalData['col_amt_' . $valprod['code']] : 0));
                 }
@@ -316,7 +316,7 @@ Class Daily_prod_prod_user_report extends WFF_Controller {
                 foreach($product as $keyprod => $valprod) {
                     $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + $keyprod) . $start_row, (!empty($dueDateCodeTotal['inci_' . $valprod['code']]) ? $dueDateCodeTotal['inci_' . $valprod['code']] : 0));
                     $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + 1 + count($product) + $keyprod) . $start_row, (!empty($dueDateCodeTotal['col_' . $valprod['code']]) ? $dueDateCodeTotal['col_' . $valprod['code']] : 0));
-        
+
                     $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + $keyprod) . $start_row, (!empty($dueDateCodeTotal['inci_amt_' . $valprod['code']]) ? $dueDateCodeTotal['inci_amt_' . $valprod['code']] : 0));
                     $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + 1 + count($product) + $keyprod) . $start_row, (!empty($dueDateCodeTotal['col_amt_' . $valprod['code']]) ? $dueDateCodeTotal['col_amt_' . $valprod['code']] : 0));
                 }
@@ -339,7 +339,7 @@ Class Daily_prod_prod_user_report extends WFF_Controller {
                 $due_date_code = $value['due_date_code'];
                 $start_row_due_date_code = $start_row;
             }
-    
+
             if($debt_group != $value['debt_group']) {
                 if(!empty($groupProduct['data'])) {
                     $rowGroup = $start_row;
@@ -355,7 +355,7 @@ Class Daily_prod_prod_user_report extends WFF_Controller {
                         foreach($product as $keyprod => $valprod) {
                             $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + $keyprod) . $rowGroup, (!empty($debtProdTotalGroup['inci_' . $valprod['code']]) ? $debtProdTotalGroup['inci_' . $valprod['code']] : 0));
                             $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + 1 + count($product) + $keyprod) . $rowGroup, (!empty($debtProdTotalGroup['col_' . $valprod['code']]) ? $debtProdTotalGroup['col_' . $valprod['code']] : 0));
-                
+
                             $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + $keyprod) . $rowGroup, (!empty($debtProdTotalGroup['inci_amt_' . $valprod['code']]) ? $debtProdTotalGroup['inci_amt_' . $valprod['code']] : 0));
                             $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + 1 + count($product) + $keyprod) . $rowGroup, (!empty($debtProdTotalGroup['col_amt_' . $valprod['code']]) ? $debtProdTotalGroup['col_amt_' . $valprod['code']] : 0));
                         }
@@ -389,7 +389,7 @@ Class Daily_prod_prod_user_report extends WFF_Controller {
                 foreach($product as $keyprod => $valprod) {
                     $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + $keyprod) . ($start_row + count($groupProduct['data'])), (!empty($debtGroupTotal['inci_' . $valprod['code']]) ? $debtGroupTotal['inci_' . $valprod['code']] : 0));
                     $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + 1 + count($product) + $keyprod) . ($start_row + count($groupProduct['data'])), (!empty($debtGroupTotal['col_' . $valprod['code']]) ? $debtGroupTotal['col_' . $valprod['code']] : 0));
-        
+
                     $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + $keyprod) . ($start_row + count($groupProduct['data'])), (!empty($debtGroupTotal['inci_amt_' . $valprod['code']]) ? $debtGroupTotal['inci_amt_' . $valprod['code']] : 0));
                     $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + 1 + count($product) + $keyprod) . ($start_row + count($groupProduct['data'])), (!empty($debtGroupTotal['col_amt_' . $valprod['code']]) ? $debtGroupTotal['col_amt_' . $valprod['code']] : 0));
                 }
@@ -414,7 +414,7 @@ Class Daily_prod_prod_user_report extends WFF_Controller {
                 $debt_group = $value['debt_group'];
                 $start_row_debt_group = $start_row;
             }
-    
+
 
             $worksheet->setCellValue('E' . $start_row, $value['team']);
             $worksheet->setCellValue('F' . $start_row, (!empty($value['tar_per']) ? $value['tar_per'] : 0));
@@ -424,7 +424,7 @@ Class Daily_prod_prod_user_report extends WFF_Controller {
             foreach($product as $keyprod => $valprod) {
                 $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + $keyprod) . $start_row, (!empty($value['inci_' . $valprod['code']]) ? $value['inci_' . $valprod['code']] : 0));
                 $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + 1 + count($product) + $keyprod) . $start_row, (!empty($value['col_' . $valprod['code']]) ? $value['col_' . $valprod['code']] : 0));
-    
+
                 $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + $keyprod) . $start_row, (!empty($value['inci_amt_' . $valprod['code']]) ? $value['inci_amt_' . $valprod['code']] : 0));
                 $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + 1 + count($product) + $keyprod) . $start_row, (!empty($value['col_amt_' . $valprod['code']]) ? $value['col_amt_' . $valprod['code']] : 0));
             }
@@ -459,7 +459,7 @@ Class Daily_prod_prod_user_report extends WFF_Controller {
                         $totalValue +=  $tempTotalDebtProd;
                     }
                 }
-                
+
             }
 
             if ($key == (count($data) - 1)) {
@@ -479,7 +479,7 @@ Class Daily_prod_prod_user_report extends WFF_Controller {
                             foreach($product as $keyprod => $valprod) {
                                 $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + $keyprod) . $rowGroup, (!empty($debtProdTotalGroup['inci_' . $valprod['code']]) ? $debtProdTotalGroup['inci_' . $valprod['code']] : 0));
                                 $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + 1 + count($product) + $keyprod) . $rowGroup, (!empty($debtProdTotalGroup['col_' . $valprod['code']]) ? $debtProdTotalGroup['col_' . $valprod['code']] : 0));
-                    
+
                                 $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + $keyprod) . $rowGroup, (!empty($debtProdTotalGroup['inci_amt_' . $valprod['code']]) ? $debtProdTotalGroup['inci_amt_' . $valprod['code']] : 0));
                                 $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + 1 + count($product) + $keyprod) . $rowGroup, (!empty($debtProdTotalGroup['col_amt_' . $valprod['code']]) ? $debtProdTotalGroup['col_amt_' . $valprod['code']] : 0));
                             }
@@ -505,16 +505,16 @@ Class Daily_prod_prod_user_report extends WFF_Controller {
                     $worksheet->mergeCells('A' . $start_row_debt_group . ':A' . ($start_row + 5));
                     $worksheet->setCellValue('A' . $start_row_debt_group, $debt_group);
                     $worksheet->getStyle('A' . $start_row_debt_group)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('FFE699');
-        
+
                     $worksheet->mergeCells('B' . $start_row_due_date_code . ':B' . ($start_row + 1));
                     $worksheet->setCellValue('B' . $start_row_due_date_code, $due_date_code);
-        
+
                     $worksheet->mergeCells('C' . $start_row_prod . ':C' . ($start_row + 1));
                     $worksheet->setCellValue('C' . $start_row_prod, $prod_row);
 
                     $worksheet->mergeCells('B' . ($start_row + 2) . ':E' . ($start_row + 2));
                     $worksheet->setCellValue('B' . ($start_row + 2), 'TOTAL');
-        
+
                     $worksheet->mergeCells('D' . $start_row_prod . ':D' . ($start_row));
                     $worksheet->setCellValue('D' . $start_row_prod, $due_date_1);
 
@@ -528,7 +528,7 @@ Class Daily_prod_prod_user_report extends WFF_Controller {
                     foreach($product as $keyprod => $valprod) {
                         $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + $keyprod) . ($start_row + 1), (!empty($total['inci_' . $valprod['code']]) ? $totla['inci_' . $valprod['code']] : 0));
                         $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + 1 + count($product) + $keyprod) . ($start_row + 1), (!empty($total['col_' . $valprod['code']]) ? $total['col_' . $valprod['code']] : 0));
-            
+
                         $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + $keyprod) . ($start_row + 1), (!empty($total['inci_amt_' . $valprod['code']]) ? $total['inci_amt_' . $valprod['code']] : 0));
                         $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + 1 + count($product) + $keyprod) . ($start_row + 1), (!empty($total['col_amt_' . $valprod['code']]) ? $total['col_amt_' . $valprod['code']] : 0));
                     }
@@ -552,7 +552,7 @@ Class Daily_prod_prod_user_report extends WFF_Controller {
                     foreach($product as $keyprod => $valprod) {
                         $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + $keyprod) . ($start_row + 2), (!empty($dueDateCodeTotal['inci_' . $valprod['code']]) ? $dueDateCodeTotal['inci_' . $valprod['code']] : 0));
                         $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + 1 + count($product) + $keyprod) . ($start_row + 2), (!empty($dueDateCodeTotal['col_' . $valprod['code']]) ? $dueDateCodeTotal['col_' . $valprod['code']] : 0));
-            
+
                         $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + $keyprod) . ($start_row + 2), (!empty($dueDateCodeTotal['inci_amt_' . $valprod['code']]) ? $dueDateCodeTotal['inci_amt_' . $valprod['code']] : 0));
                         $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + 1 + count($product) + $keyprod) . ($start_row + 2), (!empty($dueDateCodeTotal['col_amt_' . $valprod['code']]) ? $dueDateCodeTotal['col_amt_' . $valprod['code']] : 0));
                     }
@@ -576,7 +576,7 @@ Class Daily_prod_prod_user_report extends WFF_Controller {
                     foreach($product as $keyprod => $valprod) {
                         $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + $keyprod) . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['inci_' . $valprod['code']]) ? $debtGroupTotal['inci_' . $valprod['code']] : 0));
                         $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + 1 + count($product) + $keyprod) . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['col_' . $valprod['code']]) ? $debtGroupTotal['col_' . $valprod['code']] : 0));
-            
+
                         $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + $keyprod) . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['inci_amt_' . $valprod['code']]) ? $debtGroupTotal['inci_amt_' . $valprod['code']] : 0));
                         $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + 1 + count($product) + $keyprod) . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['col_amt_' . $valprod['code']]) ? $debtGroupTotal['col_amt_' . $valprod['code']] : 0));
                     }
@@ -609,7 +609,7 @@ Class Daily_prod_prod_user_report extends WFF_Controller {
                     foreach($product as $keyprod => $valprod) {
                         $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + $keyprod) . ($start_row + 1 ), (!empty($dueDateCodeTotal['inci_' . $valprod['code']]) ? $dueDateCodeTotal['inci_' . $valprod['code']] : 0));
                         $worksheet->setCellValue($this->stringFromColumnIndex($startNumber + 1 + count($product) + $keyprod) . ($start_row + 1 ), (!empty($dueDateCodeTotal['col_' . $valprod['code']]) ? $dueDateCodeTotal['col_' . $valprod['code']] : 0));
-            
+
                         $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + $keyprod) . ($start_row + 1 ), (!empty($dueDateCodeTotal['inci_amt_' . $valprod['code']]) ? $dueDateCodeTotal['inci_amt_' . $valprod['code']] : 0));
                         $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + 1 + count($product) + $keyprod) . ($start_row + 1 ), (!empty($dueDateCodeTotal['col_amt_' . $valprod['code']]) ? $dueDateCodeTotal['col_amt_' . $valprod['code']] : 0));
                     }
@@ -622,7 +622,7 @@ Class Daily_prod_prod_user_report extends WFF_Controller {
                     $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + count($product) + $keyprod ) . ($start_row + 1 ), (!empty($dueDateCodeTotal['flow_rate_amt']) ? $dueDateCodeTotal['flow_rate_amt'] : 0));
                     $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + count($product) + $keyprod + 4) . ($start_row + 1 ), (!empty($dueDateCodeTotal['col_rate_amt']) ? $dueDateCodeTotal['col_rate_amt'] : 0));
 
-                    
+
                     foreach($dueDateCodeTotal as $totalKey => &$totalValue) {
                         $totalValue = 0;
                     }
