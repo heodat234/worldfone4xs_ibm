@@ -7,3 +7,4 @@
 06/11/2019, 19:20:34: 'sheet'
 06/11/2019, 19:22:23: Number of passed names did not match number of header fields in the file
 07/11/2019, 15:53:17: header must be integer or list of integers
+05/12/2019, 13:57:32: [Errno 21] Is a directory: '/data/upload_file/20191120/'

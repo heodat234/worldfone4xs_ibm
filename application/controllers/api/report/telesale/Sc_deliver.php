@@ -22,20 +22,43 @@ Class Sc_deliver extends WFF_Controller {
         try {
             $request = json_decode($this->input->get("q"), TRUE);
 
-            $config = $this->session->userdata();
+            $start = time() - 86400*30;
+            $end = time();
+            $match_1 = array('$gte' => $start, '$lte' => $end);
+
+            if (isset($request['filter'])) {
+              $filters = $request['filter'];
+              unset($request['filter']);
+              foreach ($filters['filters'] as $value) {
+                if ($value['operator'] == 'gte') {
+                  $start = $value['value'];
+                }
+                if ($value['operator'] == 'lte') {
+                  $end = $value['value'];
+                }
+              }
+              $match_1 = array('$gte' =>strtotime($start), '$lte' => strtotime($end));
+            }
 
             $model = $this->crud->build_model($this->collection);
             $this->load->library("kendo_aggregate", $model);
             $this->kendo_aggregate->set_default("sort", null);
 
-            // if ($config['issupervisor'] || $config['isadmin']) {
-            //    $match = array();
-            // }
-            // else if(!$config['issupervisor'] && !$config['isadmin']){
-            //    $match = array(
-            //       '$match' => array('assign' => array('$eq' => $config['extension']))
-            //    );
-            // }
+            $group = array(
+               '$group' => array(
+                  '_id' => array('code'=>'$source'),
+               )
+            );
+            $this->kendo_aggregate->set_kendo_query($request)->filtering()->adding( $group);
+            // Get total
+            $total_aggregate = $this->kendo_aggregate->get_total_aggregate();
+            $total_result = $this->mongo_db->aggregate_pipeline($this->collection, $total_aggregate);
+            $total = isset($total_result[0]) ? $total_result[0]['total'] : 0;
+            // Get data
+            $data_aggregate = $this->kendo_aggregate->paging()->get_data_aggregate();
+            $data = $this->mongo_db->aggregate_pipeline($this->collection, $data_aggregate);
+
+            // PERMISSION
             $match = array();
             if(!in_array("viewall", $this->data["permission"]["actions"])) {
                 $extension = $this->session->userdata("extension");
@@ -48,25 +71,28 @@ Class Sc_deliver extends WFF_Controller {
             $group = array(
                '$group' => array(
                   '_id' => array('code'=>'$source'),
-                  "id_no_arr" => array( '$push' => '$id_no' ),
                   "phone_arr" => array( '$push' => '$phone' ),
+                  "cif_arr" => array( '$push' => '$cif' ),
                )
             );
             $this->kendo_aggregate->set_kendo_query($request)->filtering()->adding($match, $group);
-            // Get total
-            $total_aggregate = $this->kendo_aggregate->get_total_aggregate();
-            $total_result = $this->mongo_db->aggregate_pipeline($this->collection, $total_aggregate);
-            $total = isset($total_result[0]) ? $total_result[0]['total'] : 0;
             // Get data
             $data_aggregate = $this->kendo_aggregate->paging()->get_data_aggregate();
-            $data = $this->mongo_db->aggregate_pipeline($this->collection, $data_aggregate);
-            foreach ($data as &$value) {              
-              $value['count_data'] = !empty($value["phone_arr"]) ? 
-              $this->mongo_db->where(
-                array("customernumber" => ['$in' => $value["phone_arr"]], "direction" => "outbound")
-              )->count($this->call_collection) : 0;
-              $value['count_appointment'] = !empty($value["id_no"]) ? $this->mongo_db->where_in("cmnd", $value["id_no_arr"])->count($this->app_collection) : 0;
-              unset($value["phone_arr"], $value["id_no_arr"]);
+            $data_permission = $this->mongo_db->aggregate_pipeline($this->collection, $data_aggregate);
+            // print_r($data_permission);exit;
+            foreach ($data as &$value) {  
+              $value['count_data'] = 0;
+              foreach ($data_permission as $value_per) {
+                if ($value["_id"]['code'] == $value_per["_id"]['code']) {            
+                  $value['count_data'] = !empty($value_per["phone_arr"]) ? 
+                  $this->mongo_db->where(
+                    array("customernumber" => ['$in' => $value_per["phone_arr"]], "direction" => "inbound",'starttime' => $match_1)
+                  )->count($this->call_collection) : 0;
+                  // $value['count_appointment'] = !empty($value["cif_arr"]) ? $this->mongo_db->where(
+                  //   array("cif" => ['$in' => $value["cif_arr"]],'created_at' => $match_1)
+                  // )->count($this->app_collection) : 0;
+                }
+              }
             }
             $response = array("data" => $data, "total" => $total);
             echo json_encode($response);

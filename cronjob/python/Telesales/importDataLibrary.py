@@ -8,7 +8,7 @@ import ntpath
 import json
 from datetime import datetime
 from datetime import date
-from xlsxwriter.utility import xl_rowcol_to_cell
+# from xlsxwriter.utility import xl_rowcol_to_cell
 from pprint import pprint
 from bson import ObjectId
 from helper.common import Common
@@ -65,12 +65,13 @@ try:
    headers = list(headers)
 
    file_path = importLogInfo['file_path']
-   dataLibrary = excel.getDataCSV(file_path=file_path,header=0, names=None, index_col=None, usecols=None, dtype=None, converters=None, skiprows=None, na_values=None, encoding='latin-1')
+   dataLibrary = excel.getDataCSV(file_path=file_path,header=0, names=None, index_col=None, usecols=None, dtype=object, converters=None, skiprows=None, na_values=None, encoding='latin-1')
    listDataLibrary = dataLibrary.values
    for key,listCol in enumerate(listDataLibrary):
       temp = {}
       checkErr = False
       for idx,header in enumerate(headers):
+         err = {}
          if header['index'] == 23:
             continue;
          if str(listDataLibrary[key][idx]) == 'nan':
@@ -79,8 +80,8 @@ try:
             try:
                value = int(listDataLibrary[key][idx])
             except ValueError:
-               err = {}
-               err['cell'] =  xl_rowcol_to_cell(key, idx)
+               # err['cell'] =  xl_rowcol_to_cell(key, idx)
+               err['cell'] =  str(key) + ' ' + str(idx)
                err['type'] = 'int';
                errorData.append(err);
                checkErr = True
@@ -88,42 +89,27 @@ try:
             try:
                value = float(listDataLibrary[key][idx])
             except Exception as e:
-               err = {}
-               err['cell'] =  xl_rowcol_to_cell(key, idx)
+               # err['cell'] =  xl_rowcol_to_cell(key, idx)
+               err['cell'] =  str(key) + ' ' + str(idx)
                err['type'] = 'double';
                errorData.append(err);
                checkErr = True
 
          if header['type'] == 'timestamp' and str(listDataLibrary[key][idx]) != '':
-            err = {}
             try:
                dt = parse(listDataLibrary[key][idx])
                value = int(dt.timestamp())
             except Exception as e:
-               err['cell'] =  xl_rowcol_to_cell(key, idx)
+               # err['cell'] =  xl_rowcol_to_cell(key, idx)
+               err['cell'] =  str(key) + ' ' + str(idx)
                err['type'] = 'date'
                errorData.append(err)
                checkErr = True
-         if header['type'] == 'phone':
-            try:
-               value_int   = int(listDataLibrary[key][idx])
-               value       = '0'+ str(value_int)
-            except Exception as e:
-               err['cell'] =  xl_rowcol_to_cell(key, idx)
-               err['type'] = 'phone'
-               errorData.append(err)
-               checkErr = True
 
-         if header['type'] == 'name':
+         if header['type'] == 'name' or header['type'] == 'phone':
             value   = str(listDataLibrary[key][idx])
 
-         if header['type'] == 'string' and header['field'] != 'id_no':
-            try:
-               value_int   = int(listDataLibrary[key][idx])
-               value       = str(value_int)
-            except ValueError:
-               value       = str(listDataLibrary[key][idx])
-         if header['type'] == 'string' and header['field'] == 'id_no':
+         if header['type'] == 'string':
             value       = str(listDataLibrary[key][idx])
  
          if header['field'] == 'assign' and value != '':
@@ -144,7 +130,7 @@ try:
             mongodb.update(MONGO_COLLECTION=collection, WHERE={'cif':temp['cif']}, VALUE=temp)
          except Exception as e:
             now_log         = datetime.now()
-            # log.write(now_log.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')
+            # log.write(now_log.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(err) + '\n')
       
    if len(errorData) <= 0:
       status = 1

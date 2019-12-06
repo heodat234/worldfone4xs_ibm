@@ -1,12 +1,5 @@
 <div class="input-group-btn column-widget">
-	<!-- <a role="button" class="btn btn-alt btn-sm btn-primary dropdown-toggle" data-toggle="dropdown" onclick="editColumns(this)"><i class="fa fa-calculator"></i> <b>@Edit Columns@</b></a>
-    <ul class="dropdown-menu dropdown-menu-right" style="width: 300px">
-        <li class="dropdown-header text-center">@Choose columns will show@</li>
-        <li class="filter-container" style="padding-bottom: 15px">
-            <div class="form-horizontal" data-bind="source: columns" data-template="column-template"/>
-        </li>
-    </ul> -->
-	<a role="button" class="btn btn-alt btn-sm btn-primary" data-field1="cif" data-field2="contract_no" data-field3="id_no" onclick="customFilter(this, Table.dataSource)"><i class="fa fa-filter"></i> <b>@Custom Filter@</b></a>
+	<a style="visibility: hidden;" id="data-library" role="button" class="btn btn-alt btn-sm btn-primary" data-field1="cif" data-field2="contract_no" data-field3="id_no" onclick="customFilter(this, Table.dataSource)"><i class="fa fa-filter"></i> <b>@Custom Filter@</b></a>
 </div>
 <script>
 	async function customFilter(ele, dataSource, dateRange = 1) {
@@ -49,61 +42,29 @@
 	                        filter_1,filter_2,filter_3
 	                    ]
 	                };
-	              //   if (cif == '' && loanContract == '' && nationalID == '') {
-	              //   	var flag = false;
-	              //   }else{
-	              //   	var flag = true;
-	              //   }
-	              //   if(filter && flag) {
-	              //   	var setFlag = false;
-	              //   	filter.filters.map((subFilters, index) => {
-	            		// 	if(subFilters.filters) {
-	            		// 		for (var i = 0; i < subFilters.filters.length; i++) {
-	            		// 			if(subFilters.filters[i].field == field_1) {
-	            		// 				subFilters.filters = [];
-	            		// 				break;
-	            		// 			}
-	            		// 			if(subFilters.filters[i].field == field_2) {
-	            		// 				subFilters.filters = [];
-	            		// 				break;
-	            		// 			}
-	            		// 			if(subFilters.filters[i].field == field_3) {
-	            		// 				subFilters.filters = [];
-	            		// 				break;
-	            		// 			}
-	            		// 		}
-	            		// 		if(!subFilters.filters.length) {
-	            		// 			filter.filters[index] = filterTime;
-	            		// 			setFlag = true;
-	            		// 		}
-	            		// 	} else {
-	            		// 		if(subFilters[index] && subFilters[index].length)
-	            		// 			subFilters[index] = subFilters[index].filter(doc => doc.field != field);
-	            		// 	}
-	            		// })
-	              //   	if(!setFlag) filter.filters.push(filterTime);
-	              //   } else {
-	              //   	filter = {
-	              //   		logic: "and",
-	              //   		filters: []
-	              //   	};
-	              //   	filter.filters.push(filterTime);
-	              //   }
 	                dataSource.filter(filterTime);
 	            }
 	        })
 	        var template = await $.get(`${Config.templateApi}data_library/customfilter`);
 	        var kendoView = new kendo.View(template, {model: model, wrap: false, template: false});
-	        //kendo.bind($(mvvmSelector), model);
+			//kendo.bind($(mvvmSelector), model);
+			
 	        kendoView.render($(mvvmSelector));
 	        $(ele).addClass("data-bound");
-	        $(mvvmSelector).fadeIn();
+			$(mvvmSelector).fadeIn();
+			
 	    } else {
 	        if($(mvvmSelector).is(":visible")) {
 	            $(mvvmSelector).fadeOut();
 	        } else {
 	            $(mvvmSelector).fadeIn();
 	        }
-	    }
+		}
+	}
+
+	function onKeyPressTextBox(e) {
+		if(e.keyCode == 13) {
+			document.getElementById("filter-datalibrary").click();
+		}
 	}
 </script>

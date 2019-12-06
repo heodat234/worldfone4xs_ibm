@@ -2,7 +2,7 @@
     <!-- Table Styles Header -->
     <ul class="breadcrumb breadcrumb-top">
         <li>@Report@</li>
-        <li>@Data Source Report@</li>
+        <li>Call In Report</li>
         <li class="pull-right none-breakcrumb" id="top-row">
             <div class="btn-group btn-group-sm">
                 <!-- <button href="#/" class="btn btn-alt btn-default active" >@Overview@</button> -->
@@ -102,16 +102,16 @@
                               width: 150,
 
                           },
-                          {
-                              field: "count_appointment",
-                              title: "@Appointment@",
-                              width: 150,
-                          },
-                          {
-                              field: "count_sc",
-                              title: "@Deliver to SC@",
-                              width: 150,
-                          },
+                          // {
+                          //     field: "count_appointment",
+                          //     title: "@Appointment@",
+                          //     width: 150,
+                          // },
+                          // {
+                          //     field: "count_sc",
+                          //     title: "@Deliver to SC@",
+                          //     width: 150,
+                          // },
 
                      ],
                       noRecords: {

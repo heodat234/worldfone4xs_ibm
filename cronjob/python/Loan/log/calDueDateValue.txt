@@ -19,3 +19,7 @@
 04/12/2019, 10:52:37: unhashable type: 'list'
 04/12/2019, 10:54:02: must be str, not NoneType
 04/12/2019, 10:55:09: must be str, not NoneType
+05/12/2019, 15:59:01: string indices must be integers
+05/12/2019, 16:02:42: string indices must be integers
+05/12/2019, 16:06:11: string indices must be integers
+05/12/2019, 21:01:07: Authentication failed.

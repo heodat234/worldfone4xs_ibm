@@ -185,7 +185,7 @@
     	</div>
     	<div class="col-sm-12">
 			<div class="panel panel-danger">
-	            <div class="panel-heading">SC DELIVER</div>
+	            <div class="panel-heading">CALL IN</div>
 	            <div class="panel-body" style="padding: 0">
 	                <div data-role="grid" id="call-history-grid"
 	                data-pageable="{refresh: true}"
@@ -204,16 +204,7 @@
                               width: 150,
 
                           },
-                          {
-                              field: "count_appointment",
-                              title: "@Appointment@",
-                              width: 150,
-                          },
-                          {
-                              field: "count_sc",
-                              title: "@Deliver to SC@",
-                              width: 150,
-                          },
+                         
 
                      ]'
 	              data-bind="source: sc_log"></div>
@@ -230,8 +221,8 @@
                timeZoneOffset = date.getTimezoneOffset() * kendo.date.MS_PER_MINUTE;
                date.setHours(- timeZoneOffset / kendo.date.MS_PER_HOUR, 0, 0 ,0);
 
-        var fromDate = new Date(date.getTime());
-        var toDate = new Date(date.getTime() + kendo.date.MS_PER_DAY -1);
+        var fromDate = new Date(date.getTime() + timeZoneOffset);
+        var toDate = new Date(date.getTime() + kendo.date.MS_PER_DAY -1 + timeZoneOffset);
         var observable = kendo.observable({
             appointment_log: new kendo.data.DataSource({
                 serverFiltering: true,

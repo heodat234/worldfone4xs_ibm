@@ -81,10 +81,10 @@ Class Test extends CI_Controller {
    {
       ini_set('max_execution_time', '300');
       $collection = 'TS_Telesalelist';
-      $idImport = "5de78375456691670d049273";
+      $idImport = "5de9cfc760666b012e45364b";
       $extension = '999';
 
-      // $output = shell_exec('PYTHONIOENCODING=utf-8 python3.6 /var/www/html/worldfone4xs_ibm/cronjob/python/Telesales/importTelesale.py ' . $idImport . " 2>&1");
+      // $output = shell_exec('PYTHONIOENCODING=utf-8 python3.6 /var/www/html/worldfone4xs_ibm/cronjob/python/Telesales/importDataLibrary.py ' . $idImport . " 2>&1");
       // $output = shell_exec('/usr/local/bin/python3.6 /data/worldfone4xs/cronjob/python/Telesales/importDataLibrary.py ' . $idImport . " 2>&1");
       $output = shell_exec('python3.6 /var/www/html/worldfone4xs_ibm/cronjob/python/Loan/saveDailyReportEachDueDateEachGroup.py  2>&1');
       // $output = shell_exec('python3.6 /var/www/html/worldfone4xs_ibm/cronjob/python/Loan/calDueDateValue.py  2>&1');

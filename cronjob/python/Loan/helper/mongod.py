@@ -8,6 +8,7 @@ class Mongodb:
         self.bson = bson
         self.pymongo = pymongo
         connection = self.pymongo.MongoClient('127.0.0.1', 27017)
+        # connection = self.pymongo.MongoClient('127.0.0.1', 27017, username='worldfone4x', password='St3l37779db')
         self.connection = connection
         self.MONGODB = MONGODB
         self.db = connection[self.MONGODB]

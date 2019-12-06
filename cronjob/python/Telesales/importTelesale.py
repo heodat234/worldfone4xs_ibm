@@ -8,7 +8,7 @@ import ntpath
 import json
 from datetime import datetime
 from datetime import date
-from xlsxwriter.utility import xl_rowcol_to_cell
+# from xlsxwriter.utility import xl_rowcol_to_cell
 from pprint import pprint
 from bson import ObjectId
 from helper.common import Common
@@ -95,7 +95,8 @@ try:
                value = int(listDataLibrary[key][idx])
             except ValueError:
                err = {}
-               err['cell'] =  xl_rowcol_to_cell(key, idx)
+               # err['cell'] =  xl_rowcol_to_cell(key, idx+1)
+               err['cell'] =  str(key) + ' ' + str(idx)
                err['type'] = 'int';
                errorData.append(err);
                checkErr = True
@@ -104,7 +105,8 @@ try:
                value = float(listDataLibrary[key][idx])
             except Exception as e:
                err = {}
-               err['cell'] =  xl_rowcol_to_cell(key, idx)
+               # err['cell'] =  xl_rowcol_to_cell(key, idx+1)
+               err['cell'] =  str(key) + ' ' + str(idx)
                err['type'] = 'double';
                errorData.append(err);
                checkErr = True
@@ -115,7 +117,8 @@ try:
                dt = parse(listDataLibrary[key][idx])
                value = int(dt.timestamp())
             except Exception as e:
-               err['cell'] =  xl_rowcol_to_cell(key, idx)
+               # err['cell'] =  xl_rowcol_to_cell(key, idx+1)
+               err['cell'] =  str(key) + ' ' + str(idx)
                err['type'] = 'date'
                errorData.append(err)
                checkErr = True
@@ -124,7 +127,8 @@ try:
                value_int   = int(listDataLibrary[key][idx])
                value       = '0'+ str(value_int)
             except Exception as e:
-               err['cell'] =  xl_rowcol_to_cell(key, idx)
+               # err['cell'] =  xl_rowcol_to_cell(key, idx+1)
+               err['cell'] =  str(key) + ' ' + str(idx)
                err['type'] = 'phone'
                errorData.append(err)
                checkErr = True
@@ -153,7 +157,8 @@ try:
                if checkUser == False:
                   value = ''
             except ValueError:
-               err['cell'] =  xl_rowcol_to_cell(key, idx)
+               # err['cell'] =  xl_rowcol_to_cell(key, idx)
+               err['cell'] =  str(key) + ' ' + str(idx)
                err['type'] = 'int'
                errorData.append(err)
                checkErr = True
