@@ -56,7 +56,7 @@
 	        item: dataItemFull,
 	        relationshipDataSource: new kendo.data.DataSource({
 	        	serverFiltering: true,
-	        	filter: {field: "account_number", operator: "eq", value: dataItemFull.account_number},
+	        	filter: {field: "LIC_NO", operator: "eq", value: dataItemFull.LIC_NO},
 	        	transport: {
 	        		read: ENV.restApi + "relationship",
 	        		parameterMap: parameterMap

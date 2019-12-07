@@ -150,7 +150,7 @@
                                                 data-value-primitive="true"
                                                 data-text-field="account_number"
                                                 data-value-field="account_number"                  
-                                                data-bind="value: item.account_number, source: mainProductOption, events: {cascade: mainProductChange}" 
+                                                data-bind="value: item.account_number, source: mainProductOption, events: {cascade: mainProductChange, dataBound: onDataBoundAccNo}" 
                                                 style="width: 100%"/>
                                             </div>
                                         </div>
@@ -304,7 +304,7 @@
                                                 data-value-primitive="true"
                                                 data-text-field="contract_no"
                                                 data-value-field="contract_no"                  
-                                                data-bind="value: item.account_number, source: cardOption, events: {change: cardChange}" 
+                                                data-bind="value: item.account_number, source: cardOption, events: {change: cardChange, dataBound: onDataBoundContractCard}" 
                                                 style="width: 100%"/>
                                             </div>
                                         </div>
@@ -437,7 +437,7 @@
                                                 data-value-primitive="true"
                                                 data-text-field="value"
                                                 data-value-field="value"               
-                                                data-bind="value: call.debt_account, source: debtAccountOption" 
+                                                data-bind="value: call.debt_account, source: debtAccountOption, events: {dataBound: onDataBoundDebtAcc}" 
                                                 style="width: 100%"/>
                                         </div>
                                     </div>
@@ -553,7 +553,6 @@ class diallistPopupManual extends Popup {
             var customer = responseObj.data[0];
             var detailUrl = `${ENV.baseUrl}manage/customer?omc=1#/detail/${customer.id}`;
             this.item = customer;
-            this.assign({detailUrl: detailUrl}).open();
             if(customer.account_number) {
                 this.relationshipDataSource = new kendo.data.DataSource({
                     serverFiltering: true,
@@ -573,6 +572,8 @@ class diallistPopupManual extends Popup {
                         }
                     }
                 });
+            }
+            if(customer.LIC_NO) {
                 this.mainProductOption = new kendo.data.DataSource({
                     serverFiltering: true,
                     filter: {field: "LIC_NO", operator: "eq", value: customer.LIC_NO},
@@ -614,6 +615,7 @@ class diallistPopupManual extends Popup {
                         }
                     }
                 });
+                this.assign({detailUrl: detailUrl}).open();
             }
         } else {
             var buttons = {cancel: true};
@@ -630,7 +632,6 @@ class diallistPopupManual extends Popup {
                     var customer = responseObj.data[index];
                     var detailUrl = `${ENV.baseUrl}manage/customer?omc=1#/detail/${customer.id}`;
                     this.item = customer;
-                    this.assign({detailUrl: detailUrl}).open();
                     if(customer.account_number) {
                         this.relationshipDataSource = new kendo.data.DataSource({
                             serverFiltering: true,
@@ -650,6 +651,8 @@ class diallistPopupManual extends Popup {
                                 }
                             }
                         });
+                    }
+                    if(customer.LIC_NO) {
                         this.mainProductOption = new kendo.data.DataSource({
                             serverFiltering: true,
                             filter: {field: "LIC_NO", operator: "eq", value: customer.LIC_NO},
@@ -692,6 +695,7 @@ class diallistPopupManual extends Popup {
                             }
                         });
                     }
+                    this.assign({detailUrl: detailUrl}).open();
                 } else {
                     $("#popup-contain").empty();
                 }
@@ -797,6 +801,14 @@ window.popupObservable.assign({
         play(this._dataCall.calluuid);
     },
     save: function() {
+
+        var kendoValidator = $("#popup-window").kendoValidator().data("kendoValidator");
+            
+        if(!kendoValidator.validate()) {
+            notification.show("@Your data is invalid@", "error");
+            return;
+        }
+        
         var data = this.get("item").toJSON();
         var call = this.get("call").toJSON();
         data.action_code = call.action_code;
@@ -817,6 +829,7 @@ window.popupObservable.assign({
             var followUpData = Object.assign(this.get("followUp").toJSON(), {
                 name: data.name,
                 phone: data.phone,
+                account_number: this.get("call.debt_account"),
                 id: data.id,
                 collection: "Customer"
             });
@@ -963,6 +976,50 @@ window.popupObservable.assign({
         if(!$content.find("iframe").length)
             $content.append(`<iframe src='${ENV.baseUrl}manage/data/cross_sell?${query}' style="width: 100%; height: 500px; border: 0"></iframe>`);
     },
+
+    onChangePromiseDate: function(e) {
+        var value = this.get('item.promised_date');
+        this.set('followUp.reCall', value);
+    },
+
+    nonePaymentOption: dataSourceJsonData(["Actioncode", "reasonnonpayment"]),
+
+    onChangeReasonNonePayment: function(e) {
+        if(this.get('item.reason_nonpayment') == 'others') {
+            this.set('reason_nonpayment_note', true);
+        }
+        else {
+            this.set('reason_nonpayment_note', false);
+        }
+    },
+
+    onDataBoundDebtAcc: function(e) {
+        var debtAcc = $("#debt-account-select").data("kendoDropDownList");
+        var debtAccDB = debtAcc.dataSource.data();
+        if(debtAccDB.length > 0) {
+            debtAcc.select(0);
+        }
+    },
+
+    onDataBoundContractCard: function(e) {
+        var cardContractNo = $("#card-contract-no").data("kendoDropDownList");
+        if(typeof contractNo != 'undefined'){
+            var contractNoDB = contractNo.dataSource.data();
+            if(contractNoDB.length > 0) {
+                contractNo.select(0);
+            }
+        }
+    },
+
+    onDataBoundAccNo: function(e) {
+        var mainContractNo = $("#main-contract-no").data("kendoDropDownList");
+        if(typeof mainContractNo != 'undefined'){
+            var mainContractNoDB = mainContractNo.dataSource.data();
+            if(mainContractNoDB.length > 0) {
+                mainContractNo.select(0);
+            }
+        }
+    }
 });
 
 window.popupObservable.init();

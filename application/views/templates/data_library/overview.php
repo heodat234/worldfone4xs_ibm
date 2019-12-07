@@ -60,10 +60,11 @@
             })
             return response;
         },
-        
+        autoBind: false,
+        refresh: false,
     }; 
 </script>
-<script src="<?= STEL_PATH.'js/table.js' ?>"></script>
+<script src="<?= STEL_PATH.'js/tablev4.js' ?>"></script>
 <script type="text/javascript">
 	var router = new kendo.Router({routeMissing: function(e) { router.navigate("/") }});
     var customerFields = new kendo.data.DataSource({
@@ -84,7 +85,7 @@
             operator: "eq",
             value: (ENV.type ? ENV.type + "_" : "") + 'Datalibrary'
         },
-        sort: {field: "index", dir: "asc"}
+        sort: {field: "index", dir: "asc"},
     })
     customerFields.read().then(function(){
         var columns = customerFields.data().toJSON();
@@ -111,12 +112,13 @@
         columns.unshift({
             selectable: true,
             width: 32,
+            hidden: (PERMISSION.actions.includes("delete")) ? false : true
         });
         Table.columns = columns;
         Table.init();
         Table.grid.bind("change", grid_change);
+        showFilter();
     })
-
     // $( document ).ready(function() {
     //     $('.change-remove').hide();
     // });
@@ -156,5 +158,14 @@
 	$(document).on("click", ".grid-name", function() {
 		detailData($(this).closest("tr"));
 	})
-	
+    
+    function showFilter() {
+        var element = document.getElementById('data-library');
+        if(element) {
+            element.click();
+        }
+        else {
+            setTimeout(showFilter, 100)
+        }
+    }
 </script>

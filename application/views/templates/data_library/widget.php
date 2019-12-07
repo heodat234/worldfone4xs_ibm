@@ -35,14 +35,16 @@
 	                	filter_3 = {field: field_3, operator: "eq", value: nationalID};
 	                }else{
 	                	filter_3 = {field: field_3, operator: "neq", value: nationalID};
-	                }
-	                var filterTime = {
-	                    logic: "and",
-	                    filters: [
-	                        filter_1,filter_2,filter_3
-	                    ]
-	                };
-	                dataSource.filter(filterTime);
+					}
+					if(cif || loanContract || nationalID) {
+						var filterTime = {
+							logic: "and",
+							filters: [
+								filter_1,filter_2,filter_3
+							]
+						};
+						dataSource.filter(filterTime);
+					}
 	            }
 	        })
 	        var template = await $.get(`${Config.templateApi}data_library/customfilter`);

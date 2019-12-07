@@ -11,7 +11,7 @@
                 <div id="popup-tabstrip" data-role="tabstrip" style="margin-top: 2px">
                     <ul>
                         <li class="k-state-active">
-                            <i class="fa fa-user"></i><b> OBJECT INFOMATION 1</b>
+                            <i class="fa fa-user"></i><b> OBJECT INFOMATION</b>
                         </li>
                         <li data-bind="visible: detailUrl, click: openDetail">
                             <i class="gi gi-vcard"></i><b> CUSTOMER DETAIL</b>
@@ -173,7 +173,7 @@
                                         <label class="control-label col-xs-4">Rate <i class="fa fa-info-circle text-info" data-role="tooltip" title="Add on interest / Rate"></i></label>
                                         <div class="col-xs-8">
                                             <div class="input-group">
-						                        <input data-role="numerictextbox" data-decimals="6" data-format="p4" data-spinners="false" data-round="4" data-factor="100" data-max="1" data-min="0" name="rate" data-bind="value: rate, events: {change: operandChange}" style="width: 100%">
+						                        <input data-role="numerictextbox" data-decimals="6" data-format="p4" data-spinners="false" data-round="4" data-factor="100" data-max="1" data-min="0" name="rate" data-bind="value: item.rate, events: {change: operandChange}" style="width: 100%">
 						                        <div class="input-group-addon">
 						                        	<b>%</b>
 						                        </div>
@@ -183,13 +183,13 @@
                                     <div class="form-group">
                                         <label class="control-label col-xs-4">Loan amount</label>
                                         <div class="col-xs-8">
-                                            <input data-role="numerictextbox" data-format="n0" name="loan_amount" data-bind="value: loan_amount, events: {change: operandChange}" style="width: 100%">
+                                            <input data-role="numerictextbox" data-format="n0" name="loan_amount" data-bind="value: item.loan_amount, events: {change: operandChange}" style="width: 100%">
                                         </div>
                                     </div>
                                     <div class="form-group">
                                         <label class="control-label col-xs-4">Term</label>
                                         <div class="col-xs-8">
-                                            <input data-role="numerictextbox" data-format="n0" name="term" data-bind="value: term, events: {change: operandChange}" style="width: 100%">
+                                            <input data-role="numerictextbox" data-format="n0" name="temp_term" data-bind="value: item.temp_term, events: {change: operandChange}" style="width: 100%">
                                         </div>
                                     </div>
                                 </div>
@@ -197,22 +197,22 @@
                                 	<div class="form-group">
                                         <label class="control-label col-xs-6">Monthly payment</label>
                                         <div class="col-xs-6">
-                                        	<b class="text-success" data-bind="text: monthlyPayment" data-format="n0" style="line-height: 2.3"></b>
+                                        	<b class="text-success" data-bind="text: item.monthlyPayment" data-format="n0" style="line-height: 2.3"></b>
                                         </div>
                                         <div class="col-xs-12" style="margin-top: 10px">
                                         	<table style="font-weight: bold; font-size: 14px">
                                         		<tr>
                                         			<td rowspan="2">
-                                        				<i class="text-danger" data-format="n0" data-bind="text: loan_amount"></i>
+                                        				<i class="text-danger" data-format="n0" data-bind="text: item.loan_amount"></i>
                                         				<span> x&nbsp;</span>
                                         			</td>
                                         			<td style="border-bottom: 1px solid black; text-align: center; padding-bottom: 5px">
-                                        				<i class="text-danger" data-bind="text: rate">Rate</i>
+                                        				<i class="text-danger" data-bind="text: item.rate">Rate</i>
                                         			</td>
                                         		</tr>
                                         		<tr>
                                         			<td style="padding-top: 5px">
-                                        				<span>1 - (1 + <i class="text-danger" data-bind="text: rate">Rate</i>)<sup>-<i class="text-danger" data-bind="text: term">Term</i></sup></span>
+                                        				<span>1 - (1 + <i class="text-danger" data-bind="text: item.rate">Rate</i>)<sup>-<i class="text-danger" data-bind="text: item.temp_term">Term</i></sup></span>
                                         			</td>
                                         		</tr>
                                         	</table>
@@ -264,25 +264,9 @@ class diallistPopup1 extends Popup {
             return;
         }
 
-        if(responseObj.date_of_birth) responseObj.date_of_birth = new Date(responseObj.date_of_birth * 1000);
+        if(responseObj.date_of_birth) responseObj.date_of_birth = new Date(responseObj.date_of_birth);
 
         this.item = responseObj;
-
-        if(responseObj.es_pay && responseObj.es_pay.rate && typeof responseObj.es_pay.rate == 'number') {
-            this.rate = responseObj.es_pay.rate;
-        }
-
-        if(responseObj.es_pay && responseObj.es_pay.loan_amount && typeof responseObj.es_pay.loan_amount == 'number') {
-            this.loan_amount = responseObj.es_pay.loan_amount;
-        }
-
-        if(responseObj.es_pay && responseObj.es_pay.term && typeof responseObj.es_pay.term == 'number') {
-            this.term = responseObj.es_pay.term;
-        }
-
-        if(responseObj.es_pay && responseObj.es_pay.monthlyPayment && typeof responseObj.es_pay.monthlyPayment == 'number') {
-            this.monthlyPayment = responseObj.es_pay.monthlyPayment;
-        }
 
         /* Lấy iframe chi tiết khách hàng */
         var detailUrl = detailUrl = `${ENV.baseUrl}manage/telesalelist?omc=1#/detail_customer/${responseObj.id}`
@@ -303,24 +287,16 @@ window.popupObservable.assign({
     rate: "Rate",
     term: "Term",
     operandChange: function(e) {
-    	var rate = this.get("rate"),
-    		loan_amount = this.get("loan_amount"),
-    		term = this.get("term");
-    	if(typeof rate == "number" && typeof loan_amount == "number" && typeof term == "number") {
-	    	var monthlyPayment = loan_amount * (rate / (1 - (1 + rate) ** (-term)));
-	    	this.set("monthlyPayment", Math.round(monthlyPayment));
+    	var rate = this.get("item.rate"),
+    		loan_amount = this.get("item.loan_amount"),
+    		temp_term = this.get("item.temp_term");
+    	if(typeof rate == "number" && typeof loan_amount == "number" && typeof temp_term == "number") {
+	    	var monthlyPayment = loan_amount * (rate / (1 - (1 + rate) ** (-temp_term)));
+	    	this.set("item.monthlyPayment", Math.round(monthlyPayment));
     	}
     },
     save: function() {
         var data = this.item.toJSON();
-        var es_pay = {
-            'rate'              : (this.rate) ? this.rate : 0,
-            'loan_amount'       : (this.loan_amount) ? this.loan_amount : 0,
-            'term'              : (this.term) ? this.term : 0,
-            'monthlyPayment'    : (this.rate && this.loan_amount && this.term) ? this.monthlyPayment : 0
-        };
-        data['es_pay'] = es_pay;
-        console.log(this.item.toJSON());
 
         $.ajax({
             url: ENV.restApi + "telesalelist_solve/" + (data.id || "").toString(),

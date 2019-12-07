@@ -15,6 +15,7 @@
 			<div class="form-group">
 				<label>@Lead@</label>
 				<input data-role="dropdownlist" name="lead"
+					data-filter="contains"
 					data-text-field="agentname"
 					data-value-field="extension"
 					data-template="itemGroupTemplate"
@@ -24,6 +25,7 @@
 			<div class="form-group">
 				<label>@Members@</label>
 				<select data-role="multiselect" name="members" multiple="multiple"
+					data-filter="contains"
 					data-text-field="agentname"
 					data-value-field="extension"
 					data-item-template="itemGroupTemplate"

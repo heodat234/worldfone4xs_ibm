@@ -10,7 +10,7 @@
 				<div class='form-group'>
 					<label class='control-label col-xs-4'>{$fieldDoc['title']}</label>
 					<div class='col-xs-8'>
-						<input data-role='datepicker' style='width: 100%' data-bind='value: item.{$fieldDoc['field']}'>
+						<input data-role='datepicker' style='width: 100%' data-bind='value: action.{$fieldDoc['field']}'>
 					</div>
 				</div>";
 				break;
@@ -26,7 +26,7 @@
 				                    data-value-primitive="true"
 				                    data-text-field="text"
 				                    data-value-field="value"                  
-				                    data-bind="value: item.raaStatus, source: raaStatusOption" 
+				                    data-bind="value: action.raaStatus, source: raaStatusOption" 
 				                    style="width: 100%"/>
 						</div>
 					</div>
@@ -36,7 +36,7 @@
 					<div class='form-group'>
 						<label class='control-label col-xs-4'>{$fieldDoc['title']}</label>
 						<div class='col-xs-8'>
-							<input class='k-textbox' style='width: 100%' data-bind='value: item.{$fieldDoc['field']}'>
+							<input class='k-textbox' style='width: 100%' data-bind='value: action.{$fieldDoc['field']}'>
 						</div>
 					</div>";
 				}

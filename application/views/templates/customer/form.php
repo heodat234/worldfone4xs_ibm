@@ -12,7 +12,7 @@
 	        </ul>
 	    </div>
 		<div id="main-form" style="width: 65%" data-width="65%">
-	        <div class="form-group" id="basic-information" data-field="@Name@ | @Main phone@ | @Email@">
+	        <div class="form-group" id="basic-information" data-field="@Name@ | @Main phone@ | @Email@ | @Description@">
 	            <h4 class="fieldset-legend text-muted"><span>@Basic Information@</span></h4>
 	        </div>
 			<div class="form-group" data-field="@Name@">
@@ -27,6 +27,10 @@
 				<label>@Email@</label>
 				<input class="k-textbox" style="width: 100%" data-bind="value: item.email">
 			</div>
+			<div class="form-group" data-field="@Description@">
+				<label>@Description@</label>
+				<textarea class="k-textbox" style="width: 100%" data-bind="value: item.description"></textarea>
+			</div>
 			<?php $this->load->library("mongo_private"); 
 			$customerFields = $this->mongo_private->where(["collection"=>getCT('Customer')])->get("Model"); 
 			$titles = array_column($customerFields, "title"); ?>
@@ -35,7 +39,7 @@
 	        </div>
 	        <?php
 	        foreach ($customerFields as $fieldDoc) {
-	        	if(in_array($fieldDoc["field"], ["name","phone","email","createdAt"])) continue;
+	        	if(in_array($fieldDoc["field"], ["name","phone","email","description","createdAt"])) continue;
 	        	switch ($fieldDoc["type"]) {
 	        		case 'timestamp':
 						echo "

@@ -56,11 +56,10 @@
         url: `${Config.crudApi+Config.collection}/${diallistDetailId}`,
         error: errorDataSource
     }).then(function(dataItemFull) {
-    	var model = Object.assign({
-	        item: dataItemFull,
+    	var model = kendo.myClass.extend({
 	        relationshipDataSource: new kendo.data.DataSource({
 	        	serverFiltering: true,
-	        	filter: {field: "account_number", operator: "eq", value: dataItemFull.account_number},
+	        	filter: {field: "LIC_NO", operator: "eq", value: dataItemFull.LIC_NO},
 	        	transport: {
 	        		read: ENV.restApi + "relationship",
 	        		parameterMap: parameterMap
@@ -70,7 +69,7 @@
 	        		total: "total"
 	        	}
 	        })
-	    }, Config.observable);
-	    kendo.bind($("#right-form"), kendo.observable(model));
+	    });
+	    kendo.bind($("#right-form"), new model("item", dataItemFull));
     })
 </script>

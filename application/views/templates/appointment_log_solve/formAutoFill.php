@@ -27,7 +27,7 @@
                        data-text-field="dealer_name"
                        data-value-field="dealer_code"
                        data-filter="contains"
-                       data-bind="value: item.dealer_code, source: dealerOption, events: {change: onChangeDealer, dataBound: onDataBoundDealer}" style="width: 100%"
+                       data-bind="value: item.dealer_code, source: dealerOption, events: {change: onChangeDealer}" style="width: 100%"
                        required validationMessage="Empty!!!"/>
             </div>
             <div class="form-group">
@@ -45,7 +45,7 @@
                        data-text-field="sc_code"
                        data-value-field="sc_code"
                        data-filter="contains"
-                       data-bind="value: item.sc_code, source: scOption, events: {change: onChangeSC, dataBound: onDataBoundSc}" style="width: 100%"/>
+                       data-bind="value: item.sc_code, source: scOption, events: {change: onChangeSC}" style="width: 100%"/>
             </div>
             <div class="form-group">
                 <label>@SC's Name@</label>
@@ -208,6 +208,7 @@
             var dataItem = $("#sc-info").data('kendoDropDownList').dataItem();
             this.set('item.sc_phone', dataItem.phone);
             this.set('item.sc_name', dataItem.sc_name);
+            this.set('item.sc_id', dataItem.id);
         },
         customerOption: function() {
             if(this.get('item.id_no')) {

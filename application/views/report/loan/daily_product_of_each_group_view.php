@@ -36,134 +36,76 @@ async function createColumn() {
         title: "Due date",
         template: data => gridDate(data.due_date, 'dd/MM/yyyy'),
         width: 100,
-    }, {
-        field: 'team',
-        title: "Team",
-        width: 150,
-    }, {
-        title: 'Target',
+    },{
+        title: 'Number',
         columns: [{
-            field: 'tar_per',
-            title: 'Percentage',
-            width: 100
-        }, {
-            field: 'tar_amt',
-            title: 'Amount',
+            field: 'inci',
+            title: 'Incidence',
             width: 80
         }, {
-            field: 'tar_gap',
-            title: "GAP (amount)",
+            field: 'col',
+            title: 'Collected',
+            width: 80
+        }, {
+            field: 'rem',
+            title: "Remaining",
+            width: 80
+        }, {
+            field: 'flow_rate',
+            title: "Flow rate",
+            width: 80
+        }, {
+            field: 'col_rate',
+            title: "Collected rate",
+            width: 80
+        }]
+    },{
+        title: 'Outstanding Balance',
+        columns: [{
+            field: 'inci_amt',
+            title: 'Incidence (outstanding balance at due date)',
+            width: 80
+        }, {
+            field: 'inci_ob_principal',
+            title: 'Incidence (outstanding principal)',
+            width: 80
+        }, {
+            field: 'amt',
+            title: "Actual collected amount (based on oustanding balance at due date)",
+            width: 80
+        }, {
+            field: 'col_prici',
+            title: "Collected principal amount",
+            width: 80
+        }, {
+            field: 'col_amt',
+            title: "Collected  amount (OS at current - OS at due date)",
+            width: 80
+        }, {
+            field: 'rem_amt',
+            title: "Remaining (OS at current - OS at due date)",
+            width: 80
+        }, {
+            field: 'flow_rate_amt',
+            title: "Flow rate (OS at current - OS at due date)",
+            width: 80
+        }, {
+            field: 'actual_ratio',
+            title: "Collected ratio (Actual collected amount)",
+            width: 80
+        }, {
+            field: 'princi_ratio',
+            title: "Collected ratio (Principal amount)",
+            width: 80
+        }, {
+            field: 'amt_ratio',
+            title: "Collected ratio (OS at current - OS due date)",
             width: 80
         }]
     }];
 
-    var product = await $.ajax({
-        url: `${ENV.reportApi}` + 'loan/daily_prod_prod_user_report/readProduct'
-    });
 
-    var numberIncColumn = [{
-        field: 'inci',
-        title: 'Incidence',
-        width: 100
-    }]
-    var amountIncColumn = [{
-        field: 'inci_amt',
-        title: 'Total outstanding balance Incidence',
-        width: 100
-    }]
-    var numberColColumn = [{
-        field: 'col',
-        title: 'Collected',
-        width: 100
-    }]
-    var amountColColumn = [{
-        field: 'col_amt',
-        title: 'Total Collected amount(actual collected amount)',
-        width: 100
-    }]
-
-    product.map(function(prod) {
-        if (prod.code == '301') {
-            numberIncColumn.push({
-                field: 'inci_' + prod.code,
-                title: 'Card (301+302)',
-                width: 100
-            });
-            amountIncColumn.push({
-                field: 'inci_amt_' + prod.code,
-                title: 'Card (301+302)',
-                width: 100
-            });
-            numberColColumn.push({
-                field: 'col_' + prod.code,
-                title: 'Card (301+302)',
-                width: 100
-            });
-            amountColColumn.push({
-                field: 'col_amt_' + prod.code,
-                title: 'Card (301+302)',
-                width: 100
-            });
-        }else if (prod.code != '302') {
-            numberIncColumn.push({
-                field: 'inci_' + prod.code,
-                title: prod.name,
-                width: 100
-            });
-            amountIncColumn.push({
-                field: 'inci_amt_' + prod.code,
-                title: prod.name,
-                width: 100
-            });
-            numberColColumn.push({
-                field: 'col_' + prod.code,
-                title: prod.name,
-                width: 100
-            });
-            amountColColumn.push({
-                field: 'col_amt_' + prod.code,
-                title: prod.name,
-                width: 100
-            });
-        }
-        return prod;
-    });
-
-    numberColColumn.push({
-        field: 'today_rem',
-        title: 'Remaining',
-        width: 100
-    }, {
-        field: 'flow_rate',
-        title: 'Flow rate',
-        width: 100
-    }, {
-        field: 'col_rate',
-        title: 'Collected Ratio',
-        width: 100
-    });
-
-    amountColColumn.push({
-        field: 'today_rem_amt',
-        title: 'Remaining',
-        width: 100
-    }, {
-        field: 'flow_rate_amt',
-        title: 'Flow rate',
-        width: 100
-    }, {
-        field: 'col_rate_amt',
-        title: 'Collected Ratio',
-        width: 100
-    });
     
-    grid_columns.push({
-        title: 'Number',
-        columns: numberIncColumn.concat(numberColColumn)
-    }, {
-        title: 'Outstanding Balance',
-        columns: amountIncColumn.concat(amountColColumn)
-    });
 
     return grid_columns;
 }
@@ -185,10 +127,7 @@ var Config = {
         response.data.map(function(doc) {
             // doc.due_date = new date(doc.due_date * 1000)
             doc.due_date = doc.due_date ? new Date(doc.due_date * 1000) : undefined;
-            doc.inci_301     = doc.inci_301 + doc.inci_302
-            doc.inci_amt_301 = doc.inci_amt_301 + doc.inci_amt_302
-            doc.col_301      = doc.col_301 + doc.col_302
-            doc.col_amt_301  = doc.col_amt_301 + doc.col_amt_302
+            
             return doc;
         })
         return response;
@@ -206,7 +145,7 @@ var Table = function() {
                 serverPaging: true,
                 serverSorting: true,
                 serverGrouping: false,
-                pageSize: 5,
+                pageSize: 9,
                 batch: false,
                 sort: [{
                     field: "debt_group", dir: "asc"

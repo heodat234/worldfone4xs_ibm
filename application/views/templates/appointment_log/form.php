@@ -27,7 +27,7 @@
                        data-text-field="dealer_name"
                        data-value-field="dealer_code"
                        data-filter="contains"
-                       data-bind="value: item.dealer_code, source: dealerOption, events: {change: onChangeDealer, dataBound: onDataBoundDealer}" style="width: 100%"
+                       data-bind="value: item.dealer_code, source: dealerOption, events: {change: onChangeDealer}" style="width: 100%"
                        required validationMessage="Empty!!!"/>
             </div>
             <div class="form-group">
@@ -45,7 +45,7 @@
                        data-text-field="sc_code"
                        data-value-field="sc_code"
                        data-filter="contains"
-                       data-bind="value: item.sc_code, source: scOption, events: {change: onChangeSC, dataBound: onDataBoundSc}" style="width: 100%"/>
+                       data-bind="value: item.sc_code, source: scOption, events: {change: onChangeSC}" style="width: 100%"/>
             </div>
             <div class="form-group">
                 <label>@SC's Name@</label>
@@ -163,7 +163,27 @@
             }
         },
         scOption: function() {
-            if(this.get('listScBySchedule')) {
+            console.log(this.get('listScBySchedule'));
+            if(this.get('item.sc_code')) {
+                return new kendo.data.DataSource({
+                    pageSize: 5,
+                    serverFiltering: true,
+                    filter: [
+                        {field: 'sc_code', operator: 'eq', value: this.get('item.sc_code')},
+                    ],
+                    transport: {
+                        read: {
+                            url: ENV.restApi + "sc",
+                        },
+                        parameterMap: parameterMap
+                    },
+                    schema: {
+                        data: "data",
+                        total: "total"
+                    },
+                });
+            }
+            else if(this.get('listScBySchedule')) {
                 return new kendo.data.DataSource({
                     pageSize: 5,
                     serverFiltering: true,
@@ -183,13 +203,24 @@
                 });
             }
             else {
-                return []
+                return new kendo.data.DataSource({
+                    pageSize: 5,
+                    serverFiltering: true,
+                    transport: {
+                        read: {
+                            url: ENV.restApi + "sc",
+                        },
+                        parameterMap: parameterMap
+                    },
+                    schema: {
+                        data: "data",
+                        total: "total"
+                    },
+                });
             }
         },
         onDataBoundSc: function() {
-            console.log(this.get("item.sc_code"));
             if(this.get("item.sc_code")) {
-                
                 $("#sc-info").data("kendoDropDownList").value(this.get("item.sc_code"));
             }  
         },
@@ -213,13 +244,14 @@
             var dataItem = $("#sc-info").data('kendoDropDownList').dataItem();
             this.set('item.sc_phone', dataItem.phone);
             this.set('item.sc_name', dataItem.sc_name);
+            this.set('item.sc_id', dataItem.id);
         },
         customerOption: function() {
-            if(this.get('item.customer_info.id_no')) {
+            if(this.get('item.id_no')) {
                 return new kendo.data.DataSource({
                     pageSize: 5,
                     serverFiltering: true,
-                    filter: [{field: 'id_no', operator: 'eq', value: this.get('item.customer_info.id_no')}],
+                    filter: [{field: 'id_no', operator: 'eq', value: this.get('item.id_no')}],
                     transport: {
                         read: {
                             url: ENV.vApi + "telesalelist/read",
@@ -251,8 +283,9 @@
         },
         onChangeCMND: function() {
             var customerDropDown = $("#customer-info").data("kendoDropDownList");
-            var dataItem = customerDropDown.dataItem();
-            this.set('item.name', dataItem.name);
+            // var dataItem = customerDropDown.dataItem();
+            // console.log(customerDropDown.value());
+            this.set('item.name', customerDropDown.value());
         },
     });
     $(document).ready(function() {

@@ -80,7 +80,7 @@ var detailTable = function() {
                 serverSorting: true,
                 serverGrouping: false,
                 filter: {field: "diallist_id", operator: "eq", value: Config.id},
-                sort: [{field: "index", dir: "asc"}],
+                sort: [{field: "priority", dir: "asc"}, {field: "index", dir: "asc"}],
                 pageSize: 10,
                 batch: false,
                 schema: {
@@ -231,14 +231,8 @@ async function viewForm(ele) {
     kendoView.render($("#right-form"));
 }
 
-detailTable.init().then(() => {
-    setTimeout(() => refreshGridInterval(), 5000);
-});
+detailTable.init();
 
-function refreshGridInterval() {
-    detailTable.dataSource.read();
-    setTimeout(() => refreshGridInterval(), 5000);
-}
 </script>
 
 <style type="text/css">

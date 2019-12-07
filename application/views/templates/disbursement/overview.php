@@ -57,11 +57,13 @@ var Config = Object.assign(Config, {
     columns: [{
         selectable: true,
         width: 32,
+        hidden: (PERMISSION.actions.includes("edit_row")) ? false : true
     }, {
         // Use uid to fix bug data-uid of row undefined
         title: `<a data-type='action/delete_all' class='btn btn-sm btn-circle btn-action btn-primary' onclick='return deleteDataItemChecked();'><i class='fa fa-times-circle'></i></a>`,
         template: `<a data-type='action/delete_all' role="button" class="btn btn-sm btn-circle btn-action btn-primary" data-uid="#: uid #"><i class="fa fa-ellipsis-v"></i></a>`,
-        width: 48
+        width: 48,
+        hidden: (PERMISSION.actions.includes("edit_row")) ? false : true
     }, {
         field: "dealer_code",
         title: "@Dealer code@",
@@ -109,14 +111,14 @@ var Config = Object.assign(Config, {
         title: "@Released date@",
         width: '150px',
         headerAttributes: { style: "white-space: normal"},
-        format: "{0: dd/MM/yy HH:mm}",
+        format: "{0: dd/MM/yyyy}",
         filterable: true,
     },{
         field: "disbursed_date",
         title: "@Disbursed date@",
         width: '150px',
         headerAttributes: { style: "white-space: normal"},
-        format: "{0: dd/MM/yy HH:mm}",
+        format: "{0: dd/MM/yyyy}",
         filterable: true,
     },{
         field: "loan_amount",
@@ -135,7 +137,7 @@ var Config = Object.assign(Config, {
         title: "@Issued date@",
         width: '150px',
         headerAttributes: { style: "white-space: normal"},
-        format: "{0: dd/MM/yy HH:mm}",
+        format: "{0: dd/MM/yyyy}",
         filterable: true,
     },{
         field: "issued_place",

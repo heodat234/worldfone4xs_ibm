@@ -57,11 +57,13 @@ var Config = Object.assign(Config, {
         field: "advance",
         title: "@Advance@",
         filterable: false
-    }],
+	}],
+	autoBind: false,
+	refresh: false,
 });
 </script>
 
-<script src="<?= STEL_PATH.'js/table.js' ?>"></script>
+<script src="<?= STEL_PATH.'js/tablev4.js' ?>"></script>
 
 <script type="text/javascript">
 	function deleteDataItemChecked() {

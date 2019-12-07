@@ -315,7 +315,7 @@ window.popupObservable.assign({
     save: function() {
         var data = this.item.toJSON();
         $.ajax({
-            url: ENV.restApi + "telesalelist/" + (data.id || "").toString(),
+            url: ENV.restApi + "telesalelist_solve/" + (data.id || "").toString(),
             type: "PUT",
             contentType: "application/json; charset=utf-8",
             data: kendo.stringify(data),
@@ -332,10 +332,11 @@ window.popupObservable.assign({
             data: kendo.stringify({customer: data}),
             error: errorDataSource
         });
+        
         if(this.followUpChecked) {
             var followUpData = Object.assign(this.get("followUp").toJSON(), {
-                name: data.customer_name,
-                phone: data.mobile_phone_no,
+                name: data.name,
+                phone: data.phone,
                 id: data.id,
                 collection: "TS_Telesalelist"
             });

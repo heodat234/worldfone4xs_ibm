@@ -84,7 +84,7 @@
              data-sortable="true"
              data-editable="true"
              data-resizable="true"
-             data-pageable="true"/>
+             data-pageable="true"></div>
     </div>
 </div>
 <style>
@@ -173,63 +173,34 @@
                 $("#upload-excel").click();
             },
             uploadExcelSuccess: function(e) {
-                e.sender.clearAllFiles();
-                this.set("file",
-                    {filepath: e.response.filepath, filename: e.response.filename, size: e.response.size});
-                this.data.read({filepath: e.response.filepath}).then(() => {
-                    var data = this.data.data().toJSON();
-                    var gridData = [];
-                    if(data.length) {
-                        this.set("visibleData", this.data.total() - 1);
-                        columns = [];
-                        for(var prop in data[0]) {
-                            if(data[0][prop]) {
-                                columns.push({field: 'c' + prop.toString(), title: data[0][prop] + ` (${prop})`, width: 140});
+                swal({
+                    title: "@Are you sure@?",
+                    text: `@Import this data@.`,
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: false,
+                })
+                .then((sure) => {
+                    $.ajax({
+                        url: `${ENV.vApi}${Config.collection}/importExcel`,
+                        type: "PATCH",
+                        contentType: "application/json; charset=utf-8",
+                        data: kendo.stringify({filepath: e.response.filepath, import_type: 'manual', import_file_type: 'excel'}),
+                        success: function(res) {
+                            if(res.status == 1) {
+                                syncDataSource();
+                                router.navigate(`/`);
                             }
-                        }
-                        var grid = $("#data-grid").data("kendoGrid");
-                        grid.setOptions({columns: columns});
-                        this.set("dataColumns", columns);
-
-                        var temp = [];
-                        for(var prop in data) {
-                            if(prop == 0) {
-                                continue;
+                            else if(res.status == 2) {
+                                notification.show(res.message, "warning");
                             }
-                            temp.push({
-                                'c0': data[prop][0],
-                                'c1': data[prop][1],
-                                'c2': data[prop][2],
-                                'c3': data[prop][3],
-                                'c4': data[prop][4],
-                                'c5': data[prop][5],
-                                'c6': data[prop][6],
-                                'c7': data[prop][7],
-                                'c8': data[prop][8],
-                                'c9': data[prop][9],
-                                'c10': data[prop][10],
-                                'c11': data[prop][11],
-                                'c12': data[prop][12],
-                                'c13': data[prop][13],
-                                'c14': data[prop][14],
-                            });
-                        }
-
-                        var gridData = new kendo.data.DataSource({
-                            pageSize: 5,
-                            data: temp,
-                        });
-
-                        var grid = $("#data-grid").data("kendoGrid");
-                        grid.setDataSource(gridData);
-
-                        data.shift();
-                        this.data.data(data);
-
-                        this.set('excelGrid', false);
-                        this.set('csvGrid', true);
-                    }
-                });
+                            else {
+                                notification.show("Đã có lỗi trong quá trình nhập dữ liệu. Xin vui lòng kiểm tra lại trong lịch sử nhập dữ liệu", "error");
+                            }
+                        },
+                        error: errorDataSource
+                    })
+                })
             },
             import: function() {
                 swal({
@@ -259,12 +230,21 @@
                     contentType: "application/json; charset=utf-8",
                     data: kendo.stringify({filepath: filepath, convert: convert, import_type: 'manual', import_file_type: 'excel', total_data: totaldata, columnModel: columnModel}),
                     success: function(res) {
-                        if(res.status) {
+                        console.log(res);
+                        if(res.status === 1) {
                             syncDataSource();
                             router.navigate(`/`);
                         }
+                        else if(res.status === 2) {
+                            notification.show(res.message, "warning");
+                        }
                         else {
-                            notification.show("Đã có lỗi trong quá trình nhập dữ liệu. Xin vui lòng kiểm tra lại trong lịch sử nhập dữ liệu", "error");
+                            if(res.messsage) {
+                                notification.show(res.message, "error");
+                            }
+                            else {
+                                notification.show("Đã có lỗi trong quá trình nhập dữ liệu. Xin vui lòng kiểm tra lại trong lịch sử nhập dữ liệu", "error");
+                            }
                         }
                     },
                     error: errorDataSource
@@ -293,72 +273,34 @@
     });
 
     function uploadExcelSuccess(filepath) {
-        var rawData = new kendo.data.DataSource({
-            pageSize: 5,
-            transport: {
-                read: {
-                    url: ENV.reportApi + "excecuteExcel/read",
-                    data: {
-                        limit_column: "P",
-                        pageSize: null,
-                        filepath: filepath
+        swal({
+            title: "@Are you sure@?",
+            text: `@Import this data@.`,
+            icon: "warning",
+            buttons: true,
+            dangerMode: false,
+        })
+        .then((sure) => {
+            $.ajax({
+                url: `${ENV.vApi}${Config.collection}/importFTP`,
+                type: "PATCH",
+                contentType: "application/json; charset=utf-8",
+                data: kendo.stringify({filepath: filepath, import_type: 'FTP', import_file_type: 'excel'}),
+                success: function(res) {
+                    if(res.status == 1) {
+                        syncDataSource();
+                        router.navigate(`/`);
                     }
-                }
-            },
-            schema: {
-                data: "data",
-                total: "total"
-            },
-        });
-        rawData.read().then(() => {
-            var data = rawData.data().toJSON();
-            var gridData = [];
-            if(data.length) {
-                var columns = [];
-                for(var prop in data[0]) {
-                    if(data[0][prop]) {
-                        columns.push({field: 'c' + prop.toString(), title: data[0][prop] + ` (${prop})`, width: 140});
+                    else if(res.status == 2) {
+                        notification.show(res.message, "warning");
                     }
-                }
-                var grid = $("#data-grid").data("kendoGrid");
-                grid.setOptions({columns: columns});
-
-                var temp = [];
-                for(var prop in data) {
-                    if(prop == 0) {
-                        continue;
+                    else {
+                        notification.show("Đã có lỗi trong quá trình nhập dữ liệu. Xin vui lòng kiểm tra lại trong lịch sử nhập dữ liệu", "error");
                     }
-                    temp.push({
-                        'c0': data[prop][0],
-                        'c1': data[prop][1],
-                        'c2': data[prop][2],
-                        'c3': data[prop][3],
-                        'c4': data[prop][4],
-                        'c5': data[prop][5],
-                        'c6': data[prop][6],
-                        'c7': data[prop][7],
-                        'c8': data[prop][8],
-                        'c9': data[prop][9],
-                        'c10': data[prop][10],
-                        'c11': data[prop][11],
-                        'c12': data[prop][12],
-                        'c13': data[prop][13],
-                        'c14': data[prop][14],
-                    });
-                }
-
-                var gridData = new kendo.data.DataSource({
-                    pageSize: 5,
-                    data: temp,
-                });
-
-                var grid = $("#data-grid").data("kendoGrid");
-                grid.setDataSource(gridData);
-
-                data.shift();
-                rawData.data(data);
-            }
-        });
+                },
+                error: errorDataSource
+            })
+        })
     }
 
     function import_ftp(ele) {
@@ -366,30 +308,6 @@
         var selectedNode = ftp_grid.select(),
             dataItem = ftp_grid.dataItem($(ele).closest("tr"));
         uploadExcelSuccess(dataItem.filepath);
-        var columns = customerFields.data().toJSON();
-        var columnModel = arrayColumn(columns, 'type', 'field');
-        var colToField = arrayColumn(columns, "field");
-        var grid = $("#data-grid").data("kendoGrid");
-        save(dataItem.filepath, colToField, grid.dataSource.total(), columnModel);
-    }
-
-    function save(filepath, convert, totaldata, columnModel) {
-        $.ajax({
-            url: `${ENV.vApi}${Config.collection}/importExcel`,
-            type: "PATCH",
-            contentType: "application/json; charset=utf-8",
-            data: kendo.stringify({filepath: filepath, convert: convert, import_type: 'FTP', import_file_type: 'excel', total_data: totaldata, columnModel: columnModel}),
-            success: function(res) {
-                if(res.status) {
-                    syncDataSource();
-                    router.navigate(`/`);
-                }
-                else {
-                    notification.show("Đã có lỗi trong quá trình nhập dữ liệu. Xin vui lòng kiểm tra lại trong lịch sử nhập dữ liệu", "error");
-                }
-            },
-            error: errorDataSource
-        })
     }
 </script>
 

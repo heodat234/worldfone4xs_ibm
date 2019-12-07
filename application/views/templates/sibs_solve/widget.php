@@ -6,5 +6,5 @@
             <div class="form-horizontal" data-bind="source: columns" data-template="column-template"/>
         </li>
     </ul>
-	<a role="button" class="btn btn-alt btn-sm btn-primary" data-field="createdAt" onclick="customFilter(this, Table.dataSource)"><i class="fa fa-filter"></i> <b>@Custom Filter@</b></a>
-</div>
+	<a style="display: none" role="button" class="btn btn-alt btn-sm btn-primary" data-field="createdAt" onclick="customFilter(this, Table.dataSource)"><i class="fa fa-filter"></i> <b>@Custom Filter@</b></a>
+</div> 

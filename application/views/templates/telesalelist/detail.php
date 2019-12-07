@@ -660,7 +660,7 @@ var Detail = function() {
             var filter = {
                 logic: "and",
                 filters: [
-                    {field: "customernumber", operator: "eq", value: dataItemFull.mobile_phone_no},
+                    {field: "customernumber", operator: "eq", value: dataItemFull.phone},
                     {field: "userextension", operator: "eq", value: Config.extension}
                 ]
             };

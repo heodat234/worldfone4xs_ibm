@@ -2,7 +2,7 @@
 <div class="col-sm-12 statistic-view">
     <div class="row">
         <div class="col-sm-3" style="margin-top: 10px">
-            <div class="alert alert-success" style="cursor: pointer;">
+            <div class="alert alert-success" style="cursor: pointer; margin-bottom: 0px;">
                 <h4>@Total@</h4>
                 <p class="text-right">
                     <span data-bind="text: diallist.total"></span>
@@ -10,7 +10,7 @@
             </div>
         </div>
         <div class="col-sm-3" style="margin-top: 10px">
-            <div class="alert alert-info">
+            <div class="alert alert-info" style="cursor: pointer; margin-bottom: 0px;">
                 <h4>@Group name@</h4>
                 <p class="text-right">
                     <span data-bind="text: diallist.group_name"></span>
@@ -18,13 +18,13 @@
             </div>
         </div>
         <div class="col-sm-3" style="margin-top: 10px">
-            <div class="alert alert-success">
+            <div class="alert alert-success" style="cursor: pointer; margin-bottom: 0px;">
                 <h4>@Campaign target@</h4>
                 <p class="text-right"><span data-bind="text: diallist.target"></span>%</p>
             </div>
         </div>
         <div class="col-sm-3" style="margin-top: 10px" data-bind="visible: diallist.is_auto">
-            <div class="alert alert-info" style="height: 80px">
+            <div class="alert alert-info" style="height: 80px; cursor: pointer; margin-bottom: 0px;">
                 <h4>
                     <i class="fa fa-pause" aria-hidden="true" data-bind="invisible: diallist.runStatus"></i>
                     <i class="fa fa-cog fa-spin" aria-hidden="true" data-bind="visible: diallist.runStatus"></i>
@@ -42,6 +42,9 @@
             </div>
         </div>
     </div>
+    <div class="row" style="padding-bottom: 10px">
+        <div class="col-sm-12" data-template="calling-phone" data-bind="source: dialInProcessDataSource"></div>
+    </div>
 </div>
 <div class="col-sm-12" style="overflow-y: auto; padding: 0">
 	<div id="grid-<?= $id ?>"></div>
@@ -55,6 +58,9 @@
         <a href="javascript:void(0)" data-type="delete" onclick="deleteDataItem(this)"><li><i class="fa fa-times-circle text-danger"></i><span>Delete</span></li></a>
     </ul>
 </div>
+<script id="calling-phone" type="text/x-kendo-template">
+    <span class="label label-danger animation-pulse"><b data-bind="text: phone"></b> - <i data-bind="text: timeSince, attr: {data-date-time: createdAt}" class="time-interval"></i></span>
+</script>
 <script>
 function gridCallResult(data) {
     var htmlArr = [];
@@ -132,7 +138,7 @@ var detailTable = function() {
                 serverSorting: true,
                 serverGrouping: false,
                 filter: {field: "diallist_id", operator: "eq", value: Config.id},
-                sort: [{field: "index", dir: "asc"}],
+                sort: [{field: "priority", dir: "asc"}, {field: "index", dir: "asc"}],
                 pageSize: 10,
                 batch: false,
                 schema: {
@@ -195,6 +201,9 @@ var detailTable = function() {
                         break;
                     case "int": case "double":
                         col.template = data => gridInterger(data[col.field]);
+                        break;
+                    case "currency":
+                        col.template = data => gridCurrency(data[col.field]);
                         break;
                     default:
                         col.template = data => gridLongText(data[col.field], 20);
@@ -355,8 +364,8 @@ async function editForm(ele) {
 
 function deleteDataItem(ele) {
 	swal({
-	    title: "Are you sure?",
-	    text: "Once deleted, you will not be able to recover this document!",
+	    title: "@Are you sure@?",
+	    text: "@Once deleted, you will not be able to recover this document@!",
 	    icon: "warning",
 	    buttons: true,
 	    dangerMode: true,
@@ -375,8 +384,8 @@ function deleteDataItemChecked() {
     var checkIds = detailTable.grid.selectedKeyNames();
     if(checkIds.length) {
         swal({
-            title: "Are you sure?",
-            text: "Once deleted, you will not be able to recover these documents!",
+            title: "@Are you sure@?",
+            text: "@Once deleted, you will not be able to recover these documents@!",
             icon: "warning",
             buttons: true,
             dangerMode: true,
@@ -392,8 +401,8 @@ function deleteDataItemChecked() {
         });
     } else {
         swal({
-            title: "No row is checked!",
-            text: "Please check least one row to remove",
+            title: "@No row is checked@!",
+            text: "@Please check least one row to remove@",
             icon: "error"
         });
     }
@@ -407,6 +416,28 @@ async function updateStatistic() {
         diallist.is_auto = Boolean(diallist.mode == "auto");
     var statisticObservable = kendo.observable({
         diallist: diallist,
+        dialInProcessDataSource: new kendo.data.DataSource({
+            serverFiltering: true,
+            serverSorting: true,
+            filter: {field: "diallistId", operator: "eq", value: Config.id},
+            sort: [{field: "createdAt", dir: "asc"}],
+            transport: {
+                read: ENV.restApi + "dial_in_process",
+                parameterMap: parameterMap
+            },
+            schema: {
+                data: "data",
+                total: "total",
+                parse: function(res) {
+                    res.data.map(doc => {
+                        let d = new Date();
+                        d.setHours(0,0,0,0);
+                        doc.timeSince = kendo.toString(new Date(d - new Date(doc.createdAt)), "mm:ss");
+                    })
+                    return res;
+                }
+            }
+        }),
         runStatusChange: function(e) {
             $.ajax({
                 url: ENV.restApi + "diallist/" + Config.id,
@@ -419,7 +450,6 @@ async function updateStatistic() {
                             $.get(ENV.vApi + "dial_queue/createDialQueue/" + Config.id);
                         }
                         notification.show("@Change status@ @success@", "success");
-                        updateStatistic();
                     } else notification.show("@Change status@ @error@", "error");
                 },
                 error: errorDataSource
@@ -427,8 +457,25 @@ async function updateStatistic() {
         } 
     });
     kendo.bind($(".statistic-view"), statisticObservable);
+    setTimeout(() => {
+        updateStatistic();
+        detailTable.dataSource.read();
+    }, 10000);
 }
 
+if(typeof window.intervalCurrentCallInQueue == "undefined") {
+    window.intervalCurrentCallInQueue = setInterval(() => {
+        var $select = $(".time-interval[data-date-time]");
+        var d = new Date(); d.setHours(0);
+        if($select.length) {
+            for (var i = 0; i < $select.length; i++) {
+                var dateTime = $select[i].dataset.dateTime,
+                    timeText = kendo.toString(new Date(d - new Date(dateTime)), 'mm:ss');
+                $select[i].innerText = timeText;
+            }
+        } 
+    }, 1000);
+}
 </script>
 
 <style type="text/css">

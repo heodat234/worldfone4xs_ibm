@@ -84,7 +84,7 @@
              data-sortable="true"
              data-editable="true"
              data-resizable="true"
-             data-pageable="true"/>
+             data-pageable="true"></div>
     </div>
 </div>
 <style>
@@ -189,8 +189,8 @@
                                 columns.push({field: 'c' + prop.toString(), title: data[0][prop] + ` (${prop})`, width: 140});
                             }
                         }
-                        var grid = $("#data-grid").data("kendoGrid");
-                        grid.setOptions({columns: columns});
+                        var gridData = $("#data-grid").data("kendoGrid");
+                        gridData.setOptions({columns: columns});
                         // console.log(columns);
                         this.set("dataColumns", columns);
 

@@ -155,7 +155,7 @@
                 total: "total"
             },
             serverFiltering: true,
-            filter: [{field: 'collection', operator: 'eq', value: "Appointment"}]
+            filter: [{field: 'collection', operator: 'eq', value: "TS_Appointment"}]
         }),
         detailInit: function (e) {
             $("<div/>").appendTo(e.detailCell).kendoGrid({

@@ -1,6 +1,6 @@
 <div class="row" style="margin: 10px 0">
 	<div class="col-sm-2" id="page-widget"></div>
-	<div class="col-sm-9 filter-mvvm" style="display: none"></div>
+	<div class="col-sm-12 filter-mvvm" style="display: none"></div>
 </div>
 <div class="row">
 	<div class="col-sm-12" style="height: 80vh;">
@@ -40,15 +40,15 @@ var Config = Object.assign(Config, {
     columns: [{
         field: "account_no",
         title: "@Account number@",
-        filterable: true
+        filterable: false
     },{
         field: "cif",
         title: "CIF",
-        filterable: true
+        filterable: false
     },{
         field: "cus_name",
         title: "@Customer name@",
-        filterable: true
+        filterable: false
     },{
         field: "current_balance",
         title: "@Current balance@",
@@ -57,11 +57,13 @@ var Config = Object.assign(Config, {
         field: "advance",
         title: "@Advance@",
         filterable: false
-    }],
+	}],
+	autoBind: false,
+	refresh: false,
 });
 </script>
 
-<script src="<?= STEL_PATH.'js/table.js' ?>"></script>
+<script src="<?= STEL_PATH.'js/tablev4.js' ?>"></script>
 
 <script type="text/javascript">
 	function deleteDataItemChecked() {
@@ -108,5 +110,16 @@ var Config = Object.assign(Config, {
 		detailData($(this).closest("tr"));
 	});
 
-    Table.init();
+	function showFilter() {
+        var element = document.getElementById('data-library');
+        if(element) {
+            element.click();
+        }
+        else {
+            setTimeout(showFilter, 100)
+        }
+    }
+
+	Table.init();
+	showFilter();
 </script>

@@ -5,7 +5,7 @@
 <div class="row">
 	<div class="col-sm-12" style="height: 80vh;">
 	    <!-- Table Styles Content -->
-	    <div id="grid_1"></div>
+	    <div id="grid"></div>
 	    <!-- END Table Styles Content -->
 	</div>
 </div>
@@ -58,13 +58,13 @@ var Config = Object.assign(Config, {
         field: "tl_code",
         headerAttributes: { style: "white-space: normal"},
         width: "110px",
-        filterable: false
+        filterable: true
     },{
         field: "tl_name",
         title: "@Telesale name@",
         headerAttributes: { style: "white-space: normal"},
         width: "110px",
-        filterable: false
+        filterable: true
     },{
         title: "@Customer@",
         columns: [{
@@ -72,19 +72,19 @@ var Config = Object.assign(Config, {
             title: "@National ID@",
             headerAttributes: { style: "white-space: normal"},
             width: "110px",
-            filterable: false
+            filterable: true
         }, {
             field: "customer_info.name",
             title: "@Name@",
             width: "200px",
             headerAttributes: { style: "white-space: normal"},
-            filterable: false
+            filterable: true
         }, {
             field: "customer_info.phone",
             title: "@Phone@",
             width: "150px",
             headerAttributes: { style: "white-space: normal"},
-            filterable: false,
+            filterable: true,
             template: function(dataItem) {
                 return gridPhone(dataItem['customer_info']['phone'], dataItem['customer_info']['id'], 'customer');
             }
@@ -93,7 +93,7 @@ var Config = Object.assign(Config, {
             title: "@Note@",
             width: "200px",
             headerAttributes: { style: "white-space: normal"},
-            filterable: false
+            filterable: true
         }]
     },{
         field: "appointment_date",
@@ -109,19 +109,19 @@ var Config = Object.assign(Config, {
             title: "@Code@",
             headerAttributes: { style: "white-space: normal"},
             width: "100px",
-            filterable: false
+            filterable: true
         }, {
             field: "dealer_name",
             title: "@Name@",
             headerAttributes: { style: "white-space: normal"},
             width: "200px",
-            filterable: false
+            filterable: true
         }, {
             field: "dealer_address",
             title: "@Address@",
             headerAttributes: { style: "white-space: normal"},
             width: "250px",
-            filterable: false
+            filterable: true
         }]
     },{
         title: "SC",
@@ -130,25 +130,38 @@ var Config = Object.assign(Config, {
             title: "@Code@",
             headerAttributes: { style: "white-space: normal"},
             width: "100px",
-            filterable: false
+            filterable: true
         }, {
             field: "sc_name",
             title: "@Name@",
             headerAttributes: { style: "white-space: normal"},
             width: "200px",
-            filterable: false
+            filterable: true
         }, {
             field: "sc_phone",
             title: "@Phone@",
             headerAttributes: { style: "white-space: normal"},
             width: "150px",
-            filterable: false
+            filterable: true,
+            template: function(dataItem) {
+                if(typeof dataItem['sc_id'] != 'undefined' && dataItem['sc_id'] && typeof dataItem['sc_phone'] != 'undefined' && dataItem['sc_phone']) {
+                    return gridPhone(dataItem['sc_phone'].replace(/\s/g, ''), dataItem['sc_id'], 'sc');
+                }
+                else {
+                    if(typeof dataItem['sc_phone'] != 'undefined' && dataItem['sc_phone']) {
+                        return dataItem['sc_phone'].replace(/\s/g, '');
+                    }
+                    else {
+                        return '<span></span>';
+                    }
+                }
+            }
         }]
     }],
 });
 </script>
 
-<script src="<?= STEL_PATH.'js/tablev3.js' ?>"></script>
+<script src="<?= STEL_PATH.'js/tablev1.js' ?>"></script>
 
 <script type="text/javascript">
 	function deleteDataItemChecked() {

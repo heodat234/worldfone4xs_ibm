@@ -84,7 +84,7 @@
              data-sortable="true"
              data-editable="true"
              data-resizable="true"
-             data-pageable="true"/>
+             data-pageable="true"></div>
     </div>
 </div>
 <style>
@@ -268,11 +268,6 @@
                 transport: {
                     read: {
                         url: ENV.vApi + "dealer/listFileFTP",
-                        data: function() {
-                            return {
-                                'ftp_filepath': Config.ftp_filepath,
-                            }
-                        }
                     },
                     parameterMap: parameterMap
                 },
