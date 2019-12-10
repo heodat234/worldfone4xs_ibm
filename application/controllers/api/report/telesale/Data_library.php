@@ -72,6 +72,7 @@ Class Data_library extends WFF_Controller {
                 '_id' => array('code'=>'$source'),
                 "phone_arr" => array( '$push' => '$phone' ),
                 "cif_arr" => array( '$push' => '$cif' ),
+                'count_data' => array('$sum' => 1)
              )
           );
           $this->kendo_aggregate->set_kendo_query($request)->filtering()->adding($match, $group);
@@ -83,9 +84,7 @@ Class Data_library extends WFF_Controller {
             $value['count_data'] = $value['count_called'] = $value['count_success'] =$value['count_dont_pickup'] =$value['count_appointment'] = $value['count_potential'] = 0;
             foreach ($data_permission as $value_per) {
               if ($value["_id"]['code'] == $value_per["_id"]['code']) {
-                $value['count_data'] = !empty($value["_id"]['code']) ? $this->mongo_db->where(
-                  array("source" => $value["_id"]['code'],'cif' => ['$in' => $value_per["cif_arr"]], 'createdAt' => $match_1)
-                 )->count($this->collection) : 0;
+                $value['count_data'] = $value_per["count_data"];
                 $value['count_called'] = !empty($value_per["phone_arr"]) ? 
                 $this->mongo_db->where(
                   array("customernumber" => ['$in' => $value_per["phone_arr"]],'direction' => 'outbound','starttime' => $match_1)

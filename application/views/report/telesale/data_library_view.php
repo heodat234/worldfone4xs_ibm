@@ -56,7 +56,7 @@
                   var dataSource = this.dataSource = new kendo.data.DataSource({
                      serverPaging: true,
                      serverFiltering: true,
-                     pageSize: 5,
+                     pageSize: 10,
                      transport: {
                         read: ENV.reportApi + "telesale/data_library",
                         parameterMap: parameterMap
@@ -88,7 +88,12 @@
                         }
                      },
                      resizable: true,
-                     pageable: true,
+                     pageable: {
+                        refresh: true,
+                        pageSizes: [5, 10, 20, 50, 100],
+                        input: true,
+                        messages: KENDO.pageableMessages ? KENDO.pageableMessages : {}
+                     },
                      sortable: true,
                      scrollable: true,
                      columns: [

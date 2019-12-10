@@ -34,15 +34,44 @@
                 <div id="grid"></div>
             </div>
         </div>
-        <div class="row" data-bind="visible: visibleNoData">
+        <!-- <div class="row" data-bind="visible: visibleNoData">
             <h3 class="text-center">@NO DATA@</h3>
-        </div>
+        </div> -->
     </div>
     <div id="action-menu">
         <ul>
             
         </ul>
     </div>
+    <script>
+      var Config = {
+          crudApi: `${ENV.reportApi}`,
+          templateApi: `${ENV.templateApi}`,
+          collection: "daily_all_user_report",
+          observable: {
+              
+          },
+          model: {
+              id: "id",
+              fields: {
+                  
+              }
+          },
+          parse: function (response) {
+              response.data.map(function(doc) {
+                  // doc.due_date = new date(doc.due_date * 1000)
+                  doc.due_date = doc.due_date ? new Date(doc.due_date * 1000) : undefined;
+                  doc.inci_301     = doc.inci_301 + doc.inci_302
+                  doc.inci_amt_301 = doc.inci_amt_301 + doc.inci_amt_302
+                  doc.col_301      = doc.col_301 + doc.col_302
+                  doc.col_amt_301  = doc.col_amt_301 + doc.col_amt_302
+                  return doc;
+              })
+              return response;
+          },
+          filterable: KENDO.filterable
+      };
+    </script>
     <script>
       var Table = function() {
          return {
@@ -52,20 +81,17 @@
                   var dataSource = this.dataSource = new kendo.data.DataSource({
                      serverPaging: true,
                      serverFiltering: true,
-                     pageSize: 5,
+                     pageSize: 10,
                      transport: {
-                        read: ENV.reportApi + "telesale/appointment",
+                        read: {
+                            url: Config.crudApi + 'loan/' + Config.collection + '/read'
+                        },
                         parameterMap: parameterMap
                      },
                      schema: {
                         data: "data",
                         total: "total",
-                        parse: function(response) {
-                           response.data.map(doc => {
-                              doc.code = doc._id.code;
-                           });
-                           return response;
-                        }
+                        
                      }
                   });
 
@@ -90,43 +116,140 @@
                      columns: [
                           {
                               field: "name",
-                              title: "@Telesale name@",
+                              title: "Group",
                               width: 150,
                           },{
-                              field: "code",
-                              title: "@Telesale code@",
-                              width: 150,
+                              field: "count_data",
+                              title: "Total handled accounts",
+                              width: 100,
 
                           },{
-                              field: "team",
-                              title: "@Team@",
-                              width: 120,
+                              field: "unwork",
+                              title: "Unwork accounts",
+                              width: 100,
                           },
                           {
-                              field: "count_appointment",
-                              title: "@Appointment@",
-                              width: 150,
+                              field: "talk_time",
+                              title: "Talk time (minutes)",
+                              width: 100,
                           },
                           {
-                              field: "count_applied",
-                              title: "@Customer Applied@",
-                              width: 150,
+                              title: "Contacted",
+                              columns: [{
+                                  field: 'total_call',
+                                  title: 'No.of accounts',
+                                  width: 80
+                              }, {
+                                  field: 'total_amount',
+                                  title: 'No.of amount',
+                                  width: 80
+                              }]
                           },
                           {
-                              field: "count_approve",
-                              title: "@Customer Approve@",
-                              width: 150,
+                              title: "Spin",
+                              columns: [{
+                                  field: 'count_spin',
+                                  title: 'No.of accounts',
+                                  width: 80
+                              }, {
+                                  field: 'spin_amount',
+                                  title: 'No.of amount',
+                                  width: 80
+                              }]
                           },
                           {
-                              field: "count_reject",
-                              title: "@Customer Reject@",
-                              width: 150,
+                              title: "Promise to pay",
+                              columns: [{
+                                  field: 'count_ptp',
+                                  title: 'No.of accounts',
+                                  width: 80
+                              }, {
+                                  field: 'ptp_amount',
+                                  title: 'No.of amount',
+                                  width: 80
+                              }]
                           },
                           {
-                              field: "count_release",
-                              title: "@Customer Release@",
-                              width: 150,
+                              title: "Connected",
+                              columns: [{
+                                  field: 'count_conn',
+                                  title: 'No.of accounts',
+                                  width: 80
+                              }, {
+                                  field: 'conn_amount',
+                                  title: 'No.of amount',
+                                  width: 80
+                              }]
                           },
+                          {
+                              title: "Paid",
+                              columns: [{
+                                  field: 'count_paid',
+                                  title: 'No.of accounts',
+                                  width: 80
+                              }, {
+                                  field: 'paid_amount',
+                                  title: 'Actual Amount received',
+                                  width: 80
+                              }, {
+                                  field: 'count_paid_promise',
+                                  title: 'No.of accounts (keep promise to pay)',
+                                  width: 80
+                              }, {
+                                  field: 'paid_amount_promise',
+                                  title: 'Actual Amount received (keep promise to pay)',
+                                  width: 80
+                              }]
+                          },
+                          {
+                              title: "Spin rate",
+                              columns: [{
+                                  field: 'spin_rate',
+                                  title: 'Account',
+                                  width: 80
+                              }]
+                          },
+                          {
+                              title: "PTP rate",
+                              columns: [{
+                                  field: 'ptp_rate_acc',
+                                  title: 'PTP rate (total paid accounts)',
+                                  width: 80
+                              }, {
+                                  field: 'ptp_rate_amt',
+                                  title: 'PTP rate (total paid amount)',
+                                  width: 80
+                              }, {
+                                  field: 'paid_rate_acc',
+                                  title: 'PTP rate (Promised accounts)',
+                                  width: 80
+                              }, {
+                                  field: 'paid_rate_amt',
+                                  title: 'PTP rate (PromisedAmount)',
+                                  width: 80
+                              }]
+                          },
+                          {
+                              title: "Connected rate",
+                              columns: [{
+                                  field: 'conn_rate',
+                                  title: 'Account',
+                                  width: 80
+                              }]
+                          },
+                          {
+                              title: "Collected ratio",
+                              columns: [{
+                                  field: 'collect_ratio_acc',
+                                  title: 'Account',
+                                  width: 100
+                              }, {
+                                  field: 'collect_ratio_amt',
+                                  title: 'Amount',
+                                  width: 80
+                              }]
+                          }
+                          
 
                      ],
                       noRecords: {
@@ -145,63 +268,7 @@
                       return checkedIds;
                   }
 
-                  /*
-                   * Right Click Menu
-                   */
-                  var menu = $("#action-menu");
-                  if(!menu.length) return;
-
-                  $("html").on("click", function() {menu.hide()});
-
-                  $(document).on("click", "#grid tr[role=row] a.btn-action", function(e){
-                      let btna = $(e.target);
-                      let row = $(e.target).closest("tr");
-                      e.pageX -= 20;
-                      showMenu(e, row, btna);
-                  });
-
-                  function showMenu(e, that,btna) {
-                      //hide menu if already shown
-                      menu.hide();
-
-                      //Get id value of document
-                      var uid = $(that).data('uid');
-                      var fltnumber = btna.data('flt');
-                      var date = btna.data('date');
-                      if(uid)
-                      {
-                          menu.find("a").data('uid',uid);
-                          menu.find("a").data('fltnumber',fltnumber);
-                          menu.find("a").data('date',date);
-                          menu.find("a").data('dpt',btna.data('dpt'));
-                          menu.find("a").data('arv',btna.data('arv'));
-                          //get x and y values of the click event
-                          var pageX = e.pageX;
-                          var pageY = e.pageY;
-
-                          //position menu div near mouse cliked area
-                          menu.css({top: pageY , left: pageX});
-
-                          var mwidth = menu.width();
-                          var mheight = menu.height();
-                          var screenWidth = $(window).width();
-                          var screenHeight = $(window).height();
-
-                          //if window is scrolled
-                          var scrTop = $(window).scrollTop();
-
-                          //if the menu is close to right edge of the window
-                          if(pageX+mwidth > screenWidth){
-                          menu.css({left:pageX-mwidth});
-                          }
-                          //if the menu is close to bottom edge of the window
-                          if(pageY+mheight > screenHeight+scrTop){
-                          menu.css({top:pageY-mheight});
-                          }
-                          //finally show the menu
-                          menu.show();
-                      }
-                  }
+                  
               }
           }
       }();
@@ -293,7 +360,7 @@
     <script>
         function saveAsExcel() {
             $.ajax({
-              url: ENV.reportApi + "loan/daily_all_user_report/downloadExcel",
+              url: Config.crudApi + 'loan/' + Config.collection + "/exportExcel",
               type: 'POST',
               dataType: 'json',
               timeout: 30000

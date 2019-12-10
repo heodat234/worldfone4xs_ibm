@@ -190,7 +190,7 @@ Class Daily_prod_each_group_report extends WFF_Controller {
         // print_r($data);
         foreach($data as $key => $value) {
             
-            if ($value['due_date_code'] == '99' || $debt_group == 'F') {
+            if ($value['due_date_code'] == '99') {
                 $worksheet->mergeCells('B' . $start_row . ':D' . $start_row );
                 $worksheet->setCellValue('B' . $start_row, $debt_group);
                 $worksheet->getStyle('B' . $start_row. ':S'. $start_row)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('DDEBF7');
@@ -253,7 +253,7 @@ Class Daily_prod_each_group_report extends WFF_Controller {
         $worksheet->getStyle("A1:BY".$maxCell['row'])->getBorders()
         ->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
         $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
-    	$file_path = UPLOAD_PATH . "loan/export/" . 'export.xlsx';
+    	$file_path = UPLOAD_PATH . "loan/export/" . 'DailyEachDueDateEachGroup.xlsx';
 		$writer->save($file_path);
 		echo json_encode(array("status" => 1, "data" => $file_path));
     }

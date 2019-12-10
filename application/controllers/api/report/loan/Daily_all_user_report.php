@@ -52,7 +52,16 @@ Class Daily_all_user_report extends WFF_Controller {
         $this->gl_collection         = set_sub_collection($this->gl_collection);
     }
 
-
+    function read() {
+        try {
+            $request = json_decode($this->input->get("q"), TRUE);
+            $data = $this->crud->read($this->collection, $request);
+            echo json_encode($data);
+        } catch (Exception $e) {
+            echo json_encode(array("status" => 0, "message" => $e->getMessage()));
+        }
+    }
+    
     function save()
     {
         try {
@@ -2734,8 +2743,8 @@ Class Daily_all_user_report extends WFF_Controller {
       $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
       $file_path = UPLOAD_PATH . "loan/export/" . $filename;
       $writer->save($file_path);
-      print_r($file_path);
-      // echo json_encode(array("status" => 1, "data" => $file_path));
+      // print_r($file_path);
+      echo json_encode(array("status" => 1, "data" => $file_path));
 
    }
 

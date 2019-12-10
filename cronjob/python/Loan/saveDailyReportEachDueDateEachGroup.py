@@ -542,9 +542,6 @@ try:
             tempTotal['createdBy'] = 'system'
             tempTotal['for_month'] = str(month)
 
-            # insertDataTotal.append(tempTotalSibs)
-            # insertDataTotal.append(tempTotalCard)
-            # insertDataTotal.append(tempTotal)
             mongodb.insert(MONGO_COLLECTION=collection, insert_data=tempTotalSibs)
             mongodb.insert(MONGO_COLLECTION=collection, insert_data=tempTotalCard)
             mongodb.insert(MONGO_COLLECTION=collection, insert_data=tempTotal)

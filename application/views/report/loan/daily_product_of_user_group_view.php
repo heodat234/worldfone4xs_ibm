@@ -63,15 +63,15 @@ var Config = {
     }, {
         title: 'Target',
         columns: [{
-            field: 'percentage',
+            field: 'tar_per',
             title: 'Percentage',
             width: 100
         }, {
-            field: 'amt',
+            field: 'tar_amt',
             title: 'Amount',
             width: 80
         }, {
-            field: 'gap',
+            field: 'tar_gap',
             title: "GAP (amount)",
             width: 80
         }]
@@ -86,15 +86,15 @@ var Config = {
             title: 'Total Collected',
             width: 80
         }, {
-            field: 'today_rem',
+            field: 'rem',
             title: "Remaining",
             width: 80
         }, {
-            field: 'float_rate',
+            field: 'flow_rate',
             title: "Flow rate",
             width: 80
         }, {
-            field: 'col_rate',
+            field: 'col_ratio',
             title: "Collected ratio",
             width: 80
         }]
@@ -109,20 +109,32 @@ var Config = {
             title: 'Total Collected amount (actual amount)',
             width: 80
         }, {
-            field: 'pay_amt',
+            field: 'payment_amt',
             title: 'Payment amount received',
             width: 80
         }, {
-            field: 'today_rem_amt',
+            field: 'rem_actual',
             title: "Remaining (Actual amount)",
             width: 80
         }, {
-            field: 'float_rate_amt',
+            field: 'flow_rate_actual',
             title: "Flow rate",
             width: 80
         }, {
-            field: 'col_rate_amt',
+            field: 'col_ratio_actual',
             title: "Collected Ratio (Actual amount)",
+            width: 80
+        }, {
+            field: 'rem_os',
+            title: "Remaining (OS at current - OS at due date)",
+            width: 80
+        }, {
+            field: 'flow_rate_os',
+            title: "Flow rate (OS at current - OS at due date)",
+            width: 80
+        }, {
+            field: 'col_ratio_os',
+            title: "Collected Ratio (OS at current - OS at due date)",
             width: 80
         }]
     }],
