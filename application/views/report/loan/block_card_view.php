@@ -5,7 +5,7 @@
         <li>Daily Working Days Report</li>
         <li class="pull-right none-breakcrumb" id="top-row">
             <div class="btn-group btn-group-sm">
-                <a role="button" class="btn btn-sm" onclick="saveAsExcel()"><i class="fa fa-file-excel-o"></i> <b>@Export@</b></a>
+                <a role="button" class="btn btn-sm" onclick="Table.grid.saveAsExcel()"><i class="fa fa-file-excel-o"></i> <b>@Export@</b></a>
             </div>
         </li>
     </ul>
@@ -44,10 +44,13 @@
         </ul>
     </div>
     <script>
+      function girdBoolean(data) {
+        return '<input type="checkbox"'+ ( data ? 'checked="checked"' : "" )+ 'class="chkbx" disabled />';
+      }
       var Config = {
           crudApi: `${ENV.reportApi}`,
           templateApi: `${ENV.templateApi}`,
-          collection: "daily_working_days_report",
+          collection: "block_card_report",
           observable: {
               
           },
@@ -59,110 +62,51 @@
           },
           parse: function (response) {
               response.data.map(function(doc) {
-                  doc.due_date = doc.due_date ? new Date(doc.due_date * 1000) : undefined;
-                  console.log(doc);
+                  doc.createdAt = doc.createdAt ? new Date(doc.createdAt * 1000) : undefined;
                   return doc;
               })
               return response;
           },
           columns: [{
-              field: 'debt_group',
-              title: "Group",
+              field: 'index',
+              title: "STT",
               width: 80,
           }, {
-              field: 'due_date_code',
-              title: "Group",
-              width: 80,
-          }, {
-              field: 'product',
-              title: "Product",
+              field: 'account_number',
+              title: "Số Hợp đồng",
               width: 150,
           }, {
-              field: 'due_date',
-              title: "Due date",
-              template: data => gridDate(data.due_date, 'dd/MM/yyyy'),
+              field: 'name',
+              title: "Tên khách hàng",
+              width: 150,
+          }, {
+              title: 'Nội dung xử lý',
+              columns: [ {
+                  field: 'block',
+                  title: 'Block card',
+                  width: 80,
+                  template: dataItem => girdBoolean(dataItem.block),
+              }]
+          }, {
+              title: 'Remark',
+              columns: [{
+                  field: 'accl',
+                  title: 'ACCL',
+                  width: 80
+              }, {
+                  field: 'sibs',
+                  title: 'SIBS',
+                  width: 80
+              }, {
+                  field: 'group',
+                  title: "Group",
+                  width: 80
+              }]
+          }, {
+              field: 'createdAt',
+              title: "Report date",
               width: 100,
-          }, {
-              field: 'team',
-              title: "Team",
-              width: 150,
-          }, {
-              title: 'Target',
-              columns: [{
-                  field: 'tar_per',
-                  title: 'Percentage',
-                  width: 100
-              }, {
-                  field: 'tar_amt',
-                  title: 'Amount',
-                  width: 80
-              }, {
-                  field: 'tar_gap',
-                  title: "GAP (amount)",
-                  width: 80
-              }]
-          }, {
-              title: 'Number',
-              columns: [{
-                  field: 'inci',
-                  title: 'Total Incidence',
-                  width: 100
-              }, {
-                  field: 'col',
-                  title: 'Total Collected',
-                  width: 80
-              }, {
-                  field: 'rem',
-                  title: "Remaining",
-                  width: 80
-              }, {
-                  field: 'flow_rate',
-                  title: "Flow rate",
-                  width: 80
-              }, {
-                  field: 'col_ratio',
-                  title: "Collected ratio",
-                  width: 80
-              }]
-          }, {
-              title: 'Outstanding Balance',
-              columns: [{
-                  field: 'inci_amt',
-                  title: 'Total outstanding balance at due date',
-                  width: 100
-              }, {
-                  field: 'col_amt',
-                  title: 'Total Collected amount (actual amount)',
-                  width: 80
-              }, {
-                  field: 'payment_amt',
-                  title: 'Payment amount received',
-                  width: 80
-              }, {
-                  field: 'rem_actual',
-                  title: "Remaining (Actual amount)",
-                  width: 80
-              }, {
-                  field: 'flow_rate_actual',
-                  title: "Flow rate",
-                  width: 80
-              }, {
-                  field: 'col_ratio_actual',
-                  title: "Collected Ratio (Actual amount)",
-                  width: 80
-              }, {
-                  field: 'rem_os',
-                  title: "Remaining (OS at current - OS at due date)",
-                  width: 80
-              }, {
-                  field: 'flow_rate_os',
-                  title: "Flow rate (OS at current - OS at due date)",
-                  width: 80
-              }, {
-                  field: 'col_ratio_os',
-                  title: "Collected Ratio (OS at current - OS at due date)",
-                  width: 80
-              }]
+              template: dataItem => gridTimestamp(dataItem.createdAt,"dd/MM/yyyy"),
           }],
           filterable: KENDO.filterable
       };
@@ -174,9 +118,11 @@
                   var dataSource = this.dataSource = new kendo.data.DataSource({
                      serverPaging: true,
                      serverFiltering: true,
-                     pageSize: 5,
+                     pageSize: 10,
                      transport: {
-                        read: Config.crudApi + 'loan/' + Config.collection,
+                        read: {
+                            url: Config.crudApi + 'loan/' + Config.collection + '/read'
+                        },
                         parameterMap: parameterMap
                      },
                      schema: {
@@ -221,63 +167,7 @@
                       return checkedIds;
                   }
 
-                  /*
-                   * Right Click Menu
-                   */
-                  var menu = $("#action-menu");
-                  if(!menu.length) return;
-
-                  $("html").on("click", function() {menu.hide()});
-
-                  $(document).on("click", "#grid tr[role=row] a.btn-action", function(e){
-                      let btna = $(e.target);
-                      let row = $(e.target).closest("tr");
-                      e.pageX -= 20;
-                      showMenu(e, row, btna);
-                  });
-
-                  function showMenu(e, that,btna) {
-                      //hide menu if already shown
-                      menu.hide();
-
-                      //Get id value of document
-                      var uid = $(that).data('uid');
-                      var fltnumber = btna.data('flt');
-                      var date = btna.data('date');
-                      if(uid)
-                      {
-                          menu.find("a").data('uid',uid);
-                          menu.find("a").data('fltnumber',fltnumber);
-                          menu.find("a").data('date',date);
-                          menu.find("a").data('dpt',btna.data('dpt'));
-                          menu.find("a").data('arv',btna.data('arv'));
-                          //get x and y values of the click event
-                          var pageX = e.pageX;
-                          var pageY = e.pageY;
-
-                          //position menu div near mouse cliked area
-                          menu.css({top: pageY , left: pageX});
-
-                          var mwidth = menu.width();
-                          var mheight = menu.height();
-                          var screenWidth = $(window).width();
-                          var screenHeight = $(window).height();
-
-                          //if window is scrolled
-                          var scrTop = $(window).scrollTop();
-
-                          //if the menu is close to right edge of the window
-                          if(pageX+mwidth > screenWidth){
-                          menu.css({left:pageX-mwidth});
-                          }
-                          //if the menu is close to bottom edge of the window
-                          if(pageY+mheight > screenHeight+scrTop){
-                          menu.css({top:pageY-mheight});
-                          }
-                          //finally show the menu
-                          menu.show();
-                      }
-                  }
+                 
               }
           }
       }();

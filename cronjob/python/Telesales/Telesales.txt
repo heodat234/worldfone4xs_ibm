@@ -1,0 +1,3 @@
+03/12/2019, 10:36:32: Start Import
+[{'cell': 'H1345', 'type': 'phone'}, {'cell': 'H2279', 'type': 'phone'}, {'cell': 'H3687', 'type': 'phone'}, {'cell': 'H4640', 'type': 'phone'}, {'cell': 'H7581', 'type': 'phone'}, {'cell': 'H9879', 'type': 'phone'}, {'cell': 'H10714', 'type': 'phone'}, {'cell': 'H10959', 'type': 'phone'}, {'cell': 'H11468', 'type': 'phone'}, {'cell': 'H12789', 'type': 'phone'}, {'cell': 'H13033', 'type': 'phone'}, {'cell': 'H14084', 'type': 'phone'}, {'cell': 'H14714', 'type': 'phone'}, {'cell': 'H18349', 'type': 'phone'}, {'cell': 'H22708', 'type': 'phone'}, {'cell': 'H22803', 'type': 'phone'}, {'cell': 'H23643', 'type': 'phone'}, {'cell': 'H23670', 'type': 'phone'}, {'cell': 'H25617', 'type': 'phone'}]
+03/12/2019, 10:40:27: End Import

@@ -1,0 +1,10 @@
+29/11/2019, 11:48:42: Start Import
+29/11/2019, 11:48:42: name 'base_url' is not defined
+29/11/2019, 11:49:48: Start Import
+29/11/2019, 11:49:48: name 'base_url' is not defined
+29/11/2019, 11:51:42: Start Import
+29/11/2019, 12:01:43: End Import
+03/12/2019, 10:17:47: Start Import
+03/12/2019, 10:17:47: invalid literal for int() with base 10: '0932473731 - 0972071316'
+03/12/2019, 10:31:12: Start Import
+03/12/2019, 10:31:12: invalid literal for int() with base 10: 'NA'

@@ -7,8 +7,10 @@ class Common:
         import sys
         import re
         import json
+        import os
         from pprint import pprint
         from datetime import date, timedelta, datetime
+        from pathlib import Path
         self.pprint = pprint
         self.calendar = calendar
         self.time = time
@@ -16,8 +18,11 @@ class Common:
         self.json = json
         self.date = date
         self.datetime = datetime
+        self.Path = Path
+        self.os = os
+        self.sys = sys
         self.download_folder = '/data/upload_file/'
-        self.base_url = '/var/www/html/worldfone4xs_ibm/'
+        self.config_file = '/data/python_config.json'
 
     def getSubUser(self, type, collection):
         typeList = {
@@ -121,10 +126,9 @@ class Common:
         return switcher[datatype](data, formatType)
 
     def getDownloadFolder(self):
-        with open(self.base_url + 'system/config/wffdata.json') as f:
-            sysConfig = self.json.load(f)
+        wff_env = self.wff_env(self.base_url())
         
-        if sysConfig['wff_env'] in ['UAT', 'DEV']:
+        if wff_env in ['UAT']:
             # serverfolder = 'YYYYMMDD'
             today = self.datetime.strptime('20/11/2019', "%d/%m/%Y").date()
             serverfolder = today.strftime("%Y%m%d")
@@ -132,3 +136,31 @@ class Common:
             today = self.date.today()
             serverfolder = today.strftime("%Y%m%d")
         return self.download_folder + serverfolder + '/'
+
+    def countWorkingDaysBetweendate(self, starttime, endtime, mongodb):
+        count_days = 0
+        while starttime <= endtime:
+            date = self.datetime.fromtimestamp(starttime)
+            isHoliday = mongodb.getOne(MONGO_COLLECTION='LO_Report_off_sys', WHERE={'off_date': starttime})
+            if isHoliday is None and date.weekday() not in [5, 6]:
+                count_days += 1
+            starttime += 86400
+        return count_days
+
+    def base_url(self):
+        config = {}
+        base_url = ''
+        if self.os.path.isfile('/data/python_config.json'):
+            with open('/data/python_config.json') as f:
+                config = self.json.load(f)
+                base_url = config['base_url']
+        return base_url
+
+    def wff_env(self, base_url):
+        wff_env = ''
+        sysConfig = {}
+        if self.os.path.isfile(self.base_url() + 'system/config/wffdata.json'):
+            with open(self.base_url() + 'system/config/wffdata.json') as f:
+                sysConfig = self.json.load(f)
+                wff_env = sysConfig['wff_env']
+        return wff_env

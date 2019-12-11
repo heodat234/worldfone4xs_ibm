@@ -18,13 +18,14 @@ from helper.excel import Excel
 from helper.jaccs import Config
 from helper.common import Common
 
-mongodb = Mongodb("worldfone4xs")
-_mongodb = Mongodb("_worldfone4xs")
 excel = Excel()
 config = Config()
 ftp = Ftp()
 common = Common()
-base_url = config.base_url()
+base_url = common.base_url()
+wff_env = common.wff_env(base_url)
+mongodb = Mongodb(MONGODB="worldfone4xs", WFF_ENV=wff_env)
+_mongodb = Mongodb(MONGODB="_worldfone4xs", WFF_ENV=wff_env)
 log = open(base_url + "cronjob/python/Loan/log/importlnjc05.txt","a")
 now = datetime.now()
 subUserType = 'LO'
@@ -43,8 +44,8 @@ try:
     errorData = []
     total = 0
     complete = 0
-    # today = date.today()
-    today = datetime.strptime('20/11/2019', "%d/%m/%Y").date()
+    today = date.today()
+    # today = datetime.strptime('20/11/2019', "%d/%m/%Y").date()
     day = today.day
     month = today.month
     year = today.year
@@ -65,6 +66,9 @@ try:
         importLogId = str(sys.argv[1])
         importLogInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': ObjectId(sys.argv[1])})
     except Exception as SysArgvError:
+        if not os.path.isfile(ftpLocalUrl):
+            sys.exit()
+
         importLogInfo = {
             'collection'    : collection, 
             'begin_import'  : time.time(),
@@ -80,10 +84,10 @@ try:
     models = _mongodb.get(MONGO_COLLECTION='Model', WHERE={'collection': collection}, SORT=[('index', 1)], SELECT=['index', 'collection', 'field', 'type', 'sub_type'])
 
     for model in models:
-        modelColumns.append(model['field'])
-        modelConverters[model['field']] = model['type']
-        modelConverters1.append(model['type'])
         if 'sub_type' in model.keys():
+            modelColumns.append(model['field'])
+            modelConverters[model['field']] = model['type']
+            modelConverters1.append(model['type'])
             subtype = json.loads(model['sub_type'])
             if 'format' in subtype.keys():
                 modelFormat[model['field']] = subtype['format']
@@ -167,11 +171,11 @@ try:
     if(len(errorData) > 0):
         mongodbresult.remove_document(MONGO_COLLECTION=common.getSubUser(subUserType, ('LNJC05_' + str(year) + str(month) + str(day))))
         mongodbresult.batch_insert(common.getSubUser(subUserType, ('LNJC05_' + str(year) + str(month) + str(day))), errorData)
-        mongodb.update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': importLogId}, VALUE={'status': 0, 'complete_import': time.time()})
+        mongodb.update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': importLogId}, VALUE={'status': 0, 'complete_import': time.time(), 'total': total, 'complete': complete})
     else:
         if len(insertData) > 0:
             mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertData)
-        mongodb.update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': importLogId}, VALUE={'status': 1, 'complete_import': time.time()})
+        mongodb.update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': importLogId}, VALUE={'status': 1, 'complete_import': time.time(), 'total': total, 'complete': complete})
 
 except Exception as e:
     log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')

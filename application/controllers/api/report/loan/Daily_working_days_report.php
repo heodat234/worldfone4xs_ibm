@@ -395,7 +395,7 @@ Class Daily_working_days_report extends WFF_Controller {
             'start_amt' => 0,
             'tar_acc'   => 0,
             'tar_amt'   => 0,
-            'day'       => 'Collected ratio (account)',
+            'day'       => 'Overdue outstanding balance',
             'index_1'   => 0,
             'index_2'   => 0,
             'index_3'   => 0,
@@ -432,7 +432,7 @@ Class Daily_working_days_report extends WFF_Controller {
             'start_amt' => 0,
             'tar_acc'   => 0,
             'tar_amt'   => 0,
-            'day'       => 'Collected ratio (account)',
+            'day'       => 'Overdue outstanding balance',
             'index_1'   => 0,
             'index_2'   => 0,
             'index_3'   => 0,
@@ -458,14 +458,14 @@ Class Daily_working_days_report extends WFF_Controller {
             'index_23'   => 0,
             'final_num'  => 0,
         ];
-        $temp_10 = [
+        $temp_12 = [
             'group'     => 'B GROUP',
             'month'     => 'Aug-18',
             'due'       => '22th',
             'product'   => 'Card',
             'due_date'  => '7/22/2018',
             'team'     => 'Team 2 (Card)',
-            'start_acc' => 0,
+            'start_acc' => 1,
             'start_amt' => 0,
             'tar_acc'   => 0,
             'tar_amt'   => 0,
@@ -533,7 +533,7 @@ Class Daily_working_days_report extends WFF_Controller {
             'final_num'  => 0,
         ];
         $data = [];
-        array_push($data, $temp_1,$temp_2,$temp_3,$temp_4,$temp_5,$temp_6,$temp_7, $temp_8, $temp_9,$temp_10,$temp_11);
+        array_push($data, $temp_1,$temp_2,$temp_3,$temp_4,$temp_5,$temp_6,$temp_7, $temp_8, $temp_9,$temp_10,$temp_11,$temp_12,$temp_13);
         // print_r($data);exit;
 
         $spreadsheet = new Spreadsheet();
@@ -558,7 +558,7 @@ Class Daily_working_days_report extends WFF_Controller {
 
         $worksheet->getParent()->getDefaultStyle()->applyFromArray($style);
         $worksheet->getDefaultColumnDimension()->setWidth(15);
-        $worksheet->setCellValue('A1', 'A GROUP');
+        // $worksheet->setCellValue('A1', 'A GROUP');
         $worksheet->getStyle("A1")->getFill()
             ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
             ->getStartColor()->setRGB('FFFF00');
@@ -641,34 +641,44 @@ Class Daily_working_days_report extends WFF_Controller {
                 $worksheet->mergeCells('A' . $start_group . ':A' . ($start_row - 1));
                 $worksheet->setCellValue('A' . $start_group, $group);
                 
+                $worksheet->mergeCells('B' . $start_due_date . ':B' . ($start_row - 1) );
+                $worksheet->setCellValue('B' . $start_due_date, $due);
+                $worksheet->mergeCells('D' . $start_due_date . ':D' . ($start_row - 1));
+                $worksheet->setCellValue('D' . $start_due_date, $due_date);
+                
+                $due = $value['due'];
+                $due_date = $value['due_date'];
+                $start_due_date = $start_row;
+
                 $group = $value['group'];
                 $start_group = $start_row;
             }
 
-            // if($due_date != $value['due_date']) {
-            //     $worksheet->mergeCells('D' . $start_due_date . ':D' . ($start_row - 1));
-            //     $worksheet->setCellValue('D' . $start_due_date, $due_date);
-                
-            //     $due_date = $value['due_date'];
-            //     $start_due_date = $start_row;
-            // }
-
-            if($prod_row != $value['product'] ) {
-                $worksheet->mergeCells('B' . $start_row_prod . ':B' . ($start_row - 1) );
-                $worksheet->setCellValue('B' . $start_row_prod, $due);
-                $worksheet->mergeCells('C' . $start_row_prod . ':C' . ($start_row - 1) );
-                $worksheet->setCellValue('C' . $start_row_prod, $prod_row);
-                $worksheet->mergeCells('D' . $start_row_prod . ':D' .($start_row - 1) );
-                $worksheet->setCellValue('D' . $start_row_prod, $due_date);
-
+            if($due_date != $value['due_date']) {
+                $worksheet->mergeCells('B' . $start_due_date . ':B' . ($start_row - 1) );
+                $worksheet->setCellValue('B' . $start_due_date, $due);
+                $worksheet->mergeCells('D' . $start_due_date . ':D' . ($start_row - 1));
+                $worksheet->setCellValue('D' . $start_due_date, $due_date);
                 
                 $due = $value['due'];
-                $prod_row = $value['product'];
                 $due_date = $value['due_date'];
+                $start_due_date = $start_row;
+            }
+
+            if($prod_row != $value['product'] ) {
+                // $worksheet->mergeCells('B' . $start_row_prod . ':B' . ($start_row - 1) );
+                // $worksheet->setCellValue('B' . $start_row_prod, $due);
+                $worksheet->mergeCells('C' . $start_row_prod . ':C' . ($start_row - 1) );
+                $worksheet->setCellValue('C' . $start_row_prod, $prod_row);
+                // $worksheet->mergeCells('D' . $start_row_prod . ':D' . ($start_row - 1) );
+                // $worksheet->setCellValue('D' . $start_row_prod, $due_date);
+
+                // $due = $value['due'];
+                $prod_row = $value['product'];
+                // $due_date = $value['due_date'];
                 $start_row_prod = $start_row;
             }
     
-            
             if ($day != $value['day']) {
                 $worksheet->mergeCells('J' . $start_row_day . ':J' .($start_row - 1) );
                 $worksheet->setCellValue('J' . $start_row_day, $day);
@@ -709,13 +719,13 @@ Class Daily_working_days_report extends WFF_Controller {
             if ($key == (count($data) - 1)) {
                 $worksheet->mergeCells('A' . $start_group . ':A' . $start_row  );
                 $worksheet->setCellValue('A' . $start_group, $group);
-                $worksheet->mergeCells('B' . $start_row_prod . ':B' . $start_row );
-                $worksheet->setCellValue('B' . $start_row_prod, $due);
+                $worksheet->mergeCells('B' . $start_due_date . ':B' . $start_row );
+                $worksheet->setCellValue('B' . $start_due_date, $due);
                 $worksheet->mergeCells('C' . $start_row_prod . ':C' . $start_row );
                 $worksheet->setCellValue('C' . $start_row_prod, $prod_row);
-                $worksheet->mergeCells('D' . $start_row_prod . ':D' . $start_row );
-                $worksheet->setCellValue('D' . $start_row_prod, $due_date);
-                $worksheet->mergeCells('J' . $start_row_day . ':J' .($start_row + 1)  );
+                $worksheet->mergeCells('D' . $start_due_date . ':D' . $start_row );
+                $worksheet->setCellValue('D' . $start_due_date, $due_date);
+                $worksheet->mergeCells('J' . $start_row_day . ':J' .$start_row  );
                 $worksheet->setCellValue('J' . $start_row_day, $day);
 
                 

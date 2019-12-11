@@ -10,7 +10,7 @@ import os
 import csv
 import json
 from pprint import pprint
-from datetime import datetime
+from datetime import datetime, timedelta
 from datetime import date
 from bson import ObjectId
 from dateutil import parser
@@ -20,19 +20,20 @@ from helper.excel import Excel
 from helper.jaccs import Config
 from helper.common import Common
 
-mongodb = Mongodb("worldfone4xs")
-_mongodb = Mongodb("_worldfone4xs")
-excel = Excel()
-config = Config()
-ftp = Ftp()
-common = Common()
-base_url = config.base_url()
-log = open(base_url + "cronjob/python/Loan/log/importListOfAccountInCollection.txt","a")
-now = datetime.now()
-subUserType = 'LO'
-collection = common.getSubUser(subUserType, 'List_of_account_in_collection')
-
 try:
+    excel = Excel()
+    config = Config()
+    ftp = Ftp()
+    common = Common()
+    base_url = common.base_url()
+    wff_env = common.wff_env(base_url)
+    mongodb = Mongodb(MONGODB="worldfone4xs", WFF_ENV=wff_env)
+    _mongodb = Mongodb(MONGODB="_worldfone4xs", WFF_ENV=wff_env)
+    log = open(base_url + "cronjob/python/Loan/log/importListOfAccountInCollection.txt","a")
+    now = datetime.now()
+    subUserType = 'LO'
+    collection = common.getSubUser(subUserType, 'List_of_account_in_collection')
+
     modelColumns = []
     modelConverters = {}
     modelConverters1 = []
@@ -43,16 +44,17 @@ try:
     converters = {}
     insertData = []
     errorData = []
-    total = 0
-    complete = 0
-    # today = date.today()
-    today = datetime.strptime('20/11/2019', "%d/%m/%Y").date()
+    today = date.today()
+    # today = datetime.strptime('20/11/2019', "%d/%m/%Y").date()
+    yesterday = today - timedelta(days=1)
     day = today.day
     month = today.month
     year = today.year
-    fileName = "LIST_OF_ACCOUNT_IN_COLLECTION_" + str(year) + str(month) + str(day)
+    fileName = "LIST_OF_ACCOUNT_IN_COLLECTION_" + yesterday.strftime("%Y%m%d")
     sep = ','
     logDbName = "LO_Input_result_" + str(year) + str(month)
+    total = 0
+    complete = 0
 
     if day == 1:
         mongodb.create_db(DB_NAME=logDbName)
@@ -70,7 +72,8 @@ try:
         # ftp.connect(host=ftpConfig['host'], username=ftpConfig['username'], password=ftpConfig['password'])
         # ftp.downLoadFile(ftpLocalUrl, ftpInfo['filename'])
         # ftp.close()
-
+        if not os.path.isfile(ftpLocalUrl):
+            sys.exit()
         importLogInfo = {
             'collection'    : collection, 
             'begin_import'  : time.time(),
@@ -107,48 +110,50 @@ try:
     mongodb.remove_document(MONGO_COLLECTION=collection)
 
     with open(importLogInfo['file_path'], 'r', newline='\n', encoding='ISO-8859-1') as fin:
-        csv_reader = csv.reader(fin, delimiter=',', quotechar='"')
-        for row in csv_reader:
-            if len(row) > 1:
-                if isinstance(row[1], str) and len(row[1]) > 12 and row[1].isdigit():
-                    total += 1
-                    result = True
-                    temp = {}
-                    try:
-                        temp[modelColumns[0]] = common.convertDataType(data=row[1], datatype=modelConverters[modelColumns[0]], formatType=modelFormat[modelColumns[0]]) if row[1] not in [None, ''] else ''
-                        temp[modelColumns[1]] = common.convertDataType(data=row[2], datatype=modelConverters[modelColumns[1]], formatType=modelFormat[modelColumns[1]]) if row[2] not in [None, ''] else ''
-                        temp[modelColumns[2]] = common.convertDataType(data=row[3], datatype=modelConverters[modelColumns[2]], formatType=modelFormat[modelColumns[2]]) if row[3] not in [None, ''] else ''
-                        temp[modelColumns[3]] = common.convertDataType(data=row[4], datatype=modelConverters[modelColumns[3]], formatType=modelFormat[modelColumns[3]]) if row[4] not in [None, ''] else ''
-                        temp[modelColumns[4]] = common.convertDataType(data=row[5], datatype=modelConverters[modelColumns[4]], formatType=modelFormat[modelColumns[4]]) if row[5] not in [None, ''] else ''
-                        temp[modelColumns[5]] = common.convertDataType(data=row[6], datatype=modelConverters[modelColumns[5]], formatType=modelFormat[modelColumns[5]]) if row[6] not in [None, ''] else ''
-                        temp[modelColumns[6]] = common.convertDataType(data=row[7], datatype=modelConverters[modelColumns[6]], formatType=modelFormat[modelColumns[6]]) if row[7] not in [None, ''] else 0
-                        temp[modelColumns[7]] = common.convertDataType(data=row[8], datatype=modelConverters[modelColumns[7]], formatType=modelFormat[modelColumns[7]]) if row[8] not in [None, ''] else 0
-                        temp[modelColumns[8]] = common.convertDataType(data=row[9], datatype=modelConverters[modelColumns[8]], formatType=modelFormat[modelColumns[8]]) if row[9] not in [None, ''] else ''
-                    except Exception as errorConvertType:
-                        temp['error_cell'] = ''
-                        temp['type'] = ''
-                        temp['error_mesg'] = 'Sai kiểu dữ liệu nhập'
-                        temp['result'] = 'error'
-                        result = False
-                    temp['created_by'] = 'system'
-                    temp['created_at'] = time.time()
-                    temp['import_id'] = str(importLogId)
-                    if(result == False):
-                        errorData.append(temp)
-                    else:
-                        insertData.append(temp)
-                        result = True
-                        complete += 1
+        csv_reader = csv.reader(fin, delimiter=' ', quotechar='"')
+        result = True
+        for rowRaw in csv_reader:
+            if len(rowRaw) > 0:
+                row = list(filter(None, rowRaw))
+                if len(row) > 1:
+                    if isinstance(row[1], str) and len(row[1]) > 12 and row[1].isdigit():
+                        total += 1
+                        temp = {}
+                        try:
+                            temp[modelColumns[0]] = common.convertDataType(data=row[1], datatype=modelConverters[modelColumns[0]], formatType=modelFormat[modelColumns[0]])
+                            temp[modelColumns[1]] = common.convertDataType(data=row[2], datatype=modelConverters[modelColumns[1]], formatType=modelFormat[modelColumns[1]])
+                            temp[modelColumns[-1]] = common.convertDataType(data=row[-1].replace("\r\n", ''), datatype=modelConverters[modelColumns[-1]], formatType=modelFormat[modelColumns[-1]])
+                            temp[modelColumns[-2]] = common.convertDataType(data=row[-2], datatype=modelConverters[modelColumns[-2]], formatType=modelFormat[modelColumns[-2]])
+                            temp[modelColumns[-3]] = common.convertDataType(data=row[-3], datatype=modelConverters[modelColumns[-3]], formatType=modelFormat[modelColumns[-3]])
+                            temp[modelColumns[-4]] = common.convertDataType(data=row[-4], datatype=modelConverters[modelColumns[-4]], formatType=modelFormat[modelColumns[-4]])
+                            temp[modelColumns[-5]] = common.convertDataType(data=row[-5], datatype=modelConverters[modelColumns[-5]], formatType=modelFormat[modelColumns[-5]])
+                            temp[modelColumns[-6]] = common.convertDataType(data=row[-6], datatype=modelConverters[modelColumns[-6]], formatType=modelFormat[modelColumns[-6]])
+                        except Exception as errorConvertType:
+                            temp['error_mesg'] = 'Sai kiểu dữ liệu nhập'
+                            temp['result'] = 'error'
+                            result = False
+                        listName = row[3:-6]
+                        temp[modelColumns[2]] = ' '.join(listName)
+                        temp['created_by'] = 'system'
+                        temp['created_at'] = time.time()
+                        temp['import_id'] = str(importLogId)
+
+                        if result == False:
+                            errorData.append(temp)
+                        else:
+                            insertData.append(temp)
+                            result = True
+                            complete += 1
+
                     
     if(len(errorData) > 0):
         mongodbresult.remove_document(MONGO_COLLECTION=common.getSubUser(subUserType, ('LIST_OF_ACCOUNT_IN_COLLECTION_' + str(year) + str(month) + str(day))))
         mongodbresult.batch_insert(common.getSubUser(subUserType, ('LIST_OF_ACCOUNT_IN_COLLECTION_' + str(year) + str(month) + str(day))), errorData)
-        mongodb.update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': importLogId}, VALUE={'status': 0, 'complete_import': time.time()})
+        mongodb.update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': importLogId}, VALUE={'status': 0, 'complete_import': time.time(), 'total': total, 'complete': complete})
     else:
         if len(insertData) > 0:
             mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertData)
-        mongodb.update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': importLogId}, VALUE={'status': 1, 'complete_import': time.time()})
-
+        mongodb.update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': importLogId}, VALUE={'status': 1, 'complete_import': time.time(), 'total': total, 'complete': complete})
 except Exception as e:
     log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')
     pprint(str(e))

@@ -114,8 +114,7 @@ try:
          if header['type'] == 'timestamp' and str(listDataLibrary[key][idx]) != '':
             err = {}
             try:
-               dt = parse(listDataLibrary[key][idx])
-               value = int(dt.timestamp())
+               value = int(time.mktime(time.strptime(listDataLibrary[key][idx], "%d/%m/%Y")))
             except Exception as e:
                # err['cell'] =  xl_rowcol_to_cell(key, idx+1)
                err['cell'] =  str(key) + ' ' + str(idx)

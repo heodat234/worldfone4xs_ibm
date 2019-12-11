@@ -18,19 +18,20 @@ from helper.excel import Excel
 from helper.jaccs import Config
 from helper.common import Common
 
-mongodb = Mongodb("worldfone4xs")
-_mongodb = Mongodb("_worldfone4xs")
-excel = Excel()
-config = Config()
-ftp = Ftp()
-common = Common()
-base_url = config.base_url()
-log = open(base_url + "cronjob/python/Loan/log/importWoAllProd.txt","a")
-now = datetime.now()
-subUserType = 'LO'
-collection = common.getSubUser(subUserType, 'Wo_all_prod')
-
 try:
+    excel = Excel()
+    config = Config()
+    ftp = Ftp()
+    common = Common()
+    base_url = common.base_url()
+    wff_env = common.wff_env(base_url)
+    mongodb = Mongodb(MONGODB="worldfone4xs", WFF_ENV=wff_env)
+    _mongodb = Mongodb(MONGODB="_worldfone4xs", WFF_ENV=wff_env)
+    log = open(base_url + "cronjob/python/Loan/log/importWoAllProd.txt","a")
+    now = datetime.now()
+    subUserType = 'LO'
+    collection = common.getSubUser(subUserType, 'Wo_all_prod')
+
     modelColumns = []
     modelConverters = {}
     modelPosition = {}

@@ -19,4 +19,5 @@ class Config:
 
     # Base url
     def base_url(self):
-        return '/var/www/html/worldfone4xs/'
+        # return '/var/www/html/worldfone4xs_ibm/'
+        return '/data/worldfone4xs/'

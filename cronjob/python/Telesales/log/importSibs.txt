@@ -1,0 +1,10 @@
+29/11/2019, 11:37:30: the JSON object must be str, bytes or bytearray, not 'int'
+29/11/2019, 11:38:37: the JSON object must be str, bytes or bytearray, not 'int'
+29/11/2019, 11:38:56: the JSON object must be str, bytes or bytearray, not 'int'
+29/11/2019, 11:44:29: 'str' object is not callable
+29/11/2019, 11:47:10: 'str' object is not callable
+29/11/2019, 11:48:04: 'str' object is not callable
+29/11/2019, 11:48:36: 'str' object is not callable
+29/11/2019, 11:48:55: 'str' object is not callable
+29/11/2019, 11:49:14: 'str' object is not callable
+29/11/2019, 11:49:32: 'str' object is not callable

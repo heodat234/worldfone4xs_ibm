@@ -9,14 +9,14 @@ class Excel:
         self.pd = pd
         self.pprint = pprint
 
-    def getDataExcel(self, file_path, active_sheet='Sheet1', header=None, names=None, index_col=None, usecols=None, dtype=None, converters=None, skiprows=None, na_values=None, keep_default_na=False):
-        data = self.pd.read_excel(file_path, sheet_name=active_sheet, header=header, names=names, index_col=index_col, usecols=usecols, dtype=dtype, converters=converters, skiprows=skiprows, na_values=na_values, keep_default_na=keep_default_na)
+    def getDataExcel(self, file_path, active_sheet='Sheet1', header=None, names=None, index_col=None, usecols=None, dtype=None, converters=None, skiprows=None, na_values=None, keep_default_na=False, encoding='utf-8', quotechar='"'):
+        data = self.pd.read_excel(file_path, sheet_name=active_sheet, header=header, names=names, index_col=index_col, usecols=usecols, dtype=dtype, converters=converters, skiprows=skiprows, na_values=na_values, keep_default_na=keep_default_na, encoding=encoding, error_bad_lines=False, quotechar=quotechar)
         data.dropna(how="all", inplace=True)
         data.fillna('', inplace=True)
         return data
 
-    def getDataCSV(self, file_path, sep=',', lineterminator='\r', header=None, names=None, index_col=None, usecols=None, dtype=None, converters=None, skiprows=None, na_values=None, encoding=None, engine=None, keep_default_na=False):
-        data = self.pd.read_csv(file_path, sep=sep, header=header, names=names, index_col=index_col, usecols=usecols, dtype=dtype, converters=converters, skiprows=skiprows, na_values=na_values, encoding = encoding, engine = engine, keep_default_na=keep_default_na)
+    def getDataCSV(self, file_path, sep=',', lineterminator='\r', header=None, names=None, index_col=None, usecols=None, dtype=None, converters=None, skiprows=None, na_values=None, encoding='utf-8', engine=None, keep_default_na=False, quotechar='"'):
+        data = self.pd.read_csv(file_path, sep=sep, header=header, names=names, index_col=index_col, usecols=usecols, dtype=dtype, converters=converters, skiprows=skiprows, na_values=na_values, encoding = encoding, engine = engine, keep_default_na=keep_default_na, error_bad_lines=False, quotechar=quotechar)
         data.dropna(how="all", inplace=True)
         data.fillna('', inplace=True)
         return data
@@ -31,5 +31,8 @@ class Excel:
 
     def getColumnIndex(self, index_num_list=[]):
         return self.pd.Series(index_num_list)
+
+    def totalRow(self, data):
+        return data.count()
 
     # def writeDataToCSV(self, file_path='', sep=',')

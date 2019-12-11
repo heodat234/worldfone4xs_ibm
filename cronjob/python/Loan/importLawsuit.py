@@ -19,12 +19,13 @@ from common import Common
 from helper.jaccs import Config
 from dateutil.parser import parse
 
-mongodb     = Mongodb("worldfone4xs")
-_mongodb    = Mongodb("_worldfone4xs")
 excel       = Excel()
 common      = Common()
 config      = Config()
-base_url    = config.base_url()
+base_url    = common.base_url()
+wff_env     = common.wff_env(base_url)
+mongodb     = Mongodb(MONGODB="worldfone4xs", WFF_ENV=wff_env)
+_mongodb    = Mongodb(MONGODB="_worldfone4xs", WFF_ENV=wff_env)
 now         = datetime.now()
 subUserType = 'LO'
 collection = common.getSubUser(subUserType, 'Lawsuit')
