@@ -17,7 +17,7 @@ Class Main_product extends WFF_Controller {
 	{
 		try {
 			$request = json_decode($this->input->get("q"), TRUE);
-			$select = array("account_number", 'PRODGRP_ID', 'RPY_PRD', 'DT_MAT', 'INT_RATE', 'APPROV_LMT', 'TERM_ID', 'B_ADV');
+			$select = array("account_number", 'PRODGRP_ID', 'RPY_PRD', 'DT_MAT', 'INT_RATE', 'APPROV_LMT', 'TERM_ID', 'B_ADV', 'CUS_SEX', 'F_PDT');
 			$response = $this->crud->read($this->collection, $request, $select);
 
 			$productInfo = $this->crud->get(set_sub_collection('Product'));
@@ -35,6 +35,8 @@ Class Main_product extends WFF_Controller {
 					$value['principal_amount'] 				= number_format((int)$LNCJ05["outstanding_principal"]);
 					$value['no_of_overdue_date'] 			= (int)((time() - $LNCJ05["due_date"]) / 86400);
 				}else{
+					unset($response['data'][$key]);
+					continue;
 					$value["debt_group"] = $value['first_last_payment_default'] = $value['due_date'] = $value['overdue_amount'] = $value['outstanding_balance'] = $value['name_of_store'] = $value['principal_amount'] = $value['no_of_overdue_date'] = '';
 				}
 				
@@ -63,7 +65,7 @@ Class Main_product extends WFF_Controller {
 				$value['last_action_code_date'] = $last_action_code_date;
 				$value['staff_in_charge'] = isset($diallistDetail['assign']) ? $diallistDetail['assign'] : '';
 				$first_payment_date = (!empty($value['F_PDT'])) ? DateTime::createFromFormat('dmY', $value['F_PDT']) : '';
-				$value['first_payment_date'] = (!empty($first_payment_date)) ? $first_payment_date->format('d/m/Y') : '';
+				$value['F_PDT'] = (!empty($first_payment_date)) ? $first_payment_date->format('d/m/Y') : '';
 			}
 			echo json_encode($response);
 		} catch (Exception $e) {

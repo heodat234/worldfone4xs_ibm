@@ -5,7 +5,7 @@ Class Preference extends WFF_Controller {
 
 	private $collection = "User";
 	private $sub = "";
-	private $fields = array("theme", "language", "page_preloader", "ringtone", "avatar", "email", "phone","sound_effect","text_tool", "fullname");
+	private $fields = array("theme", "language", "page_preloader", "ringtone", "avatar", "email", "phone","sound_effect","text_tool", "fullname", "group_name");
 	private $only_session_fields = array("text_tool");
 
 	function __construct()

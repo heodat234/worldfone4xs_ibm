@@ -221,7 +221,9 @@ Class Dial_queue extends WFF_Controller {
 				return 1;
 
 			$check40k = $data["overdue_amount_this_month"] - $data["advance_balance"];
-			if($check40k < 40000){
+			$money = $this->mongo_db->where('type', $this->sub)->getOne($this->sub . 'Dial_config');
+			$money = isset($money["conditionDonotCall"]) ? $money["conditionDonotCall"] : 40000;
+			if($check40k < $money){
 				
 				if($data["installment_type"] == 'n' && $data["outstanding_principal"] == 0){
 					return 0;

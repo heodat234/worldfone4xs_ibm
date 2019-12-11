@@ -60,12 +60,7 @@
                      schema: {
                         data: "data",
                         total: "total",
-                        parse: function(response) {
-                           response.data.map(doc => {
-                              doc.code = doc._id.code;
-                           });
-                           return response;
-                        }
+                        
                      }
                   });
 
@@ -293,7 +288,7 @@
     <script>
         function saveAsExcel() {
             $.ajax({
-              url: ENV.reportApi + "loan/daily_working_days_report/downloadExcel",
+              url: ENV.reportApi + "loan/daily_working_days_report/exportExcel",
               type: 'POST',
               dataType: 'json',
               timeout: 30000

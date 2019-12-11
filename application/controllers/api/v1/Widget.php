@@ -87,4 +87,23 @@ Class Widget extends CI_Controller {
     	$response = $this->language_model->translate($response, "CONTENT");
     	echo json_encode($response);
     }
+
+    function updateManualGroup()
+    {
+        try {
+            $id = $this->input->post("id");
+            $name = $this->input->post("name");
+            if(!$id || !$name) throw new Exception("Lack of input", 1);
+
+            $extension = $this->session->userdata("extension");
+            $this->load->library("mongo_private");
+            $this->mongo_private->where(["extension" => $extension])->update(getCT("User"), ['$set' => ["group_name" => $name, "group_id" => $id]]);
+            
+            $this->session->set_userdata("group_name", $name);
+            $this->session->set_userdata("group_id", $id);
+            echo json_encode(array("status" => 1));
+        } catch (Exception $e) {
+            echo json_encode(array("status" => 0, "message" => $e->getMessage()));
+        }
+    }
 }

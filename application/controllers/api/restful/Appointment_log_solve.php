@@ -69,6 +69,7 @@ Class Appointment_log_solve extends WFF_Controller {
     {
         try {
             $result = $this->crud->where_id($id)->delete($this->collection, TRUE);
+            print_r($result);
             echo json_encode(array("status" => $result ? 1 : 0, "data" => []));
         } catch (Exception $e) {
             echo json_encode(array("status" => 0, "message" => $e->getMessage()));

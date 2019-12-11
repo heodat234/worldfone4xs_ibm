@@ -164,14 +164,13 @@
         columns.unshift({
             selectable: true,
             width: 32,
-            // locked: true
+            hidden: (PERMISSION.actions.includes("delete") || PERMISSION.actions.includes("reAssign"))  ? false : true
         });
         
         Table.columns = columns;
         Table.init();
         Table.grid.bind("change", grid_change);
     })
-
     $( document ).ready(function() {
         $('.change-mvvm').hide();
     });

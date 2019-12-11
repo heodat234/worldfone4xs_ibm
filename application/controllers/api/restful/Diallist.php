@@ -85,4 +85,5 @@ Class Diallist extends CI_Controller {
 		}
 		echo json_encode(array("status" => $result ? 1 : 0, "data" => []));
 	}
+
 }

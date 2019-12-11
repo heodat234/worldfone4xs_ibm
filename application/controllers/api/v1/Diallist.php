@@ -100,4 +100,29 @@ Class Diallist extends WFF_Controller {
 			echo json_encode(array("status" => 0, "message" => $e->getMessage()));
 		}
 	}
+
+	function getDialConfig(){
+		$this->load->library("mongo_db");
+		$config = $this->mongo_db->where("type", $this->sub)->getOne($this->sub . "Dial_config");
+		$config = isset($config) ? $config : array('conditionDonotCall' => 40000);
+		echo json_encode($config);
+	}
+
+	function updateDialConfig(){
+		$this->load->library("mongo_db");
+		try{
+			$data = json_decode(file_get_contents('php://input'), TRUE);
+			$data['type'] = $this->sub;
+			$check =  $this->mongo_db->where('type', $this->sub)->count($this->sub . "Dial_config");
+			if($check == 0)
+				$result = $this->mongo_db->where('type', $this->sub)->insert($this->sub . "Dial_config", $data);
+			else
+				$result = $this->mongo_db->where('type', $this->sub)->update($this->sub . "Dial_config",array('$set' => $data));
+
+			echo json_encode(array("status" => 1, "message" => "Success"));
+		}
+		catch(Exception $e) {
+			echo json_encode(array("status" => 0, "message" => $e->getMessage()));
+		}
+	}
 }

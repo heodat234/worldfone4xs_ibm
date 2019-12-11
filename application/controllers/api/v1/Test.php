@@ -28,9 +28,12 @@ Class Test extends WFF_Controller {
 		pre($result);
 		$result = $this->pbx_model->make_call_3("9999","0968495645","5dddfc021ef2b4638d24e11f","auto", "queue");
 		var_dump($result);*/
-		$this->session->set_userdata("agentname", "tri_dung_huynh");
 		// $data = $this->mongo_db->command(["listDatabases" => 1, "nameOnly" => TRUE]);
 		// pre($data);
+
+		$CI =& get_instance();
+		if(isset($CI->data, $CI->data["permission"]))
+		pre($CI->data);
 	}
 
 	function import()
@@ -38,6 +41,56 @@ Class Test extends WFF_Controller {
 		shell_exec("/usr/bin/php ".FCPATH."cronjob/LOAN/createPaymentHistory.php");
 		echo "DONE";
 	}
+
+	function cdr()
+    {
+    	header('Content-type: application/json');
+    	$this->collection = "worldfonepbxmanager";
+        $this->sub = set_sub_collection("");
+        $this->collection = $this->sub . $this->collection;
+        try {
+            $request = json_decode($this->input->get("q"), TRUE);
+            $this->load->library("cruds");
+            // PERMISSION
+            $match = array();
+            /*if(!in_array("viewall", $this->data["permission"]["actions"])) {
+                $extension = $this->session->userdata("extension");
+                $this->load->model("group_model");
+                $members = $this->group_model->members_from_lead($extension);
+                $match["userextension"] = ['$in' => $members];
+            }*/
+            $response = $this->cruds->read($this->collection, $request, [], $match);
+
+            /*foreach ($response["data"] as &$doc) {
+                if(isset($doc["dialid"]) && empty($doc["customer"])) {
+                    $diallistDetail = $this->mongo_db->where_id($doc["dialid"])->getOne($this->sub . "Diallist_detail");
+                    if($diallistDetail) {
+                        if(isset($diallistDetail["cus_name"]) && empty($diallistDetail["name"])) 
+                            $diallistDetail["name"] = $diallistDetail["cus_name"];
+                        $this->mongo_db->where_id($doc["id"])->set(array("customer" => $diallistDetail))
+                            ->update($this->collection);
+                        $doc["customer"] = $diallistDetail;
+                    }
+                }
+                if(!empty($doc["customernumber"]) && empty($doc["customer"])) {
+                    $phone = $doc["customernumber"];
+                    $customers = $this->mongo_db->where_or(array("phone" => $phone, "other_phones" => $phone))->get($this->sub . "Customer");
+                    if($customers) {
+                        if(count($customers) == 1) {
+                            $this->mongo_db->where_id($doc["id"])->set(array("customer" => $customers[0]))
+                            ->update($this->collection);
+                            $doc["customer"] = $customers[0];
+                        } else {
+                            $doc["customer"] = $customers;
+                        }
+                    }
+                }
+            }*/
+            echo json_encode($response);
+        } catch (Exception $e) {
+            echo json_encode(array("status" => 0, "message" => $e->getMessage()));
+        }
+    }
 
 	function update()
 	{

@@ -42,7 +42,7 @@ Class Action_code extends WFF_Controller {
 			$data["createdBy"]	=	$this->session->userdata("extension");
 			$result = $this->crud->create($this->collection, $data);
 			// Xu ly chien dich cheo
-			if(isset($data["LIC_NO"]) && isset($data["account_number"]) && isset($data["action_code"])) {
+			/*if(isset($data["LIC_NO"]) && isset($data["account_number"]) && isset($data["action_code"])) {
 				$doc = $this->mongo_db->where("LIC_NO", $data["LIC_NO"])
 				->where("account_number", $data["account_number"])
 				->where_gt("createdAt", strtotime('today midnight'))
@@ -66,7 +66,7 @@ Class Action_code extends WFF_Controller {
 					}
 				}
 			}
-			$this->mongo_db->where("")->get($this->sub . "Diallist_detail");
+			$this->mongo_db->where("")->get($this->sub . "Diallist_detail");*/
 			echo json_encode(array("status" => $result ? 1 : 0, "data" => [$result]));
 		} catch (Exception $e) {
 			echo json_encode(array("status" => 0, "message" => $e->getMessage()));

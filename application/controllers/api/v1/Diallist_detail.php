@@ -217,7 +217,8 @@ Class Diallist_detail extends WFF_Controller {
 		$response = $this->crud->where_id($id)->getOne($this->collection);
 		
 		if(!empty($response)) {
-			$reportReleaseSale = $this->crud->where(array('account_number' => $response['account_number']))->getOne($this->sub . 'Report_release_sale', array('temp_address', 'address'));
+			$account_number = isset($response['account_number']) ? $response['account_number'] : $response['ACCTNO'];
+			$reportReleaseSale = $this->crud->where(array('account_number' => $account_number))->getOne($this->sub . 'Report_release_sale', array('temp_address', 'address'));
 			$cus_birthday = (!empty($response['BIR_DT8'])) ? DateTime::createFromFormat('dmY', $response['BIR_DT8']) : null;
 			$response['cus_birthday'] = (!empty($cus_birthday)) ? $cus_birthday->format('d/m/Y') : '';
 			if(empty($response['temp_address'])) {

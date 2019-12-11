@@ -1,14 +1,16 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-Class Chat extends CI_Controller { 
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+Class Chat extends WFF_Controller { 
 
 	function __construct()
 	{
 		parent::__construct();
-		header('Content-type: application/json');
-		$this->load->library("mongo_db");
-		$this->load->library("session");
+		header('Content-type: application/json; charset=utf-8');
 		$this->load->model("language_model");
 		$this->sub = set_sub_collection();
 	}
@@ -41,7 +43,6 @@ Class Chat extends CI_Controller {
     }
 
     function rooms() {
-    	$this->output->set_content_type('application/json');
     	try {
     		$extension = $this->session->userdata("extension");
     		$request = json_decode($this->input->get("q"), TRUE);
@@ -59,9 +60,9 @@ Class Chat extends CI_Controller {
     			}
     			$doc["unread_count"] = $this->mongo_db->where(array('user_id' => array('$ne' => $extension), 'read.extension' => array('$ne' => $extension)))->count("Message_" . $doc["id"]);
     		}
-    		$this->output->set_output(json_encode($response));
+    		$this->output->set_content_type('application/json')->set_output(json_encode($response, JSON_PARTIAL_OUTPUT_ON_ERROR));
     	} catch (Exception $e) {
-			$this->output->set_output(json_encode(array('status' => 0, "message" => $e->getMessage())));
+			$this->output->set_content_type('application/json')->set_output(json_encode(array('status' => 0, "message" => $e->getMessage())));
 		}
     }
 

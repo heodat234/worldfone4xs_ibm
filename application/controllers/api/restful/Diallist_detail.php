@@ -18,6 +18,14 @@ Class Diallist_detail extends WFF_Controller {
 	{
 		$request = json_decode($this->input->get("q"), TRUE);
 		$response = $this->crud->read($this->collection, $request);
+		foreach ($response['data'] as $key => &$value) {
+			if(isset($value['PRODGRP_ID'])){
+				$temp = $this->mongo_db->where('code', $value['PRODGRP_ID'])->getOne('LO_Product');
+				if(!empty($temp)){
+					$value['PRODGRP_ID'] = $temp['name'];
+				}
+			}
+		}
 		echo json_encode($response);
 	}
 
