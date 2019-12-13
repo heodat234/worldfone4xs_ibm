@@ -24,6 +24,21 @@ Class Loan_group_report extends WFF_Controller {
         $this->collection = set_sub_collection($this->collection);
         $this->group_collection = set_sub_collection($this->group_collection);
     }
+    function index()
+    {
+        try {
+            $request    = json_decode($this->input->get("q"), TRUE);
+            $now        = getdate();
+            $today      = $now['mday'].'-'.$now['month'].'-'.$now['year'];
+            $date       = strtotime("$today");
+            $match      = array('createdAt' => array('$gte' => $date));
+            $response   = $this->crud->read($this->collection, $request,array());
+            echo json_encode($response);
+
+        } catch (Exception $e) {
+            echo json_encode(array("status" => 0, "message" => $e->getMessage()));
+        }
+    }
 
     function weekOfMonth($dateString) {
       list($year, $month, $mday) = explode("-", $dateString);
@@ -120,10 +135,13 @@ Class Loan_group_report extends WFF_Controller {
             $insertTotal['group']       = 'G2';
             $insertTotal['total_org']   = $sum_org_g2;
             $insertTotal['count_data']  = $sum_acc_g2;
+            $insertTotal['ratio']       = (int)$insertTotal['total_org']/$sum_org;
             $this->crud->create($this->collection, $insertTotal);
             $insertTotal['group']       = 'G3';
             $insertTotal['total_org']   = $sum_org_g3;
             $insertTotal['count_data']  = $sum_acc_g3;
+            $insertTotal['ratio']       = (int)$insertTotal['total_org']/$sum_org;
+
             $this->crud->create($this->collection, $insertTotal);
 
             
@@ -200,10 +218,14 @@ Class Loan_group_report extends WFF_Controller {
             $insertTotal['group']       = 'G2';
             $insertTotal['total_org']   = $sum_org_g2;
             $insertTotal['count_data']  = $sum_acc_g2;
+            $insertTotal['ratio']       = (int)$insertTotal['total_org']/$sum_org;
+
             $this->crud->create($this->collection, $insertTotal);
             $insertTotal['group']       = 'G3';
             $insertTotal['total_org']   = $sum_org_g3;
             $insertTotal['count_data']  = $sum_acc_g3;
+            $insertTotal['ratio']       = (int)$insertTotal['total_org']/$sum_org;
+            
             $this->crud->create($this->collection, $insertTotal);
 
         } catch (Exception $e) {

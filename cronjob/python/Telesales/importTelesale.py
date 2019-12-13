@@ -75,7 +75,7 @@ try:
 
    # fileName = importLogInfo['file_name']
    # filenameExtension = fileName.split('.')
-   dataLibrary = excel.getDataCSV(file_path=importLogInfo['file_path'],header=0, names=None, index_col=None, usecols=None, dtype=object, converters=None, skiprows=None, na_values=None, encoding='utf-8')
+   dataLibrary = excel.getDataCSV(file_path=importLogInfo['file_path'],header=0, names=None, index_col=None, usecols=None, dtype=object, converters=None, skiprows=None, na_values=None, encoding='ISO-8859-1')
    # if(filenameExtension[1] == 'csv'):
    #    dataLibrary = excel.getDataCSV(file_path=importLogInfo['file_path'], dtype=object, sep='\t', lineterminator='\r', header=None, names=None, na_values='')
    # else:
@@ -96,28 +96,30 @@ try:
             except ValueError:
                err = {}
                # err['cell'] =  xl_rowcol_to_cell(key, idx+1)
-               err['cell'] =  str(key) + ' ' + str(idx)
+               err['cell'] =  'Hàng: ' + str(key+2) + '; Cột: ' + str(idx+1)
                err['type'] = 'int';
                errorData.append(err);
                checkErr = True
-         if header['type'] == 'double':
+         if header['type'] == 'double' and str(listDataLibrary[key][idx]) != '0':
             try:
                value = float(listDataLibrary[key][idx])
             except Exception as e:
                err = {}
                # err['cell'] =  xl_rowcol_to_cell(key, idx+1)
-               err['cell'] =  str(key) + ' ' + str(idx)
+               err['cell'] =  'Hàng: ' + str(key+2) + '; Cột: ' + str(idx+1)
                err['type'] = 'double';
                errorData.append(err);
                checkErr = True
-            
+         if header['type'] == 'double' and str(listDataLibrary[key][idx]) == '0': 
+            value = int(listDataLibrary[key][idx])
+
          if header['type'] == 'timestamp' and str(listDataLibrary[key][idx]) != '':
             err = {}
             try:
                value = int(time.mktime(time.strptime(listDataLibrary[key][idx], "%d/%m/%Y")))
             except Exception as e:
                # err['cell'] =  xl_rowcol_to_cell(key, idx+1)
-               err['cell'] =  str(key) + ' ' + str(idx)
+               err['cell'] =  'Hàng: ' + str(key+2) + '; Cột: ' + str(idx+1)
                err['type'] = 'date'
                errorData.append(err)
                checkErr = True
@@ -127,7 +129,7 @@ try:
                value       = '0'+ str(value_int)
             except Exception as e:
                # err['cell'] =  xl_rowcol_to_cell(key, idx+1)
-               err['cell'] =  str(key) + ' ' + str(idx)
+               err['cell'] =  'Hàng: ' + str(key+2) + '; Cột: ' + str(idx+1)
                err['type'] = 'phone'
                errorData.append(err)
                checkErr = True
@@ -157,7 +159,7 @@ try:
                   value = ''
             except ValueError:
                # err['cell'] =  xl_rowcol_to_cell(key, idx)
-               err['cell'] =  str(key) + ' ' + str(idx)
+               err['cell'] =  'Hàng: ' + str(key+2) + '; Cột: ' + str(idx+1)
                err['type'] = 'int'
                errorData.append(err)
                checkErr = True
@@ -185,6 +187,7 @@ try:
       status = 1
    else:
       status = 0
+      # print(errorData)
       # log.write( str(errorData) + '\n')
 
    mongodb.update(MONGO_COLLECTION='TS_Import', WHERE={'_id': ObjectId(importLogId)}, VALUE={'complete_import': time.time(),'status': status,'error': errorData,'count_fixed': arr,'random': random})

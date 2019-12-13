@@ -38,6 +38,7 @@ Class Master_data_report extends WFF_Controller {
     }
     function downloadExcel()
     {
+        // shell_exec('PYTHONIOENCODING=utf-8 python3.6 /var/www/html/worldfone4xs_ibm/cronjob/python/Loan/exportMasterData.py  > /dev/null &');
         $file_path = UPLOAD_PATH . "loan/export/MasterData.xlsx";
         echo json_encode(array("status" => 1, "data" => $file_path));
     }

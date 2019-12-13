@@ -1,0 +1,21 @@
+12/12/2019, 15:58:08: Expecting value: line 1 column 1 (char 0)
+12/12/2019, 16:07:19: Expecting value: line 1 column 1 (char 0)
+12/12/2019, 16:07:40: Expecting value: line 1 column 1 (char 0)
+12/12/2019, 16:08:11: Expecting value: line 1 column 1 (char 0)
+12/12/2019, 16:08:32: Expecting value: line 1 column 1 (char 0)
+12/12/2019, 16:08:51: Expecting value: line 1 column 1 (char 0)
+12/12/2019, 16:09:10: Expecting value: line 1 column 1 (char 0)
+12/12/2019, 16:09:27: 'NoneType' object has no attribute 'to_dict'
+12/12/2019, 16:10:06: Expecting value: line 1 column 1 (char 0)
+12/12/2019, 16:11:41: Expecting value: line 1 column 1 (char 0)
+12/12/2019, 16:21:02: Expecting value: line 1 column 1 (char 0)
+12/12/2019, 16:22:09: Expecting value: line 1 column 1 (char 0)
+12/12/2019, 16:22:46: 'NoneType' object has no attribute 'to_dict'
+12/12/2019, 16:23:12: 'NoneType' object has no attribute 'to_dict'
+12/12/2019, 16:24:05: 'NoneType' object has no attribute 'to_dict'
+12/12/2019, 16:27:23: 'NoneType' object has no attribute 'to_dict'
+12/12/2019, 16:28:36: 'NoneType' object has no attribute 'to_dict'
+12/12/2019, 16:29:31: getDataExcel() got an unexpected keyword argument 'sheet_name'
+12/12/2019, 16:30:24: 'tongcong_dunokhoikien.1'
+12/12/2019, 16:36:28: Authentication failed.
+12/12/2019, 16:39:25: Authentication failed.

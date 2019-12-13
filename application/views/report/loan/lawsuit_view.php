@@ -258,7 +258,8 @@
     <script>
         function saveAsExcel() {
             $.ajax({
-              url: ENV.reportApi + "loan/lawsuit_report/saveAsExcel",
+              url: ENV.reportApi + "loan/lawsuit_report/exportExcel",
+              data: {end : $("#end-date").val(), start : $("#start-date").val()},
               type: 'POST',
               dataType: 'json',
               timeout: 30000

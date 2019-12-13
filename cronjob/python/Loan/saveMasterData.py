@@ -5,16 +5,20 @@ import os
 import time
 import ntpath
 import json
+import calendar
 from helper.mongod import Mongodb
 from datetime import datetime
 from datetime import date
 from pprint import pprint
 from bson import ObjectId
 from helper.common import Common
+from helper.jaccs import Config
 
-mongodb     = Mongodb("worldfone4xs")
-_mongodb    = Mongodb("_worldfone4xs")
 common      = Common()
+base_url    = common.base_url()
+wff_env     = common.wff_env(base_url)
+mongodb     = Mongodb(MONGODB="worldfone4xs", WFF_ENV=wff_env)
+_mongodb    = Mongodb(MONGODB="_worldfone4xs", WFF_ENV=wff_env)
 now         = datetime.now()
 subUserType = 'LO'
 collection           = common.getSubUser(subUserType, 'Master_data_report')
@@ -31,14 +35,36 @@ wo_monthly_collection     = common.getSubUser(subUserType, 'WO_monthly')
 diallist_collection       = common.getSubUser(subUserType, 'Diallist_detail')
 user_collection           = common.getSubUser(subUserType, 'User')
 
-log         = open("/var/www/html/worldfone4xs_ibm/cronjob/python/Loan/log/MasterData_log.txt","a")
-
+log         = open(base_url + "cronjob/python/Loan/log/MasterData_log.txt","a")
+log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': Start Import' + '\n')
 try:
    data        = []
    cardData        = []
    insertData  = []
    resultData  = []
    errorData   = []
+
+   today = date.today()
+   # today = datetime.strptime('12/10/2019', "%d/%m/%Y").date()
+
+   day = today.day
+   month = today.month
+   year = today.year
+   weekday = today.weekday()
+   lastDayOfMonth = calendar.monthrange(year, month)[1]
+
+   todayString = today.strftime("%d/%m/%Y")
+   todayTimeStamp = int(time.mktime(time.strptime(str(todayString + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
+
+   startMonth = int(time.mktime(time.strptime(str('01/' + str(month) + '/' + str(year) + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
+   endMonth = int(time.mktime(time.strptime(str(str(lastDayOfMonth) + '/' + str(month) + '/' + str(year) + " 23:59:59"), "%d/%m/%Y %H:%M:%S")))
+
+   holidayOfMonth = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_off_sys'))
+   listHoliday = map(lambda offDateRow: {offDateRow['off_date']}, holidayOfMonth)
+
+   if todayTimeStamp in listHoliday or (weekday == 5) or weekday == 6:
+      sys.exit()
+
    users = _mongodb.get(MONGO_COLLECTION=user_collection, SELECT=['extension','agentname'],SORT=([('_id', -1)]),SKIP=0, TAKE=200)
 
 
@@ -60,9 +86,9 @@ try:
    for row in data:
       if 'account_number' in row.keys():
          zaccf = mongodb.getOne(MONGO_COLLECTION=zaccf_collection, WHERE={'account_number': str(row['account_number'])},
-            SELECT=['BIR_DT8','CUS_ID','FRELD8','PRODGRP_ID','LIC_NO','APPROV_LMT','TERM_ID','RPY_PRD','F_PDT','DT_MAT','MOBILE_NO','WRK_REF','WRK_REF1','WRK_REF2','WRK_REF3','WRK_REF4','WRK_REF5','W_ORG','INT_RATE','OVER_DY'])
+            SELECT=['cif_birth_date','CUS_ID','FRELD8','PRODGRP_ID','LIC_NO','APPROV_LMT','TERM_ID','RPY_PRD','F_PDT','DT_MAT','MOBILE_NO','WRK_REF','WRK_REF1','WRK_REF2','WRK_REF3','WRK_REF4','WRK_REF5','W_ORG','INT_RATE','OVER_DY'])
          if zaccf != None:
-            row['BIR_DT8']          = str(zaccf['BIR_DT8'])
+            row['BIR_DT8']          = str(zaccf['cif_birth_date'])
             row['CUS_ID']           = zaccf['CUS_ID']
             row['FRELD8']           = zaccf['FRELD8']
             row['LIC_NO']           = zaccf['LIC_NO']
@@ -150,14 +176,14 @@ try:
    for row in cardData:
       if 'account_number' in row.keys():
          sbv = mongodb.getOne(MONGO_COLLECTION=sbv_collection, WHERE={'contract_no': str(row['account_number'])},
-            SELECT=['cif_birth_date','cus_no','open_date','card_type','license_no','approved_limit','address_1','ob_principal_sale','ob_principal_cash','interest_rate','overdue_days_no'])
+            SELECT=['cif_birth_date','cus_no','open_date','card_type','license_no','approved_limit','address','ob_principal_sale','ob_principal_cash','interest_rate','overdue_days_no'])
          if sbv != None:
             row['BIR_DT8']          = str(sbv['cif_birth_date'])
             row['CUS_ID']           = sbv['cus_no']
             row['FRELD8']           = sbv['open_date']
             row['LIC_NO']           = sbv['license_no']
             row['APPROV_LMT']       = sbv['approved_limit']
-            row['current_add']      = sbv['address_1']
+            row['current_add']      = sbv['address']
             row['W_ORG']            = float(sbv['ob_principal_sale']) + float(sbv['ob_principal_cash'])
             row['INT_RATE']         = sbv['interest_rate']
             row['OVER_DY']          = sbv['overdue_days_no']
@@ -263,13 +289,14 @@ try:
                temp['product_name'] = product['name']
          
          zaccf = mongodb.getOne(MONGO_COLLECTION=zaccf_collection, WHERE={'account_number': str(row['ACCTNO'])},
-            SELECT=['BIR_DT8','CUS_ID','FRELD8','PRODGRP_ID','LIC_NO','APPROV_LMT','TERM_ID','RPY_PRD','F_PDT','DT_MAT','MOBILE_NO','WRK_REF','WRK_REF1','WRK_REF2','WRK_REF3','WRK_REF4','WRK_REF5','W_ORG','INT_RATE','OVER_DY'])
+            SELECT=['cif_birth_date','name','CUS_ID','FRELD8','PRODGRP_ID','LIC_NO','APPROV_LMT','TERM_ID','RPY_PRD','F_PDT','DT_MAT','MOBILE_NO','WRK_REF','WRK_REF1','WRK_REF2','WRK_REF3','WRK_REF4','WRK_REF5','W_ORG','INT_RATE','OVER_DY'])
          if zaccf != None:
-            temp['BIR_DT8']          = str(zaccf['BIR_DT8'])
+            temp['BIR_DT8']          = str(zaccf['cif_birth_date'])
             temp['CUS_ID']           = zaccf['CUS_ID']
             temp['FRELD8']           = zaccf['FRELD8']
             temp['LIC_NO']           = zaccf['LIC_NO']
             temp['APPROV_LMT']       = zaccf['APPROV_LMT']
+            temp['cus_name']         = zaccf['name']
             temp['TERM_ID']          = zaccf['TERM_ID']
             temp['RPY_PRD']          = zaccf['RPY_PRD']
             temp['F_PDT']            = str(zaccf['F_PDT'])
@@ -353,10 +380,6 @@ try:
          temp['account_number'] = row['ACCTNO']
          
          insertData.append(temp)
-      # break
-
-
-
 
 
 
@@ -365,7 +388,7 @@ try:
       mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertData)
    now_end         = datetime.now()
    log.write(now_end.strftime("%d/%m/%Y, %H:%M:%S") + ': End Log' + '\n')
-   print(111)
+   print('DONE')
 except Exception as e:
     pprint(e)
     log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')

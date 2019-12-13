@@ -36,8 +36,8 @@ try:
     updateData = []
     listDebtGroup = []
     
-    # today = date.today()
-    today = datetime.strptime('12/10/2019', "%d/%m/%Y").date()
+    today = date.today()
+    # today = datetime.strptime('12/10/2019', "%d/%m/%Y").date()
 
     day = today.day
     month = today.month
@@ -54,8 +54,8 @@ try:
     holidayOfMonth = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_off_sys'))
     listHoliday = map(lambda offDateRow: {offDateRow['off_date']}, holidayOfMonth)
 
-    # if todayTimeStamp in listHoliday or (weekday == 5) or weekday == 6:
-    #     sys.exit()
+    if todayTimeStamp in listHoliday or (weekday == 5) or weekday == 6:
+        sys.exit()
 
     todayString = today.strftime("%d/%m/%Y")
     starttime = int(time.mktime(time.strptime(str(todayString + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))

@@ -9,7 +9,7 @@ import sys
 import os
 import json
 from pprint import pprint
-from datetime import datetime
+from datetime import datetime, timedelta
 from datetime import date
 from bson import ObjectId
 from helper.ftp import Ftp
@@ -18,31 +18,49 @@ from helper.excel import Excel
 from helper.jaccs import Config
 from helper.common import Common
 
-try:
-    excel = Excel()
-    config = Config()
-    ftp = Ftp()
-    common = Common()
-    base_url = common.base_url()
-    wff_env = common.wff_env(base_url)
-    mongodb = Mongodb(MONGODB="worldfone4xs", WFF_ENV=wff_env)
-    _mongodb = Mongodb(MONGODB="_worldfone4xs", WFF_ENV=wff_env)
-    log = open(base_url + "cronjob/python/Loan/log/importWoAllProd.txt","a")
-    now = datetime.now()
-    subUserType = 'LO'
-    collection = common.getSubUser(subUserType, 'Wo_all_prod')
+excel = Excel()
+config = Config()
+ftp = Ftp()
+common = Common()
+base_url = common.base_url()
+wff_env = common.wff_env(base_url)
+mongodb = Mongodb(MONGODB="worldfone4xs", WFF_ENV=wff_env)
+_mongodb = Mongodb(MONGODB="_worldfone4xs", WFF_ENV=wff_env)
+log = open(base_url + "cronjob/python/Loan/log/importWoAllProd.txt","a")
+now = datetime.now()
+subUserType = 'LO'
+collection = common.getSubUser(subUserType, 'Wo_all_prod')
 
+try:
     modelColumns = []
     modelConverters = {}
+    modelConverters1 = []
     modelPosition = {}
+    modelPosition1 = []
     modelFormat = {}
-    updateKey = []
-    checkNullKey = []
+    modelFormat1 = []
+    converters = {}
+    insertData = []
+    errorData = []
+    today = date.today()
+    # today = datetime.strptime('20/11/2019', "%d/%m/%Y").date()
+    yesterday = today - timedelta(days=1)
+    day = today.day
+    month = today.month
+    year = today.year
+    fileName = "WO all product.xlsx"
+    sep = ';'
+    logDbName = "LO_WO_monthly_" + str(year) + str(month)
+    total = 0
+    complete = 0
 
-    ftpInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'ftp_config'), WHERE={'collection': collection})
-
-    ftpConfig = config.ftp_config()
-    ftpLocalUrl = common.getDownloadFolder() + ftpInfo['filename']
+    if day == 1:
+        mongodb.create_db(DB_NAME=logDbName)
+        mongodbresult = Mongodb(logDbName)
+    else:
+        mongodbresult = Mongodb(logDbName)
+    
+    ftpLocalUrl = common.getDownloadFolder() + fileName
 
     try:
         sys.argv[1]
@@ -53,10 +71,13 @@ try:
         # ftp.downLoadFile(ftpLocalUrl, ftpInfo['filename'])
         # ftp.close()
 
+        if not os.path.isfile(ftpLocalUrl):
+            sys.exit()
+
         importLogInfo = {
             'collection'    : collection, 
             'begin_import'  : time.time(),
-            'file_name'     : ftpInfo['filename'],
+            'file_name'     : fileName,
             'file_path'     : ftpLocalUrl, 
             'source'        : 'ftp',
             'status'        : 2,
@@ -76,17 +97,12 @@ try:
         else:
             modelFormat[model['field']] = ''
     
-    filenameExtension = ftpInfo['filename'].split('.')
-
-    if ftpInfo['header'] == 'None':
-        header = None
-    else:
-        header = [ int(x) for x in ftpInfo['header'] ]
+    filenameExtension = fileName.split('.')
 
     if(filenameExtension[1] == 'csv'):
-        inputDataRaw = excel.getDataCSV(file_path=importLogInfo['file_path'], dtype='object', sep=ftpInfo['sep'], header=header, names=modelColumns)
+        inputDataRaw = excel.getDataCSV(file_path=importLogInfo['file_path'], dtype='object', sep=';', header=1, names=modelColumns)
     else:
-        inputDataRaw = excel.getDataExcel(file_path=importLogInfo['file_path'], dtype='object', active_sheet=ftpInfo['sheet'], header=header, names=modelColumns, na_values='')
+        inputDataRaw = excel.getDataExcel(file_path=importLogInfo['file_path'], dtype='object', active_sheet='Sheet1', header=1, names=modelColumns, na_values='')
 
     inputData = inputDataRaw.to_dict('records')
     # pprint(inputData)
@@ -99,6 +115,7 @@ try:
     countList = 0
     for idx, row in enumerate(inputData):
         temp = {}
+        total += 1
         if row['LIC_NO'] not in ['', None] and row['ACCTNO'] not in ['', None]:
             for cell in row:
                 try:
@@ -119,14 +136,15 @@ try:
                 temp['result'] = 'success'
                 insertData.append(temp)
                 result = True
+                complete += 1
 
     if(len(errorData) > 0):
         mongodb.batch_insert(common.getSubUser(subUserType, 'Wo_all_prod_result'), errorData)
-        mongodb.update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': importLogId}, VALUE={'status': 0, 'complete_import': time.time()})
+        mongodb.update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': importLogId}, VALUE={'status': 0, 'complete_import': time.time(), 'total': total, 'complete': complete})
     else:
         if len(insertData) > 0:
             mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertData)
             mongodb.batch_insert(common.getSubUser(subUserType, 'Wo_all_prod_result'), insert_data=insertData)
-        mongodb.update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': importLogId}, VALUE={'status': 1, 'complete_import': time.time()})
+        mongodb.update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': importLogId}, VALUE={'status': 1, 'complete_import': time.time(), 'total': total, 'complete': complete})
 except Exception as e:
     log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')

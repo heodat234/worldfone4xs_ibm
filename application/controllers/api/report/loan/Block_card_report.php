@@ -40,19 +40,18 @@ Class Block_card_report extends WFF_Controller {
 
     function exportExcel() {
         $now = getdate();
+        $today = $now['mday'].'-'.$now['month'].'-'.$now['year'];
+        $date = strtotime("$today");
         // $month = (string)$now['mon'];
-        $month = '11';
         $request = json_decode($this->input->get("q"), TRUE);
-        $request = array('for_month' => $month);
-        $data = $this->crud->where($request)->order_by(array('debt_group' => 'asc', 'due_date_code' => 'asc'))->get($this->collection);
-        $product = $this->crud->order_by(array('code' => 'asc'))->get(set_sub_collection('Product'));
-        $groupProduct = $this->mongo_private->where(array('tags' => array('group', 'debt', 'product')))->getOne(set_sub_collection("Jsondata"));
+        $request = array('createdAt' => array('$gte' => $date));
+        $data = $this->crud->where($request)->order_by(array('index' => 'asc'))->get($this->collection,array('index','account_number','name','block','accl','sibs','group','createdAt'));
         // print_r($data);exit;
         $spreadsheet = new Spreadsheet();
     	$spreadsheet->getProperties()
 	    ->setCreator("South Telecom")
 	    ->setLastModifiedBy("Thanh Hung")
-	    ->setTitle("Daily Each Due Date Each Group Report")
+	    ->setTitle("Block Card Report")
 	    ->setSubject("Report")
 	    ->setDescription("Office 2007 XLSX, generated using PHP classes.")
 	    ->setKeywords("office 2007 openxml php")
@@ -71,75 +70,80 @@ Class Block_card_report extends WFF_Controller {
         $worksheet->getParent()->getDefaultStyle()->applyFromArray($style);
         $worksheet->getDefaultColumnDimension()->setWidth(12);
 
-        $worksheet->mergeCells('A1:C1');
-        $worksheet->setCellValue('A1', 'month-year');
+        $worksheet->mergeCells('A1:A2');
+        $worksheet->setCellValue('A1', 'STT');
         $worksheet->getStyle("A1")->getFill()
             ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
             ->getStartColor()->setRGB('FFFF00');
         $worksheet->getStyle("A1")->applyFromArray($style);
 
-        $worksheet->mergeCells('D1:D3');
-        $worksheet->setCellValue('D1', 'Due date');
+        $worksheet->mergeCells('B1:B2');
+        $worksheet->setCellValue('B1', 'Số hợp đồng');
+        $worksheet->getStyle("B1")->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setRGB('FFFF00');
+        $worksheet->getStyle("B1")->applyFromArray($style);
+
+        $worksheet->mergeCells('C1:C2');
+        $worksheet->setCellValue('C1', 'Tên khách hàng');
+        $worksheet->getStyle("C1")->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setRGB('FFFF00');
+        $worksheet->getStyle("C1")->applyFromArray($style);
+
+        $worksheet->mergeCells('D1:E1');
+        $worksheet->setCellValue('D1', 'Nội dung xử lý');
         $worksheet->getStyle("D1")->getFill()
             ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
-            ->getStartColor()->setRGB('FFFF00');
+            ->getStartColor()->setRGB('DDEBF7');
         $worksheet->getStyle("D1")->applyFromArray($style);
 
-        $worksheet->mergeCells('E1:S1');
-        $worksheet->setCellValue('E1', $now['mon'].'/'.$now['year']);
-        $worksheet->getStyle("E1")->getFill()
-            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
-            ->getStartColor()->setRGB('FFFF00');
-        $worksheet->getStyle("E1")->applyFromArray($style);
-
-        $worksheet->mergeCells('A2:C2');
-        $worksheet->setCellValue('A2', 'number.os');
-        $worksheet->getStyle("A2")->getFill()
+        $worksheet->setCellValue('D2', 'Unblock card');
+        $worksheet->getStyle("D2")->getFill()
             ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
             ->getStartColor()->setRGB('DDEBF7');
-        $worksheet->getStyle("A2")->applyFromArray($style);
+        $worksheet->getStyle("D2")->applyFromArray($style);
 
-        $worksheet->mergeCells('E2:I2');
-        $worksheet->setCellValue('E2', 'Number');
+        $worksheet->setCellValue('E2', 'Block card');
         $worksheet->getStyle("E2")->getFill()
             ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
             ->getStartColor()->setRGB('DDEBF7');
         $worksheet->getStyle("E2")->applyFromArray($style);
 
-         $worksheet->mergeCells('J2:S2');
-        $worksheet->setCellValue('J2', 'Outstanding Balance');
-        $worksheet->getStyle("J2")->getFill()
+         $worksheet->mergeCells('F1:H1');
+        $worksheet->setCellValue('F1', 'Remark');
+        $worksheet->getStyle("F1")->getFill()
             ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
             ->getStartColor()->setRGB('DDEBF7');
-        $worksheet->getStyle("J2")->applyFromArray($style);
+        $worksheet->getStyle("F1")->applyFromArray($style);
 
-        $worksheet->mergeCells('A3:B3');
-        $worksheet->setCellValue('A3', 'Group');
-        $worksheet->setCellValue('C3', 'Product');
-        $worksheet->getStyle("A3:C3")->getFill()
+        $worksheet->setCellValue('F2', 'ACCL');
+        $worksheet->getStyle("F2")->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setRGB('DDEBF7');
+        $worksheet->getStyle("F2")->applyFromArray($style);
+
+        $worksheet->setCellValue('G2', 'SIBS');
+        $worksheet->getStyle("G2")->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setRGB('DDEBF7');
+        $worksheet->getStyle("G2")->applyFromArray($style);
+
+        $worksheet->setCellValue('H2', 'Group');
+        $worksheet->getStyle("H2")->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setRGB('DDEBF7');
+        $worksheet->getStyle("H2")->applyFromArray($style);
+
+        $worksheet->mergeCells('I1:I2');
+        $worksheet->setCellValue('I1', 'Ngày xuất báo cáo');
+        $worksheet->getStyle("I1")->getFill()
             ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
             ->getStartColor()->setRGB('EDEDED');
 
-        $worksheet->setCellValue('E3', 'Incidence');
-        $worksheet->setCellValue('F3', 'Collected');
-        $worksheet->setCellValue('G3', 'Remaining');
-        $worksheet->setCellValue('H3', 'Flow rate');
-        $worksheet->setCellValue('I3', 'Collected rate');
-        $worksheet->setCellValue('J3', 'Incidence (outstanding balance at due date)');
-        $worksheet->setCellValue('K3', 'Incidence (outstanding principal)');
-        $worksheet->setCellValue('L3', 'Actual collected amount (based on oustanding balance at due date)');
-        $worksheet->setCellValue('M3', 'Collected principal amount');
-        $worksheet->setCellValue('N3', 'Collected  amount (OS at current - OS at due date)');
-        $worksheet->setCellValue('O3', "Remaining (OS at current - OS at due date)");
-        $worksheet->setCellValue('P3', "Flow rate (OS at current - OS at due date)");
-        $worksheet->setCellValue('Q3', "Collected ratio (Actual collected amount)");
-        $worksheet->setCellValue('R3', 'Collected ratio (Principal amount)');
-        $worksheet->setCellValue('S3', 'Collected ratio (OS at current - OS due date)');
-
-        $worksheet->getStyle("E3:S3")->getFill()
-            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
-            ->getStartColor()->setRGB('DDEBF7');
-        
+        foreach(range('A','I') as $columnID) {
+            $worksheet->getColumnDimension($columnID)->setAutoSize(true);
+        }
         $headerStyle = array(
             'font'          => array(
                 'bold'      => true,
@@ -149,90 +153,32 @@ Class Block_card_report extends WFF_Controller {
             )
         );
 
-        $worksheet->getStyle("A1:S3")->applyFromArray($headerStyle);
+        $worksheet->getStyle("A1:I2")->applyFromArray($headerStyle);
 
-        $start_row = 4;
+        $start_row = 3;
 
-        $start_row_debt_group = 4;
-        $debt_group = $data[0]['debt_group'];
-
-        $start_row_due_date_code = 4;
-        $due_date_code = $data[0]['due_date_code'];
-
-        $start_row_prod = 4;
-        $prod_row = $data[0]['product'];
-
-        $start_due_date = 4;
-        $due_date = $data[0]['due_date'];
-        $due_date_1 = date('d/m/Y',  $data[0]['due_date']);
-
-        // print_r($data);
         foreach($data as $key => $value) {
+                        
+            $worksheet->setCellValue('A' . $start_row, $value['index']);
+            $worksheet->setCellValue('B' . $start_row, $value['account_number']);
+            $worksheet->setCellValue('C' . $start_row, $value['name']);
+            $worksheet->setCellValue('D' . $start_row, 'No'); 
+            $worksheet->setCellValue('E' . $start_row, ($value['block'] == 'true')? 'Yes' : 'No'); 
+
+            $worksheet->setCellValue('F' . $start_row, $value['accl']);
+            $worksheet->setCellValue('G' . $start_row, $value['sibs']);
+            $worksheet->setCellValue('H' . $start_row, $value['group']);
+            $worksheet->setCellValue('I' . $start_row, date('d/m/Y',$value['createdAt']) );
             
-            if ($value['due_date_code'] == '99') {
-                $worksheet->mergeCells('B' . $start_row . ':D' . $start_row );
-                $worksheet->setCellValue('B' . $start_row, $debt_group);
-                $worksheet->getStyle('B' . $start_row. ':S'. $start_row)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('DDEBF7');
-                $worksheet->setCellValue('B' . $start_row, $value['product']);
-            }else if ($value['due_date_code'] == '100') {
-                $worksheet->mergeCells('B' . $start_row . ':D' . $start_row );
-                $worksheet->setCellValue('B' . $start_row, $debt_group);
-                $worksheet->getStyle('B' . $start_row. ':S'. $start_row)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('FCE4D6');
-                $worksheet->setCellValue('B' . $start_row, $value['product']);
-            }
-            else{
-                $worksheet->setCellValue('B' . $start_row, $value['due_date_code']);
-                $worksheet->setCellValue('C' . $start_row, $value['product']);
-                $worksheet->setCellValue('D' . $start_row, date('d/m/Y',  $value['due_date']));
-            }
-            
-            $worksheet->setCellValue('E' . $start_row, $value['inci']);
-            $worksheet->setCellValue('F' . $start_row, $value['col']);
-            $worksheet->setCellValue('G' . $start_row, $value['rem']);
-            $worksheet->setCellValue('H' . $start_row, $value['flow_rate']); 
-            $worksheet->setCellValue('I' . $start_row, $value['col_rate']); 
-
-            $worksheet->setCellValue('J' . $start_row, $value['inci_amt']);
-            $worksheet->setCellValue('K' . $start_row, $value['inci_ob_principal']);
-            $worksheet->setCellValue('L' . $start_row, $value['amt']);
-            $worksheet->setCellValue('M' . $start_row, $value['col_prici']); 
-            $worksheet->setCellValue('N' . $start_row, $value['col_amt']); 
-            $worksheet->setCellValue('O' . $start_row, $value['rem_amt']);
-            $worksheet->setCellValue('P' . $start_row, $value['flow_rate_amt']);
-            $worksheet->setCellValue('Q' . $start_row, $value['actual_ratio']);
-            $worksheet->setCellValue('R' . $start_row, $value['princi_ratio']); 
-            $worksheet->setCellValue('S' . $start_row, $value['amt_ratio']); 
-
-            if($debt_group != $value['debt_group']) {
-
-                $worksheet->mergeCells('A' . $start_row_debt_group . ':A' . ($start_row-1) );
-                $worksheet->setCellValue('A' . $start_row_debt_group, $debt_group);
-                $worksheet->getStyle('A' . $start_row_debt_group)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('FFE699');
-
-                $debt_group = $value['debt_group'];
-                $start_row_debt_group = $start_row;
-            }
-
-
-
-            if ($key == (count($data) - 1)) {
-                // if ($value['debt_group'] != 'F') {
-                    $worksheet->mergeCells('A' . $start_row_debt_group . ':A' . $start_row);
-                    $worksheet->setCellValue('A' . $start_row_debt_group, $debt_group);
-                    $worksheet->getStyle('A' . $start_row_debt_group)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('FFE699');
-
-            
-                // }
-            }
             $start_row += 1;
 
         }
 
         $maxCell = $worksheet->getHighestRowAndColumn();
-        $worksheet->getStyle("A1:BY".$maxCell['row'])->getBorders()
+        $worksheet->getStyle("A1:I".$maxCell['row'])->getBorders()
         ->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
         $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
-    	$file_path = UPLOAD_PATH . "loan/export/" . 'DailyEachDueDateEachGroup.xlsx';
+    	$file_path = UPLOAD_PATH . "loan/export/" . 'BlockCardReport.xlsx';
 		$writer->save($file_path);
 		echo json_encode(array("status" => 1, "data" => $file_path));
     }

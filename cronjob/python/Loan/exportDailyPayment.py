@@ -13,14 +13,16 @@ from bson import ObjectId
 from helper.common import Common
 import pandas as pd
 
-mongodb     = Mongodb("worldfone4xs")
-_mongodb    = Mongodb("_worldfone4xs")
 common      = Common()
+base_url    = common.base_url()
+wff_env     = common.wff_env(base_url)
+mongodb     = Mongodb(MONGODB="worldfone4xs", WFF_ENV=wff_env)
+_mongodb    = Mongodb(MONGODB="_worldfone4xs", WFF_ENV=wff_env)
 now         = datetime.now()
 subUserType = 'LO'
 collection         = common.getSubUser(subUserType, 'Daily_payment_report')
-log         = open("/var/www/html/worldfone4xs_ibm/cronjob/python/Loan/log/exportDailyPayment_log.txt","a")
-fileOutput  = '/var/www/html/worldfone4xs_ibm/upload/loan/export/DailyPayment.xlsx' 
+log         = open(base_url + "cronjob/python/Loan/log/exportDailyPayment_log.txt","a")
+fileOutput  = base_url + 'upload/loan/export/DailyPayment.xlsx' 
 try:
    data        = []
    insertData  = []
@@ -54,8 +56,8 @@ try:
    df.to_excel(fileOutput,sheet_name='Daily',header=['AC NUMBER','NAME','OVERDUE DATE','PAYMENT DATE','AMOUNT','PAID PRINCIPAL','PAID INTEREST','PAID LATE CHARGE & FEE','GROUP','NUMBER OF OVERDUE DAYS','PIC','PRODUCT','NOTE']) 
    
    now_end         = datetime.now()
-   log.write(now_end.strftime("%d/%m/%Y, %H:%M:%S") + ': End Log' + '\n')
-   print(1)
+   # log.write(now_end.strftime("%d/%m/%Y, %H:%M:%S") + ': End Log' + '\n')
+   print('DONE')
 except Exception as e:
    pprint(e)
    log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')

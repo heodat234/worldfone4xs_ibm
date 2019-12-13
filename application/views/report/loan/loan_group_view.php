@@ -43,14 +43,23 @@
                   var dataSource = this.dataSource = new kendo.data.DataSource({
                      serverPaging: true,
                      serverFiltering: true,
-                     pageSize: 5,
+                     pageSize: 7,
                      transport: {
-                        read: ENV.reportApi + "telesale/appointment",
+                        read: ENV.reportApi + "loan/loan_group_report",
                         parameterMap: parameterMap
                      },
                      schema: {
                         data: "data",
                         total: "total",
+                        parse: function(response) {
+                           response.data.map(doc => {
+                            if (!isNaN(doc.group)) {
+                              doc.group = 'Group ' + doc.group;
+                            }
+                            doc.total_org = (doc.total_org).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+                           });
+                           return response;
+                        }
                      }
                   });
 
@@ -74,42 +83,47 @@
                      scrollable: true,
                      columns: [
                           {
-                              field: "name",
-                              title: "@Telesale name@",
-                              width: 150,
+                              field: "year",
+                              title: "Year",
+                              width: 50,
                           },{
-                              field: "code",
-                              title: "@Telesale code@",
-                              width: 150,
+                              field: "month",
+                              title: "Month",
+                              width: 80,
 
                           },{
-                              field: "team",
-                              title: "@Team@",
+                              field: "weekday",
+                              title: "Weekday",
+                              width: 100,
+                          },
+                          {
+                              field: "day",
+                              title: "Day",
                               width: 120,
                           },
                           {
-                              field: "count_appointment",
-                              title: "@Appointment@",
+                              field: "type",
+                              title: "Type",
+                              width: 80,
+                          },
+                          {
+                              field: "group",
+                              title: "Group",
+                              width: 120,
+                          },
+                          {
+                              field: "total_org",
+                              title: "Outstanding Principal",
                               width: 150,
                           },
                           {
-                              field: "count_applied",
-                              title: "@Customer Applied@",
+                              field: "count_data",
+                              title: "No. of Account",
                               width: 150,
                           },
                           {
-                              field: "count_approve",
-                              title: "@Customer Approve@",
-                              width: 150,
-                          },
-                          {
-                              field: "count_reject",
-                              title: "@Customer Reject@",
-                              width: 150,
-                          },
-                          {
-                              field: "count_release",
-                              title: "@Customer Release@",
+                              field: "ratio",
+                              title: "Ratio %",
                               width: 150,
                           },
 
@@ -135,7 +149,7 @@
           }
       }();
       window.onload = function() {
-         // Table.init();
+         Table.init();
          var dateRange = 30;
          var nowDate = new Date();
          var date =  new Date(),

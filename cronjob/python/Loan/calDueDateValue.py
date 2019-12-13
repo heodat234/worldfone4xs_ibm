@@ -19,14 +19,15 @@ from helper.jaccs import Config
 from helper.common import Common
 from helper.mongodbaggregate import Mongodbaggregate
 
-mongodb = Mongodb("worldfone4xs")
-_mongodb = Mongodb("_worldfone4xs")
+common      = Common()
+base_url    = common.base_url()
+wff_env     = common.wff_env(base_url)
+mongodb     = Mongodb(MONGODB="worldfone4xs", WFF_ENV=wff_env)
+_mongodb    = Mongodb(MONGODB="_worldfone4xs", WFF_ENV=wff_env)
 excel = Excel()
 config = Config()
 ftp = Ftp()
-common = Common()
-mongodbaggregate = Mongodbaggregate("worldfone4xs")
-base_url = config.base_url()
+# mongodbaggregate = Mongodbaggregate("worldfone4xs")
 log = open(base_url + "cronjob/python/Loan/log/calDueDateValue.txt","a")
 now = datetime.now()
 subUserType = 'LO'
@@ -36,8 +37,8 @@ try:
     updateData = []
     listDebtGroup = []
     
-    # today = date.today()
-    today = datetime.strptime('13/11/2019', "%d/%m/%Y").date()
+    today = date.today()
+    # today = datetime.strptime('13/11/2019', "%d/%m/%Y").date()
 
     day = today.day
     month = today.month
@@ -54,8 +55,8 @@ try:
     holidayOfMonth = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_off_sys'))
     listHoliday = map(lambda offDateRow: {offDateRow['off_date']}, holidayOfMonth)
 
-    # if todayTimeStamp in listHoliday or (weekday == 5) or weekday == 6:
-    #     sys.exit()
+    if todayTimeStamp in listHoliday or (weekday == 5) or weekday == 6:
+        sys.exit()
 
     todayString = today.strftime("%d/%m/%Y")
     starttime = int(time.mktime(time.strptime(str(todayString + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
@@ -66,8 +67,8 @@ try:
     if day == 1:
         mongodb.create_db(collectionName)
 
-    mongodbReport = Mongodb(collectionName)
-
+    mongodbReport = Mongodb(MONGODB=collectionName, WFF_ENV=wff_env)
+    
     lnjc05InfoFull = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'LNJC05'))
     lnjc05ColName = 'LNJC05_' + str(year) + str(month) + str(day)
     mongodbReport.create_col(COL_NAME=lnjc05ColName)

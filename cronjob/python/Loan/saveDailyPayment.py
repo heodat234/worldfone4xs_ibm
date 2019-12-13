@@ -2,20 +2,23 @@
 # -*- coding: utf-8 -*-
 import sys
 import os
-# sys.path.insert(1, '/var/www/html/worldfone4xs_ibm/cronjob/python')
 import time
 import ntpath
 import json
+import calendar
 from helper.mongod import Mongodb
 from datetime import datetime
 from datetime import date
 from pprint import pprint
 from bson import ObjectId
 from helper.common import Common
+from helper.jaccs import Config
 
-mongodb     = Mongodb("worldfone4xs")
-_mongodb    = Mongodb("_worldfone4xs")
 common      = Common()
+base_url    = common.base_url()
+wff_env     = common.wff_env(base_url)
+mongodb     = Mongodb(MONGODB="worldfone4xs", WFF_ENV=wff_env)
+_mongodb    = Mongodb(MONGODB="_worldfone4xs", WFF_ENV=wff_env)
 now         = datetime.now()
 subUserType = 'LO'
 collection         = common.getSubUser(subUserType, 'Daily_payment_report')
@@ -27,15 +30,36 @@ sbv_collection       = common.getSubUser(subUserType, 'SBV')
 group_collection     = common.getSubUser(subUserType, 'Group_card')
 account_collection   = common.getSubUser(subUserType, 'List_of_account_in_collection')
 payment_of_card_collection  = common.getSubUser(subUserType, 'Report_input_payment_of_card')
-log         = open("/var/www/html/worldfone4xs_ibm/cronjob/python/Loan/log/DailyPayment_log.txt","a")
+log         = open(base_url + "cronjob/python/Loan/log/DailyPayment_log.txt","a")
+log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': Start Import' + '\n')
 
 try:
    data        = []
    insertData  = []
    PaymentData   = []
 
-   now         = datetime.now()
-   log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': Start Import' + '\n')
+   today = date.today()
+   # today = datetime.strptime('12/10/2019', "%d/%m/%Y").date()
+
+   day = today.day
+   month = today.month
+   year = today.year
+   weekday = today.weekday()
+   lastDayOfMonth = calendar.monthrange(year, month)[1]
+
+   todayString = today.strftime("%d/%m/%Y")
+   todayTimeStamp = int(time.mktime(time.strptime(str(todayString + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
+
+   startMonth = int(time.mktime(time.strptime(str('01/' + str(month) + '/' + str(year) + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
+   endMonth = int(time.mktime(time.strptime(str(str(lastDayOfMonth) + '/' + str(month) + '/' + str(year) + " 23:59:59"), "%d/%m/%Y %H:%M:%S")))
+
+   holidayOfMonth = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_off_sys'))
+   listHoliday = map(lambda offDateRow: {offDateRow['off_date']}, holidayOfMonth)
+
+   if todayTimeStamp in listHoliday or (weekday == 5) or weekday == 6:
+      sys.exit()
+
+
    # LN3206F
    count = mongodb.count(MONGO_COLLECTION=ln3206_collection)
    quotient = int(count)/10000
@@ -159,13 +183,13 @@ try:
          insertData.append(row)
       # break
 
-   # print(insertData)
    if len(insertData) > 0:
       mongodb.remove_document(MONGO_COLLECTION=collection)
       mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertData)
+      
    now_end         = datetime.now()
    log.write(now_end.strftime("%d/%m/%Y, %H:%M:%S") + ': End Log' + '\n')
-   print(111)
+   print('DONE')
 except Exception as e:
    pprint(e)
    log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')

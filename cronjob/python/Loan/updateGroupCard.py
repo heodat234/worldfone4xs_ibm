@@ -5,6 +5,7 @@ import os
 import time
 import ntpath
 import json
+import calendar
 from helper.mongod import Mongodb
 from datetime import datetime
 from datetime import date
@@ -14,26 +15,49 @@ from bson import ObjectId
 from helper.common import Common
 import pandas as pd
 
-mongodb     = Mongodb("worldfone4xs")
-_mongodb    = Mongodb("_worldfone4xs")
 common      = Common()
+base_url    = common.base_url()
+wff_env     = common.wff_env(base_url)
+mongodb     = Mongodb(MONGODB="worldfone4xs", WFF_ENV=wff_env)
+_mongodb    = Mongodb(MONGODB="_worldfone4xs", WFF_ENV=wff_env)
 now         = datetime.now()
 subUserType = 'LO'
 account_collection      = common.getSubUser(subUserType, 'List_of_account_in_collection')
 sbv_collection          = common.getSubUser(subUserType, 'SBV')
 collection              = common.getSubUser(subUserType, 'Group_card')
 due_date_collection     = common.getSubUser(subUserType, 'Report_due_date')
-log         = open("/var/www/html/worldfone4xs_ibm/cronjob/python/Loan/log/groupCard_log.txt","a")
+log         = open(base_url + "cronjob/python/Loan/log/groupCard_log.txt","a")
 
 try:
    data        = []
    insertData  = []
    updateDate  = []
 
+   today = date.today()
+   # today = datetime.strptime('12/10/2019', "%d/%m/%Y").date()
+
+   day = today.day
+   month = today.month
+   year = today.year
+   weekday = today.weekday()
+   lastDayOfMonth = calendar.monthrange(year, month)[1]
+
+   todayString = today.strftime("%d/%m/%Y")
+   todayTimeStamp = int(time.mktime(time.strptime(str(todayString + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
+
+   startMonth = int(time.mktime(time.strptime(str('01/' + str(month) + '/' + str(year) + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
+   endMonth = int(time.mktime(time.strptime(str(str(lastDayOfMonth) + '/' + str(month) + '/' + str(year) + " 23:59:59"), "%d/%m/%Y %H:%M:%S")))
+
+   holidayOfMonth = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_off_sys'))
+   listHoliday = map(lambda offDateRow: {offDateRow['off_date']}, holidayOfMonth)
+
+   if todayTimeStamp in listHoliday or (weekday == 5) or weekday == 6:
+      sys.exit()
+
    day = now.strftime("%d/%m/%Y")
    day = common.convertTimestamp(value=day)
    result_due_date = mongodb.getOne(MONGO_COLLECTION=due_date_collection,WHERE={'due_date_add_1':day})
-   log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': Start Log' + '\n')
+   # log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': Start Log' + '\n')
    count = mongodb.count(MONGO_COLLECTION=account_collection)
    limit = 10000
    quotient = int(count)/limit
@@ -165,7 +189,7 @@ try:
          if mod >0:
             result = mongodb.get(MONGO_COLLECTION=account_collection, WHERE={'overdue_date': due_date}, SELECT=['account_number'],SORT=([('_id', -1)]),SKIP=int(int(quotient)*limit), TAKE=int(mod))
             for idx,row in enumerate(result):
-               print(idx)
+               # print(idx)
                temp = {}
                tempSbv = {}
                group = ''
@@ -207,8 +231,8 @@ try:
       
    now_end         = datetime.now()
    print('success')
-   log.write(now_end.strftime("%d/%m/%Y, %H:%M:%S") + ': End Log' + '\n')
+   # log.write(now_end.strftime("%d/%m/%Y, %H:%M:%S") + ': End Log' + '\n')
    # print(1)
 except Exception as e:
    print(e)
-   log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')
+   # log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')

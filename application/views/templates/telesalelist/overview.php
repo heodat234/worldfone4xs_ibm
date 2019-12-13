@@ -113,7 +113,8 @@
             field: 'starttime_call',
             title: "@Nearest Call@",
             width: 150,
-            type:'timestamp'
+            type:'timestamp',
+            filterable : false
         });
         columns.map(col => {
             col.width = 130;

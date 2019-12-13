@@ -2,10 +2,10 @@
     <!-- Table Styles Header -->
     <ul class="breadcrumb breadcrumb-top">
         <li>@Report@</li>
-        <li>Block Card Report</li>
+        <li>Reminder Letter Report</li>
         <li class="pull-right none-breakcrumb" id="top-row">
             <div class="btn-group btn-group-sm">
-                <a role="button" class="btn btn-sm" onclick="saveAsExcel()"><i class="fa fa-file-excel-o"></i> <b>@Export@</b></a>
+                <a role="button" class="btn btn-sm" onclick="Table.grid.saveAsExcel()"><i class="fa fa-file-excel-o"></i> <b>@Export@</b></a>
             </div>
         </li>
     </ul>
@@ -34,15 +34,9 @@
                 <div id="grid"></div>
             </div>
         </div>
-        <div class="row" data-bind="visible: visibleNoData">
-            <h3 class="text-center">@NO DATA@</h3>
-        </div>
+        
     </div>
-    <div id="action-menu">
-        <ul>
-            
-        </ul>
-    </div>
+    
     <script>
       function girdBoolean(data) {
         return '<input type="checkbox"'+ ( data ? 'checked="checked"' : "" )+ 'class="chkbx" disabled />';
@@ -50,7 +44,7 @@
       var Config = {
           crudApi: `${ENV.reportApi}`,
           templateApi: `${ENV.templateApi}`,
-          collection: "block_card_report",
+          collection: "reminder_letter_report",
           observable: {
               
           },
@@ -69,44 +63,118 @@
           },
           columns: [{
               field: 'index',
-              title: "STT",
-              width: 80,
+              title: "No",
+              width: 70,
           }, {
               field: 'account_number',
-              title: "Số Hợp đồng",
+              title: "Account number",
               width: 150,
           }, {
               field: 'name',
-              title: "Tên khách hàng",
+              title: "Customer name",
+              width: 160,
+          },{
+              field: 'address',
+              title: "Customer address",
+              width: 200,
+          },{
+              field: 'contract_date',
+              title: "Signed contract date",
+              width: 120,
+          },{
+              field: 'day',
+              title: "Day",
+              width: 80,
+          },{
+              field: 'month',
+              title: "Month",
+              width: 80,
+          },{
+              field: 'year',
+              title: "Year",
+              width: 80,
+          },{
+              field: 'approved_amt',
+              title: "Approved amount",
               width: 150,
-          }, {
-              title: 'Nội dung xử lý',
-              columns: [ {
-                  field: 'block',
-                  title: 'Block card',
-                  width: 80,
-                  template: dataItem => girdBoolean(dataItem.block),
-              }]
-          }, {
-              title: 'Remark',
-              columns: [{
-                  field: 'accl',
-                  title: 'ACCL',
-                  width: 80
-              }, {
-                  field: 'sibs',
-                  title: 'SIBS',
-                  width: 80
-              }, {
-                  field: 'group',
-                  title: "Group",
-                  width: 80
-              }]
-          }, {
+          },{
+              field: 'cur_bal',
+              title: "Current balance",
+              width: 150,
+          },{
+              field: 'overdue_amt',
+              title: "Overdue amount",
+              width: 150,
+          },{
+              field: 'phone',
+              title: "Phone number",
+              width: 150,
+          },{
               field: 'createdAt',
-              title: "Report date",
-              width: 100,
+              title: "Sending date (dd/mm/yyyy)",
+              width: 150,
               template: dataItem => gridTimestamp(dataItem.createdAt,"dd/MM/yyyy"),
+          },{
+              field: 'due_date',
+              title: "Due date",
+              width: 150,
+          },{
+              field: 'overdue_date',
+              title: "Overdue date",
+              width: 150,
+          },{
+              field: 'group',
+              title: "Group",
+              width: 150,
+          },{
+              field: 'product_code',
+              title: "Product code",
+              width: 150,
+          },{
+              field: 'outstanding_bal',
+              title: "Outstanding balance",
+              width: 150,
+          },{
+              field: 'pic',
+              title: "PIC",
+              width: 150,
+          },{
+              field: 'product_name',
+              title: "Product name",
+              width: 150,
+          },{
+              field: 'dealer_name',
+              title: "Dealer name",
+              width: 150,
+          },{
+              field: 'brand',
+              title: "Brand",
+              width: 150,
+          },{
+              field: 'model',
+              title: "Kiểu xe",
+              width: 150,
+          },{
+              field: 'engine_no',
+              title: "Số máy",
+              width: 150,
+          },{
+              field: 'chassis_no',
+              title: "Số khung",
+              width: 100,
+          }, {
+              field: 'color',
+              title: "Màu xe",
+              width: 100,
+          },  {
+              field: 'license_plates',
+              title: "license plates",
+              width: 100,
+          }, {
+              field: 'production_time',
+              title: "Năm sản xuất",
+              width: 100,
+              // template: dataItem => gridTimestamp(dataItem.createdAt,"dd/MM/yyyy"),
           }],
           filterable: KENDO.filterable
       };
@@ -118,7 +186,9 @@
                   var dataSource = this.dataSource = new kendo.data.DataSource({
                      serverPaging: true,
                      serverFiltering: true,
+                     serverSorting: true,
                      pageSize: 10,
+                     sort: { field: "index", dir: "asc" },
                      transport: {
                         read: {
                             url: Config.crudApi + 'loan/' + Config.collection + '/read'
@@ -134,12 +204,15 @@
 
                   var grid = this.grid = $("#grid").kendoGrid({
                      dataSource: dataSource,
-                     excel: {allPages: true},
+                     excel: {fileName: "Reminder Letter Export.xlsx",allPages: true},
                      excelExport: function(e) {
                         var sheet = e.workbook.sheets[0];
                         for (var rowIndex = 1; rowIndex < sheet.rows.length; rowIndex++) {
                           var row = sheet.rows[rowIndex];
                           for (var cellIndex = 0; cellIndex < row.cells.length; cellIndex ++) {
+                              if (cellIndex == 12) {
+                                row.cells[cellIndex].value = gridTimestamp(row.cells[12].value,"dd/MM/yyyy");
+                              }
                               if(row.cells[cellIndex].value instanceof Date) {
                                   row.cells[cellIndex].format = "dd-MM-yy hh:mm:ss"
                               }

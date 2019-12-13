@@ -5,16 +5,20 @@ import os
 import time
 import ntpath
 import json
+import calendar
 from helper.mongod import Mongodb
 from datetime import datetime
 from datetime import date
 from pprint import pprint
 from bson import ObjectId
 from helper.common import Common
+from helper.jaccs import Config
 
-mongodb     = Mongodb("worldfone4xs")
-_mongodb    = Mongodb("_worldfone4xs")
 common      = Common()
+base_url    = common.base_url()
+wff_env     = common.wff_env(base_url)
+mongodb     = Mongodb(MONGODB="worldfone4xs", WFF_ENV=wff_env)
+_mongodb    = Mongodb(MONGODB="_worldfone4xs", WFF_ENV=wff_env)
 now         = datetime.now()
 subUserType = 'LO'
 collection         = common.getSubUser(subUserType, 'Daily_assignment_report')
@@ -31,7 +35,8 @@ cdr_collection       = common.getSubUser(subUserType, 'worldfonepbxmanager')
 jsonData_collection  = common.getSubUser(subUserType, 'Jsondata')
 user_collection      = common.getSubUser(subUserType, 'User')
 wo_collection        = common.getSubUser(subUserType, 'WO_monthly')
-log         = open("/var/www/html/worldfone4xs_ibm/cronjob/python/Loan/log/DailyAssignment_log.txt","a")
+action_code_collection        = common.getSubUser(subUserType, 'Action_code')
+log         = open(base_url + "cronjob/python/Loan/log/DailyAssignment_log.txt","a")
 
 try:
    data        = []
@@ -39,6 +44,27 @@ try:
    PaymentData   = []
    now         = datetime.now()
    log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': Start Import' + '\n')
+
+   today = date.today()
+   # today = datetime.strptime('12/10/2019', "%d/%m/%Y").date()
+
+   day = today.day
+   month = today.month
+   year = today.year
+   weekday = today.weekday()
+   lastDayOfMonth = calendar.monthrange(year, month)[1]
+
+   todayString = today.strftime("%d/%m/%Y")
+   todayTimeStamp = int(time.mktime(time.strptime(str(todayString + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
+
+   startMonth = int(time.mktime(time.strptime(str('01/' + str(month) + '/' + str(year) + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
+   endMonth = int(time.mktime(time.strptime(str(str(lastDayOfMonth) + '/' + str(month) + '/' + str(year) + " 23:59:59"), "%d/%m/%Y %H:%M:%S")))
+
+   holidayOfMonth = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_off_sys'))
+   listHoliday = map(lambda offDateRow: {offDateRow['off_date']}, holidayOfMonth)
+
+   if todayTimeStamp in listHoliday or (weekday == 5) or weekday == 6:
+      sys.exit()
 
 
    lawsuit_fields = _mongodb.getOne(MONGO_COLLECTION=jsonData_collection,SELECT=['data'],WHERE={'name': 'lawsuit fields'})
@@ -50,7 +76,7 @@ try:
                 {
                     "$lookup":
                     {
-                        "from": diallist_detail_collection,
+                        "from": action_code_collection,
                         "localField": "account_number",
                         "foreignField": "account_number",
                         "as": "detail"
@@ -60,19 +86,18 @@ try:
    data = mongodb.aggregate_pipeline(MONGO_COLLECTION=lnjc05_collection,aggregate_pipeline=aggregate_pipeline)
    
    for idx, row in enumerate(data):
-      temp = {}
-      temp['export_date']     = now.strftime("%d/%m/%Y")
-      temp['index']           = i
-      temp['account_number']  = row['account_number']
-      temp['phone']           = row['mobile_num']
-      temp['group_id']        = row['group_id']
-      temp['name']            = row['cus_name']
-      temp['overdue_date']    = row['due_date']
-      temp['loan_overdue_amount']      = row['loan_overdue_amount']
-      temp['current_balance']          = row['current_balance']
-      temp['outstanding_principal']    = row['outstanding_principal']
-      detail = row['detail']
       for detail in row['detail']:
+         temp = {}
+         temp['export_date']     = now.strftime("%d/%m/%Y")
+         temp['index']           = i
+         temp['account_number']  = row['account_number']
+         temp['phone']           = row['mobile_num']
+         temp['group_id']        = row['group_id']
+         temp['name']            = row['cus_name']
+         temp['overdue_date']    = row['due_date']
+         temp['loan_overdue_amount']      = row['loan_overdue_amount']
+         temp['current_balance']          = row['current_balance']
+         temp['outstanding_principal']    = row['outstanding_principal']
          if 'assign' in detail.keys():
             for user in list(users):
                if user['extension'] == detail['assign']:
@@ -121,44 +146,46 @@ try:
                temp[field_raa['field']]          = detail[field_raa['field']]
             # print(x['field'])
 
-      temp['contacted'] = mongodb.count(MONGO_COLLECTION=cdr_collection,WHERE={'customernumber': str(row['mobile_num'])})
-      zaccf = mongodb.getOne(MONGO_COLLECTION=zaccf_collection, WHERE={'account_number': str(row['account_number'])},SELECT=['PRODGRP_ID'])
-      if zaccf != None:
-         temp['product_id']          = zaccf['PRODGRP_ID']
+         temp['contacted'] = mongodb.count(MONGO_COLLECTION=cdr_collection,WHERE={'customernumber': str(row['mobile_num'])})
+         zaccf = mongodb.getOne(MONGO_COLLECTION=zaccf_collection, WHERE={'account_number': str(row['account_number'])},SELECT=['PRODGRP_ID'])
+         if zaccf != None:
+            temp['product_id']          = zaccf['PRODGRP_ID']
 
-      temp['createdAt'] = time.time()
-      temp['createdBy'] = 'system'
-      insertData.append(temp)
-      i = i+1
-      # break
+         temp['createdAt'] = time.time()
+         temp['createdBy'] = 'system'
+
+         insertData.append(temp)
+         i = i+1
+         # break
 
    
    # List of Account
    data_acc = mongodb.aggregate_pipeline(MONGO_COLLECTION=account_collection,aggregate_pipeline=aggregate_pipeline)
    for idx, row in enumerate(data_acc):
-      temp = {}
-      temp['export_date']     = now.strftime("%d/%m/%Y")
-      temp['index']           = i
-      temp['account_number']  = row['account_number']
-      temp['phone']           = row['phone']
-      temp['name']            = row['cus_name']
-      temp['overdue_date']    = row['overdue_date']
-      temp['loan_overdue_amount']      = row['overdue_amt']
-      temp['current_balance']          = row['cur_bal']
       sbv = mongodb.getOne(MONGO_COLLECTION=sbv_collection, WHERE={'contract_no': str(row['account_number'])},
-            SELECT=['card_type','ob_principal_sale','ob_principal_cash'])
-      if sbv != None:
-         temp['product_id']                  = str(sbv['card_type'])
-         temp['outstanding_principal']       = float(sbv['ob_principal_sale']) + float(sbv['ob_principal_cash'])
-
+               SELECT=['card_type','ob_principal_sale','ob_principal_cash'])
       group = mongodb.getOne(MONGO_COLLECTION=group_collection, WHERE={'account_number': str(row['account_number'])},
-            SELECT=['group'])
-      if group != None:
-         temp['group_id']                  = str(group['group'])
-      temp['contacted'] = mongodb.count(MONGO_COLLECTION=cdr_collection,WHERE={'customernumber': str(row['phone'])})
-
-      detail = row['detail']
+               SELECT=['group'])
       for detail in row['detail']:
+         temp = {}
+         temp['export_date']     = now.strftime("%d/%m/%Y")
+         temp['index']           = i
+         temp['account_number']  = row['account_number']
+         temp['phone']           = row['phone']
+         temp['name']            = row['cus_name']
+         temp['overdue_date']    = row['overdue_date']
+         temp['loan_overdue_amount']      = row['overdue_amt']
+         temp['current_balance']          = row['cur_bal']
+         
+         if sbv != None:
+            temp['product_id']                  = str(sbv['card_type'])
+            temp['outstanding_principal']       = float(sbv['ob_principal_sale']) + float(sbv['ob_principal_cash'])
+
+         if group != None:
+            temp['group_id']                  = str(group['group'])
+         
+         temp['contacted'] = mongodb.count(MONGO_COLLECTION=cdr_collection,WHERE={'customernumber': str(row['phone'])})
+
          if 'assign' in detail.keys():
             for user in list(users):
                if user['extension'] == detail['assign']:
@@ -205,32 +232,38 @@ try:
                temp[field_raa['field']]          = detail[field_raa['field']]
 
       
-      temp['createdAt'] = time.time()
-      temp['createdBy'] = 'system'
-      insertData.append(temp)
-      i = i+1
-      # break
+         temp['createdAt'] = time.time()
+         temp['createdBy'] = 'system'
+         insertData.append(temp)
+         i = i+1
+         # break
 
    # Wo
    data_wo = mongodb.aggregate_pipeline(MONGO_COLLECTION=wo_collection,aggregate_pipeline=aggregate_pipeline)
    for idx, row in enumerate(data_wo):
-      temp = {}
-      temp['export_date']     = now.strftime("%d/%m/%Y")
-      temp['index']           = i
-      temp['account_number']  = row['ACCTNO']
-      temp['phone']           = row['PHONE']
-      temp['name']            = row['CUS_NM']
-      temp['overdue_date']    = common.convertTimestamp(row['NGAY_QUA_HAN'],formatString='%Y-%m-%d %H:%M:%S')
-      temp['loan_overdue_amount']      = float(row['WO9711'])+float(row['WO9713'])+float(row['WO9713'])
-      temp['current_balance']          = float(row['WO9711'])+float(row['WO9713'])+float(row['WO9713'])
-      temp['product_id']               = str(row['PROD_ID'])
-      temp['outstanding_principal']    = float(row['WO9711'])
-
-      temp['group_id']                  = 'F'
-      temp['contacted'] = mongodb.count(MONGO_COLLECTION=cdr_collection,WHERE={'customernumber': str(row['PHONE'])})
-
-      detail = row['detail']
       for detail in row['detail']:
+         temp = {}
+         temp['export_date']     = now.strftime("%d/%m/%Y")
+         temp['index']           = i
+         temp['account_number']  = row['ACCTNO']
+         temp['phone']           = row['PHONE']
+         temp['name']            = row['CUS_NM']
+         if row['NGAY_QUA_HAN'] != '':
+            try:
+               temp['overdue_date']    = common.convertTimestamp(row['NGAY_QUA_HAN'],formatString='%m/%d/%Y')
+            except Exception as e:
+               temp['overdue_date']    = common.convertTimestamp(row['NGAY_QUA_HAN'],formatString='%d/%m/%Y')
+         else:
+            temp['overdue_date'] = ''
+         
+         temp['loan_overdue_amount']      = float(row['WO9711'])+float(row['WO9713'])+float(row['WO9713'])
+         temp['current_balance']          = float(row['WO9711'])+float(row['WO9713'])+float(row['WO9713'])
+         temp['product_id']               = str(row['PROD_ID'])
+         temp['outstanding_principal']    = float(row['WO9711'])
+
+         temp['group_id']                  = 'F'
+         temp['contacted'] = mongodb.count(MONGO_COLLECTION=cdr_collection,WHERE={'customernumber': str(row['PHONE'])})
+
          if 'assign' in detail.keys():
             for user in list(users):
                if user['extension'] == detail['assign']:
@@ -277,21 +310,20 @@ try:
                temp[field_raa['field']]          = detail[field_raa['field']]
 
       
-      temp['createdAt'] = time.time()
-      temp['createdBy'] = 'system'
-      insertData.append(temp)
-      i = i+1
-      # break
+         temp['createdAt'] = time.time()
+         temp['createdBy'] = 'system'
+         insertData.append(temp)
+         i = i+1
 
 
 
-   # print(insertData)
    if len(insertData) > 0:
-      mongodb.remove_document(MONGO_COLLECTION=collection)
+      # mongodb.remove_document(MONGO_COLLECTION=collection)
       mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertData)
+      
    now_end         = datetime.now()
    log.write(now_end.strftime("%d/%m/%Y, %H:%M:%S") + ': End Log' + '\n')
-   print(111)
+   print('DONE')
 except Exception as e:
    pprint(e)
    log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')

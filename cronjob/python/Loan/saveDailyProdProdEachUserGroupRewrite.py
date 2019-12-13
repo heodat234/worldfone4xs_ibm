@@ -19,25 +19,24 @@ from helper.jaccs import Config
 from helper.common import Common
 from helper.mongodbaggregate import Mongodbaggregate
 
-mongodb = Mongodb("worldfone4xs")
-_mongodb = Mongodb("_worldfone4xs")
-excel = Excel()
-config = Config()
-ftp = Ftp()
-common = Common()
-mongodbaggregate = Mongodbaggregate("worldfone4xs")
-base_url = config.base_url()
-log = open(base_url + "cronjob/python/Loan/log/saveDailyProdProdEachUserGroup.txt","a")
-now = datetime.now()
+common      = Common()
+base_url    = common.base_url()
+wff_env     = common.wff_env(base_url)
+mongodb     = Mongodb(MONGODB="worldfone4xs", WFF_ENV=wff_env)
+_mongodb    = Mongodb(MONGODB="_worldfone4xs", WFF_ENV=wff_env)
+
 subUserType = 'LO'
 collection = common.getSubUser(subUserType, 'Daily_prod_prod_each_user_group')
+log = open(base_url + "cronjob/python/Loan/log/saveDailyProdProdEachUserGroup.txt","a")
+now = datetime.now()
+log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': Start Import' + '\n')
 try:
     insertData = []
     updateData = []
     listDebtGroup = []
     
-    # today = date.today()
-    today = datetime.strptime('20/11/2019', "%d/%m/%Y").date()
+    today = date.today()
+    # today = datetime.strptime('20/11/2019', "%d/%m/%Y").date()
 
     day = today.day
     month = today.month
@@ -54,8 +53,8 @@ try:
     holidayOfMonth = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_off_sys'))
     listHoliday = map(lambda offDateRow: {offDateRow['off_date']}, holidayOfMonth)
 
-    # if todayTimeStamp in listHoliday or (weekday == 5) or weekday == 6:
-    #     sys.exit()
+    if todayTimeStamp in listHoliday or (weekday == 5) or weekday == 6:
+        sys.exit()
 
     todayString = today.strftime("%d/%m/%Y")
     starttime = int(time.mktime(time.strptime(str(todayString + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
@@ -250,12 +249,12 @@ try:
             temp['flow_rate_amt_' + key] = 0
 
         aggregate_payment = [
-            # {
-            #     "$match":
-            #     {
-            #         "createdAt": {'$gte': temp['due_date'],'$lte' : todayTimeStamp},
-            #     }
-            # },
+            {
+                "$match":
+                {
+                    "created_at": {'$gte': temp['due_date'],'$lte' : todayTimeStamp},
+                }
+            },
             {
                 "$group":
                 {
@@ -403,9 +402,10 @@ try:
         temp['tar_gap'] = temp['tar_amt'] - temp['rem_amt']
         temp['tar_per'] = temp['tar_gap']/temp['tar_amt'] if temp['tar_amt'] != 0 else 0
         mongodb.insert(MONGO_COLLECTION=collection, insert_data=temp)
-        # print(temp)
-   
+    
+    now_end         = datetime.now()
+    log.write(now_end.strftime("%d/%m/%Y, %H:%M:%S") + ': End Log' + '\n')   
 except Exception as e:
-    # log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')
+    log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')
     pprint(str(e))
         
