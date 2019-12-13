@@ -4,3 +4,4 @@
 10/12/2019, 20:28:37: No sheet named <'ReportReleaseSale'>
 10/12/2019, 20:31:45: Invalid file path or buffer object type: <class 'NoneType'>
 10/12/2019, 21:08:43: No sheet named <'Sheet1'>
+12/12/2019, 18:57:01: 'NoneType' object has no attribute 'to_dict'

@@ -25,24 +25,11 @@ Class Daily_prod_user_group_report extends WFF_Controller {
     function read() {
         try {
             $request = json_decode($this->input->get("q"), TRUE);
-            $data = $this->crud->read($this->collection, $request);
+            $now = getdate();
+            $month = (string)$now['mon'];
+            $match = array('for_month' => $month);
+            $data = $this->crud->read($this->collection, $request,array(),$match);
             echo json_encode($data);
-        } catch (Exception $e) {
-            echo json_encode(array("status" => 0, "message" => $e->getMessage()));
-        }
-    }
-
-    function readExcel()
-    {
-        try {
-            
-            $filename = "export.xlsx";
-            $file_template = "templateLawsuit.xlsx";
-
-            $rowDataRaw = $this->excel->read(UPLOAD_PATH . "excel/" . $filename, 50, 1);
-            
-            echo json_encode($rowDataRaw);
-            // var_dump($response);
         } catch (Exception $e) {
             echo json_encode(array("status" => 0, "message" => $e->getMessage()));
         }
@@ -59,8 +46,8 @@ Class Daily_prod_user_group_report extends WFF_Controller {
 
     function exportExcel() {
         $now = getdate();
-        // $month = (string)$now['mon'];
-        $month = '11';
+        $month = (string)$now['mon'];
+        // $month = '11';
 
         $request = json_decode($this->input->get("q"), TRUE);
         $request = array('for_month' => $month);
@@ -76,7 +63,7 @@ Class Daily_prod_user_group_report extends WFF_Controller {
 	    ->setDescription("Office 2007 XLSX, generated using PHP classes.")
 	    ->setKeywords("office 2007 openxml php")
         ->setCategory("Report");
-        
+
         $style = array(
             'alignment'     => array('horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER),
             'allborders'    => array(
@@ -103,7 +90,7 @@ Class Daily_prod_user_group_report extends WFF_Controller {
         $worksheet = $spreadsheet->getSheet(0);
         $worksheet->setTitle('Group A');
         $worksheet->getParent()->getDefaultStyle()->applyFromArray($style);
-        
+
         $worksheet->mergeCells('A1:C1');
         $worksheet->setCellValue('A1', 'month-year');
         $worksheet->getStyle("A1")->getFill()
@@ -223,7 +210,7 @@ Class Daily_prod_user_group_report extends WFF_Controller {
 
         $startNumber = 10;
         $startAmt = $startNumber + 4;
-        
+
         $totalData = array(
             'tar_per'       => 0,
             'tar_amt'       => 0,
@@ -346,7 +333,7 @@ Class Daily_prod_user_group_report extends WFF_Controller {
                 $due_date_code = $value['due_date_code'];
                 $start_row_due_date_code = $start_row;
             }
-    
+
             if($debt_group != $value['debt_group']) {
                 if(!empty($groupProduct['data'])) {
                     $rowGroup = $start_row;
@@ -395,7 +382,7 @@ Class Daily_prod_user_group_report extends WFF_Controller {
                 $worksheet->setCellValue('G' . ($start_row + count($groupProduct['data'])), (!empty($debtGroupTotal['tar_amt']) ? $debtGroupTotal['tar_amt'] : 0));
                 $worksheet->setCellValue('H' . ($start_row + count($groupProduct['data'])), (!empty($debtGroupTotal['tar_gap']) ? $debtGroupTotal['tar_gap'] : 0));
                 $worksheet->setCellValue('I' . ($start_row + count($groupProduct['data'])), (!empty($debtGroupTotal['inci']) ? $debtGroupTotal['inci'] : 0));
-                
+
 
                 $worksheet->setCellValue('J' . ($start_row + count($groupProduct['data'])), (!empty($groupProduct['col']) ? $groupProduct['col'] : 0));
                 $worksheet->setCellValue('K' . ($start_row + count($groupProduct['data'])), (!empty($groupProduct['rem']) ? $groupProduct['rem'] : 0));
@@ -427,7 +414,7 @@ Class Daily_prod_user_group_report extends WFF_Controller {
                 $debt_group = $value['debt_group'];
                 $start_row_debt_group = $start_row;
             }
-    
+
 
             $worksheet->setCellValue('E' . $start_row, $value['team']);
             $worksheet->setCellValue('F' . $start_row, (!empty($value['tar_per']) ? $value['tar_per'] : 0));
@@ -444,7 +431,7 @@ Class Daily_prod_user_group_report extends WFF_Controller {
             $worksheet->setCellValue('Q' . $start_row, (!empty($value['rem_actual']) ? $value['rem_actual'] : 0));
             $worksheet->setCellValue('R' . $start_row, (!empty($value['col_ratio_actual']) ? $value['col_ratio_actual'] : 0));
             $worksheet->setCellValue('S' . $start_row, (!empty($value['flow_rate_actual']) ? $value['flow_rate_actual'] : 0));
-            
+
 
             foreach($totalData as $keyTotal => &$totalValue) {
                 $tempTotalData = (!empty($value[$keyTotal])) ? $value[$keyTotal] : 0;
@@ -468,7 +455,7 @@ Class Daily_prod_user_group_report extends WFF_Controller {
                         $totalValue +=  $tempTotalDebtProd;
                     }
                 }
-                
+
             }
 
             if ($key == (count($dataGroup1) - 1)) {
@@ -484,7 +471,7 @@ Class Daily_prod_user_group_report extends WFF_Controller {
                             $worksheet->setCellValue('G' . $rowGroup, (!empty($debtProdTotalGroup['tar_amt']) ? $debtProdTotalGroup['tar_amt'] : 0));
                             $worksheet->setCellValue('H' . $rowGroup, (!empty($debtProdTotalGroup['tar_gap']) ? $debtProdTotalGroup['tar_gap'] : 0));
                             $worksheet->setCellValue('I' . $rowGroup, (!empty($debtProdTotalGroup['inci']) ? $debtProdTotalGroup['inci'] : 0));
-                            
+
                             $worksheet->setCellValue('J' . $rowGroup, (!empty($debtProdTotalGroup['col']) ? $debtProdTotalGroup['col'] : 0));
                             $worksheet->setCellValue('K' . $rowGroup, (!empty($debtProdTotalGroup['rem']) ? $debtProdTotalGroup['rem'] : 0));
                             $worksheet->setCellValue('L' . $rowGroup, (!empty($debtProdTotalGroup['flow_rate']) ? $debtProdTotalGroup['flow_rate'] : 0));
@@ -515,16 +502,16 @@ Class Daily_prod_user_group_report extends WFF_Controller {
                     $worksheet->mergeCells('A' . $start_row_debt_group . ':A' . ($start_row + 5));
                     $worksheet->setCellValue('A' . $start_row_debt_group, $debt_group);
                     $worksheet->getStyle('A' . $start_row_debt_group)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('FFE699');
-        
+
                     $worksheet->mergeCells('B' . $start_row_due_date_code . ':B' . ($start_row + 1));
                     $worksheet->setCellValue('B' . $start_row_due_date_code, $due_date_code);
-        
+
                     $worksheet->mergeCells('C' . $start_row_prod . ':C' . ($start_row + 1));
                     $worksheet->setCellValue('C' . $start_row_prod, $prod_row);
 
                     $worksheet->mergeCells('B' . ($start_row + 2) . ':E' . ($start_row + 2));
                     $worksheet->setCellValue('B' . ($start_row + 2), 'TOTAL');
-        
+
                     $worksheet->mergeCells('D' . $start_row_prod . ':D' . ($start_row));
                     $worksheet->setCellValue('D' . $start_row_prod, $due_date);
 
@@ -535,7 +522,7 @@ Class Daily_prod_user_group_report extends WFF_Controller {
                     $worksheet->setCellValue('G' . ($start_row + 1), (!empty($total['tar_amt']) ? $total['tar_amt'] : 0));
                     $worksheet->setCellValue('H' . ($start_row + 1), (!empty($total['tar_gap']) ? $total['tar_gap'] : 0));
                     $worksheet->setCellValue('I' . ($start_row + 1), (!empty($total['inci']) ? $total['inci'] : 0));
-                    
+
                     $worksheet->setCellValue('J' . ($start_row + 1), (!empty($total['col']) ? $total['col'] : 0));
                     $worksheet->setCellValue('K' . ($start_row + 1), (!empty($total['rem']) ? $total['rem'] : 0));
                     $worksheet->setCellValue('L' . ($start_row + 1), (!empty($total['flow_rate']) ? $total['flow_rate'] : 0));
@@ -555,7 +542,7 @@ Class Daily_prod_user_group_report extends WFF_Controller {
                     $worksheet->setCellValue('G' . ($start_row + 2), (!empty($dueDateCodeTotal['tar_amt']) ? $dueDateCodeTotal['tar_amt'] : 0));
                     $worksheet->setCellValue('H' . ($start_row + 2), (!empty($dueDateCodeTotal['tar_gap']) ? $dueDateCodeTotal['tar_gap'] : 0));
                     $worksheet->setCellValue('I' . ($start_row + 2), (!empty($dueDateCodeTotal['inci']) ? $dueDateCodeTotal['inci'] : 0));
-                    
+
 
                     $worksheet->setCellValue('J' . ($start_row + 2), (!empty($dueDateCodeTotal['col']) ? $dueDateCodeTotal['col'] : 0));
                     $worksheet->setCellValue('K' . ($start_row + 2), (!empty($dueDateCodeTotal['rem']) ? $dueDateCodeTotal['rem'] : 0));
@@ -582,7 +569,7 @@ Class Daily_prod_user_group_report extends WFF_Controller {
                     $worksheet->setCellValue('G' . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['tar_amt']) ? $debtGroupTotal['tar_amt'] : 0));
                     $worksheet->setCellValue('H' . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['tar_gap']) ? $debtGroupTotal['tar_gap'] : 0));
                     $worksheet->setCellValue('I' . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['inci']) ? $debtGroupTotal['inci'] : 0));
-                    
+
 
                     $worksheet->setCellValue('J' . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['col']) ? $debtGroupTotal['col'] : 0));
                     $worksheet->setCellValue('K' . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['rem']) ? $debtGroupTotal['rem'] : 0));
@@ -620,7 +607,7 @@ Class Daily_prod_user_group_report extends WFF_Controller {
                     $worksheet->setCellValue('G' . ($start_row + 1 ), (!empty($dueDateCodeTotal['tar_amt']) ? $dueDateCodeTotal['tar_amt'] : 0));
                     $worksheet->setCellValue('H' . ($start_row + 1 ), (!empty($dueDateCodeTotal['tar_gap']) ? $dueDateCodeTotal['tar_gap'] : 0));
                     $worksheet->setCellValue('I' . ($start_row + 1 ), (!empty($dueDateCodeTotal['inci']) ? $dueDateCodeTotal['inci'] : 0));
-                    
+
 
                     $worksheet->setCellValue('J' . ($start_row + 1), (!empty($dueDateCodeTotal['col']) ? $dueDateCodeTotal['col'] : 0));
                     $worksheet->setCellValue('K' . ($start_row + 1), (!empty($dueDateCodeTotal['rem']) ? $dueDateCodeTotal['rem'] : 0));
@@ -663,7 +650,7 @@ Class Daily_prod_user_group_report extends WFF_Controller {
         $worksheet->setTitle('Group B & C');
 
         $worksheet->getParent()->getDefaultStyle()->applyFromArray($style);
-        
+
         $worksheet->mergeCells('A1:C1');
         $worksheet->setCellValue('A1', 'month-year');
         $worksheet->getStyle("A1")->getFill()
@@ -786,7 +773,7 @@ Class Daily_prod_user_group_report extends WFF_Controller {
 
         $startNumber = 10;
         $startAmt = $startNumber + 4;
-        
+
         $totalData = array(
             'tar_per'       => 0,
             'tar_amt'       => 0,
@@ -913,7 +900,7 @@ Class Daily_prod_user_group_report extends WFF_Controller {
                 $due_date_code = $value['due_date_code'];
                 $start_row_due_date_code = $start_row;
             }
-    
+
             if($debt_group != $value['debt_group']) {
                 if(!empty($groupProduct['data'])) {
                     $rowGroup = $start_row;
@@ -964,7 +951,7 @@ Class Daily_prod_user_group_report extends WFF_Controller {
                 $worksheet->setCellValue('G' . ($start_row + count($groupProduct['data'])), (!empty($debtGroupTotal['tar_amt']) ? $debtGroupTotal['tar_amt'] : 0));
                 $worksheet->setCellValue('H' . ($start_row + count($groupProduct['data'])), (!empty($debtGroupTotal['tar_gap']) ? $debtGroupTotal['tar_gap'] : 0));
                 $worksheet->setCellValue('I' . ($start_row + count($groupProduct['data'])), (!empty($debtGroupTotal['inci']) ? $debtGroupTotal['inci'] : 0));
-                
+
 
                 $worksheet->setCellValue('J' . ($start_row + count($groupProduct['data'])), (!empty($groupProduct['col']) ? $groupProduct['col'] : 0));
                 $worksheet->setCellValue('K' . ($start_row + count($groupProduct['data'])), (!empty($groupProduct['rem']) ? $groupProduct['rem'] : 0));
@@ -998,7 +985,7 @@ Class Daily_prod_user_group_report extends WFF_Controller {
                 $debt_group = $value['debt_group'];
                 $start_row_debt_group = $start_row;
             }
-    
+
 
             $worksheet->setCellValue('E' . $start_row, $value['team']);
             $worksheet->setCellValue('F' . $start_row, (!empty($value['tar_per']) ? $value['tar_per'] : 0));
@@ -1017,7 +1004,7 @@ Class Daily_prod_user_group_report extends WFF_Controller {
             $worksheet->setCellValue('S' . $start_row, (!empty($value['rem_os']) ? $value['rem_os'] : 0));
             $worksheet->setCellValue('T' . $start_row, (!empty($value['flow_rate_os']) ? $value['flow_rate_os'] : 0));
             $worksheet->setCellValue('U' . $start_row, (!empty($value['col_ratio_os']) ? $value['col_ratio_os'] : 0));
-            
+
 
             foreach($totalData as $keyTotal => &$totalValue) {
                 $tempTotalData = (!empty($value[$keyTotal])) ? $value[$keyTotal] : 0;
@@ -1041,7 +1028,7 @@ Class Daily_prod_user_group_report extends WFF_Controller {
                         $totalValue +=  $tempTotalDebtProd;
                     }
                 }
-                
+
             }
 
             if ($key == (count($dataGroup2) - 1)) {
@@ -1057,7 +1044,7 @@ Class Daily_prod_user_group_report extends WFF_Controller {
                             $worksheet->setCellValue('G' . $rowGroup, (!empty($debtProdTotalGroup['tar_amt']) ? $debtProdTotalGroup['tar_amt'] : 0));
                             $worksheet->setCellValue('H' . $rowGroup, (!empty($debtProdTotalGroup['tar_gap']) ? $debtProdTotalGroup['tar_gap'] : 0));
                             $worksheet->setCellValue('I' . $rowGroup, (!empty($debtProdTotalGroup['inci']) ? $debtProdTotalGroup['inci'] : 0));
-                            
+
                             $worksheet->setCellValue('J' . $rowGroup, (!empty($debtProdTotalGroup['col']) ? $debtProdTotalGroup['col'] : 0));
                             $worksheet->setCellValue('K' . $rowGroup, (!empty($debtProdTotalGroup['rem']) ? $debtProdTotalGroup['rem'] : 0));
                             $worksheet->setCellValue('L' . $rowGroup, (!empty($debtProdTotalGroup['flow_rate']) ? $debtProdTotalGroup['flow_rate'] : 0));
@@ -1089,16 +1076,16 @@ Class Daily_prod_user_group_report extends WFF_Controller {
                     $worksheet->mergeCells('A' . $start_row_debt_group . ':A' . ($start_row + 5));
                     $worksheet->setCellValue('A' . $start_row_debt_group, $debt_group);
                     $worksheet->getStyle('A' . $start_row_debt_group)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('FFE699');
-        
+
                     $worksheet->mergeCells('B' . $start_row_due_date_code . ':B' . ($start_row + 1));
                     $worksheet->setCellValue('B' . $start_row_due_date_code, $due_date_code);
-        
+
                     $worksheet->mergeCells('C' . $start_row_prod . ':C' . ($start_row + 1));
                     $worksheet->setCellValue('C' . $start_row_prod, $prod_row);
 
                     $worksheet->mergeCells('B' . ($start_row + 2) . ':E' . ($start_row + 2));
                     $worksheet->setCellValue('B' . ($start_row + 2), 'TOTAL');
-        
+
                     $worksheet->mergeCells('D' . $start_row_prod . ':D' . ($start_row));
                     $worksheet->setCellValue('D' . $start_row_prod, $due_date);
 
@@ -1109,7 +1096,7 @@ Class Daily_prod_user_group_report extends WFF_Controller {
                     $worksheet->setCellValue('G' . ($start_row + 1), (!empty($total['tar_amt']) ? $total['tar_amt'] : 0));
                     $worksheet->setCellValue('H' . ($start_row + 1), (!empty($total['tar_gap']) ? $total['tar_gap'] : 0));
                     $worksheet->setCellValue('I' . ($start_row + 1), (!empty($total['inci']) ? $total['inci'] : 0));
-                    
+
                     $worksheet->setCellValue('J' . ($start_row + 1), (!empty($total['col']) ? $total['col'] : 0));
                     $worksheet->setCellValue('K' . ($start_row + 1), (!empty($total['rem']) ? $total['rem'] : 0));
                     $worksheet->setCellValue('L' . ($start_row + 1), (!empty($total['flow_rate']) ? $total['flow_rate'] : 0));
@@ -1129,7 +1116,7 @@ Class Daily_prod_user_group_report extends WFF_Controller {
                     $worksheet->setCellValue('G' . ($start_row + 2), (!empty($dueDateCodeTotal['tar_amt']) ? $dueDateCodeTotal['tar_amt'] : 0));
                     $worksheet->setCellValue('H' . ($start_row + 2), (!empty($dueDateCodeTotal['tar_gap']) ? $dueDateCodeTotal['tar_gap'] : 0));
                     $worksheet->setCellValue('I' . ($start_row + 2), (!empty($dueDateCodeTotal['inci']) ? $dueDateCodeTotal['inci'] : 0));
-                    
+
 
                     $worksheet->setCellValue('J' . ($start_row + 2), (!empty($dueDateCodeTotal['col']) ? $dueDateCodeTotal['col'] : 0));
                     $worksheet->setCellValue('K' . ($start_row + 2), (!empty($dueDateCodeTotal['rem']) ? $dueDateCodeTotal['rem'] : 0));
@@ -1156,7 +1143,7 @@ Class Daily_prod_user_group_report extends WFF_Controller {
                     $worksheet->setCellValue('G' . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['tar_amt']) ? $debtGroupTotal['tar_amt'] : 0));
                     $worksheet->setCellValue('H' . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['tar_gap']) ? $debtGroupTotal['tar_gap'] : 0));
                     $worksheet->setCellValue('I' . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['inci']) ? $debtGroupTotal['inci'] : 0));
-                    
+
 
                     $worksheet->setCellValue('J' . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['col']) ? $debtGroupTotal['col'] : 0));
                     $worksheet->setCellValue('K' . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['rem']) ? $debtGroupTotal['rem'] : 0));
@@ -1193,7 +1180,7 @@ Class Daily_prod_user_group_report extends WFF_Controller {
                     $worksheet->setCellValue('G' . ($start_row + 1 ), (!empty($dueDateCodeTotal['tar_amt']) ? $dueDateCodeTotal['tar_amt'] : 0));
                     $worksheet->setCellValue('H' . ($start_row + 1 ), (!empty($dueDateCodeTotal['tar_gap']) ? $dueDateCodeTotal['tar_gap'] : 0));
                     $worksheet->setCellValue('I' . ($start_row + 1 ), (!empty($dueDateCodeTotal['inci']) ? $dueDateCodeTotal['inci'] : 0));
-                    
+
 
                     $worksheet->setCellValue('J' . ($start_row + 1), (!empty($dueDateCodeTotal['col']) ? $dueDateCodeTotal['col'] : 0));
                     $worksheet->setCellValue('K' . ($start_row + 1), (!empty($dueDateCodeTotal['rem']) ? $dueDateCodeTotal['rem'] : 0));
@@ -1234,7 +1221,7 @@ Class Daily_prod_user_group_report extends WFF_Controller {
         $worksheet = $spreadsheet->createSheet(2);
         $worksheet->setTitle('Group D & E & F');
         $worksheet->getParent()->getDefaultStyle()->applyFromArray($style);
-        
+
         $worksheet->mergeCells('A1:C1');
         $worksheet->setCellValue('A1', 'month-year');
         $worksheet->getStyle("A1")->getFill()
@@ -1353,7 +1340,7 @@ Class Daily_prod_user_group_report extends WFF_Controller {
 
         $startNumber = 10;
         $startAmt = $startNumber + 4;
-        
+
         $totalData = array(
             'tar_per'       => 0,
             'tar_amt'       => 0,
@@ -1474,7 +1461,7 @@ Class Daily_prod_user_group_report extends WFF_Controller {
                 $due_date_code = $value['due_date_code'];
                 $start_row_due_date_code = $start_row;
             }
-    
+
             if($debt_group != $value['debt_group']) {
                 if(!empty($groupProduct['data'])) {
                     $rowGroup = $start_row;
@@ -1522,7 +1509,7 @@ Class Daily_prod_user_group_report extends WFF_Controller {
                 $worksheet->setCellValue('G' . ($start_row + count($groupProduct['data'])), (!empty($debtGroupTotal['tar_amt']) ? $debtGroupTotal['tar_amt'] : 0));
                 $worksheet->setCellValue('H' . ($start_row + count($groupProduct['data'])), (!empty($debtGroupTotal['tar_gap']) ? $debtGroupTotal['tar_gap'] : 0));
                 $worksheet->setCellValue('I' . ($start_row + count($groupProduct['data'])), (!empty($debtGroupTotal['inci']) ? $debtGroupTotal['inci'] : 0));
-                
+
 
                 $worksheet->setCellValue('J' . ($start_row + count($groupProduct['data'])), (!empty($groupProduct['col']) ? $groupProduct['col'] : 0));
                 $worksheet->setCellValue('K' . ($start_row + count($groupProduct['data'])), (!empty($groupProduct['rem']) ? $groupProduct['rem'] : 0));
@@ -1553,7 +1540,7 @@ Class Daily_prod_user_group_report extends WFF_Controller {
                 $debt_group = $value['debt_group'];
                 $start_row_debt_group = $start_row;
             }
-    
+
 
             $worksheet->setCellValue('E' . $start_row, $value['team']);
             $worksheet->setCellValue('F' . $start_row, (!empty($value['tar_per']) ? $value['tar_per'] : 0));
@@ -1569,7 +1556,7 @@ Class Daily_prod_user_group_report extends WFF_Controller {
             $worksheet->setCellValue('P' . $start_row, (!empty($value['rem_os']) ? $value['rem_os'] : 0));
             $worksheet->setCellValue('Q' . $start_row, (!empty($value['flow_rate_os']) ? $value['flow_rate_os'] : 0));
             $worksheet->setCellValue('R' . $start_row, (!empty($value['col_ratio_os']) ? $value['col_ratio_os'] : 0));
-            
+
 
             foreach($totalData as $keyTotal => &$totalValue) {
                 $tempTotalData = (!empty($value[$keyTotal])) ? $value[$keyTotal] : 0;
@@ -1593,7 +1580,7 @@ Class Daily_prod_user_group_report extends WFF_Controller {
                         $totalValue +=  $tempTotalDebtProd;
                     }
                 }
-                
+
             }
 
             if ($key == (count($dataGroup3) - 1)) {
@@ -1609,7 +1596,7 @@ Class Daily_prod_user_group_report extends WFF_Controller {
                             $worksheet->setCellValue('G' . $rowGroup, (!empty($debtProdTotalGroup['tar_amt']) ? $debtProdTotalGroup['tar_amt'] : 0));
                             $worksheet->setCellValue('H' . $rowGroup, (!empty($debtProdTotalGroup['tar_gap']) ? $debtProdTotalGroup['tar_gap'] : 0));
                             $worksheet->setCellValue('I' . $rowGroup, (!empty($debtProdTotalGroup['inci']) ? $debtProdTotalGroup['inci'] : 0));
-                            
+
                             $worksheet->setCellValue('J' . $rowGroup, (!empty($debtProdTotalGroup['col']) ? $debtProdTotalGroup['col'] : 0));
                             $worksheet->setCellValue('K' . $rowGroup, (!empty($debtProdTotalGroup['rem']) ? $debtProdTotalGroup['rem'] : 0));
                             $worksheet->setCellValue('L' . $rowGroup, (!empty($debtProdTotalGroup['flow_rate']) ? $debtProdTotalGroup['flow_rate'] : 0));
@@ -1639,16 +1626,16 @@ Class Daily_prod_user_group_report extends WFF_Controller {
                     $worksheet->mergeCells('A' . $start_row_debt_group . ':A' . ($start_row + 5));
                     $worksheet->setCellValue('A' . $start_row_debt_group, $debt_group);
                     $worksheet->getStyle('A' . $start_row_debt_group)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('FFE699');
-        
+
                     $worksheet->mergeCells('B' . $start_row_due_date_code . ':B' . ($start_row + 1));
                     $worksheet->setCellValue('B' . $start_row_due_date_code, $due_date_code);
-        
+
                     $worksheet->mergeCells('C' . $start_row_prod . ':C' . ($start_row + 1));
                     $worksheet->setCellValue('C' . $start_row_prod, $prod_row);
 
                     $worksheet->mergeCells('B' . ($start_row + 2) . ':E' . ($start_row + 2));
                     $worksheet->setCellValue('B' . ($start_row + 2), 'TOTAL');
-        
+
                     $worksheet->mergeCells('D' . $start_row_prod . ':D' . ($start_row));
                     $worksheet->setCellValue('D' . $start_row_prod, $due_date);
 
@@ -1659,7 +1646,7 @@ Class Daily_prod_user_group_report extends WFF_Controller {
                     $worksheet->setCellValue('G' . ($start_row + 1), (!empty($total['tar_amt']) ? $total['tar_amt'] : 0));
                     $worksheet->setCellValue('H' . ($start_row + 1), (!empty($total['tar_gap']) ? $total['tar_gap'] : 0));
                     $worksheet->setCellValue('I' . ($start_row + 1), (!empty($total['inci']) ? $total['inci'] : 0));
-                    
+
                     $worksheet->setCellValue('J' . ($start_row + 1), (!empty($total['col']) ? $total['col'] : 0));
                     $worksheet->setCellValue('K' . ($start_row + 1), (!empty($total['rem']) ? $total['rem'] : 0));
                     $worksheet->setCellValue('L' . ($start_row + 1), (!empty($total['flow_rate']) ? $total['flow_rate'] : 0));
@@ -1678,7 +1665,7 @@ Class Daily_prod_user_group_report extends WFF_Controller {
                     $worksheet->setCellValue('G' . ($start_row + 2), (!empty($dueDateCodeTotal['tar_amt']) ? $dueDateCodeTotal['tar_amt'] : 0));
                     $worksheet->setCellValue('H' . ($start_row + 2), (!empty($dueDateCodeTotal['tar_gap']) ? $dueDateCodeTotal['tar_gap'] : 0));
                     $worksheet->setCellValue('I' . ($start_row + 2), (!empty($dueDateCodeTotal['inci']) ? $dueDateCodeTotal['inci'] : 0));
-                    
+
 
                     $worksheet->setCellValue('J' . ($start_row + 2), (!empty($dueDateCodeTotal['col']) ? $dueDateCodeTotal['col'] : 0));
                     $worksheet->setCellValue('K' . ($start_row + 2), (!empty($dueDateCodeTotal['rem']) ? $dueDateCodeTotal['rem'] : 0));
@@ -1704,7 +1691,7 @@ Class Daily_prod_user_group_report extends WFF_Controller {
                     $worksheet->setCellValue('G' . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['tar_amt']) ? $debtGroupTotal['tar_amt'] : 0));
                     $worksheet->setCellValue('H' . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['tar_gap']) ? $debtGroupTotal['tar_gap'] : 0));
                     $worksheet->setCellValue('I' . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['inci']) ? $debtGroupTotal['inci'] : 0));
-                    
+
 
                     $worksheet->setCellValue('J' . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['col']) ? $debtGroupTotal['col'] : 0));
                     $worksheet->setCellValue('K' . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['rem']) ? $debtGroupTotal['rem'] : 0));
@@ -1741,7 +1728,7 @@ Class Daily_prod_user_group_report extends WFF_Controller {
                     $worksheet->setCellValue('G' . ($start_row + 1 ), (!empty($dueDateCodeTotal['tar_amt']) ? $dueDateCodeTotal['tar_amt'] : 0));
                     $worksheet->setCellValue('H' . ($start_row + 1 ), (!empty($dueDateCodeTotal['tar_gap']) ? $dueDateCodeTotal['tar_gap'] : 0));
                     $worksheet->setCellValue('I' . ($start_row + 1 ), (!empty($dueDateCodeTotal['inci']) ? $dueDateCodeTotal['inci'] : 0));
-                    
+
 
                     $worksheet->setCellValue('J' . ($start_row + 1), (!empty($dueDateCodeTotal['col']) ? $dueDateCodeTotal['col'] : 0));
                     $worksheet->setCellValue('K' . ($start_row + 1), (!empty($dueDateCodeTotal['rem']) ? $dueDateCodeTotal['rem'] : 0));

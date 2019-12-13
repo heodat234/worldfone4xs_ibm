@@ -9,7 +9,7 @@ use PhpOffice\PhpSpreadsheet\Style;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 Class Daily_working_days_report extends WFF_Controller {
 
-    private $collection             = "Daily_prod_working_days_report";
+    private $collection             = "Daily_prod_working_day";
    
 
     function __construct()
@@ -532,9 +532,10 @@ Class Daily_working_days_report extends WFF_Controller {
             'index_23'   => 0,
             'final_num'  => 0,
         ];
-        $data = [];
-        array_push($data, $temp_1,$temp_2,$temp_3,$temp_4,$temp_5,$temp_6,$temp_7, $temp_8, $temp_9,$temp_10,$temp_11,$temp_12,$temp_13);
+        // $data = [];
+        // array_push($data, $temp_1,$temp_2,$temp_3,$temp_4,$temp_5,$temp_6,$temp_7, $temp_8, $temp_9,$temp_10,$temp_11,$temp_12,$temp_13);
         // print_r($data);exit;
+        $this->crud->read($this->collection, $request);
 
         $spreadsheet = new Spreadsheet();
         $spreadsheet->getProperties()
@@ -688,7 +689,7 @@ Class Daily_working_days_report extends WFF_Controller {
             }
 
             $worksheet->setCellValue('A' . $start_row, $value['month']);
-            $worksheet->setCellValue('E' . $start_row, (!empty($value['team']) ? $value['team'] : 0));
+            $worksheet->setCellValue('E' . $start_row, (!empty($value['team_name']) ? $value['team_name'] : 0));
             $worksheet->setCellValue('F' . $start_row, (!empty($value['start_acc']) ? $value['start_acc'] : 0));
             $worksheet->setCellValue('G' . $start_row, (!empty($value['start_amt']) ? $value['start_amt'] : 0));
             $worksheet->setCellValue('H' . $start_row, (!empty($value['tar_acc']) ? $value['tar_acc'] : 0));
@@ -706,7 +707,7 @@ Class Daily_working_days_report extends WFF_Controller {
             $worksheet->setCellValue($this->stringFromColumnIndex($startIndex + 1) . $start_row, (!empty($value['final_num']) ? $value['final_num'] : 0));
 
 
-            if ($value['team'] == 'TOTAL') {
+            if ($value['team_name'] == 'TOTAL') {
                 $worksheet->getStyle('E' . $start_row)->getFill()
                 ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
                 ->getStartColor()->setRGB('E2EFDA');

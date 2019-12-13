@@ -29,7 +29,7 @@ _mongodb = Mongodb(MONGODB="_worldfone4xs", WFF_ENV=wff_env)
 log = open(base_url + "cronjob/python/Loan/log/importlnjc05.txt","a")
 now = datetime.now()
 subUserType = 'LO'
-collection = common.getSubUser(subUserType, 'LNJC05')
+collection = common.getSubUser(subUserType, 'K201908120244R1820191030')
 
 try:
     modelColumns = []
@@ -49,7 +49,7 @@ try:
     day = today.day
     month = today.month
     year = today.year
-    fileName = "LNJC05F"
+    fileName = "K20190812.0244.R18.20191030.xlsx"
     sep = ';'
     logDbName = "LO_Input_result_" + str(year) + str(month)
 
@@ -76,7 +76,7 @@ try:
             'file_path'     : ftpLocalUrl, 
             'source'        : 'ftp',
             'status'        : 2,
-            'command'       : '/usr/local/bin/python3.6 ' + base_url + "cronjob/python/Loan/importLNJC05.py > /dev/null &",
+            'command'       : '/usr/local/bin/python3.6 ' + base_url + "cronjob/python/Loan/importK20190812.0244.R18.20191030.py > /dev/null &",
             'created_by'    : 'system'
         }
         importLogId = mongodb.insert(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), insert_data=importLogInfo)

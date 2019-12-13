@@ -43,8 +43,8 @@ try:
     errorData = []
     total = 0
     complete = 0
-    # today = date.today()
-    today = datetime.strptime('20/11/2019', "%d/%m/%Y").date()
+    today = date.today()
+    # today = datetime.strptime('20/11/2019', "%d/%m/%Y").date()
     day = today.day
     month = today.month
     year = today.year
@@ -54,9 +54,9 @@ try:
 
     if day == 1:
         mongodb.create_db(DB_NAME=logDbName)
-        mongodbresult = Mongodb(logDbName)
+        mongodbresult = Mongodb(logDbName, wff_env)
     else:
-        mongodbresult = Mongodb(logDbName)
+        mongodbresult = Mongodb(logDbName, wff_env)
     
     ftpLocalUrl = common.getDownloadFolder() + fileName
 
@@ -65,6 +65,9 @@ try:
         importLogId = str(sys.argv[1])
         importLogInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': ObjectId(sys.argv[1])})
     except Exception as SysArgvError:
+        if not os.path.isfile(ftpLocalUrl):
+            sys.exit()
+
         importLogInfo = {
             'collection'    : collection, 
             'begin_import'  : time.time(),
@@ -72,7 +75,7 @@ try:
             'file_path'     : ftpLocalUrl, 
             'source'        : 'ftp',
             'status'        : 2,
-            'command'       : 'python3.6 ' + base_url + "cronjob/python/Loan/importTemporaryPayment.py > /dev/null &",
+            'command'       : '/usr/local/bin/python3.6 ' + base_url + "cronjob/python/Loan/importTemporaryPayment.py > /dev/null &",
             'created_by'    : 'system'
         }
         importLogId = mongodb.insert(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), insert_data=importLogInfo)
@@ -104,7 +107,7 @@ try:
     if len(filenameExtension) < 2:
         filenameExtension.append('txt')
 
-    mongodb.remove_document(MONGO_COLLECTION=collection)
+    # mongodb.remove_document(MONGO_COLLECTION=collection)
 
     if filenameExtension[1] in ['csv', 'xlsx']:
         if(filenameExtension[1] == 'csv'):
@@ -126,12 +129,25 @@ try:
                         temp['error_mesg'] = 'Sai kiểu dữ liệu nhập'
                         temp['result'] = 'error'
                         result = False
+                        
                 temp['created_by'] = 'system'
                 temp['created_at'] = time.time()
                 temp['import_id'] = str(importLogId)
                 if(result == False):
                     errorData.append(temp)
                 else:
+                    lnjc05Info = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'LNJC05'), WHERE={'account_number': temp['account_number']})
+                    if lnjc05Info is not None:
+                        temp['type'] = 'ZACCF'
+                        temp['overdue_amount'] = (lnjc05Info['overdue_amount_this_month']) if lnjc05Info['overdue_amount_this_month'] is not None else 0
+                        temp['remain_amount'] = temp['overdue_amount'] - temp['amt']
+                        
+                    list_acc = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'List_of_account_in_collection'), WHERE={'account_number': temp['account_number']})
+                    if list_acc is not None:
+                        temp['type'] = 'SBV'
+                        temp['overdue_amount'] = (list_acc['cur_bal']) if list_acc['cur_bal'] is not None else 0
+                        temp['remain_amount'] = temp['overdue_amount'] - temp['amt']
+                        
                     insertData.append(temp)
                     result = True
                     complete += 1
@@ -166,11 +182,11 @@ try:
     if(len(errorData) > 0):
         mongodbresult.remove_document(MONGO_COLLECTION=common.getSubUser(subUserType, ('Temporary_payment_' + str(year) + str(month) + str(day))))
         mongodbresult.batch_insert(common.getSubUser(subUserType, ('Temporary_payment_' + str(year) + str(month) + str(day))), errorData)
-        mongodb.update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': importLogId}, VALUE={'status': 0, 'complete_import': time.time()})
+        mongodb.update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': ObjectId(str(importLogId))}, VALUE={'status': 0, 'complete_import': time.time(), 'total': total, 'complete': complete})
     else:
         if len(insertData) > 0:
             mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertData)
-        mongodb.update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': importLogId}, VALUE={'status': 1, 'complete_import': time.time()})
+        mongodb.update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': ObjectId(str(importLogId))}, VALUE={'status': 1, 'complete_import': time.time(), 'total': total, 'complete': complete})
 
 except Exception as e:
     log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')

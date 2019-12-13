@@ -7,7 +7,7 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Reader;
 use PhpOffice\PhpSpreadsheet\Style;
-Class Daily_all_user_report extends WFF_Controller {
+Class Daily_all_user_report extends CI_Controller {
 
     private $collection                = "Daily_all_user_report";
     private $lnjc05_collection         = "LNJC05";

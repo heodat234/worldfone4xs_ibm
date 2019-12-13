@@ -38,7 +38,7 @@ try:
     lnjc05ByGroup = {}
 
     # today = date.today()
-    today = datetime.strptime('22/10/2019', "%d/%m/%Y").date()
+    today = datetime.strptime('14/10/2019', "%d/%m/%Y").date()
 
     day = today.day
     month = today.month
@@ -152,8 +152,8 @@ try:
 
             target_os_bl = 1
             target_no = 1
-            # groupName = 'Main Product/' + 'Team ' + group[0:1] + '/Group ' + group
-            groupInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Group'), WHERE={'name': {'$regex' : ".*" + group + ".*"}})
+            groupName = 'Main Product/' + 'Team ' + group[0:1] + '/Group ' + group
+            groupInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Group'), WHERE={'name': groupName})
             if groupInfo is not None:
                 diallistInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Diallist'), WHERE={'group_id': groupInfo['_id']})
                 if diallistInfo is not None:

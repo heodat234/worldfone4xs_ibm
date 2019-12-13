@@ -26,10 +26,10 @@ base_url = common.base_url()
 wff_env = common.wff_env(base_url)
 mongodb = Mongodb(MONGODB="worldfone4xs", WFF_ENV=wff_env)
 _mongodb = Mongodb(MONGODB="_worldfone4xs", WFF_ENV=wff_env)
-log = open(base_url + "cronjob/python/Loan/log/importlnjc05.txt","a")
+log = open(base_url + "cronjob/python/Loan/log/importLockCard.txt","a")
 now = datetime.now()
 subUserType = 'LO'
-collection = common.getSubUser(subUserType, 'LNJC05')
+collection = common.getSubUser(subUserType, 'Block_card')
 
 try:
     modelColumns = []
@@ -49,7 +49,7 @@ try:
     day = today.day
     month = today.month
     year = today.year
-    fileName = "LNJC05F"
+    fileName = "TOTAL DANH SACH KHOA THE ( START 30.11.2018 ).xlsx"
     sep = ';'
     logDbName = "LO_Input_result_" + str(year) + str(month)
 
@@ -76,7 +76,7 @@ try:
             'file_path'     : ftpLocalUrl, 
             'source'        : 'ftp',
             'status'        : 2,
-            'command'       : '/usr/local/bin/python3.6 ' + base_url + "cronjob/python/Loan/importLNJC05.py > /dev/null &",
+            'command'       : '/usr/local/bin/python3.6 ' + base_url + "cronjob/python/Loan/importLock_card.py > /dev/null &",
             'created_by'    : 'system'
         }
         importLogId = mongodb.insert(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), insert_data=importLogInfo)
@@ -108,15 +108,14 @@ try:
     if len(filenameExtension) < 2:
         filenameExtension.append('txt')
 
-    mongodb.remove_document(MONGO_COLLECTION=collection)
-
     if filenameExtension[1] in ['csv', 'xlsx']:
         if(filenameExtension[1] == 'csv'):
-            inputDataRaw = excel.getDataCSV(file_path=importLogInfo['file_path'], dtype=object, sep=sep, header=None, names=modelColumns, na_values='')
+            inputDataRaw = excel.getDataCSV(file_path=importLogInfo['file_path'], dtype=object, sep=';', header=0, names=modelColumns, na_values='')
         else:
-            inputDataRaw = excel.getDataExcel(file_path=importLogInfo['file_path'], header=None, names=modelColumns, na_values='')
+            inputDataRaw = excel.getDataExcel(file_path=importLogInfo['file_path'], header=0, names=modelColumns, na_values='')
 
         inputData = inputDataRaw.to_dict('records')
+        pprint(inputData)
         for idx, row in enumerate(inputData):
             total += 1
             temp = {}
@@ -169,8 +168,8 @@ try:
                         complete += 1
 
     if(len(errorData) > 0):
-        mongodbresult.remove_document(MONGO_COLLECTION=common.getSubUser(subUserType, ('LNJC05_' + str(year) + str(month) + str(day))))
-        mongodbresult.batch_insert(common.getSubUser(subUserType, ('LNJC05_' + str(year) + str(month) + str(day))), errorData)
+        mongodbresult.remove_document(MONGO_COLLECTION=common.getSubUser(subUserType, ('Block_card_' + str(year) + str(month) + str(day))))
+        mongodbresult.batch_insert(common.getSubUser(subUserType, ('Block_card_' + str(year) + str(month) + str(day))), errorData)
         mongodb.update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': importLogId}, VALUE={'status': 0, 'complete_import': time.time(), 'total': total, 'complete': complete})
     else:
         if len(insertData) > 0:

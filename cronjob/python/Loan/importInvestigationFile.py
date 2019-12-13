@@ -44,20 +44,20 @@ try:
     errorData = []
     total = 0
     complete = 0
-    # today = date.today()
-    today = datetime.strptime('20/11/2019', "%d/%m/%Y").date()
+    today = date.today()
+    # today = datetime.strptime('20/11/2019', "%d/%m/%Y").date()
     day = today.day
     month = today.month
     year = today.year
-    fileName = ""
+    fileName = "Investigation file.xlsx"
     sep = ';'
     logDbName = "LO_Input_result_" + str(year) + str(month)
 
     if day == 1:
         mongodb.create_db(DB_NAME=logDbName)
-        mongodbresult = Mongodb(logDbName)
+        mongodbresult = Mongodb(logDbName, WFF_ENV=wff_env)
     else:
-        mongodbresult = Mongodb(logDbName)
+        mongodbresult = Mongodb(logDbName, WFF_ENV=wff_env)
     
     ftpLocalUrl = common.getDownloadFolder() + fileName
 
@@ -66,6 +66,9 @@ try:
         importLogId = str(sys.argv[1])
         importLogInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': ObjectId(sys.argv[1])})
     except Exception as SysArgvError:
+        if not os.path.isfile(ftpLocalUrl):
+            sys.exit()
+    
         importLogInfo = {
             'collection'    : collection, 
             'begin_import'  : time.time(),
@@ -73,7 +76,7 @@ try:
             'file_path'     : ftpLocalUrl, 
             'source'        : 'ftp',
             'status'        : 2,
-            'command'       : 'python3.6 ' + base_url + "cronjob/python/Loan/importInvestigation.py > /dev/null &",
+            'command'       : '/usr/local/bin/python3.6 ' + base_url + "cronjob/python/Loan/importInvestigation.py > /dev/null &",
             'created_by'    : 'system'
         }
         importLogId = mongodb.insert(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), insert_data=importLogInfo)
@@ -115,7 +118,7 @@ try:
             total += 1
             temp = {}
             result = True
-            if row['account_number'] not in ['', None]:
+            if row['contract_no'] not in ['', None]:
                 for cell in row:
                     try:
                         temp[cell] = common.convertDataType(data=row[cell], datatype=modelConverters[cell], formatType=modelFormat[cell])

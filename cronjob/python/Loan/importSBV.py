@@ -57,9 +57,9 @@ try:
 
     if day == 1:
         mongodb.create_db(DB_NAME=logDbName)
-        mongodbresult = Mongodb(logDbName)
+        mongodbresult = Mongodb(logDbName, wff_env)
     else:
-        mongodbresult = Mongodb(logDbName)
+        mongodbresult = Mongodb(logDbName, wff_env)
     
     ftpLocalUrl = common.getDownloadFolder() + fileName
 
@@ -81,7 +81,7 @@ try:
             'file_path'     : ftpLocalUrl, 
             'source'        : 'ftp',
             'status'        : 2,
-            'command'       : 'python3.6 ' + base_url + "cronjob/python/Loan/importSBV.py > /dev/null &",
+            'command'       : '/usr/local/bin/python3.6 ' + base_url + "cronjob/python/Loan/importSBV.py > /dev/null &",
             'created_by'    : 'system'
         }
         importLogId = mongodb.insert(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), insert_data=importLogInfo)

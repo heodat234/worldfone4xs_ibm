@@ -90,7 +90,14 @@ class Common:
         return result
 
     def convertInt(self, value, formatType=''):
-        return int(value)
+        try:
+            if value in ['']:
+                value = 0
+            if isinstance(value, str):
+                value = value.replace(',', '')
+            return int(value)
+        except Exception as e:
+            str(e)
 
     def convertBoolean(self, value, formatType=''):
         return bool(value)

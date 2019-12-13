@@ -56,9 +56,9 @@ try:
 
     if day == 1:
         mongodb.create_db(DB_NAME=logDbName)
-        mongodbresult = Mongodb(logDbName)
+        mongodbresult = Mongodb(logDbName, wff_env)
     else:
-        mongodbresult = Mongodb(logDbName)
+        mongodbresult = Mongodb(logDbName, wff_env)
     
     ftpLocalUrl = common.getDownloadFolder() + fileName
 

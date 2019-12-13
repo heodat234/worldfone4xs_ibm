@@ -64,3 +64,35 @@ else
    echo "Worldfone ScanJob service is running"
    exit 0
 fi
+
+if [ $(ps -ef | grep -v grep | grep importReportReleaseSale.py | wc -l) -lt 1 ]; then
+   /usr/local/bin/python3.6 ${BASEDIR}/importReportReleaseSale.py > /dev/null 2>&1 &
+   echo "RUN ${BASEDIR}/importReportReleaseSale.py"
+else
+   echo "Worldfone ScanJob service is running"
+   exit 0
+fi
+
+if [ $(ps -ef | grep -v grep | grep importSiteResult.py | wc -l) -lt 1 ]; then
+   /usr/local/bin/python3.6 ${BASEDIR}/importSiteResult.py > /dev/null 2>&1 &
+   echo "RUN ${BASEDIR}/importSiteResult.py"
+else
+   echo "Worldfone ScanJob service is running"
+   exit 0
+fi
+
+if [ $(ps -ef | grep -v grep | grep importCollateralInfo.py | wc -l) -lt 1 ]; then
+   /usr/local/bin/python3.6 ${BASEDIR}/importCollateralInfo.py > /dev/null 2>&1 &
+   echo "RUN ${BASEDIR}/importCollateralInfo.py"
+else
+   echo "Worldfone ScanJob service is running"
+   exit 0
+fi
+
+if [ $(ps -ef | grep -v grep | grep importListOfCusAssignedToPartner.py | wc -l) -lt 1 ]; then
+   /usr/local/bin/python3.6 ${BASEDIR}/importListOfCusAssignedToPartner.py > /dev/null 2>&1 &
+   echo "RUN ${BASEDIR}/importListOfCusAssignedToPartner.py"
+else
+   echo "Worldfone ScanJob service is running"
+   exit 0
+fi
