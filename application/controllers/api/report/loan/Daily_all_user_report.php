@@ -695,7 +695,7 @@ Class Daily_all_user_report extends CI_Controller {
                                           array_push($arr_spin, $key_phone);
                                        }
                                     }
-
+                                    
                                     // if (isset($duedate)) {
                                     //    $match_spin = array(
                                     //       '$match' => array(
@@ -2528,8 +2528,8 @@ Class Daily_all_user_report extends CI_Controller {
       $now = date('d/m/Y');
       $now = getdate();
       $today = $now['mday'].'-'.$now['month'].'-'.$now['year'];
-      // $date = strtotime("$today");
-      $date = 1569862800;
+      $date = strtotime("$today");
+      // $date = 1569862800;
       $data = $this->mongo_db->where(array('date' => $date  ))->get($this->collection);
 
       $filename = "DAILY ALL USER REPORT.xlsx";
