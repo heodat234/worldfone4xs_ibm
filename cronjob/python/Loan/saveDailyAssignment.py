@@ -46,7 +46,7 @@ try:
    log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': Start Import' + '\n')
 
    today = date.today()
-   # today = datetime.strptime('12/10/2019', "%d/%m/%Y").date()
+   # today = datetime.strptime('13/12/2019', "%d/%m/%Y").date()
 
    day = today.day
    month = today.month
@@ -84,7 +84,7 @@ try:
                 }
             ]
    data = mongodb.aggregate_pipeline(MONGO_COLLECTION=lnjc05_collection,aggregate_pipeline=aggregate_pipeline)
-   
+
    for idx, row in enumerate(data):
       for detail in row['detail']:
          temp = {}
@@ -158,7 +158,7 @@ try:
          i = i+1
          # break
 
-   
+
    # List of Account
    data_acc = mongodb.aggregate_pipeline(MONGO_COLLECTION=account_collection,aggregate_pipeline=aggregate_pipeline)
    for idx, row in enumerate(data_acc):
@@ -176,24 +176,24 @@ try:
          temp['overdue_date']    = row['overdue_date']
          temp['loan_overdue_amount']      = row['overdue_amt']
          temp['current_balance']          = row['cur_bal']
-         
+
          if sbv != None:
             temp['product_id']                  = str(sbv['card_type'])
             temp['outstanding_principal']       = float(sbv['ob_principal_sale']) + float(sbv['ob_principal_cash'])
 
          if group != None:
             temp['group_id']                  = str(group['group'])
-         
+
          temp['contacted'] = mongodb.count(MONGO_COLLECTION=cdr_collection,WHERE={'customernumber': str(row['phone'])})
 
          if 'assign' in detail.keys():
             for user in list(users):
                if user['extension'] == detail['assign']:
                   temp['assign']   = detail['assign']+' '+user['agentname']
-         
+
          if 'action_code' in detail.keys():
             temp['action_code']          = detail['action_code']
-         
+
          for field in list(lawsuit_fields['data']):
             if field['field'] in detail.keys():
                temp[field['field']]          = detail[field['field']]
@@ -231,7 +231,7 @@ try:
             if field_raa['field'] in detail.keys():
                temp[field_raa['field']]          = detail[field_raa['field']]
 
-      
+
          temp['createdAt'] = time.time()
          temp['createdBy'] = 'system'
          insertData.append(temp)
@@ -255,7 +255,7 @@ try:
                temp['overdue_date']    = common.convertTimestamp(row['NGAY_QUA_HAN'],formatString='%d/%m/%Y')
          else:
             temp['overdue_date'] = ''
-         
+
          temp['loan_overdue_amount']      = float(row['WO9711'])+float(row['WO9713'])+float(row['WO9713'])
          temp['current_balance']          = float(row['WO9711'])+float(row['WO9713'])+float(row['WO9713'])
          temp['product_id']               = str(row['PROD_ID'])
@@ -268,10 +268,10 @@ try:
             for user in list(users):
                if user['extension'] == detail['assign']:
                   temp['assign']   = detail['assign']+' '+user['agentname']
-         
+
          if 'action_code' in detail.keys():
             temp['action_code']          = detail['action_code']
-         
+
          for field in list(lawsuit_fields['data']):
             if field['field'] in detail.keys():
                temp[field['field']]          = detail[field['field']]
@@ -309,7 +309,7 @@ try:
             if field_raa['field'] in detail.keys():
                temp[field_raa['field']]          = detail[field_raa['field']]
 
-      
+
          temp['createdAt'] = time.time()
          temp['createdBy'] = 'system'
          insertData.append(temp)
@@ -320,7 +320,7 @@ try:
    if len(insertData) > 0:
       # mongodb.remove_document(MONGO_COLLECTION=collection)
       mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertData)
-      
+
    now_end         = datetime.now()
    log.write(now_end.strftime("%d/%m/%Y, %H:%M:%S") + ': End Log' + '\n')
    print('DONE')

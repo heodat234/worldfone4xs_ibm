@@ -31,3 +31,4 @@
 13/12/2019, 15:38:24: Authentication failed.
 13/12/2019, 15:39:31: Authentication failed.
 13/12/2019, 15:41:50: Authentication failed.
+14/12/2019, 17:12:34: object of type 'Cursor' has no len()

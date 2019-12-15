@@ -94,12 +94,12 @@ try:
    quotient = int(count)/10000
    mod = int(count)%10000
    for x in range(int(quotient)):
-      result = mongodb.get(MONGO_COLLECTION=account_collection, SELECT=['phone','cus_name','overdue_amt','current_bal','account_number'],SORT=([('_id', -1)]),SKIP=int(x*10000), TAKE=int(10000))
+      result = mongodb.get(MONGO_COLLECTION=account_collection, SELECT=['phone','cus_name','overdue_amt','cur_bal','account_number'],SORT=([('_id', -1)]),SKIP=int(x*10000), TAKE=int(10000))
       for idx,row in enumerate(result):
          PaymentData.append(row)
 
    if int(mod) > 0:
-      result = mongodb.get(MONGO_COLLECTION=account_collection,SELECT=['phone','cus_name','overdue_amt','current_bal','account_number'], SORT=([('_id', -1)]),SKIP=int(int(quotient)*10000), TAKE=int(mod))
+      result = mongodb.get(MONGO_COLLECTION=account_collection,SELECT=['phone','cus_name','overdue_amt','cur_bal','account_number'], SORT=([('_id', -1)]),SKIP=int(int(quotient)*10000), TAKE=int(mod))
       for idx,row in enumerate(result):
          PaymentData.append(row)
 
@@ -117,7 +117,7 @@ try:
          temp['phone']           = row['phone']
          temp['name']            = row['cus_name']
          temp['os']              = row['overdue_amt']
-         temp['amount']          = row['current_bal']
+         temp['amount']          = row['cur_bal']
          temp['sending_date']    = now.strftime("%d/%m/%Y")
          temp['createdAt']       = time.time()
          insertData.append(temp)

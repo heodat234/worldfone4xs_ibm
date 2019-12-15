@@ -42,9 +42,9 @@ try:
    data        = []
    insertData  = []
    now         = datetime.now()
-   
+
    today = date.today()
-   # today = datetime.strptime('12/10/2019', "%d/%m/%Y").date()
+   # today = datetime.strptime('13/12/2019', "%d/%m/%Y").date()
 
    day = today.day
    month = today.month
@@ -63,7 +63,7 @@ try:
 
    if todayTimeStamp in listHoliday or (weekday == 5) or weekday == 6:
       sys.exit()
-   
+
    # Account
    aggregate_acc = [
       {
@@ -174,14 +174,14 @@ try:
             'createdBy'       : 'system',
             'createdAt'       : time.time()
          }
-         
+
          insertData.append(temp)
          i += 1
 
    if len(insertData) > 0:
       # mongodb.remove_document(MONGO_COLLECTION=collection)
       mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertData)
-      
+
    now_end         = datetime.now()
    log.write(now_end.strftime("%d/%m/%Y, %H:%M:%S") + ': End Log' + '\n')
    print('DONE')

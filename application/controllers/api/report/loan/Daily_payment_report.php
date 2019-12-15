@@ -26,7 +26,11 @@ Class Daily_payment_report extends WFF_Controller {
     {
         try {
             $request = json_decode($this->input->get("q"), TRUE);
-            $response = $this->crud->read($this->collection, $request);
+            $now = getdate();
+            $today = $now['mday'].'-'.$now['month'].'-'.$now['year'];
+            $date = strtotime("$today");
+            $match = array('createdAt' => array('$gte' => $date));
+            $response = $this->crud->read($this->collection, $request,array(),$match);
             echo json_encode($response);
 
         } catch (Exception $e) {
@@ -37,7 +41,7 @@ Class Daily_payment_report extends WFF_Controller {
     function save()
     {
       shell_exec('PYTHONIOENCODING=utf-8 python3.6 /var/www/html/worldfone4xs_ibm/cronjob/python/Loan/saveDailyPayment.py  > /dev/null &');
-        
+
     }
 
     function exportExcel()

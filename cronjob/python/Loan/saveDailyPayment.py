@@ -6,6 +6,7 @@ import time
 import ntpath
 import json
 import calendar
+import traceback
 from helper.mongod import Mongodb
 from datetime import datetime
 from datetime import date
@@ -38,8 +39,8 @@ try:
    insertData  = []
    PaymentData   = []
 
-   today = date.today()
-   # today = datetime.strptime('12/10/2019', "%d/%m/%Y").date()
+   # today = date.today()
+   today = datetime.strptime('13/12/2019', "%d/%m/%Y").date()
 
    day = today.day
    month = today.month
@@ -59,7 +60,7 @@ try:
    if todayTimeStamp in listHoliday or (weekday == 5) or weekday == 6:
       sys.exit()
 
-
+   i = 1
    # LN3206F
    count = mongodb.count(MONGO_COLLECTION=ln3206_collection)
    quotient = int(count)/10000
@@ -103,7 +104,7 @@ try:
 
          lnjc05 = mongodb.getOne(MONGO_COLLECTION=lnjc05_collection, WHERE={'account_number': str(row['account_number'])},SELECT=['due_date','group_id'])
          if lnjc05 != None:
-            row['group']      = lnjc05['group_id'] 
+            row['group']      = lnjc05['group_id']
             date_time = datetime.fromtimestamp(lnjc05['due_date'])
             d2       = date_time.strftime('%d/%m/%y')
             tdelta   = datetime.strptime(d1, '%d/%m/%y') - datetime.strptime(d2, '%d/%m/%y')
@@ -117,7 +118,11 @@ try:
       row['note'] = ''
       row.pop('_id')
       row.pop('date')
+      row['stt'] = i
+      row['createdAt'] = time.time()
+      row['createdBy'] = 'system'
       insertData.append(row)
+      i += 1
       # break
 
    # Report_input_payment_of_card
@@ -171,25 +176,29 @@ try:
             d2          = date_time.strftime('%d/%m/%y')
             row['due_date']   = d2
             # d2       = account['overdue']
-            tdelta   = datetime.strptime(d1, '%d/%m/%y') - datetime.strptime(d2, '%d/%m/%Y')
+            tdelta   = datetime.strptime(d1, '%d/%m/%y') - datetime.strptime(d2, '%d/%m/%y')
             row['num_of_overdue_day'] = tdelta.days
-         
+
          row['amt'] = row['amount']
          row['pic'] = ''
          row['note'] = ''
          row.pop('_id')
          row.pop('effective_date')
          row.pop('amount')
+         row['stt'] = i
+         row['createdAt'] = time.time()
+         row['createdBy'] = 'system'
          insertData.append(row)
+         i += 1
       # break
 
    if len(insertData) > 0:
-      mongodb.remove_document(MONGO_COLLECTION=collection)
+      # mongodb.remove_document(MONGO_COLLECTION=collection)
       mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertData)
-      
+
    now_end         = datetime.now()
    log.write(now_end.strftime("%d/%m/%Y, %H:%M:%S") + ': End Log' + '\n')
    print('DONE')
 except Exception as e:
-   pprint(e)
+   print(traceback.format_exc())
    log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')

@@ -8,6 +8,7 @@ import time
 import sys
 import os
 import json
+import traceback
 from pprint import pprint
 from datetime import datetime
 from datetime import date, timedelta
@@ -45,8 +46,8 @@ try:
         '03'    : '31st'
     }
 
-    today = date.today()
-    # today = datetime.strptime('20/11/2019', "%d/%m/%Y").date()
+    # today = date.today()
+    today = datetime.strptime('13/12/2019', "%d/%m/%Y").date()
 
     day = today.day
     month = today.month
@@ -65,7 +66,8 @@ try:
 
     dueDateThisMonth = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_due_date'))
 
-    if todayTimeStamp in listHoliday or (weekday == 5) or weekday == 6:
+    # if todayTimeStamp in listHoliday or (weekday == 5) or weekday == 6:
+    if todayTimeStamp in listHoliday or weekday == 6:
         sys.exit()
 
     todayString = today.strftime("%d/%m/%Y")
@@ -92,12 +94,12 @@ try:
     listGroupProductRaw = _mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Jsondata'), WHERE={'tags': ['group', 'debt', 'product']})
     listGroupProduct = listGroupProductRaw['data']
 
-    lnjc05 = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'LNJC05'))
-    total_lnjc05 = 0
-    total_cur_bal_lnjc05 = 0
-    for lnjc05_row in lnjc05:
-        total_lnjc05 += 1
-        total_cur_bal_lnjc05 += lnjc05_row['current_balance']
+    # lnjc05 = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'LNJC05'))
+    # total_lnjc05 = 0
+    # total_cur_bal_lnjc05 = 0
+    # for lnjc05_row in lnjc05:
+    #     total_lnjc05 += 1
+    #     total_cur_bal_lnjc05 += lnjc05_row['current_balance']
     
     list_acc = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'List_of_account_in_collection'))
     total_list_acc = 0
@@ -111,110 +113,154 @@ try:
             dueDayOfMonth = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_due_date'), WHERE={'for_month': str(month), 'debt_group': debtGroupCell[1:3]})
             dueDayLastMonth = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_due_date'), WHERE={'for_month': str(month - 1), 'debt_group': debtGroupCell[1:3]})
             if todayTimeStamp > dueDayOfMonth['due_date_add_1']:
-                todayIndex = str(common.countWorkingDaysBetweendate(starttime = dueDayOfMonth['due_date_add_1'], endtime = todayTimeStamp, mongodb=mongodb))
+                todayIndex = int(common.countWorkingDaysBetweendate(starttime = dueDayOfMonth['due_date_add_1'], endtime = todayTimeStamp, mongodb=mongodb))
             else:
-                todayIndex = str(common.countWorkingDaysBetweendate(starttime = dueDayLastMonth['due_date_add_1'], endtime = todayTimeStamp, mongodb=mongodb))
+                todayIndex = int(common.countWorkingDaysBetweendate(starttime = dueDayLastMonth['due_date_add_1'], endtime = todayTimeStamp, mongodb=mongodb))
             
-            for groupProductCell in listGroupProduct:
-                for key in dpWorkingdaysdaycol:
-                    groupInfoByDueDate = list(mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Group'), WHERE={'debt_groups': debtGroupCell, 'name': {"$regex": groupProductCell['text'] + '.*'}}))
-                    groupInfoByDueDate.extend([{'name': 'Total'}])
-                    for groupCell in groupInfoByDueDate:
-                        debtList = []
-                        cur_bal = 0
-                        if groupProductCell['value'] == 'SIBS':
-                            count_acc = total_lnjc05
-                            cur_bal = total_cur_bal_lnjc05
+            if todayTimeStamp == dueDayOfMonth['due_date_add_1']:
+                pprint("DUNG")
+                for groupProductCell in listGroupProduct:
+                    for key in dpWorkingdaysdaycol:
+                        groupInfoByDueDate = list(mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Group'), WHERE={'debt_groups': debtGroupCell, 'name': {"$regex": groupProductCell['text'] + '.*'}}))
+                        groupInfoByDueDate.extend([{'name': 'Total'}])
+                        for groupCell in groupInfoByDueDate:
+                            if groupCell['name'] != 'Total':
+                                dueDateValue = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Due_date_next_date'), WHERE={'due_date_one': {'$gte': starttime, '$lte': starttime}, 'team_id': str(groupCell['_id'])})
+                                target = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Target'), WHERE={'group.id': str(groupCell['_id'])})
+                                temp = {
+                                    'group'         : debtGroupCell[0:1] + ' GROUP',
+                                    'month'         : today.strftime("%b-%y"),
+                                    'due'           : due[debtGroupCell[1:3]],
+                                    'product'       : groupProductCell['value'],
+                                    'due_date'      : todayTimeStamp - 86400,
+                                    'day'           : dpWorkingdaysdaycol[key],
+                                    'day_code'      : key,
+                                    'team_name'     : groupCell['name'],
+                                    'team_id'       : str(groupCell['_id']),
+                                    'start_acc'     : dueDateValue['debt_acc_no'] if dueDateValue['debt_acc_no'] is not None else 0,
+                                    'start_amt'     : dueDateValue['current_balance_total'] if dueDateValue['current_balance_total'] is not None else 0,
+                                    'target_acc'    : (dueDateValue['debt_acc_no'] * int(target['target'])) / 100 if dueDateValue['debt_acc_no'] is not None and target['target'] is not None else 0,
+                                    'target_amt'    : (dueDateValue['current_balance_total'] * int(target['target'])) / 100 if dueDateValue['current_balance_total'] is not None and target['target'] is not None else 0,
+                                    'created_at'    : time.time(),
+                                    'created_by'    : 'system',
+                                    'updated_by'    : 'system',
+                                    'updated_at'    : time.time()
+                                }
+
+                                if key == '1':
+                                    temp['index_1'] = dueDateValue['debt_acc_no'] if dueDateValue['debt_acc_no'] is not None else 0
                                 
-                        if groupProductCell['value'] == 'Card':
-                            count_acc = total_list_acc
-                            cur_bal = total_cur_bal_list_acc
+                                if key == '2':
+                                    temp['index_1'] = 0
 
-                        no_overdue = count_acc
-                        no_paid_acc_accumulayed = 0
-                        no_overdue_amt = cur_bal
-                        no_paid_acc_accumulayed_amt = 0
-                        if(groupCell['name'] != 'Total'):
-                            temp = {
-                                'group'         : debtGroupCell[0:1] + ' GROUP',
-                                'month'         : today.strftime("%b-%y"),
-                                'due'           : due[debtGroupCell[1:3]],
-                                'product'       : groupProductCell['value'],
-                                'day'           : dpWorkingdaysdaycol[key],
-                                'day_code'      : key,
-                                'team_name'     : groupCell['name'],
-                                'team_id'       : str(groupCell['_id']),
-                            }
-        
-                            if todayTimeStamp < dueDayOfMonth['due_date_add_1']:
-                                temp['due_date'] = dueDayLastMonth['due_date'] if dueDayLastMonth is not None else ''
-                                # #Lay gia tri no vao ngay due date + 1#
-                                # incidenceInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Due_date_next_date'), WHERE={'for_month': str(month - 1), 'team_id': str(groupCell['_id'])})
-                                # #Lay gia tri no vao ngay due date + 1#
-                            else:
-                                # incidenceInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Due_date_next_date'), WHERE={'for_month': str(month), 'team_id': str(groupCell['_id'])})
-                                temp['due_date'] = dueDayOfMonth['due_date']
+                                if key == '3':
+                                    temp['index_1'] = 0
 
-                            if key == '2':
-                                temp['index_' + todayIndex] = 0
+                                if key == '4':
+                                    temp['index_1'] = 0
 
-                            if key == '6':
-                                temp['index_' + todayIndex] = 0
+                                if key == '5':
+                                    temp['index_1'] = dueDateValue['current_balance_total'] if dueDateValue['current_balance_total'] is not None else 0
 
-                            if key == '1':
-                                temp['index_' + todayIndex] = no_overdue
+                                if key == '6':
+                                    temp['index_1'] = 0
+                                
+                                if key == '7':
+                                    temp['index_1'] = 0
 
-                            if key == '3':
-                                temp['index_' + todayIndex] = no_paid_acc_accumulayed
+                                if key == '8':
+                                    temp['index_1'] = 0
+                                # pprint(temp)
+                                mongodb.insert(MONGO_COLLECTION=collection, insert_data=temp)
+            else:
+                pprint("SAI")
+                for groupProductCell in listGroupProduct:
+                    for key in dpWorkingdaysdaycol:
+                        groupInfoByDueDate = list(mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Group'), WHERE={'debt_groups': debtGroupCell, 'name': {"$regex": groupProductCell['text'] + '.*'}}))
+                        groupInfoByDueDate.extend([{'name': 'Total'}])
+                        for groupCell in groupInfoByDueDate:
+                            if groupCell['name'] != 'Total':
+                                yesterdayInfo = mongodb.getOne(MONGO_COLLECTION=collection, WHERE={'updated_at': {'$gte': yesterday_starttime, '$lte': yesterday_endtime}, 'team_id': str(groupCell['_id'])})
+                                debtList = []
+                                cur_bal = 0
+                                count_acc = 0
 
-                            if key == '5':
-                                temp['index_' + todayIndex] = no_overdue_amt
+                                if groupProductCell['value'] == 'SIBS':
+                                    lead = ['JIVF00' + groupCell['lead']] if 'lead' in groupCell.keys() else []
+                                    member = ('JIVF00' + s for s in groupCell['members']) if 'members' in groupCell.keys() else []
+                                    officerIdRaw = list(lead) + list(member)
+                                    officerId = list(dict.fromkeys(officerIdRaw))
 
-                            if key == '7':
-                                temp['index_' + todayIndex] = no_paid_acc_accumulayed_amt
+                                    lnjc05Info = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'LNJC05'), WHERE={'officer_id': {'$in': officerId}})
+                                    if lnjc05Info is not None:
+                                        count_acc = len(list(lnjc05Info))
+                                        cur_bal = sum(lnjc05['current_balance'] for lnjc05 in lnjc05Info)
 
-                            # Không cho tính target trong này, phải lấy từ bảng đầu tháng
-                            # if todayTimeStamp == dueDayOfMonth['due_date_add_1']:
-                            #     temp['target'] = target['target'],
-                            #     temp['target_acc'] = (no_overdue * int(temp['target'])) / 100
-                            #     temp['target_amt'] = (no_overdue_amt * int(temp['target'])) / 100
+                                        
+                                if groupProductCell['value'] == 'Card':
+                                    diallist_Info = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Diallist'), WHERE={'group_id': str(groupCell['_id']), 'createdAt': {'$gte': starttime, '$lte': endtime}})
+                                    if diallist_Info is not None:
+                                        diallist_Detail = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Diallist_detail'), WHERE={'diallist_id': diallist_Info['_id']})
+                                        if diallist_Detail is not None:
+                                            count_acc = len(list(diallist_Info))
+                                            cur_bal = sum(detail['cur_bal'] for detail in diallist_Detail)
 
-                            temp['start_acc'] = 0
-                            temp['start_amt'] = 0
+                                no_overdue = count_acc
+                                no_overdue_amt = cur_bal
+                                paid_acc_end_date_yesterday = yesterdayInfo['index_' + str(todayIndex - 1)] - no_overdue if yesterdayInfo is not None and yesterdayInfo['index_' + str(todayIndex - 1)] is not None else 0
+                                if(groupCell['name'] != 'Total'):
+                                    temp = {}
+                                    if key == '1':
+                                        temp['index_' + str(todayIndex)] = no_overdue
 
-                            if key == '4':
-                                # temp['col_ratio_acc'] = no_acc_end_date / no_overdue if no_overdue not in [None, 0] else 0
-                                temp['index_' + todayIndex] = 0
-
-                            if key == '8':
-                                temp['index_' + todayIndex] = 0
-                            
-                            if todayTimeStamp != dueDayOfMonth['due_date_add_1']:
-                                yesterdayData = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Daily_prod_working_day'), WHERE={'team_id': str(groupCell['_id']), 'day_code': key, 'updated_at': {'$gte': yesterday_starttime, '$lte': yesterday_endtime}})
-                                no_acc_end_date = 0
-                                no_acc_end_date_amt = 0
-                                if yesterdayData is not None:
-                                    # pprint(temp)
-                                    no_acc_end_date = yesterdayData['no_overdue'] - no_overdue
-                                    no_acc_end_date_amt = yesterdayData['no_overdue_amt'] - no_overdue_amt
-                                    updateDataYesterday = {}
                                     if key == '2':
-                                        updateDataYesterday['index_' + (todayIndex - 1)] = no_acc_end_date
+                                        temp['index_' + str(todayIndex - 1)] = yesterdayInfo['index_' + str(todayIndex - 1)] - no_overdue if yesterdayInfo is not None and yesterdayInfo['index_' + str(todayIndex - 1)] is not None else 0
+                                        temp['index_' + str(todayIndex)] = 0
+
+                                    if key == '3':
+                                        temp['index_' + str(todayIndex)] = yesterdayInfo['start_acc'] - no_overdue if yesterdayInfo is not None and yesterdayInfo['start_acc'] is not None else 0
+                                        # if (todayIndex) == 3:
+                                        #     temp['index_1'] = 
+
+                                    if key == '4':
+                                        temp['index_' + str(todayIndex)] = (yesterdayInfo['index_' + str(todayIndex - 1)] - no_overdue) / yesterdayInfo['start_acc'] if yesterdayInfo is not None and yesterdayInfo['start_acc'] is not None else 0
+
+                                    if key == '5':
+                                        temp['index_' + str(todayIndex)] = no_overdue_amt
 
                                     if key == '6':
-                                        updateDataYesterday['index_' + (todayIndex - 1)] = no_acc_end_date_amt
+                                        temp['index_' + str(todayIndex)] = yesterdayInfo['index_' + str(todayIndex - 1)] - no_overdue_amt if yesterdayInfo is not None and yesterdayInfo['index_' + str(todayIndex - 1)] is not None else 0
 
-                                    updateDataYesterday['index_' + todayIndex] = temp['index_' + todayIndex]
-                                    updateDataYesterday['updated_at'] = time.time()
-                                    # pprint(temp)
-                                    mongodb.update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Daily_prod_working_day'), WHERE={'team_id': str(groupCell['_id']), 'day_code': key, 'updated_at': {'$gte': yesterday_starttime, '$lte': yesterday_endtime}}, VALUE=updateDataYesterday)
-                                else:
-                                    pprint(temp)
-                                    mongodb.insert(MONGO_COLLECTION=common.getSubUser(subUserType, 'Daily_prod_working_day'), insert_data=temp)
-                                # checkYesterdayExist = 
-   
+                                    if key == '7':
+                                        temp['index_' + str(todayIndex)] = yesterdayInfo['start_amt'] - no_overdue_amt if yesterdayInfo is not None and yesterdayInfo['start_amt'] is not None else 0
+
+                                    if key == '8':
+                                        temp['index_' + str(todayIndex)] = (yesterdayInfo['index_' + str(todayIndex - 1)] - no_overdue_amt) / yesterdayInfo['start_amt'] if yesterdayInfo is not None and yesterdayInfo['start_amt'] is not None and yesterdayInfo['index_' + str(todayIndex - 1)] is not None else 0
+                                    
+                                    if yesterdayInfo is not None:
+                                        mongodb.update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Daily_prod_working_day'), WHERE={'team_id': str(groupCell['_id']), 'day_code': key, 'updated_at': {'$gte': yesterday_starttime, '$lte': yesterday_endtime}}, VALUE=temp)
+                                    else:
+                                        temp['group']       = debtGroupCell[0:1] + ' GROUP'
+                                        temp['month']       = today.strftime("%b-%y")
+                                        temp['due']         = due[debtGroupCell[1:3]]
+                                        temp['product']     = groupProductCell['value']
+                                        if todayTimeStamp > dueDayOfMonth['due_date_add_1']:
+                                            temp['due_date']= dueDayOfMonth['due_date_add_1']
+                                        else:
+                                            temp['due_date']= dueDayLastMonth['due_date_add_1']
+                                        temp['due_date']    = todayTimeStamp - 86400
+                                        temp['day']         = dpWorkingdaysdaycol[key]
+                                        temp['day_code']    = key
+                                        temp['team_name']   = groupCell['name']
+                                        temp['team_id']     = str(groupCell['_id'])
+                                        temp['created_at']  = time.time()
+                                        temp['created_by']  = 'system'
+                                        temp['updated_by']  = 'system'
+                                        temp['updated_at']  = time.time()
+                                        mongodb.insert(MONGO_COLLECTION=collection, insert_data=temp)
     print('DONE')
 except Exception as e:
     # log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')
-    pprint(str(e))
+    # pprint(str(e))
+    print(traceback.format_exc())
         

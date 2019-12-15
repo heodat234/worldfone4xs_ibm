@@ -41,7 +41,7 @@
     </div>
     <div id="action-menu">
         <ul>
-            
+
         </ul>
     </div>
     <script>
@@ -53,7 +53,11 @@
                   var dataSource = this.dataSource = new kendo.data.DataSource({
                      serverPaging: true,
                      serverFiltering: true,
+                     serverSorting: true,
                      pageSize: 10,
+                     sort: {
+                       field: "stt", dir: "asc"
+                   },
                      transport: {
                         read: ENV.reportApi + "loan/daily_payment_report",
                         parameterMap: parameterMap
@@ -61,7 +65,7 @@
                      schema: {
                         data: "data",
                         total: "total",
-                        
+
                      }
                   });
 
@@ -87,11 +91,11 @@
                       {
                           field: "stt",
                           title: "No",
-                          width: 50
+                          width: 70
                       },{
-                          field: "account",
+                          field: "account_number",
                           title: "ACCOUNT NUMBER",
-                          width: 100
+                          width: 150
                       },{
                           field: "name",
                           title: "NAME",
@@ -302,7 +306,7 @@
          kendo.bind($(".mvvm"), observable);
       };
 
-      
+
     </script>
     <script>
         function saveAsExcel() {

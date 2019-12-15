@@ -1,0 +1,73 @@
+14/12/2019, 10:37:39: Start Import
+14/12/2019, 10:38:31: Start Import
+14/12/2019, 10:38:55: Start Import
+14/12/2019, 10:43:06: Start Import
+14/12/2019, 10:44:08: Start Import
+14/12/2019, 10:46:00: Start Import
+14/12/2019, 10:46:28: Start Import
+14/12/2019, 14:25:07: Start Import
+14/12/2019, 14:25:29: Start Import
+14/12/2019, 14:26:08: Start Import
+14/12/2019, 14:26:08: name 'user_collection' is not defined
+14/12/2019, 14:27:03: Start Import
+14/12/2019, 14:27:03: 'count_data'
+14/12/2019, 14:28:22: Start Import
+14/12/2019, 14:28:22: 'count_paid'
+14/12/2019, 14:29:15: Start Import
+14/12/2019, 14:29:15: 'phone_ans_arr'
+14/12/2019, 14:30:23: Start Import
+14/12/2019, 14:30:23: 'ascii' codec can't encode character '\u1ec5' in position 32: ordinal not in range(128)
+14/12/2019, 14:31:56: Start Import
+14/12/2019, 14:32:06: End Log
+14/12/2019, 14:34:52: Start Import
+14/12/2019, 14:35:01: End Log
+14/12/2019, 14:35:30: Start Import
+14/12/2019, 14:35:39: End Log
+14/12/2019, 14:37:51: Start Import
+14/12/2019, 14:38:00: End Log
+14/12/2019, 14:39:12: Start Import
+14/12/2019, 14:39:12: End Log
+14/12/2019, 14:41:16: Start Import
+14/12/2019, 14:41:26: End Log
+14/12/2019, 14:43:45: Start Import
+14/12/2019, 14:43:54: End Log
+14/12/2019, 14:44:23: Start Import
+14/12/2019, 14:44:32: End Log
+14/12/2019, 14:47:35: Start Import
+14/12/2019, 14:47:35: 'NoneType' object is not subscriptable
+14/12/2019, 14:48:27: Start Import
+14/12/2019, 14:48:37: End Log
+14/12/2019, 14:51:06: Start Import
+14/12/2019, 14:51:16: End Log
+14/12/2019, 14:57:13: Start Import
+14/12/2019, 14:57:24: End Log
+14/12/2019, 15:17:52: Start Import
+14/12/2019, 15:18:06: End Log
+14/12/2019, 15:33:00: Start Import
+14/12/2019, 15:33:13: End Log
+14/12/2019, 16:18:16: Start Import
+14/12/2019, 16:18:28: End Log
+14/12/2019, 16:26:02: Start Import
+14/12/2019, 16:26:02: End Log
+14/12/2019, 16:28:02: Start Import
+14/12/2019, 16:28:02: 'ascii' codec can't encode character '\u1ec5' in position 22: ordinal not in range(128)
+14/12/2019, 16:29:08: Start Import
+14/12/2019, 16:29:08: End Log
+14/12/2019, 16:31:57: Start Import
+14/12/2019, 16:31:57: End Log
+14/12/2019, 16:34:51: Start Import
+14/12/2019, 16:34:51: End Log
+14/12/2019, 16:38:56: Start Import
+14/12/2019, 16:39:48: End Log
+14/12/2019, 16:44:19: Start Import
+14/12/2019, 16:44:19: End Log
+14/12/2019, 17:07:02: Start Import
+14/12/2019, 17:07:02: name 'debtGroupCell' is not defined
+14/12/2019, 17:07:54: Start Import
+14/12/2019, 17:07:54: name 'temp' is not defined
+14/12/2019, 17:08:25: Start Import
+14/12/2019, 17:08:25: name 'temp' is not defined
+14/12/2019, 17:10:30: Start Import
+14/12/2019, 17:10:30: End Log
+14/12/2019, 17:11:31: Start Import
+14/12/2019, 17:12:27: End Log

@@ -176,7 +176,7 @@ try:
                             for row in ptpData:
                                 account_ptp_arr           = row['acc_arr']
 
-                        
+
                         if groupProduct['value'] == 'SIBS':
                             aggregate_ptp_amt = [
                                 {
@@ -218,7 +218,7 @@ try:
                             if paidPromiseData != None:
                                 for row in paidPromiseData:
                                     temp['count_paid_promise']            = len(row['count_paid_promise'] )
-                                    temp['paid_amount_promise']           = row['paid_amount_promise']     
+                                    temp['paid_amount_promise']           = row['paid_amount_promise']
 
                             # paid
                             aggregate_paid = [
@@ -241,7 +241,7 @@ try:
                             if paidPromiseData != None:
                                 for row in paidPromiseData:
                                     temp['count_paid']            = len(row['count_paid'] )
-                                    temp['paid_amount']           = row['paid_amount']     
+                                    temp['paid_amount']           = row['paid_amount']
 
 
                         if groupProduct['value'] == 'Card':
@@ -285,7 +285,7 @@ try:
                             if paidPromiseData != None:
                                 for row in paidPromiseData:
                                     temp['count_paid_promise']            = len(row['count_paid_promise'] )
-                                    temp['paid_amount_promise']           = row['paid_amount_promise']    
+                                    temp['paid_amount_promise']           = row['paid_amount_promise']
 
                             # paid
                             aggregate_paid = [
@@ -308,10 +308,10 @@ try:
                             if paidPromiseData != None:
                                 for row in paidPromiseData:
                                     temp['count_paid']            = len(row['count_paid'] )
-                                    temp['paid_amount']           = row['paid_amount']     
+                                    temp['paid_amount']           = row['paid_amount']
 
 
-                        
+
                         # members
                         member_arr = []
                         count_member = len(team['members'])
@@ -341,7 +341,7 @@ try:
                             users = _mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'User'),WHERE={'extension': str(member)}, SELECT=['extension','agentname'])
                             if users != None:
                                 temp_member['name'] = users['agentname']
-                            
+
                             aggregate_cdr = [
                                 {
                                     "$match":
@@ -367,8 +367,8 @@ try:
                             if cdrData != None:
                                 for row in cdrData:
                                     temp_member['talk_time']            = row['talk_time']
-                                    temp_member['total_call']           = row['total_call'] 
-                                    phone_arr                           = row['phone_arr'] 
+                                    temp_member['total_call']           = row['total_call']
+                                    phone_arr                           = row['phone_arr']
 
                             # connected
                             aggregate_cdr_ans = [
@@ -586,7 +586,7 @@ try:
 
                         i += 1
 
-                
+
             checkGroupA = 'true'
 
         if debtGroupCell[0:1] != 'A' and debtGroupCell[0:1] != 'F':
@@ -620,7 +620,7 @@ try:
                         'count_paid_promise'        : 0,
                     }
 
-                    
+
                     # members
                     member_arr = []
                     count_member = len(teams['members'])
@@ -650,7 +650,7 @@ try:
                         users = _mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'User'),WHERE={'extension': str(member)}, SELECT=['extension','agentname'])
                         if users != None:
                             temp_member['name'] = users['agentname']
-                        
+
                         if todayTimeStamp < dueDayOfMonth['due_date_add_1']:
                             dueDayLastMonth = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_due_date'), WHERE={'for_month': str(month - 1), 'debt_group': debtGroupCell[1:3]})
                             temp['due_date'] = dueDayLastMonth['due_date'] if dueDayLastMonth is not None else ''
@@ -738,8 +738,8 @@ try:
                         if cdrData != None:
                             for row in cdrData:
                                 temp_member['talk_time']            = row['talk_time']
-                                temp_member['total_call']           = row['total_call'] 
-                                phone_arr                           = row['phone_arr'] 
+                                temp_member['total_call']           = row['total_call']
+                                phone_arr                           = row['phone_arr']
 
                          # connected
                         aggregate_cdr_ans = [
@@ -808,7 +808,7 @@ try:
                             if paidPromiseData != None:
                                 for row in paidPromiseData:
                                     temp_member['count_paid_promise']            = len(row['count_paid_promise'] )
-                                    temp_member['paid_amount_promise']           = row['paid_amount_promise']     
+                                    temp_member['paid_amount_promise']           = row['paid_amount_promise']
 
 
                             # paid
@@ -832,7 +832,7 @@ try:
                             if paidPromiseData != None:
                                 for row in paidPromiseData:
                                     temp_member['count_paid']            = len(row['count_paid'] )
-                                    temp_member['paid_amount']           = row['paid_amount']     
+                                    temp_member['paid_amount']           = row['paid_amount']
 
                             aggregate_cdr_amt = [
                                 {
@@ -943,7 +943,7 @@ try:
                             if paidPromiseData != None:
                                 for row in paidPromiseData:
                                     temp_member['count_paid_promise']            = len(row['count_paid_promise'] )
-                                    temp_member['paid_amount_promise']           = row['paid_amount_promise']     
+                                    temp_member['paid_amount_promise']           = row['paid_amount_promise']
 
 
                             # paid
@@ -967,7 +967,7 @@ try:
                             if paidPromiseData != None:
                                 for row in paidPromiseData:
                                     temp_member['count_paid']            = len(row['count_paid'] )
-                                    temp_member['paid_amount']           = row['paid_amount']     
+                                    temp_member['paid_amount']           = row['paid_amount']
 
                             aggregate_cdr_amt = [
                                 {
@@ -1050,7 +1050,7 @@ try:
                         temp['ptp_amount']     += temp_member['ptp_amount'];
                         temp['count_paid_promise']      += temp_member['count_paid_promise'];
                         temp['paid_amount_promise']     += temp_member['count_paid_promise'];
-                        
+
 
                         temp_member['spin_rate']     = temp_member['count_spin']/temp_member['total_call'] if temp_member['total_call'] != 0 else 0
                         temp_member['ptp_rate_acc']  = temp_member['count_ptp']/temp_member['total_call'] if temp_member['total_call'] != 0 else 0
@@ -1083,9 +1083,9 @@ try:
 
                     i += 1
 
-                
+
     # WO
-    
+
     teams = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Group'), WHERE={'name' : {'$regex' : 'WO'} , 'debt_groups': 'F01'})
     if teams != None:
         # temp = {
@@ -1112,7 +1112,7 @@ try:
         #     'count_paid_promise'        : 0,
         # }
 
-        
+
         # members
         i = 1
         member_arr = []
@@ -1142,8 +1142,8 @@ try:
             users = _mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'User'),WHERE={'extension': str(member)}, SELECT=['extension','agentname'])
             if users != None:
                 temp_member['name'] = users['agentname']
-            
-            incidenceInfo = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Due_date_next_date'), WHERE={'for_month': str(month), 'debt_group': 'F','product':'WO'}) 
+
+            incidenceInfo = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Due_date_next_date'), WHERE={'for_month': str(month), 'debt_group': 'F','product':'WO'})
 
             acc_arr = []
             if incidenceInfo is not None:
@@ -1221,8 +1221,8 @@ try:
             if cdrData != None:
                 for row in cdrData:
                     temp_member['talk_time']            = row['talk_time']
-                    temp_member['total_call']           = row['total_call'] 
-                    phone_arr                           = row['phone_arr'] 
+                    temp_member['total_call']           = row['total_call']
+                    phone_arr                           = row['phone_arr']
 
              # connected
             aggregate_cdr_ans = [
@@ -1258,7 +1258,7 @@ try:
                         "ACCTNO": {'$in': account_ptp_arr},
                     }
                 },{
-                    '$project': 
+                    '$project':
                     {
                         'pay_payment': {'$sum' : [ '$WO9711', '$WO9712' ,'$WO9713'] }
                     }
@@ -1284,7 +1284,7 @@ try:
                         "account_number": {'$in': account_ptp_arr},
                     }
                 },{
-                    '$project': 
+                    '$project':
                     {
                         'account_number' : 1,
                         'pay_payment': {'$sum' : [ '$pay_9711', '$pay_9712' ,'$late_charge_9713'] }
@@ -1302,7 +1302,7 @@ try:
             if paidPromiseData != None:
                 for row in paidPromiseData:
                     temp_member['count_paid_promise']            = len(row['count_paid_promise'] )
-                    temp_member['paid_amount_promise']           = row['paid_amount_promise']     
+                    temp_member['paid_amount_promise']           = row['paid_amount_promise']
 
 
             # paid
@@ -1314,7 +1314,7 @@ try:
                         "account_number": {'$in': acc_arr},
                     }
                 },{
-                    '$project': 
+                    '$project':
                     {
                         'account_number' : 1,
                         'pay_payment': {'$sum' : [ '$pay_9711', '$pay_9712' ,'$late_charge_9713'] }
@@ -1332,7 +1332,7 @@ try:
             if paidPromiseData != None:
                 for row in paidPromiseData:
                     temp_member['count_paid']            = len(row['count_paid'] )
-                    temp_member['paid_amount']           = row['paid_amount']     
+                    temp_member['paid_amount']           = row['paid_amount']
 
             aggregate_cdr_amt = [
                 {
@@ -1341,7 +1341,7 @@ try:
                         "PHONE": {'$in': customernumber_arr},
                     }
                 },{
-                    '$project': 
+                    '$project':
                     {
                         'pay_payment': {'$sum' : [ '$WO9711', '$WO9712' ,'$WO9713'] }
                     }
@@ -1374,7 +1374,7 @@ try:
                         "PHONE": {'$in': phone_spin_arr},
                     }
                 },{
-                    '$project': 
+                    '$project':
                     {
                         'pay_payment': {'$sum' : [ '$WO9711', '$WO9712' ,'$WO9713'] }
                     }
@@ -1400,7 +1400,7 @@ try:
                         "PHONE": {'$in': phone_ans_arr},
                     }
                 },{
-                    '$project': 
+                    '$project':
                     {
                         'pay_payment': {'$sum' : [ '$WO9711', '$WO9712' ,'$WO9713'] }
                     }
@@ -1417,7 +1417,7 @@ try:
                 for row in amtAnsData:
                     temp_member['conn_amount']            = row['conn_amount']
 
-            
+
             # temp['count_data']      += temp_member['count_data'];
             # temp['unwork']          += temp_member['unwork'];
             # temp['talk_time']      += temp_member['talk_time'];
@@ -1431,7 +1431,7 @@ try:
             # temp['ptp_amount']     += temp_member['ptp_amount'];
             # temp['count_paid_promise']      += temp_member['count_paid_promise'];
             # temp['paid_amount_promise']     += temp_member['count_paid_promise'];
-            
+
 
             temp_member['spin_rate']     = temp_member['count_spin']/temp_member['total_call'] if temp_member['total_call'] != 0 else 0
             temp_member['ptp_rate_acc']  = temp_member['count_ptp']/temp_member['total_call'] if temp_member['total_call'] != 0 else 0
@@ -1464,7 +1464,7 @@ try:
 
             i += 1
 
-    
+
 
     if len(insertData) > 0:
         mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertData)

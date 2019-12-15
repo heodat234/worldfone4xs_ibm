@@ -34,9 +34,9 @@ try:
     insertData = []
     updateData = []
     listDebtGroup = []
-    
+
     today = date.today()
-    # today = datetime.strptime('20/11/2019', "%d/%m/%Y").date()
+    # today = datetime.strptime('13/12/2019', "%d/%m/%Y").date()
 
     day = today.day
     month = today.month
@@ -114,7 +114,7 @@ try:
                     temp['product'] = groupProduct['text']
                     temp['team'] = groupCell['name']
                     temp['team_id'] = str(groupCell['_id'])
-                    
+
                     if incidenceInfo is not None:
                         temp['inci'] = incidenceInfo['debt_acc_no'] if 'debt_acc_no' in incidenceInfo.keys() else 0
                         temp['inci_amt'] = incidenceInfo['current_balance_total'] if 'current_balance_total' in incidenceInfo.keys() else 0
@@ -123,11 +123,11 @@ try:
                         temp['inci'] = 0
                         temp['inci_amt'] = 0
                         acc_arr = []
-                    
+
 
                     if groupProduct['value'] == 'SIBS':
                         yesterdayReportData = mongodb.getOne(MONGO_COLLECTION=collection, WHERE={'team_id': str(groupCell['_id']), 'created_at': {'$gte': (starttime - 86400), '$lte': (endtime - 86400)}})
-                        
+
                         dueDateOneData = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Due_date_next_date_SIBS'), WHERE={'debt_group': debtGroupCell[0:1], 'due_date_code': debtGroupCell[1:3], 'for_month': str(month)})
 
                         lead = ['JIVF00' + groupCell['lead']] if 'lead' in groupCell.keys() else []
@@ -139,7 +139,7 @@ try:
                         for lnjc05 in lnjc05Info:
                             col_today += 1
                             col_amt_today += lnjc05['current_balance']
-    
+
                         aggregate_ln3206 = [
                             {
                                 "$match":
@@ -159,7 +159,7 @@ try:
                         if ln3206fInfo is not None:
                             for ln3206 in ln3206fInfo:
                                 temp['payment_amt'] = ln3206['total_amt']
-                            
+
                     if groupProduct['value'] == 'Card':
                         yesterdayReportData = mongodb.getOne(MONGO_COLLECTION=collection, WHERE={'team_id': str(groupCell['_id']), 'created_at': {'$gte': (starttime - 86400), '$lte': (endtime - 86400)}})
 
@@ -167,7 +167,7 @@ try:
                         for account in listOfAccount:
                             col_today += 1
                             col_amt_today += account['cur_bal']
-                               
+
                         aggregate_gl = [
                             {
                                 "$match":
@@ -186,8 +186,8 @@ try:
                         glInfo = mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_input_payment_of_card'),aggregate_pipeline=aggregate_gl)
                         if glInfo is not None:
                             for gl in glInfo:
-                                temp['payment_amt'] = gl['total_amt']   
-                    
+                                temp['payment_amt'] = gl['total_amt']
+
                     temp['col']         = temp['inci'] - col_today
                     temp['col_amt']     = temp['inci_amt'] - col_amt_today
                     temp['rem']         = temp['inci'] - temp['col']
@@ -212,7 +212,7 @@ try:
                     mongodb.insert(MONGO_COLLECTION=collection, insert_data=temp)
                     # log.write(json.dumps(temp))
                     # pprint(temp)
-        
+
 
     # wo
     groupInfo = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Group'), WHERE={'name': {"$regex": 'WO'},'debt_groups' : {'$exists': 'true'}})
@@ -276,7 +276,7 @@ try:
                         'ACCTNO': {'$in' : acc_payment },
                     }
                 },{
-                    '$project': 
+                    '$project':
                     {
                        'pay_payment': {'$sum' : [ '$WO9711', '$WO9712' ,'$WO9713'] },
                     }
@@ -302,7 +302,7 @@ try:
                         'ACCTNO': {'$in' : acc_payment },
                     }
                 },{
-                    '$project': 
+                    '$project':
                     {
                        'pay_payment': {'$sum' : [ '$WOAMT', '$WO_INT' ,'$WO_LC'] },
                     }
@@ -325,7 +325,7 @@ try:
         temp['flow_rate_os']   = temp['rem_os'] / temp['inci_amt'] if temp['inci_amt'] != 0 else 0
         temp['col_ratio']       = temp['col'] / temp['inci'] if temp['inci'] != 0 else 0
         temp['col_ratio_os']   = temp['col_amt'] / temp['inci_amt'] if temp['inci_amt'] != 0 else 0
-            
+
         targetInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Target'), WHERE={ 'group.id': str(groupCell['_id'])})
         target = int(targetInfo['target'])
         temp['tar_amt'] = (target * temp['inci_amt'])/100
@@ -343,4 +343,3 @@ try:
 except Exception as e:
     log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')
     pprint(str(e))
-        

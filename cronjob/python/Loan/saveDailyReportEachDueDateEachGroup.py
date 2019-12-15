@@ -36,7 +36,7 @@ try:
     listDebtGroup = []
 
     today = date.today()
-    # today = datetime.strptime('20/11/2019', "%d/%m/%Y").date()
+    # today = datetime.strptime('13/12/2019', "%d/%m/%Y").date()
 
     day = today.day
     month = today.month
@@ -79,7 +79,7 @@ try:
 
     for debtGroupCell in list(listDebtGroup):
         if debtGroupCell[0:1] is not 'F':
-            
+
             dueDayOfMonth = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_due_date'), WHERE={'for_month': str(month), 'debt_group': debtGroupCell[1:3]})
             for groupProduct in list(listGroupProduct):
                 temp = {
@@ -263,8 +263,8 @@ try:
                 mongodb.insert(MONGO_COLLECTION=collection, insert_data=temp)
                 # pprint(temp)
 
-    
-        
+
+
     # wo
     temp = {
         'due_date'       : 0,
@@ -313,7 +313,7 @@ try:
                 # "account_number": {'$in': acc_arr}
             }
         },{
-            '$project': 
+            '$project':
             {
                'account_number' : 1,
                'pay_payment': {'$sum' : [ '$pay_9711', '$pay_9712' ,'$late_charge_9713'] }
@@ -342,7 +342,7 @@ try:
                     "ACCTNO": {'$in': arr_acc_payment}
                 }
             },{
-                '$project': 
+                '$project':
                 {
                    'WO9711': 1,
                    'pay_payment': {'$sum' : [ '$WO9711', '$WO9712' ,'$WO9713'] }
@@ -371,7 +371,7 @@ try:
                     "ACCTNO": {'$in': arr_acc_payment}
                 }
             },{
-                '$project': 
+                '$project':
                 {
                    'WOAMT': 1,
                    'pay_payment': {'$sum' : [ '$OFF_OSTD', '$OFF_RECEIVE_INT' ,'$OFF_LATE_CHARGE'] }
@@ -391,8 +391,8 @@ try:
                 amt_today           = wo_row['total_amt']
                 ob_principal_today  = wo_row['ob_principal_total']
 
-        
-    
+
+
 
     temp['col']         = temp['inci'] - col_today
     temp['col_amt']     = temp['inci_amt'] - amt_today
@@ -530,7 +530,7 @@ try:
                     tempTotal['princi_ratio']       += row['princi_ratio']
                     tempTotal['amt_ratio']          += row['amt_ratio']
 
-            
+
             tempTotalSibs['createdAt'] = time.time()
             tempTotalSibs['createdBy'] = 'system'
             tempTotalSibs['for_month'] = str(month)

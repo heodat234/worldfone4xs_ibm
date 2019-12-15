@@ -9,7 +9,6 @@ else
    exit 0
 fi
 
-BASEDIR=$(dirname "$0")
 if [ $(ps -ef | grep -v grep | grep updateGroupCard.py | wc -l) -lt 1 ]; then
    /usr/local/bin/python3.6 ${BASEDIR}/updateGroupCard.py > /dev/null 2>&1 &
    echo "RUN ${BASEDIR}/updateGroupCard.py"

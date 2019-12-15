@@ -102,35 +102,35 @@ try:
             row['W_ORG']            = zaccf['W_ORG']
             row['INT_RATE']         = zaccf['INT_RATE']
             row['OVER_DY']          = zaccf['OVER_DY']
-            
+
             product = mongodb.getOne(MONGO_COLLECTION=product_collection, WHERE={'code': str(zaccf['PRODGRP_ID'])},SELECT=['name'])
             if product != None:
                row['product_name'] = product['name']
-         
+
          customer = mongodb.getOne(MONGO_COLLECTION=customer_collection, WHERE={'CONTRACTNR': str(row['account_number'])},SELECT=['DATE_HANDOVER','COMPANY','DISTRICT','PROVINCE','PERNAMENT_ADDRESS','PERNAMENT_DISTRICT','PERNAMENT_PROVINCE'])
          if customer != None:
             row['DATE_HANDOVER']    = customer['DATE_HANDOVER']
             row['COMPANY']          = customer['COMPANY']
-            row['current_district']       = customer['DISTRICT']      
-            row['current_province']       = customer['PROVINCE']      
-            row['pernament_add']          = customer['PERNAMENT_ADDRESS']      
-            row['pernament_district']     = customer['PERNAMENT_DISTRICT']      
-            row['pernament_province']     = customer['PERNAMENT_PROVINCE']          
+            row['current_district']       = customer['DISTRICT']
+            row['current_province']       = customer['PROVINCE']
+            row['pernament_add']          = customer['PERNAMENT_ADDRESS']
+            row['pernament_district']     = customer['PERNAMENT_DISTRICT']
+            row['pernament_province']     = customer['PERNAMENT_PROVINCE']
          else:
             row['COMPANY']          = ''
 
          investigation = mongodb.getOne(MONGO_COLLECTION=investigation_collection, WHERE={'contract_no': str(row['account_number'])},SELECT=['license_plates_no'])
          if investigation != None:
             row['license_plates_no']    = investigation['license_plates_no']
-         
+
          release_sale = mongodb.getOne(MONGO_COLLECTION=release_sale_collection, WHERE={'acc_no': str(row['account_number'])},SELECT=['temp_address','temp_district','temp_province','address','district','province'])
          if release_sale != None:
             row['current_add']            = release_sale['temp_address']
-            row['current_district']       = release_sale['temp_district']      
-            row['current_province']       = release_sale['temp_province']      
-            row['pernament_add']          = release_sale['address']      
-            row['pernament_district']     = release_sale['district']      
-            row['pernament_province']     = release_sale['province']      
+            row['current_district']       = release_sale['temp_district']
+            row['current_province']       = release_sale['temp_province']
+            row['pernament_add']          = release_sale['address']
+            row['pernament_district']     = release_sale['district']
+            row['pernament_province']     = release_sale['province']
          else:
             row['current_add']    = row['address']
 
@@ -141,7 +141,7 @@ try:
          d2       = date_time.strftime(FMT)
          tdelta   = datetime.strptime(d1, FMT) - datetime.strptime(d2, FMT)
          row['CURRENT_DPD'] = tdelta.days
-         
+
          diallist = mongodb.getOne(MONGO_COLLECTION=diallist_collection, WHERE={'account_number': str(row['account_number'])},
             SELECT=['assign'])
          if diallist != None:
@@ -155,6 +155,8 @@ try:
          row.pop('_id')
          row.pop('officer_name')
          row.pop('due_date')
+         row['createdAt'] = time.time()
+         row['createdBy'] = 'system'
          insertData.append(row)
 
 
@@ -187,36 +189,36 @@ try:
             row['W_ORG']            = float(sbv['ob_principal_sale']) + float(sbv['ob_principal_cash'])
             row['INT_RATE']         = sbv['interest_rate']
             row['OVER_DY']          = sbv['overdue_days_no']
-            
+
             product = mongodb.getOne(MONGO_COLLECTION=product_collection, WHERE={'code': str(sbv['card_type'])},SELECT=['name'])
             if product != None:
                row['product_name'] = product['name']
-         
+
          customer = mongodb.getOne(MONGO_COLLECTION=customer_collection, WHERE={'CONTRACTNR': str(row['account_number'])},SELECT=['DATE_HANDOVER','COMPANY','DISTRICT','PROVINCE','PERNAMENT_ADDRESS','PERNAMENT_DISTRICT','PERNAMENT_PROVINCE'])
          if customer != None:
             row['DATE_HANDOVER']    = customer['DATE_HANDOVER']
             row['COMPANY']          = customer['COMPANY']
-            row['current_district']       = customer['DISTRICT']      
-            row['current_province']       = customer['PROVINCE']      
-            row['pernament_add']          = customer['PERNAMENT_ADDRESS']      
-            row['pernament_district']     = customer['PERNAMENT_DISTRICT']      
-            row['pernament_province']     = customer['PERNAMENT_PROVINCE']          
+            row['current_district']       = customer['DISTRICT']
+            row['current_province']       = customer['PROVINCE']
+            row['pernament_add']          = customer['PERNAMENT_ADDRESS']
+            row['pernament_district']     = customer['PERNAMENT_DISTRICT']
+            row['pernament_province']     = customer['PERNAMENT_PROVINCE']
          else:
             row['COMPANY']          = ''
 
          investigation = mongodb.getOne(MONGO_COLLECTION=investigation_collection, WHERE={'contract_no': str(row['account_number'])},SELECT=['license_plates_no'])
          if investigation != None:
             row['license_plates_no']    = investigation['license_plates_no']
-         
-         
+
+
          release_sale = mongodb.getOne(MONGO_COLLECTION=release_sale_collection, WHERE={'acc_no': str(row['account_number'])},SELECT=['temp_address','temp_district','temp_province','address','district','province'])
          if release_sale != None:
-            row['current_district']       = release_sale['temp_district']      
-            row['current_province']       = release_sale['temp_province']      
-            row['pernament_add']          = release_sale['address']      
-            row['pernament_district']     = release_sale['district']      
-            row['pernament_province']     = release_sale['province']      
-         
+            row['current_district']       = release_sale['temp_district']
+            row['current_province']       = release_sale['temp_province']
+            row['pernament_add']          = release_sale['address']
+            row['pernament_district']     = release_sale['district']
+            row['pernament_province']     = release_sale['province']
+
          balance = mongodb.getOne(MONGO_COLLECTION=trialBalance_collection, WHERE={'acc_no': str(row['account_number'])},SELECT=['prin_cash_balance','prin_retail_balance','int_balance','fee_balance','cash_int_accrued'])
          if balance != None:
             row['current_balance']    = float(balance['prin_cash_balance']) + float(balance['prin_retail_balance'])+ float(balance['int_balance'])+ float(balance['fee_balance'])+ float(balance['cash_int_accrued'])
@@ -225,7 +227,7 @@ try:
             SELECT=['WRK_REF','WRK_REF1','WRK_REF2','WRK_REF3','WRK_REF4','WRK_REF5'])
          if zaccf != None:
             row['WRK_REF']          = zaccf['WRK_REF']+'; '+zaccf['WRK_REF1']+'; '+zaccf['WRK_REF2']+'; '+zaccf['WRK_REF3']+'; '+zaccf['WRK_REF4']+'; '+zaccf['WRK_REF5']
-         
+
          diallist = mongodb.getOne(MONGO_COLLECTION=diallist_collection, WHERE={'account_no': str(row['account_number'])},
             SELECT=['assign'])
          if diallist != None:
@@ -235,7 +237,7 @@ try:
                      if user['extension'] == diallist['assign']:
                         row['COMPANY']          = user['agentname']
                         break
-         
+
          today    = datetime.now()
          FMT      = '%d/%m/%Y'
          d1       = today.strftime(FMT)
@@ -249,6 +251,8 @@ try:
          row.pop('_id')
          row.pop('overdue_date')
          row.pop('phone')
+         row['createdAt'] = time.time()
+         row['createdBy'] = 'system'
          insertData.append(row)
       # break
 
@@ -283,11 +287,11 @@ try:
             temp['W_ORG']            = float(sbv['ob_principal_sale']) + float(sbv['ob_principal_cash'])
             temp['INT_RATE']         = sbv['interest_rate']
             temp['OVER_DY']          = sbv['overdue_days_no']
-            
+
             product = mongodb.getOne(MONGO_COLLECTION=product_collection, WHERE={'code': str(sbv['card_type'])},SELECT=['name'])
             if product != None:
                temp['product_name'] = product['name']
-         
+
          zaccf = mongodb.getOne(MONGO_COLLECTION=zaccf_collection, WHERE={'account_number': str(row['ACCTNO'])},
             SELECT=['cif_birth_date','name','CUS_ID','FRELD8','PRODGRP_ID','LIC_NO','APPROV_LMT','TERM_ID','RPY_PRD','F_PDT','DT_MAT','MOBILE_NO','WRK_REF','WRK_REF1','WRK_REF2','WRK_REF3','WRK_REF4','WRK_REF5','W_ORG','INT_RATE','OVER_DY'])
          if zaccf != None:
@@ -306,21 +310,21 @@ try:
             temp['W_ORG']            = zaccf['W_ORG']
             temp['INT_RATE']         = zaccf['INT_RATE']
             temp['OVER_DY']          = zaccf['OVER_DY']
-            
+
             product = mongodb.getOne(MONGO_COLLECTION=product_collection, WHERE={'code': str(zaccf['PRODGRP_ID'])},SELECT=['name'])
             if product != None:
                temp['product_name'] = product['name']
-         
+
          customer = mongodb.getOne(MONGO_COLLECTION=customer_collection, WHERE={'CONTRACTNR': str(row['ACCTNO'])},SELECT=['DATE_HANDOVER','COMPANY','DISTRICT','PROVINCE','PERNAMENT_ADDRESS','PERNAMENT_DISTRICT','PERNAMENT_PROVINCE','CURRENT_ADDRESS'])
          if customer != None:
             temp['current_add']      = customer['CURRENT_ADDRESS']
             temp['DATE_HANDOVER']    = customer['DATE_HANDOVER']
             temp['COMPANY']          = customer['COMPANY']
-            temp['current_district']       = customer['DISTRICT']      
-            temp['current_province']       = customer['PROVINCE']      
-            temp['pernament_add']          = customer['PERNAMENT_ADDRESS']      
-            temp['pernament_district']     = customer['PERNAMENT_DISTRICT']      
-            temp['pernament_province']     = customer['PERNAMENT_PROVINCE']          
+            temp['current_district']       = customer['DISTRICT']
+            temp['current_province']       = customer['PROVINCE']
+            temp['pernament_add']          = customer['PERNAMENT_ADDRESS']
+            temp['pernament_district']     = customer['PERNAMENT_DISTRICT']
+            temp['pernament_province']     = customer['PERNAMENT_PROVINCE']
          else:
             temp['COMPANY']          = ''
 
@@ -328,7 +332,7 @@ try:
             SELECT=['license_plates_no'])
          if investigation != None:
             temp['license_plates_no']    = investigation['license_plates_no']
-         
+
          account = mongodb.getOne(MONGO_COLLECTION=account_collection, WHERE={'account_number': str(row['ACCTNO'])},
             SELECT=['overdue_date','phone'])
          if account != None:
@@ -347,13 +351,13 @@ try:
             SELECT=['temp_address','temp_district','temp_province','address','district','province'])
          if release_sale != None:
             temp['current_add']            = release_sale['temp_address']
-            temp['current_district']       = release_sale['temp_district']      
-            temp['current_province']       = release_sale['temp_province']      
-            temp['pernament_add']          = release_sale['address']      
-            temp['pernament_district']     = release_sale['district']      
-            temp['pernament_province']     = release_sale['province']      
-         
-        
+            temp['current_district']       = release_sale['temp_district']
+            temp['current_province']       = release_sale['temp_province']
+            temp['pernament_add']          = release_sale['address']
+            temp['pernament_district']     = release_sale['district']
+            temp['pernament_province']     = release_sale['province']
+
+
          lnjc05 = mongodb.getOne(MONGO_COLLECTION=lnjc05_collection, WHERE={'account_number': str(row['ACCTNO'])},
             SELECT=['due_date'])
          if lnjc05 != None:
@@ -364,7 +368,7 @@ try:
             d2       = date_time.strftime(FMT)
             tdelta   = datetime.strptime(d1, FMT) - datetime.strptime(d2, FMT)
             temp['CURRENT_DPD'] = tdelta.days
-         
+
          diallist = mongodb.getOne(MONGO_COLLECTION=diallist_collection, WHERE={'account_no': str(row['ACCTNO'])},
             SELECT=['assign'])
          if diallist != None:
@@ -376,15 +380,16 @@ try:
                         break
 
          temp['current_balance']    = float(row['WO9711']) + float(row['WO9712'])+ float(row['WO9713'])
-         
+
          temp['account_number'] = row['ACCTNO']
-         
+         temp['createdAt'] = time.time()
+         temp['createdBy'] = 'system'
          insertData.append(temp)
 
 
 
    if len(insertData) > 0:
-      mongodb.remove_document(MONGO_COLLECTION=collection)
+      # mongodb.remove_document(MONGO_COLLECTION=collection)
       mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertData)
    now_end         = datetime.now()
    log.write(now_end.strftime("%d/%m/%Y, %H:%M:%S") + ': End Log' + '\n')

@@ -41,7 +41,7 @@
     </div>
     <div id="action-menu">
         <ul>
-            
+
         </ul>
     </div>
     <script>
@@ -61,12 +61,6 @@
                      schema: {
                         data: "data",
                         total: "total",
-                        parse: function(response) {
-                           response.data.map(doc => {
-                              doc.code = doc._id.code;
-                           });
-                           return response;
-                        }
                      }
                   });
 
@@ -94,7 +88,7 @@
                           title: "No",
                           width: 50
                       },{
-                          field: "account",
+                          field: "account_number",
                           title: "ACCOUNT NUMBER",
                           width: 100
                       },{
@@ -307,7 +301,7 @@
          kendo.bind($(".mvvm"), observable);
       };
 
-      
+
     </script>
     <script>
         function saveAsExcel() {

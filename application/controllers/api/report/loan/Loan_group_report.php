@@ -51,7 +51,9 @@ Class Loan_group_report extends WFF_Controller {
         try {
             $now =getdate();
             $week = $this->weekOfMonth(date('Y-m-d'));
-            
+            $day = date('d/m/y');
+            // $week = $this->weekOfMonth(date('2019-12-13'));
+            // print_r($now);exit();
             //sibs
             $request = json_decode($this->input->get("q"), TRUE);
             $model = $this->crud->build_model($this->zaccf_collection);
@@ -59,7 +61,7 @@ Class Loan_group_report extends WFF_Controller {
             $this->kendo_aggregate->set_default("sort", null);
 
             $match = array(
-              '$match' => array('W_ORG' => array('$gt' => 0))
+              '$match' => array('W_ORG' => array('$gt' => '0'))
             );
             $group = array(
                '$group' => array(
@@ -69,7 +71,7 @@ Class Loan_group_report extends WFF_Controller {
                )
             );
             $this->kendo_aggregate->set_kendo_query($request)->filtering()->adding($match,$group);
-            
+
             $data_aggregate = $this->kendo_aggregate->paging()->get_data_aggregate();
             $data = $this->mongo_db->aggregate_pipeline($this->zaccf_collection, $data_aggregate);
             $sum_org = $sum_acc = $sum_org_g2 = $sum_acc_g2 = $sum_org_g3 = $sum_acc_g3 = 0;
@@ -107,23 +109,23 @@ Class Loan_group_report extends WFF_Controller {
                     default:
                         break;
                 }
-                $value['ratio']      = (int)$value['total_org']/$sum_org;
+                $value['ratio']      = ($sum_org != 0) ? (int)$value['total_org']/$sum_org : 0;
                 $value['year']       = (string)$now['year'];
                 $value['month']      = $now['month'];
                 $value['weekday']    = $now['weekday'];
-                $value['day']        = date('d/m/Y');
+                $value['day']        = $day;
                 $value['weekOfMonth']       = $week;
                 $value['type']        = 'sibs';
                 $value["createdBy"]   =   $this->session->userdata("extension");
                 unset($value['_id']);
                 $result = $this->crud->create($this->collection, $value);
-                
+
             }
             $insertTotal = array(
                 'year'          => (string)$now['year'],
                 'month'         => $now['month'],
-                'weekday'       => $now['weekday'], 
-                'day'           => date('d/m/Y'),
+                'weekday'       => $now['weekday'],
+                'day'           => $day,
                 'weekOfMonth'   => $week,
                 'type'          => 'sibs',
                 'createdBy'     => $this->session->userdata("extension"),
@@ -135,16 +137,16 @@ Class Loan_group_report extends WFF_Controller {
             $insertTotal['group']       = 'G2';
             $insertTotal['total_org']   = $sum_org_g2;
             $insertTotal['count_data']  = $sum_acc_g2;
-            $insertTotal['ratio']       = (int)$insertTotal['total_org']/$sum_org;
+            $insertTotal['ratio']       = ($sum_org != 0) ? (int)$insertTotal['total_org']/$sum_org : 0;
             $this->crud->create($this->collection, $insertTotal);
             $insertTotal['group']       = 'G3';
             $insertTotal['total_org']   = $sum_org_g3;
             $insertTotal['count_data']  = $sum_acc_g3;
-            $insertTotal['ratio']       = (int)$insertTotal['total_org']/$sum_org;
+            $insertTotal['ratio']       = ($sum_org != 0) ? (int)$insertTotal['total_org']/$sum_org : 0;
 
             $this->crud->create($this->collection, $insertTotal);
 
-            
+
             //card
             $request = json_decode($this->input->get("q"), TRUE);
             $model = $this->crud->build_model($this->sbv_collection);
@@ -168,33 +170,33 @@ Class Loan_group_report extends WFF_Controller {
                )
             );
             $this->kendo_aggregate->set_kendo_query($request)->filtering()->adding($match,$group);
-            
+
             $data_aggregate = $this->kendo_aggregate->paging()->get_data_aggregate();
             $data = $this->mongo_db->aggregate_pipeline($this->sbv_collection, $data_aggregate);
             $sum_org = $sum_acc = $sum_org_g2 = $sum_acc_g2 = $sum_org_g3 = $sum_acc_g3 = 0;
             foreach ($data as &$value) {
-                if (isset($value['_id'][0])) {
+                if (isset($value['_id'])) {
                     $value['total_org']  = $value['total_ob_principal_sale'] + $value['total_ob_principal_cash'];
                     $sum_org += $value['total_org'];
                     $sum_acc += $value['count_data'];
-                    if ($value['_id'] != '1') {
+                    if ($value['_id'] != '01') {
                         $sum_org_g2 += $value['total_org'];
                         $sum_acc_g2 += $value['count_data'];
                     }
-                    if ($value['_id'] != '1' || $value['_id'] != '2') {
+                    if ($value['_id'] != '01' || $value['_id'] != '02') {
                         $sum_org_g3 += $value['total_org'];
                         $sum_acc_g3 += $value['count_data'];
                     }
                 }
             }
             foreach ($data as &$value) {
-                $value['group']      = isset($value['_id'][0]) ? $value['_id'][0] : 0;
+                $value['group']      = ($value['_id'] != '') ? $value['_id'] : 0;
                 if ($value['group'] != 0) {
-                    $value['ratio']      = (int)$value['total_org']/$sum_org;
+                    $value['ratio']      = ($sum_org != 0) ? (int)$value['total_org']/$sum_org : 0;
                     $value['year']       = (string)$now['year'];
                     $value['month']      = $now['month'];
                     $value['weekday']    = $now['weekday'];
-                    $value['day']        = date('d/m/Y');
+                    $value['day']        = $day;
                     $value['weekOfMonth']       = $week;
                     $value['type']        = 'card';
                     $value["createdBy"]   =   $this->session->userdata("extension");
@@ -205,8 +207,8 @@ Class Loan_group_report extends WFF_Controller {
             $insertTotal = array(
                 'year'          => (string)$now['year'],
                 'month'         => $now['month'],
-                'weekday'       => $now['weekday'], 
-                'day'           => date('d/m/Y'),
+                'weekday'       => $now['weekday'],
+                'day'           => $day,
                 'weekOfMonth'   => $week,
                 'type'          => 'card',
                 'createdBy'     => $this->session->userdata("extension"),
@@ -218,21 +220,21 @@ Class Loan_group_report extends WFF_Controller {
             $insertTotal['group']       = 'G2';
             $insertTotal['total_org']   = $sum_org_g2;
             $insertTotal['count_data']  = $sum_acc_g2;
-            $insertTotal['ratio']       = (int)$insertTotal['total_org']/$sum_org;
+            $insertTotal['ratio']       = ($sum_org != 0) ? (int)$insertTotal['total_org']/$sum_org : 0;
 
             $this->crud->create($this->collection, $insertTotal);
             $insertTotal['group']       = 'G3';
             $insertTotal['total_org']   = $sum_org_g3;
             $insertTotal['count_data']  = $sum_acc_g3;
-            $insertTotal['ratio']       = (int)$insertTotal['total_org']/$sum_org;
-            
+            $insertTotal['ratio']       = ($sum_org != 0) ? (int)$insertTotal['total_org']/$sum_org : 0;
+
             $this->crud->create($this->collection, $insertTotal);
 
         } catch (Exception $e) {
             echo json_encode(array("status" => 0, "message" => $e->getMessage()));
         }
     }
-    
+
     function exportExcel()
     {
         $startDay = date('Y-m-1');
@@ -252,7 +254,7 @@ Class Loan_group_report extends WFF_Controller {
 
         //sibs
         $worksheet = $excelWorkbook->setActiveSheetIndex(0);
-        for ($i=0; $i <= 31; $i++) { 
+        for ($i=0; $i <= 31; $i++) {
             $cenvertedTime = date('Y-m-d',strtotime('+'.$i.' day',strtotime($startDay)));
             $getNextDate = getdate(strtotime($cenvertedTime));
             if ($getNextDate['mon'] != $month) {
@@ -299,13 +301,13 @@ Class Loan_group_report extends WFF_Controller {
                     $worksheet->setCellValueExplicit($colRatio . $row, $doc['ratio'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
                 }
             }
-            
+
         }
 
         //card
         $worksheetCard = $excelWorkbook->setActiveSheetIndex(1);
 
-        for ($i=0; $i <= 31; $i++) { 
+        for ($i=0; $i <= 31; $i++) {
             $cenvertedTime = date('Y-m-d',strtotime('+'.$i.' day',strtotime($startDay)));
             $getNextDate = getdate(strtotime($cenvertedTime));
             if ($getNextDate['mon'] != $month) {
@@ -352,7 +354,7 @@ Class Loan_group_report extends WFF_Controller {
                     $worksheetCard->setCellValue($colRatio . $row, $doc['ratio']);
                 }
             }
-            
+
         }
         $file_path = UPLOAD_PATH . "loan/export/" . $filename;
         $objWriter = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($excelWorkbook, $inputFileType);
@@ -421,7 +423,7 @@ Class Loan_group_report extends WFF_Controller {
         $data = array('col' => $col, 'colIndex' => $colIndex, 'row' => $row );
         return $data;
     }
-    
+
     function downloadExcel()
     {
         $file_path = $this->exportExcel();

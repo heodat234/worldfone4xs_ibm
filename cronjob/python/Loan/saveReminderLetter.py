@@ -37,9 +37,9 @@ try:
    data        = []
    insertData  = []
    now         = datetime.now()
-   
+
    today = date.today()
-   # today = datetime.strptime('12/10/2019', "%d/%m/%Y").date()
+   # today = datetime.strptime('13/12/2019', "%d/%m/%Y").date()
 
    day = today.day
    month = today.month
@@ -81,7 +81,7 @@ try:
    data_faccf = mongodb.aggregate_pipeline(MONGO_COLLECTION=zaccf_collection,aggregate_pipeline=aggregate_acc)
 
    account_number_arr = []
-   
+
    if data_faccf != None:
       for row in data_faccf:
          for detail in row['detailLC05']:
@@ -124,7 +124,7 @@ try:
             temp['day']    = contract_date[0:2]
             temp['month']  = contract_date[2:4]
             temp['year']   = contract_date[4:8]
-            
+
             if tdelta.days == 35:
                diallistInfo = mongodb.getOne(MONGO_COLLECTION=diallist_detail_collection, WHERE={'account_number': str(row['account_number'])},SELECT=['assign'])
                if diallistInfo != None:
@@ -214,7 +214,7 @@ try:
             temp['day']    = contract_date[0:2]
             temp['month']  = contract_date[2:4]
             temp['year']   = contract_date[4:8]
-            
+
             if tdelta.days == 35:
                diallistInfo = mongodb.getOne(MONGO_COLLECTION=diallist_detail_collection, WHERE={'account_number': str(row['contract_no'])},SELECT=['assign'])
                if diallistInfo != None:
@@ -233,7 +233,7 @@ try:
 
                insertData.append(temp)
                i += 1
-   
+
 
    if len(insertData) > 0:
       # mongodb.remove_document(MONGO_COLLECTION=collection)
