@@ -61,8 +61,8 @@ Class Daily_prod_each_group_report extends WFF_Controller {
 
     function exportExcel() {
         $now = getdate();
-        // $month = (string)$now['mon'];
-        $month = '11';
+        $month = (string)$now['mon'];
+        // $month = '11';
         $request = json_decode($this->input->get("q"), TRUE);
         $request = array('for_month' => $month);
         $data = $this->crud->where($request)->order_by(array('debt_group' => 'asc', 'due_date_code' => 'asc'))->get($this->collection);

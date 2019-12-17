@@ -79,18 +79,18 @@
 
                   var grid = this.grid = $("#grid").kendoGrid({
                      dataSource: dataSource,
-                     excel: {allPages: true},
-                     excelExport: function(e) {
-                        var sheet = e.workbook.sheets[0];
-                        for (var rowIndex = 1; rowIndex < sheet.rows.length; rowIndex++) {
-                          var row = sheet.rows[rowIndex];
-                          for (var cellIndex = 0; cellIndex < row.cells.length; cellIndex ++) {
-                              if(row.cells[cellIndex].value instanceof Date) {
-                                  row.cells[cellIndex].format = "dd-MM-yy hh:mm:ss"
-                              }
-                          }
-                        }
-                     },
+                     // excel: {allPages: true},
+                     // excelExport: function(e) {
+                     //    var sheet = e.workbook.sheets[0];
+                     //    for (var rowIndex = 1; rowIndex < sheet.rows.length; rowIndex++) {
+                     //      var row = sheet.rows[rowIndex];
+                     //      for (var cellIndex = 0; cellIndex < row.cells.length; cellIndex ++) {
+                     //          if(row.cells[cellIndex].value instanceof Date) {
+                     //              row.cells[cellIndex].format = "dd-MM-yy hh:mm:ss"
+                     //          }
+                     //      }
+                     //    }
+                     // },
                      resizable: true,
                      pageable: {
                         refresh: true,

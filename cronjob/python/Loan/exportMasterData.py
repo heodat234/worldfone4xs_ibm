@@ -32,29 +32,43 @@ try:
    resultData  = []
    errorData   = []
 
-   count = mongodb.count(MONGO_COLLECTION=collection)
-   quotient = int(count)/10000
-   mod = int(count)%10000
-   dem = 0
-   if quotient != 0:
-      for x in range(int(quotient)):
-         result = mongodb.get(MONGO_COLLECTION=collection, SORT=([('_id', -1)]),SKIP=int(x*10000), TAKE=int(10000))
-         for idx,row in enumerate(result):
-            # if row['due_date'] != '':
-            #    due_date = datetime.fromtimestamp(row['due_date'])
-            #    row['due_date']       = due_date.strftime("%d-%m-%Y")
-            
-            data.append(row)
+   today = date.today()
+   # today = datetime.strptime('13/12/2019', "%d/%m/%Y").date()
 
-   if int(mod) > 0:
-      result = mongodb.get(MONGO_COLLECTION=collection, SORT=([('_id', -1)]),SKIP=int(int(quotient)*10000), TAKE=int(mod))
-      for idx,row in enumerate(result):
-         # if row['due_date'] != '':
-         #    due_date = datetime.fromtimestamp(row['due_date'])
-         #    row['due_date']       = due_date.strftime("%d-%m-%Y")
-         
-         data.append(row)
+   day = today.day
+   month = today.month
+   year = today.year
+   weekday = today.weekday()
+   lastDayOfMonth = calendar.monthrange(year, month)[1]
 
+   todayString = today.strftime("%d/%m/%Y")
+   todayTimeStamp = int(time.mktime(time.strptime(str(todayString + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
+
+   startMonth = int(time.mktime(time.strptime(str('01/' + str(month) + '/' + str(year) + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
+   endMonth = int(time.mktime(time.strptime(str(str(lastDayOfMonth) + '/' + str(month) + '/' + str(year) + " 23:59:59"), "%d/%m/%Y %H:%M:%S")))
+
+   holidayOfMonth = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_off_sys'))
+   listHoliday = map(lambda offDateRow: {offDateRow['off_date']}, holidayOfMonth)
+
+   if todayTimeStamp in listHoliday or (weekday == 5) or weekday == 6:
+      sys.exit()
+
+
+   aggregate_acc = [
+      {
+          "$match":
+          {
+              "createdAt": {'$gte' : todayTimeStamp},
+          }
+      },
+      {
+         "$project":
+          {
+              "_id": 0,
+          }
+      }
+   ]
+   data = mongodb.aggregate_pipeline(MONGO_COLLECTION=collection,aggregate_pipeline=aggregate_acc)
 
    df = pd.DataFrame(data, columns= ['account_number','cus_name','BIR_DT8','CUS_ID','FRELD8','product_name','LIC_NO','APPROV_LMT','TERM_ID','RPY_PRD','F_PDT','DT_MAT','current_balance','CURRENT_DPD','MOBILE_NO','WRK_REF','current_add','current_district','current_province','pernament_add','pernament_district','pernament_province','W_ORG','INT_RATE','OVER_DY','DATE_HANDOVER','license_plates_no','COMPANY'])
    # df.to_excel(writer,sheet_name='Daily',header=['CONTRACTNR','CLIENT_NAME','BIRTH_DATE','CIF','SIGNED_DATE','PRODUCTNAME','ID NO','CREDIT AMOUNT','INSTALLMENT NUMBER','INSTALMENT AMOUNT','DATE_FIRST_DUE','DATE_LAST_DUE','CURRENT_DEBT','CURRENT_DPD','PHONE NUMBER','REFERENCE PHONE','Current_ADDRESS (if any)','District','PROVINCE','PERNAMENT_ADDRESS','District','PROVINCE','PRINCIPAL','INTEREST/ year','DPD','DATE HANDOVER','lICENSE PLATES NO','COMPANY']) 

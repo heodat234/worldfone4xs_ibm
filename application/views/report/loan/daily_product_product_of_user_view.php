@@ -130,7 +130,7 @@ async function createColumn() {
     });
 
     numberColColumn.push({
-        field: 'today_rem',
+        field: 'rem',
         title: 'Remaining',
         width: 100
     }, {
@@ -144,7 +144,7 @@ async function createColumn() {
     });
 
     amountColColumn.push({
-        field: 'today_rem_amt',
+        field: 'rem_amt',
         title: 'Remaining',
         width: 100
     }, {

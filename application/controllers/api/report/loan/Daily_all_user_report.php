@@ -2528,10 +2528,9 @@ Class Daily_all_user_report extends CI_Controller {
       $now = date('d/m/Y');
       $now = getdate();
       $today = $now['mday'].'-'.$now['month'].'-'.$now['year'];
-      $date = strtotime("$today");
-      // $date = 1569862800;
-      $data = $this->mongo_db->where(array('date' => $date  ))->get($this->collection);
-
+      // $date = strtotime("$today");
+      $date = 1576195200;
+      $data = $this->mongo_db->where(array('createdAt' => array('$gte' => $date)  ))->get($this->collection);
       $filename = "DAILY ALL USER REPORT.xlsx";
       $spreadsheet = new Spreadsheet();
       $spreadsheet->getProperties()
