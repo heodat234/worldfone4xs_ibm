@@ -165,3 +165,16 @@ if(notificationAfterRefreshData = JSON.parse(sessionStorage.getItem("notificatio
 if(ENV.sound_effect) {
 	$(document).on("click", "a[role=button], a.btn, button", function(e) {playSound("btn-click");})
 }
+
+var ISO_8601_FULL = /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(\.\d+)?(([+-]\d\d:\d\d)|Z)?$/i
+
+kendo.myClass = kendo.Class.extend({
+    init: function(key, dataItem = {}) {
+    	for(let prop in dataItem) {
+    		if(ISO_8601_FULL.test(dataItem[prop])) {
+				dataItem[prop] = new Date(dataItem[prop]);
+			}
+    	}
+        this[key] = dataItem;
+    }
+});

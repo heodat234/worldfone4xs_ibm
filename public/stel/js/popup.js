@@ -332,9 +332,16 @@ class Popup {
         if(dialog) dialog.center().open();
     }
 
-    onRingEvent(data) {}
+    onRingEvent(data = {}) {
+        if(this._dataCall.direction == "outbound" && !this._dataCall.calluuid && data.calluuid) {
+            this._dataCall = data;
+        }
+    }
 
-    onCallEvent(data) {
+    onCallEvent(data = {}) {
+        if(this._dataCall.direction == "outbound" && !this._dataCall.calluuid && data.calluuid) {
+            this._dataCall = data;
+        }
         tabTitle(false,  "public/stel/img/call-ico-blue.png");
     }
 }

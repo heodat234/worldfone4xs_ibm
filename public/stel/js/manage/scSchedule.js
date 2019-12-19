@@ -40,7 +40,7 @@ var layoutViewModel = kendo.observable({
             this.set(`detailList[${i}].active`, (this.detailList[i].id == ticket.id) ? true : false);
         }
         this.set("hasDetail", true);
-    }
+    },
 })
 
 // views, layouts

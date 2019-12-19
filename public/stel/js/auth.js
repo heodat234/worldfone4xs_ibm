@@ -13,18 +13,15 @@ var sidebarWidgetPromise = $.ajax({
 	dataType: "html"
 })
 
-Promise.all([navPromise, headerPromise, sidebarWidgetPromise]).then(values => {
-	$("#sidebar-nav-contain").html(values[0]);
-	$("#main-container header.navbar").html(values[1]);
-	$("#sidebar-widget").html(values[2]);
-	App.init();
-})
-
 var checkPermisssion = function() {
-	if(!PERMISSION.isadmin) {
+	if(!PERMISSION.issysadmin) {
+		var permissionsArr = [];
 		["create","update","delete"].forEach(function(value){
 			if(!PERMISSION[value]) $(`[data-type=${value}]`).remove();
+			else permissionsArr.push(value);
 		})
+		$("div.sidebar-user-role").attr("title", permissionsArr.concat(PERMISSION.actions).join(","));
+
 		// Check actions
 		var btnActions = $("[data-type^=action]");
 		if(btnActions.length) {
@@ -42,4 +39,12 @@ var checkPermisssion = function() {
 			}
 		}
 	}
-}()
+};
+
+Promise.all([navPromise, headerPromise, sidebarWidgetPromise]).then(values => {
+	$("#sidebar-nav-contain").html(values[0]);
+	$("#main-container header.navbar").html(values[1]);
+	$("#sidebar-widget").html(values[2]);
+	App.init();
+	checkPermisssion();
+})

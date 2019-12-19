@@ -67,7 +67,14 @@ function gridDate(data, format = "dd/MM/yy H:mm") {
 }
 
 function gridTimestamp(data, format = "dd/MM/yy H:mm") {
-    return data ? kendo.toString(new Date(data * 1000), format) : "";
+    if(!data) return "";
+    let date = new Date();
+    if(typeof data == "string") {
+        date = new Date(data);
+    } else {
+        date = new Date(data * 1000);
+    }
+    return kendo.toString(date, format);
 }
 
 function gridName(name, href = "javascript:void(0)") {
@@ -75,18 +82,18 @@ function gridName(name, href = "javascript:void(0)") {
 }
 
 function gridInterger(data, format = "n0") {
-    return kendo.toString(Number(data), format);
+    return data ? kendo.toString(Number(data), format) : "";
 }
 
 function gridPhone(data, id = '', type = '') {
     var html = "<span></span>";
     if(data) {
         if(typeof data == "string") {
-            html = `<a href="javascript:void(0)" class="label label-info" onclick="makeCallWithDialog('${data}','${id}','${type}')" title="Call now" data-role="tooltip" data-position="top">${data}</a>`;
+            html = `<a href="javascript:void(0)" class="label label-info" onclick="makeCall('${data}','${id}','${type}')" title="Call now" data-role="tooltip" data-position="top">${data}</a>`;
         } else {
             if(data.length) {
                 template = $.map($.makeArray(data), function(value, index) {
-                    return `<a href="javascript:void(0)" class="label label-default" data-index="${index}" onclick="makeCallWithDialog('${value}','${id}','${type}')" title="Call now" data-role="tooltip" data-position="top">${value}</a>`;
+                    return `<a href="javascript:void(0)" class="label label-default" data-index="${index}" onclick="makeCall('${value}','${id}','${type}')" title="Call now" data-role="tooltip" data-position="top">${value}</a>`;
                 });;
                 html = template.join(' ');
             }
@@ -104,6 +111,18 @@ function gridLongText(data, leng = 30) {
     return html;
 }
 
+function gridCurrency(data) {
+    if(data == undefined) return '';
+    data = data.toString();
+    var content  = data.split('.');
+    content      = content[0];
+    if(content.includes(',')){
+        return content;
+    }else{
+        return content.replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,");
+    }
+}
+
 /*
  * Dropdownlist for grid cell
  */
@@ -119,11 +138,12 @@ function gridDropDownEditor(container, options) {
         });
 }; 
 
-function dataSourceDropDownList(collection, field, match = null, parse = res => res, pageSize = 20) {
+function dataSourceDropDownList(collection, field, match = null, parse = res => res, pageSize = 1000) {
     if(typeof match === "function") {
         parse = match;
         match = null;
     }
+
     return new kendo.data.DataSource({
         serverFiltering: true,
         serverPaging: true,
@@ -566,4 +586,41 @@ Date.prototype.toIsoLocalString = function() {
         ':' + pad(this.getSeconds()) +
         dif + pad(tzo / 60) +
         ':' + pad(tzo % 60);
+}
+
+function getPDF(selector, filename = "Report") {
+    kendo.drawing.drawDOM($(selector)).then(function(group){
+      kendo.drawing.pdf.saveAs(group, `${filename}.pdf`);
+    });
+}
+
+
+function gridPhoneDialId(data, id = '', type = '') {
+    var html = "<span></span>";
+    if(data) {
+        if(typeof data == "string") {
+            html = `<a href="javascript:void(0)" class="label label-info" onclick="makeCallDialId('${data}','${id}','${type}')" title="Call now" data-role="tooltip" data-position="top">${data}</a>`;
+        } else {
+            if(data.length) {
+                template = $.map($.makeArray(data), function(value, index) {
+                    return `<a href="javascript:void(0)" class="label label-default" data-index="${index}" onclick="makeCallDialId('${value}','${id}','${type}')" title="Call now" data-role="tooltip" data-position="top">${value}</a>`;
+                });;
+                html = template.join(' ');
+            }
+        }
+    }
+    return html;
+}
+
+function makeCallDialId(phone, dialid = "", type = "") {
+    startPopup({dialid:dialid,customernumber:phone,dialtype:"manual",direction:"outbound",starttime:Date.now()/1000})
+    $.ajax({
+        url: ENV.vApi + "wfpbx/makeCall",
+        data: {phone: phone, dialid: dialid, type: type},
+        success: function(e) {
+            notification.show(e.message, e.status ? "success" : "error");
+            if(typeof actionPhoneRing != "undefined" && e.status) actionPhoneRing();
+        },
+        error: errorDataSource
+    })
 }

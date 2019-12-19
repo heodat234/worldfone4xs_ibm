@@ -2,6 +2,7 @@ var Table = {
     dataSource: {},
     grid: {},
     columns: Config.columns,
+    sort: Config.sort,
     init: function() {
         var dataSource = this.dataSource = new kendo.data.DataSource({
             serverFiltering: true,
@@ -10,6 +11,7 @@ var Table = {
             serverGrouping: false,
             pageSize: 10,
             batch: false,
+            sort: this.sort,
             schema: {
                 data: "data",
                 total: "total",
@@ -41,20 +43,31 @@ var Table = {
                 parameterMap: parameterMap
             },
             sync: syncDataSource,
-            error: errorDataSource
+            error: errorDataSource,
+            change: function(e) {
+                if(e.action == "sync") {
+                    e.sender.read();
+                }
+            }
         });
 
         var grid = this.grid = $("#grid").kendoGrid({
-        	editable: false,
+        	editable: "inline",
             dataSource: dataSource,
             resizable: true,
             pageable: {
-                refresh: true
+                refresh: true,
+                pageSizes: true,
+                input: true,
+                messages: KENDO.pageableMessages ? KENDO.pageableMessages : {}
             },
             sortable: true,
             scrollable: false,
             columns: this.columns,
-            filterable: true,
+            filterable: Config.filterable ? Config.filterable : true,
+            noRecords: {
+                template: `<h2 class='text-danger'>${KENDO.noRecords}</h2>`
+            }
         }).data("kendoGrid");
 
         grid.selectedKeyNames = function() {
@@ -125,72 +138,6 @@ var Table = {
 
 Table.init();
 
-async function editForm(ele) {
-	var dataItem = Table.dataSource.getByUid($(ele).data("uid")),
-        dataItemFull = await $.ajax({
-            url: `${Config.crudApi+Config.collection}/${dataItem.id}`,
-            error: errorDataSource
-        }),
-	    formHtml = await $.ajax({
-    	    url: Config.templateApi + Config.collection + "/form",
-    	    error: errorDataSource
-    	});
-	var model = Object.assign({
-		item: dataItemFull,
-		save: function() {
-            $.ajax({
-                url: `${Config.crudApi+Config.collection}/${dataItem.id}`,
-                data: JSON.stringify(this.item.toJSON()),
-                error: errorDataSource,
-                type: "PUT",
-                contentType: "application/json; charset=utf-8",
-                success: function() {
-                    Table.dataSource.read()
-                }
-            })
-		}
-	}, Config.observable);
-	kendo.destroy($("#right-form"));
-	$("#right-form").empty();
-	var kendoView = new kendo.View(formHtml, { wrap: false, model: model, evalTemplate: false });
-	kendoView.render($("#right-form"));
+function addForm(ele) {
+	Table.grid.addRow();
 }
-
-var handleNavCheck = function() {
-    // Animation Speed, change the values for different results
-    var page        = $('#page-container');
-    var upSpeed     = 250;
-    var downSpeed   = 250;
-
-    // Get all vital links
-    var menuLinks       = $('.check-sidebar .sidebar-nav-menu');
-    var submenuLinks    = $('.check-sidebar .sidebar-nav-submenu');
-
-    // Primary Accordion functionality
-    menuLinks.click(function(){
-        var link = $(this);
-
-        if (page.hasClass('sidebar-mini') && page.hasClass('sidebar-visible-lg-mini') && (getWindowWidth() > 991)) {
-            if (link.hasClass('open')) {
-                link.removeClass('open');
-            }
-            else {
-                $('.sidebar-nav-menu.open').removeClass('open');
-                link.addClass('open');
-            }
-        }
-        else if (!link.parent().hasClass('active')) {
-            if (link.hasClass('open')) {
-                link.removeClass('open').next().slideUp(upSpeed);
-            }
-            else {
-                $('.sidebar-nav-menu.open').removeClass('open').next().slideUp(upSpeed);
-                link.addClass('open').next().slideDown(downSpeed);
-            }
-        }
-
-        link.blur();
-
-        return false;
-    });
-};

@@ -1,5 +1,4 @@
 var Table = function() {
-    console.log(Config);
     var columnsStorage = JSON.parse(sessionStorage.getItem("columns_" + ENV.currentUri));
     if(columnsStorage) {
         Config.columns.map((col, idx) => {
@@ -18,11 +17,28 @@ var Table = function() {
     if(filterStorage) {
         Config.filter = filterStorage;
     }
+    var columnsStorage = JSON.parse(sessionStorage.getItem("columns_" + ENV.currentUri));
+    if(columnsStorage) {
+        var fieldToIndex = {};
+        var fieldToWidth = {};
+        columnsStorage.forEach((col, idx) => {
+            if(col.field) {
+                fieldToIndex[col.field] = idx;
+            }
+        });
+        Config.columns.sort(function(a, b) {
+            if(a.field && b.field) {
+                return fieldToIndex[a.field] - fieldToIndex[b.field];
+            } return -1;
+        });
+    }
     return {
         dataSource: {},
         grid: {},
         columns: Config.columns,
         gridOptions: {},
+        autoBind: (typeof Config.autoBind != 'undefined') ? Config.autoBind : true,
+        refresh: (typeof Config.refresh != 'undefined') ? Config.refresh : true,
         init: function() {
             var dataSource = this.dataSource = new kendo.data.DataSource({
                 serverFiltering: true,
@@ -43,23 +59,23 @@ var Table = function() {
                 },
                 transport: {
                     read: {
-                        url: Config.crudApi + Config.collection + '/read'
+                        url: Config.crudApi + Config.collection
                     },
                     update: {
                         url: function(data) {
-                            return Config.crudApi + Config.collection + "/update/" + data.id;
+                            return Config.crudApi + Config.collection + "/" + data.id;
                         },
                         type: "PUT",
                         contentType: "application/json; charset=utf-8"
                     },
                     create: {
-                        url: Config.crudApi + Config.collection + '/create',
+                        url: Config.crudApi + Config.collection,
                         type: "POST",
                         contentType: "application/json; charset=utf-8"
                     },
                     destroy: {
                         url: function(data) {
-                            return Config.crudApi + Config.collection + "/delete/" + data.id;
+                            return Config.crudApi + Config.collection + "/" + data.id;
                         },
                         type: "DELETE",
                     },
@@ -70,6 +86,7 @@ var Table = function() {
             });
 
             this.gridOptions = Object.assign({
+                autoBind: this.autoBind,
                 dataSource: dataSource,
                 excel: {allPages: true},
                 excelExport: function(e) {
@@ -85,13 +102,9 @@ var Table = function() {
                   }
                 },
                 resizable: true,
-                pageable: {
-                    refresh: true,
-                    pageSizes: [5, 10, 20, 50, 100],
-                    input: true,
-                    messages: KENDO.pageableMessages ? KENDO.pageableMessages : {}
-                },
-                sortable: true,
+                pageable: true,
+                sortable: false,
+                reorderable: Boolean(Config.reorderable),
                 scrollable: Boolean(Config.scrollable),
                 columns: this.columns,
                 filterable: Config.filterable ? Config.filterable : true,
@@ -107,10 +120,18 @@ var Table = function() {
                 },
                 filter: function(e) {
                     sessionStorage.setItem("filter_" + ENV.currentUri, JSON.stringify(e.filter));
+                },
+                columnReorder: function(e) {
+                    setTimeout(() => {
+                        sessionStorage.setItem("columns_" + ENV.currentUri, JSON.stringify(e.sender.columns));
+                    }, 100);
+                },
+                dataBinding: function() {
+                    record = (dataSource.page() -1) * dataSource.pageSize();
                 }
             }, Config.gridOptions);
 
-            var grid = this.grid = $("#grid_1").kendoGrid(this.gridOptions).data("kendoGrid");
+            var grid = this.grid = $("#grid").kendoGrid(this.gridOptions).data("kendoGrid");
 
             grid.selectedKeyNames = function() {
                 var items = this.select(),
@@ -131,7 +152,7 @@ var Table = function() {
             
             $("html").on("click", function() {menu.hide()});
 
-            $(document).on("click", "#grid_1 tr[role=row] a.btn-action", function(e){
+            $(document).on("click", "#grid tr[role=row] a.btn-action", function(e){
                 let row = $(e.target).closest("tr");
                 e.pageX -= 20;
                 showMenu(e, row);

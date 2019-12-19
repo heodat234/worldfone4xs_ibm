@@ -201,6 +201,9 @@ try:
                     temp['tar_amt'] = (target * temp['inci_amt'])/100
                     temp['tar_gap'] = temp['tar_amt'] - temp['rem_amt']
                     temp['tar_per'] = temp['tar_gap']/temp['tar_amt'] if temp['tar_amt'] != 0 else 0
+
+                    temp['createdAt'] = time.time()
+                    temp['createdBy'] = 'system'
                     mongodb.insert(MONGO_COLLECTION=collection, insert_data=temp)
                     # log.write(json.dumps(temp))
                     # pprint(temp)
@@ -401,6 +404,9 @@ try:
         temp['tar_amt'] = (target * temp['inci_amt'])/100
         temp['tar_gap'] = temp['tar_amt'] - temp['rem_amt']
         temp['tar_per'] = temp['tar_gap']/temp['tar_amt'] if temp['tar_amt'] != 0 else 0
+
+        temp['createdAt'] = time.time()
+        temp['createdBy'] = 'system'
         mongodb.insert(MONGO_COLLECTION=collection, insert_data=temp)
 
     now_end         = datetime.now()

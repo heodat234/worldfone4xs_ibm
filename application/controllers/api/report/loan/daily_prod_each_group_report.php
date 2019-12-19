@@ -27,28 +27,16 @@ Class Daily_prod_each_group_report extends WFF_Controller {
     function read() {
         try {
             $request = json_decode($this->input->get("q"), TRUE);
-            $data = $this->crud->read($this->collection, $request);
+            $date = date('d-m-Y',strtotime("-1 days"));
+            
+            $match = array('createdAt' => array('$gte' => strtotime($date)));
+            $data = $this->crud->read($this->collection, $request, array(), $match);
             echo json_encode($data);
         } catch (Exception $e) {
             echo json_encode(array("status" => 0, "message" => $e->getMessage()));
         }
     }
 
-    function readExcel()
-    {
-        try {
-
-            $filename = "export.xlsx";
-            $file_template = "templateLawsuit.xlsx";
-
-            $rowDataRaw = $this->excel->read(UPLOAD_PATH . "excel/" . $filename, 50, 1);
-
-            echo json_encode($rowDataRaw);
-            // var_dump($response);
-        } catch (Exception $e) {
-            echo json_encode(array("status" => 0, "message" => $e->getMessage()));
-        }
-    }
 
     function readProduct() {
         try {
@@ -62,9 +50,9 @@ Class Daily_prod_each_group_report extends WFF_Controller {
     function exportExcel() {
         $now = getdate();
         $month = (string)$now['mon'];
-        // $month = '11';
-        $request = json_decode($this->input->get("q"), TRUE);
-        $request = array('for_month' => $month);
+        $date = date('d-m-Y',strtotime("-1 days"));
+
+        $request = array('createdAt' => array('$gte' => strtotime($date)));
         $data = $this->crud->where($request)->order_by(array('debt_group' => 'asc', 'due_date_code' => 'asc'))->get($this->collection);
         $product = $this->crud->order_by(array('code' => 'asc'))->get(set_sub_collection('Product'));
         $groupProduct = $this->mongo_private->where(array('tags' => array('group', 'debt', 'product')))->getOne(set_sub_collection("Jsondata"));

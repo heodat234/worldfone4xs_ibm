@@ -63,7 +63,7 @@ var Config = Object.assign(Config, {
 });
 </script>
 
-<script src="<?= STEL_PATH.'js/tablev4.js' ?>"></script>
+<script src="<?= STEL_PATH.'js/tablev5.js' ?>"></script>
 
 <script type="text/javascript">
 	function deleteDataItemChecked() {

@@ -105,3 +105,9 @@
 15/12/2019, 12:15:13: Start Import
 15/12/2019, 12:22:32: Start Import
 15/12/2019, 12:22:32: time data '22/11/19' does not match format '%d/%m/%Y'
+15/12/2019, 13:07:45: Start Import
+15/12/2019, 13:07:45: time data '22/11/19' does not match format '%d/%m/%Y'
+15/12/2019, 13:35:21: Start Import
+15/12/2019, 13:47:41: End Log
+15/12/2019, 14:00:45: Start Import
+15/12/2019, 14:13:05: End Log

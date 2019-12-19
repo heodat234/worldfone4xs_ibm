@@ -64,7 +64,7 @@
         refresh: false,
     }; 
 </script>
-<script src="<?= STEL_PATH.'js/tablev4.js' ?>"></script>
+<script src="<?= STEL_PATH.'js/tablev5.js' ?>"></script>
 <script type="text/javascript">
 	var router = new kendo.Router({routeMissing: function(e) { router.navigate("/") }});
     var customerFields = new kendo.data.DataSource({

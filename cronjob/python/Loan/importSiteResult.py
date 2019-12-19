@@ -111,6 +111,7 @@ try:
     temp = {}
     countList = 0
     for idx, row in enumerate(inputData):
+        total += 1
         temp = {}
         if row['contract_no'] not in ['', None]:
             for cell in row:
@@ -132,6 +133,7 @@ try:
                 temp['result'] = 'success'
                 insertData.append(temp)
                 result = True
+                complete += 1
 
     if(len(errorData) > 0):
         mongodb.batch_insert(common.getSubUser(subUserType, 'Site_result_result'), errorData)

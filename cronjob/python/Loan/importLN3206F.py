@@ -44,8 +44,8 @@ try:
     errorData = []
     total = 0
     complete = 0
-    # today = date.today()
-    today = datetime.strptime('13/12/2019', "%d/%m/%Y").date()
+    today = date.today()
+    # today = datetime.strptime('13/12/2019', "%d/%m/%Y").date()
     day = today.day
     month = today.month
     year = today.year

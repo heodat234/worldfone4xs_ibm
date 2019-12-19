@@ -98,6 +98,7 @@ router.route("/history", async function() {
 router.start();
 
 async function addForm() {
+    console.log(Config);
     var formHtml = await $.ajax({
         url: Config.templateApi + Config.collection + "/form",
         error: errorDataSource
@@ -105,45 +106,21 @@ async function addForm() {
     var model = Object.assign(Config.observable, {
         item: {},
         save: function() {
-            Table.dataSource.add(this.item);
-            Table.dataSource.sync().then(() => {Table.dataSource.read()});
-        }
-    });
-    kendo.destroy($("#right-form"));
-    $("#right-form").empty();
-    var kendoView = new kendo.View(formHtml, { wrap: false, model: model, evalTemplate: false });
-    kendoView.render($("#right-form"));
-}
-
-async function editForm(ele) {
-    var dataItem = Table.dataSource.getByUid($(ele).data("uid")),
-        dataItemFullTemp = await $.ajax({
-            url: `${Config.crudApi+Config.collection}/${dataItem.id}`,
-            error: errorDataSource
-        }),
-        formHtml = await $.ajax({
-            url: Config.templateApi + Config.collection + "/form",
-            error: errorDataSource
-        });
-    var dataItemFull = {
-        cmnd            : dataItemFullTemp.cmnd,
-        issued_date     : dataItemFullTemp.issued_date,
-        bank_acc        : dataItemFullTemp.bank_acc,
-        bank_branch     : dataItemFullTemp.bank_branch
-    };
-    var model = Object.assign(Config.observable, {
-        item: dataItemFull,
-        save: function() {
+            var item = this.get('item');
+            var appointment_date = new Date(this.item.appointment_date);
+            appointment_date.setHours(0, 0, 0, 0);
+            item.appointment_date = appointment_date.getTime() / 1000;
             $.ajax({
-                url: `${Config.crudApi+Config.collection}/${dataItem.id}`,
-                data: kendo.stringify(this.item.toJSON()),
+                url: ENV.vApi + "appointment_log_solve/create",
+                data: kendo.stringify(item.toJSON()),
                 error: errorDataSource,
                 contentType: "application/json; charset=utf-8",
                 type: "PUT",
                 success: function() {
-                    Table.dataSource.read()
+                    closeForm();
+                    Table.dataSource.sync().then(() => {Table.dataSource.read()});
                 }
-            })
+            });
         }
     });
     kendo.destroy($("#right-form"));

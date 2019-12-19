@@ -1,4 +1,4 @@
-function dataSourceDropDownListPrivate(collection, field, match = null, parse = res => res, pageSize = 20) {
+function dataSourceDropDownListPrivate(collection, field, match = null, parse = res => res, pageSize = 1000) {
     if(typeof match === "function") {
         parse = match;
         match = null;

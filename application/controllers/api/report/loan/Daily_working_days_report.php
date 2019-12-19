@@ -28,7 +28,10 @@ Class Daily_working_days_report extends WFF_Controller {
     {
         try {
             $request = json_decode($this->input->get("q"), TRUE);
-            $response = $this->crud->read($this->collection, $request);
+            $date = date('d-m-Y',strtotime("-1 days"));
+            
+            $match = array('createdAt' => array('$gte' => strtotime($date)));
+            $response = $this->crud->read($this->collection, $request,array(),$match);
             echo json_encode($response);
 
         } catch (Exception $e) {
@@ -690,10 +693,23 @@ Class Daily_working_days_report extends WFF_Controller {
 
             $worksheet->setCellValue('A' . $start_row, $value['month']);
             $worksheet->setCellValue('E' . $start_row, (!empty($value['team_name']) ? $value['team_name'] : 0));
+            $worksheet->getStyle('E' . $start_row)->getAlignment()->setHorizontal('left');
             $worksheet->setCellValue('F' . $start_row, (!empty($value['start_acc']) ? $value['start_acc'] : 0));
+            $worksheet->getStyle('F' . $start_row)->getNumberFormat()
+            ->setFormatCode('#,##0');
+            $worksheet->getStyle('F' . $start_row)->getAlignment()->setHorizontal('right');
             $worksheet->setCellValue('G' . $start_row, (!empty($value['start_amt']) ? $value['start_amt'] : 0));
+            $worksheet->getStyle('G' . $start_row)->getNumberFormat()
+            ->setFormatCode('#,##0');
+            $worksheet->getStyle('G' . $start_row)->getAlignment()->setHorizontal('right');
             $worksheet->setCellValue('H' . $start_row, (!empty($value['tar_acc']) ? $value['tar_acc'] : 0));
+            $worksheet->getStyle('H' . $start_row)->getNumberFormat()
+            ->setFormatCode('#,##0');
+            $worksheet->getStyle('H' . $start_row)->getAlignment()->setHorizontal('right');
             $worksheet->setCellValue('I' . $start_row, (!empty($value['tar_amt']) ? $value['tar_amt'] : 0));
+            $worksheet->getStyle('I' . $start_row)->getNumberFormat()
+            ->setFormatCode('#,##0');
+            $worksheet->getStyle('I' . $start_row)->getAlignment()->setHorizontal('right');
             // $worksheet->setCellValue('J' . $start_row, (!empty($value['day']) ? $value['day'] : 0));
             $worksheet->getStyle("F".$start_row.":I".$start_row)->getFill()
                 ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
@@ -703,6 +719,9 @@ Class Daily_working_days_report extends WFF_Controller {
             for ($i=1; $i <=23 ; $i++) { 
                 $startIndex ++;
                 $worksheet->setCellValue($this->stringFromColumnIndex($startIndex) . $start_row, (!empty($value['index_'.$i]) ? $value['index_'.$i] : 0));
+                $worksheet->getStyle($this->stringFromColumnIndex($startIndex) . $start_row)->getNumberFormat()
+                ->setFormatCode('#,##0');
+                $worksheet->getStyle($this->stringFromColumnIndex($startIndex) . $start_row)->getAlignment()->setHorizontal('right');
             }
             $worksheet->setCellValue($this->stringFromColumnIndex($startIndex + 1) . $start_row, (!empty($value['final_num']) ? $value['final_num'] : 0));
 

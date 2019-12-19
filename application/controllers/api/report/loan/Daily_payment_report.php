@@ -26,10 +26,9 @@ Class Daily_payment_report extends WFF_Controller {
     {
         try {
             $request = json_decode($this->input->get("q"), TRUE);
-            $now = getdate();
-            $today = $now['mday'].'-'.$now['month'].'-'.$now['year'];
-            $date = strtotime("$today");
-            $match = array('createdAt' => array('$gte' => $date));
+            $date = date('d-m-Y',strtotime("-1 days"));
+            
+            $match = array('createdAt' => array('$gte' => strtotime($date)));
             $response = $this->crud->read($this->collection, $request,array(),$match);
             echo json_encode($response);
 

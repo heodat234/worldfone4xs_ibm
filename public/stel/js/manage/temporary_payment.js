@@ -95,29 +95,28 @@ router.route("/history", async function() {
     layout.showIn("#bottom-row", kendoView);
 });
 
+router.route("/localOverview", async function() {
+    var HTML = await $.get(`${Config.templateApi}${Config.collection}/appointment_history`);
+    var kendoView = new kendo.View(HTML, {model: {}});
+    layout.showIn("#bottom-row", kendoView);
+});
+
 router.start();
 
 async function addForm() {
+    var rightForm = $("#right-form");
+    console.log(rightForm);
     var formHtml = await $.ajax({
-        url: Config.templateApi + Config.collection + "/form",
-        error: errorDataSource
+        url: ENV.templateApi + "appointment/form",
     });
-    var model = Object.assign(Config.observable, {
-        item: {},
-        save: function() {
-            Table.dataSource.add(this.item);
-            Table.dataSource.sync().then(() => {Table.dataSource.read()});
-        }
-    });
-    kendo.destroy($("#right-form"));
-    $("#right-form").empty();
-    var kendoView = new kendo.View(formHtml, { wrap: false, model: model, evalTemplate: false });
-    kendoView.render($("#right-form"));
+    kendo.destroy(rightForm);
+    rightForm.empty();
+    rightForm.append(formHtml);
 }
 
 async function editForm(ele) {
     var dataItem = Table.dataSource.getByUid($(ele).data("uid")),
-        dataItemFullTemp = await $.ajax({
+        dataItemFull = await $.ajax({
             url: `${Config.crudApi+Config.collection}/${dataItem.id}`,
             error: errorDataSource
         }),
@@ -125,12 +124,6 @@ async function editForm(ele) {
             url: Config.templateApi + Config.collection + "/form",
             error: errorDataSource
         });
-    var dataItemFull = {
-        cmnd            : dataItemFullTemp.cmnd,
-        issued_date     : dataItemFullTemp.issued_date,
-        bank_acc        : dataItemFullTemp.bank_acc,
-        bank_branch     : dataItemFullTemp.bank_branch
-    };
     var model = Object.assign(Config.observable, {
         item: dataItemFull,
         save: function() {

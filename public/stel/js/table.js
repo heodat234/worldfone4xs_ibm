@@ -37,6 +37,7 @@ var Table = function() {
         grid: {},
         columns: Config.columns,
         gridOptions: {},
+        autoBind: (typeof Config.autoBind != 'undefined') ? Config.autoBind : true,
         init: function() {
             var dataSource = this.dataSource = new kendo.data.DataSource({
                 serverFiltering: true,
@@ -84,6 +85,7 @@ var Table = function() {
             });
 
             this.gridOptions = Object.assign({
+                autoBind: this.autoBind,
                 dataSource: dataSource,
                 excel: {allPages: true},
                 excelExport: function(e) {

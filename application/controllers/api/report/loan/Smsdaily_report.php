@@ -16,9 +16,8 @@ Class Smsdaily_report extends WFF_Controller {
         header('Content-type: application/json');
         $this->load->library("crud");
         $this->collection = set_sub_collection($this->collection);
-        $now = getdate();
-        $today = $now['mday'].'-'.$now['month'].'-'.$now['year'];
-        $this->date = strtotime("$today");
+        $date = date('d-m-Y',strtotime("-1 days"));
+        $this->date = strtotime($date);
     }
 
     function sibs()

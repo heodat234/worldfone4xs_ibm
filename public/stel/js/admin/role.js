@@ -132,7 +132,18 @@ function editorActions(container, options) {
             .kendoMultiSelect({
                 valuePrimitive: true,
                 values: (options.model[field] || []).slice(0),
-                dataSource: (options.model[field] || []).slice(0)
+                dataSource: new kendo.data.DataSource({
+                    transport: {
+                        read: ENV.restApi + "module/" + options.model.module_id
+                    },
+                    schema: {
+                        data: "actions",
+                        parse: function(res) {
+                            res.actions = res.actions || [];
+                            return res;
+                        }
+                    }
+                })
             }).data("kendoMultiSelect");
 };
 

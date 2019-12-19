@@ -26,7 +26,10 @@ Class Daily_assignment_report extends WFF_Controller {
     {
         try {
             $request = json_decode($this->input->get("q"), TRUE);
-            $response = $this->crud->read($this->collection, $request);
+            $date = date('d-m-Y',strtotime("-1 days"));
+            
+            $match = array('createdAt' => array('$gte' => strtotime($date)));
+            $response = $this->crud->read($this->collection, $request,array(),$match);
             echo json_encode($response);
 
         } catch (Exception $e) {

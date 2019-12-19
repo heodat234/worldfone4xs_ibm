@@ -25,9 +25,9 @@ Class Daily_prod_user_group_report extends WFF_Controller {
     function read() {
         try {
             $request = json_decode($this->input->get("q"), TRUE);
-            $now = getdate();
-            $month = (string)$now['mon'];
-            $match = array('for_month' => $month);
+            $date = date('d-m-Y',strtotime("-1 days"));
+            
+            $match = array('createdAt' => array('$gte' => strtotime($date)));
             $data = $this->crud->read($this->collection, $request,array(),$match);
             echo json_encode($data);
         } catch (Exception $e) {
@@ -47,10 +47,9 @@ Class Daily_prod_user_group_report extends WFF_Controller {
     function exportExcel() {
         $now = getdate();
         $month = (string)$now['mon'];
-        // $month = '11';
+        $date = date('d-m-Y',strtotime("-1 days"));
 
-        $request = json_decode($this->input->get("q"), TRUE);
-        $request = array('for_month' => $month);
+        $request = array('createdAt' => array('$gte' => strtotime($date)));
         $data = $this->crud->where($request)->order_by(array('debt_group' => 'asc', 'due_date_code' => 'asc', 'product' => 'desc', 'team' => 'asc'))->get($this->collection);
         $groupProduct = $this->mongo_private->where(array('tags' => array('group', 'debt', 'product')))->getOne(set_sub_collection("Jsondata"));
 

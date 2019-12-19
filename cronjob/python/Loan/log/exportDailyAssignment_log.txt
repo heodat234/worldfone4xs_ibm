@@ -1,2 +1,12 @@
 28/11/2019, 14:18:01: End Log
 28/11/2019, 14:18:37: End Log
+17/12/2019, 10:03:05: name 'calendar' is not defined
+17/12/2019, 10:04:06: End Log
+17/12/2019, 10:09:36: A pipeline stage specification object must contain exactly one field.
+17/12/2019, 10:10:33: A pipeline stage specification object must contain exactly one field.
+17/12/2019, 10:10:44: A pipeline stage specification object must contain exactly one field.
+17/12/2019, 10:15:21: 'dict' object has no attribute 'pod'
+17/12/2019, 10:27:18: End Log
+17/12/2019, 10:29:10: name 'my_dict' is not defined
+17/12/2019, 10:29:22: End Log
+17/12/2019, 10:31:10: End Log

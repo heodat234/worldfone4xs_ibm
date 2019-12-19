@@ -123,7 +123,7 @@ try:
          if investigation != None:
             row['license_plates_no']    = investigation['license_plates_no']
 
-         release_sale = mongodb.getOne(MONGO_COLLECTION=release_sale_collection, WHERE={'acc_no': str(row['account_number'])},SELECT=['temp_address','temp_district','temp_province','address','district','province'])
+         release_sale = mongodb.getOne(MONGO_COLLECTION=release_sale_collection, WHERE={'account_number': str(row['account_number'])},SELECT=['temp_address','temp_district','temp_province','address','district','province'])
          if release_sale != None:
             row['current_add']            = release_sale['temp_address']
             row['current_district']       = release_sale['temp_district']
@@ -180,7 +180,13 @@ try:
          sbv = mongodb.getOne(MONGO_COLLECTION=sbv_collection, WHERE={'contract_no': str(row['account_number'])},
             SELECT=['cif_birth_date','cus_no','open_date','card_type','license_no','approved_limit','address','ob_principal_sale','ob_principal_cash','interest_rate','overdue_days_no'])
          if sbv != None:
-            row['BIR_DT8']          = str(sbv['cif_birth_date'])
+            try:
+               birth_date   = datetime.fromtimestamp(sbv['cif_birth_date'])
+               birth_date   = birth_date.strftime('%d/%m/%Y')
+               row['BIR_DT8']          = birth_date
+            except Exception as e:
+               row['BIR_DT8']          = str(sbv['cif_birth_date'])
+            
             row['CUS_ID']           = sbv['cus_no']
             row['FRELD8']           = sbv['open_date']
             row['LIC_NO']           = sbv['license_no']
@@ -211,7 +217,7 @@ try:
             row['license_plates_no']    = investigation['license_plates_no']
 
 
-         release_sale = mongodb.getOne(MONGO_COLLECTION=release_sale_collection, WHERE={'acc_no': str(row['account_number'])},SELECT=['temp_address','temp_district','temp_province','address','district','province'])
+         release_sale = mongodb.getOne(MONGO_COLLECTION=release_sale_collection, WHERE={'account_number': str(row['account_number'])},SELECT=['temp_address','temp_district','temp_province','address','district','province'])
          if release_sale != None:
             row['current_district']       = release_sale['temp_district']
             row['current_province']       = release_sale['temp_province']
@@ -219,7 +225,7 @@ try:
             row['pernament_district']     = release_sale['district']
             row['pernament_province']     = release_sale['province']
 
-         balance = mongodb.getOne(MONGO_COLLECTION=trialBalance_collection, WHERE={'acc_no': str(row['account_number'])},SELECT=['prin_cash_balance','prin_retail_balance','int_balance','fee_balance','cash_int_accrued'])
+         balance = mongodb.getOne(MONGO_COLLECTION=trialBalance_collection, WHERE={'account_number': str(row['account_number'])},SELECT=['prin_cash_balance','prin_retail_balance','int_balance','fee_balance','cash_int_accrued'])
          if balance != None:
             row['current_balance']    = float(balance['prin_cash_balance']) + float(balance['prin_retail_balance'])+ float(balance['int_balance'])+ float(balance['fee_balance'])+ float(balance['cash_int_accrued'])
 
@@ -228,7 +234,7 @@ try:
          if zaccf != None:
             row['WRK_REF']          = zaccf['WRK_REF']+'; '+zaccf['WRK_REF1']+'; '+zaccf['WRK_REF2']+'; '+zaccf['WRK_REF3']+'; '+zaccf['WRK_REF4']+'; '+zaccf['WRK_REF5']
 
-         diallist = mongodb.getOne(MONGO_COLLECTION=diallist_collection, WHERE={'account_no': str(row['account_number'])},
+         diallist = mongodb.getOne(MONGO_COLLECTION=diallist_collection, WHERE={'account_number': str(row['account_number'])},
             SELECT=['assign'])
          if diallist != None:
             if row['COMPANY'] == '':
@@ -263,18 +269,21 @@ try:
    mod = int(count_wo)%10000
    if quotient != 0:
       for x in range(int(quotient)):
-         result = mongodb.get(MONGO_COLLECTION=wo_monthly_collection, SELECT=['ACCTNO','WO9711','WO9712','WO9713'],SORT=([('_id', -1)]),SKIP=int(x*10000), TAKE=int(10000))
+         result = mongodb.get(MONGO_COLLECTION=wo_monthly_collection, SELECT=['ACCTNO','CUS_NM','PHONE','PROD_ID','WO9711','WO9712','WO9713'],SORT=([('_id', -1)]),SKIP=int(x*10000), TAKE=int(10000))
          for idx,row in enumerate(result):
             cardData.append(row)
 
    if int(mod) > 0:
-      result = mongodb.get(MONGO_COLLECTION=wo_monthly_collection,SELECT=['ACCTNO','WO9711','WO9712','WO9713'], SORT=([('_id', -1)]),SKIP=int(int(quotient)*10000), TAKE=int(mod))
+      result = mongodb.get(MONGO_COLLECTION=wo_monthly_collection,SELECT=['ACCTNO','CUS_NM','PHONE','PROD_ID','WO9711','WO9712','WO9713'], SORT=([('_id', -1)]),SKIP=int(int(quotient)*10000), TAKE=int(mod))
       for idx,row in enumerate(result):
          cardData.append(row)
 
    for row in cardData:
       temp = {}
       if 'ACCTNO' in row.keys():
+         temp['cus_name']         = row['CUS_NM']
+         temp['MOBILE_NO']         = row['PHONE']
+         temp['product_name']         = row['PROD_ID']
          sbv = mongodb.getOne(MONGO_COLLECTION=sbv_collection, WHERE={'contract_no': str(row['ACCTNO'])},
             SELECT=['cif_birth_date','name','cus_no','open_date','card_type','license_no','approved_limit','ob_principal_sale','ob_principal_cash','interest_rate','overdue_days_no'])
          if sbv != None:
@@ -347,7 +356,7 @@ try:
             temp['MOBILE_NO']     = account['phone']
 
 
-         release_sale = mongodb.getOne(MONGO_COLLECTION=release_sale_collection, WHERE={'acc_no': str(row['ACCTNO'])},
+         release_sale = mongodb.getOne(MONGO_COLLECTION=release_sale_collection, WHERE={'account_number': str(row['ACCTNO'])},
             SELECT=['temp_address','temp_district','temp_province','address','district','province'])
          if release_sale != None:
             temp['current_add']            = release_sale['temp_address']
@@ -369,7 +378,7 @@ try:
             tdelta   = datetime.strptime(d1, FMT) - datetime.strptime(d2, FMT)
             temp['CURRENT_DPD'] = tdelta.days
 
-         diallist = mongodb.getOne(MONGO_COLLECTION=diallist_collection, WHERE={'account_no': str(row['ACCTNO'])},
+         diallist = mongodb.getOne(MONGO_COLLECTION=diallist_collection, WHERE={'account_number': str(row['ACCTNO'])},
             SELECT=['assign'])
          if diallist != None:
             if row['COMPANY'] == '':
@@ -389,7 +398,7 @@ try:
 
 
    if len(insertData) > 0:
-      # mongodb.remove_document(MONGO_COLLECTION=collection)
+      mongodb.remove_document(MONGO_COLLECTION=collection)
       mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertData)
    now_end         = datetime.now()
    log.write(now_end.strftime("%d/%m/%Y, %H:%M:%S") + ': End Log' + '\n')

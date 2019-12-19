@@ -1,22 +1,6 @@
 #!/bin/bash
 
 BASEDIR=$(dirname "$0")
-if [ $(ps -ef | grep -v grep | grep exportDailyPayment.py | wc -l) -lt 1 ]; then
-   /usr/local/bin/python3.6 ${BASEDIR}/exportDailyPayment.py > /dev/null 2>&1 &
-   echo "RUN ${BASEDIR}/exportDailyPayment.py"
-else
-   echo "Worldfone ScanJob service is running"
-   exit 0
-fi
-
-if [ $(ps -ef | grep -v grep | grep exportMasterData.py | wc -l) -lt 1 ]; then
-   /usr/local/bin/python3.6 ${BASEDIR}/exportMasterData.py > /dev/null 2>&1 &
-   echo "RUN ${BASEDIR}/exportMasterData.py"
-else
-   echo "Worldfone ScanJob service is running"
-   exit 0
-fi
-
 if [ $(ps -ef | grep -v grep | grep saveBlockCardReport.py | wc -l) -lt 1 ]; then
    /usr/local/bin/python3.6 ${BASEDIR}/saveBlockCardReport.py > /dev/null 2>&1 &
    echo "RUN ${BASEDIR}/saveBlockCardReport.py"
@@ -65,13 +49,13 @@ else
    exit 0
 fi
 
-if [ $(ps -ef | grep -v grep | grep saveDPWorkingDay.py | wc -l) -lt 1 ]; then
-   /usr/local/bin/python3.6 ${BASEDIR}/saveDPWorkingDay.py > /dev/null 2>&1 &
-   echo "RUN ${BASEDIR}/saveDPWorkingDay.py"
-else
-   echo "Worldfone ScanJob service is running"
-   exit 0
-fi
+# if [ $(ps -ef | grep -v grep | grep saveDPWorkingDay.py | wc -l) -lt 1 ]; then
+#    /usr/local/bin/python3.6 ${BASEDIR}/saveDPWorkingDay.py > /dev/null 2>&1 &
+#    echo "RUN ${BASEDIR}/saveDPWorkingDay.py"
+# else
+#    echo "Worldfone ScanJob service is running"
+#    exit 0
+# fi
 
 if [ $(ps -ef | grep -v grep | saveMasterData.py | wc -l) -lt 1 ]; then
    /usr/local/bin/python3.6 ${BASEDIR}/saveMasterData.py > /dev/null 2>&1 &
@@ -97,9 +81,17 @@ else
    exit 0
 fi
 
-if [ $(ps -ef | grep -v grep | saveSmsDaily.py | wc -l) -lt 1 ]; then
-   /usr/local/bin/python3.6 ${BASEDIR}/saveSmsDaily.py > /dev/null 2>&1 &
-   echo "RUN ${BASEDIR}/saveSmsDaily.py"
+if [ $(ps -ef | grep -v grep | saveCardLoanGroupReport.py | wc -l) -lt 1 ]; then
+   /usr/local/bin/python3.6 ${BASEDIR}/saveCardLoanGroupReport.py > /dev/null 2>&1 &
+   echo "RUN ${BASEDIR}/saveCardLoanGroupReport.py"
+else
+   echo "Worldfone ScanJob service is running"
+   exit 0
+fi
+
+if [ $(ps -ef | grep -v grep | saveProdAllUser.py | wc -l) -lt 1 ]; then
+   /usr/local/bin/python3.6 ${BASEDIR}/saveProdAllUser.py > /dev/null 2>&1 &
+   echo "RUN ${BASEDIR}/saveProdAllUser.py"
 else
    echo "Worldfone ScanJob service is running"
    exit 0

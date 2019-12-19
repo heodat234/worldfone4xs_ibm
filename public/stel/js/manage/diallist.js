@@ -61,56 +61,7 @@ router.route("/", async function() {
 
 router.route("/create", async function() {
 	var HTML = await $.get(`${Config.templateApi}diallist/create`);
-	var model = {
-		item: {},
-		modeOption: dataSourceJsonData(["Diallist","mode"]),
-		typeOption: dataSourceJsonData(["Diallist","type"]),
-		groupOption: dataSourceDropDownList("Group", ["name"], {active: true}),
-		typeCascade: function(e) {
-			this.typeCascadeAsync(e);
-		},
-		typeCascadeAsync: async function(e) {
-			var value = e.sender.value();
-			var response = await $.get(ENV.vApi + "diallist/diallistdetailfield/" + value);
-			if(response.data) {
-				this.set("item.columns", response.data);
-			}
-		},
-		save: function() {
-			var data = this.item.toJSON();
-			$.ajax({
-				url: `${ENV.restApi}diallist`,
-				type: "POST",
-				contentType: "application/json; charset=utf-8",
-				data: JSON.stringify(data),
-				success: function(response) {
-					if(response.status) {
-						syncDataSource();
-						router.navigate(`/`);
-					}
-				},
-				error: errorDataSource
-			})
-		},
-		saveAndImport: function() {
-			var data = this.item.toJSON();
-			$.ajax({
-				url: `${ENV.restApi}diallist`,
-				type: "POST",
-				contentType: "application/json; charset=utf-8",
-				data: JSON.stringify(data),
-				success: function(response) {
-					if(response.status) {
-						syncDataSource();
-						var id = response.data.id;
-						router.navigate(`/import/${id}`);
-					}
-				},
-				error: errorDataSource
-			})
-		}
-	};
-	var kendoView = new kendo.View(HTML, {model: model});
+	var kendoView = new kendo.View(HTML, {model: {}});
     layout.showIn("#bottom-row", kendoView);
 });
 
@@ -145,9 +96,7 @@ router.route("/import/:id", async function(id) {
 		extensions: [],
 		group: {members: []},
 		visibleData: false,
-		data: new kendo.data.DataSource({
-			pageSize: 5
-		}),
+		data: new kendo.data.DataSource(),
 		originalDataColumns: [],
 		dataColumns: [],
 		moveDataColumns: function(oldIndex, newIndex) {

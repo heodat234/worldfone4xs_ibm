@@ -128,48 +128,6 @@ async function addForm() {
     kendoView.render($("#right-form"));
 }
 
-// async function addForm() {
-//     var rightForm = $("#right-form");
-//     console.log(rightForm);
-//     var formHtml = await $.ajax({
-//         url: ENV.templateApi + "appointment/form",
-//     });
-//     kendo.destroy(rightForm);
-//     rightForm.empty();
-//     rightForm.append(formHtml);
-// }
-
-async function editForm(ele) {
-    var dataItem = Table.dataSource.getByUid($(ele).data("uid")),
-        dataItemFull = await $.ajax({
-            url: `${Config.crudApi+Config.collection}/${dataItem.id}`,
-            error: errorDataSource
-        }),
-        formHtml = await $.ajax({
-            url: Config.templateApi + Config.collection + "/form",
-            error: errorDataSource
-        });
-    var model = Object.assign(Config.observable, {
-        item: dataItemFull,
-        save: function() {
-            $.ajax({
-                url: `${Config.crudApi+Config.collection}/${dataItem.id}`,
-                data: kendo.stringify(this.item.toJSON()),
-                error: errorDataSource,
-                contentType: "application/json; charset=utf-8",
-                type: "PUT",
-                success: function() {
-                    Table.dataSource.read()
-                }
-            })
-        }
-    });
-    kendo.destroy($("#right-form"));
-    $("#right-form").empty();
-    var kendoView = new kendo.View(formHtml, { wrap: false, model: model, evalTemplate: false });
-    kendoView.render($("#right-form"));
-}
-
 function deleteDataItem(ele) {
     swal({
         title: "@Are you sure@?",
