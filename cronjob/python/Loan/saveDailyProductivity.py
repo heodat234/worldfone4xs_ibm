@@ -76,7 +76,7 @@ try:
 
     # listLNJCO5 = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'LNJC05'), WHERE={"due_date": {'$gte': starttime, '$lte': endtime}})
 
-    # if todayTimeStamp in listHoliday or (weekday == 5) or weekday == 6:
+    # if todayTimeStamp in listHoliday:
     #     pprint("HOLIDAY")
     #     sys.exit()
 

@@ -36,7 +36,7 @@ try:
     insertData = []
     updateData = []
     listDebtGroup = []
-
+    zaccfData = []
     today = date.today()
     # today = datetime.strptime('21/12/2019', "%d/%m/%Y").date()
 
@@ -65,7 +65,7 @@ try:
     holidayOfMonth = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_off_sys'))
     listHoliday = map(lambda offDateRow: {offDateRow['off_date']}, holidayOfMonth)
 
-    if todayTimeStamp in listHoliday or (weekday == 5) or weekday == 6:
+    if todayTimeStamp in listHoliday:
         sys.exit()
 
     todayString = today.strftime("%d/%m/%Y")
@@ -93,6 +93,7 @@ try:
             {
                 "_id": '$ODIND_FG',
                 "total_org": {'$sum': '$W_ORG'},
+                'W_ORG_arr': {'$push': '$W_ORG'},
                 "count_data": {'$sum': 1},
             }
         }
@@ -105,111 +106,110 @@ try:
     sum_acc_g2 = 0
     sum_org_g3 = 0
     sum_acc_g3 = 0
+    sum_org_B = 0
+    sum_acc_B = 0
     if zaccfInfo is not None:
         for zaccf in zaccfInfo:
-            if zaccf['_id'] != '':
+            if zaccf['_id'] != None:
+                temp = zaccf
+                temp['total_org'] = 0
+                for orgInfo in zaccf['W_ORG_arr']:
+                    org = float(orgInfo)
+                    temp['total_org'] += org
+                # print(zaccf['total_org'])
+                zaccfData.append(temp)
+
+        for zaccf in zaccfData:
+            if zaccf['_id'] != None:
                 sum_org += zaccf['total_org']
                 sum_acc += zaccf['count_data']
                 if zaccf['_id'] != 'A':
                     sum_org_g2 += zaccf['total_org']
                     sum_acc_g2 += zaccf['count_data']
-                if zaccf['_id'] != 'A' or zaccf['_id'] != 'B':
-                    sum_org_g3 += zaccf['total_org']
-                    sum_acc_g3 += zaccf['count_data']
-
-    aggregate_zaccf = [
-        {
-            "$match":
-            {
-                "W_ORG": {'$gt': '0'},
-            }
-        },{
-            "$group":
-            {
-                "_id": '$ODIND_FG',
-                "total_org": {'$sum': '$W_ORG'},
-                "count_data": {'$sum': 1},
-            }
-        }
-    ]
-    zaccfInfo = mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'ZACCF'),aggregate_pipeline=aggregate_zaccf)
-    if zaccfInfo is not None:
-        for zaccf in zaccfInfo:
-            if zaccf['_id'] != '':
-                temp = {}
-                if zaccf['_id'] == 'A':
-                    temp['group'] = '1'
                 if zaccf['_id'] == 'B':
-                    temp['group'] = '2'
-                if zaccf['_id'] == 'C':
-                    temp['group'] = '3'
-                if zaccf['_id'] == 'D':
-                    temp['group'] = '4'
-                if zaccf['_id'] == 'E':
-                    temp['group'] = '5'
+                    sum_org_B += zaccf['total_org']
+                    sum_acc_B += zaccf['count_data']
 
-                temp['count_data'] = zaccf['count_data']
-                temp['total_org'] = zaccf['total_org']
-                temp['ratio'] = temp['total_org']/sum_org if sum_org != 0 else 0
-                temp['year'] = str(year)
-                temp['month'] = month
-                temp['weekday'] = weekday
-                temp['day'] = todayString
-                temp['weekOfMonth'] = weekOfMonth
-                temp['type'] = 'sibs'
-                temp['createdBy'] = 'system'
-                temp['createdAt'] = time.time()
-                mongodb.insert(MONGO_COLLECTION=collection, insert_data=temp)
-    
-        insertTotal = {
-            'year'          : str(year),
-            'month'         : month,
-            'weekday'       : weekday,
-            'day'           : todayString,
-            'weekOfMonth'   : weekOfMonth,
-            'type'          : 'sibs',
-            'createdBy'     : 'system',
-            'createdAt'     : time.time()
-        }
-        insertTotalG2 = {
-            'year'          : str(year),
-            'month'         : month,
-            'weekday'       : weekday,
-            'day'           : todayString,
-            'weekOfMonth'   : weekOfMonth,
-            'type'          : 'sibs',
-            'createdBy'     : 'system',
-            'createdAt'     : time.time()
-        }
-        insertTotalG3 = {
-            'year'          : str(year),
-            'month'         : month,
-            'weekday'       : weekday,
-            'day'           : todayString,
-            'weekOfMonth'   : weekOfMonth,
-            'type'          : 'sibs',
-            'createdBy'     : 'system',
-            'createdAt'     : time.time()
-        }
-        insertTotal['group']       = 'Total'
-        insertTotal['total_org']   = sum_org
-        insertTotal['count_data']  = sum_acc
-        mongodb.insert(MONGO_COLLECTION=collection, insert_data=insertTotal)
-        insertTotalG2['group']       = 'G2'
-        insertTotalG2['total_org']   = sum_org_g2
-        insertTotalG2['count_data']  = sum_acc_g2
-        insertTotalG2['ratio']       = insertTotalG2['total_org']/sum_org if sum_org != 0 else 0
-        mongodb.insert(MONGO_COLLECTION=collection, insert_data=insertTotalG2)
-        insertTotalG3['group']       = 'G3'
-        insertTotalG3['total_org']   = sum_org_g3
-        insertTotalG3['count_data']  = sum_acc_g3
-        insertTotalG3['ratio']       = insertTotalG3['total_org']/sum_org if sum_org != 0 else 0
-        mongodb.insert(MONGO_COLLECTION=collection, insert_data=insertTotalG3)
+    sum_org_g3 = sum_org_g2 - sum_org_B
+    sum_acc_g3 = sum_acc_g2 - sum_acc_B
+
+    for zaccf in zaccfData:
+        if zaccf['_id'] != None:
+            temp = {}
+            if zaccf['_id'] == 'A':
+                temp['group'] = '1'
+            if zaccf['_id'] == 'B':
+                temp['group'] = '2'
+            if zaccf['_id'] == 'C':
+                temp['group'] = '3'
+            if zaccf['_id'] == 'D':
+                temp['group'] = '4'
+            if zaccf['_id'] == 'E':
+                temp['group'] = '5'
+
+            temp['count_data'] = zaccf['count_data']
+            temp['total_org'] = zaccf['total_org']
+            temp['ratio'] = temp['total_org']/sum_org if sum_org != 0 else 0
+            temp['year'] = str(year)
+            temp['month'] = month
+            temp['weekday'] = weekday
+            temp['day'] = todayString
+            temp['weekOfMonth'] = weekOfMonth
+            temp['type'] = 'sibs'
+            temp['createdBy'] = 'system'
+            temp['createdAt'] = time.time()
+            mongodb.insert(MONGO_COLLECTION=collection, insert_data=temp)
+
+    insertTotal = {
+        'year'          : str(year),
+        'month'         : month,
+        'weekday'       : weekday,
+        'day'           : todayString,
+        'weekOfMonth'   : weekOfMonth,
+        'type'          : 'sibs',
+        'createdBy'     : 'system',
+        'createdAt'     : time.time()
+    }
+    insertTotalG2 = {
+        'year'          : str(year),
+        'month'         : month,
+        'weekday'       : weekday,
+        'day'           : todayString,
+        'weekOfMonth'   : weekOfMonth,
+        'type'          : 'sibs',
+        'createdBy'     : 'system',
+        'createdAt'     : time.time()
+    }
+    insertTotalG3 = {
+        'year'          : str(year),
+        'month'         : month,
+        'weekday'       : weekday,
+        'day'           : todayString,
+        'weekOfMonth'   : weekOfMonth,
+        'type'          : 'sibs',
+        'createdBy'     : 'system',
+        'createdAt'     : time.time()
+    }
+    insertTotal['group']       = 'Total'
+    insertTotal['total_org']   = sum_org
+    insertTotal['count_data']  = sum_acc
+    mongodb.insert(MONGO_COLLECTION=collection, insert_data=insertTotal)
+    insertTotalG2['group']       = 'G2'
+    insertTotalG2['total_org']   = sum_org_g2
+    insertTotalG2['count_data']  = sum_acc_g2
+    insertTotalG2['ratio']       = insertTotalG2['total_org']/sum_org if sum_org != 0 else 0
+    mongodb.insert(MONGO_COLLECTION=collection, insert_data=insertTotalG2)
+    insertTotalG3['group']       = 'G3'
+    insertTotalG3['total_org']   = sum_org_g3
+    insertTotalG3['count_data']  = sum_acc_g3
+    insertTotalG3['ratio']       = insertTotalG3['total_org']/sum_org if sum_org != 0 else 0
+    mongodb.insert(MONGO_COLLECTION=collection, insert_data=insertTotalG3)
 
 
 
 
     # Card
+    sbvData = []
     aggregate_sbv = [
         {
             "$match":
@@ -237,49 +237,61 @@ try:
     sum_acc_g2 = 0
     sum_org_g3 = 0
     sum_acc_g3 = 0
+    sum_org_B = 0
+    sum_acc_B = 0
     if sbvInfo is not None:
         for sbv in sbvInfo:
             if sbv['_id'] != None:
+                temp = sbv
                 total_org =  sbv['total_ob_principal_sale'] + sbv['total_ob_principal_cash']
+
+                temp['total_org'] = total_org
                 sum_org += total_org
                 sum_acc += sbv['count_data']
                 if sbv['_id'] != '01':
                     sum_org_g2 += total_org
                     sum_acc_g2 += sbv['count_data']
-                if sbv['_id'] != '01' or sbv['_id'] != '02':
-                    sum_org_g3 += total_org
-                    sum_acc_g3 += sbv['count_data']
+                if  sbv['_id'] == '02':
+                    sum_org_B += total_org
+                    sum_acc_B += sbv['count_data']
 
+                sbvData.append(temp)
 
+    sum_org_g3 = sum_org_g2 - sum_org_B
+    sum_acc_g3 = sum_acc_g2 - sum_acc_B
 
-    aggregate_sbv = [
-        {
-            "$match":
-            {
-                '$or' : [{
-                    'ob_principal_sale': {'$gt': 0},
-                    'ob_principal_cash' : {'$gt': 0}
-                }]
-            }
-        },
-        {
-            "$group":
-            {
-                "_id": '$first_due_group',
-                "total_ob_principal_sale": {'$sum': '$ob_principal_sale'},
-                "total_ob_principal_cash": {'$sum': '$ob_principal_cash'},
-                "count_data": {'$sum': 1},
-            }
-        }
-    ]
-    sbvInfo = mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'SBV'),aggregate_pipeline=aggregate_sbv)
-    if sbvInfo is not None:
-        for sbv in sbvInfo:
+    # print(sum_)
+    # print(sum_acc_g2)
+    # print(sum_acc_g3)
+
+    # aggregate_sbv = [
+    #     {
+    #         "$match":
+    #         {
+    #             '$or' : [{
+    #                 'ob_principal_sale': {'$gt': 0},
+    #                 'ob_principal_cash' : {'$gt': 0}
+    #             }]
+    #         }
+    #     },
+    #     {
+    #         "$group":
+    #         {
+    #             "_id": '$first_due_group',
+    #             "total_ob_principal_sale": {'$sum': '$ob_principal_sale'},
+    #             "total_ob_principal_cash": {'$sum': '$ob_principal_cash'},
+    #             "count_data": {'$sum': 1},
+    #         }
+    #     }
+    # ]
+    # sbvInfo = mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'SBV'),aggregate_pipeline=aggregate_sbv)
+    if sbvData is not None:
+        for sbv in sbvData:
             if sbv['_id'] != None:
                 temp = {}
                 temp['group'] = sbv['_id']
                 temp['count_data'] = sbv['count_data']
-                temp['total_org'] = sbv['total_ob_principal_sale'] + sbv['total_ob_principal_cash']
+                temp['total_org'] = sbv['total_org']
                 temp['ratio'] = temp['total_org']/sum_org if sum_org != 0 else 0
                 temp['year'] = str(year)
                 temp['month'] = month
@@ -289,6 +301,7 @@ try:
                 temp['type'] = 'card'
                 temp['createdBy'] = 'system'
                 temp['createdAt'] = time.time()
+                # print(temp)
                 mongodb.insert(MONGO_COLLECTION=collection, insert_data=temp)
 
         insertTotal = {

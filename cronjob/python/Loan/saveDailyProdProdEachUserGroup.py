@@ -54,7 +54,7 @@ try:
     holidayOfMonth = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_off_sys'))
     listHoliday = map(lambda offDateRow: {offDateRow['off_date']}, holidayOfMonth)
 
-    if todayTimeStamp in listHoliday or (weekday == 5) or weekday == 6:
+    if todayTimeStamp in listHoliday:
         sys.exit()
 
     todayString = today.strftime("%d/%m/%Y")

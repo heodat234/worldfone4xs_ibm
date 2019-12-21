@@ -66,8 +66,7 @@ try:
 
     dueDateThisMonth = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_due_date'))
 
-    # if todayTimeStamp in listHoliday or (weekday == 5) or weekday == 6:
-    if todayTimeStamp in listHoliday or weekday == 6:
+    if todayTimeStamp in listHoliday:
         sys.exit()
 
     todayString = today.strftime("%d/%m/%Y")

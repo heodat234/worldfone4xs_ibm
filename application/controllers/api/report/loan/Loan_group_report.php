@@ -28,9 +28,8 @@ Class Loan_group_report extends WFF_Controller {
     {
         try {
             $request    = json_decode($this->input->get("q"), TRUE);
-            $getDate    = getdate();
-            
-            $match      = array('month' => $getDate['mon'] );
+            $getDate    = getdate(strtotime("-1 days"));
+            $match      = array('month' => $getDate['month'] );
             $response   = $this->crud->read($this->collection, $request,array(),$match);
             echo json_encode($response);
 
@@ -50,7 +49,7 @@ Class Loan_group_report extends WFF_Controller {
     {
         $startDay = date('Y-m-1');
         $getDate = getdate();
-        $month = $getDate['mon'];
+        $month = $getDate['month'];
         $response = $this->crud->read($this->collection, array('take' => 1000,'skip' => 0),'', array('month' => $getDate['month'] ));
         if (isset($response['data'])) {
             $data = $response['data'];

@@ -60,7 +60,7 @@ try:
         listDayOfMonth.append(str(format(startDayOfMonth, '02d')) + str(format(month, '02d')) + str(year))
         startDayOfMonth += 1
     
-    if todayTimeStamp in listHoliday or (weekday == 5) or weekday == 6:
+    if todayTimeStamp in listHoliday:
         sys.exit()
 
     # Check hom nay co phai la ngay cuoi thang

@@ -33,8 +33,8 @@ try:
    insertData  = []
    updateDate  = []
 
-   # today = date.today()
-   today = datetime.strptime('13/12/2019', "%d/%m/%Y").date()
+   today = date.today()
+   # today = datetime.strptime('13/12/2019', "%d/%m/%Y").date()
 
    day = today.day
    month = today.month
@@ -51,8 +51,8 @@ try:
    holidayOfMonth = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_off_sys'))
    listHoliday = map(lambda offDateRow: {offDateRow['off_date']}, holidayOfMonth)
 
-   # if todayTimeStamp in listHoliday or weekday == 6:
-   #    sys.exit()
+   if todayTimeStamp in listHoliday:
+      sys.exit()
 
    dayStamp = common.convertTimestamp(value=today.strftime("%d/%m/%Y"))
    result_due_date = mongodb.getOne(MONGO_COLLECTION=due_date_collection,WHERE={'due_date_add_1':dayStamp})
@@ -80,19 +80,19 @@ try:
             if dueDayOfMonth != None:
                debt_group = dueDayOfMonth['debt_group']
 
-               sbv = mongodb.getOne(MONGO_COLLECTION=sbv_collection, WHERE={'contract_no': str(row['account_number'])},SELECT=['overdue_indicator'])
+               sbv = mongodb.getOne(MONGO_COLLECTION=sbv_collection, WHERE={'contract_no': str(row['account_number'])},SELECT=['delinquency_group'])
                if sbv != None:
-                  group = sbv['overdue_indicator']+debt_group
-                  # if int(sbv['delinquency_group']) == 1:
-                  #    group = sbv['delinquency_group']+debt_group
-                  # if int(sbv['delinquency_group']) == 2:
-                  #    group = 'B'+debt_group
-                  # if int(sbv['delinquency_group']) == 3:
-                  #    group = 'C'+debt_group
-                  # if int(sbv['delinquency_group']) == 4:
-                  #    group = 'D'+debt_group
-                  # if int(sbv['delinquency_group']) == 5:
-                  #    group = 'E'+debt_group
+                  # group = sbv['overdue_indicator']+debt_group
+                  if int(sbv['delinquency_group']) == 1:
+                     group = 'A'+debt_group
+                  if int(sbv['delinquency_group']) == 2:
+                     group = 'B'+debt_group
+                  if int(sbv['delinquency_group']) == 3:
+                     group = 'C'+debt_group
+                  if int(sbv['delinquency_group']) == 4:
+                     group = 'D'+debt_group
+                  if int(sbv['delinquency_group']) == 5:
+                     group = 'E'+debt_group
             
                   temp['account_number']   = row['account_number']
                   temp['due_date']     = row['overdue_date']
@@ -126,10 +126,20 @@ try:
             if dueDayOfMonth != None:
                debt_group = dueDayOfMonth['debt_group']
                
-               sbv = mongodb.getOne(MONGO_COLLECTION=sbv_collection, WHERE={'contract_no': str(row['account_number'])},SELECT=['overdue_indicator'])
+               sbv = mongodb.getOne(MONGO_COLLECTION=sbv_collection, WHERE={'contract_no': str(row['account_number'])},SELECT=['delinquency_group'])
                if sbv != None:
-                  group = sbv['overdue_indicator']+debt_group
-            
+                  # group = sbv['overdue_indicator']+debt_group
+                  if int(sbv['delinquency_group']) == 1:
+                     group = 'A'+debt_group
+                  if int(sbv['delinquency_group']) == 2:
+                     group = 'B'+debt_group
+                  if int(sbv['delinquency_group']) == 3:
+                     group = 'C'+debt_group
+                  if int(sbv['delinquency_group']) == 4:
+                     group = 'D'+debt_group
+                  if int(sbv['delinquency_group']) == 5:
+                     group = 'E'+debt_group
+                     
                   temp['account_number']   = row['account_number']
                   temp['due_date']     = row['overdue_date']
                   temp['group']        = group
@@ -154,19 +164,19 @@ try:
                dueDayOfMonth = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_due_date'), WHERE={'for_month': str(month), 'due_date': row['due_date']})
                if dueDayOfMonth != None:
                   debt_group = dueDayOfMonth['debt_group']
-               sbv = mongodb.getOne(MONGO_COLLECTION=sbv_collection, WHERE={'contract_no': str(row['account_number'])},SELECT=['overdue_indicator'])
+               sbv = mongodb.getOne(MONGO_COLLECTION=sbv_collection, WHERE={'contract_no': str(row['account_number'])},SELECT=['delinquency_group'])
                if sbv != None:
-                  group = sbv['overdue_indicator']+debt_group
-                  # if int(sbv['delinquency_group']) == 1:
-                  #    group = 'A'+debt_group
-                  # if int(sbv['delinquency_group']) == 2:
-                  #    group = 'B'+debt_group
-                  # if int(sbv['delinquency_group']) == 3:
-                  #    group = 'C'+debt_group
-                  # if int(sbv['delinquency_group']) == 4:
-                  #    group = 'D'+debt_group
-                  # if int(sbv['delinquency_group']) == 5:
-                  #    group = 'E'+debt_group
+                  # group = sbv['overdue_indicator']+debt_group
+                  if int(sbv['delinquency_group']) == 1:
+                     group = 'A'+debt_group
+                  if int(sbv['delinquency_group']) == 2:
+                     group = 'B'+debt_group
+                  if int(sbv['delinquency_group']) == 3:
+                     group = 'C'+debt_group
+                  if int(sbv['delinquency_group']) == 4:
+                     group = 'D'+debt_group
+                  if int(sbv['delinquency_group']) == 5:
+                     group = 'E'+debt_group
             
                   temp['account_number']   = row['account_number']
                   temp['due_date']     = due_date
@@ -193,19 +203,19 @@ try:
                dueDayOfMonth = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_due_date'), WHERE={'for_month': str(month), 'due_date': row['due_date']})
                if dueDayOfMonth != None:
                   debt_group = dueDayOfMonth['debt_group']
-               sbv = mongodb.getOne(MONGO_COLLECTION=sbv_collection, WHERE={'contract_no': str(row['account_number'])},SELECT=['overdue_indicator'])
+               sbv = mongodb.getOne(MONGO_COLLECTION=sbv_collection, WHERE={'contract_no': str(row['account_number'])},SELECT=['delinquency_group'])
                if sbv != None:
-                  group = sbv['overdue_indicator']+debt_group
-                  # if int(sbv['delinquency_group']) == 1:
-                  #    group = 'A'+debt_group
-                  # if int(sbv['delinquency_group']) == 2:
-                  #    group = 'B'+debt_group
-                  # if int(sbv['delinquency_group']) == 3:
-                  #    group = 'C'+debt_group
-                  # if int(sbv['delinquency_group']) == 4:
-                  #    group = 'D'+debt_group
-                  # if int(sbv['delinquency_group']) == 5:
-                  #    group = 'E'+debt_group
+                  # group = sbv['overdue_indicator']+debt_group
+                  if int(sbv['delinquency_group']) == 1:
+                     group = 'A'+debt_group
+                  if int(sbv['delinquency_group']) == 2:
+                     group = 'B'+debt_group
+                  if int(sbv['delinquency_group']) == 3:
+                     group = 'C'+debt_group
+                  if int(sbv['delinquency_group']) == 4:
+                     group = 'D'+debt_group
+                  if int(sbv['delinquency_group']) == 5:
+                     group = 'E'+debt_group
             
                   temp['account_number']   = row['account_number']
                   temp['due_date']     = due_date

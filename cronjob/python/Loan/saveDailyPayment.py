@@ -38,9 +38,9 @@ try:
    data        = []
    insertData  = []
    PaymentData   = []
-
-   # today = date.today()
-   today = datetime.strptime('13/12/2019', "%d/%m/%Y").date()
+   insertDataPayment = []
+   today = date.today()
+   # today = datetime.strptime('13/12/2019', "%d/%m/%Y").date()
 
    day = today.day
    month = today.month
@@ -57,24 +57,41 @@ try:
    holidayOfMonth = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_off_sys'))
    listHoliday = map(lambda offDateRow: {offDateRow['off_date']}, holidayOfMonth)
 
-   if todayTimeStamp in listHoliday or (weekday == 5) or weekday == 6:
+   if todayTimeStamp in listHoliday:
       sys.exit()
 
    i = 1
    # LN3206F
-   count = mongodb.count(MONGO_COLLECTION=ln3206_collection)
-   quotient = int(count)/10000
-   mod = int(count)%10000
-   if quotient != 0:
-      for x in range(int(quotient)):
-         result = mongodb.get(MONGO_COLLECTION=ln3206_collection, SELECT=['account_number','amt','date'],SORT=([('_id', -1)]),SKIP=int(x*10000), TAKE=int(10000))
-         for idx,row in enumerate(result):
-            data.append(row)
+   aggregate_pipeline = [
+       # {
+       #     "$match":
+       #     {
+       #         'created_at': {'$gte' : todayTimeStamp },
+       #     }
+       # },
+       {
+           "$project":
+           {
+               "account_number": 1,
+               "amt": 1,
+               "date": 1,
+           }
+       }
+   ]
+   data = mongodb.aggregate_pipeline(MONGO_COLLECTION=ln3206_collection,aggregate_pipeline=aggregate_pipeline)
+   # count = mongodb.count(MONGO_COLLECTION=ln3206_collection)
+   # quotient = int(count)/10000
+   # mod = int(count)%10000
+   # if quotient != 0:
+   #    for x in range(int(quotient)):
+   #       result = mongodb.get(MONGO_COLLECTION=ln3206_collection, SELECT=['account_number','amt','date'],SORT=([('_id', -1)]),SKIP=int(x*10000), TAKE=int(10000))
+   #       for idx,row in enumerate(result):
+   #          data.append(row)
 
-   if int(mod) > 0:
-      result = mongodb.get(MONGO_COLLECTION=ln3206_collection,SELECT=['account_number','amt','date'], SORT=([('_id', -1)]),SKIP=int(int(quotient)*10000), TAKE=int(mod))
-      for idx,row in enumerate(result):
-         data.append(row)
+   # if int(mod) > 0:
+   #    result = mongodb.get(MONGO_COLLECTION=ln3206_collection,SELECT=['account_number','amt','date'], SORT=([('_id', -1)]),SKIP=int(int(quotient)*10000), TAKE=int(mod))
+   #    for idx,row in enumerate(result):
+   #       data.append(row)
 
    for row in data:
       if 'account_number' in row.keys():
@@ -118,26 +135,49 @@ try:
       row['note'] = ''
       row.pop('_id')
       row.pop('date')
-      row['stt'] = i
+      # row['stt'] = i
       row['createdAt'] = time.time()
       row['createdBy'] = 'system'
+      # mongodb.insert(MONGO_COLLECTION=collection, insert_data=row)
       insertData.append(row)
       i += 1
       # break
 
-   # Report_input_payment_of_card
-   count = mongodb.count(MONGO_COLLECTION=payment_of_card_collection)
-   quotient = int(count)/10000
-   mod = int(count)%10000
-   for x in range(int(quotient)):
-      result = mongodb.get(MONGO_COLLECTION=payment_of_card_collection, SELECT=['account_number','effective_date','amount'],SORT=([('_id', -1)]),SKIP=int(x*10000), TAKE=int(10000))
-      for idx,row in enumerate(result):
-         PaymentData.append(row)
+   if len(insertData) > 0:
+      # mongodb.remove_document(MONGO_COLLECTION=collection)
+      mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertData)
 
-   if int(mod) > 0:
-      result = mongodb.get(MONGO_COLLECTION=payment_of_card_collection,SELECT=['account_number','effective_date','amount'], SORT=([('_id', -1)]),SKIP=int(int(quotient)*10000), TAKE=int(mod))
-      for idx,row in enumerate(result):
-         PaymentData.append(row)
+
+   # Report_input_payment_of_card
+   aggregate_pipeline = [
+       # {
+       #     "$match":
+       #     {
+       #         'created_at': {'$gte' : todayTimeStamp },
+       #     }
+       # },
+       {
+           "$project":
+           {
+               "account_number": 1,
+               "amount": 1,
+               "effective_date": 1,
+           }
+       }
+   ]
+   PaymentData = mongodb.aggregate_pipeline(MONGO_COLLECTION=payment_of_card_collection,aggregate_pipeline=aggregate_pipeline)
+   # count = mongodb.count(MONGO_COLLECTION=payment_of_card_collection)
+   # quotient = int(count)/10000
+   # mod = int(count)%10000
+   # for x in range(int(quotient)):
+   #    result = mongodb.get(MONGO_COLLECTION=payment_of_card_collection, SELECT=['account_number','effective_date','amount'],SORT=([('_id', -1)]),SKIP=int(x*10000), TAKE=int(10000))
+   #    for idx,row in enumerate(result):
+   #       PaymentData.append(row)
+
+   # if int(mod) > 0:
+   #    result = mongodb.get(MONGO_COLLECTION=payment_of_card_collection,SELECT=['account_number','effective_date','amount'], SORT=([('_id', -1)]),SKIP=int(int(quotient)*10000), TAKE=int(mod))
+   #    for idx,row in enumerate(result):
+   #       PaymentData.append(row)
 
    for row in PaymentData:
       if 'account_number' in row.keys():
@@ -185,16 +225,17 @@ try:
          row.pop('_id')
          row.pop('effective_date')
          row.pop('amount')
-         row['stt'] = i
+         # row['stt'] = i
          row['createdAt'] = time.time()
          row['createdBy'] = 'system'
-         insertData.append(row)
+         insertDataPayment.append(row)
+         # mongodb.insert(MONGO_COLLECTION=collection, insert_data=row)
          i += 1
       # break
 
-   if len(insertData) > 0:
+   if len(insertDataPayment) > 0:
       # mongodb.remove_document(MONGO_COLLECTION=collection)
-      mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertData)
+      mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertDataPayment)
 
    now_end         = datetime.now()
    log.write(now_end.strftime("%d/%m/%Y, %H:%M:%S") + ': End Log' + '\n')

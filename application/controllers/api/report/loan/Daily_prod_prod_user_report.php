@@ -58,7 +58,7 @@ Class Daily_prod_prod_user_report extends WFF_Controller {
     	$spreadsheet->getProperties()
 	    ->setCreator("South Telecom")
 	    ->setLastModifiedBy("Tri Dung")
-	    ->setTitle("Report")
+	    ->setTitle("Daily productivity Report - Product of each user and group NEW")
 	    ->setSubject("Report")
 	    ->setDescription("Office 2007 XLSX, generated using PHP classes.")
 	    ->setKeywords("office 2007 openxml php")

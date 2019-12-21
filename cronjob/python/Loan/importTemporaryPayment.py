@@ -137,10 +137,12 @@ try:
                     errorData.append(temp)
                 else:
                     lnjc05Info = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'LNJC05'), WHERE={'account_number': temp['account_number']})
+                    zaccf = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'ZACCF'), WHERE={'account_number': temp['account_number']})
                     if lnjc05Info is not None:
                         temp['type'] = 'ZACCF'
                         temp['overdue_amount'] = (lnjc05Info['overdue_amount_this_month']) if lnjc05Info['overdue_amount_this_month'] is not None else 0
-                        temp['remain_amount'] = temp['overdue_amount'] - temp['amt']
+                        temp['advance_money'] = float(zaccf['B_ADV']) if zaccf['B_ADV'] is not None else 0
+                        temp['remain_amount'] = temp['overdue_amount'] - temp['amt'] - temp['advance_money']
                         
                     list_acc = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'List_of_account_in_collection'), WHERE={'account_number': temp['account_number']})
                     if list_acc is not None:

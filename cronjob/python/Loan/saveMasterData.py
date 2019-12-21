@@ -62,26 +62,40 @@ try:
    holidayOfMonth = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_off_sys'))
    listHoliday = map(lambda offDateRow: {offDateRow['off_date']}, holidayOfMonth)
 
-   if todayTimeStamp in listHoliday or (weekday == 5) or weekday == 6:
+   if todayTimeStamp in listHoliday:
       sys.exit()
 
    users = _mongodb.get(MONGO_COLLECTION=user_collection, SELECT=['extension','agentname'],SORT=([('_id', -1)]),SKIP=0, TAKE=200)
 
 
    # SIBS
-   count = mongodb.count(MONGO_COLLECTION=lnjc05_collection)
-   quotient = int(count)/10000
-   mod = int(count)%10000
-   if quotient != 0:
-      for x in range(int(quotient)):
-         result = mongodb.get(MONGO_COLLECTION=lnjc05_collection, SELECT=['account_number','cus_name','current_balance','due_date','address','officer_name'],SORT=([('_id', -1)]),SKIP=int(x*10000), TAKE=int(10000))
-         for idx,row in enumerate(result):
-            data.append(row)
+   aggregate_pipeline = [
+       {
+           "$project":
+           {
+               "account_number": 1,
+               "cus_name": 1,
+               "current_balance": 1,
+               "due_date": 1,
+               "address": 1,
+               "officer_name": 1,
+           }
+       }
+   ]
+   data = mongodb.aggregate_pipeline(MONGO_COLLECTION=lnjc05_collection,aggregate_pipeline=aggregate_pipeline)
+   # count = mongodb.count(MONGO_COLLECTION=lnjc05_collection)
+   # quotient = int(count)/10000
+   # mod = int(count)%10000
+   # if quotient != 0:
+   #    for x in range(int(quotient)):
+   #       result = mongodb.get(MONGO_COLLECTION=lnjc05_collection, SELECT=['account_number','cus_name','current_balance','due_date','address','officer_name'],SORT=([('_id', -1)]),SKIP=int(x*10000), TAKE=int(10000))
+   #       for idx,row in enumerate(result):
+   #          data.append(row)
 
-   if int(mod) > 0:
-      result = mongodb.get(MONGO_COLLECTION=lnjc05_collection,SELECT=['account_number','cus_name','current_balance','due_date','address','officer_name'], SORT=([('_id', -1)]),SKIP=int(int(quotient)*10000), TAKE=int(mod))
-      for idx,row in enumerate(result):
-         data.append(row)
+   # if int(mod) > 0:
+   #    result = mongodb.get(MONGO_COLLECTION=lnjc05_collection,SELECT=['account_number','cus_name','current_balance','due_date','address','officer_name'], SORT=([('_id', -1)]),SKIP=int(int(quotient)*10000), TAKE=int(mod))
+   #    for idx,row in enumerate(result):
+   #       data.append(row)
 
    for row in data:
       if 'account_number' in row.keys():
@@ -161,19 +175,32 @@ try:
 
 
    # CARD
-   count = mongodb.count(MONGO_COLLECTION=account_collection)
-   quotient = int(count)/10000
-   mod = int(count)%10000
-   if quotient != 0:
-      for x in range(int(quotient)):
-         result = mongodb.get(MONGO_COLLECTION=account_collection, SELECT=['account_number','cus_name','overdue_date','phone'],SORT=([('_id', -1)]),SKIP=int(x*10000), TAKE=int(10000))
-         for idx,row in enumerate(result):
-            cardData.append(row)
+   aggregate_pipeline = [
+       {
+           "$project":
+           {
+               "account_number": 1,
+               "cus_name": 1,
+               # "current_balance": 1,
+               "overdue_date": 1,
+               "phone": 1,
+           }
+       }
+   ]
+   cardData = mongodb.aggregate_pipeline(MONGO_COLLECTION=account_collection,aggregate_pipeline=aggregate_pipeline)
+   # count = mongodb.count(MONGO_COLLECTION=account_collection)
+   # quotient = int(count)/10000
+   # mod = int(count)%10000
+   # if quotient != 0:
+   #    for x in range(int(quotient)):
+   #       result = mongodb.get(MONGO_COLLECTION=account_collection, SELECT=['account_number','cus_name','overdue_date','phone'],SORT=([('_id', -1)]),SKIP=int(x*10000), TAKE=int(10000))
+   #       for idx,row in enumerate(result):
+   #          cardData.append(row)
 
-   if int(mod) > 0:
-      result = mongodb.get(MONGO_COLLECTION=account_collection,SELECT=['account_number','cus_name','overdue_date','phone'], SORT=([('_id', -1)]),SKIP=int(int(quotient)*10000), TAKE=int(mod))
-      for idx,row in enumerate(result):
-         cardData.append(row)
+   # if int(mod) > 0:
+   #    result = mongodb.get(MONGO_COLLECTION=account_collection,SELECT=['account_number','cus_name','overdue_date','phone'], SORT=([('_id', -1)]),SKIP=int(int(quotient)*10000), TAKE=int(mod))
+   #    for idx,row in enumerate(result):
+   #       cardData.append(row)
 
    for row in cardData:
       if 'account_number' in row.keys():
@@ -264,21 +291,36 @@ try:
 
 
    # WO_monthly
-   count_wo = mongodb.count(MONGO_COLLECTION=wo_monthly_collection)
-   quotient = int(count_wo)/10000
-   mod = int(count_wo)%10000
-   if quotient != 0:
-      for x in range(int(quotient)):
-         result = mongodb.get(MONGO_COLLECTION=wo_monthly_collection, SELECT=['ACCTNO','CUS_NM','PHONE','PROD_ID','WO9711','WO9712','WO9713'],SORT=([('_id', -1)]),SKIP=int(x*10000), TAKE=int(10000))
-         for idx,row in enumerate(result):
-            cardData.append(row)
+   aggregate_pipeline = [
+       {
+           "$project":
+           {
+               "ACCTNO": 1,
+               "CUS_NM": 1,
+               "WO9711": 1,
+               "WO9712": 1,
+               "WO9713": 1,
+               "PROD_ID": 1,
+               "PHONE": 1,
+           }
+       }
+   ]
+   woData = mongodb.aggregate_pipeline(MONGO_COLLECTION=wo_monthly_collection,aggregate_pipeline=aggregate_pipeline)
+   # count_wo = mongodb.count(MONGO_COLLECTION=wo_monthly_collection)
+   # quotient = int(count_wo)/10000
+   # mod = int(count_wo)%10000
+   # if quotient != 0:
+   #    for x in range(int(quotient)):
+   #       result = mongodb.get(MONGO_COLLECTION=wo_monthly_collection, SELECT=['ACCTNO','CUS_NM','PHONE','PROD_ID','WO9711','WO9712','WO9713'],SORT=([('_id', -1)]),SKIP=int(x*10000), TAKE=int(10000))
+   #       for idx,row in enumerate(result):
+   #          cardData.append(row)
 
-   if int(mod) > 0:
-      result = mongodb.get(MONGO_COLLECTION=wo_monthly_collection,SELECT=['ACCTNO','CUS_NM','PHONE','PROD_ID','WO9711','WO9712','WO9713'], SORT=([('_id', -1)]),SKIP=int(int(quotient)*10000), TAKE=int(mod))
-      for idx,row in enumerate(result):
-         cardData.append(row)
+   # if int(mod) > 0:
+   #    result = mongodb.get(MONGO_COLLECTION=wo_monthly_collection,SELECT=['ACCTNO','CUS_NM','PHONE','PROD_ID','WO9711','WO9712','WO9713'], SORT=([('_id', -1)]),SKIP=int(int(quotient)*10000), TAKE=int(mod))
+   #    for idx,row in enumerate(result):
+   #       cardData.append(row)
 
-   for row in cardData:
+   for row in woData:
       temp = {}
       if 'ACCTNO' in row.keys():
          temp['cus_name']         = row['CUS_NM']
