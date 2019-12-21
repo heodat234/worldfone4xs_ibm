@@ -27,7 +27,7 @@ Class Daily_assignment_report extends WFF_Controller {
         try {
             $request = json_decode($this->input->get("q"), TRUE);
             $date = date('d-m-Y',strtotime("-1 days"));
-            
+
             $match = array('createdAt' => array('$gte' => strtotime($date)));
             $response = $this->crud->read($this->collection, $request,array(),$match);
             echo json_encode($response);
@@ -46,10 +46,10 @@ Class Daily_assignment_report extends WFF_Controller {
     // {
     //     shell_exec('PYTHONIOENCODING=utf-8 python3.6 /var/www/html/worldfone4xs_ibm/cronjob/python/Loan/exportDailyAssignment.py  > /dev/null &');
     // }
-    // function downloadExcel()
-    // {
-    //   $this->exportExcel();
-    //     $file_path = UPLOAD_PATH . "/loan/export/DailyAssignment.xlsx";
-    //     echo json_encode(array("status" => 1, "data" => $file_path));
-    // }
+    function downloadExcel()
+    {
+      $this->exportExcel();
+        $file_path = UPLOAD_PATH . "/loan/export/DailyAssignment.xlsx";
+        echo json_encode(array("status" => 1, "data" => $file_path));
+    }
 }

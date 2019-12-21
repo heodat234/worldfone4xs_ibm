@@ -26,7 +26,7 @@ now         = datetime.now()
 subUserType = 'LO'
 collection         = common.getSubUser(subUserType, 'Daily_assignment_report')
 log         = open(base_url + "cronjob/python/Loan/log/exportDailyAssignment_log.txt","a")
-fileOutput  = base_url + 'upload/loan/export/DailyAssignment.xlsx' 
+fileOutput  = base_url + 'upload/loan/export/DailyAssignment.xlsx'
 try:
    data        = []
    insertData  = []
@@ -34,7 +34,7 @@ try:
    errorData   = []
 
    today = date.today()
-   # today = datetime.strptime('13/12/2019', "%d/%m/%Y").date()
+   today = datetime.strptime('20/12/2019', "%d/%m/%Y").date()
 
    day = today.day
    month = today.month
@@ -72,9 +72,9 @@ try:
    data = mongodb.aggregate_pipeline(MONGO_COLLECTION=collection,aggregate_pipeline=aggregate_acc)
 
    df = pd.DataFrame(data)
-   # df.to_excel(writer,sheet_name='Daily',header=['CONTRACTNR','CLIENT_NAME','BIRTH_DATE','CIF','SIGNED_DATE','PRODUCTNAME','ID NO','CREDIT AMOUNT','INSTALLMENT NUMBER','INSTALMENT AMOUNT','DATE_FIRST_DUE','DATE_LAST_DUE','CURRENT_DEBT','CURRENT_DPD','PHONE NUMBER','REFERENCE PHONE','Current_ADDRESS (if any)','District','PROVINCE','PERNAMENT_ADDRESS','District','PROVINCE','PRINCIPAL','INTEREST/ year','DPD','DATE HANDOVER','lICENSE PLATES NO','COMPANY']) 
+   # df.to_excel(writer,sheet_name='Daily',header=['CONTRACTNR','CLIENT_NAME','BIRTH_DATE','CIF','SIGNED_DATE','PRODUCTNAME','ID NO','CREDIT AMOUNT','INSTALLMENT NUMBER','INSTALMENT AMOUNT','DATE_FIRST_DUE','DATE_LAST_DUE','CURRENT_DEBT','CURRENT_DPD','PHONE NUMBER','REFERENCE PHONE','Current_ADDRESS (if any)','District','PROVINCE','PERNAMENT_ADDRESS','District','PROVINCE','PRINCIPAL','INTEREST/ year','DPD','DATE HANDOVER','lICENSE PLATES NO','COMPANY'])
    writer = pd.ExcelWriter(fileOutput, engine='xlsxwriter')
-   df.to_excel(writer,sheet_name='Sheet1',index=False) 
+   df.to_excel(writer,sheet_name='Sheet1',index=False)
    workbook = writer.book
    worksheet = writer.sheets['Sheet1']
 
