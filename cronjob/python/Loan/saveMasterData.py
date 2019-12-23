@@ -83,20 +83,6 @@ try:
        }
    ]
    data = mongodb.aggregate_pipeline(MONGO_COLLECTION=lnjc05_collection,aggregate_pipeline=aggregate_pipeline)
-   # count = mongodb.count(MONGO_COLLECTION=lnjc05_collection)
-   # quotient = int(count)/10000
-   # mod = int(count)%10000
-   # if quotient != 0:
-   #    for x in range(int(quotient)):
-   #       result = mongodb.get(MONGO_COLLECTION=lnjc05_collection, SELECT=['account_number','cus_name','current_balance','due_date','address','officer_name'],SORT=([('_id', -1)]),SKIP=int(x*10000), TAKE=int(10000))
-   #       for idx,row in enumerate(result):
-   #          data.append(row)
-
-   # if int(mod) > 0:
-   #    result = mongodb.get(MONGO_COLLECTION=lnjc05_collection,SELECT=['account_number','cus_name','current_balance','due_date','address','officer_name'], SORT=([('_id', -1)]),SKIP=int(int(quotient)*10000), TAKE=int(mod))
-   #    for idx,row in enumerate(result):
-   #       data.append(row)
-
    for row in data:
       if 'account_number' in row.keys():
          zaccf = mongodb.getOne(MONGO_COLLECTION=zaccf_collection, WHERE={'account_number': str(row['account_number'])},
@@ -154,7 +140,10 @@ try:
          date_time = datetime.fromtimestamp(row['due_date'])
          d2       = date_time.strftime(FMT)
          tdelta   = datetime.strptime(d1, FMT) - datetime.strptime(d2, FMT)
-         row['CURRENT_DPD'] = tdelta.days
+         holidayOfMonth = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_off_sys'), WHERE={'off_date': {'$gte': row['due_date']}, 'off_date': {'$lte': todayTimeStamp}})
+         countHoliday = len(list(holidayOfMonth))
+
+         row['CURRENT_DPD'] = int(tdelta.days) - int(countHoliday)
 
          diallist = mongodb.getOne(MONGO_COLLECTION=diallist_collection, WHERE={'account_number': str(row['account_number'])},
             SELECT=['assign'])
@@ -188,20 +177,6 @@ try:
        }
    ]
    cardData = mongodb.aggregate_pipeline(MONGO_COLLECTION=account_collection,aggregate_pipeline=aggregate_pipeline)
-   # count = mongodb.count(MONGO_COLLECTION=account_collection)
-   # quotient = int(count)/10000
-   # mod = int(count)%10000
-   # if quotient != 0:
-   #    for x in range(int(quotient)):
-   #       result = mongodb.get(MONGO_COLLECTION=account_collection, SELECT=['account_number','cus_name','overdue_date','phone'],SORT=([('_id', -1)]),SKIP=int(x*10000), TAKE=int(10000))
-   #       for idx,row in enumerate(result):
-   #          cardData.append(row)
-
-   # if int(mod) > 0:
-   #    result = mongodb.get(MONGO_COLLECTION=account_collection,SELECT=['account_number','cus_name','overdue_date','phone'], SORT=([('_id', -1)]),SKIP=int(int(quotient)*10000), TAKE=int(mod))
-   #    for idx,row in enumerate(result):
-   #       cardData.append(row)
-
    for row in cardData:
       if 'account_number' in row.keys():
          sbv = mongodb.getOne(MONGO_COLLECTION=sbv_collection, WHERE={'contract_no': str(row['account_number'])},
@@ -306,20 +281,6 @@ try:
        }
    ]
    woData = mongodb.aggregate_pipeline(MONGO_COLLECTION=wo_monthly_collection,aggregate_pipeline=aggregate_pipeline)
-   # count_wo = mongodb.count(MONGO_COLLECTION=wo_monthly_collection)
-   # quotient = int(count_wo)/10000
-   # mod = int(count_wo)%10000
-   # if quotient != 0:
-   #    for x in range(int(quotient)):
-   #       result = mongodb.get(MONGO_COLLECTION=wo_monthly_collection, SELECT=['ACCTNO','CUS_NM','PHONE','PROD_ID','WO9711','WO9712','WO9713'],SORT=([('_id', -1)]),SKIP=int(x*10000), TAKE=int(10000))
-   #       for idx,row in enumerate(result):
-   #          cardData.append(row)
-
-   # if int(mod) > 0:
-   #    result = mongodb.get(MONGO_COLLECTION=wo_monthly_collection,SELECT=['ACCTNO','CUS_NM','PHONE','PROD_ID','WO9711','WO9712','WO9713'], SORT=([('_id', -1)]),SKIP=int(int(quotient)*10000), TAKE=int(mod))
-   #    for idx,row in enumerate(result):
-   #       cardData.append(row)
-
    for row in woData:
       temp = {}
       if 'ACCTNO' in row.keys():
@@ -394,7 +355,11 @@ try:
             date_time   = datetime.fromtimestamp(account['overdue_date'])
             d2          = date_time.strftime(FMT)
             tdelta   = datetime.strptime(d1, FMT) - datetime.strptime(d2, FMT)
-            temp['CURRENT_DPD']   = tdelta.days
+
+            holidayOfMonth = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_off_sys'), WHERE={'off_date': {'$gte': account['overdue_date']}, 'off_date': {'$lte': todayTimeStamp}})
+            countHoliday = len(list(holidayOfMonth))
+
+            temp['CURRENT_DPD'] = int(tdelta.days) - int(countHoliday)
             temp['MOBILE_NO']     = account['phone']
 
 
@@ -440,7 +405,7 @@ try:
 
 
    if len(insertData) > 0:
-      mongodb.remove_document(MONGO_COLLECTION=collection)
+      # mongodb.remove_document(MONGO_COLLECTION=collection)
       mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertData)
    now_end         = datetime.now()
    log.write(now_end.strftime("%d/%m/%Y, %H:%M:%S") + ': End Log' + '\n')

@@ -47,7 +47,7 @@ try:
    log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': Start Import' + '\n')
 
    today = date.today()
-   # today = datetime.strptime('13/12/2019', "%d/%m/%Y").date()
+   # today = datetime.strptime('21/12/2019', "%d/%m/%Y").date()
 
    day = today.day
    month = today.month
@@ -57,6 +57,7 @@ try:
 
    todayString = today.strftime("%d/%m/%Y")
    todayTimeStamp = int(time.mktime(time.strptime(str(todayString + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
+   endTodayTimeStamp = int(time.mktime(time.strptime(str(todayString + " 23:59:59"), "%d/%m/%Y %H:%M:%S")))
 
    startMonth = int(time.mktime(time.strptime(str('01/' + str(month) + '/' + str(year) + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
    endMonth = int(time.mktime(time.strptime(str(str(lastDayOfMonth) + '/' + str(month) + '/' + str(year) + " 23:59:59"), "%d/%m/%Y %H:%M:%S")))
@@ -68,8 +69,8 @@ try:
       sys.exit()
 
 
-   lawsuit_fields = _mongodb.getOne(MONGO_COLLECTION=jsonData_collection,SELECT=['data'],WHERE={'name': 'lawsuit fields'})
-   raa_fields = _mongodb.getOne(MONGO_COLLECTION=jsonData_collection,SELECT=['data'],WHERE={'name': 'Raa fields'})
+   lawsuit_fields = _mongodb.getOne(MONGO_COLLECTION=jsonData_collection,SELECT=['data'],WHERE={'tags': ['LAWSUIT', 'fields']})
+   raa_fields = _mongodb.getOne(MONGO_COLLECTION=jsonData_collection,SELECT=['data'],WHERE={'tags': ['RAA', 'fields']})
    users = _mongodb.get(MONGO_COLLECTION=user_collection,SELECT=['extension','agentname'],WHERE={'active': 'true'})
    i = 1
    # LNJC05
@@ -100,8 +101,8 @@ try:
    ]
    data = mongodb.aggregate_pipeline(MONGO_COLLECTION=lnjc05_collection,aggregate_pipeline=aggregate_pipeline)
 
-   for idx, row in enumerate(data):
-      action_code = mongodb.get(MONGO_COLLECTION=action_code_collection,WHERE={'account_number': str(row['account_number'])},SORT=([('_id', -1)]),SKIP=0, TAKE=int(10000))
+   for row in data:
+      action_code = mongodb.get(MONGO_COLLECTION=action_code_collection,WHERE={'account_number': str(row['account_number']), 'createdAt': {'$gte': todayTimeStamp}, 'createdAt': {'$lte': endTodayTimeStamp}},SORT=([('_id', -1)]),SKIP=0, TAKE=int(10000))
       if action_code != None:
          for detail in action_code:
             temp = {}
@@ -115,16 +116,25 @@ try:
             temp['loan_overdue_amount']      = row['loan_overdue_amount']
             temp['current_balance']          = row['current_balance']
             temp['outstanding_principal']    = row['outstanding_principal']
-            if 'assign' in detail.keys():
+
+            dialistDetail = mongodb.getOne(MONGO_COLLECTION=diallist_detail_collection,WHERE={'account_number': str(row['account_number']), 'createdAt': {'$gte': todayTimeStamp}, 'createdAt': {'$lte': endTodayTimeStamp}}, SELECT=['assign'])
+            if dialistDetail != None:
                for user in list(users):
-                  if user['extension'] == detail['assign']:
-                     temp['assign']   = detail['assign']+' '+user['agentname']
+                  if user['extension'] == dialistDetail['assign']:
+                     temp['assign']   = dialistDetail['assign']+' '+user['agentname']
             else:
-               temp['assign']          = row['officer_id']
+               extension = row['officer_id']
+               for user in list(users):
+                  if user['extension'] == extension[6:9]:
+                     temp['assign']   = extension[6:9]+' '+user['agentname']
+
+            temp['chief']   = ''
             if 'action_code' in detail.keys():
                temp['action_code']          = detail['action_code']
             else:
                temp['action_code']          = ''
+
+            temp['note']            = detail['note'] if 'note' in detail.keys() else ''
             for field in list(lawsuit_fields['data']):
                if field['field'] in detail.keys():
                   temp[field['field']]          = detail[field['field']]
@@ -163,12 +173,12 @@ try:
                   temp[field_raa['field']]          = detail[field_raa['field']]
                # print(x['field'])
 
-            temp['contacted'] = mongodb.count(MONGO_COLLECTION=cdr_collection,WHERE={'customernumber': str(row['mobile_num'])})
+            temp['contacted'] = mongodb.count(MONGO_COLLECTION=cdr_collection,WHERE={'customernumber': str(row['mobile_num']), 'starttime': {'$gte': todayTimeStamp}, 'starttime': {'$lte': endTodayTimeStamp}})
             zaccf = mongodb.getOne(MONGO_COLLECTION=zaccf_collection, WHERE={'account_number': str(row['account_number'])},SELECT=['PRODGRP_ID'])
             if zaccf != None:
                temp['product_id']          = zaccf['PRODGRP_ID']
 
-            temp['createdAt'] = time.time()
+            temp['createdAt'] = todayTimeStamp
             temp['createdBy'] = 'system'
             # mongodb.insert(MONGO_COLLECTION=collection, insert_data=temp)
             insertData.append(temp)
@@ -195,12 +205,12 @@ try:
              
    ]
    data_acc = mongodb.aggregate_pipeline(MONGO_COLLECTION=account_collection,aggregate_pipeline=aggregate_pipeline)
-   for idx, row in enumerate(data_acc):
+   for row in data_acc:
       sbv = mongodb.getOne(MONGO_COLLECTION=sbv_collection, WHERE={'contract_no': str(row['account_number'])},
                SELECT=['card_type','ob_principal_sale','ob_principal_cash'])
       group = mongodb.getOne(MONGO_COLLECTION=group_collection, WHERE={'account_number': str(row['account_number'])},
                SELECT=['group'])
-      action_code = mongodb.get(MONGO_COLLECTION=action_code_collection,WHERE={'account_number': str(row['account_number'])},SORT=([('_id', -1)]),SKIP=0, TAKE=int(10000))
+      action_code = mongodb.get(MONGO_COLLECTION=action_code_collection,WHERE={'account_number': str(row['account_number']),'createdAt': {'$gte': todayTimeStamp}, 'createdAt': {'$lte': endTodayTimeStamp}},SORT=([('_id', -1)]),SKIP=0, TAKE=int(10000))
       if action_code != None:
          for detail in action_code:
             temp = {}
@@ -220,15 +230,21 @@ try:
             if group != None:
                temp['group_id']                  = str(group['group'])
 
-            temp['contacted'] = mongodb.count(MONGO_COLLECTION=cdr_collection,WHERE={'customernumber': str(row['phone'])})
+            temp['contacted'] = mongodb.count(MONGO_COLLECTION=cdr_collection,WHERE={'customernumber': str(row['phone']), 'starttime': {'$gte': todayTimeStamp}, 'starttime': {'$lte': endTodayTimeStamp}})
 
-            if 'assign' in detail.keys():
+            dialistDetail = mongodb.getOne(MONGO_COLLECTION=diallist_detail_collection,WHERE={'account_number': str(row['account_number']), 'createdAt': {'$gte': todayTimeStamp}, 'createdAt': {'$lte': endTodayTimeStamp}}, SELECT=['assign'])
+            if dialistDetail != None:
                for user in list(users):
-                  if user['extension'] == detail['assign']:
-                     temp['assign']   = detail['assign']+' '+user['agentname']
+                  if user['extension'] == dialistDetail['assign']:
+                     temp['assign']   = dialistDetail['assign']+' '+user['agentname']
+            else:
+               temp['assign']          = ''
 
+            temp['chief']   = ''
             if 'action_code' in detail.keys():
                temp['action_code']          = detail['action_code']
+
+            temp['note']            = detail['note'] if 'note' in detail.keys() else ''
 
             for field in list(lawsuit_fields['data']):
                if field['field'] in detail.keys():
@@ -268,7 +284,7 @@ try:
                   temp[field_raa['field']]          = detail[field_raa['field']]
 
 
-            temp['createdAt'] = time.time()
+            temp['createdAt'] = todayTimeStamp
             temp['createdBy'] = 'system'
             # mongodb.insert(MONGO_COLLECTION=collection, insert_data=temp)
             insertDataCard.append(temp)
@@ -299,8 +315,8 @@ try:
              
    ]
    data_wo = mongodb.aggregate_pipeline(MONGO_COLLECTION=wo_collection,aggregate_pipeline=aggregate_pipeline)
-   for idx, row in enumerate(data_wo):
-      action_code = mongodb.get(MONGO_COLLECTION=action_code_collection,WHERE={'account_number': str(row['ACCTNO'])},SORT=([('_id', -1)]),SKIP=0, TAKE=int(10000))
+   for row in data_wo:
+      action_code = mongodb.get(MONGO_COLLECTION=action_code_collection,WHERE={'account_number': str(row['ACCTNO']), 'createdAt': {'$gte': todayTimeStamp}, 'createdAt': {'$lte': endTodayTimeStamp}},SORT=([('_id', -1)]),SKIP=0, TAKE=int(10000))
       if action_code != None:
          for detail in action_code:
             temp = {}
@@ -323,15 +339,22 @@ try:
             temp['outstanding_principal']    = float(row['WO9711'])
 
             temp['group_id']                  = 'F'
-            temp['contacted'] = mongodb.count(MONGO_COLLECTION=cdr_collection,WHERE={'customernumber': str(row['PHONE'])})
+            temp['contacted'] = mongodb.count(MONGO_COLLECTION=cdr_collection,WHERE={'customernumber': str(row['PHONE']), 'starttime': {'$gte': todayTimeStamp}, 'starttime': {'$lte': endTodayTimeStamp}})
 
-            if 'assign' in detail.keys():
+            dialistDetail = mongodb.getOne(MONGO_COLLECTION=diallist_detail_collection,WHERE={'account_number': str(row['account_number']), 'createdAt': {'$gte': todayTimeStamp}, 'createdAt': {'$lte': endTodayTimeStamp}}, SELECT=['assign'])
+            if dialistDetail != None:
                for user in list(users):
-                  if user['extension'] == detail['assign']:
-                     temp['assign']   = detail['assign']+' '+user['agentname']
+                  if user['extension'] == dialistDetail['assign']:
+                     temp['assign']   = dialistDetail['assign']+' '+user['agentname']
+            else:
+               temp['assign']          = ''
+
+            temp['chief']   = ''
 
             if 'action_code' in detail.keys():
                temp['action_code']          = detail['action_code']
+
+            temp['note']            = detail['note'] if 'note' in detail.keys() else ''
 
             for field in list(lawsuit_fields['data']):
                if field['field'] in detail.keys():
@@ -371,7 +394,7 @@ try:
                   temp[field_raa['field']]          = detail[field_raa['field']]
 
 
-            temp['createdAt'] = time.time()
+            temp['createdAt'] = todayTimeStamp
             temp['createdBy'] = 'system'
 
             # mongodb.insert(MONGO_COLLECTION=collection, insert_data=temp)

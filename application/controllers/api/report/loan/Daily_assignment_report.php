@@ -48,7 +48,7 @@ Class Daily_assignment_report extends WFF_Controller {
     // }
     function downloadExcel()
     {
-      $this->exportExcel();
+      // $this->exportExcel();
         $file_path = UPLOAD_PATH . "/loan/export/DailyAssignment.xlsx";
         echo json_encode(array("status" => 1, "data" => $file_path));
     }

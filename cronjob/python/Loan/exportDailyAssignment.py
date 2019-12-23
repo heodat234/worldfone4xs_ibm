@@ -34,7 +34,7 @@ try:
    errorData   = []
 
    today = date.today()
-   today = datetime.strptime('20/12/2019', "%d/%m/%Y").date()
+   # today = datetime.strptime('21/12/2019', "%d/%m/%Y").date()
 
    day = today.day
    month = today.month
