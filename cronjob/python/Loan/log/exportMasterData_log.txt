@@ -11,3 +11,4 @@
 13/12/2019, 18:41:12: End Log
 13/12/2019, 18:50:30: name 'my_dataframe' is not defined
 13/12/2019, 18:52:56: End Log
+24/12/2019, 14:00:40: End Log

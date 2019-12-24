@@ -37,8 +37,8 @@ try:
     updateData = []
     listDebtGroup = []
     
-    today = date.today()
-    # today = datetime.strptime('13/12/2019', "%d/%m/%Y").date()
+    # today = date.today()
+    today = datetime.strptime('13/12/2019', "%d/%m/%Y").date()
 
     day = today.day
     month = today.month
@@ -106,6 +106,9 @@ try:
                 for groupProduct in list(listGroupProduct):
                     groupInfoByDueDate = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Group'), WHERE={'debt_groups': debtGroupCell, 'name': {"$regex": groupProduct['text'] + '.*'}})
                     for groupCell in list(groupInfoByDueDate):
+                        if 'G2' in groupCell['name'] or 'G3' in groupCell['name']:
+                            continue
+
                         temp = {
                             'due_date'              : todayTimeStamp - 86400,
                             'due_date_one'          : todayTimeStamp,
@@ -113,6 +116,7 @@ try:
                             'debt_group'            : debtGroupCell[0:1],
                             'due_date_code'         : debtGroupCell[1:3],
                             'team_id'               : str(groupCell['_id']),
+                            'team_name'             : groupCell['name'],
                             'for_month'             : str(month),
                             'debt_acc_no'           : 0,
                             'current_balance_total' : 0,

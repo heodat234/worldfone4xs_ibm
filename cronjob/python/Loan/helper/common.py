@@ -149,7 +149,7 @@ class Common:
         while starttime <= endtime:
             date = self.datetime.fromtimestamp(starttime)
             isHoliday = mongodb.getOne(MONGO_COLLECTION='LO_Report_off_sys', WHERE={'off_date': starttime})
-            if isHoliday is None and date.weekday() not in [5, 6]:
+            if isHoliday is None:
                 count_days += 1
             starttime += 86400
         return count_days

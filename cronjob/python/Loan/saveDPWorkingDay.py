@@ -61,23 +61,27 @@ try:
     startMonth = int(time.mktime(time.strptime(str('01/' + str(month) + '/' + str(year) + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
     endMonth = int(time.mktime(time.strptime(str(str(lastDayOfMonth) + '/' + str(month) + '/' + str(year) + " 23:59:59"), "%d/%m/%Y %H:%M:%S")))
     
-    holidayOfMonth = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_off_sys'))
-    listHoliday = map(lambda offDateRow: {offDateRow['off_date']}, holidayOfMonth)
+    # holidayOfMonth = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_off_sys'))
+    # listHoliday = map(lambda offDateRow: {offDateRow['off_date']}, holidayOfMonth)
 
-    dueDateThisMonth = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_due_date'))
+    dueDateThisMonth = list(mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_due_date')))
 
-    if todayTimeStamp in listHoliday:
-        sys.exit()
+    # if todayTimeStamp in listHoliday:
+    #     sys.exit()
 
     todayString = today.strftime("%d/%m/%Y")
     starttime = int(time.mktime(time.strptime(str(todayString + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
     endtime = int(time.mktime(time.strptime(str(todayString + " 23:59:59"), "%d/%m/%Y %H:%M:%S")))
 
+    holidayOfMonth = list(mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_off_sys'), WHERE={'off_date': {'$gte': starttime, '$lte': endtime}}))
+    if len(holidayOfMonth) > 0:
+        sys.exit()
+
     yesterday_starttime = starttime - 86400
     yesterday_endtime = endtime - 86400
-
+    pprint(yesterday_endtime)
     mainProduct = {}
-    mainProductRaw = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Product'))
+    mainProductRaw = list(mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Product')))
     for prod in mainProductRaw:
         mainProduct[prod['code']] = prod['name']
 
@@ -100,7 +104,7 @@ try:
     #     total_lnjc05 += 1
     #     total_cur_bal_lnjc05 += lnjc05_row['current_balance']
     
-    list_acc = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'List_of_account_in_collection'))
+    list_acc = list(mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'List_of_account_in_collection')))
     total_list_acc = 0
     total_cur_bal_list_acc = 0
     for list_acc_row in list_acc:
@@ -121,171 +125,177 @@ try:
                 for groupProductCell in listGroupProduct:
                     for key in dpWorkingdaysdaycol:
                         groupInfoByDueDate = list(mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Group'), WHERE={'debt_groups': debtGroupCell, 'name': {"$regex": groupProductCell['text'] + '.*'}}))
-                        groupInfoByDueDate.extend([{'name': 'Total'}])
-                        total_no_overdue = 0
-                        total_no_paid_acc_end_day = 0
-                        total_no_paid_acc_accumulated = 0
-                        total_collected_acc = 0
-                        total_overdue_outstanding_bal = 0
-                        total_collected_amt_and_day = 0
-                        total_collected_amt_accumulated = 0
-                        total_collected_ratio_amt = 0
+                        if len(groupInfoByDueDate) > 0:
+                            groupInfoByDueDate.extend([{'name': 'Total'}])
+                            total_no_overdue = 0
+                            total_no_paid_acc_end_day = 0
+                            total_no_paid_acc_accumulated = 0
+                            total_collected_acc = 0
+                            total_overdue_outstanding_bal = 0
+                            total_collected_amt_and_day = 0
+                            total_collected_amt_accumulated = 0
+                            total_collected_ratio_amt = 0
 
-                        total_start_acc = 0
-                        total_start_amt = 0
-                        total_target_acc = 0
-                        total_target_amt = 0
-                        for groupCell in groupInfoByDueDate:
-                            if groupCell['name'] != 'Total':
-                                dueDateValue = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Due_date_next_date'), WHERE={'due_date_one': {'$gte': starttime, '$lte': starttime}, 'team_id': str(groupCell['_id'])})
-                                target = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Target'), WHERE={'group.id': str(groupCell['_id'])})
-                                temp = {
-                                    'group'         : debtGroupCell[0:1] + ' GROUP',
-                                    'month'         : today.strftime("%b-%y"),
-                                    'due'           : due[debtGroupCell[1:3]],
-                                    'product'       : groupProductCell['value'],
-                                    'due_date'      : todayTimeStamp - 86400,
-                                    'day'           : dpWorkingdaysdaycol[key],
-                                    'day_code'      : key,
-                                    'team_name'     : groupCell['name'],
-                                    'team_id'       : str(groupCell['_id']),
-                                    'created_at'    : time.time(),
-                                    'created_by'    : 'system',
-                                    'updated_by'    : 'system',
-                                    'updated_at'    : time.time()
-                                }
+                            total_start_acc = 0
+                            total_start_amt = 0
+                            total_target_acc = 0
+                            total_target_amt = 0
+                            for groupCell in groupInfoByDueDate:
+                                if groupCell['name'] != 'Total':
+                                    if 'G2' in groupCell['name'] or 'G3' in groupCell['name']:
+                                        continue
 
-                                if key == '1':
-                                    temp['index_1']     = dueDateValue['debt_acc_no'] if dueDateValue['debt_acc_no'] is not None else 0
-                                    temp['start_acc']   = temp['index_1']
-                                    temp['start_amt']   = dueDateValue['current_balance_total'] if dueDateValue['current_balance_total'] is not None else 0
-                                    temp['target_acc']  = (dueDateValue['debt_acc_no'] * int(target['target'])) / 100 if dueDateValue['debt_acc_no'] is not None and target['target'] is not None else 0
-                                    temp['target_amt']  = (dueDateValue['current_balance_total'] * int(target['target'])) / 100 if dueDateValue['current_balance_total'] is not None and target['target'] is not None else 0
-                                    total_no_overdue += temp['index_1']
-                                    total_start_acc += temp['start_acc']
-                                    total_start_amt += temp['start_amt']
-                                    total_target_acc += temp['target_acc']
-                                    total_target_amt += temp['target_amt']
-                                
-                                if key == '2':
-                                    temp['index_1'] = 0
-                                    total_no_paid_acc_end_day += temp['index_1']
+                                    groupCell['name'] = groupCell['name'].replace('/G1', '')
+                                    dueDateValue = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Due_date_next_date'), WHERE={'due_date_one': {'$gte': starttime, '$lte': starttime}, 'team_id': str(groupCell['_id'])})
+                                    target = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Target'), WHERE={'group.id': str(groupCell['_id'])})
+                                    temp = {
+                                        'group'         : debtGroupCell[0:1] + ' GROUP',
+                                        'month'         : today.strftime("%b-%y"),
+                                        'due'           : due[debtGroupCell[1:3]],
+                                        'product'       : groupProductCell['value'],
+                                        'due_date'      : todayTimeStamp - 86400,
+                                        'day'           : dpWorkingdaysdaycol[key],
+                                        'day_code'      : key,
+                                        'team_name'     : groupCell['name'],
+                                        'team_id'       : str(groupCell['_id']),
+                                        'created_at'    : time.time(),
+                                        'created_by'    : 'system',
+                                        'updated_by'    : 'system',
+                                        'updated_at'    : time.time()
+                                    }
 
-                                if key == '3':
-                                    temp['index_1'] = 0
-                                    total_no_paid_acc_accumulated += temp['index_1']
+                                    if key == '1':
+                                        temp['index_1']     = dueDateValue['debt_acc_no'] if dueDateValue['debt_acc_no'] is not None else 0
+                                        temp['start_acc']   = temp['index_1']
+                                        temp['start_amt']   = dueDateValue['current_balance_total'] if dueDateValue['current_balance_total'] is not None else 0
+                                        temp['target_acc']  = (dueDateValue['debt_acc_no'] * int(target['target'])) / 100 if dueDateValue['debt_acc_no'] is not None and target['target'] is not None else 0
+                                        temp['target_amt']  = (dueDateValue['current_balance_total'] * int(target['target'])) / 100 if dueDateValue['current_balance_total'] is not None and target['target'] is not None else 0
+                                        total_no_overdue += temp['index_1']
+                                        total_start_acc += temp['start_acc']
+                                        total_start_amt += temp['start_amt']
+                                        total_target_acc += temp['target_acc']
+                                        total_target_amt += temp['target_amt']
+                                    
+                                    if key == '2':
+                                        temp['index_1'] = 0
+                                        total_no_paid_acc_end_day += temp['index_1']
 
-                                if key == '4':
-                                    temp['index_1'] = 0
-                                    total_collected_acc += temp['index_1']
+                                    if key == '3':
+                                        temp['index_1'] = 0
+                                        total_no_paid_acc_accumulated += temp['index_1']
 
-                                if key == '5':
-                                    temp['index_1'] = dueDateValue['current_balance_total'] if dueDateValue['current_balance_total'] is not None else 0
-                                    total_overdue_outstanding_bal += temp['index_1']
+                                    if key == '4':
+                                        temp['index_1'] = 0
+                                        total_collected_acc += temp['index_1']
 
-                                if key == '6':
-                                    temp['index_1'] = 0
-                                    total_collected_amt_and_day += temp['index_1']
-                                
-                                if key == '7':
-                                    temp['index_1'] = 0
-                                    total_collected_amt_accumulated += temp['index_1']
+                                    if key == '5':
+                                        temp['index_1'] = dueDateValue['current_balance_total'] if dueDateValue['current_balance_total'] is not None else 0
+                                        total_overdue_outstanding_bal += temp['index_1']
 
-                                if key == '8':
-                                    temp['index_1'] = 0
-                                    total_collected_ratio_amt += temp['index_1']
-                                # pprint(temp)
-                                mongodb.insert(MONGO_COLLECTION=collection, insert_data=temp)
-                            else:
-                                temp = {
-                                    'group'         : debtGroupCell[0:1] + ' GROUP',
-                                    'month'         : today.strftime("%b-%y"),
-                                    'due'           : due[debtGroupCell[1:3]],
-                                    'product'       : groupProductCell['value'],
-                                    'due_date'      : todayTimeStamp - 86400,
-                                    'day'           : dpWorkingdaysdaycol[key],
-                                    'day_code'      : key,
-                                    'team_name'     : 'Total',
-                                    'team_id'       : '',
-                                    'created_at'    : time.time(),
-                                    'created_by'    : 'system',
-                                    'updated_by'    : 'system',
-                                    'updated_at'    : time.time()
-                                }
+                                    if key == '6':
+                                        temp['index_1'] = 0
+                                        total_collected_amt_and_day += temp['index_1']
+                                    
+                                    if key == '7':
+                                        temp['index_1'] = 0
+                                        total_collected_amt_accumulated += temp['index_1']
 
-                                if key == '1':
-                                    temp['index_1'] = total_no_overdue
-                                    temp['start_acc'] = total_start_acc
-                                    temp['start_amt'] = total_start_amt
-                                    temp['target_acc'] = total_target_acc
-                                    temp['target_amt'] = total_target_amt
-                                
-                                if key == '2':
-                                    temp['index_1'] = total_no_paid_acc_end_day
+                                    if key == '8':
+                                        temp['index_1'] = 0
+                                        total_collected_ratio_amt += temp['index_1']
+                                    # pprint(temp)
+                                    mongodb.insert(MONGO_COLLECTION=collection, insert_data=temp)
+                                else:
+                                    temp = {
+                                        'group'         : debtGroupCell[0:1] + ' GROUP',
+                                        'month'         : today.strftime("%b-%y"),
+                                        'due'           : due[debtGroupCell[1:3]],
+                                        'product'       : groupProductCell['value'],
+                                        'due_date'      : todayTimeStamp - 86400,
+                                        'day'           : dpWorkingdaysdaycol[key],
+                                        'day_code'      : key,
+                                        'team_name'     : 'Total',
+                                        'team_id'       : '',
+                                        'created_at'    : time.time(),
+                                        'created_by'    : 'system',
+                                        'updated_by'    : 'system',
+                                        'updated_at'    : time.time()
+                                    }
 
-                                if key == '3':
-                                    temp['index_1'] = total_no_paid_acc_accumulated
+                                    if key == '1':
+                                        temp['index_1'] = total_no_overdue
+                                        temp['start_acc'] = total_start_acc
+                                        temp['start_amt'] = total_start_amt
+                                        temp['target_acc'] = total_target_acc
+                                        temp['target_amt'] = total_target_amt
+                                    
+                                    if key == '2':
+                                        temp['index_1'] = total_no_paid_acc_end_day
 
-                                if key == '4':
-                                    temp['index_1'] = total_collected_acc
+                                    if key == '3':
+                                        temp['index_1'] = total_no_paid_acc_accumulated
 
-                                if key == '5':
-                                    temp['index_1'] = total_overdue_outstanding_bal
+                                    if key == '4':
+                                        temp['index_1'] = total_collected_acc
 
-                                if key == '6':
-                                    temp['index_1'] = total_collected_amt_and_day
-                                
-                                if key == '7':
-                                    temp['index_1'] = total_collected_amt_accumulated
+                                    if key == '5':
+                                        temp['index_1'] = total_overdue_outstanding_bal
 
-                                if key == '8':
-                                    temp['index_1'] = total_collected_ratio_amt
-                                mongodb.insert(MONGO_COLLECTION=collection, insert_data=temp)
+                                    if key == '6':
+                                        temp['index_1'] = total_collected_amt_and_day
+                                    
+                                    if key == '7':
+                                        temp['index_1'] = total_collected_amt_accumulated
+
+                                    if key == '8':
+                                        temp['index_1'] = total_collected_ratio_amt
+                                    mongodb.insert(MONGO_COLLECTION=collection, insert_data=temp)
             else:
                 pprint("SAI")
                 for groupProductCell in listGroupProduct:
                     for key in dpWorkingdaysdaycol:
                         groupInfoByDueDate = list(mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Group'), WHERE={'debt_groups': debtGroupCell, 'name': {"$regex": groupProductCell['text'] + '.*'}}))
-                        groupInfoByDueDate.extend([{'name': 'Total'}])
-                        total_no_overdue = 0
-                        total_no_paid_acc_end_day = 0
-                        total_no_paid_acc_accumulated = 0
-                        total_collected_acc = 0
-                        total_overdue_outstanding_bal = 0
-                        total_collected_amt_and_day = 0
-                        total_collected_amt_accumulated = 0
-                        total_collected_ratio_amt = 0
-                        for groupCell in groupInfoByDueDate:
-                            if groupCell['name'] != 'Total':
-                                yesterdayInfo = mongodb.getOne(MONGO_COLLECTION=collection, WHERE={'updated_at': {'$gte': yesterday_starttime, '$lte': yesterday_endtime}, 'team_id': str(groupCell['_id'])})
-                                debtList = []
-                                cur_bal = 0
-                                count_acc = 0
+                        if len(groupInfoByDueDate) > 0:
+                            groupInfoByDueDate.extend([{'name': 'Total'}])
+                            total_no_overdue = 0
+                            total_no_paid_acc_end_day = 0
+                            total_no_paid_acc_accumulated = 0
+                            total_collected_acc = 0
+                            total_overdue_outstanding_bal = 0
+                            total_collected_amt_and_day = 0
+                            total_collected_amt_accumulated = 0
+                            total_collected_ratio_amt = 0
+                            for groupCell in groupInfoByDueDate:
+                                if 'G2' in groupCell['name'] or 'G3' in groupCell['name']:
+                                    continue
+                                groupCell['name'] = groupCell['name'].replace('/G1', '')
+                                if groupCell['name'] != 'Total':
+                                    yesterdayInfo = mongodb.getOne(MONGO_COLLECTION=collection, WHERE={'updated_at': {'$gte': yesterday_starttime, '$lte': yesterday_endtime}, 'team_id': str(groupCell['_id'])})
+                                    debtList = []
+                                    cur_bal = 0
+                                    count_acc = 0
 
-                                if groupProductCell['value'] == 'SIBS':
-                                    lead = ['JIVF00' + groupCell['lead']] if 'lead' in groupCell.keys() else []
-                                    member = ('JIVF00' + s for s in groupCell['members']) if 'members' in groupCell.keys() else []
-                                    officerIdRaw = list(lead) + list(member)
-                                    officerId = list(dict.fromkeys(officerIdRaw))
+                                    if groupProductCell['value'] == 'SIBS':
+                                        lead = ['JIVF00' + groupCell['lead']] if 'lead' in groupCell.keys() else []
+                                        member = ('JIVF00' + s for s in groupCell['members']) if 'members' in groupCell.keys() else []
+                                        officerIdRaw = list(lead) + list(member)
+                                        officerId = list(dict.fromkeys(officerIdRaw))
 
-                                    lnjc05Info = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'LNJC05'), WHERE={'officer_id': {'$in': officerId}})
-                                    if lnjc05Info is not None:
-                                        count_acc = len(list(lnjc05Info))
+                                        lnjc05Info = list(mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'LNJC05'), WHERE={'officer_id': {'$in': officerId}}))
+                                        count_acc = len(lnjc05Info)
                                         cur_bal = sum(lnjc05['current_balance'] for lnjc05 in lnjc05Info)
+                                            
+                                    if groupProductCell['value'] == 'Card':
+                                        diallist_Info = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Diallist'), WHERE={'group_id': str(groupCell['_id']), 'createdAt': {'$gte': starttime, '$lte': endtime}})
+                                        if diallist_Info is not None:
+                                            diallist_Detail = list(mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Diallist_detail'), WHERE={'diallist_id': diallist_Info['_id']}))
+                                            if diallist_Detail is not None:
+                                                count_acc = len(diallist_Info)
+                                                cur_bal = sum(detail['cur_bal'] for detail in diallist_Detail)
 
-                                        
-                                if groupProductCell['value'] == 'Card':
-                                    diallist_Info = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Diallist'), WHERE={'group_id': str(groupCell['_id']), 'createdAt': {'$gte': starttime, '$lte': endtime}})
-                                    if diallist_Info is not None:
-                                        diallist_Detail = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Diallist_detail'), WHERE={'diallist_id': diallist_Info['_id']})
-                                        if diallist_Detail is not None:
-                                            count_acc = len(list(diallist_Info))
-                                            cur_bal = sum(detail['cur_bal'] for detail in diallist_Detail)
-
-                                no_overdue = count_acc
-                                no_overdue_amt = cur_bal
-                                paid_acc_end_date_yesterday = yesterdayInfo['index_' + str(todayIndex - 1)] - no_overdue if yesterdayInfo is not None and yesterdayInfo['index_' + str(todayIndex - 1)] is not None else 0
-                                if(groupCell['name'] != 'Total'):
+                                    no_overdue = count_acc
+                                    no_overdue_amt = cur_bal
+                                    paid_acc_end_date_yesterday = yesterdayInfo['index_' + str(todayIndex - 1)] - no_overdue if yesterdayInfo is not None and yesterdayInfo['index_' + str(todayIndex - 1)] is not None else 0
                                     temp = {}
                                     if key == '1':
                                         temp['index_' + str(todayIndex)] = no_overdue
@@ -343,6 +353,51 @@ try:
                                         temp['updated_by']  = 'system'
                                         temp['updated_at']  = time.time()
                                         mongodb.insert(MONGO_COLLECTION=collection, insert_data=temp)
+                                else:
+                                    temp = {
+                                        'group'         : debtGroupCell[0:1] + ' GROUP',
+                                        'month'         : today.strftime("%b-%y"),
+                                        'due'           : due[debtGroupCell[1:3]],
+                                        'product'       : groupProductCell['value'],
+                                        'due_date'      : todayTimeStamp - 86400,
+                                        'day'           : dpWorkingdaysdaycol[key],
+                                        'day_code'      : key,
+                                        'team_name'     : 'Total',
+                                        'team_id'       : '',
+                                        'created_at'    : time.time(),
+                                        'created_by'    : 'system',
+                                        'updated_by'    : 'system',
+                                        'updated_at'    : time.time()
+                                    }
+
+                                    if key == '1':
+                                        temp['index_' + str(todayIndex)] = total_no_overdue
+                                        temp['start_acc'] = total_start_acc
+                                        temp['start_amt'] = total_start_amt
+                                        temp['target_acc'] = total_target_acc
+                                        temp['target_amt'] = total_target_amt
+                                    
+                                    if key == '2':
+                                        temp['index_' + str(todayIndex)] = total_no_paid_acc_end_day
+
+                                    if key == '3':
+                                        temp['index_' + str(todayIndex)] = total_no_paid_acc_accumulated
+
+                                    if key == '4':
+                                        temp['index_' + str(todayIndex)] = total_collected_acc
+
+                                    if key == '5':
+                                        temp['index_' + str(todayIndex)] = total_overdue_outstanding_bal
+
+                                    if key == '6':
+                                        temp['index_' + str(todayIndex)] = total_collected_amt_and_day
+                                    
+                                    if key == '7':
+                                        temp['index_' + str(todayIndex)] = total_collected_amt_accumulated
+
+                                    if key == '8':
+                                        temp['index_' + str(todayIndex)] = total_collected_ratio_amt
+                                    mongodb.insert(MONGO_COLLECTION=collection, insert_data=temp)
     print('DONE')
 except Exception as e:
     # log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')

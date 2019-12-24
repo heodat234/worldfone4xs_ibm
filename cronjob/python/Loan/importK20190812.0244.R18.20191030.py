@@ -29,7 +29,7 @@ _mongodb = Mongodb(MONGODB="_worldfone4xs", WFF_ENV=wff_env)
 log = open(base_url + "cronjob/python/Loan/log/importlnjc05.txt","a")
 now = datetime.now()
 subUserType = 'LO'
-collection = common.getSubUser(subUserType, 'K201908120244R1820191030')
+collection = common.getSubUser(subUserType, 'K201908120244R18')
 
 try:
     modelColumns = []
@@ -49,7 +49,7 @@ try:
     day = today.day
     month = today.month
     year = today.year
-    fileName = "K20190812.0244.R18.20191030.xlsx"
+    fileName = "K20190812.0244.R18.xlsx"
     sep = ';'
     logDbName = "LO_Input_result_" + str(year) + str(month)
 
@@ -67,6 +67,19 @@ try:
         importLogInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': ObjectId(sys.argv[1])})
     except Exception as SysArgvError:
         if not os.path.isfile(ftpLocalUrl):
+            notification = {
+                'title'     : 'Import K20190812.0244.R18 error',
+                'active'    : True,
+                'icon'      : 'fa fa-exclamation-triangle',
+                'color'     : 'text-warning',
+                'content'   : 'Không có file K20190812.0244.R18 hôm nay',
+                'link'      : '/manage/data/import_file',
+                'to'        : ['911'],
+                'notifyDate': datetime.utcnow(),
+                'createdBy' : 'System',
+                'createdAt' : time.time()
+            }
+            mongodb.insert(MONGO_COLLECTION=common.getSubUser(subUserType, 'Notification'), insert_data=notification)
             sys.exit()
 
         importLogInfo = {

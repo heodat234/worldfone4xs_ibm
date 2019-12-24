@@ -73,11 +73,13 @@ try:
        {
            "$project":
            {
+               "group_id": 1,
                "account_number": 1,
                "cus_name": 1,
                "current_balance": 1,
                "due_date": 1,
                "address": 1,
+               "officer_id": 1,
                "officer_name": 1,
            }
        }
@@ -145,18 +147,26 @@ try:
 
          row['CURRENT_DPD'] = int(tdelta.days) - int(countHoliday)
 
-         diallist = mongodb.getOne(MONGO_COLLECTION=diallist_collection, WHERE={'account_number': str(row['account_number'])},
+         diallist = mongodb.getOne(MONGO_COLLECTION=diallist_collection, WHERE={'account_number': str(row['account_number']),'createdAt': {'$gte' : todayTimeStamp}},
             SELECT=['assign'])
          if diallist != None:
             if row['COMPANY'] == '':
                if 'assign' in diallist.keys():
                   for user in list(users):
-                     if user['extension'] == diallist['assign']:
+                     if str(user['extension']) ==str(diallist['assign']):
+                        row['COMPANY']          = user['agentname']
+                        break
+               else: 
+                  name = row['officer_id']
+                  extension = name[6:9]
+                  for user in list(users):
+                     if user['extension'] == extension:
                         row['COMPANY']          = user['agentname']
                         break
 
          row.pop('_id')
          row.pop('officer_name')
+         row.pop('officer_id')
          row.pop('due_date')
          row['createdAt'] = time.time()
          row['createdBy'] = 'system'
@@ -180,7 +190,7 @@ try:
    for row in cardData:
       if 'account_number' in row.keys():
          sbv = mongodb.getOne(MONGO_COLLECTION=sbv_collection, WHERE={'contract_no': str(row['account_number'])},
-            SELECT=['cif_birth_date','cus_no','open_date','card_type','license_no','approved_limit','address','ob_principal_sale','ob_principal_cash','interest_rate','overdue_days_no'])
+            SELECT=['cif_birth_date','cus_no','open_date','card_type','license_no','approved_limit','address','ob_principal_sale','ob_principal_cash','interest_rate','overdue_days_no','overdue_indicator'])
          if sbv != None:
             try:
                birth_date   = datetime.fromtimestamp(sbv['cif_birth_date'])
@@ -189,6 +199,7 @@ try:
             except Exception as e:
                row['BIR_DT8']          = str(sbv['cif_birth_date'])
             
+            row['group_id']         = sbv['overdue_indicator']
             row['CUS_ID']           = sbv['cus_no']
             row['FRELD8']           = sbv['open_date']
             row['LIC_NO']           = sbv['license_no']
@@ -236,7 +247,7 @@ try:
          if zaccf != None:
             row['WRK_REF']          = zaccf['WRK_REF']+'; '+zaccf['WRK_REF1']+'; '+zaccf['WRK_REF2']+'; '+zaccf['WRK_REF3']+'; '+zaccf['WRK_REF4']+'; '+zaccf['WRK_REF5']
 
-         diallist = mongodb.getOne(MONGO_COLLECTION=diallist_collection, WHERE={'account_number': str(row['account_number'])},
+         diallist = mongodb.getOne(MONGO_COLLECTION=diallist_collection, WHERE={'account_number': str(row['account_number']),'createdAt': {'$gte' : todayTimeStamp}},
             SELECT=['assign'])
          if diallist != None:
             if row['COMPANY'] == '':
@@ -288,8 +299,9 @@ try:
          temp['MOBILE_NO']         = row['PHONE']
          temp['product_name']         = row['PROD_ID']
          sbv = mongodb.getOne(MONGO_COLLECTION=sbv_collection, WHERE={'contract_no': str(row['ACCTNO'])},
-            SELECT=['cif_birth_date','name','cus_no','open_date','card_type','license_no','approved_limit','ob_principal_sale','ob_principal_cash','interest_rate','overdue_days_no'])
+            SELECT=['cif_birth_date','name','cus_no','open_date','card_type','license_no','approved_limit','ob_principal_sale','ob_principal_cash','interest_rate','overdue_days_no','overdue_indicator'])
          if sbv != None:
+            temp['group_id']          = sbv['overdue_indicator']
             temp['BIR_DT8']          = str(sbv['cif_birth_date'])
             temp['CUS_ID']           = sbv['cus_no']
             temp['FRELD8']           = sbv['open_date']
@@ -375,8 +387,11 @@ try:
 
 
          lnjc05 = mongodb.getOne(MONGO_COLLECTION=lnjc05_collection, WHERE={'account_number': str(row['ACCTNO'])},
-            SELECT=['due_date'])
+            SELECT=['due_date','group_id','officer_id'])
+         officer_id                 = ''
          if lnjc05 != None:
+            officer_id                 = lnjc05['officer_id']
+            temp['group_id']           = lnjc05['group_id']
             today    = datetime.now()
             date_time = datetime.fromtimestamp(lnjc05['due_date'])
             FMT      = '%d-%m-%y'
@@ -385,13 +400,20 @@ try:
             tdelta   = datetime.strptime(d1, FMT) - datetime.strptime(d2, FMT)
             temp['CURRENT_DPD'] = tdelta.days
 
-         diallist = mongodb.getOne(MONGO_COLLECTION=diallist_collection, WHERE={'account_number': str(row['ACCTNO'])},
-            SELECT=['assign'])
+         diallist = mongodb.getOne(MONGO_COLLECTION=diallist_collection, WHERE={'account_number': str(row['ACCTNO']),'createdAt': {'$gte' : todayTimeStamp}},
+            SELECT=['assign','officer_id'])
          if diallist != None:
             if row['COMPANY'] == '':
                if 'assign' in diallist.keys():
                   for user in list(users):
                      if user['extension'] == diallist['assign']:
+                        row['COMPANY']          = user['agentname']
+                        break
+               else: 
+                  name = officer_id
+                  extension = name[6:9]
+                  for user in list(users):
+                     if user['extension'] == extension:
                         row['COMPANY']          = user['agentname']
                         break
 

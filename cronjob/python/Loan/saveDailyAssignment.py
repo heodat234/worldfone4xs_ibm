@@ -119,14 +119,15 @@ try:
 
             dialistDetail = mongodb.getOne(MONGO_COLLECTION=diallist_detail_collection,WHERE={'account_number': str(row['account_number']), 'createdAt': {'$gte': todayTimeStamp}, 'createdAt': {'$lte': endTodayTimeStamp}}, SELECT=['assign'])
             if dialistDetail != None:
-               for user in list(users):
-                  if user['extension'] == dialistDetail['assign']:
-                     temp['assign']   = dialistDetail['assign']+' '+user['agentname']
-            else:
-               extension = row['officer_id']
-               for user in list(users):
-                  if user['extension'] == extension[6:9]:
-                     temp['assign']   = extension[6:9]+' '+user['agentname']
+               if 'assign' in dialistDetail.keys():
+                  for user in list(users):
+                     if user['extension'] == dialistDetail['assign']:
+                        temp['assign']   = dialistDetail['assign']+' '+user['agentname']
+               else:
+                  extension = row['officer_id']
+                  for user in list(users):
+                     if user['extension'] == extension[6:9]:
+                        temp['assign']   = extension[6:9]+' '+user['agentname']
 
             temp['chief']   = ''
             if 'action_code' in detail.keys():

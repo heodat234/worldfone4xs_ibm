@@ -74,6 +74,19 @@ try:
         # ftp.close()
 
         if not os.path.isfile(ftpLocalUrl):
+            notification = {
+                'title'     : 'Import REPORT INPUT PAYMENT OF CARD error',
+                'active'    : True,
+                'icon'      : 'fa fa-exclamation-triangle',
+                'color'     : 'text-warning',
+                'content'   : f'Không có file <b style="font-size: 15px">{ftpLocalUrl}</b> hôm nay',
+                'link'      : '/manage/data/import_file',
+                'to'        : ['911'],
+                'notifyDate': datetime.utcnow(),
+                'createdBy' : 'System',
+                'createdAt' : time.time()
+            }
+            mongodb.insert(MONGO_COLLECTION=common.getSubUser(subUserType, 'Notification'), insert_data=notification)
             sys.exit()
 
         importLogInfo = {

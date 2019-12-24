@@ -48,7 +48,6 @@ try:
     last_month_day = last_month_last_day.day
     last_month_month = last_month_last_day.month
     last_month_year = last_month_last_day.year
-    pprint(last_month_last_day)
 
     lastDayOfMonth = calendar.monthrange(year, month)[1]
     insertDataTotal = []
@@ -95,7 +94,8 @@ try:
     starttime = int(time.mktime(time.strptime(str(todayString + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
     endtime = int(time.mktime(time.strptime(str(todayString + " 23:59:59"), "%d/%m/%Y %H:%M:%S")))
     
-    list_product = mongodb.get(common.getSubUser(subUserType, 'Product'), SORT=[("$name", 1)])
+    list_product = mongodb.get(common.getSubUser(subUserType, 'Product'), SORT=[("code", 1)])
+
     credit_card_range = list(map(lambda x: str(format(x, '03d')), range(1, 100, 1)))
 
     for product_code, product_value in enumerate(list_product):
@@ -272,7 +272,7 @@ try:
                         lastMonthInfoTotal = mongodb.getOne(common.getSubUser(subUserType, 'Collection_factors_total'), WHERE={'created_at': {'$gte': endLastMonthStarttime, '$lte': endLastMonthEndtime}, 'detail': 'amt', 'product_code': product_value['code']})
                         temp_total['last_month'] = lastMonthInfoTotal['this_month'] if lastMonthInfoTotal is not None and lastMonthInfoTotal['this_month'] is not None else 0
                     insertDataTotal.append(temp_total)
-
+                pprint(temp_total_amt_zaccf)
                 temp_2 = {
                     'index'         : '1b',
                     'type_detail'   : 'group_b',
@@ -338,10 +338,8 @@ try:
                     'created_at'    : time.time(),
                     'created_by'    : 'system'
                 }
-                insertDataDetail.append(temp_5)
+                # insertDataDetail.append(temp_5)
 
-                pprint(product_code)
-                sys.exit()
                 if product_code == 0:
                     temp_2_plus = {
                         'index'         : '5b',
@@ -445,6 +443,126 @@ try:
                 lastMonthInfoTotal = mongodb.getOne(common.getSubUser(subUserType, 'Collection_factors_detail'), WHERE={'created_at': {'$gte': endLastMonthStarttime, '$lte': endLastMonthEndtime}, 'product_code': product_value['code'], 'type_detail': 'group_c_plus_ratio'})
                 temp_total['last_month_acc'] = lastMonthInfoTotal['this_month_acc'] if lastMonthInfoTotal is not None and lastMonthInfoTotal['this_month_acc'] is not None else 0
                 temp_total['last_month_amt'] = lastMonthInfoTotal['this_month_amt'] if lastMonthInfoTotal is not None and lastMonthInfoTotal['this_month_amt'] is not None else 0
+                insertDataDetail.append(temp_3_ratio)
+            else:
+                temp_2 = {
+                    'index'         : '1b',
+                    'type_detail'   : 'group_b',
+                    'group_name'    : '',
+                    'product_code'  : product_value['code'],
+                    'product_name'  : product_value['name'],
+                    'this_month_acc': 0,
+                    'this_month_amt': 0,
+                    'created_at'    : time.time(),
+                    'created_by'    : 'system'
+                }
+                insertDataDetail.append(temp_2)
+                temp_3 = {
+                    'index'         : '2b',
+                    'type_detail'   : 'group_c',
+                    'group_name'    : '',
+                    'product_code'  : product_value['code'],
+                    'product_name'  : product_value['name'],
+                    'this_month_acc': 0,
+                    'this_month_amt': 0,
+                    'created_at'    : time.time(),
+                    'created_by'    : 'system'
+                }
+                insertDataDetail.append(temp_3)
+                temp_4 = {
+                    'index'         : '3b',
+                    'type_detail'   : 'group_d',
+                    'group_name'    : '',
+                    'product_code'  : product_value['code'],
+                    'product_name'  : product_value['name'],
+                    'this_month_acc': 0,
+                    'this_month_amt': 0,
+                    'created_at'    : time.time(),
+                    'created_by'    : 'system'
+                }
+                insertDataDetail.append(temp_4)
+                if product_code == 0:
+                    temp_2_plus = {
+                        'index'         : '5b',
+                        'type_detail'   : 'group_b_plus',
+                        'group_name'    : '(Ｇ２以上）',
+                        'product_code'  : product_value['code'],
+                        'product_name'  : product_value['name'],
+                        'this_month_acc': 0,
+                        'this_month_amt': 0,
+                        'created_at'    : time.time(),
+                        'created_by'    : 'system'
+                    }
+                else:
+                    temp_2_plus = {
+                        'index'         : '5b',
+                        'type_detail'   : 'group_b_plus',
+                        'group_name'    : '',
+                        'product_code'  : product_value['code'],
+                        'product_name'  : product_value['name'],
+                        'this_month_acc': 0,
+                        'this_month_amt': 0,
+                        'created_at'    : time.time(),
+                        'created_by'    : 'system'
+                    }
+                insertDataDetail.append(temp_2_plus)
+                if product_code == 0:
+                    temp_2_ratio = {
+                        'index'         : '6b',
+                        'type_detail'   : 'group_b_plus_ratio',
+                        'group_name'    : '(Ｇ２以上）',
+                        'product_code'  : product_value['code'],
+                        'product_name'  : product_value['name'],
+                        'this_month_amt': 0,
+                        'created_at'    : time.time(),
+                        'created_by'    : 'system'
+                    }
+                else:
+                    temp_2_ratio = {
+                        'index'         : '6b',
+                        'type_detail'   : 'group_b_plus_ratio',
+                        'group_name'    : '',
+                        'product_code'  : product_value['code'],
+                        'product_name'  : product_value['name'],
+                        'this_month_amt': 0,
+                        'created_at'    : time.time(),
+                        'created_by'    : 'system'
+                    }
+                insertDataDetail.append(temp_2_ratio)
+                temp_3_plus = {
+                    'index'         : '7b',
+                    'type_detail'   : 'group_c_plus',
+                    'group_name'    : '',
+                    'product_code'  : product_value['code'],
+                    'product_name'  : product_value['name'],
+                    'this_month_acc': 0,
+                    'this_month_amt': 0,
+                    'created_at'    : time.time(),
+                    'created_by'    : 'system'
+                }
+                insertDataDetail.append(temp_3_plus)
+                if product_code == 0:
+                    temp_3_ratio = {
+                        'index'         : '9b',
+                        'type_detail'   : 'group_c_plus_ratio',
+                        'group_name'    : '(Ｇ２以上）',
+                        'product_code'  : product_value['code'],
+                        'product_name'  : product_value['name'],
+                        'this_month_amt': 0,
+                        'created_at'    : time.time(),
+                        'created_by'    : 'system'
+                    }
+                else:
+                    temp_3_ratio = {
+                        'index'         : '9b',
+                        'type_detail'   : 'group_c_plus_ratio',
+                        'group_name'    : '',
+                        'product_code'  : product_value['code'],
+                        'product_name'  : product_value['name'],
+                        'this_month_amt': 0,
+                        'created_at'    : time.time(),
+                        'created_by'    : 'system'
+                    }
                 insertDataDetail.append(temp_3_ratio)
         else:
             # SBV
@@ -869,6 +987,20 @@ try:
         'created_by'    : 'system'
     })
 
+    lastMonthInfoTotal_b_plus = mongodb.getOne(common.getSubUser(subUserType, 'Collection_factors_detail'), WHERE={'created_at': {'$gte': endLastMonthStarttime, '$lte': endLastMonthEndtime}, 'type_detail': 'total_inc_dec_b_plus'})
+
+    insertDataDetail.append({
+        'index'         : '5bc',
+        'type_detail'   : 'total_inc_dec_b_plus',
+        'group_name'    : '増減 (Increase and Decrease)',
+        'product_code'  : '',
+        'product_name'  : '',
+        'this_month_acc': total_g_b_plus_acc - lastMonthInfoTotal_b_plus['this_month_acc'] if lastMonthInfoTotal_b_plus is not None and lastMonthInfoTotal_b_plus['this_month_acc'] is not None else total_g_b_plus_acc,
+        'this_month_amt': total_g_b_plus_amt - lastMonthInfoTotal_b_plus['this_month_amt'] if lastMonthInfoTotal_b_plus is not None and lastMonthInfoTotal_b_plus['this_month_amt'] is not None else total_g_b_plus_amt,
+        'created_at'    : time.time(),
+        'created_by'    : 'system'
+    })
+
     insertDataDetail.append({
         'index'         : '6a',
         'type_detail'   : 'total_group_b_plus_ratio',
@@ -893,16 +1025,16 @@ try:
         'created_by'    : 'system'
     })
 
-    lastMonthInfoTotal = mongodb.getOne(common.getSubUser(subUserType, 'Collection_factors_detail'), WHERE={'created_at': {'$gte': endLastMonthStarttime, '$lte': endLastMonthEndtime}, 'type_detail': 'total_inc_dec'})
+    lastMonthInfoTotal_c_plus = mongodb.getOne(common.getSubUser(subUserType, 'Collection_factors_detail'), WHERE={'created_at': {'$gte': endLastMonthStarttime, '$lte': endLastMonthEndtime}, 'type_detail': 'total_inc_dec_c_plus'})
 
     insertDataDetail.append({
         'index'         : '8a',
-        'type_detail'   : 'total_inc_dec',
+        'type_detail'   : 'total_inc_dec_c_plus',
         'group_name'    : '増減 (Increase and Decrease)',
         'product_code'  : '',
         'product_name'  : '',
-        'this_month_acc': total_g_c_plus_acc - lastMonthInfoTotal['this_month_acc'] if lastMonthInfoTotal is not None and lastMonthInfoTotal['this_month_acc'] is not None else 0,
-        'this_month_amt': total_g_c_plus_amt - lastMonthInfoTotal['this_month_amt'] if lastMonthInfoTotal is not None and lastMonthInfoTotal['this_month_amt'] is not None else 0,
+        'this_month_acc': total_g_c_plus_acc - lastMonthInfoTotal_c_plus['this_month_acc'] if lastMonthInfoTotal_c_plus is not None and lastMonthInfoTotal_c_plus['this_month_acc'] is not None else total_g_c_plus_acc,
+        'this_month_amt': total_g_c_plus_amt - lastMonthInfoTotal_c_plus['this_month_amt'] if lastMonthInfoTotal_c_plus is not None and lastMonthInfoTotal_c_plus['this_month_amt'] is not None else total_g_c_plus_amt,
         'created_at'    : time.time(),
         'created_by'    : 'system'
     })

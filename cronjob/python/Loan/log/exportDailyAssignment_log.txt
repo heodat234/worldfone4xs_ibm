@@ -10,3 +10,30 @@
 17/12/2019, 10:29:10: name 'my_dict' is not defined
 17/12/2019, 10:29:22: End Log
 17/12/2019, 10:31:10: End Log
+21/12/2019, 16:43:21: End Log
+23/12/2019, 17:40:55: End Log
+23/12/2019, 17:43:22: End Log
+24/12/2019, 13:52:50: [Errno 13] Permission denied: '/var/www/html/worldfone4xs_ibm/upload/loan/export/DailyAssignment.xlsx'
+24/12/2019, 13:53:24: [Errno 13] Permission denied: '/var/www/html/worldfone4xs_ibm/upload/loan/export/DailyAssignment.xlsx'
+24/12/2019, 13:54:30: [Errno 13] Permission denied: '/var/www/html/worldfone4xs_ibm/upload/loan/export/DailyAssignment.xlsx'
+24/12/2019, 13:57:49: [Errno 13] Permission denied: '/var/www/html/worldfone4xs_ibm/upload/loan/export/DailyAssignment.xlsx'
+24/12/2019, 15:00:51: 'DataFrame' object has no attribute 'str'
+24/12/2019, 15:02:16: End Log
+24/12/2019, 15:03:54: 'DataFrame' object has no attribute 'str'
+24/12/2019, 15:06:02: End Log
+24/12/2019, 15:07:34: End Log
+24/12/2019, 15:09:33: End Log
+24/12/2019, 15:25:44: End Log
+24/12/2019, 15:26:35: End Log
+24/12/2019, 15:27:47: End Log
+24/12/2019, 15:28:22: End Log
+24/12/2019, 15:33:08: End Log
+24/12/2019, 15:37:54: End Log
+24/12/2019, 15:39:20: Start Import
+24/12/2019, 15:40:24: End Log
+24/12/2019, 15:45:10: Start Import
+24/12/2019, 15:45:10: unknown url type: '/var/www/html/worldfone4xs_ibm/upload/loan/export/DailyAssignment.xlsx'
+24/12/2019, 15:49:00: Start Import
+24/12/2019, 15:50:10: End Log
+24/12/2019, 16:27:48: Start Import
+24/12/2019, 16:27:48: unknown url type: '/var/www/html/worldfone4xs_ibm/upload/loan/export/DailyAssignment.xlsx'

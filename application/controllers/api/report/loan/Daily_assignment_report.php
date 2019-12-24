@@ -46,10 +46,15 @@ Class Daily_assignment_report extends WFF_Controller {
     // {
     //     shell_exec('PYTHONIOENCODING=utf-8 python3.6 /var/www/html/worldfone4xs_ibm/cronjob/python/Loan/exportDailyAssignment.py  > /dev/null &');
     // }
+
     function downloadExcel()
     {
-      // $this->exportExcel();
-        $file_path = UPLOAD_PATH . "/loan/export/DailyAssignment.xlsx";
-        echo json_encode(array("status" => 1, "data" => $file_path));
+        $date = $this->input->post('date');
+
+        $output = exec('PYTHONIOENCODING=utf-8 python3.6 /var/www/html/worldfone4xs_ibm/cronjob/python/Loan/exportDailyAssignment.py ' . $date . "  > /dev/null &");
+        // print_r($output);exit;
+        // sleep(1800);
+        // $file_path = UPLOAD_PATH . "/loan/export/DailyAssignment.xlsx";
+        // echo json_encode(array("status" => 1, "data" => $file_path));
     }
 }

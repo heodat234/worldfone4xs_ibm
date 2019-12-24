@@ -23,3 +23,5 @@
 12/12/2019, 15:53:24: Expecting value: line 1 column 1 (char 0)
 12/12/2019, 15:55:32: Expecting value: line 1 column 1 (char 0)
 12/12/2019, 15:56:24: 'NoneType' object has no attribute 'to_dict'
+24/12/2019, 09:29:04: type object 'datetime.datetime' has no attribute 'datetime'
+24/12/2019, 09:36:57: cannot encode object: datetime.date(2019, 12, 24), of type: <class 'datetime.date'>
