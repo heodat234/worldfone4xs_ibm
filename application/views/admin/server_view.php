@@ -274,7 +274,17 @@
 
 	function checkMongoTop() {
 		$("#mongotop-row").show();
-		$("#loadarea-container").html(`<iframe src="${ENV.reportApi}server/mongotop" id="loadarea" style="width: 100%; border: 0; height: 220px"></iframe>`);
+		if(window.serverArr.length > 1) {
+			let server_name = window.selectedServer ? window.selectedServer : window.serverArr[0],
+				base_url = "http://" + server_name;
+			$("#loadarea-container").html(`<iframe src="${base_url}/public/other/mongo_monitor/top.php" id="loadarea" style="width: 100%; border: 0; height: 220px"></iframe>`);
+	    } else {
+		    $("#loadarea-container").html(`<iframe src="${ENV.baseUrl}/public/other/mongo_monitor/top.php" id="loadarea" style="width: 100%; border: 0; height: 220px"></iframe>`);
+		    intervalScrollMongoTop();
+		}
+	}
+
+	function intervalScrollMongoTop() {
 		window.tailload = setInterval(function() {
 		  var elem = document.getElementById('loadarea');
 		  elem.contentWindow.scrollTo( 0, 999999 );
@@ -310,6 +320,10 @@
 		$container.addClass("hidden");
 	}
 
+	function selectServer(ele) {
+		window.selectedServer = $(ele).text();
+	}
+
 	function getPSAUX() {
 		if($("#psaux-grid").data("kendoGrid")) {
 			$("#psaux-grid").data("kendoGrid").destroy();
@@ -342,7 +356,6 @@
 					total: "total"
 				}
 			},
-			pageable: true,
 			sortable: true,
 			filterable: true,
 			resizable: true,
@@ -544,9 +557,10 @@
 		                }
 		                var serverArrHtml = [];
 		                serverArr.forEach(serverName => {
-		                	serverArrHtml.push(`<span class="label ${(currentServer == serverName) ? 'label-primary animation-pulse' : 'label-default'}">${serverName}</span>`);
+		                	serverArrHtml.push(`<span class="label ${(currentServer == serverName) ? 'label-primary animation-pulse' : 'label-default'}" style="cursor: pointer" onclick="selectServer(this)">${window.selectedServer == serverName ? '<i class="fa fa-check-circle"></i>&nbsp;' : ''}${serverName}</span>`);
 		                })
 		                $('#server-name').html(serverArrHtml.join("&nbsp;"));
+		                window.serverArr = serverArr;
 	            	} catch(err) {
 						console.log(err);
 					}

@@ -27,7 +27,7 @@
                 <ul class="dropdown-menu dropdown-custom dropdown-options" data-bind="source: diallistList" data-template="detail-dropdown-template">
 			    </ul>
                 <button href="#/create" class="btn btn-alt btn-default" data-bind="click: goTo, css: {active: activeArray[2]}">@Create@</button>
-                <button href="#/config" class="btn btn-alt btn-default hidden" data-bind="click: goTo, css: {active: activeArray[3]}">@Config@</button>
+                <button href="#/config" class="btn btn-alt btn-default" data-bind="click: goTo, css: {active: activeArray[3]}">@Config@</button>
             </div>
         </li>
     </ul>
@@ -118,6 +118,13 @@
         router.route("/create", async function() {
             layoutViewModel.set("breadcrumb2", "");
             var HTML = await $.get(`${Config.templateApi}diallist/create`);
+            var kendoView = new kendo.View(HTML, {model: {}});
+            layout.showIn("#bottom-row", kendoView);
+        });
+
+        router.route("/config", async function() {
+            layoutViewModel.set("breadcrumb2", "");
+            var HTML = await $.get(`${Config.templateApi}diallist/config`);
             var kendoView = new kendo.View(HTML, {model: {}});
             layout.showIn("#bottom-row", kendoView);
         });

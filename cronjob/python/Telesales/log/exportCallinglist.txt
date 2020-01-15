@@ -1,0 +1,40 @@
+Traceback (most recent call last):
+  File "/var/www/html/worldfone4xs_ibm/cronjob/python/Telesales/saveTelesaleList.py", line 66, in <module>
+    for header_key, header_value in enumerate(model_title):
+NameError: name 'model_title' is not defined
+Traceback (most recent call last):
+  File "/var/www/html/worldfone4xs_ibm/cronjob/python/Telesales/saveTelesaleList.py", line 127, in <module>
+    mongodb.update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Export'), WHERE={'_id': ObjectId(exportLogId)}, VALUE={'status': 1, 'end': time.time()}),
+NameError: name 'exportLogId' is not defined
+Traceback (most recent call last):
+  File "/var/www/html/worldfone4xs_ibm/cronjob/python/Telesales/update_app_status_callinglist.py", line 46, in <module>
+    pprint(str(callingListInfo['_id']))
+TypeError: 'NoneType' object is not subscriptable
+Traceback (most recent call last):
+  File "/var/www/html/worldfone4xs_ibm/cronjob/python/Telesales/update_app_status_callinglist.py", line 59, in <module>
+    mongodb.batch_update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Appointment'), WHERE={'cmnd': callingListInfo['cmnd']}, VALUE=updateInfo)
+KeyError: 'cmnd'
+Traceback (most recent call last):
+  File "/var/www/html/worldfone4xs_ibm/cronjob/python/Telesales/update_app_status_callinglist.py", line 41, in <module>
+    updateLastCallCallinglist()
+NameError: name 'updateLastCallCallinglist' is not defined
+Traceback (most recent call last):
+  File "/var/www/html/worldfone4xs_ibm/cronjob/python/Telesales/update_app_status_callinglist.py", line 41, in <module>
+    self.updateLastCallCallinglist()
+NameError: name 'self' is not defined
+Traceback (most recent call last):
+  File "/var/www/html/worldfone4xs_ibm/cronjob/python/Telesales/update_app_status_callinglist.py", line 41, in <module>
+    updateLastCallCallinglist()()
+NameError: name 'updateLastCallCallinglist' is not defined
+Traceback (most recent call last):
+  File "/var/www/html/worldfone4xs_ibm/cronjob/python/Telesales/update_app_status_callinglist.py", line 41, in <module>
+    locals()["updateLastCallCallinglist"]()
+KeyError: 'updateLastCallCallinglist'
+Traceback (most recent call last):
+  File "/var/www/html/worldfone4xs_ibm/cronjob/python/Telesales/update_app_status_callinglist.py", line 41, in <module>
+    globals()["updateLastCallCallinglist"]()
+KeyError: 'updateLastCallCallinglist'
+Traceback (most recent call last):
+  File "/var/www/html/worldfone4xs_ibm/cronjob/python/Telesales/update_app_status_callinglist.py", line 41, in <module>
+    updateLastCallCallinglist()
+NameError: name 'updateLastCallCallinglist' is not defined

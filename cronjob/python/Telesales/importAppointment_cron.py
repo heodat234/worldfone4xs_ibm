@@ -133,6 +133,14 @@ try:
                         temp['error_mesg'] = 'Sai kiểu dữ liệu nhập'
                         temp['result'] = 'error'
                         result = False
+                callingListInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Telesalelist'), WHERE={'id_no': temp['cmnd']})
+                if callingListInfo != None:
+                    temp['assign'] = callingListInfo['assign'] if 'assign' in callingListInfo.keys() else ''
+                    temp['assign_name'] = callingListInfo['assign_name'] if 'assign_name' in callingListInfo.keys() else ''
+                    temp['cus_name'] = callingListInfo['name'] if 'name' in callingListInfo.keys() else ''
+                    temp['cus_phone'] = callingListInfo['phone'] if 'phone' in callingListInfo.keys() else ''
+                    temp['cus_note'] = callingListInfo['note'] if 'note' in callingListInfo.keys() else ''
+                    temp['cus_id'] = str(callingListInfo['_id']) if '_id' in callingListInfo.keys() else ''
                 temp['created_by'] = 'system'
                 temp['created_at'] = time.time()
                 temp['import_id'] = str(importLogId)
@@ -152,6 +160,8 @@ try:
                         insertData.append(temp)
                     result = True
                     complete += 1
+
+                mongodb.batch_update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Telesalelist'), WHERE={'id_no': temp['cmnd']}, VALUE={'app_status': temp['status']})
     else:
         with open(importLogInfo['file_path'], 'r', newline='\n', encoding='utf-16') as fin:
             csv_reader = csv.reader(fin, delimiter=';', quotechar='"')
@@ -170,6 +180,14 @@ try:
                                 temp['error_mesg'] = 'Sai kiểu dữ liệu nhập'
                                 temp['result'] = 'error'
                                 result = False
+                    callingListInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Telesalelist'), WHERE={'id_no': temp['cmnd']})
+                    if callingListInfo != None:
+                        temp['assign'] = callingListInfo['assign'] if 'assign' in callingListInfo.keys() else ''
+                        temp['assign_name'] = callingListInfo['assign_name'] if 'assign_name' in callingListInfo.keys() else ''
+                        temp['cus_name'] = callingListInfo['name'] if 'name' in callingListInfo.keys() else ''
+                        temp['cus_phone'] = callingListInfo['phone'] if 'phone' in callingListInfo.keys() else ''
+                        temp['cus_note'] = callingListInfo['note'] if 'note' in callingListInfo.keys() else ''
+                        temp['cus_id'] = str(callingListInfo['_id']) if '_id' in callingListInfo.keys() else ''
                     temp['created_by'] = 'system'
                     temp['created_at'] = time.time()
                     temp['import_id'] = str(importLogId)
@@ -189,6 +207,7 @@ try:
                             insertData.append(temp)
                         result = True
                         complete += 1
+                    mongodb.batch_update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Telesalelist'), WHERE={'id_no': temp['cmnd']}, VALUE={'app_status': temp['status']})
 
     if(len(errorData) > 0):
         mongodbresult.remove_document(MONGO_COLLECTION=common.getSubUser(subUserType, ('Appointment_' + str(year) + str(month) + str(day))))

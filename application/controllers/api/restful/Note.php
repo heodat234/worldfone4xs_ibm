@@ -17,7 +17,15 @@ Class Note extends WFF_Controller {
 	{
 		try {
 			$request = json_decode($this->input->get("q"), TRUE);
-			$response = $this->crud->read($this->collection, $request);
+			$response = $this->crud->read($this->collection, $request, ['foreign_id', "content", "created_at", "created_by", "createdAt", "createdBy"]) ;
+			foreach ($response['data'] as $key => &$value) {
+				if(isset($value['created_at'])){
+					$value["createdAt"] = (int) $value['created_at'];
+				}
+				if(isset($value["created_by"])){
+					$value['createdBy'] = $value['created_by'];
+				}
+			}
 			echo json_encode($response);
 		} catch (Exception $e) {
 			echo json_encode(array("status" => 0, "message" => $e->getMessage()));

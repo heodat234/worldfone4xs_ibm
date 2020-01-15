@@ -1,0 +1,8 @@
+02/01/2020, 13:56:14: Start Import
+02/01/2020, 13:56:14: End Log
+02/01/2020, 14:01:36: Start Import
+02/01/2020, 14:01:36: End Log
+02/01/2020, 14:05:09: Start Import
+02/01/2020, 14:05:09: 'calluuid'
+02/01/2020, 14:45:52: Start Import
+02/01/2020, 14:45:52: '$set' is empty. You must specify a field like so: {$set: {<field>: ...}}

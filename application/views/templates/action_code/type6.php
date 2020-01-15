@@ -31,7 +31,32 @@
 						</div>
 					</div>
 					';
-				} else {
+				} 
+				elseif($fieldDoc["field"] == "reason_nonpayment") {
+					echo '
+					<div class="form-group">
+				        <label class="control-label col-xs-4">@Reason for nonpayment@</label>
+				        <div class="col-xs-8">
+							<input data-role="dropdownlist" name="reason_nonpayment"
+				                    data-value-primitive="true"
+				                    data-text-field="text"
+				                    data-value-field="value"                  
+				                    data-bind="value: action.reason_nonpayment, source: nonePaymentOption, events: {change: onChangeReasonNonePayment, dataBound: onChangeReasonNonePayment}" 
+				                    style="width: 100%"/>
+						</div>
+					</div>
+					';
+				} 
+				elseif($fieldDoc["field"] == "reason_nonpayment_note") {
+					echo "
+					<div class='form-group' data-bind='visible: reason_nonpayment_note'>
+						<label class='control-label col-xs-4'>@Reason for nonpayment Note@</label>
+						<div class='col-xs-8'>
+							<input class='k-textbox' style='width: 100%' data-bind='value: action.reason_nonpayment_note'>
+						</div>
+					</div>";
+				} 
+				else {
 					echo "
 					<div class='form-group'>
 						<label class='control-label col-xs-4'>{$fieldDoc['title']}</label>

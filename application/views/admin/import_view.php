@@ -29,17 +29,17 @@ var Config = {
             field: "file_path",
             title: "File path"
         },{
-            field: "file_run",
-            title: "File run"
-        },{
             field: "command",
             title: "Command",
+        },{
+            field: "status",
+            title: "Status",
+            width: 70
         },{
         	field: "modify_time",
             title: "Modify time",
             template: data => gridTimestamp(data.modify_time),
-            width: 140,
-            hidden: true
+            width: 140
         },{
             title: "Action",
             command: ["edit","destroy"],

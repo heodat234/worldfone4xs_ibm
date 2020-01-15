@@ -4,12 +4,17 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Author: dung.huynh@southtelecom.vn
  *
  * Configuration file for worldfone4xs`
+ * EXT: The PHP file extension
+ * FCPATH: Path to the front controller (this file) (root of CI)
+ * SELF: The name of THIS file (index.php)
+ * BASEPATH: Path to the system folder
+ * APPPATH: The path to the "application" folder
  *
  */
 // Default
 // default_preference cua moi user
 $config["default_preference"] = array(
-	"language"		=> "eng",
+	"language"		=> "vie",
 	"ringtone"		=> "",
 	"avatar"		=> "",
 	"sound_effect"	=> FALSE

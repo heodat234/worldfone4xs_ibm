@@ -72,7 +72,7 @@ var Config = {
     <!-- Table Styles Header -->
     <ul class="breadcrumb breadcrumb-top">
         <li>Admin</li>
-        <li>Model</li>
+        <li>Widget</li>
         <li class="pull-right none-breakcrumb">
         </li>
     </ul>

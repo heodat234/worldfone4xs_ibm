@@ -17,30 +17,34 @@ Class Monitor extends WFF_Controller {
 
     function users()
     {
-        $request = json_decode($this->input->get("q"), TRUE);
-        $this->load->library("crud");
-        $this->load->model("agentstatus_model");
-        $this->load->model("agentsign_model");
-        $this->load->model("call_model");
-        $match = ["active" => TRUE];
-        if(!in_array("viewall", $this->data["permission"]["actions"])) {
-            $extension = $this->session->userdata("extension");
-            $this->load->model("group_model");
-            $members = $this->group_model->members_from_lead($extension);
-            $match["extension"] = ['$in' => $members];
+        try {
+            $request = json_decode($this->input->get("q"), TRUE);
+            $this->load->model("agentstatus_model");
+            $this->load->model("agentsign_model");
+            $this->load->model("call_model");
+            $match = ["active" => TRUE];
+            if(!in_array("viewall", $this->data["permission"]["actions"])) {
+                $extension = $this->session->userdata("extension");
+                $this->load->model("group_model");
+                $members = $this->group_model->members_from_lead($extension);
+                $match["extension"] = ['$in' => $members];
+            }
+            $this->load->library("crud");
+            $this->crud->select_db($this->config->item("_mongo_db"));
+            $result = $this->crud->read("{$this->sub}User", $request, ["extension", "agentname", "favorite", "avatar", "fullname"],  $match);
+            $this->crud->select_db();
+            foreach ($result["data"] as $index => &$doc) {
+                $doc["status"] = $this->agentstatus_model->get_today_by_extension($doc["extension"]);
+                $doc["totalCurrentUser"] = $this->agentsign_model->count_current_by_extension($doc["extension"]);
+                $doc["totalCallIn"] = $this->call_model->get_total_today_by_extension($doc["extension"], array("direction" => "inbound"));
+                $doc["totalCallOut"] = $this->call_model->get_total_today_by_extension($doc["extension"], array("direction" => "outbound"));
+                $doc["currentCall"] = $this->call_model->get_current_call($doc["extension"]);
+            }
+            $result["time"] = time();
+            echo json_encode($result);
+        } catch (Exception $e) {
+            echo json_encode(array('status' => 0, "message" => $e->getMessage()));
         }
-        $this->crud->select_db($this->config->item("_mongo_db"));
-        $result = $this->crud->read("{$this->sub}User", $request, ["extension", "agentname", "favorite", "avatar", "fullname"],  $match);
-        $this->crud->select_db();
-        foreach ($result["data"] as $index => &$doc) {
-            $doc["status"] = $this->agentstatus_model->get_today_by_extension($doc["extension"]);
-            $doc["totalCurrentUser"] = $this->agentsign_model->count_current_by_extension($doc["extension"]);
-            $doc["totalCallIn"] = $this->call_model->get_total_today_by_extension($doc["extension"], array("direction" => "inbound"));
-            $doc["totalCallOut"] = $this->call_model->get_total_today_by_extension($doc["extension"], array("direction" => "outbound"));
-            $doc["currentCall"] = $this->call_model->get_current_call($doc["extension"]);
-        }
-        $result["time"] = time();
-        echo json_encode($result);
     }
 
     function callin()
@@ -51,7 +55,8 @@ Class Monitor extends WFF_Controller {
                     '$and' => array(
                             array('direction' => 'inbound'),
                             array('starttime' => array('$gte'=>strtotime("today"))),
-                            array('dnis' => array('$exists'=>true))
+                            array('dnis' => array('$exists'=>true)),
+                            array('disposition' => array('$ne' => 'FAILED'))
                         )
                     )
             ),
@@ -111,7 +116,8 @@ Class Monitor extends WFF_Controller {
                     '$and' => array(
                             array('direction' => 'outbound'),
                             array('starttime' => array('$gte'=>strtotime("today"))),
-                            array('dnis' => array('$exists'=>true))
+                            array('dnis' => array('$exists'=>true)),
+                            array('disposition' => array('$ne' => 'FAILED'))
                         )
                     )
             ),
@@ -334,5 +340,19 @@ Class Monitor extends WFF_Controller {
         $this->load->model("call_model");
         $data = $this->call_model->get_call_in_queue();
         echo json_encode(array("data" => $data, "total" => count($data), "time" => time()));
+    }
+
+    function getGroups()
+    {
+        $request = json_decode($this->input->get("q"), TRUE);
+        // PERMISSION
+        $match = array();
+        if(!in_array("viewall", $this->data["permission"]["actions"])) {
+            $extension = $this->session->userdata("extension");
+            $match["lead"] = $extension;
+        }
+        $this->load->library("crud");
+        $response = $this->crud->read($this->sub . "Group", $request, [], $match);
+        echo json_encode($response);
     }
 }

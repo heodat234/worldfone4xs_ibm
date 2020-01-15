@@ -14,7 +14,6 @@ class Authentication {
     private $time_cache = 60;
     private $auth_redirect = TRUE;
     private $config_collection = "ConfigType";
-    private $use_model = TRUE;
     private $external_path = "externalcrm/";
 
     function __construct() {
@@ -25,16 +24,16 @@ class Authentication {
     }
 
     function authenticate_pbx($username, $password) {
-        if( !$username ) throw new Exception("Username empty");
-        $this->WFF->load->library("mongo_db");
-        // Load db private
-        $_db = $this->WFF->config->item("_mongo_db");
-        $this->WFF->mongo_db->switch_db($_db);
-        $config = $this->WFF->mongo_db->where(array("deleted" => array('$ne' => true)))
-        ->getOne($this->config_collection);
-        // Reset
-        $this->WFF->mongo_db->switch_db();
         try {
+            if( !$username ) throw new Exception("Username empty");
+            $this->WFF->load->library("mongo_db");
+            // Load db private
+            $_db = $this->WFF->config->item("_mongo_db");
+            $this->WFF->mongo_db->switch_db($_db);
+            $config = $this->WFF->mongo_db->where(array("deleted" => array('$ne' => true)))
+            ->getOne($this->config_collection);
+            // Reset
+            $this->WFF->mongo_db->switch_db();
         	if(!$config) throw new Exception("Not config");
         	//call webservice login
         	$secret = $config['secret_key'];
@@ -124,32 +123,11 @@ class Authentication {
         $this->WFF->load->driver('cache', array('adapter' => 'memcached', 'backup' => 'file'));
         $this->WFF->config->load('env');
         $env = $this->WFF->config->item('v1');
-        //$this->WFF->cache->delete($my_session_id . "_permissions"); // Use for Erase all permission cache
+        //$this->WFF->cache->delete($my_session_id . "_permissions"); // Use for Erase permission cache
         if (!$permissions = $this->WFF->cache->get($my_session_id . "_permissions")) {
-            if(!$this->use_model) {
-                $query = http_build_query(array("issysadmin" => $issysadmin, "type" => $type));
-                $vApiLocal = str_replace(base_url(), "http://127.0.0.1/", $env["vApi"]);
-                $ch = curl_init("{$vApiLocal}permission/access/{$extension}?{$query}");
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                $result = curl_exec($ch);
-                $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-                curl_close($ch);
-
-                switch ($httpcode) {
-                    case 200:
-                        $permissions = json_decode($result, TRUE);
-                        $this->WFF->cache->save($my_session_id . "_permissions", $permissions, $this->time_cache);
-                        break;
-                    
-                    default:
-                        exit("Can't connect Data Server");
-                        break;
-                }
-            } else {
-                $this->WFF->load->model("permission_model");
-                $permissions = $this->WFF->permission_model->access();
-                $this->WFF->cache->save($my_session_id . "_permissions", $permissions, $this->time_cache);
-            }
+            $this->WFF->load->model("permission_model");
+            $permissions = $this->WFF->permission_model->access();
+            $this->WFF->cache->save($my_session_id . "_permissions", $permissions, $this->time_cache);
         }
 
         //pre($permissions);
@@ -215,15 +193,20 @@ class Authentication {
             if(!$check_flag && !$issysadmin && $this->auth_redirect) {
                 $this->WFF->load->library("mongo_private");
                 // Load db private, write log unaccess
-                $this->WFF->mongo_private->insert("Unaccess", 
-                    array(
-                        "uri"           => $uri, 
-                        "extension"     => $extension, 
-                        "permissions"   => $permissions,
-                        "my_session_id" => $my_session_id,
-                        "time"          => (new DateTime())->format('Y-m-d H:i:s')
-                    )
+                $unaccess_doc = array(
+                    "from"          => isset($_SERVER['HTTP_CURRENTURI']) ? $_SERVER['HTTP_CURRENTURI'] : null,
+                    "uri"           => $uri, 
+                    "extension"     => $extension, 
+                    "permissions"   => $permissions,
+                    "my_session_id" => $my_session_id,
+                    "time"          => (new DateTime())->format('Y-m-d H:i:s')
                 );
+                $this->WFF->mongo_private->insert("Unaccess", $unaccess_doc);
+                // Auto add api to uri
+                if( isset($unaccess_doc['from']) && $this->WFF->config->item("auto_add_api") ) {
+                    $this->WFF->load->model("permission_model");
+                    $this->WFF->permission_model->add_api_to_navigator($unaccess_doc['from'], $unaccess_doc['uri']);
+                }
                 // Redirect 403
                 redirect(base_url("page/error/403"));
             }
@@ -267,30 +250,9 @@ class Authentication {
         $lang           = $this->WFF->session->userdata("language");
 
         if (!$nav = $this->WFF->cache->get($my_session_id . "_nav")) {
-            if(!$this->use_model) {
-                $query = http_build_query(array("issysadmin" => $issysadmin, "type" => $type, "lang" => $lang));
-                $vApiLocal = str_replace(base_url(), "http://127.0.0.1/", $env["vApi"]);
-                $ch = curl_init("{$vApiLocal}permission/nav/{$extension}?{$query}");
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                $result = curl_exec($ch);
-                $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-                curl_close($ch);
-
-                switch ($httpcode) {
-                    case 200:
-                        $nav = json_decode($result, TRUE);
-                        $this->WFF->cache->save($my_session_id . "_nav", $nav, $this->time_cache);
-                        break;
-                    
-                    default:
-                        exit("Can't connect Data Server");
-                        break;
-                }
-            } else {
-                $this->WFF->load->model("permission_model");
-                $nav = $this->WFF->permission_model->nav();
-                $this->WFF->cache->save($my_session_id . "_nav", $nav, $this->time_cache);
-            }
+            $this->WFF->load->model("permission_model");
+            $nav = $this->WFF->permission_model->nav();
+            $this->WFF->cache->save($my_session_id . "_nav", $nav, $this->time_cache);
         }
         return $nav;
     }

@@ -1,12 +1,100 @@
 <?php $id = $this->input->get("id") ?>
+<div class="col-sm-12 statistic-view">
+    <div class="row">
+        <div class="col-sm-3" style="margin-top: 10px">
+            <div class="alert alert-success" style="cursor: pointer; margin-bottom: 0px;">
+                <h4>@Total@</h4>
+                <a class="pull-left" data-bind="click: toggleAutoRefresh"><i class="fa fa-refresh" data-bind="css: {fa-spin: autoRefresh}"></i>&nbsp;
+                    <i data-bind="visible: autoRefresh">@Auto refresh@ 10s</i>
+                    <i data-bind="invisible: autoRefresh">@Manual refresh@</i>
+                </a>
+                <p class="text-right">
+                    <span data-bind="text: diallist.total"></span>
+                </p>
+            </div>
+        </div>
+        <div class="col-sm-3" style="margin-top: 10px">
+            <div class="alert alert-info" style="cursor: pointer; margin-bottom: 0px;">
+                <h4>@Group name@</h4>
+                <p class="text-right">
+                    <span data-bind="text: diallist.group_name"></span>
+                </p>
+            </div>
+        </div>
+        <div class="col-sm-3" style="margin-top: 10px">
+            <div class="alert alert-success" style="cursor: pointer; margin-bottom: 0px;">
+                <h4>@Campaign target@</h4>
+                <div class="pull-left">@Called@: <span data-bind="html: diallist.called"></span></div>
+                <p class="text-right"><span data-bind="text: diallist.target"></span>%</p>
+            </div>
+        </div>
+        <div class="col-sm-3" style="margin-top: 10px" data-bind="visible: diallist.is_auto">
+            <div class="alert alert-info" style="height: 80px; cursor: pointer; margin-bottom: 0px;">
+                <h4>
+                    <i class="fa fa-pause" aria-hidden="true" data-bind="invisible: diallist.runStatus"></i>
+                    <i class="fa fa-cog fa-spin" aria-hidden="true" data-bind="visible: diallist.runStatus"></i>
+                    @Status@
+                </h4>
+                <div class="pull-left">Queue: <span data-bind="html: diallist.queuesHTML"></span></div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-4">
+            <span>@Total OutBal@ @of@ @you@: <b id="total-outstanding-balance" class="text-danger"></b> VND</span>
+        </div>
+        <div class="col-sm-4">
+            <button class="k-button btn-primary" data-bind="click: exportExcel" style="padding: 0 4px; font-size: 12px"><i class="fa fa-file-excel-o"></i>&nbsp;@Export@ excel</button>
+        </div>
+        <div class="col-sm-4" id="do-no-call-filter">
+            <label style="line-height: 1.5">
+                <input class="custom-checkbox" type="checkbox" data-bind="events: {change: filterOnlyCall}">
+                <span></span>
+                <span>@Only@ @case@ @need@ @calling@</span>
+            </label>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            @Members@: <span data-template="member-template" data-bind="source: diallist.queueMembers"></span>
+        </div>
+    </div>
+    <div class="row" style="padding-bottom: 10px">
+        <div class="col-sm-12" data-template="calling-phone" data-bind="source: dialInProcessDataSource"></div>
+    </div>
+</div>
 <div class="col-sm-12" style="overflow-y: auto; padding: 0">
     <div id="grid-<?= $id ?>"></div>
 </div>
 <div id="detail-action-menu" class="action-menu">
     <ul>
         <a href="javascript:void(0)" data-type="detail" onclick="openForm({title: '@View@ @case@', width: 900}); viewForm(this)"><li><i class="fa fa-television text-info"></i><span>@View@</span></li></a>
+        <li class="devide"></li>
+        <a href="javascript:void(0)" data-type="detail" onclick="viewPopup(this)"><li><i class="fa fa-newspaper-o text-danger"></i><span>@View@ popup</span></li></a>
     </ul>
 </div>
+<script id="member-template" type="text/x-kendo-template">
+    <div class="member-element" style="min-width"><span style="background-image: url('/api/v1/avatar/agent/#: data.extension #')"></span><b class="# switch (data.statuscode) { 
+                    case 1: # 
+                        text-success
+                    # break;
+                    case 2: #
+                        text-info
+                    # break;
+                    case 3: # 
+                        text-danger
+                    # break;
+                    case 4: # 
+                        text-warning
+                    # break;
+                    default: #
+                        text-muted
+                    # break; 
+                } #">#: data.extension || '' # (#: data.agentname || '' #)</b> <i class=""></i></div>
+</script>
+<script id="calling-phone" type="text/x-kendo-template">
+    <span class="label label-danger animation-pulse"><b data-bind="text: phone"></b> - <i data-bind="text: timeSince, attr: {data-date-time: createdAt}" class="time-interval"></i></span>
+</script>
 <script>
 function gridCallResult(data) {
     var htmlArr = [];
@@ -34,7 +122,7 @@ var Config = {
     columns: [{
             field: "index",
             title: "#",
-            width: 50,
+            width: 40,
             locked: true
         },{
             field: "phone",
@@ -51,13 +139,13 @@ var Config = {
         },{
             field: "action_code",
             title: "@Call code@",
-            width: 110,
+            width: 80,
             locked: true
         },{
             field: "callResult",
             title: "@Calls@",
             template: diallistDetail => gridCallResult(diallistDetail.callResult),
-            width: 120,
+            width: 110,
             locked: true
         },{
             // Use uid to fix bug data-uid of row undefined
@@ -69,6 +157,16 @@ var Config = {
 }; 
 
 var detailTable = function() {
+    var page = null;
+    var sort = [{field: "priority", dir: "asc"}, {field: "index", dir: "asc"}];
+    var pageStorage = Number(sessionStorage.getItem("page_" + ENV.currentUri + location.hash));
+    if(pageStorage) {
+        page = pageStorage;
+    }
+    var sortStorage = JSON.parse(sessionStorage.getItem("sort_" + ENV.currentUri + location.hash));
+    if(sortStorage) {
+        sort = sortStorage;
+    }
     return {
         dataSource: {},
         grid: {},
@@ -80,7 +178,8 @@ var detailTable = function() {
                 serverSorting: true,
                 serverGrouping: false,
                 filter: {field: "diallist_id", operator: "eq", value: Config.id},
-                sort: [{field: "priority", dir: "asc"}, {field: "index", dir: "asc"}],
+                sort: sort,
+                page: page,
                 pageSize: 10,
                 batch: false,
                 schema: {
@@ -93,6 +192,8 @@ var detailTable = function() {
                 transport: {
                     read: {
                         url: Config.crudApi + Config.collection,
+                        data: {diallist_id: Config.id},
+                        global: false
                     },
                     update: {
                         url: function(data) {
@@ -118,25 +219,78 @@ var detailTable = function() {
                 error: errorDataSource
             });
 
-            var diallistDetailModel = this.diallist = await $.get(`${ENV.restApi}model`, {q: JSON.stringify({filter: {
+            var this_diallist = await $.get(`${ENV.restApi}diallist/${Config.id}`);
+            var sub_type = "1";
+            if(this_diallist['team'] != undefined){
+                if(this_diallist['team'] == 'CARD'){
+                    sub_type = "2";
+                }
+                if(this_diallist['team'] != 'SIBS') {
+                    $("#do-no-call-filter").remove();
+                }
+            }
+            var diallistDetailModel = this.diallist = await $.get(`${ENV.restApi}model`, {q: JSON.stringify({
+                filter: {
                     logic: "and",
                     filters: [
-                        {field: "collection", operator: "eq", value: ENV.type + "_Diallist_detail"},
-                        {field: "sub_type", operator: "isnotempty", value: ""}
+                    {field: "collection", operator: "eq", value: ENV.type + "_Diallist_detail"},
+                    {field: "sub_type", operator: "isnotempty", value: ""},
+                    {field: "sub_type", operator: "isnotnull", value: ""},
+                    {field: "sub_type", operator: "eq", value: sub_type},
                     ]
-                }})});
+                },
+                sort: [{field: "index", dir: "asc"}]
+            })});
 
             diallistDetailColumns = diallistDetailModel.data;
 
             diallistDetailColumns.map((col, idx) => {
-                col.width = 150;
-                col.template = data => gridLongText(data[col.field], 20);
+                if(col.field == 'assign'){
+                    col.template = data => convertExtensionToAgentname[data[col.field]];
+                }else{
+                   switch(col.type) {
+                    case "array": case "arrayPhone":
+                    col.template = data => gridArray(data[col.field]);
+                    break;
+                    case "timestamp":
+                    col.template = data => gridTimestamp(data[col.field]);
+                    break;
+                    case "currency":
+                    col.template = data => gridCurrency(data[col.field]);
+                    break;
+                    case "int": case "double":
+                    col.template = data => gridInterger(data[col.field]);
+                    break;
+                    default:
+                    col.template = data => gridLongText(data[col.field], 25);
+                    break;
+                }
+
+                }
+                if(idx == 0)
+                    col.width = 120;
+                else
+                    col.width = 100;
+
             });
 
             this.columns = this.columns.concat(diallistDetailColumns);
 
             var grid = this.grid = $(`#grid-${Config.id}`).kendoGrid({
                 dataSource: dataSource,
+                excel: {allPages: true, fileName: this_diallist.name + "_assign_" + ENV.extension + ".xlsx"},
+                excelExport: function(e) {
+                  var sheet = e.workbook.sheets[0];
+
+                  for (var rowIndex = 1; rowIndex < sheet.rows.length; rowIndex++) {
+                    var row = sheet.rows[rowIndex];
+                    for (var cellIndex = 0; cellIndex < row.cells.length; cellIndex ++) {
+                        if(row.cells[cellIndex].value instanceof Date) {
+                            row.cells[cellIndex].format = "dd-MM-yy hh:mm:ss"
+                        }
+                    }
+                  }
+                },
                 resizable: true,
                 pageable: {
                     refresh: true,
@@ -148,7 +302,13 @@ var detailTable = function() {
                 height: '80vh',
                 columns: this.columns,
                 filterable: KENDO.filterable,
-                editable: false
+                editable: false,
+                page: function(e) {
+                    sessionStorage.setItem("page_" + ENV.currentUri + location.hash, e.page);
+                },
+                sort: function(e) {
+                    sessionStorage.setItem("sort_" + ENV.currentUri + location.hash, JSON.stringify(e.sort));
+                }
             }).data("kendoGrid");
 
             grid.selectedKeyNames = function() {
@@ -231,7 +391,100 @@ async function viewForm(ele) {
     kendoView.render($("#right-form"));
 }
 
+function viewPopup(ele) {
+    var dataItem = detailTable.dataSource.getByUid($(ele).data("uid"));
+    startPopup({dialid:dataItem.id,customernumber:dataItem.phone,dialtype:"manual",direction:"view",starttime:Date.now()/1000});
+}
+
 detailTable.init();
+updateStatistic();
+
+$.get(ENV.vApi + "diallist/getTotalData/" + Config.id + "?extension=" + ENV.extension, function(res) {
+    $("#total-outstanding-balance").text(gridCurrency(res.totalOutBal));
+})
+
+async function updateStatistic() {
+    var diallist = await $.get({
+            url: ENV.vApi + "diallist/getStatistic/" + Config.id,
+            global: false
+        });
+        diallist.statusText = diallist.status ? "@Running@" : "@Stop@";
+        diallist.is_auto = Boolean(diallist.mode == "auto");
+        diallist.queueMembers = await $.get({
+            url: ENV.vApi + "group/getMembersOfGroupId/" + diallist.group_id,
+            global: false
+        });
+        if(diallist.is_auto) {
+            diallist.queues = await $.get({
+                url: ENV.vApi + "group/getQueuesLinkToGroupId/" + diallist.group_id,
+                global: false
+            });
+            diallist.queuesHTML = gridArray(diallist.queues);
+        }
+    var statisticObservable = window.statisticObservable = kendo.observable({
+        diallist: diallist,
+        dialInProcessDataSource: diallist.is_auto && (window.statisticObservable ? window.statisticObservable.autoRefresh : false) ? new kendo.data.DataSource({
+            serverFiltering: true,
+            serverSorting: true,
+            filter: {field: "diallistId", operator: "eq", value: Config.id},
+            sort: [{field: "createdAt", dir: "asc"}],
+            transport: {
+                read: {
+                    url: ENV.restApi + "dial_in_process",
+                    global: false
+                },
+                parameterMap: parameterMap
+            },
+            schema: {
+                data: "data",
+                total: "total",
+                parse: function(res) {
+                    res.data.map(doc => {
+                        doc.timeSince = time_since( new Date(doc.createdAt) );
+                    })
+                    return res;
+                }
+            }
+        }) : [],
+        autoRefresh: window.statisticObservable ? window.statisticObservable.autoRefresh : false,
+        toggleAutoRefresh: function(e) {
+            clearTimeout(window.timeoutAutoRefresh);
+            let autoRefresh = this.get("autoRefresh");
+            this.set("autoRefresh", !autoRefresh);
+            if(!autoRefresh) updateStatistic();
+        },
+        filterOnlyCall: function(e) {
+            let filter = {};
+            if(e.currentTarget.checked) {
+                filter = {field:"Donotcall",operator:"eq",value:"N"};
+            }
+            detailTable.dataSource.filter(filter);
+        },
+        exportExcel: function(e) {
+            detailTable.grid.saveAsExcel();
+        },
+    });
+    kendo.bind($(".statistic-view"), statisticObservable);
+    window.timeoutAutoRefresh = setTimeout(() => {
+        if(window.statisticObservable.autoRefresh) {
+            updateStatistic();
+            detailTable.dataSource.read();
+        }
+    }, 10000);
+}
+
+if(typeof window.intervalCurrentCallInQueue == "undefined") {
+    window.intervalCurrentCallInQueue = setInterval(() => {
+        var $select = $(".time-interval[data-date-time]");
+        if($select.length) {
+            for (var i = 0; i < $select.length; i++) {
+                var dateTime = $select[i].dataset.dateTime,
+                    timeText = time_since( new Date(dateTime) );
+                $select[i].innerText = timeText;
+            }
+        } 
+    }, 1000);
+}
 
 </script>
 

@@ -63,6 +63,11 @@ var Config = {
             title: "@Name@",
             width: 240
         },{
+            field: "default",
+            title: "@Default@",
+            template: data => gridBoolean(data.default),
+            width: 80
+        },{
             field: "description",
             title: "@Description@",
         },{

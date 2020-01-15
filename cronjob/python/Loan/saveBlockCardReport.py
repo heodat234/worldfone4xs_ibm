@@ -44,7 +44,7 @@ try:
    now         = datetime.now()
 
    today = date.today()
-   # today = datetime.strptime('13/12/2019', "%d/%m/%Y").date()
+   # today = datetime.strptime('04/01/2020', "%d/%m/%Y").date()
 
    day = today.day
    month = today.month
@@ -58,26 +58,40 @@ try:
    startMonth = int(time.mktime(time.strptime(str('01/' + str(month) + '/' + str(year) + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
    endMonth = int(time.mktime(time.strptime(str(str(lastDayOfMonth) + '/' + str(month) + '/' + str(year) + " 23:59:59"), "%d/%m/%Y %H:%M:%S")))
 
-   holidayOfMonth = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_off_sys'))
-   listHoliday = map(lambda offDateRow: {offDateRow['off_date']}, holidayOfMonth)
-
-   if todayTimeStamp in listHoliday:
+   holidayOfMonth = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_off_sys'), WHERE={'off_date': todayTimeStamp})
+   if holidayOfMonth != None:
       sys.exit()
+
+   aggregate_blockcard = [
+      {
+          "$group":
+          {
+              "_id": 'null',
+              "acc_blook_card": {'$push': '$account_number'},
+          }
+      }
+   ]
+   blook_acc = mongodb.aggregate_pipeline(MONGO_COLLECTION=collection,aggregate_pipeline=aggregate_blockcard)
+
+   blockCard_arr = []
+   for row in blook_acc:
+      blockCard_arr = row['acc_blook_card']
+
 
    # Account
    aggregate_acc = [
       {
            "$lookup":
            {
-               "from": group_collection,
+               "from": common.getSubUser(subUserType, 'SBV_Stored'),
                "localField": "account_number",
-               "foreignField": "account_number",
+               "foreignField": "contract_no",
                "as": "detail"
            }
       },{
           "$match":
           {
-              "detail.group_number": '02',
+              "detail.kydue": '02',
           }
       },{
           "$group":
@@ -93,7 +107,8 @@ try:
    for row in data_acc:
       account_number_arr = row['acc_arr']
 
-   accountInfo = mongodb.get(MONGO_COLLECTION=account_collection,WHERE={'account_number': {'$in' : account_number_arr}})
+
+   accountInfo = mongodb.get(MONGO_COLLECTION=account_collection,WHERE={'account_number': {'$in' : account_number_arr, '$nin': blockCard_arr}})
    if accountInfo != None:
       i = 1
       for acc_row in accountInfo:
@@ -106,7 +121,7 @@ try:
             'sibs'            : '',
             'group'           : '',
             'createdBy'       : 'system',
-            'createdAt'       : time.time()
+            'createdAt'       : todayTimeStamp
          }
          groupInfo = mongodb.getOne(MONGO_COLLECTION=group_collection,WHERE={'account_number': acc_row['account_number']})
          if groupInfo  != None:
@@ -143,6 +158,7 @@ try:
       },{
           "$match":
           {
+              "account_number" : {'$nin' : blockCard_arr},
               "detailSBV.license_no": {'$exists' : 'true'},
           }
       },{
@@ -172,7 +188,7 @@ try:
             'sibs'            : group,
             'group'           : '',
             'createdBy'       : 'system',
-            'createdAt'       : time.time()
+            'createdAt'       : todayTimeStamp
          }
 
          insertData.append(temp)

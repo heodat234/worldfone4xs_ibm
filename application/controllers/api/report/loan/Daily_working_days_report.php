@@ -24,13 +24,12 @@ Class Daily_working_days_report extends WFF_Controller {
         
     }
 
-    function index()
-    {
+    function read() {
         try {
             $request = json_decode($this->input->get("q"), TRUE);
-            $date = date('d-m-Y',strtotime("-1 days"));
-            
-            $match = array('createdAt' => array('$gte' => strtotime($date)));
+            $date = date('d-m-Y',strtotime("-1 day"));
+            $match = array();
+            // $match = array('updated_at' => array('$gte' => strtotime($date)));
             $response = $this->crud->read($this->collection, $request,array(),$match);
             echo json_encode($response);
 
@@ -47,499 +46,24 @@ Class Daily_working_days_report extends WFF_Controller {
         print_r($groupProducts);
     }
 
-    function exportExcel() {
-        $request = json_decode($this->input->get("q"), TRUE);
-        $request = array();
-        $data = $this->crud->where($request)->order_by(array('debt_group' => 'asc', 'due_date_code' => 'asc', 'due_date' => 'asc', 'product' => 'desc', 'team' => 'asc'))->get($this->collection);
+    function exportExcel($due) {
+        ini_set("display_errors", 1);
+        ini_set("display_startup_errors", 1);
+        error_reporting(E_ALL);
+        // print_r($this->input->get("q"));
+        // $request = json_decode($this->input->get("q"), TRUE);
+        
+        // $request = array();
+        $date = date('d-m-Y',strtotime("-1 day"));
+        $match = array('due' => $due);
+        // $match = array_merge($match, $request);
+        // print_r($match);
+        // exit();
+        // $match = array('updated_at' => array('$gte' => strtotime($date)));
+        $data = $this->crud->where($match)->order_by(array('debt_group' => 'asc', 'due_date_code' => 'asc', 'due_date' => 'asc', 'product' => 'desc', 'team' => 'asc'))->get($this->collection);
+        // print_r($data);
         $product = $this->crud->order_by(array('code' => 'asc'))->get(set_sub_collection('Product'));
         $groupProduct = $this->mongo_private->where(array('tags' => array('group', 'debt', 'product')))->getOne(set_sub_collection("Jsondata"));
-
-        $temp_1 = [
-            'group'     => 'A GROUP',
-            'month'     => 'Aug-18',
-            'due'       => '12th',
-            'product'   => 'SIBS',
-            'due_date'  => '7/12/2018',
-            'team'     => 'Team 1 (SIBS)',
-            'start_acc' => 0,
-            'start_amt' => 0,
-            'tar_acc'   => 0,
-            'tar_amt'   => 0,
-            'day'       => 'No. of Overdue accounts',
-            'index_1'   => 0,
-            'index_2'   => 0,
-            'index_3'   => 0,
-            'index_4'   => 0,
-            'index_5'   => 0,
-            'index_6'   => 0,
-            'index_7'   => 0,
-            'index_8'   => 0,
-            'index_9'   => 0,
-            'index_10'   => 0,
-            'index_11'   => 0,
-            'index_12'   => 0,
-            'index_13'   => 0,
-            'index_14'   => 0,
-            'index_15'   => 0,
-            'index_16'   => 0,
-            'index_17'   => 0,
-            'index_18'   => 0,
-            'index_19'   => 0,
-            'index_20'   => 0,
-            'index_21'   => 0,
-            'index_22'   => 0,
-            'index_23'   => 0,
-            'final_num'  => 0,
-        ];
-        $temp_2 = [
-            'group'     => 'A GROUP',
-            'month'     => 'Aug-18',
-            'due'       => '12th',
-            'product'   => 'SIBS',
-            'due_date'  => '7/12/2018',
-            'team'     => 'Team 2 (SIBS)',
-            'start_acc' => 0,
-            'start_amt' => 0,
-            'tar_acc'   => 0,
-            'tar_amt'   => 0,
-            'day'       => 'No. of Overdue accounts',
-            'index_1'   => 0,
-            'index_2'   => 0,
-            'index_3'   => 0,
-            'index_4'   => 0,
-            'index_5'   => 0,
-            'index_6'   => 0,
-            'index_7'   => 0,
-            'index_8'   => 0,
-            'index_9'   => 0,
-            'index_10'   => 0,
-            'index_11'   => 0,
-            'index_12'   => 0,
-            'index_13'   => 0,
-            'index_14'   => 0,
-            'index_15'   => 0,
-            'index_16'   => 0,
-            'index_17'   => 0,
-            'index_18'   => 0,
-            'index_19'   => 0,
-            'index_20'   => 0,
-            'index_21'   => 0,
-            'index_22'   => 0,
-            'index_23'   => 0,
-            'final_num'  => 0,
-        ];
-        $temp_3 = [
-            'group'     => 'A GROUP',
-            'month'     => 'Aug-18',
-            'due'       => '12th',
-            'product'   => 'SIBS',
-            'due_date'  => '7/12/2018',
-            'team'     => 'TOTAL',
-            'start_acc' => 0,
-            'start_amt' => 0,
-            'tar_acc'   => 0,
-            'tar_amt'   => 0,
-            'day'       => 'No. of Overdue accounts',
-            'index_1'   => 0,
-            'index_2'   => 0,
-            'index_3'   => 0,
-            'index_4'   => 0,
-            'index_5'   => 0,
-            'index_6'   => 0,
-            'index_7'   => 0,
-            'index_8'   => 0,
-            'index_9'   => 0,
-            'index_10'   => 0,
-            'index_11'   => 0,
-            'index_12'   => 0,
-            'index_13'   => 0,
-            'index_14'   => 0,
-            'index_15'   => 0,
-            'index_16'   => 0,
-            'index_17'   => 0,
-            'index_18'   => 0,
-            'index_19'   => 0,
-            'index_20'   => 0,
-            'index_21'   => 0,
-            'index_22'   => 0,
-            'index_23'   => 0,
-            'final_num'  => 0,
-        ];
-        $temp_4 = [
-            'group'     => 'A GROUP',
-            'month'     => 'Aug-18',
-            'due'       => '12th',
-            'product'   => 'SIBS',
-            'due_date'  => '7/12/2018',
-            'team'     => 'Team 2 (SIBS)',
-            'start_acc' => 0,
-            'start_amt' => 0,
-            'tar_acc'   => 0,
-            'tar_amt'   => 0,
-            'day'       => 'No. of Paid accounts end of day',
-            'index_1'   => 0,
-            'index_2'   => 0,
-            'index_3'   => 0,
-            'index_4'   => 0,
-            'index_5'   => 0,
-            'index_6'   => 0,
-            'index_7'   => 0,
-            'index_8'   => 0,
-            'index_9'   => 0,
-            'index_10'   => 0,
-            'index_11'   => 0,
-            'index_12'   => 0,
-            'index_13'   => 0,
-            'index_14'   => 0,
-            'index_15'   => 0,
-            'index_16'   => 0,
-            'index_17'   => 0,
-            'index_18'   => 0,
-            'index_19'   => 0,
-            'index_20'   => 0,
-            'index_21'   => 0,
-            'index_22'   => 0,
-            'index_23'   => 0,
-            'final_num'  => 0,
-        ];
-        $temp_5 = [
-            'group'     => 'A GROUP',
-            'month'     => 'Aug-18',
-            'due'       => '12th',
-            'product'   => 'SIBS',
-            'due_date'  => '7/12/2018',
-            'team'     => 'TOTAL',
-            'start_acc' => 0,
-            'start_amt' => 0,
-            'tar_acc'   => 0,
-            'tar_amt'   => 0,
-            'day'       => 'No. of Paid accounts end of day',
-            'index_1'   => 0,
-            'index_2'   => 0,
-            'index_3'   => 0,
-            'index_4'   => 0,
-            'index_5'   => 0,
-            'index_6'   => 0,
-            'index_7'   => 0,
-            'index_8'   => 0,
-            'index_9'   => 0,
-            'index_10'   => 0,
-            'index_11'   => 0,
-            'index_12'   => 0,
-            'index_13'   => 0,
-            'index_14'   => 0,
-            'index_15'   => 0,
-            'index_16'   => 0,
-            'index_17'   => 0,
-            'index_18'   => 0,
-            'index_19'   => 0,
-            'index_20'   => 0,
-            'index_21'   => 0,
-            'index_22'   => 0,
-            'index_23'   => 0,
-            'final_num'  => 0,
-        ];
-        $temp_6 = [
-            'group'     => 'A GROUP',
-            'month'     => 'Aug-18',
-            'due'       => '12th',
-            'product'   => 'Card',
-            'due_date'  => '7/12/2018',
-            'team'     => 'Team 2 (Card)',
-            'start_acc' => 0,
-            'start_amt' => 0,
-            'tar_acc'   => 0,
-            'tar_amt'   => 0,
-            'day'       => 'No. of Overdue accounts',
-            'index_1'   => 0,
-            'index_2'   => 0,
-            'index_3'   => 0,
-            'index_4'   => 0,
-            'index_5'   => 0,
-            'index_6'   => 0,
-            'index_7'   => 0,
-            'index_8'   => 0,
-            'index_9'   => 0,
-            'index_10'   => 0,
-            'index_11'   => 0,
-            'index_12'   => 0,
-            'index_13'   => 0,
-            'index_14'   => 0,
-            'index_15'   => 0,
-            'index_16'   => 0,
-            'index_17'   => 0,
-            'index_18'   => 0,
-            'index_19'   => 0,
-            'index_20'   => 0,
-            'index_21'   => 0,
-            'index_22'   => 0,
-            'index_23'   => 0,
-            'final_num'  => 0,
-        ];
-        $temp_7 = [
-            'group'     => 'A GROUP',
-            'month'     => 'Aug-18',
-            'due'       => '12th',
-            'product'   => 'Card',
-            'due_date'  => '7/12/2018',
-            'team'     => 'TOTAL',
-            'start_acc' => 0,
-            'start_amt' => 0,
-            'tar_acc'   => 0,
-            'tar_amt'   => 0,
-            'day'       => 'No. of Overdue accounts',
-            'index_1'   => 0,
-            'index_2'   => 0,
-            'index_3'   => 0,
-            'index_4'   => 0,
-            'index_5'   => 0,
-            'index_6'   => 0,
-            'index_7'   => 0,
-            'index_8'   => 0,
-            'index_9'   => 0,
-            'index_10'   => 0,
-            'index_11'   => 0,
-            'index_12'   => 0,
-            'index_13'   => 0,
-            'index_14'   => 0,
-            'index_15'   => 0,
-            'index_16'   => 0,
-            'index_17'   => 0,
-            'index_18'   => 0,
-            'index_19'   => 0,
-            'index_20'   => 0,
-            'index_21'   => 0,
-            'index_22'   => 0,
-            'index_23'   => 0,
-            'final_num'  => 0,
-        ];
-        $temp_8 = [
-            'group'     => 'B GROUP',
-            'month'     => 'Aug-18',
-            'due'       => '12th',
-            'product'   => 'SIBS',
-            'due_date'  => '7/12/2018',
-            'team'     => 'Team 3 (SIBS)',
-            'start_acc' => 0,
-            'start_amt' => 0,
-            'tar_acc'   => 0,
-            'tar_amt'   => 0,
-            'day'       => 'Collected ratio (account)',
-            'index_1'   => 0,
-            'index_2'   => 0,
-            'index_3'   => 0,
-            'index_4'   => 0,
-            'index_5'   => 0,
-            'index_6'   => 0,
-            'index_7'   => 0,
-            'index_8'   => 0,
-            'index_9'   => 0,
-            'index_10'   => 0,
-            'index_11'   => 0,
-            'index_12'   => 0,
-            'index_13'   => 0,
-            'index_14'   => 0,
-            'index_15'   => 0,
-            'index_16'   => 0,
-            'index_17'   => 0,
-            'index_18'   => 0,
-            'index_19'   => 0,
-            'index_20'   => 0,
-            'index_21'   => 0,
-            'index_22'   => 0,
-            'index_23'   => 0,
-            'final_num'  => 0,
-        ];
-        $temp_9 = [
-            'group'     => 'B GROUP',
-            'month'     => 'Aug-18',
-            'due'       => '12th',
-            'product'   => 'SIBS',
-            'due_date'  => '7/12/2018',
-            'team'     => 'TOTAL',
-            'start_acc' => 0,
-            'start_amt' => 0,
-            'tar_acc'   => 0,
-            'tar_amt'   => 0,
-            'day'       => 'Collected ratio (account)',
-            'index_1'   => 0,
-            'index_2'   => 0,
-            'index_3'   => 0,
-            'index_4'   => 0,
-            'index_5'   => 0,
-            'index_6'   => 0,
-            'index_7'   => 0,
-            'index_8'   => 0,
-            'index_9'   => 0,
-            'index_10'   => 0,
-            'index_11'   => 0,
-            'index_12'   => 0,
-            'index_13'   => 0,
-            'index_14'   => 0,
-            'index_15'   => 0,
-            'index_16'   => 0,
-            'index_17'   => 0,
-            'index_18'   => 0,
-            'index_19'   => 0,
-            'index_20'   => 0,
-            'index_21'   => 0,
-            'index_22'   => 0,
-            'index_23'   => 0,
-            'final_num'  => 0,
-        ];
-        $temp_10 = [
-            'group'     => 'B GROUP',
-            'month'     => 'Aug-18',
-            'due'       => '12th',
-            'product'   => 'Card',
-            'due_date'  => '7/12/2018',
-            'team'     => 'Team 1 (Card)',
-            'start_acc' => 0,
-            'start_amt' => 0,
-            'tar_acc'   => 0,
-            'tar_amt'   => 0,
-            'day'       => 'Overdue outstanding balance',
-            'index_1'   => 0,
-            'index_2'   => 0,
-            'index_3'   => 0,
-            'index_4'   => 0,
-            'index_5'   => 0,
-            'index_6'   => 0,
-            'index_7'   => 0,
-            'index_8'   => 0,
-            'index_9'   => 0,
-            'index_10'   => 0,
-            'index_11'   => 0,
-            'index_12'   => 0,
-            'index_13'   => 0,
-            'index_14'   => 0,
-            'index_15'   => 0,
-            'index_16'   => 0,
-            'index_17'   => 0,
-            'index_18'   => 0,
-            'index_19'   => 0,
-            'index_20'   => 0,
-            'index_21'   => 0,
-            'index_22'   => 0,
-            'index_23'   => 0,
-            'final_num'  => 0,
-        ];
-        $temp_11 = [
-            'group'     => 'B GROUP',
-            'month'     => 'Aug-18',
-            'due'       => '12th',
-            'product'   => 'Card',
-            'due_date'  => '7/12/2018',
-            'team'     => 'TOTAL',
-            'start_acc' => 0,
-            'start_amt' => 0,
-            'tar_acc'   => 0,
-            'tar_amt'   => 0,
-            'day'       => 'Overdue outstanding balance',
-            'index_1'   => 0,
-            'index_2'   => 0,
-            'index_3'   => 0,
-            'index_4'   => 0,
-            'index_5'   => 0,
-            'index_6'   => 0,
-            'index_7'   => 0,
-            'index_8'   => 0,
-            'index_9'   => 0,
-            'index_10'   => 0,
-            'index_11'   => 0,
-            'index_12'   => 0,
-            'index_13'   => 0,
-            'index_14'   => 0,
-            'index_15'   => 0,
-            'index_16'   => 0,
-            'index_17'   => 0,
-            'index_18'   => 0,
-            'index_19'   => 0,
-            'index_20'   => 0,
-            'index_21'   => 0,
-            'index_22'   => 0,
-            'index_23'   => 0,
-            'final_num'  => 0,
-        ];
-        $temp_12 = [
-            'group'     => 'B GROUP',
-            'month'     => 'Aug-18',
-            'due'       => '22th',
-            'product'   => 'Card',
-            'due_date'  => '7/22/2018',
-            'team'     => 'Team 2 (Card)',
-            'start_acc' => 1,
-            'start_amt' => 0,
-            'tar_acc'   => 0,
-            'tar_amt'   => 0,
-            'day'       => ' Collected amount (end of day)',
-            'index_1'   => 0,
-            'index_2'   => 0,
-            'index_3'   => 0,
-            'index_4'   => 0,
-            'index_5'   => 0,
-            'index_6'   => 0,
-            'index_7'   => 0,
-            'index_8'   => 0,
-            'index_9'   => 0,
-            'index_10'   => 0,
-            'index_11'   => 0,
-            'index_12'   => 0,
-            'index_13'   => 0,
-            'index_14'   => 0,
-            'index_15'   => 0,
-            'index_16'   => 0,
-            'index_17'   => 0,
-            'index_18'   => 0,
-            'index_19'   => 0,
-            'index_20'   => 0,
-            'index_21'   => 0,
-            'index_22'   => 0,
-            'index_23'   => 0,
-            'final_num'  => 0,
-        ];
-        $temp_13 = [
-            'group'     => 'B GROUP',
-            'month'     => 'Aug-18',
-            'due'       => '22th',
-            'product'   => 'Card',
-            'due_date'  => '7/22/2018',
-            'team'     => 'TOTAL',
-            'start_acc' => 0,
-            'start_amt' => 0,
-            'tar_acc'   => 0,
-            'tar_amt'   => 0,
-            'day'       => ' Collected amount (end of day)',
-            'index_1'   => 0,
-            'index_2'   => 0,
-            'index_3'   => 0,
-            'index_4'   => 0,
-            'index_5'   => 0,
-            'index_6'   => 0,
-            'index_7'   => 0,
-            'index_8'   => 0,
-            'index_9'   => 0,
-            'index_10'   => 0,
-            'index_11'   => 0,
-            'index_12'   => 0,
-            'index_13'   => 0,
-            'index_14'   => 0,
-            'index_15'   => 0,
-            'index_16'   => 0,
-            'index_17'   => 0,
-            'index_18'   => 0,
-            'index_19'   => 0,
-            'index_20'   => 0,
-            'index_21'   => 0,
-            'index_22'   => 0,
-            'index_23'   => 0,
-            'final_num'  => 0,
-        ];
-        // $data = [];
-        // array_push($data, $temp_1,$temp_2,$temp_3,$temp_4,$temp_5,$temp_6,$temp_7, $temp_8, $temp_9,$temp_10,$temp_11,$temp_12,$temp_13);
-        // print_r($data);exit;
-        $this->crud->read($this->collection, $request);
-
         $spreadsheet = new Spreadsheet();
         $spreadsheet->getProperties()
         ->setCreator("South Telecom")
@@ -559,7 +83,7 @@ Class Daily_working_days_report extends WFF_Controller {
         );
 
         $worksheet = $spreadsheet->getActiveSheet();
-
+        
         $worksheet->getParent()->getDefaultStyle()->applyFromArray($style);
         $worksheet->getDefaultColumnDimension()->setWidth(15);
         // $worksheet->setCellValue('A1', 'A GROUP');
@@ -634,19 +158,12 @@ Class Daily_working_days_report extends WFF_Controller {
         $group = $data[0]['group'];
 
         foreach($data as $key => $value) {
-
-            if ($group != $value['group']) {
-                
-            }else{
-                
-            }
-
             if($group != $value['group']) {
                 $worksheet->mergeCells('A' . $start_group . ':A' . ($start_row - 1));
                 $worksheet->setCellValue('A' . $start_group, $group);
                 
                 $worksheet->mergeCells('B' . $start_due_date . ':B' . ($start_row - 1) );
-                $worksheet->setCellValue('B' . $start_due_date, $due);
+                $worksheet->setCellValue('B' . $start_due_date, $value['due']);
                 $worksheet->mergeCells('D' . $start_due_date . ':D' . ($start_row - 1));
                 $worksheet->setCellValue('D' . $start_due_date, $due_date);
                 
@@ -659,8 +176,8 @@ Class Daily_working_days_report extends WFF_Controller {
             }
 
             if($due_date != $value['due_date']) {
-                $worksheet->mergeCells('B' . $start_due_date . ':B' . ($start_row - 1) );
-                $worksheet->setCellValue('B' . $start_due_date, $due);
+                // $worksheet->mergeCells('B' . $start_due_date . ':B' . ($start_row - 1) );
+                $worksheet->setCellValue('B' . $start_due_date, $value['due']);
                 $worksheet->mergeCells('D' . $start_due_date . ':D' . ($start_row - 1));
                 $worksheet->setCellValue('D' . $start_due_date, $due_date);
                 
@@ -691,6 +208,17 @@ Class Daily_working_days_report extends WFF_Controller {
                 $start_row_day = $start_row ;
             }
 
+            if(!empty($value['team_name'])) {
+                if(strpos($value['team_name'], 'G1') !== false || strpos($value['team_name'], 'G3') !== false) {
+                    continue;
+                }
+    
+                if(strpos($value['team_name'], 'G2') !== false) {
+                    $groupName = explode("/G2", $value['team_name']);
+                    $value['team_name'] = $groupName[0];
+                }
+            }
+
             $worksheet->setCellValue('A' . $start_row, $value['month']);
             $worksheet->setCellValue('E' . $start_row, (!empty($value['team_name']) ? $value['team_name'] : 0));
             $worksheet->getStyle('E' . $start_row)->getAlignment()->setHorizontal('left');
@@ -718,13 +246,14 @@ Class Daily_working_days_report extends WFF_Controller {
             $startIndex = 10;
             for ($i=1; $i <=23 ; $i++) { 
                 $startIndex ++;
-                $worksheet->setCellValue($this->stringFromColumnIndex($startIndex) . $start_row, (!empty($value['index_'.$i]) ? $value['index_'.$i] : 0));
-                $worksheet->getStyle($this->stringFromColumnIndex($startIndex) . $start_row)->getNumberFormat()
-                ->setFormatCode('#,##0');
+                $valueByIndex = (!empty($value['index_'.$i])) ? $value['index_'.$i] : '';
+                // print_r($valueByIndex);
+                $worksheet->setCellValue($this->stringFromColumnIndex($startIndex) . $start_row, $valueByIndex);
+                $worksheet->getStyle($this->stringFromColumnIndex($startIndex) . $start_row)->getNumberFormat()->setFormatCode('#,##0');
                 $worksheet->getStyle($this->stringFromColumnIndex($startIndex) . $start_row)->getAlignment()->setHorizontal('right');
             }
-            $worksheet->setCellValue($this->stringFromColumnIndex($startIndex + 1) . $start_row, (!empty($value['final_num']) ? $value['final_num'] : 0));
 
+            $worksheet->setCellValue($this->stringFromColumnIndex($startIndex + 1) . $start_row, (!empty($value['final_num']) ? $value['final_num'] : 0));
 
             if ($value['team_name'] == 'TOTAL') {
                 $worksheet->getStyle('E' . $start_row)->getFill()
@@ -750,17 +279,18 @@ Class Daily_working_days_report extends WFF_Controller {
 
                 
             }
+            
             $start_row += 1;
 
         }
 
         $maxCell = $worksheet->getHighestRowAndColumn();
-        $worksheet->getStyle("A1:AH".$maxCell['row'])->getBorders()
-        ->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+        $worksheet->getStyle("A1:AH".$maxCell['row'])->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
         $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
         $file_path = UPLOAD_PATH . "loan/export/" . 'Daily_working_days.xlsx';
         $writer->save($file_path);
         echo json_encode(array("status" => 1, "data" => $file_path));
+        // print_r('TEST');
     }
 
     function stringFromColumnIndex($columnIndex) {

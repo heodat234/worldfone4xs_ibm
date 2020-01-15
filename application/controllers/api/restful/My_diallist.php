@@ -22,7 +22,7 @@ Class My_diallist extends WFF_Controller {
 		$request = json_decode($this->input->get("q"), TRUE);
 		$extension = $this->session->userdata("extension");
 
-		$response = $this->crud->read($this->collection, $request, [], ["members" => $extension]);
+		$response = $this->crud->read($this->collection, $request, [], ["assigns" => $extension]);
         // Change foreign_key
         $this->load->library("mongo_private");
         $jsondata_collection = set_sub_collection($this->jsondata_collection);

@@ -1,0 +1,97 @@
+09/11/2019, 11:04:15: Start Log
+09/11/2019, 11:04:19: End Log
+09/11/2019, 11:41:19: Start Log
+09/11/2019, 11:41:20: End Log
+09/11/2019, 11:41:41: Start Log
+09/11/2019, 11:41:44: End Log
+09/11/2019, 14:28:02: must be str, not datetime.timedelta
+09/11/2019, 14:28:46: name 'd2' is not defined
+09/11/2019, 14:29:14: End Log
+12/11/2019, 13:53:51: Start Log
+12/11/2019, 13:53:51: End Log
+12/11/2019, 13:56:27: Start Log
+12/11/2019, 13:56:27: End Log
+12/11/2019, 13:58:10: Start Log
+12/11/2019, 13:58:10: End Log
+12/11/2019, 14:22:34: Start Log
+12/11/2019, 14:22:34: name 'collection' is not defined
+12/11/2019, 14:23:24: Start Log
+12/11/2019, 14:23:24: 'overdue_date'
+12/11/2019, 14:27:14: Start Log
+12/11/2019, 14:27:31: End Log
+12/11/2019, 14:32:21: Start Log
+12/11/2019, 14:32:21: string indices must be integers
+12/11/2019, 14:32:58: Start Log
+12/11/2019, 14:32:58: string indices must be integers
+12/11/2019, 14:33:32: Start Log
+12/11/2019, 14:33:32: string indices must be integers
+12/11/2019, 14:34:03: Start Log
+12/11/2019, 14:34:03: string indices must be integers
+12/11/2019, 14:34:27: Start Log
+12/11/2019, 14:34:27: string indices must be integers
+12/11/2019, 14:36:18: Start Log
+12/11/2019, 14:36:18: string indices must be integers
+12/11/2019, 14:36:47: Start Log
+12/11/2019, 14:36:47: string indices must be integers
+12/11/2019, 14:37:23: Start Log
+12/11/2019, 14:37:23: End Log
+12/11/2019, 14:37:52: Start Log
+12/11/2019, 14:37:52: End Log
+12/11/2019, 14:38:29: Start Log
+12/11/2019, 14:38:29: End Log
+12/11/2019, 14:39:40: Start Log
+12/11/2019, 14:39:40: string indices must be integers
+12/11/2019, 14:40:15: Start Log
+12/11/2019, 14:40:15: End Log
+12/11/2019, 14:41:39: Start Log
+12/11/2019, 14:41:39: name 'due_date' is not defined
+12/11/2019, 14:42:20: Start Log
+12/11/2019, 14:42:50: End Log
+12/11/2019, 14:52:08: Start Log
+12/11/2019, 14:52:15: End Log
+12/11/2019, 14:53:04: Start Log
+12/11/2019, 14:53:33: End Log
+12/11/2019, 15:02:57: Start Log
+12/11/2019, 15:03:25: End Log
+12/11/2019, 15:04:02: Start Log
+12/11/2019, 15:04:11: End Log
+12/11/2019, 15:06:41: Start Log
+12/11/2019, 15:06:50: End Log
+12/11/2019, 15:16:23: Start Log
+12/11/2019, 15:16:31: End Log
+12/11/2019, 15:17:23: Start Log
+12/11/2019, 15:17:30: End Log
+12/11/2019, 15:18:48: Start Log
+12/11/2019, 15:18:55: End Log
+12/11/2019, 15:20:20: Start Log
+12/11/2019, 15:20:28: End Log
+13/11/2019, 09:38:19: Start Log
+13/11/2019, 09:38:37: End Log
+23/11/2019, 10:53:37: Start Log
+23/11/2019, 10:53:37: End Log
+23/11/2019, 10:54:38: Start Log
+23/11/2019, 10:54:38: 'account_no'
+23/11/2019, 10:55:41: Start Log
+23/11/2019, 10:55:41: 'account_no'
+23/11/2019, 11:11:59: Start Log
+23/11/2019, 11:11:59: End Log
+23/11/2019, 11:15:04: Start Log
+23/11/2019, 11:15:05: End Log
+23/11/2019, 11:15:49: Start Log
+23/11/2019, 11:15:49: End Log
+23/11/2019, 11:16:36: Start Log
+23/11/2019, 11:16:36: End Log
+23/11/2019, 11:17:40: Start Log
+23/11/2019, 11:17:40: End Log
+23/11/2019, 11:18:14: Start Log
+23/11/2019, 11:18:14: End Log
+23/11/2019, 11:19:09: Start Log
+23/11/2019, 11:19:09: End Log
+23/11/2019, 11:13:15: Start Log
+23/11/2019, 11:25:24: End Log
+23/11/2019, 11:19:37: Start Log
+23/11/2019, 11:31:42: End Log
+28/11/2019, 15:29:06: Start Log
+28/11/2019, 15:29:06: End Log
+28/11/2019, 15:31:36: Start Log
+28/11/2019, 15:31:45: End Log

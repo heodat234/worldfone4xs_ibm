@@ -15,7 +15,7 @@
             <div class="form-group col-sm-3">
                <label class="control-label col-xs-3">@Date@</label>
                <div class="col-xs-8">
-                  <input id="start-date" data-role="datepicker" data-format="dd/MM/yyyy" name="fromDateTime" data-bind="value: fromDateTime, events: {change: startDate}" disabled="">
+                  <input id="start-date" data-role="datepicker" data-format="dd/MM/yyyy" name="fromDateTime" data-bind="value: fromDateTime, events: {change: startDate}"  >
                </div>
             </div>
             <!-- <div class="form-group col-sm-4">
@@ -75,7 +75,7 @@
                   var dataSource = this.dataSource = new kendo.data.DataSource({
                      serverPaging: true,
                      serverFiltering: true,
-                     pageSize: 5,
+                     pageSize: 10,
                      transport: {
                         read: ENV.reportApi + "loan/master_data_report",
                         parameterMap: parameterMap
@@ -328,24 +328,27 @@
             cif:"",
             loanContract: "",
             nationalID: "",
-            fromDate: kendo.toString(fromDate, "dd/MM/yyyy H:mm"),
-            toDate: kendo.toString(toDate, "dd/MM/yyyy H:mm"),
+            fromDate: kendo.toString(fromDate, "dd/MM/yyyy"),
+            toDate: kendo.toString(toDate, "dd/MM/yyyy"),
 
             search: function() {
-               this.set("fromDate", kendo.toString(this.get("fromDateTime"), "dd/MM/yyyy H:mm"));
-               this.set("toDate", kendo.toString(this.get("toDateTime"), "dd/MM/yyyy H:mm"));
+               this.set("fromDate", kendo.toString(this.get("fromDateTime"), "dd/MM/yyyy"));
+               this.set("toDate", kendo.toString(this.get("toDateTime"), "dd/MM/yyyy"));
                this.asyncSearch();
             },
              asyncSearch: async function() {
                var field = "created_at";
-               var fromDateTime = new Date(this.fromDateTime.getTime() - timeZoneOffset).toISOString();
-                var toDateTime = new Date(this.toDateTime.getTime() - timeZoneOffset).toISOString();
+               var fromDateTime = new Date(this.fromDateTime.getTime()).toISOString();
+               var fromDate = (this.fromDateTime.getTime()).toString();
+               // console.log(fromDate.substr(0,10));
+                // var toDateTime = new Date(this.toDateTime.getTime() - timeZoneOffset).toISOString();
                 var cif = this.cif;
                 var loanContract = this.loanContract;
                 var nationalID = this.nationalID;
                 var field_1 = 'CUS_ID';
                 var field_2 = 'account_number';
                 var field_3 = 'LIC_NO';
+                var field_4 = 'createdAt';
 
                 if (cif != '') {
                     filter_1 = {field: field_1, operator: "eq", value: cif};
@@ -362,10 +365,11 @@
                 }else{
                     filter_3 = {field: field_3, operator: "neq", value: nationalID};
                 }
+                filter_4 = {field: field_4, operator: "gte", value: parseInt(fromDate.substr(0,10))};
                 var filter = {
                     logic: "and",
                     filters: [
-                        filter_1,filter_2,filter_3
+                        filter_1,filter_2,filter_3,filter_4
                     ]
                 };
 

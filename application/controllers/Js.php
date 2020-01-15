@@ -35,7 +35,8 @@ Class Js extends CI_Controller {
         $env["short_key_ipphone"] = $this->config->item("short_key_ipphone");
 
         // Preference
-        $env["extension"]       = $this->session->userdata("extension");
+        $extension = $this->session->userdata("extension");
+        $env["extension"]       = $extension;
         $env["ringtone"]        = $this->session->userdata("ringtone");
         $env["avatar"]          = $this->session->userdata("avatar");
         $env["language"]        = $this->session->userdata("language");
@@ -46,6 +47,10 @@ Class Js extends CI_Controller {
             . ($this->session->userdata("test_mode") ? " (TM)" : "");
         $env["sound_effect"]    = $this->session->userdata("sound_effect");
         $env["role_name"]       = $this->session->userdata("role_name");
+
+        // Queues which extension belong to
+        $this->load->model("group_model");
+        $env["queues"] = $this->group_model->queues_of_extension($extension);
 
         $data['ENV'] = json_encode($env);
 

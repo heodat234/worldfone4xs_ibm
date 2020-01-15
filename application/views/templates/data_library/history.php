@@ -83,16 +83,7 @@ var Config = {
             field: "status",
             title: "@Status@",
             locked: true,
-            template: function(dataItem) {
-            	if (dataItem.status == 1) {
-            		return '<h4 style="font-weight: bold">@Success@</h4>';
-            	}else if (dataItem.status == 0) {
-            		return '<h4 style="font-weight: bold">@Fail@</h4>';
-            	}else if(dataItem.status == 2){
-                    return '<div class"col-sm-8"><div class="progress"></div></div><div class="status-upload">@Loading@...</div></div>';
-                }
-
-            }
+            'template': kendo.template($('#status-template').html()),
         }
         // ,{
         //     // Use uid to fix bug data-uid of row undefined
@@ -103,6 +94,17 @@ var Config = {
 };
 </script>
 <!-- <script src="<?= STEL_PATH.'js/tablev2.js' ?>"></script> -->
+
+<script id="status-template" type="text/x-kendo-template">
+    #if(status == 1) {#
+        <h4 style='font-weight: bold'>Success</h4>
+    #} else if(status == 0) {#
+        <h4 style='font-weight: bold'>Fail</h4>
+    #} else if(status == 2) {#
+        <div class='col-sm-8'><div class='progress' data-role='progressbar' data-min='0' data-max='100' data-value='false'></div><div class='status-upload'>Loading...</div></div><div class='col-sm-4 cancel-upload'><a href='javascript:void(0)' onclick='cancelUpload(#= JSON.stringify(id) #)'>Cancel</a></div>
+    #}#
+</script>
+
 <script type="text/javascript">
     var router = new kendo.Router({routeMissing: function(e) { router.navigate("/") }});
 	function re_Upload(ele) {
@@ -328,6 +330,19 @@ var Config = {
         Table.init();
     });
 
+
+    function cancelUpload(id) {
+        $.ajax({
+            url: ENV.vApi + `data_library/update_import_log/${id}`,
+            data: kendo.stringify({'status': 0}),
+            error: errorDataSource,
+            contentType: "application/json; charset=utf-8",
+            type: "PUT",
+            success: function() {
+                $("#grid_1").data("kendoGrid").dataSource.read();
+            }
+        })
+    }
 </script>
 <script>
 

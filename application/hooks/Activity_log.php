@@ -6,7 +6,7 @@ class Activity_log
 	private $uri_string_exceptions = [
 		"undefined","js","public","upload","page","playback","api/v1/avatar",
 		"api/v1/ping","api/v1/widget","template/nav","template/widget", 
-		"api/v1/monitor","api/report/server"
+		"api/v1/monitor","api/report/server","api/v1/group/getImageNameById"
 	];
 
     public function __construct() 
@@ -54,6 +54,9 @@ class Activity_log
 		        	$elapsed_time = (double) $CI->benchmark->elapsed_time("total_execution_time_start", "total_execution_time_end");
 		        	$memory_usage = ($usage = memory_get_usage()) != '' ? $usage : 0;
 
+		        	// Add 07/12/2019
+		        	$permission = isset($CI->data, $CI->data["permission"]) ? $CI->data["permission"] : null;
+
 		        	$data = array(
 			        	"directory"		=> $directory,
 			        	"class"			=> $class,
@@ -66,6 +69,7 @@ class Activity_log
 			        	"input"			=> $input,
 			        	"elapsed_time"	=> $elapsed_time,
 			        	"memory_usage"	=> $memory_usage,
+			        	"permission"	=> $permission,
 			        	"createdAt"		=> $time,
 			        );
 

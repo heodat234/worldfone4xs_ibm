@@ -625,13 +625,9 @@ var List = function() {
                     "text": "@Available@"
                   },
                   {
-                    "value": 0,
-                    "text": "Phone @unvailable@"
-                  },
-                  /*{
                     "value": 3,
-                    "text": "Unvailable"
-                  },*/
+                    "text": "@Unvailable@"
+                  },
                   {
                     "value": 4,
                     "text": "@After call work@"
@@ -639,6 +635,10 @@ var List = function() {
                   {
                     "value": 2,
                     "text": "Phone @oncall@",
+                  },
+                  {
+                    "value": 0,
+                    "text": "Phone @unvailable@"
                   },
                   {
                     "value" : -1,
@@ -700,7 +700,8 @@ var List = function() {
                 groupOption: new kendo.data.DataSource({
                     serverFiltering: true,
                     transport: {
-                        read: `${ENV.restApi}group`
+                        read: `${ENV.restApi}group`,
+                        parameterMap: parameterMap
                     },
                     schema: {
                         data: "data"

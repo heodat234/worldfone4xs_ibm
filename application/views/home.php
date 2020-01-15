@@ -33,7 +33,7 @@
         $("#agentname-home").text(ENV.agentname);
     </script>
     <div class="row options" style="margin-bottom: 10px">
-        <div class="col-sm-4">
+        <div class="col-sm-3">
             <b>@Week@: </b>
             <label class="radio-inline">
                 <input id="currentWeek" name="week" type="radio" value="0" checked="checked" autocomplete="off" />@Current week@
@@ -42,7 +42,7 @@
                 <input id="previousWeek" name="week" type="radio" value="-1" autocomplete="off" />@Previous week@
             </label>
         </div>
-        <div class="col-sm-4">
+        <div class="col-sm-3">
             <b>@Chart type@: </b>
             <label class="radio-inline">
                 <input id="typeColumn" name="seriesType" type="radio" value="column" checked="checked" autocomplete="off" />@Columns@
@@ -54,7 +54,7 @@
                 <input id="typeLine" name="seriesType" type="radio" value="line" autocomplete="off" />@Lines@
             </label>
         </div>
-        <div class="col-sm-4">
+        <div class="col-sm-3">
             <b>@Option@: </b>
             <label class="checkbox-inline">
                 <input id="stack" type="checkbox" autocomplete="off" checked="checked">
@@ -65,12 +65,32 @@
                 @All@
             </label>
         </div>
+        <div class="col-sm-3" style="margin: -4px">
+            <b>@Unit@: </b>
+            <label class="form-group">
+                <input id="call-unit" class="k-textbox" type="number" style="width: 70px" value="10">
+            </label>
+        </div>
     </div>
     <div class="demo-section k-content wide">
         <div id="chart"></div>
     </div>
 </div>
 <script>
+    var countUsers = Object.keys(convertExtensionToAgentname).length;
+
+    var coefficient = 10;
+
+    if(countUsers > 200) {
+        coefficient = 200;
+    } else if(countUsers > 100) {
+        coefficient = 100;
+    } else if(countUsers > 50) {
+        coefficient = 50;
+    } else if(countUsers > 20) {
+        coefficient = 20;
+    }
+
     var series = [{
         field: "outbound",
         categoryField: "date",
@@ -113,7 +133,7 @@
                 labels: {
                     format: "N0"
                 },
-                majorUnit: 5,
+                majorUnit: $("#call-unit").val(),
                 line: {
                     visible: false
                 }
@@ -141,7 +161,8 @@
             type = $("input[name=seriesType]:checked").val(),
             stack = $("#stack").prop("checked"),
             week = Number($("input[name=week]:checked").val()),
-            all = $("#all").prop("checked");
+            all = $("#all").prop("checked"),
+            unit = all ? $("#call-unit").val() * coefficient : $("#call-unit").val();
 
         for (var i = 0, length = series.length; i < length; i++) {
             series[i].stack = stack;
@@ -151,7 +172,7 @@
             chart.setOptions({
                 series: series,
                 valueAxis: {
-                    majorUnit: all ? 50 : 5,
+                    majorUnit: unit,
                 },
                 title: {
                     text: week ? "@Statistic call previous week@ " + (all ? " @all@" : "@of me@") : "@Statistic call current week@ "  + (all ? "@all@" : "@of me@")
@@ -242,36 +263,6 @@
                         title: "@Shift@",
                         name: "Shift",
                         dataSource: dataSourceJsonData(["Scheduler", "shift"])
-                    },
-                    {
-                        field: "ownerId",
-                        title: "@Extension@",
-                        name: "Extension",
-                        multiple: true,
-                        dataSource: {
-                            serverPaging: true,
-                            serverSorting: true,
-                            pageSize : 100,
-                            transport: {
-                                read: {
-                                    url: ENV.vApi + `select/foreign_private/User`,
-                                    data: {field: ["extension", "agentname"], match: null}
-                                },
-                                parameterMap: parameterMap
-                            },
-                            schema: {
-                                data: "data",
-                                parse: res => {
-                                    res.data.map(doc => {
-                                        doc.ownerId = doc.value = doc.extension;
-                                        doc.text = doc.extension + " - " + doc.agentname;
-                                        doc.color = getRandomColor();
-                                    })
-                                    return res;
-                                }
-                            },
-                            error: errorDataSource
-                        }
                     }
                 ]
             });
@@ -284,6 +275,10 @@
 </script>
 
 <script id="event-all-day-template" type="text/x-kendo-template">
+  <div>#: title #</div>
+</script>
+
+<script id="event-all-day-template-old" type="text/x-kendo-template">
   <div># for (var i = 0; i < resources.length; i++) { #
         #if(resources[i].field == "shift"){#
             #: resources[i].value #

@@ -172,24 +172,25 @@
                                     <div class="form-group">
                                         <label class="control-label col-xs-4">Rate <i class="fa fa-info-circle text-info" data-role="tooltip" title="Add on interest / Rate"></i></label>
                                         <div class="col-xs-8">
-                                            <div class="input-group">
-                                                <input data-role="numerictextbox" data-decimals="6" data-format="p4" data-spinners="false" data-round="4" data-factor="100" data-max="1" data-min="0" name="rate" data-bind="value: rate, events: {change: operandChange}" style="width: 100%">
-                                                <div class="input-group-addon">
-                                                    <b>%</b>
-                                                </div>
-                                            </div>
+                                            <input id="rate" data-role="combobox" data-text-field="text" data-value-field="value" data-clear-button="false" name="rate" data-value-primitive="true" data-bind="value: item.rate_text, events: {change: operandChange, dataBound: onDataBoundRate}, source: rateOption" style="width: 100%">
+                                            <!-- <div class="input-group">
+						                        <input data-role="numerictextbox" data-decimals="6" data-format="p4" data-spinners="false" data-round="4" data-factor="100" data-max="1" data-min="0" name="rate" data-bind="value: item.rate, events: {change: operandChange}" style="width: 100%">
+						                        <div class="input-group-addon">
+						                        	<b>%</b>
+						                        </div>
+						                    </div> -->
                                         </div>
                                     </div>
                                     <div class="form-group">
                                         <label class="control-label col-xs-4">Loan amount</label>
                                         <div class="col-xs-8">
-                                            <input data-role="numerictextbox" data-format="n0" name="loan_amount" data-bind="value: loan_amount, events: {change: operandChange}" style="width: 100%">
+                                            <input data-role="numerictextbox" data-format="n0" name="loan_amount" data-bind="value: item.loan_amount, events: {change: operandChange}" style="width: 100%">
                                         </div>
                                     </div>
                                     <div class="form-group">
                                         <label class="control-label col-xs-4">Term</label>
                                         <div class="col-xs-8">
-                                            <input data-role="numerictextbox" data-format="n0" name="term" data-bind="value: term, events: {change: operandChange}" style="width: 100%">
+                                            <input data-role="numerictextbox" data-format="n0" name="temp_term" data-bind="value: item.temp_term, events: {change: operandChange}" style="width: 100%">
                                         </div>
                                     </div>
                                 </div>
@@ -197,22 +198,22 @@
                                     <div class="form-group">
                                         <label class="control-label col-xs-6">Monthly payment</label>
                                         <div class="col-xs-6">
-                                            <b class="text-success" data-bind="text: monthlyPayment" data-format="n0" style="line-height: 2.3"></b>
+                                            <b class="text-success" data-bind="text: item.monthlyPayment" data-format="n0" style="line-height: 2.3"></b>
                                         </div>
                                         <div class="col-xs-12" style="margin-top: 10px">
                                             <table style="font-weight: bold; font-size: 14px">
                                                 <tr>
                                                     <td rowspan="2">
-                                                        <i class="text-danger" data-format="n0" data-bind="text: loan_amount"></i>
+                                                        <i class="text-danger" data-format="n0" data-bind="text: item.loan_amount"></i>
                                                         <span> x&nbsp;</span>
                                                     </td>
                                                     <td style="border-bottom: 1px solid black; text-align: center; padding-bottom: 5px">
-                                                        <i class="text-danger" data-bind="text: rate">Rate</i>
+                                                        <i class="text-danger" data-bind="text: item.rate">Rate</i>
                                                     </td>
                                                 </tr>
                                                 <tr>
                                                     <td style="padding-top: 5px">
-                                                        <span>1 - (1 + <i class="text-danger" data-bind="text: rate">Rate</i>)<sup>-<i class="text-danger" data-bind="text: term">Term</i></sup></span>
+                                                        <span>1 - (1 + <i class="text-danger" data-bind="text: item.rate">Rate</i>)<sup>-<i class="text-danger" data-bind="text: item.temp_term">Term</i></sup></span>
                                                     </td>
                                                 </tr>
                                             </table>
@@ -263,7 +264,7 @@ class diallistPopup1 extends Popup {
         } else if(responseObj.total == 1) {
             var customer = responseObj.data[0];
             if(customer.date_of_birth) customer.date_of_birth = new Date(customer.date_of_birth * 1000);
-            var detailUrl = `${ENV.baseUrl}manage/telesalelist?omc=1#/detail_customer/${customer.id}`;
+            var detailUrl = `${ENV.baseUrl}manage/telesalelist/solve?omc=1#/detail_customer/${customer.id}`;
             this.item = customer;
             this.assign({detailUrl: detailUrl}).open();
         } else {
@@ -280,7 +281,7 @@ class diallistPopup1 extends Popup {
                 if(index !== null && index !== false) {
                     var customer = responseObj.data[index];
                     if(customer.date_of_birth) customer.date_of_birth = new Date(customer.date_of_birth * 1000);
-                    var detailUrl = `${ENV.baseUrl}manage/telesalelist?omc=1#/detail_customer/${customer.id}`;
+                    var detailUrl = `${ENV.baseUrl}manage/telesalelist/solve?omc=1#/detail_customer/${customer.id}`;
                     this.item = customer;
                     this.assign({detailUrl: detailUrl}).open();
                 } else {
@@ -297,6 +298,7 @@ window.popupObservable = new diallistPopup1(callData);
 window.popupObservable.assign({
     followUp: {},
     callCodeOption: dataSourceJsonData(["Call", "result"]),
+    rateOption: () => dataSourceDropDownList("Rate", ["text", "value"]),
     playRecording: function(e) {
         play(this._dataCall.calluuid);
     },
@@ -304,16 +306,33 @@ window.popupObservable.assign({
     rate: "Rate",
     term: "Term",
     operandChange: function(e) {
-        var rate = this.get("rate"),
-            loan_amount = this.get("loan_amount"),
-            term = this.get("term");
-        if(typeof rate == "number" && typeof loan_amount == "number" && typeof term == "number") {
-            var monthlyPayment = loan_amount * (rate / (1 - (1 + rate) ** (-term)));
-            this.set("monthlyPayment", Math.round(monthlyPayment));
+        var rate_source = $("#rate").data("kendoComboBox");
+        var selectedIndex = rate_source.selectedIndex
+        if(selectedIndex == -1) {
+            this.set("item.rate", this.get("item.rate_text") / 100)
+            this.set("item.rate_text", parseFloat(this.get("item.rate_text")).toFixed(2) + "%")
+        }
+        else {
+            this.set("item.rate", this.get("item.rate_text"))
+        }
+        this.set("rate", this.get("item.rate"));
+        var rate = this.get("item.rate"),
+    		loan_amount = this.get("item.loan_amount"),
+            temp_term = this.get("item.temp_term");
+        console.log(typeof temp_term);
+    	if(typeof rate == "number" && typeof loan_amount == "number" && typeof temp_term == "number") {
+	    	var monthlyPayment = loan_amount * (rate / (1 - (1 + rate) ** (-temp_term)));
+	    	this.set("item.monthlyPayment", Math.round(monthlyPayment));
+    	}
+    },
+    onDataBoundRate: function(e) {
+        if(!this.get('item.rate_text')) {
+            this.set('item.rate_text', this.get('item.rate'));
         }
     },
     save: function() {
         var data = this.item.toJSON();
+        data['calluuid'] = this._dataCall.calluuid;
         $.ajax({
             url: ENV.restApi + "telesalelist_solve/" + (data.id || "").toString(),
             type: "PUT",

@@ -140,12 +140,11 @@
         }),
         locationOption: () => dataSourceDistinct('Dealer', 'location'),
         dealerOption: function() {
-            var location = this.get('item.dealer_location');
-            if(location) {
+            if(this.get('item.dealer_code')) {
                 return new kendo.data.DataSource({
                     pageSize: 5,
                     serverFiltering: true,
-                    filter: [{field: 'location', operator: 'eq', value: (location.location) ? location.location : location}],
+                    filter: [{field: 'dealer_code', operator: 'eq', value: this.get('item.dealer_code')}],
                     transport: {
                         read: {
                             url: ENV.restApi + "dealer",
@@ -159,11 +158,30 @@
                 });
             }
             else {
-                return [];
+                var location = this.get('item.dealer_location');
+                if(location) {
+                    return new kendo.data.DataSource({
+                        pageSize: 5,
+                        serverFiltering: true,
+                        filter: [{field: 'location', operator: 'eq', value: (location.location) ? location.location : location}],
+                        transport: {
+                            read: {
+                                url: ENV.restApi + "dealer",
+                            },
+                            parameterMap: parameterMap
+                        },
+                        schema: {
+                            data: "data",
+                            total: "total"
+                        },
+                    });
+                }
+                else {
+                    return [];
+                }
             }
         },
         scOption: function() {
-            console.log(this.get('listScBySchedule'));
             if(this.get('item.sc_code')) {
                 return new kendo.data.DataSource({
                     pageSize: 5,
@@ -242,6 +260,7 @@
         },
         onChangeSC: function() {
             var dataItem = $("#sc-info").data('kendoDropDownList').dataItem();
+            console.log(dataItem);
             this.set('item.sc_phone', dataItem.phone);
             this.set('item.sc_name', dataItem.sc_name);
             this.set('item.sc_id', dataItem.id);

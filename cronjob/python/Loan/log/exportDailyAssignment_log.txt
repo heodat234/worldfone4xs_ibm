@@ -37,3 +37,139 @@
 24/12/2019, 15:50:10: End Log
 24/12/2019, 16:27:48: Start Import
 24/12/2019, 16:27:48: unknown url type: '/var/www/html/worldfone4xs_ibm/upload/loan/export/DailyAssignment.xlsx'
+24/12/2019, 22:29:25: Start Import
+24/12/2019, 22:29:25: name 'xlwriter' is not defined
+24/12/2019, 22:30:57: Start Import
+24/12/2019, 22:30:57: name 'StreamingHttpResponse' is not defined
+25/12/2019, 09:35:33: Start Import
+25/12/2019, 09:36:36: End Log
+25/12/2019, 14:09:21: Start Import
+25/12/2019, 14:09:21: End Log
+25/12/2019, 17:43:02: Start Import
+25/12/2019, 17:43:03: End Log
+25/12/2019, 17:43:30: Start Import
+25/12/2019, 17:43:30: an integer is required (got type NoneType)
+25/12/2019, 17:44:43: Start Import
+25/12/2019, 17:44:43: an integer is required (got type NoneType)
+25/12/2019, 17:48:28: Start Import
+25/12/2019, 17:48:28: an integer is required (got type str)
+25/12/2019, 17:49:54: Start Import
+25/12/2019, 17:49:54: int() argument must be a string, a bytes-like object or a number, not 'NoneType'
+25/12/2019, 17:55:15: Start Import
+25/12/2019, 17:55:15: End Log
+25/12/2019, 17:55:50: Start Import
+25/12/2019, 17:55:50: End Log
+25/12/2019, 17:56:16: Start Import
+25/12/2019, 17:56:16: End Log
+25/12/2019, 17:56:56: Start Import
+25/12/2019, 17:56:56: an integer is required (got type NoneType)
+25/12/2019, 17:58:41: Start Import
+25/12/2019, 17:58:41: an integer is required (got type NoneType)
+25/12/2019, 18:01:16: Start Import
+25/12/2019, 18:01:16: an integer is required (got type NoneType)
+25/12/2019, 18:01:38: Start Import
+25/12/2019, 18:01:38: an integer is required (got type NoneType)
+26/12/2019, 15:06:54: Start Import
+26/12/2019, 15:06:54: name 'endTodayTimeStamp' is not defined
+26/12/2019, 15:09:52: Start Import
+26/12/2019, 15:13:20: End Log
+26/12/2019, 15:27:04: Start Import
+26/12/2019, 15:27:14: End Log
+31/12/2019, 14:56:19: Start Import
+31/12/2019, 14:56:33: End Log
+31/12/2019, 17:07:14: Start Import
+31/12/2019, 17:07:34: End Log
+01/01/2020, 15:23:28: Start Import
+01/01/2020, 15:23:48: End Log
+01/01/2020, 15:29:19: Start Import
+01/01/2020, 15:29:19: End Log
+01/01/2020, 15:29:31: Start Import
+01/01/2020, 15:29:31: End Log
+01/01/2020, 15:30:22: Start Import
+01/01/2020, 15:30:22: End Log
+01/01/2020, 15:57:29: Start Import
+01/01/2020, 15:57:49: End Log
+01/01/2020, 16:14:11: Start Import
+01/01/2020, 16:14:12: End Log
+01/01/2020, 16:27:51: Start Import
+01/01/2020, 16:27:52: End Log
+01/01/2020, 16:43:03: Start Import
+01/01/2020, 16:43:30: End Log
+01/01/2020, 16:56:22: Start Import
+01/01/2020, 16:56:47: End Log
+01/01/2020, 17:18:44: Start Import
+01/01/2020, 17:19:16: End Log
+01/01/2020, 17:34:35: Start Import
+01/01/2020, 17:35:04: End Log
+01/01/2020, 17:48:25: Start Import
+01/01/2020, 17:48:52: End Log
+01/01/2020, 17:53:09: Start Import
+01/01/2020, 17:53:24: End Log
+02/01/2020, 11:10:08: Start Import
+02/01/2020, 11:10:29: End Log
+02/01/2020, 16:56:12: Start Import
+02/01/2020, 16:56:42: End Log
+02/01/2020, 16:56:47: Start Import
+02/01/2020, 16:57:03: End Log
+02/01/2020, 17:29:33: Start Import
+02/01/2020, 17:30:20: End Log
+02/01/2020, 17:31:59: Start Import
+02/01/2020, 17:32:15: End Log
+02/01/2020, 19:52:06: Start Import
+02/01/2020, 19:52:22: End Log
+02/01/2020, 20:33:30: Start Import
+02/01/2020, 20:34:00: End Log
+02/01/2020, 20:38:33: Start Import
+02/01/2020, 20:39:04: End Log
+02/01/2020, 20:41:56: Start Import
+02/01/2020, 20:42:21: End Log
+02/01/2020, 20:46:03: Start Import
+02/01/2020, 20:46:31: End Log
+02/01/2020, 20:48:57: Start Import
+02/01/2020, 20:48:58: End Log
+02/01/2020, 20:51:50: Start Import
+02/01/2020, 20:52:11: End Log
+02/01/2020, 20:54:52: Start Import
+02/01/2020, 20:55:12: End Log
+10/01/2020, 12:23:45: Start Import
+10/01/2020, 12:24:30: End Log
+10/01/2020, 14:03:11: Start Import
+10/01/2020, 14:03:11: End Log
+10/01/2020, 14:03:56: Start Import
+10/01/2020, 14:03:57: End Log
+13/01/2020, 14:02:42: Start Import
+13/01/2020, 14:02:42: an integer is required (got type str)
+13/01/2020, 14:03:34: Start Import
+13/01/2020, 14:03:34: invalid literal for int() with base 10: '2019-12-23T00:00:00+07:00'
+13/01/2020, 14:05:51: Start Import
+13/01/2020, 14:07:03: End Log
+13/01/2020, 15:15:37: Start Import
+13/01/2020, 15:16:53: End Log
+13/01/2020, 16:19:35: Start Import
+13/01/2020, 16:20:50: End Log
+13/01/2020, 17:02:15: Start Import
+13/01/2020, 17:03:33: End Log
+13/01/2020, 17:04:18: Start Import
+13/01/2020, 17:04:18: could not convert string to float: 
+13/01/2020, 17:06:31: Start Import
+13/01/2020, 17:06:49: End Log
+13/01/2020, 17:52:57: Start Import
+13/01/2020, 17:53:30: End Log
+13/01/2020, 19:51:57: Start Import
+13/01/2020, 19:51:57: End Log
+13/01/2020, 19:52:44: Start Import
+13/01/2020, 19:53:15: End Log
+13/01/2020, 20:00:12: Start Import
+13/01/2020, 20:00:58: End Log
+13/01/2020, 20:06:25: Start Import
+13/01/2020, 20:07:36: End Log
+13/01/2020, 20:32:38: Start Import
+13/01/2020, 20:33:46: End Log
+13/01/2020, 20:42:14: Start Import
+13/01/2020, 20:43:22: End Log
+13/01/2020, 20:51:33: Start Import
+13/01/2020, 20:52:20: End Log
+13/01/2020, 20:57:34: Start Import
+13/01/2020, 20:58:05: End Log
+14/01/2020, 10:41:25: Start Import
+14/01/2020, 10:42:28: End Log

@@ -9,7 +9,6 @@ var Config = {
     model: {
         id: "id",
         fields: {
-        
         }
     },
     parse: function(res) {
@@ -34,7 +33,13 @@ var Config = {
     	{
     		field: "principal_amount",
     		title: "@Principal Amount@",
+            template: data => gridCurrency(data.principal_amount)
     	},
+        {
+            field: "B_ADV",
+            title: "@Advance Payment@",
+            template: data => gridCurrency(data.B_ADV)
+        },
     	{
     		field: "debt_group",
     		title: "@Debt Group@"
@@ -238,7 +243,7 @@ var Table = function() {
 <ul class="breadcrumb breadcrumb-top">
     <li>@Manage@</li>
     <li>@Data@</li>
-    <li>@Field action@</li>
+    <li>Cross sell</li>
     <li class="pull-right none-breakcrumb">
         <div class="input-group-btn column-widget">
             <a role="button" class="btn btn-sm dropdown-toggle" data-toggle="dropdown" onclick="editColumns(this)"><i class="fa fa-calculator"></i> <b>@Edit Columns@</b></a>
@@ -271,9 +276,9 @@ var Table = function() {
 </div>
 <script type="text/javascript">
 	window.onload = function() {
-       <?php if(!empty($filter)) { ?>
+        <?php if(!empty($filter)) { ?>
         Config.filter = <?= $filter ?>;
-    <?php } ?>
+        <?php } ?>
 		Table.init();
 	}
 </script>

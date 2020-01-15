@@ -40,7 +40,9 @@ var Config = {
             field: "duration",
             title: "@Duration@",
             template: function(dataItem) {
-                return (dataItem.duration !== undefined) ? kendo.toString(new Date(dataItem.duration * 1000  + (((new Date()).getTimezoneOffset() - 60) * 60000)), "H:mm:ss") : "@Not over@";
+                let d = new Date();
+                d.setHours(0,0,0,0);
+                return (dataItem.duration !== undefined) ? kendo.toString(new Date(d.getTime() + dataItem.duration * 1000), "H:mm:ss") : "@Not over@";
             },
             filterable: false,
             width: 140

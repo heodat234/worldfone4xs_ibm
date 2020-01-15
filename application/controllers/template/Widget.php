@@ -12,7 +12,6 @@ Class Widget extends CI_Controller {
         $data["LEFT_HEADER_WIDGETS"] = $this->language_model->translate($this->_widgets("LEFT_HEADER_WIDGET"), "HEADERBAR");
         // Right widget
         $data["RIGHT_HEADER_WIDGETS"] = $this->language_model->translate($this->_widgets("RIGHT_HEADER_WIDGET"), "HEADERBAR");
-
         $this->parser->parse('templates/headerbar/left', $data);
         $this->parser->parse('templates/headerbar/right', $data);
 	}
@@ -48,7 +47,7 @@ Class Widget extends CI_Controller {
                 $parser_data[] = array($type => $this->parser->parse("widgets/{$file}", array(), TRUE));
             }
         }
-        
+
         return $parser_data;
     }
 }

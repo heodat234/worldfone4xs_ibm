@@ -1,0 +1,6 @@
+04/11/2019, 10:09:11: 'open_date'
+04/11/2019, 10:10:11: 'open_date'
+04/11/2019, 10:12:08: 'account_no'
+04/11/2019, 10:12:39: 'open_date'
+05/11/2019, 12:31:11: [Errno -5] No address associated with hostname
+05/11/2019, 12:31:56: [Errno -5] No address associated with hostname

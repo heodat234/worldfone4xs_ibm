@@ -14,7 +14,6 @@ Class Appointment_solve extends WFF_Controller {
         $this->load->library("Excel");
         $this->load->library("csv");
         $this->load->library('mongo_db');
-        $this->load->library('pheanstalk');
         $this->load->model('ftp_model');
         $this->load->model('user_model');
 		$this->collection = set_sub_collection($this->collection);
@@ -25,13 +24,7 @@ Class Appointment_solve extends WFF_Controller {
         try {
             $match = array();
             $request = json_decode($this->input->get("q"), TRUE);
-            $telesaleList = $this->crud->distinct(set_sub_collection('Telesalelist'), array(), array('id_no'), array('assign' => $this->session->userdata("extension")));
-            if(!empty($telesaleList)) {
-                $listCMND = $telesaleList['data'];
-                $match['cmnd'] = array(
-                    '$in'   => $listCMND
-                );
-            }
+            $match['assign'] = $this->session->userdata("extension");
             $response = $this->crud->read($this->collection, $request, [], $match);
             if(!empty($response['data'])) {
                 foreach($response['data'] as $key => &$value) {

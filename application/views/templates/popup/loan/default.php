@@ -88,6 +88,18 @@
                                             <span style="vertical-align: -7px" data-bind="text: item.LIC_NO"></span>
                                         </div>
                                     </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-xs-4">@Gender@</label>
+                                        <div class="col-xs-8">
+                                            <span style="vertical-align: -7px" data-bind="text: item.CUS_SEX"></span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-xs-4">@Total Moving Payment@</label>
+                                        <div class="col-xs-8">
+                                            <span id="total_moving_payment" style="vertical-align: -7px">0</span>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="col-sm-7">
                                     <div class="form-group">
@@ -133,6 +145,13 @@
                                     </div>
                                     <div data-template="relationship-template" data-bind="source: relationshipDataSource">
                                     </div>
+                                    <div class="form-group">
+                                        <div class="col-xs-2"></div>
+                                        <div class="col-xs-10">
+                                            <button data-role="button" data-icon="add" data-bind="click: addRef">@Add@</button>
+                                            <button data-role="button" data-icon="save" data-bind="click: saveRef">@Save@</button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <div class="row title-row main-product-container">
@@ -146,7 +165,7 @@
                                         <div class="form-group">
                                             <label class="control-label col-xs-4">@Contract No.@ <span id="main-product-count"></span></label>
                                             <div class="col-xs-8">
-                                                <input data-role="dropdownlist" name="contractNo"
+                                                <input id="main-contract-no" data-role="dropdownlist" name="contractNo"
                                                 data-value-primitive="true"
                                                 data-text-field="account_number"
                                                 data-value-field="account_number"                  
@@ -163,13 +182,13 @@
                                         <div class="form-group" data-bind="visible: collapseMain">
                                             <label class="control-label col-xs-4">@Monthly amount@</label>
                                             <div class="col-xs-8">
-                                                <p class="form-control-static" data-format="n0" data-bind="text: mainProduct.RPY_PRD"></p>
+                                                <p class="form-control-static" data-format="n0" data-bind="text: mainProduct.monthy_amount"></p>
                                             </div>
                                         </div>
                                         <div class="form-group" data-bind="visible: collapseMain">
                                             <label class="control-label col-xs-4">@Maturity Date@</label>
                                             <div class="col-xs-8">
-                                                <p class="form-control-static" data-bind="text: mainProduct.DT_MAT"></p>
+                                                <p class="form-control-static" data-bind="text: mainProduct.maturity_date"></p>
                                             </div>
                                         </div>
                                         <div class="form-group" data-bind="visible: collapseMain">
@@ -194,6 +213,12 @@
                                             <label class="control-label col-xs-4">@Interest rate@</label>
                                             <div class="col-xs-8">
                                                 <p class="form-control-static" data-bind="text: mainProduct.interest_rate"></p>
+                                            </div>
+                                        </div>
+                                        <div class="form-group" data-bind="visible: collapseMain">
+                                            <label class="control-label col-xs-4">@First Payment Date@</label>
+                                            <div class="col-xs-8">
+                                                <p class="form-control-static" data-bind="text: mainProduct.F_PDT"></p>
                                             </div>
                                         </div>
                                     </div>
@@ -300,11 +325,11 @@
                                         <div class="form-group">
                                             <label class="control-label col-xs-4">@Contract No.@ <span id="card-count"></span></label>
                                             <div class="col-xs-8">
-                                                <input data-role="dropdownlist" name="contract_no"
+                                                <input id="card-contract-no" data-role="dropdownlist" name="contract_no"
                                                 data-value-primitive="true"
                                                 data-text-field="contract_no"
                                                 data-value-field="contract_no"                  
-                                                data-bind="value: item.account_number, source: cardOption, events: {change: cardChange, dataBound: onDataBoundContractCard}" 
+                                                data-bind="value: item.account_number, source: cardOption, events: {cascade: cardChange, dataBound: onDataBoundContractCard}" 
                                                 style="width: 100%"/>
                                             </div>
                                         </div>
@@ -471,10 +496,10 @@
                                                 style="width: 100%"/>
                                         </div>
                                     </div>
-                                    <div class="form-group">
-                                        <label style="line-height: 1.5">
-                                            <span>SECURED ASSET</span>
-                                            <input class="custom-checkbox" type="checkbox" data-bind="checked: item.secured_asset">
+                                   <div class="form-group" style="padding-left: 50px">
+                                        <label style="line-height: 1.5" class="checkbox-inline">
+                                            <input class="" type="checkbox" data-bind="checked: item.secured_asset">
+                                            <span>SECURED ASSET(Xe máy, xe phân khối lớn, xe hơi)</span>
                                             <span></span>
                                         </label>
                                     </div>
@@ -546,17 +571,17 @@ class diallistPopupManual extends Popup {
         var responseObj = await $.get(ENV.vApi + `popup/get_customer_by_phone`, {phone: fieldIdValue});
 
         if(responseObj.total == 0) {
-            notification.show("Customer is not found", "error");
-            $("#popup-contain").empty();
-            return;
+            this.item = {};
+            this.open();
         } else if(responseObj.total == 1) {
             var customer = responseObj.data[0];
             var detailUrl = `${ENV.baseUrl}manage/customer?omc=1#/detail/${customer.id}`;
             this.item = customer;
+
             if(customer.account_number) {
                 this.relationshipDataSource = new kendo.data.DataSource({
                     serverFiltering: true,
-                    filter: {field: "account_number", operator: "eq", value: customer.account_number},
+                    filter: {field: "LIC_NO", operator: "eq", value: customer.LIC_NO},
                     transport: {
                         read: ENV.restApi + "relationship",
                         parameterMap: parameterMap
@@ -573,6 +598,7 @@ class diallistPopupManual extends Popup {
                     }
                 });
             }
+            
             if(customer.LIC_NO) {
                 this.mainProductOption = new kendo.data.DataSource({
                     serverFiltering: true,
@@ -586,6 +612,7 @@ class diallistPopupManual extends Popup {
                         total: "total",
                         parse: function(res) {
                             res.data.map(doc => {
+                                updateTotalMoving(doc.time_moving);
                                 addNewDebtAccount("#debt-account-select", doc.account_number);
                             })
                             
@@ -607,6 +634,7 @@ class diallistPopupManual extends Popup {
                         total: "total",
                         parse: function(res) {
                             res.data.map(doc => {
+                                updateTotalMoving(doc.time_moving);
                                 addNewDebtAccount("#debt-account-select", doc.contract_no);
                             })
                             $("#card-count").html('<span class="text-danger">(' + res.total + ')</span>');
@@ -635,7 +663,7 @@ class diallistPopupManual extends Popup {
                     if(customer.account_number) {
                         this.relationshipDataSource = new kendo.data.DataSource({
                             serverFiltering: true,
-                            filter: {field: "account_number", operator: "eq", value: customer.account_number},
+                            filter: {field: "LIC_NO", operator: "eq", value: customer.LIC_NO},
                             transport: {
                                 read: ENV.restApi + "relationship",
                                 parameterMap: parameterMap
@@ -665,6 +693,7 @@ class diallistPopupManual extends Popup {
                                 total: "total",
                                 parse: function(res) {
                                     res.data.map(doc => {
+                                        updateTotalMoving(doc.time_moving);
                                         addNewDebtAccount("#debt-account-select", doc.account_number);
                                     })
                                     
@@ -686,6 +715,7 @@ class diallistPopupManual extends Popup {
                                 total: "total",
                                 parse: function(res) {
                                     res.data.map(doc => {
+                                        updateTotalMoving(doc.time_moving);
                                         addNewDebtAccount("#debt-account-select", doc.contract_no);
                                     })
                                     $("#card-count").html('<span class="text-danger">(' + res.total + ')</span>');
@@ -722,19 +752,16 @@ window.popupObservable.assign({
         document.onkeydown = (evt) => {
             evt = evt || window.event;
             if (evt.keyCode == 13) {
-                swal({
-                    title: `${NOTIFICATION.checkSure}?`,
-                    text: `@Save@ @this record@`,
-                    icon: "warning",
-                    buttons: true,
-                    dangerMode: false,
-                })
-                .then((sure) => {
-                    if (sure) {
-                       this.save();
-                       document.onkeydown = null;
-                    }
-                });
+               swal({
+                title: `${NOTIFICATION.checkSure}?`,
+                text: "@Save@ @this form@",
+                icon: "warning",
+                buttons: true,
+                dangerMode: false,
+            }).then(sureenter => { console.log('sureenter',sureenter)
+                this.save();
+            })
+                document.onkeydown = null;
             }
         };
     },
@@ -793,7 +820,6 @@ window.popupObservable.assign({
     callThisPhone: function(e) {
         let diallistDetailId = this._dataCall[this._fieldId];
         let phone = $(e.currentTarget).data("phone");
-        this.closePopup();
         startPopup({dialid:diallistDetailId,customernumber:phone,dialtype:"manual",direction:"outbound"})
         makeCall(phone, diallistDetailId, "manual");
     },
@@ -801,84 +827,97 @@ window.popupObservable.assign({
         play(this._dataCall.calluuid);
     },
     save: function() {
-
-        var kendoValidator = $("#popup-window").kendoValidator().data("kendoValidator");
-            
-        if(!kendoValidator.validate()) {
-            notification.show("@Your data is invalid@", "error");
-            return;
-        }
-        
-        var data = this.get("item").toJSON();
-        var call = this.get("call").toJSON();
-        data.action_code = call.action_code;
-        $.ajax({
-            url: ENV.restApi + "diallist_detail/" + (data.id || ""),
-            type: "PUT",
-            contentType: "application/json; charset=utf-8",
-            data: kendo.stringify(data),
-            success: (response) => {
-                if(response.status)
-                    syncDataSource();
-            },
-            error: errorDataSource
+        swal({
+            title: `${NOTIFICATION.checkSure}?`,
+            text: "@Save@ @this form@",
+            icon: "warning",
+            buttons: true,
+            dangerMode: false,
         })
-
-        if(data.cus_name) data.name = data.cus_name;
-        if(this.followUpChecked) {
-            var followUpData = Object.assign(this.get("followUp").toJSON(), {
-                name: data.name,
-                phone: data.phone,
-                account_number: this.get("call.debt_account"),
-                id: data.id,
-                collection: "Customer"
-            });
+        .then((sure) => {
+            if(sure){
+                   var kendoValidator = $("#popup-window").kendoValidator().data("kendoValidator");
+                
+            if(!kendoValidator.validate()) {
+                notification.show("@Your data is invalid@", "error");
+                return;
+            }
+            
+            var data = this.get("item").toJSON();
+            var call = this.get("call").toJSON();
+            data.action_code = call.action_code;
             $.ajax({
-                url: ENV.restApi + "follow_up",
-                type: "POST",
+                url: ENV.restApi + "diallist_detail/" + (data.id || ""),
+                type: "PUT",
                 contentType: "application/json; charset=utf-8",
-                data: kendo.stringify(followUpData),
+                data: kendo.stringify(data),
                 success: (response) => {
                     if(response.status)
                         syncDataSource();
                 },
                 error: errorDataSource
             })
-        }
-        $.ajax({
-            url: ENV.vApi + "customer/upsert/LIC_NO/" + data.LIC_NO,
-            type: "POST",
-            contentType: "application/json; charset=utf-8",
-            data: kendo.stringify(data),
-            error: errorDataSource,
-            success: res => {
-                if(res.status) {
-                    var customer = res.data[0];
-                }
+
+            if(data.cus_name) data.name = data.cus_name;
+            if(this.followUpChecked) {
+                var followUpData = Object.assign(this.get("followUp").toJSON(), {
+                    name: data.name,
+                    phone: this.get("phone"),
+                    account_number: this.get("call.debt_account"),
+                    id: data.id,
+                    collection: "Customer"
+                });
+                $.ajax({
+                    url: ENV.restApi + "follow_up",
+                    type: "POST",
+                    contentType: "application/json; charset=utf-8",
+                    data: kendo.stringify(followUpData),
+                    success: (response) => {
+                        if(response.status)
+                            syncDataSource();
+                    },
+                    error: errorDataSource
+                })
             }
-        })
-
-        $.ajax({
-            url: ENV.vApi + "cdr/update/" + this._dataCall.calluuid,
-            type: "PUT",
-            contentType: "application/json; charset=utf-8",
-            data: kendo.stringify(Object.assign(this.get("call").toJSON(), {customer: data})),
-            error: errorDataSource
-        })
-
-        if(this.get("note")) {
             $.ajax({
-                url: ENV.restApi + "note",
+                url: ENV.vApi + "customer/upsert/LIC_NO/" + data.LIC_NO,
                 type: "POST",
                 contentType: "application/json; charset=utf-8",
-                data: kendo.stringify({
-                    from: "Diallist_detail",
-                    foreign_id: data.LIC_NO,
-                    content: this.get("note"),
-                }),
+                data: kendo.stringify(data),
+                error: errorDataSource,
+                success: res => {
+                    if(res.status) {
+                        var customer = res.data[0];
+                    }
+                }
+            })
+
+            $.ajax({
+                url: ENV.vApi + "cdr/update/" + this._dataCall.calluuid,
+                type: "PUT",
+                contentType: "application/json; charset=utf-8",
+                data: kendo.stringify(Object.assign(this.get("call").toJSON(), {customer: data})),
                 error: errorDataSource
             })
-        }
+
+            if(this.get("note")) {
+                $.ajax({
+                    url: ENV.restApi + "note",
+                    type: "POST",
+                    contentType: "application/json; charset=utf-8",
+                    data: kendo.stringify({
+                        from: "Diallist_detail",
+                        foreign_id: data.LIC_NO,
+                        content: this.get("note"),
+                    }),
+                    error: errorDataSource
+                })
+            }
+
+            this.closePopup();
+            }
+         
+        })
     },
     collapseMainProduct: function() {
         if(this.collapseMain){
@@ -901,9 +940,10 @@ window.popupObservable.assign({
 
     openCdr: function(e) {
         var filter = JSON.stringify({
-            logic: "and",
+            logic: "or",
             filters: [
-                {field: "customernumber", operator: "eq", value: this.phone}
+                {field: "customernumber", operator: "eq", value: this.phone},
+                {field: "customernumber", operator: "in", value: this.get("item.other_phones") || []}
             ]
         });
         var query = httpBuildQuery({filter: filter, omc: 1});
@@ -927,9 +967,10 @@ window.popupObservable.assign({
 
     openPaymentHistory: function(e) { 
         var filter = JSON.stringify({
-            logic: "and",
+            logic: "or",
             filters: [
-                {field: "account_number", operator: "eq", value: this.item.account_number}
+                {field: "account_number", operator: "eq", value: this.item.account_number},
+                {field: "account_number", operator: "eq", value: this.item.account_number.substring(2)},
             ]
         });
         var query = httpBuildQuery({filter: filter, omc: 1});
@@ -964,11 +1005,11 @@ window.popupObservable.assign({
             $content.append(`<iframe src='${ENV.baseUrl}manage/data/lawsuit_history?${query}' style="width: 100%; height: 500px; border: 0"></iframe>`);
     },
 
-    openCrossSell: function(e) { 
+     openCrossSell: function(e) { 
         var filter = JSON.stringify({
             logic: "and",
             filters: [
-                {field: "contract_no", operator: "eq", value: this.item.account_number}
+                {field: "LIC_NO", operator: "eq", value: this.item.LIC_NO}
             ]
         });
         var query = httpBuildQuery({filter: filter, omc: 1});
@@ -1019,6 +1060,17 @@ window.popupObservable.assign({
                 mainContractNo.select(0);
             }
         }
+    },
+
+    addRef: function(e) {
+        if(typeof this.relationshipDataSource != 'undefined') {
+            this.relationshipDataSource.insert(this.relationshipDataSource.total(), {index: this.relationshipDataSource.total() + 1, LIC_NO: this.get("item.LIC_NO"), phone: ""});
+        }
+        
+    },
+
+    saveRef: function(e) {
+        this.relationshipDataSource.sync();
     }
 });
 
@@ -1029,6 +1081,12 @@ function addNewDebtAccount(widgetId, value) {
     var dataSource = widget.dataSource;
     dataSource.add({value: value});
 };
+
+function updateTotalMoving(time_moving){
+    var total_moving = parseInt($('#total_moving_payment').text());
+    total_moving += time_moving;
+    $('#total_moving_payment').text(total_moving);
+}
 </script>
 
 <style type="text/css">

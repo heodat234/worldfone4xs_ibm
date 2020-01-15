@@ -24,7 +24,7 @@ Class Upload extends WFF_Controller {
 			$allowed_types = 'jpeg|jpg|png|gif|ico';
 			$filesize = @filesize($file['tmp_name']);
 			if(strpos($allowed_types, strtolower($file_parts['extension'])) === FALSE) throw new Exception("Wrong file type. Only accept jpeg, png or gif");
-			if($filesize > 1000000) throw new Exception("File too large");
+			if($filesize > 4000000) throw new Exception("File too large");
 			$new_file_name = str_replace([" ","/"], ["",""], $file['name']);
 			$file_path = $path . $new_file_name;
 			if (@is_uploaded_file($file['tmp_name'])) {
@@ -68,7 +68,7 @@ Class Upload extends WFF_Controller {
 				$allowed_types = 'jpeg|jpg|png|gif|ico';
 				$filesize = @filesize($file['tmp_name']);
 				if(strpos($allowed_types, strtolower($file_parts['extension'])) === FALSE) throw new Exception("Wrong file type. Only accept jpeg, png or gif");
-				if($filesize > 1000000) throw new Exception("File too large");
+				if($filesize > 4000000) throw new Exception("File too large");
 				$new_file_name = str_replace([" ","/"], ["",""], $file['name']);
 				$file_path = $path . $new_file_name;
 				if (@is_uploaded_file($file['tmp_name'])) {

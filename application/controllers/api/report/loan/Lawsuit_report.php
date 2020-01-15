@@ -34,9 +34,8 @@ Class Lawsuit_report extends WFF_Controller {
     }
     function exportExcel() {
         $request    = $this->input->post();
-        $start      =  strtotime($request['start']);
+        $start      =  strtotime(str_replace('/', '-', $request['start'])) ;
         $end        = strtotime(str_replace('/', '-', $request['end'])) ;
-        // print_r($start);exit;    
         $match = array(
                  '$and' => array(
                     array('created_at'=> array( '$gte'=> $start, '$lte'=> $end))

@@ -1,0 +1,5 @@
+[11-Jan-2020 23:50:04 Asia/Ho_Chi_Minh] PHP Notice:  Undefined variable: test in /var/www/html/worldfone4xs_ibm/cronjob/LOAN/test.php on line 7
+[11-Jan-2020 23:50:12 Asia/Ho_Chi_Minh] PHP Notice:  Undefined variable: test in /var/www/html/worldfone4xs_ibm/cronjob/LOAN/test.php on line 7
+[11-Jan-2020 23:50:12 Asia/Ho_Chi_Minh] PHP Notice:  Undefined variable: test in /var/www/html/worldfone4xs_ibm/cronjob/LOAN/test.php on line 7
+[11-Jan-2020 23:50:13 Asia/Ho_Chi_Minh] PHP Notice:  Undefined variable: test in /var/www/html/worldfone4xs_ibm/cronjob/LOAN/test.php on line 7
+[11-Jan-2020 23:51:50 Asia/Ho_Chi_Minh] PHP Notice:  Undefined variable: test in /var/www/html/worldfone4xs_ibm/cronjob/LOAN/test.php on line 7

@@ -1,0 +1,25 @@
+25/11/2019, 09:39:43: name 'collectionName' is not defined
+25/11/2019, 09:41:46: must be str, not int
+25/11/2019, 09:45:34: must be str, not int
+25/11/2019, 09:48:02: batch op errors occurred
+25/11/2019, 09:49:59: batch op errors occurred
+25/11/2019, 09:52:38: batch op errors occurred
+25/11/2019, 10:54:20: batch op errors occurred
+26/11/2019, 11:54:43: 'debt_acc_no'
+26/11/2019, 11:55:19: 'debt_acc_no'
+26/11/2019, 11:56:08: 'NoneType' object is not subscriptable
+26/11/2019, 12:00:47: 'NoneType' object is not subscriptable
+26/11/2019, 13:40:32: index 'group_id' cannot be applied to Cursor instances
+02/12/2019, 17:14:16: 'debt_acc_301_302'
+04/12/2019, 10:43:58: must be str, not NoneType
+04/12/2019, 10:45:37: name 'diallist' is not defined
+04/12/2019, 10:46:28: must be str, not NoneType
+04/12/2019, 10:51:28: must be str, not NoneType
+04/12/2019, 10:52:15: cannot encode object: {'$WO9713', '$WO9711', '$WO9712'}, of type: <class 'set'>
+04/12/2019, 10:52:37: unhashable type: 'list'
+04/12/2019, 10:54:02: must be str, not NoneType
+04/12/2019, 10:55:09: must be str, not NoneType
+05/12/2019, 15:59:01: string indices must be integers
+05/12/2019, 16:02:42: string indices must be integers
+05/12/2019, 16:06:11: string indices must be integers
+05/12/2019, 21:01:07: Authentication failed.

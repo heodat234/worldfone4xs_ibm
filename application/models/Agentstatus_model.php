@@ -63,7 +63,13 @@ class Agentstatus_model extends CI_Model {
     	$extension = $this->session->userdata("extension");
         $my_session_id = $this->session->userdata("my_session_id");
 
-        $this->update_previous($extension);
+        // Update previous
+    	$this->load->driver('cache', array('adapter' => 'memcached', 'backup' => 'file'));
+    	$cache_name = $my_session_id . "_update_previous_agent_status";
+    	if ($this->cache->get($cache_name)) {
+        	$this->update_previous($extension);
+    		$this->cache->save($cache_name , 1, $this->config->item("sess_time_to_update"));
+        }
         
         if(!$list_agent_state) {
         	$this->WFF =& get_instance();
@@ -93,6 +99,7 @@ class Agentstatus_model extends CI_Model {
         if( isset($current_agent_state['state']) && !in_array($current_agent_state['state'], $this->phoneOfflineSoftphoneStatusArr) ) {
         	// Trang thai chu dong
         	if($current_agent_state["dnd"] == "1") {
+        		$this->_action_queue($extension, $this->statusBlock);
         		$default_data["statuscode"] = $this->statusBlock;
 	        	$default_data["substatus"] = "Unknown";
 	        	$default_data["note"] = 'Continue Block';
@@ -163,22 +170,6 @@ class Agentstatus_model extends CI_Model {
 		$this->WFF->load->model("pbx_model");
 		$responseArr = $this->WFF->pbx_model->list_agent_state($extension);
 		$current_agent_state = $responseArr['data'][0];
-
-		// Agent state update || TABLE AGENT STATE
-	    /*$this->WFF->load->model("agentstate_model");
-	    if(isset($current_agent_state["state"])) {
-		    if(!$agent_state_doc = $this->WFF->agentstate_model->getOne(["status"])) {
-		    	$this->WFF->agentstate_model->start(array("status" => $current_agent_state["state"], "dnd" => (bool) (int) $current_agent_state["dnd"]), $responseArr);
-		    } else {
-			    if(isset($agent_state_doc["status"]) && $agent_state_doc["status"] != $current_agent_state["state"]) 
-			    {
-			    	$this->WFF->agentstate_model->end(array("endnote" => "Softphone change"));
-			    	$this->WFF->agentstate_model->start(array("status" => $current_agent_state["state"], "dnd" => (bool) (int) $current_agent_state["dnd"]), $responseArr);
-			    }
-			    else $this->WFF->agentstate_model->update(array("status" => $current_agent_state["state"], "dnd" => (bool) (int) $current_agent_state["dnd"]));
-		    }
-	    }*/
-	    // END Agent state
 
 		$default_data = array(
 			"agentstate" => $current_agent_state,
@@ -300,9 +291,9 @@ class Agentstatus_model extends CI_Model {
     	// Move to log
     	$data = $this->mongo_db
     	->where(array(
-    		"endtime" => array('$ne' => 0, '$lt' => $time - (24 * 3600))
+    		"endtime" => array('$ne' => 0, '$lt' => strtotime('today midnight'))
     	))
-    	->limit(10)
+    	->limit(100)
     	->get($this->collection);
     	if( $data ) {
     		foreach ($data as $doc) {
@@ -363,6 +354,8 @@ class Agentstatus_model extends CI_Model {
 						$queue_name = $responseArr['data'][0]['queues']['queue'][$tq]['queuename'];
 	            		$this->WFF->pbx_model->unpause_queue_member($queue_name, $extension, 1);
 					}
+				} else {
+					$this->WFF->pbx_model->unpause_queue_member("", $extension, 1);
 				}
 				$note="User Action - Unpause queue";
 				break;
@@ -372,6 +365,8 @@ class Agentstatus_model extends CI_Model {
 						$queue_name = $responseArr['data'][0]['queues']['queue'][$tq]['queuename'];
 	            		$this->WFF->pbx_model->pause_queue_member($queue_name, $extension, 1);
 					}
+				} else {
+					$this->WFF->pbx_model->pause_queue_member("", $extension, 1);
 				}
                 $note="User Action - Pause queue";
 				break;
@@ -441,18 +436,6 @@ class Agentstatus_model extends CI_Model {
 	 			)
 	 		),
 	 		array('$sort' => array("statuscode" => 1)),
-	 		array('$lookup' => array(
-	        		"from" 			=> $this->collection_reference,
-				    "localField" 	=> "statuscode",
-				    "foreignField" 	=> "value",
-				    "as" 			=> "status"
-	        	)
-	    	),
-	    	array('$unwind' => array(
-	    			'path'							=> '$status',
-			    	'preserveNullAndEmptyArrays'	=> TRUE
-	    		)
-	    	),
 	    	array('$project' => array(
 	 				"statuscode"					=> 1,
 	 				"last_substatus"				=> 1,
@@ -460,11 +443,20 @@ class Agentstatus_model extends CI_Model {
 	 				"last_endtime"					=> 1,
 	 				"last_update"					=> 1,
 	 				"total_time"					=> 1,
-	 				"statustext"					=> '$status.text'
 	 			)
 	 		)
         );
         $data = $this->mongo_db->aggregate_pipeline($this->collection, $aggregate);
+        $this->load->driver('cache', array('adapter' => 'memcached', 'backup' => 'file'));
+        foreach ($data as &$doc) {
+        	$code = isset($doc["value"]) ? $doc["value"] : "";
+        	$cache_name = $this->collection_reference . "_{$code}";
+			if(!$status = $this->cache->get($cache_name)) {
+				$status = $this->mongo_db->where("value", $code)->select([], ["_id","value","updatedAt","updatedBy"])->getOne($this->collection_reference);
+				$this->cache->save($cache_name, $status, $this->time_cache);
+			}
+			$doc["statustext"] = isset($status["text"]) ? $status["text"] : "";
+        }
         return $data;
     }
 

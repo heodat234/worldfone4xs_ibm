@@ -288,24 +288,11 @@ Class Appointment extends WFF_Controller {
                 $extension = $this->session->userdata("extension");
                 $this->load->model("group_model");
                 $members = $this->group_model->members_from_lead($extension);
-                $telesaleList = $this->crud->distinct(set_sub_collection('Telesalelist'), array(), array('id_no'), array('assign' => array('$in' => $members)));
-                if(!empty($telesaleList)) {
-                    $listCMND = $telesaleList['data'];
-                    $match['cmnd'] = array(
-                        '$in'   => $listCMND
-                    );
-                }
+                $match['assign'] = array(
+                    '$in'   => $members
+                );
             }
             $response = $this->crud->read($this->collection, $request, [], $match);
-            if(!empty($response['data'])) {
-                foreach($response['data'] as $key => &$value) {
-                    if(!empty($value['cif'])) {
-                        $telesaleListInfo = $this->crud->where(array('cif' => $value['cif']))->getOne(set_sub_collection('Telesalelist'));
-                        $value['customer_info'] = (!empty($telesaleListInfo)) ? $telesaleListInfo : array();
-                    }
-                    
-                }
-            }
             echo json_encode($response);
         } catch (Exception $e) {
             echo json_encode(array("status" => 0, "message" => $e->getMessage()));
@@ -356,6 +343,19 @@ Class Appointment extends WFF_Controller {
     {
         try {
             $result = $this->crud->where_id($id)->delete($this->collection, TRUE);
+            echo json_encode(array("status" => $result ? 1 : 0, "data" => []));
+        } catch (Exception $e) {
+            echo json_encode(array("status" => 0, "message" => $e->getMessage()));
+        }
+    }
+
+    function update_import_log($id) {
+        try {
+            $data = json_decode(file_get_contents('php://input'), TRUE);
+            $data['complete_import'] = time();
+            $data["updated_by"]  =   $this->session->userdata("extension");
+            $data['updated_at'] = time();
+            $result = $this->crud->where_id($id)->update(set_sub_collection("Import"), array('$set' => $data));
             echo json_encode(array("status" => $result ? 1 : 0, "data" => []));
         } catch (Exception $e) {
             echo json_encode(array("status" => 0, "message" => $e->getMessage()));

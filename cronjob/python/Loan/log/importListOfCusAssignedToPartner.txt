@@ -5,3 +5,8 @@
 08/11/2019, 15:23:55: 'CONTRACTNR'
 08/11/2019, 15:25:53: 'CONTRACTNR'
 08/11/2019, 15:29:46: documents must be a non-empty list
+08/01/2020, 11:06:55: 'NoneType' object has no attribute 'to_dict'
+08/01/2020, 11:07:24: 'NoneType' object has no attribute 'to_dict'
+08/01/2020, 11:09:06: 'NoneType' object is not iterable
+08/01/2020, 11:10:43: 'NoneType' object is not iterable
+08/01/2020, 11:24:38: 'NoneType' object is not iterable

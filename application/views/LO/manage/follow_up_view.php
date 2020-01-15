@@ -38,7 +38,7 @@ var Config = {
 		</div>
 		<div id="action-menu">
 		    <ul>
-		        <a href="javascript:void(0)" data-type="detail" onclick="detailData(this)"><li><i class="fa fa-exclamation-circle text-info hidden"></i><span>@Detail@</span></li></a>
+		        <a href="javascript:void(0)" data-type="detail" onclick="detailData(this)"><li><i class="fa fa-exclamation-circle text-info"></i><span>@Detail@</span></li></a>
 		    	<li class="devide"></li>
 		        <a href="javascript:void(0)" data-type="delete" onclick="deleteDataItem(this)"><li><i class="fa fa-times-circle text-danger"></i><span>@Delete@</span></li></a>
 		    </ul>

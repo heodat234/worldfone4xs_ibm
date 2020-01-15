@@ -1,6 +1,13 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Reader;
+use PhpOffice\PhpSpreadsheet\Style;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+
 Class Telesalelist extends WFF_Controller {
 
 	private $collection = "Telesalelist";
@@ -83,5 +90,25 @@ Class Telesalelist extends WFF_Controller {
 		} catch (Exception $e) {
 			echo json_encode(array("status" => 0, "message" => $e->getMessage()));
 		}
+	}
+
+	function update_import_log($id) {
+        try {
+            $data = json_decode(file_get_contents('php://input'), TRUE);
+            $data['complete_import'] = time();
+            $data["updated_by"]  =   $this->session->userdata("extension");
+            $data['updated_at'] = time();
+            $result = $this->crud->where_id($id)->update(set_sub_collection("Import"), array('$set' => $data));
+            echo json_encode(array("status" => $result ? 1 : 0, "data" => []));
+        } catch (Exception $e) {
+            echo json_encode(array("status" => 0, "message" => $e->getMessage()));
+        }
+	}
+	
+	function exportExcel() {
+		ini_set('max_execution_time', 0);
+		$date = date("dmY");
+		$url = 'upload/telesales/export/' . 'Calling_list_' . $date . '.xlsx';
+		echo json_encode(array('status' => 1, 'data' => $url));
 	}
 }

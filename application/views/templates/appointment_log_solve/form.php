@@ -45,7 +45,7 @@
                        data-text-field="sc_code"
                        data-value-field="sc_code"
                        data-filter="contains"
-                       data-bind="value: item.sc_code, source: scOption, events: {change: onChangeSC}" style="width: 100%"/>
+                       data-bind="value: item.sc_code, source: scOption, events: {cascade: onChangeSC}" style="width: 100%"/>
             </div>
             <div class="form-group">
                 <label>@SC's Name@</label>
@@ -140,12 +140,11 @@
         }),
         locationOption: () => dataSourceDistinct('Dealer', 'location'),
         dealerOption: function() {
-            var location = this.get('item.dealer_location');
-            if(location) {
+            if(this.get('item.dealer_code')) {
                 return new kendo.data.DataSource({
                     pageSize: 5,
                     serverFiltering: true,
-                    filter: [{field: 'location', operator: 'eq', value: (location.location) ? location.location : location}],
+                    filter: [{field: 'dealer_code', operator: 'eq', value: this.get('item.dealer_code')}],
                     transport: {
                         read: {
                             url: ENV.restApi + "dealer",
@@ -159,7 +158,27 @@
                 });
             }
             else {
-                return [];
+                var location = this.get('item.dealer_location');
+                if(location) {
+                    return new kendo.data.DataSource({
+                        pageSize: 5,
+                        serverFiltering: true,
+                        filter: [{field: 'location', operator: 'eq', value: (location.location) ? location.location : location}],
+                        transport: {
+                            read: {
+                                url: ENV.restApi + "dealer",
+                            },
+                            parameterMap: parameterMap
+                        },
+                        schema: {
+                            data: "data",
+                            total: "total"
+                        },
+                    });
+                }
+                else {
+                    return [];
+                }
             }
         },
         scOption: function() {
@@ -242,9 +261,11 @@
         },
         onChangeSC: function() {
             var dataItem = $("#sc-info").data('kendoDropDownList').dataItem();
-            this.set('item.sc_phone', dataItem.phone);
-            this.set('item.sc_name', dataItem.sc_name);
-            this.set('item.sc_id', dataItem.id);
+            if(typeof dataItem != 'undefined') {
+                this.set('item.sc_phone', dataItem.phone);
+                this.set('item.sc_name', dataItem.sc_name);
+                this.set('item.sc_id', dataItem.id);
+            }
         },
         customerOption: function() {
             if(this.get('item.id_no')) {

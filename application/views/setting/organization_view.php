@@ -486,6 +486,7 @@
             <div class="k-edit-field" style="width: 70%">
                 <input style="width: 100%"
                 data-role="dropdownlist"
+                data-filter="contains"
                 data-value-primitive="true"
                 data-value-field="extension" data-text-field="agentname"
                 data-template="itemGroupTemplate"
@@ -498,6 +499,7 @@
             <div class="k-edit-field" style="width: 70%" data-bind="invisible: item.hasChild">
                 <select style="width: 100%"
                 data-role="multiselect"
+                data-filter="contains"
                 data-value-primitive="true"
                 data-value-field="extension" data-text-field="agentname" 
                 data-item-template="itemGroupTemplate"

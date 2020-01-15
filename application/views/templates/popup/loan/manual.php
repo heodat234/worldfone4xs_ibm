@@ -45,7 +45,16 @@
                                     <div class="form-group">
                                         <label class="control-label col-xs-4">@Type of object@</label>
                                         <div class="col-xs-8">
-                                            <span style="vertical-align: -7px">Normal</span>
+                                            <span style="vertical-align: -7px">Delinquent</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-7">
+                                    <div class="form-group">
+                                        <label class="control-label col-xs-2">Tag</label>
+                                        <div class="col-xs-10">
+                                            <span class="label label-success" style="vertical-align: -7px" data-bind="text: diallist.name"></span>
+                                            <span class="label label-info" style="vertical-align: -7px">#<b data-bind="text: item.index"></b></span>
                                         </div>
                                     </div>
                                 </div>
@@ -61,7 +70,7 @@
                                     <div class="form-group">
                                         <label class="control-label col-xs-4">@Birthday@</label>
                                         <div class="col-xs-8">
-                                            <span style="vertical-align: -7px" data-bind="text: item.cus_birthday"></span>
+                                            <span style="vertical-align: -7px" data-bind="text: item.BIR_DT8"></span>
                                         </div>
                                     </div>
                                     <div class="form-group">
@@ -73,7 +82,7 @@
                                     <div class="form-group">
                                         <label class="control-label col-xs-4">@Profession@</label>
                                         <div class="col-xs-8">
-                                            <input data-role="dropdownlist" name="actionCode"
+                                            <input data-role="dropdownlist" name="profession"
                                                 data-filter="contains"
                                                 data-value-primitive="true"
                                                 data-text-field="text"
@@ -86,6 +95,18 @@
                                         <label class="control-label col-xs-4">@Nation ID@</label>
                                         <div class="col-xs-8">
                                             <span style="vertical-align: -7px" data-bind="text: item.LIC_NO"></span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-xs-4">@Gender@</label>
+                                        <div class="col-xs-8">
+                                            <span style="vertical-align: -7px" data-bind="text: item.CUS_SEX"></span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-xs-4">@Total Moving Payment@</label>
+                                        <div class="col-xs-8">
+                                            <span id="total_moving_payment" style="vertical-align: -7px">0</span>
                                         </div>
                                     </div>
                                 </div>
@@ -201,6 +222,12 @@
                                             <label class="control-label col-xs-4">@Interest rate@</label>
                                             <div class="col-xs-8">
                                                 <p class="form-control-static" data-bind="text: mainProduct.interest_rate"></p>
+                                            </div>
+                                        </div>
+                                        <div class="form-group" data-bind="visible: collapseMain">
+                                            <label class="control-label col-xs-4">@First Payment Date@</label>
+                                            <div class="col-xs-8">
+                                                <p class="form-control-static" data-bind="text: mainProduct.F_PDT"></p>
                                             </div>
                                         </div>
                                     </div>
@@ -479,10 +506,10 @@
                                                 style="width: 100%"/>
                                         </div>
                                     </div>
-                                    <div class="form-group">
-                                        <label style="line-height: 1.5">
-                                            <span>SECURED ASSET</span>
-                                            <input class="custom-checkbox" type="checkbox" data-bind="checked: item.secured_asset">
+                                    <div class="form-group" style="padding-left: 50px">
+                                        <label style="line-height: 1.5" class="checkbox-inline">
+                                            <input class="" type="checkbox" data-bind="checked: item.secured_asset">
+                                              <span>SECURED ASSET(Xe máy, xe phân khối lớn, xe hơi)</span>
                                             <span></span>
                                         </label>
                                     </div>
@@ -531,6 +558,7 @@
         </div>
     </div>
 </script>
+
 <script type="text/javascript">
 class diallistPopupManual extends Popup {
     constructor(dataCall) {
@@ -551,15 +579,16 @@ class diallistPopupManual extends Popup {
     async init(fieldId) {
         var fieldIdValue = this._dataCall[this._fieldId];
         /* Lấy dữ liệu */
-        var responseObj = await $.get(ENV.vApi + `diallist_detail/detail/${fieldIdValue}`);
+        var responseObj = await $.get(ENV.restApi + `diallist_detail/${fieldIdValue}`);
 
-        if(!responseObj) {
+        if(!responseObj || typeof responseObj != "object") {
             responseObj = {};
             notification.show("Data is not found", "error");
             return;
         }
 
         this.item = responseObj;
+        this.item.total_moving_payment = 0;
         if(responseObj.debt_account) this.call.debt_account = responseObj.debt_account;
         if(responseObj.action_code) this.call.action_code = responseObj.action_code;
 
@@ -602,7 +631,13 @@ class diallistPopupManual extends Popup {
                     total: "total",
                     parse: function(res) {
                         res.data.map(doc => {
+                            updateTotalMoving(doc.time_moving);
                             addNewDebtAccount("#debt-account-select", doc.account_number, "SIBS");
+                            doc.staff_in_charge = (doc.staff_in_charge != undefined && doc.staff_in_charge != '') ? convertExtensionToAgentname[doc.staff_in_charge] : '';
+                            if(doc.staff_in_charge == '' && doc.officer_id != undefined){
+                                var temp = doc.officer_id.substring(6);
+                                doc.staff_in_charge = convertExtensionToAgentname[temp];
+                            }
                         })
                         
                         $("#main-product-count").html('<span class="text-danger">(' + res.total + ')</span>');
@@ -623,7 +658,13 @@ class diallistPopupManual extends Popup {
                     total: "total",
                     parse: function(res) {
                         res.data.map(doc => {
+                            updateTotalMoving(doc.time_moving);
                             addNewDebtAccount("#debt-account-select", doc.contract_no, "CARD");
+                             doc.staff_in_charge = (doc.staff_in_charge != undefined && doc.staff_in_charge != '') ? convertExtensionToAgentname[doc.staff_in_charge] : '';
+                             if(doc.staff_in_charge == '' && doc.officer_id != undefined){
+                                var temp = doc.officer_id.substring(6);
+                                doc.staff_in_charge = convertExtensionToAgentname[temp];
+                             }
                         })
                         $("#card-count").html('<span class="text-danger">(' + res.total + ')</span>');
                         if(!res.total) $(".card-container").addClass("hidden");
@@ -650,6 +691,7 @@ var callData = <?= json_encode($callData) ?>;
 
 window.popupObservable = new diallistPopupManual(callData);
 window.popupObservable.assign({
+    diallist: <?= $diallist ? json_encode($diallist) : "{}" ?>,
     followUp: {},
     mainProduct: {},
     card: {},
@@ -660,13 +702,22 @@ window.popupObservable.assign({
     reason_nonpayment_note: false,
     btnCollapseMain: "@See more@",
     btnCollapseCard: "@See more@",
+    maxDate: new Date(),
     actionCodeOption: dataSourceJsonData(["Call", "result"]),
     actionCodeChange: function(e) {
         this.actionCodeChangeAsync(e);
         document.onkeydown = (evt) => {
             evt = evt || window.event;
             if (evt.keyCode == 13) {
+               swal({
+                title: `${NOTIFICATION.checkSure}?`,
+                text: "@Save@ @this form@",
+                icon: "warning",
+                buttons: true,
+                dangerMode: false,
+            }).then(sureenter => { console.log('sureenter',sureenter)
                 this.save();
+            })
                 document.onkeydown = null;
             }
         };
@@ -681,7 +732,10 @@ window.popupObservable.assign({
                 $("#filling-form").html(kendoView.render());
                 break;
             case "2":
-                this.set("visibleFillingForm", false);
+                this.set("visibleFillingForm", true);
+                var HTML = await $.get(ENV.templateApi + "action_code/type" + actionType);
+                var kendoView = new kendo.View(HTML, { model: this, template: false, wrap: false });
+                $("#filling-form").html(kendoView.render());
                 break;
             case "3":
                 this.set("visibleFillingForm", true);
@@ -714,18 +768,36 @@ window.popupObservable.assign({
                 var kendoView = new kendo.View(HTML, { model: this, template: false, wrap: false });
                 $("#filling-form").html(kendoView.render());
                 break;
+            case "8":
+                this.set("visibleFillingForm", true);
+                var HTML = await $.get(ENV.templateApi + "action_code/type" + actionType);
+                var kendoView = new kendo.View(HTML, { model: this, template: false, wrap: false });
+                $("#filling-form").html(kendoView.render());
+                break;
+            case "9":
+                this.set("visibleFillingForm", true);
+                var HTML = await $.get(ENV.templateApi + "action_code/type" + actionType);
+                var kendoView = new kendo.View(HTML, { model: this, template: false, wrap: false });
+                $("#filling-form").html(kendoView.render());
+                break;
+            case "10":
+                this.set("visibleFillingForm", true);
+                var HTML = await $.get(ENV.templateApi + "action_code/type" + actionType);
+                var kendoView = new kendo.View(HTML, { model: this, template: false, wrap: false });
+                $("#filling-form").html(kendoView.render());
+                break;
         }
 
         var requeuenumdate = parseInt(e.sender.dataItem().requeuenumdate);
-        this.set('followUpChecked', true);
+        // this.set('followUpChecked', true);
         if(requeuenumdate != 0) {
             recallDate = addSecondToDate(new Date(), requeuenumdate);
             this.set('followUp.reCall', recallDate);
         }
 
-        if(requeuenumdate == 0) {
-            this.set('followUpChecked', false);
-        }
+        // if(requeuenumdate == 0) {
+        //     this.set('followUpChecked', false);
+        // }
     },
     professionOption: dataSourceJsonData(["Customer", "profession"]),
     mainProductChange: function(e) {
@@ -738,7 +810,6 @@ window.popupObservable.assign({
     callThisPhone: function(e) {
         let diallistDetailId = this._dataCall[this._fieldId];
         let phone = $(e.currentTarget).data("phone");
-        this.closePopup();
         startPopup({dialid:diallistDetailId,customernumber:phone,dialtype:"manual",direction:"outbound"})
         makeCall(phone, diallistDetailId, "manual");
     },
@@ -747,118 +818,146 @@ window.popupObservable.assign({
         play(this._dataCall.calluuid);
     },
     save: function() {
+        swal({
+            title: `${NOTIFICATION.checkSure}?`,
+            text: "@Save@ @this form@",
+            icon: "warning",
+            buttons: true,
+            dangerMode: false,
+        })
+        .then((surecheck) => {console.log('sure2',surecheck)
+            if(surecheck){
+              var kendoValidator = $("#popup-window").kendoValidator().data("kendoValidator");
 
-        var kendoValidator = $("#popup-window").kendoValidator().data("kendoValidator");
-            
-        if(!kendoValidator.validate()) {
-            notification.show("@Your data is invalid@", "error");
-            return;
-        }
+              if(!kendoValidator.validate()) {
+                notification.show("@Your data is invalid@", "error");
+                return;
+            }
 
-        var data = this.get("item").toJSON();
-        var call = this.get("call").toJSON();
+            var data = this.get("item").toJSON();
+            var call = this.get("call").toJSON();
 
-        data = Object.assign(data, call);
+            data = Object.assign(data, call);
 
-        if(data.cus_name) data.name = data.cus_name;
+            if(data.cus_name) data.name = data.cus_name;
 
-        if(this.followUpChecked) {
-            var followUp = this.get("followUp").toJSON();
-            data = Object.assign(data, followUp);
+            if(this.followUpChecked) {
+                var followUp = this.get("followUp").toJSON();
+                data = Object.assign(data, followUp);
 
-            var followUpData = Object.assign(followUp, {
-                name: data.name,
-                phone: data.phone,
-                account_number: this.get("call.debt_account"),
-                id: data.id,
-                collection: "Diallist_detail"
-            });
+                var followUpData = Object.assign(followUp, {
+                    name: data.name,
+                    phone: this.get("phone"),
+                    account_number: this.get("call.debt_account"),
+                    id: data.id,
+                    collection: "Diallist_detail"
+                });
+                $.ajax({
+                    url: ENV.restApi + "follow_up",
+                    type: "POST",
+                    contentType: "application/json; charset=utf-8",
+                    data: kendo.stringify(followUpData),
+                    success: (response) => {
+                        if(response.status)
+                            syncDataSource();
+                    },
+                    error: errorDataSource
+                })
+            }
+
             $.ajax({
-                url: ENV.restApi + "follow_up",
-                type: "POST",
+                url: ENV.vApi + "diallist_detail/update/" + (data.id || ""),
+                type: "PUT",
                 contentType: "application/json; charset=utf-8",
-                data: kendo.stringify(followUpData),
+                data: kendo.stringify(data),
                 success: (response) => {
                     if(response.status)
                         syncDataSource();
                 },
                 error: errorDataSource
             })
-        }
 
-        $.ajax({
-            url: ENV.vApi + "diallist_detail/update/" + (data.id || ""),
-            type: "PUT",
-            contentType: "application/json; charset=utf-8",
-            data: kendo.stringify(data),
-            success: (response) => {
-                if(response.status)
-                    syncDataSource();
-            },
-            error: errorDataSource
-        })
-
-        $.ajax({
-            url: ENV.vApi + "customer/upsert/LIC_NO/" + data.LIC_NO,
-            type: "POST",
-            contentType: "application/json; charset=utf-8",
-            data: kendo.stringify(data),
-            error: errorDataSource,
-            success: res => {
-                if(res.status) {
-                    var customer = res.data[0];
-                }
-            }
-        })
-
-        $.ajax({
-            url: ENV.vApi + "cdr/update/" + this._dataCall.calluuid,
-            type: "PUT",
-            contentType: "application/json; charset=utf-8",
-            data: kendo.stringify(Object.assign(this.get("call").toJSON(), {customer: data})),
-            error: errorDataSource
-        })
-
-        if(this.get("note")) {
             $.ajax({
-                url: ENV.restApi + "note",
+                url: ENV.vApi + "customer/upsert/LIC_NO/" + data.LIC_NO,
                 type: "POST",
                 contentType: "application/json; charset=utf-8",
-                data: kendo.stringify({
-                    from: "Diallist_detail",
-                    foreign_id: data.LIC_NO,
-                    content: this.get("note"),
-                }),
+                data: kendo.stringify(data),
+                error: errorDataSource,
+                success: res => {
+                    if(res.status) {
+                        var customer = res.data[0];
+                    }
+                }
+            })
+
+            $.ajax({
+                url: ENV.vApi + "cdr/update/" + window.popupObservable.dataCall.calluuid,
+                type: "PUT",
+                contentType: "application/json; charset=utf-8",
+                data: kendo.stringify(Object.assign(this.get("call").toJSON(), {customer: data})),
                 error: errorDataSource
             })
-        }
 
-        this.relationshipDataSource.sync();
-        // Change status to ready
-        changeStatus(1);
+            if(this.get("note")) {
+                $.ajax({
+                    url: ENV.restApi + "note",
+                    type: "POST",
+                    contentType: "application/json; charset=utf-8",
+                    data: kendo.stringify({
+                        from: "Diallist_detail",
+                        foreign_id: data.LIC_NO,
+                        content: this.get("note"),
+                    }),
+                    error: errorDataSource
+                })
+            }
 
-        var data_action_code                = this.get("action");
-        data_action_code['calluuid']        = this.get("_dataCall.calluuid");
-        data_action_code['LIC_NO']          = this.get("item.LIC_NO");
-        data_action_code['account_number']  = this.get("call.debt_account");
-        data_action_code['action_code']     = this.get("call.action_code");
-        data_action_code['account_type']    = this.get("call.account_type");
-        data_action_code['note']            = this.get("note");
+            this.relationshipDataSource.sync();
+            // Change status to ready
+            changeStatus(1);
 
-        $.ajax({
-            url: ENV.restApi + "action_code",
-            type: "POST",
-            contentType: "application/json; charset=utf-8",
-            data: kendo.stringify(data_action_code),
-            success: (response) => {
-                if(response.status) {
-                    syncDataSource();
-                    let actionCodeData = this.get("actionCodeData") || [];
-                    actionCodeData.push(data_action_code);
-                    this.set("actionCodeData", actionCodeData);
-                }
-            },
-            error: errorDataSource
+            var data_action_code                = this.action;
+            data_action_code['calluuid']        = (window.popupObservable._dataCall.calluuid) ? window.popupObservable._dataCall.calluuid : '';
+            data_action_code['LIC_NO']          = (this.item.LIC_NO) ? this.item.LIC_NO : '';
+            data_action_code['account_number']  = (this.call.debt_account) ? this.call.debt_account : '';
+            data_action_code['action_code']     = (this.call.action_code) ? this.call.action_code : '';
+            data_action_code['account_type']    = (this.call.account_type) ? this.call.account_type : '';
+            data_action_code['note']            = (this.note) ? this.note : '';
+
+            $.ajax({
+                url: ENV.restApi + "action_code",
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                data: kendo.stringify(data_action_code),
+                success: (response) => {
+                    if(response.status) {
+                        syncDataSource();
+                        let actionCodeData = this.get("actionCodeData") || [];
+                        actionCodeData.push(data_action_code);
+                        this.set("actionCodeData", actionCodeData);
+                    }
+                },
+                error: errorDataSource
+            })
+
+            if(data_action_code['action_code'] == 'LAWSUIT') {
+                $.ajax({
+                    url: ENV.restApi + "lawsuit",
+                    type: "POST",
+                    contentType: "application/json; charset=utf-8",
+                    data: kendo.stringify(this.get("action")),
+                    success: (response) => {
+                        if(response.status) {
+                            console.log('Import lawsuit');
+                        }
+                    },
+                    error: errorDataSource
+                })
+            }
+
+            this.closePopup();
+            }
+      
         })
     },
     collapseMainProduct: function() {
@@ -882,9 +981,10 @@ window.popupObservable.assign({
 
     openCdr: function(e) {
         var filter = JSON.stringify({
-            logic: "and",
+            logic: "or",
             filters: [
-                {field: "customernumber", operator: "eq", value: this.phone}
+                {field: "customernumber", operator: "eq", value: this.phone},
+                {field: "customernumber", operator: "in", value: this.get("item.other_phones") || []}
             ]
         });
         var query = httpBuildQuery({filter: filter, omc: 1});
@@ -908,9 +1008,10 @@ window.popupObservable.assign({
 
     openPaymentHistory: function(e) { 
         var filter = JSON.stringify({
-            logic: "and",
+            logic: "or",
             filters: [
-                {field: "account_number", operator: "eq", value: this.item.account_number}
+                {field: "account_number", operator: "eq", value: this.item.account_number},
+                {field: "account_number", operator: "eq", value: this.item.account_number.substring(2)},
             ]
         });
         var query = httpBuildQuery({filter: filter, omc: 1});
@@ -949,7 +1050,7 @@ window.popupObservable.assign({
         var filter = JSON.stringify({
             logic: "and",
             filters: [
-                {field: "contract_no", operator: "eq", value: this.item.account_number}
+                {field: "LIC_NO", operator: "eq", value: this.item.LIC_NO}
             ]
         });
         var query = httpBuildQuery({filter: filter, omc: 1});
@@ -966,7 +1067,7 @@ window.popupObservable.assign({
     nonePaymentOption: dataSourceJsonData(["Actioncode", "reasonnonpayment"]),
 
     onChangeReasonNonePayment: function(e) {
-        if(this.get('item.reason_nonpayment') == 'others') {
+        if(this.get('action.reason_nonpayment') == 'others') {
             this.set('reason_nonpayment_note', true);
         }
         else {
@@ -1024,14 +1125,34 @@ window.popupObservable.init();
 
 function addNewDebtAccount(widgetId, value, type = "SIBS") {
     var widget = $(widgetId).getKendoDropDownList();
-    var dataSource = widget.dataSource;
-    dataSource.add({value: value, type: type});
+    if(widget) {
+        var dataSource = widget.dataSource;
+        dataSource.add({value: value, type: type});
+    }
 };
+
+function updateTotalMoving(time_moving){
+    var total_moving = parseInt($('#total_moving_payment').text());
+    total_moving += time_moving;
+    $('#total_moving_payment').text(total_moving);
+}
 
 function addSecondToDate(dateNeedSet, seconds) {
     dateNeedSet.setSeconds( dateNeedSet.getSeconds() + seconds );
     return dateNeedSet;
 }
+
+kendo.data.binders.widget.max = kendo.data.Binder.extend({
+    init: function(widget, bindings, options) {
+        //call the base constructor
+        kendo.data.Binder.fn.init.call(this, widget.element[0], bindings, options);
+    },
+    refresh: function() {
+        var that = this,
+        value = that.bindings["max"].get(); //get the value from the View-Model
+        $(that.element).data("kendoDatePicker").max(value); //update the widget
+    }
+});
 </script>
 
 <script id="action-code-template" type="text/x-kendo-template">

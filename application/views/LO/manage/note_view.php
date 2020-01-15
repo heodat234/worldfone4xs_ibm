@@ -33,7 +33,11 @@ var Config = {
     {
         field: "createdBy",
         title: "@Created by@",
-        template: data => convertExtensionToAgentname[data.createdBy],
+        template: function(data) { 
+            if(convertExtensionToAgentname[data.createdBy] != undefined)
+                return convertExtensionToAgentname[data.createdBy];
+           else return 'system';
+          },
         filterable: false,
         width: 150
     },

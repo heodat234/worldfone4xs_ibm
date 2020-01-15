@@ -27,9 +27,13 @@ Class Agentstatuscode extends CI_Controller {
 	function get_by_value($value)
 	{
 		try {
-			$this->load->library("mongo_db");
-			$response = $this->mongo_db->where("value", (int) $value)->select([],["_id"])->getOne($this->collection);
-
+			$this->load->driver('cache', array('adapter' => 'memcached', 'backup' => 'file'));
+			$cache_name = $this->collection . "_" . $value;
+			if (!$response = $this->cache->get($cache_name)) {
+				$this->load->library("mongo_db");
+				$response = $this->mongo_db->where("value", (int) $value)->select([],["_id"])->getOne($this->collection);
+				$this->cache->save($cache_name , $response, $this->config->item("wff_time_cache"));
+			}
 			echo json_encode($response);
 		} catch (Exception $e) {
 			echo json_encode(array("status" => 0, "message" => $e->getMessage()));

@@ -5,7 +5,7 @@
         <li>SMS Daily SMS Report</li>
         <li class="pull-right none-breakcrumb" id="top-row">
             <div class="btn-group btn-group-sm">
-                <a role="button" class="btn btn-sm" onclick="Table.grid.saveAsExcel()"><i class="fa fa-file-excel-o"></i> <b>@Export@ SIBS</b></a>
+                <a role="button" class="btn btn-sm" onclick="saveAsExcel()"><i class="fa fa-file-excel-o"></i> <b>@Export@ SIBS</b></a>
                 <a role="button" class="btn btn-sm" onclick="Table_1.grid.saveAsExcel()"><i class="fa fa-file-excel-o"></i> <b>@Export@ Card</b></a>
             </div>
         </li>
@@ -75,7 +75,7 @@
 
                   var grid = this.grid = $("#grid").kendoGrid({
                      dataSource: dataSource,
-                     excel: {allPages: true},
+                     excel: {allPages: true, fileName: 'SMS Daily Report'},
                      excelExport: function(e) {
                         var sheet = e.workbook.sheets[0];
                         for (var rowIndex = 1; rowIndex < sheet.rows.length; rowIndex++) {
@@ -133,7 +133,7 @@
 
                   var grid = this.grid = $("#grid_1").kendoGrid({
                      dataSource: dataSource,
-                     excel: {allPages: true},
+                     excel: {allPages: true, fileName: 'SMS Daily report'},
                      excelExport: function(e) {
                         var sheet = e.workbook.sheets[0];
                         for (var rowIndex = 1; rowIndex < sheet.rows.length; rowIndex++) {
@@ -377,7 +377,25 @@
 
       
     </script>
-    
+    <script>
+        function saveAsExcel() {
+            $.ajax({
+              url: ENV.reportApi + "loan/smsdaily_report/downloadExcel",
+              type: 'POST',
+              dataType: 'json',
+              timeout: 30000
+            })
+            .done(function(response) {
+              if (response.status == 1) {
+                window.location = response.data
+              }
+            })
+            .fail(function() {
+              console.log("error");
+            });
+
+        }
+    </script>
 </div>
 
 

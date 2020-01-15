@@ -84,4 +84,36 @@ Class Telesalelist_solve extends WFF_Controller {
 			echo json_encode(array("status" => 0, "message" => $e->getMessage()));
 		}
 	}
+
+	function exportExcel() {
+		ini_set('max_execution_time', 0);
+		$this->load->library('mongo_db');
+		$request = $this->input->get();
+		$match = array('assign' => $this->session->userdata("extension"));
+		$model = $this->crud->build_model($this->collection);
+		$this->load->library("kendo_aggregate", $model);
+		$this->kendo_aggregate->set_kendo_query($request);
+		$this->kendo_aggregate->filtering();
+		$data_aggregate = $this->kendo_aggregate->get_data_aggregate();
+		// echo(json_encode($data_aggregate));
+		$pythonCron = FCPATH . 'cronjob/python/Telesales/saveTelesaleList.py';
+		$exportLog = array(
+			'start'			=> time(),
+			'filter'		=> json_encode($request),
+			'status'		=> 2,
+			'python_cron'   => $pythonCron,
+			'filter'		=> json_encode($data_aggregate),
+			'created_at'	=> time(),
+			'created_by'	=>$this->session->userdata("extension")
+		);
+		$exportLogId = $this->crud->create(set_sub_collection('Export'), $exportLog);
+		if (in_array(ENVIRONMENT, array('UAT'))) {
+			$command = escapeshellcmd('/usr/local/bin/python3.6 ' . $pythonCron . ' ' . $exportLogId['id']) . ' > /dev/null &';
+		}
+		else {
+			$command = escapeshellcmd('/usr/local/bin/python3.6 ' . $pythonCron . ' ' . $exportLogId['id']) . ' > /dev/null &';
+		}
+		$output = shell_exec($command);
+		echo json_encode(array('status' => 2, "message" => "Xuất dữ liệu... Xin vui lòng chờ trong giây lát"));
+	}
 }

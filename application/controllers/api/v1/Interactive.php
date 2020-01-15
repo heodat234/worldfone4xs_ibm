@@ -4,6 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 Class Interactive extends WFF_Controller {
 
 	private $collection = "Interactive";
+	private $cdr_collection = "worldfonepbxmanager";
 
 	function __construct()
 	{
@@ -11,12 +12,28 @@ Class Interactive extends WFF_Controller {
 		header('Content-type: application/json');
 		$this->load->library("crud");
 		$this->collection = set_sub_collection($this->collection);
+		$this->cdr_collection = set_sub_collection($this->cdr_collection);
 	}
 
 	function read()
 	{
 		$request = json_decode($this->input->get("q"), TRUE);
-		$response = $this->crud->read($this->collection, $request);
+		$match = array();
+		// print_r($this->data["permission"]["actions"]);
+        if(!in_array("viewall", $this->data["permission"]["actions"])) {
+            $extension = $this->session->userdata("extension");
+            $this->load->model("group_model");
+            $members = $this->group_model->members_from_lead($extension);
+            $match["userextension"] = ['$in' => $members];
+        }
+        $cdr = $this->crud->read($this->cdr_collection, $request, ['calluuid'], $match);
+        $calluuid = array();
+        foreach ($cdr['data'] as $row) {
+        	array_push($calluuid, $row['calluuid']);
+       	}
+       	// print_r($match);exit;
+        $match_1["other_id"] = ['$in' => $calluuid];
+		$response = $this->crud->read($this->collection, array(), [], $match_1);
 		echo json_encode($response);
 	}
 

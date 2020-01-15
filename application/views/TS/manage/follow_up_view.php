@@ -162,6 +162,9 @@ var Config = {
 								else col.template = (dataItem) => gridDate(dataItem[col.field]);
 								break;
 							default:
+								if(col.field == "createdBy") {
+									col.template = data => convertExtensionToAgentname[data.createdBy];
+								}
 								break;
 						}
 					});

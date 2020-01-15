@@ -783,7 +783,11 @@ Class Mongo_db{
 	*/
 	function where_id($id)
     {
-        $this->wheres["_id"] = new MongoDB\BSON\ObjectId($id);
+    	if(strlen($id) === 24) {
+        	$this->wheres["_id"] = new MongoDB\BSON\ObjectId($id);
+    	} else {
+    		$this->wheres["_id"] = $id;
+    	}
         return $this;
     }
 
@@ -798,7 +802,11 @@ Class Mongo_db{
 	*/
 	function where_object_id($field, $id)
     {
-        $this->wheres[$field] = new MongoDB\BSON\ObjectId($id);
+    	if(strlen($id) === 24) {
+        	$this->wheres[$field] = new MongoDB\BSON\ObjectId($id);
+    	} else {
+    		$this->wheres[$field] = $id;
+    	}
         return $this;
     }
 
@@ -831,7 +839,7 @@ Class Mongo_db{
 	*
 	* @usage : $this->mongo_db->like('foo', 'bar', 'im', FALSE, TRUE);
 	*/
-	public function like($field = "", $value = "", $flags = "i", $enable_start_wildcard = TRUE, $enable_end_wildcard = TRUE)
+	public function like($field = "", $value = "", $flags = "i", $enable_start_wildcard = FALSE, $enable_end_wildcard = FALSE)
 	{
 		if (empty($field))
 		{
@@ -847,16 +855,16 @@ Class Mongo_db{
 		$this->_w($field);
 		$value = (string) trim($value);
 		$value = quotemeta($value);
-		if ($enable_start_wildcard !== TRUE)
+		if ($enable_start_wildcard)
 		{
 			$value = "^" . $value;
 		}
-		if ($enable_end_wildcard !== TRUE)
+		if ($enable_end_wildcard)
 		{
 			$value .= "$";
 		}
-		$regex = "/$value/$flags";
-		$this->wheres[$field] = new MongoRegex($regex);
+		$regex = $value;
+		$this->wheres[$field] = array('$regex' => $regex, '$options' => $flags);;
 		return ($this);
 	}
 
@@ -1491,8 +1499,8 @@ Class Mongo_db{
 			show_error("Nothing to update in Mongo collection or update is not an array", 500);	
 		}
 
-		$options = array_merge(array('multi' => TRUE), $options);
-
+		// $options = array_merge(array('multi' => TRUE), $options);
+		// print_r($options);exit;
 		$bulk = new MongoDB\Driver\BulkWrite();
 		$bulk->update($this->wheres, $this->updates, $options);
 			
@@ -1741,7 +1749,7 @@ Class Mongo_db{
 		}
 		else
 		{
-			return new MongoDB\BSON\UTCDateTime($stamp);
+			return new MongoDB\BSON\UTCDateTime($stamp * 1000);
 		}
 		
 	}
@@ -2097,5 +2105,15 @@ NOWDOC
 		$result = $this->command(['eval' => $jscode]);
 		if(!$result) throw new Exception("Error Processing", 1);
 		return $result[0];
+	}
+
+	function listCollections(){
+		$listdatabases = new MongoDB\Driver\Command(["listCollections" => 1]);
+		$res = $this->db->executeCommand($this->database, $listdatabases);
+		$listCollections = [];
+		foreach ($res->toArray() as $key => $obj) {
+			$listCollections[] = $obj->name;
+		}
+		return $listCollections;
 	}
 }

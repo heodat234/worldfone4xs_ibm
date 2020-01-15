@@ -36,6 +36,7 @@ var Config = Object.assign(Config, {
             doc.appointment_date = doc.appointment_date ? new Date(doc.appointment_date * 1000) : undefined;
             doc.created_at = doc.created_at ? new Date(doc.created_at * 1000) : undefined;
             doc.customer_info = (typeof doc.customer_info !== 'undefined') ? doc.customer_info : {};
+            doc.updated_at = doc.updated_at ? new Date(doc.updated_at * 1000) : undefined;
             return doc;
         });
         return response;
@@ -68,13 +69,13 @@ var Config = Object.assign(Config, {
     },{
         title: "@Customer@",
         columns: [{
-            field: "customer_info.id_no",
+            field: "id_no",
             title: "@National ID@",
             headerAttributes: { style: "white-space: normal"},
             width: "110px",
             filterable: true
         }, {
-            field: "customer_info.name",
+            field: "name",
             title: "@Name@",
             width: "200px",
             headerAttributes: { style: "white-space: normal"},
@@ -84,16 +85,16 @@ var Config = Object.assign(Config, {
             title: "@Phone@",
             width: "150px",
             headerAttributes: { style: "white-space: normal"},
-            filterable: true,
+            filterable: false,
             template: function(dataItem) {
-                return gridPhone(dataItem['customer_info']['phone'], dataItem['customer_info']['id'], 'customer');
+                return gridPhone(dataItem['phone'], dataItem['id'], 'customer');
             }
         }, {
             field: "customer_info.note",
             title: "@Note@",
             width: "200px",
             headerAttributes: { style: "white-space: normal"},
-            filterable: true
+            filterable: false
         }]
     },{
         field: "appointment_date",
@@ -157,7 +158,21 @@ var Config = Object.assign(Config, {
                 }
             }
         }]
-    }],
+    }, {
+        field: "last_modified",
+        title: "@Last modified@",
+        width: "150px",
+        headerAttributes: { style: "white-space: normal"},
+        filterable: true,
+        template: function(dataItem) {
+            if(typeof dataItem.updated_at != 'undefined') {
+                return gridDate(dataItem.updated_at);
+            }
+            else {
+                return gridDate(dataItem.created_at);
+            }
+        }
+    },],
 });
 </script>
 

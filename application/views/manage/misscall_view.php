@@ -55,6 +55,10 @@ var Config = {
             title: "@Available Extensions@",
             template: (dataItem) => gridArray(dataItem.extension_available)
         },{
+            field: "glide_extension",
+            title: "@Glide Extensions@",
+            template: (dataItem) => gridArray(dataItem.glide_extension)
+        },{
             field: "assign",
             title: "@Assign@",
             width: 140
@@ -67,7 +71,7 @@ var Config = {
             title: "@Assign at@",
             width: 140,
             template: function(dataItem) {
-                return (kendo.toString(new Date(dataItem.assignAt), "dd/MM/yy H:mm:ss") ||  "").toString();
+                return dataItem.assignAt ? kendo.toString(new Date(dataItem.assignAt * 1000), "dd/MM/yy H:mm:ss") : "";
             }
         }]
 }; 

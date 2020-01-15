@@ -1,0 +1,78 @@
+31/12/2019, 17:27:46: Start Import
+31/12/2019, 17:27:53: End Log
+31/12/2019, 17:29:10: Start Import
+31/12/2019, 17:29:16: End Log
+31/12/2019, 17:31:17: Start Import
+31/12/2019, 17:31:23: End Log
+31/12/2019, 17:34:01: Start Import
+31/12/2019, 17:34:01: unsupported operand type(s) for /: 'str' and 'int'
+31/12/2019, 17:35:28: Start Import
+31/12/2019, 17:35:28: invalid literal for int() with base 10: '.415200000'
+31/12/2019, 17:48:52: Start Import
+31/12/2019, 17:48:52: 'PRODGRP_ID'
+31/12/2019, 17:53:32: Start Import
+31/12/2019, 17:53:32: invalid literal for int() with base 10: '.00'
+31/12/2019, 17:57:20: Start Import
+31/12/2019, 18:08:41: Start Import
+31/12/2019, 18:11:41: End Log
+31/12/2019, 18:12:28: Start Import
+31/12/2019, 18:16:29: End Log
+02/01/2020, 09:33:18: Start Import
+02/01/2020, 09:37:13: End Log
+02/01/2020, 09:45:16: Start Import
+02/01/2020, 09:53:08: End Log
+02/01/2020, 11:47:32: Start Import
+02/01/2020, 11:47:32: 'float' object is not iterable
+02/01/2020, 11:52:25: Start Import
+02/01/2020, 11:52:25: name 'insertData1' is not defined
+02/01/2020, 11:52:53: Start Import
+02/01/2020, 11:59:56: End Log
+02/01/2020, 12:06:50: Start Import
+02/01/2020, 12:06:50: 'float' object is not iterable
+02/01/2020, 12:08:26: Start Import
+02/01/2020, 12:08:26: 'float' object is not iterable
+02/01/2020, 12:08:56: Start Import
+02/01/2020, 12:08:56: 'list' object has no attribute 'type'
+02/01/2020, 13:47:12: Start Import
+02/01/2020, 13:59:11: End Log
+02/01/2020, 14:23:32: Start Import
+02/01/2020, 14:29:49: End Log
+02/01/2020, 16:35:42: Start Import
+02/01/2020, 16:41:04: End Log
+02/01/2020, 16:56:29: Start Import
+02/01/2020, 16:56:29: 'float' object is not iterable
+02/01/2020, 17:01:19: Start Import
+02/01/2020, 17:01:19: 'float' object is not iterable
+02/01/2020, 17:09:47: Start Import
+02/01/2020, 17:09:47: 'float' object is not iterable
+02/01/2020, 17:24:10: Start Import
+02/01/2020, 17:33:24: End Log
+02/01/2020, 18:05:06: Start Import
+02/01/2020, 18:05:06: name 'unnround' is not defined
+02/01/2020, 18:05:41: Start Import
+02/01/2020, 18:09:40: End Log
+03/01/2020, 09:16:54: Start Import
+03/01/2020, 09:23:05: End Log
+03/01/2020, 09:33:39: Start Import
+03/01/2020, 09:35:22: Start Import
+03/01/2020, 09:35:42: End Log
+03/01/2020, 15:36:55: Start Import
+03/01/2020, 15:36:55: name 'row' is not defined
+03/01/2020, 15:37:12: Start Import
+03/01/2020, 15:37:12: name 'row' is not defined
+03/01/2020, 15:37:44: Start Import
+03/01/2020, 15:37:44: key must be an instance of str
+03/01/2020, 15:38:47: Start Import
+03/01/2020, 15:38:47: key must be an instance of str
+03/01/2020, 15:39:49: Start Import
+03/01/2020, 15:39:49: list indices must be integers or slices, not str
+03/01/2020, 15:40:24: Start Import
+03/01/2020, 15:45:20: Start Import
+03/01/2020, 15:45:20: list indices must be integers or slices, not str
+03/01/2020, 15:46:02: Start Import
+03/01/2020, 15:46:47: Start Import
+03/01/2020, 15:48:25: Start Import
+03/01/2020, 15:51:40: Start Import
+03/01/2020, 15:52:41: Start Import
+03/01/2020, 15:52:41: End Log
+03/01/2020, 15:52:41: name 'df' is not defined

@@ -124,6 +124,22 @@ class Chatstatus_model extends CI_Model {
 		    	}
 	    	}
     	}
+
+        // Move to log
+        $data = $this->mongo_db
+        ->where(array(
+            "endtime" => array('$ne' => 0, '$lt' => $time - (24 * 3600))
+        ))
+        ->limit(10)
+        ->get($this->collection);
+        if( $data ) {
+            foreach ($data as $doc) {
+                $id = $doc["id"];
+                unset($doc["id"]);
+                $this->mongo_db->insert($this->collection . "_log", $doc);
+                $this->mongo_db->where_id($id)->delete($this->collection);
+            }
+        }
     }
 
     function change($data = array())

@@ -1,7 +1,4 @@
-<?php
-//define('BASEPATH', realpath("./../system") . DIRECTORY_SEPARATOR );
-$app_path = str_replace("cronjob", "", __DIR__);
-require_once $app_path . "/application/config/mongo_db.php";
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 /**
 * CodeIgniter MongoDB Active Record Library
 *
@@ -14,6 +11,35 @@ require_once $app_path . "/application/config/mongo_db.php";
 * @link http://intekhab.in
 * @version Version 1.0
 */
+$project_path = dirname(__DIR__);
+
+$file = $project_path . "/system/config/wffdata.json";
+$fd = fopen ($file, 'r');
+$content = filesize($file) ? fread($fd, filesize($file)) : "[]";
+
+$wff_config = json_decode($content, TRUE);
+$env = 'development';
+if(isset($wff_config['wff_env'])) {
+	switch ($wff_config['wff_env']) {
+		case 'LIVE':
+			$env = "production";
+			break;
+		
+		case 'UAT':
+			$env = "testing";
+			break;
+
+		default:
+			$env = "development";
+			break;
+	}
+}
+
+defined('ENVIRONMENT') OR define('ENVIRONMENT', $env);
+
+echo "RUN IN " . ENVIRONMENT . "." . PHP_EOL;
+
+require_once $project_path . "/application/config/mongo_db.php";
 
 Class Mongo_db{
 
@@ -56,16 +82,14 @@ Class Mongo_db{
 	* Try to connect on MongoDB server.
 	*/
 
-	function __construct($param = array())
+	function __construct($param = [])
 	{
-		global $config;
+
 		if ( ! class_exists('MongoDB\Driver\Manager'))
 		{
 			show_error("The MongoDB PECL extension has not been installed or enabled", 500);
 		}
-		/*$this->CI =& get_instance();
-		$this->CI->load->config('mongo_db');
-		$this->config = $this->CI->config->item('mongo_db');*/
+		global $config;
 		$this->config = $config["mongo_db"];
 		$this->param = $param;
 		$this->connect();
@@ -242,6 +266,7 @@ Class Mongo_db{
 			}
 			else
 			{
+				$dns .= "?authSource=admin";
 				$options = array('username'=>$this->username, 'password'=>$this->password);
 			}
 
@@ -777,6 +802,36 @@ Class Mongo_db{
 
 	/**
 	* --------------------------------------------------------------------------------
+	* Where id
+	* --------------------------------------------------------------------------------
+	*
+	* Get the documents where the value of a _id equal to ObjectId($id)
+	*
+	* @usage : $this->mongo_db->where_id('9dfs12312dsfsd121sde')->get('foobar');
+	*/
+	function where_id($id)
+    {
+        $this->wheres["_id"] = new MongoDB\BSON\ObjectId($id);
+        return $this;
+    }
+
+    /**
+	* --------------------------------------------------------------------------------
+	* Where object id
+	* --------------------------------------------------------------------------------
+	*
+	* Get the documents where the value of a field equal to ObjectId($id)
+	*
+	* @usage : $this->mongo_db->where_id('other_id', '9dfs12312dsfsd121sde')->get('foobar');
+	*/
+	function where_object_id($field, $id)
+    {
+        $this->wheres[$field] = new MongoDB\BSON\ObjectId($id);
+        return $this;
+    }
+
+	/**
+	* --------------------------------------------------------------------------------
 	* Like
 	* --------------------------------------------------------------------------------
 	*
@@ -804,7 +859,7 @@ Class Mongo_db{
 	*
 	* @usage : $this->mongo_db->like('foo', 'bar', 'im', FALSE, TRUE);
 	*/
-	public function like($field = "", $value = "", $flags = "i", $enable_start_wildcard = TRUE, $enable_end_wildcard = TRUE)
+	public function like($field = "", $value = "", $flags = "i", $enable_start_wildcard = FALSE, $enable_end_wildcard = FALSE)
 	{
 		if (empty($field))
 		{
@@ -820,16 +875,16 @@ Class Mongo_db{
 		$this->_w($field);
 		$value = (string) trim($value);
 		$value = quotemeta($value);
-		if ($enable_start_wildcard !== TRUE)
+		if ($enable_start_wildcard)
 		{
 			$value = "^" . $value;
 		}
-		if ($enable_end_wildcard !== TRUE)
+		if ($enable_end_wildcard)
 		{
 			$value .= "$";
 		}
-		$regex = "/$value/$flags";
-		$this->wheres[$field] = new MongoRegex($regex);
+		$regex = $value;
+		$this->wheres[$field] = array('$regex' => $regex, '$options' => $flags);;
 		return ($this);
 	}
 
@@ -863,7 +918,9 @@ Class Mongo_db{
 
 			$query = new MongoDB\Driver\Query($this->wheres, $options);
 			$cursor = $this->db->executeQuery($this->database.".".$collection, $query, $read_preference);
-
+			if ($this->return_as == 'array') {
+				$cursor->setTypeMap(['root'=>'array','document' =>'array','array'=>'array']);
+			}
 			// Clear
 			$this->_clear();
 			$returns = array();
@@ -962,6 +1019,9 @@ Class Mongo_db{
 			
 			$query = new MongoDB\Driver\Query($this->wheres, $options);
 			$cursor = $this->db->executeQuery($this->database.".".$collection, $query, $read_preference);
+			if ($this->return_as == 'array') {
+				$cursor->setTypeMap(['root'=>'array','document' =>'array','array'=>'array']);
+			}
 
 			// Clear
 			$this->_clear();
@@ -1344,15 +1404,19 @@ Class Mongo_db{
 
 		try
 		{
-			$documents = $this->db->{$collection}->distinct($field, $this->wheres);
-			$this->_clear();
+			$query = $this->wheres ? $this->wheres : null;
+			$command = array('distinct'=>$collection, 'key'=>$field, 'query'=>$query);
+			$result = $this->command($command);
+
+			if(!$result) throw new Exception("Error Processing", 1);
+			$document = $result[0];
 			if ($this->return_as == 'object')
 			{
-				return (object)$documents;
+				return $document->values;
 			}
 			else
 			{
-				return $documents;
+				return $document["values"];
 			}
 		}
 		catch (MongoCursorException $e)
@@ -1455,7 +1519,7 @@ Class Mongo_db{
 			show_error("Nothing to update in Mongo collection or update is not an array", 500);	
 		}
 
-		$options = array_merge(array('multiple' => TRUE), $options);
+		$options = array_merge(array('multi' => TRUE), $options);
 
 		$bulk = new MongoDB\Driver\BulkWrite();
 		$bulk->update($this->wheres, $this->updates, $options);
@@ -1576,8 +1640,7 @@ Class Mongo_db{
 
 		$options = array('limit'=>false);
 		$bulk = new MongoDB\Driver\BulkWrite();
-		// $bulk->delete($this->wheres, $this->updates/*, $options*/); old wrong with 3 parameters
-		$bulk->delete($this->wheres, $this->updates);
+		$bulk->delete($this->wheres, $options);
 			
 		$writeConcern = new MongoDB\Driver\WriteConcern(MongoDB\Driver\WriteConcern::MAJORITY, 1000);
 
@@ -1627,7 +1690,7 @@ Class Mongo_db{
 	*
 	* @usage : $this->mongo_db->aggregate('foo', $ops = array());
 	*/
-	public function aggregate($collection, $operation)
+	public function aggregate($collection, $operation, $options = array())
 	{
         if (empty($collection))
 	 	{
@@ -1639,14 +1702,14 @@ Class Mongo_db{
 	 		show_error("Operation must be an array to perform aggregate.", 500);
 	 	}
 
-		$command = array('aggregate'=>$collection, 'pipeline'=>$operation);
+		$command = array_merge(array('aggregate'=>$collection, 'pipeline'=>$operation), $options);
 		return $this->command($command);		
     }
 
     public function aggregate_pipeline($collection, $operation)
     {
     	$array_result = $this->aggregate($collection, $operation);
-    	if($this->version > 3.59)
+    	if($this->version > 3.4)
     	{
     		$result = $array_result;
     	} 
@@ -1706,7 +1769,7 @@ Class Mongo_db{
 		}
 		else
 		{
-			return new MongoDB\BSON\UTCDateTime($stamp);
+			return new MongoDB\BSON\UTCDateTime($stamp * 1000);
 		}
 		
 	}
@@ -1759,7 +1822,12 @@ Class Mongo_db{
 		{
 			$new_id = $document['_id']->__toString();
 			unset($document['_id']);
-			$document['id'] = $new_id;
+			if(!empty($this->param["_id"])) {
+				$document['_id'] = new \stdClass();
+				$document['_id']->{'$id'} = $new_id;
+			} else {
+				$document['id'] = $new_id;
+			}
 		}
 		return $document;
 	}
@@ -1777,11 +1845,19 @@ Class Mongo_db{
         * @return object or array
 	*/
 	
-    public function command($command = array())
+    public function command($command = array(), $use_cursor = TRUE)
     {
 		try{
-			$command['cursor'] = new stdClass();
+			if($use_cursor) {
+				$command['cursor'] = new stdClass();
+			}
+
 			$cursor = $this->db->executeCommand($this->database, new MongoDB\Driver\Command($command));
+
+			if ($this->return_as == 'array') {
+				$cursor->setTypeMap(['root'=>'array','document' =>'array','array'=>'array']);
+			}
+
 			// Clear
 			$this->_clear();
 			$returns = array();
@@ -1799,7 +1875,7 @@ Class Mongo_db{
 					}
 					else
 					{
-						$returns[] = (array) $this->convert_document_id($doc);
+						$returns[] = $this->convert_document_id($doc);
 					}
 					$it->next();
 				}
@@ -1851,9 +1927,10 @@ Class Mongo_db{
 			show_error("Index could not be created to MongoDB Collection because no keys were specified", 500);
 		}
 
+		$nameArr = array();
 		foreach ($keys as $col => $val)
 		{
-			if($val == -1 || $val === FALSE || strtolower($val) == 'desc')
+			if($val === -1 || $val === FALSE || strtolower($val) === 'desc')
 			{
 				$keys[$col] = -1;
 			}
@@ -1861,12 +1938,15 @@ Class Mongo_db{
 			{
 				$keys[$col] = 1;
 			}
+			$nameArr[] = $col . "_" . $keys[$col];
 		}
-		$commond = array();
-		$commond['createIndexes'] = $collection;
-		$commond['indexes'] = array($keys);
+		$index = array_merge(array("key" => $keys, "name" => implode($nameArr, "_")), $options);
 
-		return $this->command($command);
+		$command = array();
+		$command['createIndexes'] = $collection;
+		$command['indexes'] = array($index);
+
+		return $this->command($command, FALSE);
 	}
 
 	/**
@@ -1887,14 +1967,14 @@ Class Mongo_db{
 			show_error("No Mongo collection specified to remove index from", 500);
 		}
 
-		if (empty($keys))
+		if (empty($name))
 		{
 			show_error("Index could not be removed from MongoDB Collection because no index name were specified", 500);
 		}
 
-		$commond = array();
-		$commond['dropIndexes'] = $collection;
-		$commond['index'] = $name;
+		$command = array();
+		$command['dropIndexes'] = $collection;
+		$command['index'] = $name;
 
 		return $this->command($command);
 	}
@@ -1914,8 +1994,8 @@ Class Mongo_db{
 		{
 			show_error("No Mongo collection specified to list all indexes from", 500);
 		}
-		$commond = array();
-		$commond['listIndexes'] = $collection;
+		$command = array();
+		$command['listIndexes'] = $collection;
 
 		return $this->command($command);
 	}	
@@ -1956,8 +2036,8 @@ Class Mongo_db{
 			show_error('Failed to drop MongoDB database because name is empty', 500);
 		}
 
-		$commond = array();
-		$commond['dropDatabase'] = 1;
+		$command = array();
+		$command['dropDatabase'] = 1;
 
 		return $this->command($command);
 	}
@@ -1977,8 +2057,8 @@ Class Mongo_db{
 			show_error('Failed to drop MongoDB collection because collection name is empty', 500);
 		}
 
-		$commond = array();
-		$commond['drop'] = $col;
+		$command = array();
+		$command['drop'] = $col;
 
 		return $this->command($command);
 	}
@@ -2028,6 +2108,33 @@ Class Mongo_db{
 		{
 			$this->updates[ $method ] = array();
 		}
+	}
+	/**
+	* --------------------------------------------------------------------------------
+	* @author: Dung
+	* --------------------------------------------------------------------------------
+	* 
+	* Run javascript code.
+	*/
+	function run($js)
+	{
+		$jscode = new \MongoDB\BSON\Javascript(<<<NOWDOC
+		$js
+NOWDOC
+);
+		$result = $this->command(['eval' => $jscode]);
+		if(!$result) throw new Exception("Error Processing", 1);
+		return $result[0];
+	}
+
+	function listCollections(){
+		$listdatabases = new MongoDB\Driver\Command(["listCollections" => 1]);
+		$res = $this->db->executeCommand($this->database, $listdatabases);
+		$listCollections = [];
+		foreach ($res->toArray() as $key => $obj) {
+			$listCollections[] = $obj->name;
+		}
+		return $listCollections;
 	}
 
 }

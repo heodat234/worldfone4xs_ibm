@@ -1,13 +1,5 @@
 #!/bin/sh
-BASEDIR="/var/www/html/worldfone4xs_ibm/cronjob/python/Loan"
-
-if [ $(ps -ef | grep -v grep | grep saveBlockCardReport.py | wc -l) -lt 1 ]; then
-   /usr/local/bin/python3.6 $BASEDIR/saveBlockCardReport.py > /dev/null 2>&1 &
-   echo "RUN $BASEDIR/saveBlockCardReport.py"
-else
-   echo "Worldfone ScanJob service is running"
-   exit 0
-fi
+BASEDIR=$(dirname "$0")
 
 if [ $(ps -ef | grep -v grep | grep saveDailyAssignment.py | wc -l) -lt 1 ]; then
    /usr/local/bin/python3.6 $BASEDIR/saveDailyAssignment.py > /dev/null 2>&1 &
@@ -73,23 +65,23 @@ fi
 #    exit 0
 # fi
 
-if [ $(ps -ef | grep -v grep | saveSmsDaily.py | wc -l) -lt 1 ]; then
-   /usr/local/bin/python3.6 $BASEDIR/saveSmsDaily.py > /dev/null 2>&1 &
-   echo "RUN $BASEDIR/saveSmsDaily.py"
-else
-   echo "Worldfone ScanJob service is running"
-   exit 0
-fi
+# if [ $(ps -ef | grep -v grep | saveSmsDaily.py | wc -l) -lt 1 ]; then
+#    /usr/local/bin/python3.6 $BASEDIR/saveSmsDaily.py > /dev/null 2>&1 &
+#    echo "RUN $BASEDIR/saveSmsDaily.py"
+# else
+#    echo "Worldfone ScanJob service is running"
+#    exit 0
+# fi
 
-if [ $(ps -ef | grep -v grep | saveCardLoanGroupReport.py | wc -l) -lt 1 ]; then
-   /usr/local/bin/python3.6 $BASEDIR/saveCardLoanGroupReport.py > /dev/null 2>&1 &
-   echo "RUN $BASEDIR/saveCardLoanGroupReport.py"
-else
-   echo "Worldfone ScanJob service is running"
-   exit 0
-fi
+# if [ $(ps -ef | grep -v grep | grep saveCardLoanGroupReport.py | wc -l) -lt 1 ]; then
+#    /usr/local/bin/python3.6 $BASEDIR/saveCardLoanGroupReport.py > /dev/null 2>&1 &
+#    echo "RUN $BASEDIR/saveCardLoanGroupReport.py"
+# else
+#    echo "Worldfone ScanJob service is running"
+#    exit 0
+# fi
 
-if [ $(ps -ef | grep -v grep | saveProdAllUser.py | wc -l) -lt 1 ]; then
+if [ $(ps -ef | grep -v grep | grep saveProdAllUser.py | wc -l) -lt 1 ]; then
    /usr/local/bin/python3.6 $BASEDIR/saveProdAllUser.py > /dev/null 2>&1 &
    echo "RUN $BASEDIR/saveProdAllUser.py"
 else

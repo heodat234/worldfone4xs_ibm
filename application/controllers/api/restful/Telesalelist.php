@@ -22,16 +22,21 @@ Class Telesalelist extends WFF_Controller {
 		try {
 			$request = json_decode($this->input->get("q"), TRUE);
 			$match = [];
+			$match_cdr = [];
+			$members = [];
 			if(!in_array("viewall", $this->data["permission"]["actions"])) {
                 $extension = $this->session->userdata("extension");
                 $this->load->model("group_model");
                 $members = $this->group_model->members_from_lead($extension);
                 $match = ["assign" => ['$in' => $members]];
+                $match_cdr = ["userextension" => ['$in' => $members]];
             }
 			$response = $this->crud->read($this->collection, $request, [], $match);
 			foreach ($response['data'] as &$value) {
-				$call = $this->mongo_db->where(array('customernumber' => $value['phone']  ))->select(array('starttime'))->order_by(array('starttime' => -1))->getOne($this->call_collection);
-				$value['starttime_call'] = $call['starttime'];
+				if (!empty($members) && isset($value['updatedBy']) && !in_array($value['updatedBy'], $members) ) {
+					$value['is_potential'] = false;
+					$value['result'] = '';
+				}
 			}
 			echo json_encode($response);
 		} catch (Exception $e) {

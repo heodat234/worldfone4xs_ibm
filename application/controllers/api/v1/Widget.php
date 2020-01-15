@@ -58,6 +58,8 @@ Class Widget extends CI_Controller {
         $navigatorData = $this->language_model->translate($navigatorData, "SIDEBAR");
         if(isset($request["filter"], $request["filter"]["filters"], $request["filter"]["filters"][0])) {
             $search = $request["filter"]["filters"][0]["value"];
+            // Escape /
+            $search = str_replace('/', '\/', $search);
 
             foreach ($navigatorData as $key => $doc) {
                 if((preg_match("/{$search}/i", $doc["name"]) || preg_match("/{$search}/i", $doc["uri"])) && !empty($doc["visible"])) {

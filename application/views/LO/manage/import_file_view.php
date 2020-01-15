@@ -22,13 +22,50 @@ var Config = {
         },{
             field: "begin_import",
             title: "@Import at@",
-            template: data => gridTimestamp(data.begin_import),
+            template: data => gridTimestamp(data.begin_import, "dd/MM/yy H:mm"),
             width: 140
         },{
             field: "status",
             title: "@Result@",
+            template: function(data) {
+                var html  = "";
+                switch(data.status) {
+                    case 0:
+                        html  = `<div class="progress" style="margin-bottom: 0">
+                          <div class="progress-bar progress-bar-danger" role="progressbar" style="width: 100%">
+                            Failure
+                          </div>
+                        </div>`;
+                        break;
+                    case 1:
+                        html  = data.total ? `<div class="progress" style="margin-bottom: 0">
+                          <div class="progress-bar ${data.complete != data.total ? 'progress-bar-warning progress-bar-striped active' : 'progress-bar-success'}" role="progressbar" style="width: 100%">
+                            Complete ${data.complete} records
+                          </div>
+                        </div>`: 
+                        `<div class="progress" style="margin-bottom: 0">
+                          <div class="progress-bar progress-bar-warning progress-bar-striped active" role="progressbar" style="width: 100%">
+                            Progressing complete ${data.complete} records
+                          </div>
+                        </div>`;
+                        break;
+                    case 2: default:
+                        html  =  data.total ? `<div class="progress" style="margin-bottom: 0">
+                          <div class="progress-bar progress-bar-info progress-bar-striped active" role="progressbar" style="width: ${data.total ? (data.complete*100 / data.total) : 0}%">
+                            ${data.total ? (data.complete*100 / data.total) : 0}%
+                          </div>
+                        </div>`: 
+                        `<div class="progress" style="margin-bottom: 0">
+                          <div class="progress-bar progress-bar-warning progress-bar-striped active" role="progressbar" style="width: 100%">
+                            Progressing complete ${data.complete} records
+                          </div>
+                        </div>`;
+                        break;
+                }
+                return html;
+            },
             values: [{text: "@Failed@", value: 0},{text: "@Success@", value: 1},{text: "@Processing@", value: 2}],
-            width: 140
+            width: 240
         },{
             field: "description",
             title: "@Description@",
@@ -86,9 +123,14 @@ function importFile(ele) {
         if (sure) {
             var uid = $(ele).closest("tr").data('uid');
             var dataItem = Table.dataSource.getByUid(uid);
-            $.get(ENV.vApi + "import/reImport/" + dataItem.id, function(res) {
-                notification.show(res.message, res.status ? "success" : "error")
-            })
+            $.get({
+                url: ENV.vApi + "import/reImport/" + dataItem.id, 
+                global: false,
+                success: function(res) {
+                    notification.show(res.message, res.status ? "success" : "error")
+                }
+            });
+            Table.dataSource.read();
         }
     });
 }

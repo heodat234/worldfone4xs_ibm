@@ -89,104 +89,7 @@
                         <div class="panel panel-primary">
                             <div class="panel-heading">@APPOINTMENT HISTORY@</div>
                             <div class="panel-body" style="padding: 0">
-                                <div data-role="grid"
-                                    data-pageable="{refresh: true}"
-                                    data-no-records="{
-                                        template: `<h2 class='text-danger'>@NO DATA@</h2>`
-                                    }"
-                                    data-columns='[
-                                        {
-                                            title: "@Created at@",
-                                            field: "created_at",
-                                            headerAttributes: { style: "white-space: normal"},
-                                            width: "110px",
-                                            filterable: false,
-                                            template: data => gridDate(data.appointment_date),
-                                        },{
-                                            title: "@Telesale code@",
-                                            field: "tl_code",
-                                            headerAttributes: { style: "white-space: normal"},
-                                            width: "110px",
-                                            filterable: false
-                                        },{
-                                            field: "tl_name",
-                                            title: "@Telesale name@",
-                                            headerAttributes: { style: "white-space: normal"},
-                                            width: "110px",
-                                            filterable: false
-                                        },{
-                                            title: "@Customer@",
-                                            columns: [{
-                                                field: "customer_info.cmnd",
-                                                title: "@National ID@",
-                                                headerAttributes: { style: "white-space: normal"},
-                                                width: "110px",
-                                                filterable: false
-                                            }, {
-                                                field: "customer_info.name",
-                                                title: "@Name@",
-                                                width: "200px",
-                                                headerAttributes: { style: "white-space: normal"},
-                                                filterable: false
-                                            }, {
-                                                field: "customer_info.phone",
-                                                title: "@Phone@",
-                                                width: "150px",
-                                                headerAttributes: { style: "white-space: normal"},
-                                                filterable: false
-                                            }]
-                                        },{
-                                            field: "appointment_date",
-                                            title: "@Appointment date@",
-                                            headerAttributes: { style: "white-space: normal"},
-                                            width: "150px",
-                                            template: data => gridDate(data.appointment_date, "dd/MM/yyyy"),
-                                            filterable: false
-                                        },{
-                                            title: "@Loan Counter@",
-                                            columns: [{
-                                                field: "dealer_code",
-                                                title: "@Code@",
-                                                headerAttributes: { style: "white-space: normal"},
-                                                width: "100px",
-                                                filterable: false
-                                            }, {
-                                                field: "dealer_name",
-                                                title: "@Name@",
-                                                headerAttributes: { style: "white-space: normal"},
-                                                width: "200px",
-                                                filterable: false
-                                            }, {
-                                                field: "dealer_address",
-                                                title: "@Address@",
-                                                headerAttributes: { style: "white-space: normal"},
-                                                width: "250px",
-                                                filterable: false
-                                            }]
-                                        },{
-                                            title: "SC",
-                                            columns: [{
-                                                field: "sc_code",
-                                                title: "@Code@",
-                                                headerAttributes: { style: "white-space: normal"},
-                                                width: "100px",
-                                                filterable: false
-                                            }, {
-                                                field: "sc_name",
-                                                title: "@Name@",
-                                                headerAttributes: { style: "white-space: normal"},
-                                                width: "200px",
-                                                filterable: false
-                                            }, {
-                                                field: "sc_phone",
-                                                title: "@Phone@",
-                                                headerAttributes: { style: "white-space: normal"},
-                                                width: "150px",
-                                                filterable: false
-                                            }]
-                                        }
-                                        ]'
-                                  data-bind="source: appointment_log"></div>
+                                <div id="grid_app"></div>
                             </div>
                         </div>
                     </div>
@@ -532,7 +435,7 @@ var Detail = function() {
             sort: {field: "starttime", dir: "desc"},
             pageSize: 5,
             transport: {
-                read: `${ENV.restApi}cdr`,
+                read: ENV.vApi+'cdr/TS_index',
                 parameterMap: parameterMap
             },
             schema: {
@@ -547,29 +450,6 @@ var Detail = function() {
             }
         }),
         
-        appointment_log: new kendo.data.DataSource({
-            serverFiltering: true,
-            serverPaging: true,
-            serverSorting: true,
-            // filter: {field: "cmnd", operator: "eq", value: "5d81d7c71ef2b43aff4326ac"},
-            pageSize: 5,
-            transport: {
-                read: ENV.restApi + "appointment_log",
-                parameterMap: parameterMap
-            },
-            schema: {
-                data: "data",
-                total: "total",
-                parse: function(response) {
-                    response.data.map(doc =>  {
-                        doc.createdAtText = gridTimestamp(doc.createdAt);
-                        doc.customerFormat = doc.customerFormat ? doc.customerFormat.join(", ") : "";
-                    })
-                    return response
-                }
-            },
-            error: errorDataSource
-        }),
         
     });
     var model = kendo.observable(observable);
@@ -655,50 +535,243 @@ var Detail = function() {
                         } else $("#customer-sign-link").html(`<i>@No data@</i>`);
                 })
             }
+            var appointment_log = this.appointment_log = new kendo.data.DataSource({
+                serverFiltering: true,
+                serverPaging: true,
+                serverSorting: true,
+                // filter: {field: "cmnd", operator: "eq", value: "5d81d7c71ef2b43aff4326ac"},
+                pageSize: 5,
+                transport: {
+                    read: ENV.restApi + "appointment_log",
+                    parameterMap: parameterMap
+                },
+                schema: {
+                    data: "data",
+                    total: "total",
+                    parse: function(response) {
+                        response.data.map(function(doc) {
+                            doc.appointment_date = doc.appointment_date ? new Date(doc.appointment_date * 1000) : undefined;
+                            doc.created_at = doc.created_at ? new Date(doc.created_at * 1000) : undefined;
+                            doc.customer_info = (typeof doc.customer_info !== 'undefined') ? doc.customer_info : {};
+                            doc.updated_at = doc.updated_at ? new Date(doc.updated_at * 1000) : undefined;
+                            return doc;
+                        });
+                        return response
+                    }
+                },
+                error: errorDataSource
+            });
+            var grid = this.grid = $("#grid_app").kendoGrid({
+                 dataSource: appointment_log,
+                 excel: {allPages: true},
+                 excelExport: function(e) {
+                    var sheet = e.workbook.sheets[0];
+                    for (var rowIndex = 1; rowIndex < sheet.rows.length; rowIndex++) {
+                      var row = sheet.rows[rowIndex];
+                      for (var cellIndex = 0; cellIndex < row.cells.length; cellIndex ++) {
+                          if(row.cells[cellIndex].value instanceof Date) {
+                              row.cells[cellIndex].format = "dd-MM-yy hh:mm:ss"
+                          }
+                      }
+                    }
+                 },
+                 resizable: true,
+                 pageable: {
+                    refresh: true,
+                    pageSizes: [5, 10, 20, 50, 100],
+                    input: true,
+                    messages: KENDO.pageableMessages ? KENDO.pageableMessages : {}
+                 },
+                 sortable: true,
+                 scrollable: true,
+                 columns: [
+                    {
+                        title: "@Created at@",
+                        field: "created_at",
+                        headerAttributes: { style: "white-space: normal"},
+                        width: "110px",
+                        filterable: false,
+                        template: data => gridDate(data.created_at),
+                    },{
+                        title: "@Telesale code@",
+                        field: "tl_code",
+                        headerAttributes: { style: "white-space: normal"},
+                        width: "110px",
+                        filterable: true
+                    },{
+                        field: "tl_name",
+                        title: "@Telesale name@",
+                        headerAttributes: { style: "white-space: normal"},
+                        width: "110px",
+                        filterable: true
+                    },{
+                        title: "@Customer@",
+                        columns: [{
+                            field: "id_no",
+                            title: "@National ID@",
+                            headerAttributes: { style: "white-space: normal"},
+                            width: "110px",
+                            filterable: true
+                        }, {
+                            field: "name",
+                            title: "@Name@",
+                            width: "200px",
+                            headerAttributes: { style: "white-space: normal"},
+                            filterable: true
+                        }, {
+                            field: "customer_info.phone",
+                            title: "@Phone@",
+                            width: "150px",
+                            headerAttributes: { style: "white-space: normal"},
+                            filterable: false,
+                            template: function(dataItem) {
+                                return gridPhone(dataItem['phone'], dataItem['id'], 'customer');
+                            }
+                        }, {
+                            field: "note",
+                            title: "@Note@",
+                            width: "200px",
+                            headerAttributes: { style: "white-space: normal"},
+                            filterable: false
+                        }]
+                    },{
+                        field: "appointment_date",
+                        title: "@Appointment date@",
+                        headerAttributes: { style: "white-space: normal"},
+                        width: "150px",
+                        template: data => gridDate(data.appointment_date, "dd/MM/yyyy"),
+                        filterable: false
+                    },{
+                        title: "@Loan Counter@",
+                        columns: [{
+                            field: "dealer_code",
+                            title: "@Code@",
+                            headerAttributes: { style: "white-space: normal"},
+                            width: "100px",
+                            filterable: true
+                        }, {
+                            field: "dealer_name",
+                            title: "@Name@",
+                            headerAttributes: { style: "white-space: normal"},
+                            width: "200px",
+                            filterable: true
+                        }, {
+                            field: "dealer_address",
+                            title: "@Address@",
+                            headerAttributes: { style: "white-space: normal"},
+                            width: "250px",
+                            filterable: true
+                        }]
+                    },{
+                        title: "SC",
+                        columns: [{
+                            field: "sc_code",
+                            title: "@Code@",
+                            headerAttributes: { style: "white-space: normal"},
+                            width: "100px",
+                            filterable: true
+                        }, {
+                            field: "sc_name",
+                            title: "@Name@",
+                            headerAttributes: { style: "white-space: normal"},
+                            width: "200px",
+                            filterable: true
+                        }, {
+                            field: "sc_phone",
+                            title: "@Phone@",
+                            headerAttributes: { style: "white-space: normal"},
+                            width: "150px",
+                            filterable: true,
+                            template: function(dataItem) {
+                                if(typeof dataItem['sc_id'] != 'undefined' && dataItem['sc_id'] && typeof dataItem['sc_phone'] != 'undefined' && dataItem['sc_phone']) {
+                                    return gridPhone(dataItem['sc_phone'].replace(/\s/g, ''), dataItem['sc_id'], 'sc');
+                                }
+                                else {
+                                    if(typeof dataItem['sc_phone'] != 'undefined' && dataItem['sc_phone']) {
+                                        return dataItem['sc_phone'].replace(/\s/g, '');
+                                    }
+                                    else {
+                                        return '<span></span>';
+                                    }
+                                }
+                            }
+                        }]
+                    }, {
+                        field: "last_modified",
+                        title: "@Last modified@",
+                        width: "150px",
+                        headerAttributes: { style: "white-space: normal"},
+                        filterable: true,
+                        template: function(dataItem) {
+                            if(typeof dataItem.updated_at != 'undefined') {
+                                return gridDate(dataItem.updated_at);
+                            }
+                            else {
+                                return gridDate(dataItem.created_at);
+                            }
+                        }
+                    },],
+                  noRecords: {
+                      template: `<h2 class='text-danger'>${KENDO.noRecords}</h2>`
+                  }
+              }).data("kendoGrid");
 
             // CDR
+            
             var filter = {
                 logic: "and",
                 filters: [
                     {field: "customernumber", operator: "eq", value: dataItemFull.phone},
-                    {field: "userextension", operator: "eq", value: Config.extension}
+                    // {field: "userextension", operator: "eq", value: Config.extension}
                 ]
             };
-
             this.model.callHistory.filter(filter);
 
+
+            
             var filter_appointment = {
                 logic: "and",
                 filters: [
-                    {field: "customer_info.id_no", operator: "eq", value: dataItemFull.id_no},
-                    {field: "tl_code", operator: "eq", value: Config.extension}
+                    {field: "cif", operator: "eq", value: dataItemFull.cif},
+                    // {field: "tl_code", operator: "eq", value: Config.extension}
                 ]
             };
-            this.model.appointment_log.filter(filter_appointment);
+            // }
+            appointment_log.filter(filter_appointment);
 
-
-            var interactiveFilters = [{
+            var interactiveFilters = {
                 logic: "and",
                 filters: [
-                    {field: "foreign_id", operator: "eq", value: Config.id},
-                    {field: "active", operator: "eq", value: false}
+                    {field: "customernumber", operator: "eq", value: dataItemFull.phone},
+                    // {field: "tl_code", operator: "eq", value: Config.extension}
                 ]
-            }];
-            if(dataItemFull.mobile_phone_no) {
-                interactiveFilters.push({
-                    logic: "and",
-                    filters: [
-                        {field: "type", operator: "eq", value: "call"},
-                        {field: "foreign_key", operator: "eq", value: dataItemFull.mobile_phone_no},
-                        {field: "active", operator: "eq", value: true}
-                    ]
-                })
-            }
+            };
+            // }
+            this.model.interactiveDataSource.filter(interactiveFilters);
+
+
+            // var interactiveFilters = [{
+            //     logic: "and",
+            //     filters: [
+            //         {field: "foreign_id", operator: "eq", value: Config.id},
+            //         {field: "active", operator: "eq", value: false}
+            //     ]
+            // }];
+            // if(dataItemFull.phone) {
+            //     interactiveFilters.push({
+            //         logic: "and",
+            //         filters: [
+            //             {field: "type", operator: "eq", value: "call"},
+            //             {field: "foreign_key", operator: "eq", value: dataItemFull.phone},
+            //             {field: "active", operator: "eq", value: true}
+            //         ]
+            //     })
+            // }
             
-            this.model.interactiveDataSource.filter({
-                logic: "or",
-                filters: interactiveFilters
-            });
+            // this.model.interactiveDataSource.filter({
+            //     logic: "or",
+            //     filters: interactiveFilters
+            // });
             return dataItemFull;
         },
         init: function() {
@@ -762,6 +835,8 @@ var Detail = function() {
         }
     }
 }();
+
+
 
 Detail.init();
 

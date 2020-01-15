@@ -29,10 +29,10 @@
 
         <!-- jQuery first for code jQuery in Main -->
 
-        <?php if(!empty($js_nodefer)) { foreach($js_nodefer as $file){ echo '<script type="text/javascript" src="'.$file.'"></script>'; } } ?>
+        <?php if(!empty($js_nodefer)) { foreach($js_nodefer as $file){ echo '<script type="text/javascript" src="'.$file.'?'.$template["version"].'"></script>'; } } ?>
 
         <!-- JS -->
-        <?php foreach($js as $file){ echo '<script type="text/javascript" defer src="'.$file.'"></script>'; } ?>
+        <?php foreach($js as $file){ echo '<script type="text/javascript" defer src="'.$file.'?'.$template["version"].'"></script>'; } ?>
         <!-- END JS -->
     </head>
     

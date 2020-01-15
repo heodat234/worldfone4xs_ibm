@@ -8,7 +8,7 @@
 	<div class="form-group">
         <label class="control-label col-xs-4">@Payment date@</label>
         <div class="col-xs-8">
-			<input data-role="datepicker" data-format="dd/MM/yy" name="payment_date" data-bind="value: action.payment_date" style="width: 100%">
+			<input data-role="datepicker" data-format="dd/MM/yy" name="payment_date" data-bind="value: action.payment_date, max: maxDate" style="width: 100%" required>
 		</div>
 	</div>
 </div>
@@ -30,7 +30,6 @@
 	<div class="form-group">
         <label class="control-label col-xs-4">@Reason for nonpayment@</label>
         <div class="col-xs-8">
-			<input class="k-textbox" name="reason_nonpayment" data-bind="value: action.reason_nonpayment" style="width: 100%">
 			<input data-role="dropdownlist" name="actionCode"
 				data-filter="contains"
 				data-value-primitive="true"

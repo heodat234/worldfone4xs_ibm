@@ -123,7 +123,9 @@ Class Diallist_detail extends WFF_Controller {
 					$dialQueue["createdAt"] = $this->mongo_db->date();
 					if($diallist["team"] == "SIBS") {
 
-						if($data["action_code"] == "CHECK") {
+						if($data["action_code"] == "Callback") {
+							$dialQueue["priority"] = 50;
+						} elseif($data["action_code"] == "CHECK") {
 							$dialQueue["priority"] = 100;
 						} elseif(isset($data["PRODGRP_ID"]) && in_array($data["PRODGRP_ID"], ["401","701","103"])) {
 							$dialQueue["priority"] = 200;
@@ -182,7 +184,7 @@ Class Diallist_detail extends WFF_Controller {
 						// REFERENCE
 
 						if(!empty($diallistDetail["LIC_NO"])) {
-							$REFS = $this->mongo->where("LIC_NO", $diallistDetail["LIC_NO"])->get(getCT("Relationship"));
+							$REFS = $this->mongo_db->where("LIC_NO", $diallistDetail["LIC_NO"])->get(getCT("Relationship"));
 							foreach ($REFS as $doc) {
 								if(!empty($doc["phone"]) && strlen($doc["phone"]) > 7) {
 									$dialQueue["phone"] = $doc["phone"];
@@ -202,7 +204,9 @@ Class Diallist_detail extends WFF_Controller {
 			$priority = 100;
 			$action_arr = ['CHECK','LOC','NOT','BPTP','PTP','LM'];
 			$idx = array_search($data["action_code"], $action_arr);
-			if($idx !== FALSE) {
+			if($data["action_code"] == "Callback") {
+				$priority = 50;
+			}elseif($idx !== FALSE) {
 				$priority += $idx * 10;
 			} else {
 				$priority += count($action_arr) * 10;
@@ -229,5 +233,38 @@ Class Diallist_detail extends WFF_Controller {
 			}
 		}                        
 		echo json_encode($response);
+	}
+	
+	function changeDiallist()
+	{
+		try {
+			$data = json_decode(file_get_contents('php://input'), TRUE);
+			if(empty($data['ids']) || empty($data['diallist_id'])) throw new Exception("Lack of input", 1);
+			$ids 			= $data['ids'];
+			$diallist_id 	= $data['diallist_id'];
+			
+			$diallist = $this->mongo_db->where_id($diallist_id)->getOne('LO_Diallist');
+
+			$lastDiallistDetail = $this->mongo_db->where_object_id("diallist_id",$diallist_id)->order_by(["index"=>-1])->getOne($this->collection);
+			$lastIndex = ($lastDiallistDetail && isset($lastDiallistDetail["index"])) ? $lastDiallistDetail["index"] : 1;
+			foreach ($ids as $id) {
+				$this->mongo_db->where_id($id)->update($this->collection, 
+					array(
+
+						'$set' => array(
+							"diallist_id" 	=> new MongoDB\BSON\ObjectId($diallist_id),
+							"index"			=> ++$lastIndex,
+							'event'			=> 'Change diallist',
+							'owner_group_remember' 	=> $diallist['group_name'],
+						),
+
+						'$unset' => array('assign' => 1),
+					)
+				);
+			}
+			echo json_encode(array("status" => 1, "message" => count($ids)));
+		} catch (Exception $e) {
+			echo json_encode(array("status" => 0, "message" => $e->getMessage()));
+		}
 	}
 }

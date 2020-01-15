@@ -24,7 +24,7 @@
 					schema: {
 						data: "data",
 						parse: function(res) {
-							res.data.push({name: "<span class='text-danger'>@You don't find any suitable result@. @Try advanced search@<span>.", type: "AdvancedSearch", typeText: "<span class='text-danger'>@Click here@!</span>"});
+							/*res.data.push({name: "<span class='text-danger'>@You don't find any suitable result@. @Try advanced search@<span>.", type: "AdvancedSearch", typeText: "<span class='text-danger'>@Click here@!</span>"});*/
 							return res;
 						}
 					}

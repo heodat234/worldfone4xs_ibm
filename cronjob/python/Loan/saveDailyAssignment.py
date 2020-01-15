@@ -6,6 +6,7 @@ import time
 import ntpath
 import json
 import calendar
+import traceback
 from helper.mongod import Mongodb
 from datetime import datetime
 from datetime import date
@@ -34,7 +35,7 @@ diallist_detail_collection  = common.getSubUser(subUserType, 'Diallist_detail')
 cdr_collection       = common.getSubUser(subUserType, 'worldfonepbxmanager')
 jsonData_collection  = common.getSubUser(subUserType, 'Jsondata')
 user_collection      = common.getSubUser(subUserType, 'User')
-wo_collection        = common.getSubUser(subUserType, 'WO_monthly')
+relationship_collection        = common.getSubUser(subUserType, 'Relationship')
 action_code_collection        = common.getSubUser(subUserType, 'Action_code')
 log         = open(base_url + "cronjob/python/Loan/log/DailyAssignment_log.txt","a")
 
@@ -47,7 +48,7 @@ try:
    log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': Start Import' + '\n')
 
    today = date.today()
-   # today = datetime.strptime('21/12/2019', "%d/%m/%Y").date()
+   # today = datetime.strptime('13/01/2020', "%d/%m/%Y").date()
 
    day = today.day
    month = today.month
@@ -74,343 +75,175 @@ try:
    users = _mongodb.get(MONGO_COLLECTION=user_collection,SELECT=['extension','agentname'],WHERE={'active': 'true'})
    i = 1
    # LNJC05
+
+   # diallistInfo = mongodb.getOne(MONGO_COLLECTION=diallist_detail_collection, WHERE={'$or' : [{ 'mobile_num' : str('0338001318')}, { 'phone' : str('0338001318')},  { 'other_phones' :str('0338001318')} ],  "createdAt" : {'$gte' : 1578502800,'$lte' : 1578589199}, 'assign' : '2324' }) 
+   # print(diallistInfo)
+
    aggregate_pipeline = [
       {
-           "$project":
+           "$match":
            {
-               "account_number": 1,
-               "mobile_num": 1,
-               "group_id": 1,
-               "cus_name": 1,
-               "due_date": 1,
-               "loan_overdue_amount": 1,
-               "current_balance": 1,
-               "outstanding_principal": 1,
-               "officer_id": 1,
+               "starttime" : {'$gte' : todayTimeStamp,'$lte' : endTodayTimeStamp},
+               "direction" : 'outbound'
+               # '$or' : [{
+               #      "action_code" : {'$exists' : 'true'},
+               #      "customer.action_code" : {'$exists' : 'true'},
+               #  }]
+               
            }
-       }
-                # {
-                #     "$lookup":
-                #     {
-                #         "from": action_code_collection,
-                #         "localField": "account_number",
-                #         "foreignField": "account_number",
-                #         "as": "detail"
-                #     }
-                # }
+      }
+            
    ]
-   data = mongodb.aggregate_pipeline(MONGO_COLLECTION=lnjc05_collection,aggregate_pipeline=aggregate_pipeline)
+   data = mongodb.aggregate_pipeline(MONGO_COLLECTION=cdr_collection,aggregate_pipeline=aggregate_pipeline)
+   # unique_phone_arr = []
+   # if dataPhone != None:
+   #    for phone in dataPhone:
+   #       unique_phone_arr = phone['phone_arr']
+   # print(len(list(data)))
+   if data != None:
+      for cdr in data:
+         temp = {}
+         temp['export_date']     = todayString
+         temp['index']           = i
+         temp['contacted']       = cdr['customernumber']
+         if 'action_code' in cdr.keys():
+           temp['action_code']     = cdr['action_code'] 
+        
+         user = _mongodb.getOne(MONGO_COLLECTION=user_collection, WHERE={'extension': str(cdr['userextension'])},SELECT=['agentname'])
+         if user != None:
+            temp['assign']       = cdr['userextension'] + '-' + user['agentname']
 
-   for row in data:
-      action_code = mongodb.get(MONGO_COLLECTION=action_code_collection,WHERE={'account_number': str(row['account_number']), 'createdAt': {'$gte': todayTimeStamp}, 'createdAt': {'$lte': endTodayTimeStamp}},SORT=([('_id', -1)]),SKIP=0, TAKE=int(10000))
-      if action_code != None:
-         for detail in action_code:
-            temp = {}
-            temp['export_date']     = now.strftime("%d/%m/%Y")
-            temp['index']           = i
-            temp['account_number']  = row['account_number']
-            temp['phone']           = row['mobile_num']
-            temp['group_id']        = row['group_id']
-            temp['name']            = row['cus_name']
-            temp['overdue_date']    = row['due_date']
-            temp['loan_overdue_amount']      = row['loan_overdue_amount']
-            temp['current_balance']          = row['current_balance']
-            temp['outstanding_principal']    = row['outstanding_principal']
-
-            dialistDetail = mongodb.getOne(MONGO_COLLECTION=diallist_detail_collection,WHERE={'account_number': str(row['account_number']), 'createdAt': {'$gte': todayTimeStamp}, 'createdAt': {'$lte': endTodayTimeStamp}}, SELECT=['assign'])
-            if dialistDetail != None:
-               if 'assign' in dialistDetail.keys():
-                  for user in list(users):
-                     if user['extension'] == dialistDetail['assign']:
-                        temp['assign']   = dialistDetail['assign']+' '+user['agentname']
+         groupInfo = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Group'), WHERE={'members': str(cdr['userextension'])},SELECT=['lead'],SORT=[("updatedAt", -1)], SKIP=0, TAKE=1)
+         if groupInfo != None:
+            for group in groupInfo:
+               if 'lead' in group.keys():
+                  user1 = _mongodb.getOne(MONGO_COLLECTION=user_collection, WHERE={'extension': str(group['lead'])},SELECT=['agentname'])
+                  if user1 != None:
+                     temp['chief']       = group['lead'] + '-' + user1['agentname']
                else:
-                  extension = row['officer_id']
-                  for user in list(users):
-                     if user['extension'] == extension[6:9]:
-                        temp['assign']   = extension[6:9]+' '+user['agentname']
+                  user1 = _mongodb.getOne(MONGO_COLLECTION=user_collection, WHERE={'extension': str(cdr['userextension'])},SELECT=['agentname'])
+                  if user1 != None:
+                     temp['chief']       = cdr['userextension'] + '-' + user1['agentname']
 
-            temp['chief']   = ''
-            if 'action_code' in detail.keys():
-               temp['action_code']          = detail['action_code']
+         diallistInfo = None
+         if 'dialid' in cdr.keys() and 'customer' not in cdr.keys():
+            if len(str(cdr['dialid'])) == 24:
+               diallistInfo = mongodb.getOne(MONGO_COLLECTION=diallist_detail_collection, WHERE={'_id': ObjectId(str(cdr['dialid'])),  "createdAt" : {'$gte' : todayTimeStamp,'$lte' : endTodayTimeStamp}}) 
+
+         if 'dialid' not in cdr.keys():
+            diallistInfo = mongodb.getOne(MONGO_COLLECTION=diallist_detail_collection, WHERE={'$or' : [{ 'mobile_num' : str(cdr['customernumber'])}, { 'phone' : str(cdr['customernumber'])},  { 'other_phones' :str(cdr['customernumber'])} ],  "createdAt" : {'$gte' : todayTimeStamp,'$lte' : endTodayTimeStamp}, 'assign' : str(cdr['userextension']) }) 
+            # diallistInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Customer'), WHERE={'$or' : [{ 'mobile_num' : str(cdr['customernumber'])}, { 'phone' : str(cdr['customernumber'])},  { 'other_phones' :str(cdr['customernumber'])} ],  'assign' : str(cdr['userextension']) }) 
+               # if diallistInfo == None:
+               #    relationkshipInfo = mongodb.getOne(MONGO_COLLECTION=relationship_collection, WHERE={'phone': {'$regex' :str(cdr['customernumber'])}},SELECT=['LIC_NO'])
+               #    if relationkshipInfo != None:
+               #       temp['LIC_NO'] = relationkshipInfo['LIC_NO']
+
+               #       diallistInfo = mongodb.getOne(MONGO_COLLECTION=diallist_detail_collection, WHERE={'LIC_NO': str(temp['LIC_NO']),  "createdAt" : {'$gte' : todayTimeStamp,'$lte' : endTodayTimeStamp}})
+         if 'customer' in cdr.keys():
+            if 'action_code' in cdr['customer'].keys():
+               temp['action_code']     = cdr['customer']['action_code'] 
+
+            temp['account_number']  = cdr['customer']['account_number']
+            temp['name']            = cdr['customer']['cus_name']
+            temp['overdue_date']             = cdr['customer']['overdue_date'] if 'overdue_date' in cdr['customer'].keys() else cdr['customer']['due_date']
+            temp['loan_overdue_amount']      = cdr['customer']['overdue_amt'] if 'overdue_amt' in cdr['customer'].keys() else cdr['customer']['loan_overdue_amount']
+            temp['current_balance']          = cdr['customer']['cur_bal'] if 'cur_bal' in cdr['customer'].keys() else cdr['customer']['current_balance']
+            temp['group_id']                 = cdr['customer']['group_id'].replace('-','')
+
+            if 'overdue_indicator' in cdr['customer']:
+               sbv = mongodb.getOne(MONGO_COLLECTION=sbv_collection, WHERE={'contract_no': str(temp['account_number']), "created_at" : {'$gte' : todayTimeStamp,'$lte' : endTodayTimeStamp} },SELECT=['card_type','ob_principal_sale','ob_principal_cash'])
+               if sbv != None:
+                  temp['outstanding_principal']       = float(sbv['ob_principal_sale']) + float(sbv['ob_principal_cash'])
+                  if int(sbv['card_type']) < 100:
+                     product_id = '301'
+                  else:
+                     product_id = '302'
             else:
-               temp['action_code']          = ''
+               product_id                       = cdr['customer']['PRODGRP_ID']
+               temp['outstanding_principal']    = cdr['customer']['outstanding_principal'] if 'outstanding_principal' in cdr['customer'].keys() else ''
 
-            temp['note']            = detail['note'] if 'note' in detail.keys() else ''
-            for field in list(lawsuit_fields['data']):
-               if field['field'] in detail.keys():
-                  temp[field['field']]          = detail[field['field']]
-            if 'promised_amount' in detail.keys():
-               temp['promised_amount']          = detail['promised_amount']
-            if 'reason_nonpayment' in detail.keys():
-               temp['reason_nonpayment']          = detail['reason_nonpayment']
-            if 'promised_person' in detail.keys():
-               temp['promised_person']          = detail['promised_person']
-            if 'promised_date' in detail.keys():
-               temp['promised_date']          = detail['promised_date']
-            if 'death_info' in detail.keys():
-               temp['death_info']          = detail['death_info']
-            if 'contact_person' in detail.keys():
-               temp['contact_person']          = detail['contact_person']
-            if 'reason_die' in detail.keys():
-               temp['reason_die']          = detail['reason_die']
-            if 'contact_person_phone' in detail.keys():
-               temp['contact_person_phone']          = detail['contact_person_phone']
-            if 'payment_amount' in detail.keys():
-               temp['payment_amount']          = detail['payment_amount']
-            if 'payment_date' in detail.keys():
-               temp['payment_date']          = detail['payment_date']
-            if 'payment_person' in detail.keys():
-               temp['payment_person']          = detail['payment_person']
-            if 'channel' in detail.keys():
-               temp['channel']          = detail['channel']
-            if 'promised_person_phone' in detail.keys():
-               temp['promised_person_phone']          = detail['promised_person_phone']
-            if 'fc_name' in detail.keys():
-               temp['fc_name']          = detail['fc_name']
-            if 'report_date' in detail.keys():
-               temp['report_date']          = detail['report_date']
-            for field_raa in list(raa_fields['data']):
-               if field_raa['field'] in detail.keys():
-                  temp[field_raa['field']]          = detail[field_raa['field']]
-               # print(x['field'])
 
-            temp['contacted'] = mongodb.count(MONGO_COLLECTION=cdr_collection,WHERE={'customernumber': str(row['mobile_num']), 'starttime': {'$gte': todayTimeStamp}, 'starttime': {'$lte': endTodayTimeStamp}})
-            zaccf = mongodb.getOne(MONGO_COLLECTION=zaccf_collection, WHERE={'account_number': str(row['account_number'])},SELECT=['PRODGRP_ID'])
-            if zaccf != None:
-               temp['product_id']          = zaccf['PRODGRP_ID']
+            product = mongodb.getOne(MONGO_COLLECTION=product_collection, WHERE={'code': str(product_id)},SELECT=['name'])
+            if product != None:
+               temp['product_id'] = product['name']
 
-            temp['createdAt'] = todayTimeStamp
-            temp['createdBy'] = 'system'
-            # mongodb.insert(MONGO_COLLECTION=collection, insert_data=temp)
-            insertData.append(temp)
-            i = i+1
-            # break
+
+         if diallistInfo != None:
+            temp['account_number']  = diallistInfo['account_number']
+            temp['name']            = diallistInfo['cus_name']
+            temp['overdue_date']             = diallistInfo['overdue_date'] if 'overdue_date' in diallistInfo.keys() else diallistInfo['due_date']
+            temp['loan_overdue_amount']      = diallistInfo['overdue_amt'] if 'overdue_amt' in diallistInfo.keys() else diallistInfo['loan_overdue_amount']
+            temp['current_balance']          = diallistInfo['cur_bal'] if 'cur_bal' in diallistInfo.keys() else diallistInfo['current_balance']
+            temp['group_id']                 = diallistInfo['group_id'].replace('-','') if 'group_id' in diallistInfo.keys() else ''
+
+            if 'overdue_indicator' in diallistInfo:
+               sbv_stored = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'SBV_Stored'), WHERE={'contract_no': str(temp['account_number'])})
+               if sbv_stored != None:
+                  temp['group_id']                 = sbv_stored['overdue_indicator'] + sbv_stored['kydue']
+
+               sbv = mongodb.getOne(MONGO_COLLECTION=sbv_collection, WHERE={'contract_no': str(temp['account_number']), "created_at" : {'$gte' : todayTimeStamp,'$lte' : endTodayTimeStamp} },SELECT=['card_type','ob_principal_sale','ob_principal_cash'])
+               if sbv != None:
+                  temp['outstanding_principal']       = float(sbv['ob_principal_sale']) + float(sbv['ob_principal_cash'])
+                  if int(sbv['card_type']) < 100:
+                     product_id = '301'
+                  else:
+                     product_id = '302'
+            else:
+               product_id                       = diallistInfo['PRODGRP_ID']
+               temp['outstanding_principal']    = diallistInfo['outstanding_principal'] if 'outstanding_principal' in diallistInfo.keys() else ''
+
+            product = mongodb.getOne(MONGO_COLLECTION=product_collection, WHERE={'code': str(product_id)},SELECT=['name'])
+            if product != None:
+               temp['product_id'] = product['name']
+         
+         
+         temp['connected'] = 1
+         # print(temp)
+         # break
+         aggregate_pipeline_action = [
+            {
+                 "$match":
+                 {
+                     "calluuid" : cdr['calluuid']
+                 }
+            },{
+                 "$project":
+                 {
+                     "_id": 0,
+                     # "LIC_NO": 0,
+                     "account_number": 0,
+                     "account_type": 0,
+                 }
+            }
+                  
+         ]
+         actionCode = mongodb.aggregate_pipeline(MONGO_COLLECTION=action_code_collection,aggregate_pipeline=aggregate_pipeline_action)
+         if actionCode != None:
+            for row_1 in list(actionCode):
+               for x in row_1.keys():
+                  temp[x] = row_1[x]
+         # actionCode = _mongodb.getOne(MONGO_COLLECTION=action_code_collection, WHERE={ "calluuid" : cdr['calluuid'] })
+         # if actionCode != None:
+         #    for x in actionCode.keys():
+         #       temp[x] = actionCode[x]
+
+
+         temp['createdAt'] = int(todayTimeStamp)
+         temp['createdBy'] = 'system'
+
+         # print(i)
+         # break
+         insertData.append(temp)
+         i = i+1
+         # break
+   # break
 
    if len(insertData) > 0:
-      # mongodb.remove_document(MONGO_COLLECTION=collection)
       mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertData)
-
-   # List of Account
-   aggregate_pipeline = [
-      {
-           "$project":
-           {
-               "account_number": 1,
-               "phone": 1,
-               "cus_name": 1,
-               "overdue_date": 1,
-               "overdue_amt": 1,
-               "cur_bal": 1,
-           }
-       }
-             
-   ]
-   data_acc = mongodb.aggregate_pipeline(MONGO_COLLECTION=account_collection,aggregate_pipeline=aggregate_pipeline)
-   for row in data_acc:
-      sbv = mongodb.getOne(MONGO_COLLECTION=sbv_collection, WHERE={'contract_no': str(row['account_number'])},
-               SELECT=['card_type','ob_principal_sale','ob_principal_cash'])
-      group = mongodb.getOne(MONGO_COLLECTION=group_collection, WHERE={'account_number': str(row['account_number'])},
-               SELECT=['group'])
-      action_code = mongodb.get(MONGO_COLLECTION=action_code_collection,WHERE={'account_number': str(row['account_number']),'createdAt': {'$gte': todayTimeStamp}, 'createdAt': {'$lte': endTodayTimeStamp}},SORT=([('_id', -1)]),SKIP=0, TAKE=int(10000))
-      if action_code != None:
-         for detail in action_code:
-            temp = {}
-            temp['export_date']     = now.strftime("%d/%m/%Y")
-            temp['index']           = i
-            temp['account_number']  = row['account_number']
-            temp['phone']           = row['phone']
-            temp['name']            = row['cus_name']
-            temp['overdue_date']    = row['overdue_date']
-            temp['loan_overdue_amount']      = row['overdue_amt']
-            temp['current_balance']          = row['cur_bal']
-
-            if sbv != None:
-               temp['product_id']                  = str(sbv['card_type'])
-               temp['outstanding_principal']       = float(sbv['ob_principal_sale']) + float(sbv['ob_principal_cash'])
-
-            if group != None:
-               temp['group_id']                  = str(group['group'])
-
-            temp['contacted'] = mongodb.count(MONGO_COLLECTION=cdr_collection,WHERE={'customernumber': str(row['phone']), 'starttime': {'$gte': todayTimeStamp}, 'starttime': {'$lte': endTodayTimeStamp}})
-
-            dialistDetail = mongodb.getOne(MONGO_COLLECTION=diallist_detail_collection,WHERE={'account_number': str(row['account_number']), 'createdAt': {'$gte': todayTimeStamp}, 'createdAt': {'$lte': endTodayTimeStamp}}, SELECT=['assign'])
-            if dialistDetail != None:
-               for user in list(users):
-                  if user['extension'] == dialistDetail['assign']:
-                     temp['assign']   = dialistDetail['assign']+' '+user['agentname']
-            else:
-               temp['assign']          = ''
-
-            temp['chief']   = ''
-            if 'action_code' in detail.keys():
-               temp['action_code']          = detail['action_code']
-
-            temp['note']            = detail['note'] if 'note' in detail.keys() else ''
-
-            for field in list(lawsuit_fields['data']):
-               if field['field'] in detail.keys():
-                  temp[field['field']]          = detail[field['field']]
-            if 'promised_amount' in detail.keys():
-               temp['promised_amount']          = detail['promised_amount']
-            if 'reason_nonpayment' in detail.keys():
-               temp['reason_nonpayment']          = detail['reason_nonpayment']
-            if 'promised_person' in detail.keys():
-               temp['promised_person']          = detail['promised_person']
-            if 'promised_date' in detail.keys():
-               temp['promised_date']          = detail['promised_date']
-            if 'death_info' in detail.keys():
-               temp['death_info']          = detail['death_info']
-            if 'contact_person' in detail.keys():
-               temp['contact_person']          = detail['contact_person']
-            if 'reason_die' in detail.keys():
-               temp['reason_die']          = detail['reason_die']
-            if 'contact_person_phone' in detail.keys():
-               temp['contact_person_phone']          = detail['contact_person_phone']
-            if 'payment_amount' in detail.keys():
-               temp['payment_amount']          = detail['payment_amount']
-            if 'payment_date' in detail.keys():
-               temp['payment_date']          = detail['payment_date']
-            if 'payment_person' in detail.keys():
-               temp['payment_person']          = detail['payment_person']
-            if 'channel' in detail.keys():
-               temp['channel']          = detail['channel']
-            if 'promised_person_phone' in detail.keys():
-               temp['promised_person_phone']          = detail['promised_person_phone']
-            if 'fc_name' in detail.keys():
-               temp['fc_name']          = detail['fc_name']
-            if 'report_date' in detail.keys():
-               temp['report_date']          = detail['report_date']
-            for field_raa in list(raa_fields['data']):
-               if field_raa['field'] in detail.keys():
-                  temp[field_raa['field']]          = detail[field_raa['field']]
-
-
-            temp['createdAt'] = todayTimeStamp
-            temp['createdBy'] = 'system'
-            # mongodb.insert(MONGO_COLLECTION=collection, insert_data=temp)
-            insertDataCard.append(temp)
-            i = i+1
-            # break
-
-   if len(insertDataCard) > 0:
-      # mongodb.remove_document(MONGO_COLLECTION=collection)
-      mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertDataCard)
-
-   
-
-   # Wo
-   aggregate_pipeline = [
-      {
-           "$project":
-           {
-               "ACCTNO": 1,
-               "PHONE": 1,
-               "NGAY_QUA_HAN": 1,
-               "CUS_NM": 1,
-               "WO9711": 1,
-               "WO9712": 1,
-               "WO9713": 1,
-               "PROD_ID": 1,
-           }
-       }
-             
-   ]
-   data_wo = mongodb.aggregate_pipeline(MONGO_COLLECTION=wo_collection,aggregate_pipeline=aggregate_pipeline)
-   for row in data_wo:
-      action_code = mongodb.get(MONGO_COLLECTION=action_code_collection,WHERE={'account_number': str(row['ACCTNO']), 'createdAt': {'$gte': todayTimeStamp}, 'createdAt': {'$lte': endTodayTimeStamp}},SORT=([('_id', -1)]),SKIP=0, TAKE=int(10000))
-      if action_code != None:
-         for detail in action_code:
-            temp = {}
-            temp['export_date']     = now.strftime("%d/%m/%Y")
-            temp['index']           = i
-            temp['account_number']  = row['ACCTNO']
-            temp['phone']           = row['PHONE']
-            temp['name']            = row['CUS_NM']
-            if row['NGAY_QUA_HAN'] != '':
-               try:
-                  temp['overdue_date']    = common.convertTimestamp(row['NGAY_QUA_HAN'],formatString='%m/%d/%Y')
-               except Exception as e:
-                  temp['overdue_date']    = common.convertTimestamp(row['NGAY_QUA_HAN'],formatString='%d/%m/%Y')
-            else:
-               temp['overdue_date'] = ''
-
-            temp['loan_overdue_amount']      = float(row['WO9711'])+float(row['WO9712'])+float(row['WO9713'])
-            temp['current_balance']          = float(row['WO9711'])+float(row['WO9712'])+float(row['WO9713'])
-            temp['product_id']               = str(row['PROD_ID'])
-            temp['outstanding_principal']    = float(row['WO9711'])
-
-            temp['group_id']                  = 'F'
-            temp['contacted'] = mongodb.count(MONGO_COLLECTION=cdr_collection,WHERE={'customernumber': str(row['PHONE']), 'starttime': {'$gte': todayTimeStamp}, 'starttime': {'$lte': endTodayTimeStamp}})
-
-            dialistDetail = mongodb.getOne(MONGO_COLLECTION=diallist_detail_collection,WHERE={'account_number': str(row['account_number']), 'createdAt': {'$gte': todayTimeStamp}, 'createdAt': {'$lte': endTodayTimeStamp}}, SELECT=['assign'])
-            if dialistDetail != None:
-               for user in list(users):
-                  if user['extension'] == dialistDetail['assign']:
-                     temp['assign']   = dialistDetail['assign']+' '+user['agentname']
-            else:
-               temp['assign']          = ''
-
-            temp['chief']   = ''
-
-            if 'action_code' in detail.keys():
-               temp['action_code']          = detail['action_code']
-
-            temp['note']            = detail['note'] if 'note' in detail.keys() else ''
-
-            for field in list(lawsuit_fields['data']):
-               if field['field'] in detail.keys():
-                  temp[field['field']]          = detail[field['field']]
-            if 'promised_amount' in detail.keys():
-               temp['promised_amount']          = detail['promised_amount']
-            if 'reason_nonpayment' in detail.keys():
-               temp['reason_nonpayment']          = detail['reason_nonpayment']
-            if 'promised_person' in detail.keys():
-               temp['promised_person']          = detail['promised_person']
-            if 'promised_date' in detail.keys():
-               temp['promised_date']          = detail['promised_date']
-            if 'death_info' in detail.keys():
-               temp['death_info']          = detail['death_info']
-            if 'contact_person' in detail.keys():
-               temp['contact_person']          = detail['contact_person']
-            if 'reason_die' in detail.keys():
-               temp['reason_die']          = detail['reason_die']
-            if 'contact_person_phone' in detail.keys():
-               temp['contact_person_phone']          = detail['contact_person_phone']
-            if 'payment_amount' in detail.keys():
-               temp['payment_amount']          = detail['payment_amount']
-            if 'payment_date' in detail.keys():
-               temp['payment_date']          = detail['payment_date']
-            if 'payment_person' in detail.keys():
-               temp['payment_person']          = detail['payment_person']
-            if 'channel' in detail.keys():
-               temp['channel']          = detail['channel']
-            if 'promised_person_phone' in detail.keys():
-               temp['promised_person_phone']          = detail['promised_person_phone']
-            if 'fc_name' in detail.keys():
-               temp['fc_name']          = detail['fc_name']
-            if 'report_date' in detail.keys():
-               temp['report_date']          = detail['report_date']
-            for field_raa in list(raa_fields['data']):
-               if field_raa['field'] in detail.keys():
-                  temp[field_raa['field']]          = detail[field_raa['field']]
-
-
-            temp['createdAt'] = todayTimeStamp
-            temp['createdBy'] = 'system'
-
-            # mongodb.insert(MONGO_COLLECTION=collection, insert_data=temp)
-            insertDataWO.append(temp)
-            i = i+1
-
-
-
-   if len(insertDataWO) > 0:
-      # mongodb.remove_document(MONGO_COLLECTION=collection)
-      mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertDataWO)
 
    now_end         = datetime.now()
    log.write(now_end.strftime("%d/%m/%Y, %H:%M:%S") + ': End Log' + '\n')
    print('DONE')
 except Exception as e:
-   pprint(e)
+   print(traceback.format_exc())
    log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')

@@ -148,9 +148,9 @@
                     col.width = 120;
                   }
                   switch (col.type) {
-                      case "name":
-                          col.template = (dataItem) => gridName(dataItem[col.field]);
-                          break;
+                      // case "name":
+                      //     col.template = (dataItem) => gridName(dataItem[col.field]);
+                      //     break;
                       case "phone": case "arrayPhone":
                           col.template = (dataItem) => gridPhone(dataItem[col.field]);
                           break;

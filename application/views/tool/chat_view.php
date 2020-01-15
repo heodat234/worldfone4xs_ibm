@@ -129,6 +129,7 @@
 <div class="hidden">
 	<input name="file" type="file" id="upload-image"/>
 	<input name="file" type="file" id="upload-file"/>
+	<input name="file" type="file" id="upload-audio"/>
 </div>
 <style type="text/css">
 	#right-chat-menu {
@@ -403,7 +404,7 @@
             		members.push({value: ext, text: `${ext} (${convertExtensionToAgentname[ext]})`});
             	}
                 var model = {
-                    item: {type: "group", members: [ENV.extension]},
+                    item: {type: "group", members: [ENV.extension], org_type: ENV.type},
                     memberOption: members,
                     uploadAvatar: function() {
 						$("#upload-avatar").click();
@@ -522,7 +523,10 @@
 			userOnlineData: new kendo.data.DataSource({
 				serverFiltering: true,
 				transport: {
-					read: ENV.vApi + "chat/users",
+					read: {
+						url: ENV.vApi + "chat/users",
+						global: false
+					},
 					parameterMap: parameterMap
 				},
 				schema: {
@@ -539,7 +543,6 @@
 				serverPaging: true,
 				serverFiltering: true,
 				serverSorting: true,
-				filter: {field: "members", operator: "eq", value: ENV.extension},
 				sort: [{field: "pin", dir: "desc"}, {field: "last_time", dir: "desc"}, {field: "updatedAt", dir: "desc"}],
 				transport: {
 					read: ENV.vApi + "chat/rooms",
@@ -608,7 +611,8 @@
 				var id = $(e.currentTarget).data("room-id"),
 					room = this.recentChatData.get(id);
 				this.set("isGroup", Boolean(room.type == "group"));
-				this.set("membersCount", room.members.length)
+				this.set("membersCount", room.members.length);
+				window.location.hash = id;
 			},
 			openRoomChatAsync: async function(e) {
 				var $chat = $("#chat");
@@ -623,7 +627,7 @@
 						url: ENV.vApi + "chat/createRoom",
 						type: "POST",
 						contentType: "application/json; charset=utf-8",
-						data: JSON.stringify({members: [ENV.extension, user_id], type: "private"}),
+						data: JSON.stringify({members: [ENV.extension, user_id], type: "private", org_type: ENV.type}),
 					});
 					if(response.status)
 						room_id = response.data.id;
@@ -661,6 +665,9 @@
 		            		case "sendfile":
 		            			$("#upload-file").click();
 		            			break;
+		            		case "sendaudio":
+		            			$("#upload-audio").click();
+		            			break;
 		            		default: break;
 		            	}
 	                },
@@ -668,7 +675,8 @@
 	                    toggleable: true,
 	                    buttons: [
 	                        { name: "sendimage", iconClass: "k-icon k-i-image", text: "@Upload@ @image@" },
-	                        { name: "sendfile", iconClass: "k-icon k-i-file", text: "@Upload@ @file@" }
+	                        { name: "sendfile", iconClass: "k-icon k-i-file", text: "@Upload@ @file@" },
+	                        { name: "sendaudio", iconClass: "k-icon k-i-audio", text: "@Upload@ @audio@" }
 	                    ]
 	                }
 				}).data("kendoMyChat");
@@ -832,6 +840,35 @@
 	        showFileList: false
 	    }).data("kendoUpload");
 
+	    var uploadFile = $("#upload-audio").kendoUpload({
+	        async: {
+	            saveUrl: "api/v1/upload/file/chatattachment",
+	            autoUpload: true
+	        },
+	        success: function (e) {
+		        if (e.operation === "upload") {
+		        	notification.show(e.response.message, e.response.status ? "success" : "error");
+	  				e.sender.clearAllFiles();
+	  				if(e.response.filepath) {
+	  					var msg = {
+	  						type: "audio", 
+	  						text: e.response.filename,
+	  						size: e.response.size,
+	  						url: e.response.filepath, 
+	  						from: chatUI.getUser(), 
+	  						time: new Date, 
+	  						user_id: ENV.extension, 
+	  						room_id: window.chatWindowObservable.get("room_id"), 
+	  						uid: window.kendo.guid()
+	  					};
+	  					chatUI.renderMessage(msg, chatUI.getUser());
+	  					socket.emit("chat message", JSON.stringify(msg));
+	  				}
+		        }
+		    },
+	        showFileList: false
+	    }).data("kendoUpload");
+
 	    var IMAGE_CARD_TEMPLATE = kendo.template(
 	        '<div class="k-card k-card-type-rich">' +
 	        '<div class="k-card-body quoteCard">' +
@@ -841,6 +878,11 @@
 	    );
 
 	    kendo.chat.registerTemplate("image_card", IMAGE_CARD_TEMPLATE);
+
+	    setTimeout(() => {
+	    	let room_id = (window.location.hash || "").replace("#", ""); 
+	    	if(room_id) $(`.list-group-item[data-room-id=${room_id}]`).click();
+		}, 1000);
     }
 
     function zoomImgChat(ele) {

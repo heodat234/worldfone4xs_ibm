@@ -87,7 +87,6 @@
     if(popupOption) {
         popupOption.name = popupOption.name;
     }
-    console.log(popupOption);
     appointmentObservable = {
         listScBySchedule: [],
         getSCBySchedule: function() {

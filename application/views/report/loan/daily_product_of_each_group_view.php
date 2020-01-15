@@ -287,6 +287,25 @@ $(document).on("click", ".grid-name", function() {
 
 $(document).on("ready", function() {
     Table.init();
+
+    var dateRange = 30;
+    var nowDate = new Date();
+    var date =  new Date();
+    date.setDate(nowDate.getDate() - 1);
+    var timeZoneOffset = date.getTimezoneOffset() * kendo.date.MS_PER_MINUTE;
+    date.setHours(- timeZoneOffset / kendo.date.MS_PER_HOUR, 0, 0 ,0);
+
+    var fromDate = new Date(date.getTime() + timeZoneOffset);
+    var toDate = new Date(date.getTime() + timeZoneOffset + kendo.date.MS_PER_DAY -1)
+    var observable = kendo.observable({
+        fromDateTime: fromDate,
+        toDateTime: toDate,
+        filterField: "",
+        fromDate: kendo.toString(fromDate, "dd/MM/yyyy H:mm"),
+        toDate: kendo.toString(toDate, "dd/MM/yyyy H:mm"),
+        
+    })
+    kendo.bind($(".mvvm"), observable);
 })
 
 function saveAsExcel() {
@@ -312,25 +331,25 @@ function saveAsExcel() {
     <!-- Table Styles Header -->
     <ul class="breadcrumb breadcrumb-top">
         <li>@Report@</li>
-        <li>Daily productivity report -each user and group</li>
+        <li>Daily productivity report - each due date and each group</li>
         <li class="pull-right none-breakcrumb">
-            <a role="button" class="btn btn-sm" data-field="starttime" onclick="customFilter(this, Table.dataSource)"><i class="fa fa-filter"></i> <b>@Custom Filter@</b></a>
-            <div class="input-group-btn column-widget">
-                <a role="button" class="btn btn-sm dropdown-toggle" data-toggle="dropdown" onclick="editColumns(this)"><i class="fa fa-calculator"></i> <b>@Edit Columns@</b></a>
-                <ul class="dropdown-menu dropdown-menu-right" style="width: 300px">
-                    <li class="dropdown-header text-center">@Choose columns will show@</li>
-                    <li class="filter-container" style="padding-bottom: 15px">
-                        <div class="form-horizontal" data-bind="source: columns" data-template="column-template"/>
-                    </li>
-                </ul>
-            </div>
+            
             <a role="button" class="btn btn-sm" onclick="saveAsExcel()"><i class="fa fa-file-excel-o"></i> <b>@Export@</b></a>
         </li>
     </ul>
     <!-- END Table Styles Header -->
 
-    <div class="container-fluid">
+    <div class="container-fluid mvvm">
         <div class="row filter-mvvm" style="display: none; margin: 10px 0">
+        </div>
+        <div class="row form-horizontal" style="margin: 10px 0">
+            <div class="form-group col-sm-4">
+            <label class="control-label col-xs-4">@Date@</label>
+            <div class="col-xs-8">
+                <input id="start-date" data-role="datepicker" data-format="dd/MM/yyyy" name="fromDateTime" data-bind="value: fromDateTime" disabled="">
+            </div>
+            </div>
+            
         </div>
         <div class="row">
             <div class="col-sm-12" style="height: 80vh; overflow-y: auto; padding: 0">

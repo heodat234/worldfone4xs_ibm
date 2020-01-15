@@ -7,11 +7,14 @@
     	<a href="javascript:void(0)" data-type="import" onclick="importData(this)"><li><i class="fa fa-download text-success"></i><span>@Import@</span></li></a>
     	<a href="javascript:void(0)" data-type="import" onclick="assignData(this)"><li><i class="fa fa-check-square-o text-success"></i><span>@Assign@</span></li></a>
     	<li class="devide"></li>
-        <a href="javascript:void(0)" data-type="update" onclick="openForm({title: '@Edit@ @campaign@', width: 400}); editForm(this)"><li><i class="fa fa-pencil-square-o text-warning"></i><span>@Edit@</span></li></a>
+        <a href="javascript:void(0)" data-type="update" onclick="openForm({title: '@Edit@ @campaign@', width: 700}); editForm(this)"><li><i class="fa fa-pencil-square-o text-warning"></i><span>@Edit@</span></li></a>
         <a href="javascript:void(0)" data-type="delete" onclick="deleteDataItem(this)"><li><i class="fa fa-times-circle text-danger"></i><span>@Delete@</span></li></a>
     </ul>
 </div>
 <script>
+var todayMidnight = new Date();
+todayMidnight.setHours(0,0,0,0);
+
 var Config = {
     crudApi: `${ENV.restApi}`,
     templateApi: `${ENV.templateApi}`,
@@ -21,8 +24,18 @@ var Config = {
     model: {
         id: "id",
         fields: {
+        	count_detail: {type: "number"},
+        	createdAt: {type: "date"}
         }
     },
+    parse: function(res) {
+    	res.data.map(doc => {
+    		doc.createdAt = doc.createdAt ? new Date(doc.createdAt * 1000) : null;
+    	})
+    	return res;
+    },
+    filter: {field: "createdAt", operator: "gte", value: todayMidnight},
+    filterable: KENDO.filterable,
     columns: [{
             field: "name",
             title: "@Name@",
@@ -45,7 +58,7 @@ var Config = {
         },{
             field: "createdAt",
             title: "@Create at@",
-            template: dataItem => gridTimestamp(dataItem.createdAt)
+            format: "{0: dd/MM/yy HH:mm}"
         },{
             field: "createdBy",
             title: "@Create by@"
@@ -60,57 +73,12 @@ var Config = {
 <script type="text/javascript">
 	async function editForm(ele) {
 		var dataItem = Table.dataSource.getByUid($(ele).data("uid")),
-	        dataItemFull = await $.ajax({
-	            url: `${Config.crudApi+Config.collection}/${dataItem.id}`,
-	            error: errorDataSource
-	        }),
-		    formHtml = await $.ajax({
-	    	    url: Config.templateApi + Config.collection + "/form",
-	    	    error: errorDataSource
-	    	});
-		var model = Object.assign({
-			item: {name: dataItemFull.name, mode: dataItemFull.mode},
-			modeOption: dataSourceJsonData(["Diallist","mode"]),
-			save: function() {
-	            $.ajax({
-	                url: `${Config.crudApi+Config.collection}/${dataItem.id}`,
-	                data: JSON.stringify(this.item.toJSON()),
-	                error: errorDataSource,
-                    contentType: "application/json; charset=utf-8",
-	                type: "PUT",
-	                success: function(res) {
-	                	if(res.status) {
-	                    	Table.dataSource.read();
-	                    	closeForm()
-	                	} else {
-	                		notification.show(res.message, "success");
-	                	}
-	                }
-	            })
-			}
-		}, Config.observable);
+	    formHtml = await $.ajax({
+    	    url: Config.templateApi + Config.collection + "/form?id=" + dataItem.id,
+    	    error: errorDataSource
+    	});
 		kendo.destroy($("#right-form"));
-		$("#right-form").empty();
-		var kendoView = new kendo.View(formHtml, { wrap: false, model: model, evalTemplate: false });
-		kendoView.render($("#right-form"));
-	}
-
-	async function addForm() {
-		var formHtml = await $.ajax({
-		    url: Config.templateApi + Config.collection + "/form",
-		    error: errorDataSource
-		});
-		var model = Object.assign({
-			item: {},
-			save: function() {
-				Table.dataSource.add(this.item);
-				Table.dataSource.sync().then(() => {Table.dataSource.read()});
-			}
-		}, Config.observable);
-		kendo.destroy($("#right-form"));
-		$("#right-form").empty();
-		var kendoView = new kendo.View(formHtml, { wrap: false, model: model, evalTemplate: false });
-		kendoView.render($("#right-form"));
+		$("#right-form").html(formHtml);
 	}
 
 	function deleteDataItem(ele) {
@@ -133,7 +101,7 @@ var Config = {
 	function importData(ele) {
 		var uid = $(ele).data('uid');
 		var dataItem = Table.dataSource.getByUid(uid);
-		router.navigate(`/import_from_basket/${dataItem.id}`);
+		router.navigate(`/import/${dataItem.id}`);
 	}
 
 	function detailData(ele) {

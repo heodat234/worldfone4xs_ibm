@@ -30,10 +30,8 @@ Class Test extends WFF_Controller {
 		var_dump($result);*/
 		// $data = $this->mongo_db->command(["listDatabases" => 1, "nameOnly" => TRUE]);
 		// pre($data);
-
-		$CI =& get_instance();
-		if(isset($CI->data, $CI->data["permission"]))
-		pre($CI->data);
+		$this->load->driver('cache', array('adapter' => 'memcached', 'backup' => 'file'));
+		var_dump($this->cache->get_metadata("LO_Agent_status_code_1"));
 	}
 
 	function import()

@@ -5,7 +5,7 @@
     <li>Daily Working Days Report</li>
     <li class="pull-right none-breakcrumb" id="top-row">
         <div class="btn-group btn-group-sm">
-            <a role="button" class="btn btn-sm" onclick="saveAsExcel()"><i class="fa fa-file-excel-o"></i> <b>@Export@</b></a>
+            <!-- <a role="button" class="btn btn-sm" onclick="saveAsExcel()"><i class="fa fa-file-excel-o"></i> <b>@Export@</b></a> -->
         </div>
     </li>
 </ul>
@@ -29,9 +29,19 @@
         </div> -->
     </div>
     <div class="row chart-page"  style="background-color: white">
+        <div class="col-sm-12">
+            <h3>Kỳ due 12th</h3>
+            <div id="grid"></div>
+        </div>
 
         <div class="col-sm-12">
-            <div id="grid"></div>
+            <h3>Kỳ due 22nd</h3>
+            <div id="grid_1"></div>
+        </div>
+
+        <div class="col-sm-12">
+            <h3>Kỳ due 31st</h3>
+            <div id="grid_2"></div>
         </div>
     </div>
     <div class="row" data-bind="visible: visibleNoData">
@@ -203,6 +213,380 @@
             field: 'index_23',
             title: '23',
             width: 100
+        }, {
+            field: 'index_24',
+            title: '24',
+            width: 100
+        }, {
+            field: 'index_25',
+            title: '25',
+            width: 100
+        }, {
+            field: 'index_26',
+            title: '26',
+            width: 100
+        }, {
+            field: 'index_27',
+            title: '27',
+            width: 100
+        }, {
+            field: 'index_28',
+            title: '28',
+            width: 100
+        }, {
+            field: 'index_29',
+            title: '29',
+            width: 100
+        }, {
+            field: 'index_30',
+            title: '30',
+            width: 100
+        }, {
+            field: 'index_31',
+            title: '31',
+            width: 100
+        }],
+        columns_1: [{
+            field: 'month',
+            title: "Month",
+            width: 80,
+        }, {
+            field: 'due',
+            title: "Due",
+            width: 80,
+        }, {
+            field: 'product',
+            title: "Product",
+            width: 150,
+        }, {
+            field: 'due_date',
+            title: "Due date",
+            template: data => gridDate(data.due_date, 'dd/MM/yyyy'),
+            width: 100,
+        }, {
+            field: 'team_name',
+            title: "Team",
+            width: 150,
+        }, {
+            title: 'Start',
+            columns: [{
+                field: 'start_acc',
+                title: 'Accounts'
+            }, {
+                field: 'start_amt',
+                title: 'Amount'
+            }]
+        }, {
+            title: 'Target',
+            columns: [{
+                field: 'target_acc',
+                title: 'Accounts',
+                width: 100
+            }, {
+                field: 'target_amt',
+                title: 'Amount',
+                width: 80
+            }]
+        }, {
+            field: 'day',
+            title: 'Day',
+            width: 100,
+            headerAttributes: { style: "white-space: normal"},
+        }, {
+            field: 'index_1',
+            title: '1',
+            width: 100
+        }, {
+            field: 'index_2',
+            title: '2',
+            width: 100
+        }, {
+            field: 'index_3',
+            title: '3',
+            width: 100
+        }, {
+            field: 'index_4',
+            title: '4',
+            width: 100
+        }, {
+            field: 'index_5',
+            title: '5',
+            width: 100
+        }, {
+            field: 'index_6',
+            title: '6',
+            width: 100
+        }, {
+            field: 'index_7',
+            title: '7',
+            width: 100
+        }, {
+            field: 'index_8',
+            title: '8',
+            width: 100
+        }, {
+            field: 'index_9',
+            title: '9',
+            width: 100
+        }, {
+            field: 'index_10',
+            title: '10',
+            width: 100
+        }, {
+            field: 'index_11',
+            title: '11',
+            width: 100
+        }, {
+            field: 'index_12',
+            title: '12',
+            width: 100
+        }, {
+            field: 'index_13',
+            title: '13',
+            width: 100
+        }, {
+            field: 'index_14',
+            title: '14',
+            width: 100
+        }, {
+            field: 'index_15',
+            title: '15',
+            width: 100
+        }, {
+            field: 'index_16',
+            title: '16',
+            width: 100
+        }, {
+            field: 'index_17',
+            title: '17',
+            width: 100
+        }, {
+            field: 'index_18',
+            title: '18',
+            width: 100
+        }, {
+            field: 'index_19',
+            title: '19',
+            width: 100
+        }, {
+            field: 'index_20',
+            title: '20',
+            width: 100
+        }, {
+            field: 'index_21',
+            title: '21',
+            width: 100
+        }, {
+            field: 'index_22',
+            title: '22',
+            width: 100
+        }, {
+            field: 'index_23',
+            title: '23',
+            width: 100
+        }, {
+            field: 'index_24',
+            title: '24',
+            width: 100
+        }, {
+            field: 'index_25',
+            title: '25',
+            width: 100
+        }, {
+            field: 'index_26',
+            title: '26',
+            width: 100
+        }, {
+            field: 'index_27',
+            title: '27',
+            width: 100
+        }, {
+            field: 'index_28',
+            title: '28',
+            width: 100
+        }, {
+            field: 'index_29',
+            title: '29',
+            width: 100
+        }, {
+            field: 'index_30',
+            title: '30',
+            width: 100
+        }, {
+            field: 'index_31',
+            title: '31',
+            width: 100
+        }],
+        columns_2: [{
+            field: 'month',
+            title: "Month",
+            width: 80,
+        }, {
+            field: 'due',
+            title: "Due",
+            width: 80,
+        }, {
+            field: 'product',
+            title: "Product",
+            width: 150,
+        }, {
+            field: 'due_date',
+            title: "Due date",
+            template: data => gridDate(data.due_date, 'dd/MM/yyyy'),
+            width: 100,
+        }, {
+            field: 'team_name',
+            title: "Team",
+            width: 150,
+        }, {
+            title: 'Start',
+            columns: [{
+                field: 'start_acc',
+                title: 'Accounts'
+            }, {
+                field: 'start_amt',
+                title: 'Amount'
+            }]
+        }, {
+            title: 'Target',
+            columns: [{
+                field: 'target_acc',
+                title: 'Accounts',
+                width: 100
+            }, {
+                field: 'target_amt',
+                title: 'Amount',
+                width: 80
+            }]
+        }, {
+            field: 'day',
+            title: 'Day',
+            width: 100,
+            headerAttributes: { style: "white-space: normal"},
+        }, {
+            field: 'index_1',
+            title: '1',
+            width: 100
+        }, {
+            field: 'index_2',
+            title: '2',
+            width: 100
+        }, {
+            field: 'index_3',
+            title: '3',
+            width: 100
+        }, {
+            field: 'index_4',
+            title: '4',
+            width: 100
+        }, {
+            field: 'index_5',
+            title: '5',
+            width: 100
+        }, {
+            field: 'index_6',
+            title: '6',
+            width: 100
+        }, {
+            field: 'index_7',
+            title: '7',
+            width: 100
+        }, {
+            field: 'index_8',
+            title: '8',
+            width: 100
+        }, {
+            field: 'index_9',
+            title: '9',
+            width: 100
+        }, {
+            field: 'index_10',
+            title: '10',
+            width: 100
+        }, {
+            field: 'index_11',
+            title: '11',
+            width: 100
+        }, {
+            field: 'index_12',
+            title: '12',
+            width: 100
+        }, {
+            field: 'index_13',
+            title: '13',
+            width: 100
+        }, {
+            field: 'index_14',
+            title: '14',
+            width: 100
+        }, {
+            field: 'index_15',
+            title: '15',
+            width: 100
+        }, {
+            field: 'index_16',
+            title: '16',
+            width: 100
+        }, {
+            field: 'index_17',
+            title: '17',
+            width: 100
+        }, {
+            field: 'index_18',
+            title: '18',
+            width: 100
+        }, {
+            field: 'index_19',
+            title: '19',
+            width: 100
+        }, {
+            field: 'index_20',
+            title: '20',
+            width: 100
+        }, {
+            field: 'index_21',
+            title: '21',
+            width: 100
+        }, {
+            field: 'index_22',
+            title: '22',
+            width: 100
+        }, {
+            field: 'index_23',
+            title: '23',
+            width: 100
+        }, {
+            field: 'index_24',
+            title: '24',
+            width: 100
+        }, {
+            field: 'index_25',
+            title: '25',
+            width: 100
+        }, {
+            field: 'index_26',
+            title: '26',
+            width: 100
+        }, {
+            field: 'index_27',
+            title: '27',
+            width: 100
+        }, {
+            field: 'index_28',
+            title: '28',
+            width: 100
+        }, {
+            field: 'index_29',
+            title: '29',
+            width: 100
+        }, {
+            field: 'index_30',
+            title: '30',
+            width: 100
+        }, {
+            field: 'index_31',
+            title: '31',
+            width: 100
         }],
         filterable: KENDO.filterable
     };
@@ -237,9 +621,88 @@
                         field: 'day_code',
                         dir: 'asc'
                     }],
+                    filter: [{field: 'due', operator: 'eq', value: '12th'}],
                     pageSize: 5,
                     transport: {
-                        read: Config.crudApi + 'loan/' + Config.collection,
+                        read: Config.crudApi + 'loan/' + Config.collection + '/read',
+                        parameterMap: parameterMap
+                    },
+                    schema: {
+                        data: "data",
+                        total: "total",
+                        parse: Config.parse
+                    }
+                });
+
+                var dataSource_1 = this.dataSource = new kendo.data.DataSource({
+                    serverPaging: true,
+                    serverFiltering: true,
+                    serverSorting: true,
+                    sort: [{
+                        field: 'month',
+                        dir: 'asc'
+                    }, {
+                        field: 'due',
+                        dir: 'asc'
+                    },{
+                        field: 'product',
+                        dir: 'desc'
+                    }, {
+                        field: 'due_date',
+                        dir: 'asc'
+                    }, {
+                        field: 'team_name',
+                        dir: 'asc'
+                    }, {
+                        field: 'team_name',
+                        dir: 'asc'
+                    }, {
+                        field: 'day_code',
+                        dir: 'asc'
+                    }],
+                    pageSize: 5,
+                    filter: [{field: 'due', operator: 'eq', value: '22nd'}],
+                    transport: {
+                        read: Config.crudApi + 'loan/' + Config.collection + '/read',
+                        parameterMap: parameterMap
+                    },
+                    schema: {
+                        data: "data",
+                        total: "total",
+                        parse: Config.parse
+                    }
+                });
+
+                var dataSource_2 = this.dataSource = new kendo.data.DataSource({
+                    serverPaging: true,
+                    serverFiltering: true,
+                    serverSorting: true,
+                    sort: [{
+                        field: 'month',
+                        dir: 'asc'
+                    }, {
+                        field: 'due',
+                        dir: 'asc'
+                    },{
+                        field: 'product',
+                        dir: 'desc'
+                    }, {
+                        field: 'due_date',
+                        dir: 'asc'
+                    }, {
+                        field: 'team_name',
+                        dir: 'asc'
+                    }, {
+                        field: 'team_name',
+                        dir: 'asc'
+                    }, {
+                        field: 'day_code',
+                        dir: 'asc'
+                    }],
+                    pageSize: 5,
+                    filter: [{field: 'due', operator: 'eq', value: '31st'}],
+                    transport: {
+                        read: Config.crudApi + 'loan/' + Config.collection + '/read',
                         parameterMap: parameterMap
                     },
                     schema: {
@@ -251,18 +714,82 @@
 
                 var grid = this.grid = $("#grid").kendoGrid({
                     dataSource: dataSource,
-                    excel: {allPages: true},
-                    excelExport: function(e) {
-                    var sheet = e.workbook.sheets[0];
-                    for (var rowIndex = 1; rowIndex < sheet.rows.length; rowIndex++) {
-                        var row = sheet.rows[rowIndex];
-                        for (var cellIndex = 0; cellIndex < row.cells.length; cellIndex ++) {
-                            if(row.cells[cellIndex].value instanceof Date) {
-                                row.cells[cellIndex].format = "dd-MM-yy hh:mm:ss"
-                            }
+                    // excel: {allPages: true},
+                    // excelExport: function(e) {
+                    //     var sheet = e.workbook.sheets[0];
+                    //     for (var rowIndex = 1; rowIndex < sheet.rows.length; rowIndex++) {
+                    //         var row = sheet.rows[rowIndex];
+                    //         for (var cellIndex = 0; cellIndex < row.cells.length; cellIndex ++) {
+                    //             if(row.cells[cellIndex].value instanceof Date) {
+                    //                 row.cells[cellIndex].format = "dd-MM-yy hh:mm:ss"
+                    //             }
+                    //         }
+                    //     }
+                    // },
+                    toolbar: [
+                        {
+                            template: '<a class="k-button" href="\\#" onclick="return saveAsExcel(\'12th\')">Export excel</a>'
                         }
+                    ],
+                    resizable: true,
+                    pageable: true,
+                    sortable: true,
+                    scrollable: true,
+                    columns: Config.columns,
+                    noRecords: {
+                        template: `<h2 class='text-danger'>${KENDO.noRecords}</h2>`
                     }
-                    },
+                }).data("kendoGrid");
+
+                var grid_1 = this.grid = $("#grid_1").kendoGrid({
+                    dataSource: dataSource_1,
+                    // excel: {allPages: true},
+                    // excelExport: function(e) {
+                    //     var sheet = e.workbook.sheets[0];
+                    //     for (var rowIndex = 1; rowIndex < sheet.rows.length; rowIndex++) {
+                    //         var row = sheet.rows[rowIndex];
+                    //         for (var cellIndex = 0; cellIndex < row.cells.length; cellIndex ++) {
+                    //             if(row.cells[cellIndex].value instanceof Date) {
+                    //                 row.cells[cellIndex].format = "dd-MM-yy hh:mm:ss"
+                    //             }
+                    //         }
+                    //     }
+                    // },
+                    // toolbar: [{ name: "exportExcel", text: "Export excel", click: saveAsExcel('22nd')}],
+                    toolbar: [
+                        {
+                            template: '<a class="k-button" href="\\#" onclick="return saveAsExcel(\'22nd\')">Export excel</a>'
+                        }
+                    ],
+                    resizable: true,
+                    pageable: true,
+                    sortable: true,
+                    scrollable: true,
+                    columns: Config.columns,
+                    noRecords: {
+                        template: `<h2 class='text-danger'>${KENDO.noRecords}</h2>`
+                    }
+                }).data("kendoGrid");
+
+                var grid_2 = this.grid = $("#grid_2").kendoGrid({
+                    dataSource: dataSource_2,
+                    // excel: {allPages: true},
+                    // excelExport: function(e) {
+                    //     var sheet = e.workbook.sheets[0];
+                    //     for (var rowIndex = 1; rowIndex < sheet.rows.length; rowIndex++) {
+                    //         var row = sheet.rows[rowIndex];
+                    //         for (var cellIndex = 0; cellIndex < row.cells.length; cellIndex ++) {
+                    //             if(row.cells[cellIndex].value instanceof Date) {
+                    //                 row.cells[cellIndex].format = "dd-MM-yy hh:mm:ss"
+                    //             }
+                    //         }
+                    //     }
+                    // },
+                    toolbar: [
+                        {
+                            template: '<a class="k-button" href="\\#" onclick="return saveAsExcel(\'31st\')">Export excel</a>'
+                        }
+                    ],
                     resizable: true,
                     pageable: true,
                     sortable: true,
@@ -274,6 +801,28 @@
                 }).data("kendoGrid");
 
                 grid.selectedKeyNames = function() {
+                    var items = this.select(),
+                        that = this,
+                        checkedIds = [];
+                    $.each(items, function(){
+                        if(that.dataItem(this))
+                            checkedIds.push(that.dataItem(this).uid);
+                    })
+                    return checkedIds;
+                }
+
+                grid_1.selectedKeyNames = function() {
+                    var items = this.select(),
+                        that = this,
+                        checkedIds = [];
+                    $.each(items, function(){
+                        if(that.dataItem(this))
+                            checkedIds.push(that.dataItem(this).uid);
+                    })
+                    return checkedIds;
+                }
+
+                grid_2.selectedKeyNames = function() {
                     var items = this.select(),
                         that = this,
                         checkedIds = [];
@@ -348,9 +897,10 @@
         Table.init();
         var dateRange = 30;
         var nowDate = new Date();
-        var date =  new Date(),
-            timeZoneOffset = date.getTimezoneOffset() * kendo.date.MS_PER_MINUTE;
-            date.setHours(- timeZoneOffset / kendo.date.MS_PER_HOUR, 0, 0 ,0);
+        var date =  new Date();
+        date.setDate(nowDate.getDate() - 1);
+        var timeZoneOffset = date.getTimezoneOffset() * kendo.date.MS_PER_MINUTE;
+        date.setHours(- timeZoneOffset / kendo.date.MS_PER_HOUR, 0, 0 ,0);
 
         // var fromDate = new Date(date.getTime() + timeZoneOffset - (dateRange - 1) * 86400000);
         var fromDate = new Date(date.getTime() + timeZoneOffset);
@@ -430,10 +980,11 @@
     
 </script>
 <script>
-    function saveAsExcel() {
+    function saveAsExcel(due = '') {
         $.ajax({
-            url: Config.crudApi + 'loan/' + Config.collection+ "/exportExcel",
-            type: 'POST',
+            url: Config.crudApi + 'loan/' + Config.collection + "/exportExcel/" + due,
+            // data: JSON.stringify({q: {due: due}}),
+            type: 'GET',
             dataType: 'json',
             timeout: 30000
         })

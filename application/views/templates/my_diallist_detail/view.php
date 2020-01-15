@@ -6,6 +6,22 @@
 	}
 ?>
 <div class="container-fluid">
+	<div class="row hidden" id="customer-detail-container">
+		<div class="panel panel-info">
+			<div class="panel-heading">
+				<h4 class="panel-title">
+					<a class="accordion-toggle" data-toggle="collapse" href="\#customer-detail"><b>@Customer detail@</b></a>
+					&nbsp;
+					<i class="fa fa-angle-down"></i>
+				</h4>
+			</div>
+			<div id="customer-detail" class="panel-collapse collapse in">
+				<div class="panel-body" style="padding: 5px">
+					<iframe style="width: 100%; min-height: 70vh; border: 0"></iframe>
+				</div>
+			</div>
+		</div>
+	</div>
 	<div class="row">
 		<div>
 			<div class="col-xs-8">
@@ -68,5 +84,16 @@
 	        })
 	    }, Config.observable);
 	    kendo.bind($("#right-form"), kendo.observable(model));
+
+	    $.ajax({
+	    	url: `${Config.crudApi}customer`,
+	    	data: {q: JSON.stringify({filter: {field: "LIC_NO", operator: "eq", value: dataItemFull.LIC_NO}})},
+	    	success: function(res) {
+	    		if(res.total && res.data) {
+	    			$("#customer-detail-container").removeClass("hidden");
+	    			$("#customer-detail-container").find("iframe").attr("src", ENV.baseUrl + "manage/customer/?omc=1#/detail/" + res.data[0].id);
+	    		}
+	    	}
+	    })
     })
 </script>

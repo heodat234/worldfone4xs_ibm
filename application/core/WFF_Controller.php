@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-abstract Class WFF_Controller extends CI_Controller
+Class WFF_Controller extends CI_Controller
 {   
     public $data = array();
 
@@ -15,6 +15,8 @@ abstract Class WFF_Controller extends CI_Controller
         $this->authentication->check_login();
 
         $this->data["permission"] = $this->authentication->check_permissions();
+
+        $this->check_page_module();
     }
 
     /*
@@ -144,5 +146,32 @@ abstract Class WFF_Controller extends CI_Controller
         $this->output->set_template('proui');
 
         $this->output->data = $data;
+    }
+
+    protected function check_page_module() {
+
+        $this->data["page_module"] = "";
+
+        if(ENVIRONMENT != "production") {
+            $this->data["page_module"] .= $this->load->view("themes/module/taco_assistant", [], TRUE);
+        }
+
+        // Benchmark
+        $this->output->enable_profiler($this->input->get("cmd_profiler") == "show");
+
+        if($this->input->get("cmd_php_logs")) {
+            $php_logs_value = $this->input->get("cmd_php_logs");
+            $this->load->helper('file');
+            $date = $php_logs_value == "today" ? time() : strtotime($php_logs_value . " day");
+            $file_name = "log-". date("Y-m-d", $date) . ".php";
+            $content = read_file(APPPATH . '/logs/' . $file_name);
+            $this->data["page_module"] .= $this->load->view("themes/module/php_logs", ["content" => $content, "file_name" => $file_name], TRUE);
+        }
+
+        if($this->input->get("cmd_js_logs")) {
+            $value = $this->input->get("cmd_js_logs");
+            $js_log_timestamp = $value == "today" ? strtotime("today midnight") : strtotime($value . " day midnight");
+            $this->data["page_module"] .= $this->load->view("themes/module/js_logs", ["js_log_timestamp" => $js_log_timestamp], TRUE);
+        }
     }
 }

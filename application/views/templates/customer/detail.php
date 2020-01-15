@@ -12,18 +12,17 @@
                 <li class="k-state-active">
                     @BASIC INFORMATION@
                 </li>
-
                 <li>
                     @LOG@
                 </li>
                 <li data-bind="click: openPaymentHistory">
-                    PAYMENT HISTORY
+                    @PAYMENT HISTORY@
                 </li>
                 <li data-bind="click: openFieldAction">
-                    FIELD ACTION
+                    @FIELD ACTION@
                 </li>
                 <li data-bind="click: openLawSuit">
-                    LAWSUIT
+                    @LAWSUIT@
                 </li>
                 <li data-bind="click: openCrossSell">
                     CROSS-SELL
@@ -111,11 +110,21 @@
                                 </div>
                             </div>
                             <div class="row form-horizontal" style="padding-top: 10px;">
-                                <div class="col-sm-12" id="customer-detail-view" style="height: 300px">
+                                <div class="col-sm-12" id="customer-detail-view" style="min-height: 300px">
+                                </div>
+                            </div>
+                            <div class="row" style="padding-top: 10px;">
+                                <hr>
+                                <h3 class="text-center">RELATIONSHIP</h3>
+                                <div class="col-sm-12" data-template="relationship-detail-template" data-bind="source: relationshipDataSource"></div>
+                                <div class="col-sm-12 text-center" style="padding: 10px">
+                                    <button data-role="button" data-icon="add" data-bind="click: addRef">@Add@</button>
+                                    <button data-role="button" data-icon="save" data-bind="click: saveRef">@Save@</button>
                                 </div>
                             </div>
                         </div>
                     </div>
+                    
                 </div>
             </div>
             <div>
@@ -144,6 +153,26 @@
                                 }
                                 ]"
                               data-bind="source: callHistory"></div>
+                            </div>
+                        </div>
+                        <div class="panel panel-success">
+                            <div class="panel-heading">ACTION CODE</div>
+                            <div class="panel-body" style="padding: 0">
+                                <div data-role="grid"
+                                data-pageable="{refresh: true}"
+                                data-scrollable="false"
+                                data-no-records="{
+                                        template: `<h2 class='text-danger'>@NO DATA@</h2>`
+                                    }"
+                                data-columns="[
+                                    {field: 'account_type', title: '@Type@'},
+                                    {field: 'account_number', title: '@Account number@'},
+                                    {field: 'action_code', title: '@Action code@'},
+                                    {field: 'promised_date', title: '@PTP Date@'},
+                                    {field: 'promised_amount', title: '@PTP Amount@'},
+                                    {field: 'note', title: '@Note@'},
+                                ]"
+                              data-bind="source: actionCodeHistory"></div>
                             </div>
                         </div>
                     </div>
@@ -558,6 +587,22 @@
     </div>
 </script>
 
+<script type="text/x-kendo-template" id="relationship-detail-template">
+    <div class="form-group">
+        <label class="control-label col-xs-2">REF <span data-bind="text: index"></span></label>
+        <div class="col-xs-10">
+            <input class="k-textbox" data-bind="value: relation" readonly style="width: 10%">
+            <span>@Name@</span>
+            <input class="k-textbox" data-bind="value: name" readonly style="width: 30%">
+            <span>@Phone@</span>
+            <input class="k-textbox" data-bind="value: phone" readonly style="width: 20%">
+            #if (ENV.role_name == 'Leader' || ENV.role_name == 'Chief' || PERMISSION.isadmin){#
+            <button class="k-button btn-danger" data-type="delete" data-bind="click: removeRef, attr: {data-uid: uid}">@Remove@</button>
+            #}#
+        </div>
+    </div>
+</script>
+
 <script>
 var Config = Object.assign(Config, {
     id: '<?= $this->input->get("id") ?>'
@@ -698,12 +743,10 @@ var Detail = function() {
         noteData: new kendo.data.DataSource({
             serverFiltering: true,
             serverSorting: true,
-            filter: [
-                {field: "foreign_id", operator: "eq", value: Config.id}
-            ],
+            filter: {field: "foreign_id", operator: "eq", value: Config.id},
             sort: [{field: "createdAt", dir: "desc"}],
             transport: {
-                read: `${ENV.restApi}customer_note`,
+                read: `${ENV.restApi}note`,
                 parameterMap: parameterMap
             },
             schema: {
@@ -732,7 +775,7 @@ var Detail = function() {
                     if (sure) {
                         e.currentTarget.value = "";
                         $.ajax({
-                            url: `${ENV.restApi}customer_note`,
+                            url: `${ENV.restApi}note`,
                             type: "POST",
                             contentType: "application/json; charset=utf-8",
                             data: kendo.stringify({
@@ -762,7 +805,7 @@ var Detail = function() {
             .then((sure) => {
                 if(sure) {
                     $.ajax({
-                        url: `${ENV.restApi}customer_note/${id}`,
+                        url: `${ENV.restApi}note/${id}`,
                         type: "DELETE",
                         success: function() {
                             syncDataSource();
@@ -793,6 +836,27 @@ var Detail = function() {
                     response.data.map(function(doc){
                         doc.starttime = doc.starttime ? kendo.toString(new Date(doc.starttime * 1000), "dd/MM/yy H:mm:ss").toString() : "";
                     })
+                    return response;
+                }
+            }
+        }),
+        actionCodeHistory: new kendo.data.DataSource({
+            serverFiltering: true,
+            serverPaging: true,
+            serverSorting: true,
+            sort: {field: "createdAt", dir: "asc"},
+            pageSize: 5,
+            transport: {
+                read: `${ENV.restApi}action_code`,
+                parameterMap: parameterMap
+            },
+            schema: {
+                data: "data",
+                total: "total",
+                parse: function(response) {
+                    response.data.map(doc => {
+                        doc.promised_date = doc.promised_date ? gridTimestamp(doc.promised_date, "dd/MM/yy") : "";
+                    });
                     return response;
                 }
             }
@@ -861,7 +925,7 @@ var Detail = function() {
             var filter = JSON.stringify({
                 logic: "and",
                 filters: [
-                    {field: "contract_no", operator: "eq", value: this.item.account_number}
+                    {field: "LIC_NO", operator: "eq", value: this.item.LIC_NO}
                 ]
             });
             var query = httpBuildQuery({filter: filter, omc: 1});
@@ -869,6 +933,73 @@ var Detail = function() {
             if(!$content.find("iframe").length)
                 $content.append(`<iframe src='${ENV.baseUrl}manage/data/cross_sell?${query}' style="width: 100%; height: 500px; border: 0"></iframe>`);
         },
+
+        relationshipDataSource: new kendo.data.DataSource({
+            serverFiltering: true,
+            transport: {
+                read: ENV.restApi + "relationship",
+                create: {
+                    url: ENV.restApi + "relationship",
+                    type: "POST",
+                    contentType: "application/json; charset=utf-8"
+                },
+                update: {
+                    url: function(data) {
+                        return ENV.restApi + "relationship/" + data.id;
+                    },
+                    type: "PUT",
+                    contentType: "application/json; charset=utf-8"
+                },
+                destroy: {
+                    url: function(data) {
+                        return ENV.restApi + "relationship/" + data.id;
+                    },
+                    type: "DELETE",
+                },
+                parameterMap: parameterMap
+            },
+            schema: {
+                data: "data",
+                total: "total",
+                model: {
+                    id: "id"
+                },
+                parse: function(res) {
+                    res.data.map((doc, idx) => {
+                        doc.index = idx + 1;
+                    })
+                    return res;
+                }
+            }
+        }),
+
+        addRef: function(e) {
+            if(typeof this.relationshipDataSource != 'undefined') {
+                this.relationshipDataSource.insert(this.relationshipDataSource.total(), {index: this.relationshipDataSource.total() + 1, LIC_NO: this.get("item.LIC_NO"), phone: ""});
+            }
+            
+        },
+
+        removeRef: function(e) {
+            swal({
+                title: `${NOTIFICATION.checkSure}?`,
+                icon: "warning",
+                buttons: true,
+                dangerMode: true,
+            })
+            .then((sure) => {
+                if (sure) {
+                    let uid = $(e.currentTarget).data("uid"),
+                        dataItem = this.relationshipDataSource.getByUid(uid);
+                    this.relationshipDataSource.remove(dataItem);
+                    this.saveRef();
+                }
+            });
+        },
+
+        saveRef: function(e) {
+            this.relationshipDataSource.sync();
+        }
     });
     var model = kendo.observable(observable);
     return {
@@ -941,6 +1072,9 @@ var Detail = function() {
             }
             this.model.callHistory.filter(filter);
 
+            // Action code
+            this.model.actionCodeHistory.filter({field: "LIC_NO", operator: "eq", value: dataItemFull.LIC_NO});
+
             var interactiveFilters = [{
                 logic: "and",
                 filters: [
@@ -953,8 +1087,14 @@ var Detail = function() {
                     logic: "and",
                     filters: [
                         {field: "type", operator: "eq", value: "call"},
-                        {field: "foreign_key", operator: "eq", value: dataItemFull.phone},
-                        {field: "active", operator: "eq", value: true}
+                        {field: "active", operator: "eq", value: true},
+                        {
+                            logic: "or",
+                            filters: [
+                                {field: "foreign_key", operator: "eq", value: dataItemFull.phone},
+                                {field: "foreign_key", operator: "in", value: dataItemFull.other_phones}
+                            ]
+                        }
                     ]
                 })
             }
@@ -1008,6 +1148,16 @@ var Detail = function() {
                     }
                 }
             })
+
+            this.model.noteData.filter({
+                logic: "or",
+                filters: [
+                    {field: "foreign_id", operator: "eq", value: Config.id},
+                    {field: "foreign_id", operator: "eq", value: dataItemFull.LIC_NO}
+                ]
+            });
+
+            this.model.relationshipDataSource.filter({field: "LIC_NO", operator: "eq", value: dataItemFull.LIC_NO});
 
             return dataItemFull;
         },

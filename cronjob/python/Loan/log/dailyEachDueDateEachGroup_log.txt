@@ -4,3 +4,69 @@
 23/12/2019, 12:09:19: End Log
 23/12/2019, 12:10:59: Start Import
 23/12/2019, 12:11:01: End Log
+04/01/2020, 10:40:29: Start Import
+04/01/2020, 10:40:29: 'NoneType' object is not subscriptable
+04/01/2020, 10:41:51: Start Import
+04/01/2020, 10:41:51: End Log
+04/01/2020, 10:45:27: Start Import
+04/01/2020, 10:45:27: 'NoneType' object is not subscriptable
+04/01/2020, 10:46:10: Start Import
+04/01/2020, 10:46:11: End Log
+04/01/2020, 10:47:00: Start Import
+04/01/2020, 10:47:00: End Log
+04/01/2020, 10:47:16: Start Import
+04/01/2020, 10:47:16: 'NoneType' object is not subscriptable
+04/01/2020, 10:47:23: Start Import
+04/01/2020, 10:47:23: 'NoneType' object is not subscriptable
+04/01/2020, 10:47:45: Start Import
+04/01/2020, 10:47:45: 'NoneType' object is not subscriptable
+04/01/2020, 10:48:06: Start Import
+04/01/2020, 10:48:06: 'NoneType' object is not subscriptable
+04/01/2020, 10:48:13: Start Import
+04/01/2020, 10:48:13: 'NoneType' object is not subscriptable
+04/01/2020, 10:52:43: Start Import
+04/01/2020, 10:52:43: End Log
+04/01/2020, 10:53:28: Start Import
+04/01/2020, 10:53:28: End Log
+04/01/2020, 10:54:06: Start Import
+04/01/2020, 10:54:06: End Log
+04/01/2020, 12:42:32: Start Import
+04/01/2020, 12:42:33: End Log
+04/01/2020, 12:44:51: Start Import
+04/01/2020, 12:44:51: End Log
+04/01/2020, 12:47:09: Start Import
+04/01/2020, 12:47:10: End Log
+04/01/2020, 12:50:24: Start Import
+04/01/2020, 12:50:24: End Log
+04/01/2020, 12:51:09: Start Import
+04/01/2020, 12:51:10: End Log
+04/01/2020, 12:53:32: Start Import
+04/01/2020, 12:53:32: End Log
+04/01/2020, 12:57:40: Start Import
+04/01/2020, 12:57:43: End Log
+04/01/2020, 13:08:14: Start Import
+04/01/2020, 13:08:16: End Log
+04/01/2020, 13:09:21: Start Import
+04/01/2020, 13:09:21: End Log
+04/01/2020, 13:10:11: Start Import
+04/01/2020, 13:10:11: End Log
+04/01/2020, 13:10:31: Start Import
+04/01/2020, 13:10:31: End Log
+04/01/2020, 13:11:00: Start Import
+04/01/2020, 13:11:00: End Log
+04/01/2020, 13:12:43: Start Import
+04/01/2020, 13:12:43: End Log
+04/01/2020, 13:13:46: Start Import
+04/01/2020, 13:13:46: End Log
+04/01/2020, 13:14:08: Start Import
+04/01/2020, 13:14:08: End Log
+04/01/2020, 13:15:05: Start Import
+04/01/2020, 13:15:05: End Log
+04/01/2020, 13:15:44: Start Import
+04/01/2020, 13:15:46: End Log
+04/01/2020, 14:02:17: Start Import
+04/01/2020, 14:02:22: End Log
+04/01/2020, 14:05:13: Start Import
+04/01/2020, 14:05:15: End Log
+04/01/2020, 15:09:20: Start Import
+04/01/2020, 15:09:44: End Log

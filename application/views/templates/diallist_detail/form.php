@@ -1,6 +1,6 @@
 <?php
 	$this->load->library("mongo_private");
-	$dataFields = $this->mongo_private->where(["collection"=>getCT("Diallist_detail"), "sub_type"=>['$exists'=>TRUE,'$nin'=>['',null]]])->get("Model");
+	$dataFields = $this->mongo_private->where(["collection"=>getCT("Diallist_detail"), "sub_type"=>$this->input->get("sub_type")])->get("Model");
 	foreach ($dataFields as &$doc) {
 		$doc["title"] = !empty($doc["title"]) ? $doc["title"] : $doc["field"];
 	}

@@ -84,7 +84,7 @@ Class Action extends CI_Controller {
         $time = time();
         if($this->session->userdata("isadmin")) {
             foreach (["_worldfone4xs", "worldfone4xs"] as $db) {
-                shell_exec("mongodump --out ". APPPATH."/logs/backupdb_$time" ." --db {$db}");
+                shell_exec("mongodump --out ". APPPATH."/database/$db" ." --db {$db}");
             }
             echo "DB backup done";
         } else echo "Unauthorized";

@@ -8,3 +8,47 @@
 23/12/2019, 12:10:16: End Log
 23/12/2019, 12:10:58: Start Import
 23/12/2019, 12:11:47: End Log
+04/01/2020, 14:17:05: Start Import
+04/01/2020, 14:17:05: 'NoneType' object is not subscriptable
+04/01/2020, 14:20:56: Start Import
+04/01/2020, 14:20:56: 'NoneType' object is not subscriptable
+04/01/2020, 14:28:14: Start Import
+04/01/2020, 14:28:14: 'NoneType' object is not subscriptable
+04/01/2020, 14:29:02: Start Import
+04/01/2020, 14:29:02: End Log
+04/01/2020, 14:30:20: Start Import
+04/01/2020, 14:30:20: End Log
+04/01/2020, 14:31:01: Start Import
+04/01/2020, 14:31:01: End Log
+04/01/2020, 14:31:40: Start Import
+04/01/2020, 14:31:41: End Log
+04/01/2020, 14:32:06: Start Import
+04/01/2020, 14:34:25: End Log
+04/01/2020, 14:35:12: Start Import
+04/01/2020, 14:36:02: End Log
+04/01/2020, 14:36:30: Start Import
+04/01/2020, 14:37:17: End Log
+04/01/2020, 14:39:18: Start Import
+04/01/2020, 14:39:18: 'NoneType' object is not subscriptable
+04/01/2020, 14:40:53: Start Import
+04/01/2020, 14:40:53: 'target'
+04/01/2020, 14:43:10: Start Import
+04/01/2020, 14:43:10: 'target'
+04/01/2020, 14:46:37: Start Import
+04/01/2020, 14:46:37: 'target'
+04/01/2020, 14:48:25: Start Import
+04/01/2020, 14:49:10: End Log
+04/01/2020, 14:50:19: Start Import
+04/01/2020, 14:51:04: End Log
+04/01/2020, 14:55:28: Start Import
+04/01/2020, 14:56:15: End Log
+04/01/2020, 14:57:17: Start Import
+04/01/2020, 14:58:02: End Log
+04/01/2020, 14:59:18: Start Import
+04/01/2020, 14:59:18: 'NoneType' object is not subscriptable
+04/01/2020, 17:16:45: Start Import
+04/01/2020, 17:16:45: 'NoneType' object is not subscriptable
+04/01/2020, 17:19:57: Start Import
+04/01/2020, 17:21:40: End Log
+04/01/2020, 17:24:03: Start Import
+04/01/2020, 17:24:59: End Log

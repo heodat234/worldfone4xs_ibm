@@ -1,0 +1,7 @@
+08/11/2019, 15:12:03: 550 Failed to open file.
+08/11/2019, 15:14:09: 'contract_no'
+08/11/2019, 15:19:44: 'CONTRACTNR'
+08/11/2019, 15:22:06: 'CONTRACTNR'
+08/11/2019, 15:23:55: 'CONTRACTNR'
+08/11/2019, 15:25:53: 'CONTRACTNR'
+08/11/2019, 15:29:46: documents must be a non-empty list

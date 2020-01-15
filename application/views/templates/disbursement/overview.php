@@ -15,8 +15,6 @@
 <div id="action-menu">
     <ul>
         <a href="javascript:void(0)" data-type="update" onclick="openForm({title: '@Edit@', width: 500}); editForm(this)"><li><i class="fa fa-pencil-square-o text-warning"></i><span>@Edit@</span></li></a>
-    	<!-- <li class="devide"></li>
-        <a href="javascript:void(0)" data-type="delete" onclick="deleteDataItem(this)"><li><i class="fa fa-times-circle text-danger"></i><span>@Delete@</span></li></a> -->
     </ul>
 </div>
 

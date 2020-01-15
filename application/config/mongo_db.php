@@ -25,14 +25,15 @@
 |
 */
 
+
 $config['mongo_db']['active'] = 'default';
 
 $config['mongo_db']['default']['version'] 			= 4.2;
-$config['mongo_db']['default']['no_auth'] 			= true;
+$config['mongo_db']['default']['no_auth'] 			= !(ENVIRONMENT == 'production');
 $config['mongo_db']['default']['hostname'] 			= 'localhost';
 $config['mongo_db']['default']['port'] 				= '27017';
-$config['mongo_db']['default']['username'] 			= '';
-$config['mongo_db']['default']['password'] 			= '';
+$config['mongo_db']['default']['username'] 			= (ENVIRONMENT == 'production') ? 'worldfone4x' : '';
+$config['mongo_db']['default']['password'] 			= (ENVIRONMENT == 'production') ? 'St3l37779db' : '';
 $config['mongo_db']['default']['database'] 			= 'worldfone4xs';
 $config['mongo_db']['default']['db_debug'] 			= TRUE;
 $config['mongo_db']['default']['return_as'] 		= 'array';

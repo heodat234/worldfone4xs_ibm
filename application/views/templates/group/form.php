@@ -16,17 +16,17 @@
 				<label>@Lead@</label>
 				<input data-role="dropdownlist" name="lead"
 					data-filter="contains"
-					data-text-field="agentname"
+					data-text-field="extension"
 					data-value-field="extension"
 					data-template="itemGroupTemplate"
+					data-value-template="tagGroupTemplate"
 					data-value-primitive="true"           
-                    data-bind="value: item.lead, source: membersOption, enabled: item.active" style="width: 100%">
+                    data-bind="value: item.lead, source: leadOption, enabled: item.active" style="width: 100%">
 			</div>
 			<div class="form-group">
 				<label>@Members@</label>
 				<select data-role="multiselect" name="members" multiple="multiple"
-					data-filter="contains"
-					data-text-field="agentname"
+					data-text-field="extension"
 					data-value-field="extension"
 					data-item-template="itemGroupTemplate"
 					data-tag-template="tagGroupTemplate"

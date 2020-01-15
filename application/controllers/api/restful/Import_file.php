@@ -3,7 +3,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 Class Import_file extends WFF_Controller {
 
-	private $collection = "Import_file";
+	private $collection = "Import";
 
 	function __construct()
 	{

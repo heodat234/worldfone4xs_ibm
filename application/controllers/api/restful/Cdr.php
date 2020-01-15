@@ -19,7 +19,7 @@ Class Cdr extends WFF_Controller {
         $this->collection = set_sub_collection($this->collection);
     }
 
-    function read()
+    function read() 
     {
         try {
             $request = json_decode($this->input->get("q"), TRUE);

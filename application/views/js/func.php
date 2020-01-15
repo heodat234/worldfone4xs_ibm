@@ -1,6 +1,35 @@
 window.onerror = function(msg, url, linenumber){
   <?php if(ENVIRONMENT != "production") { ?>
   if(typeof tacoSpeech != "undefined") tacoSpeech('Hey! You have an error message: <b>'+msg+'</b>.<br>In: <b>'+url+'</b> <br>Line Number: <b>'+linenumber+'</b>', 10000);
+  var filename = "Screen-" + Date.now() + ".png";
+  kendo.drawing.drawDOM($("body"))
+  .then((group) => {
+    return kendo.drawing.exportImage(group);
+  })
+  .done((dataImg) => {
+    $.ajax({
+      url: ENV.vApi + "upload/capture",
+      type: "POST",
+      data: {dataImg: dataImg, filename: filename},
+      success: function(response) {
+        if(response.status) {
+          var data = {
+            title: "JS error",
+            imgPath: response.filepath,
+            url: window.location.href,
+            priority: "High",
+            content: 'Error message: '+msg+'. Url: '+url+'. Line Number: '+linenumber
+          };
+          $.ajax({
+            url: ENV.restApi + "reporterror",
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+              data: kendo.stringify(data)
+          })
+        }
+      }
+    });
+  });
   <?php } else { ?>
   setTimeout(function() {
     swal({

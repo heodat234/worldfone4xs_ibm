@@ -36,11 +36,24 @@ Class Popup extends CI_Controller {
 
     private function loan()
     {
-        $data["callData"] = $callData = json_decode($this->input->get("q"), TRUE);
+        $this->load->library('mongo_db');
+        $data["callData"]   = $callData = json_decode($this->input->get("q"), TRUE);
+        $string             = 'templates/popup/loan/';
+
         if(isset($callData["dialid"])) {
-            $view = $this->load->view("templates/popup/loan/" . $callData["dialtype"], $data, TRUE);
+            $diallist_detail    = $this->mongo_db->where_id($callData['dialid'])->getOne('LO_Diallist_detail');
+            $diallist  = $data["diallist"] = $this->mongo_db->where_id($diallist_detail["diallist_id"])->getOne('LO_Diallist');
+            if($callData["dialtype"] == 'manual'){
+                if(isset($diallist['team'])){
+                    $view   = (strtolower($diallist['team']) == 'wo') ? $this->load->view($string . "wo", $data, TRUE) : $this->load->view($string . "manual", $data, TRUE);
+                }else{
+                    $view   = $this->load->view($string . "manual", $data, TRUE);
+                }
+            }else{
+                $view = $this->load->view($string . $callData["dialtype"], $data, TRUE);
+            }
         } else {
-            $view = $this->load->view("templates/popup/loan/default", $data, TRUE);
+            $view = $this->load->view($string . "default", $data, TRUE);
         }
         return $view;
     }

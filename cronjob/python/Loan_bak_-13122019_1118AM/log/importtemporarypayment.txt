@@ -1,0 +1,3 @@
+10/12/2019, 17:43:25: Number of passed names did not match number of header fields in the file
+["account_number", "amt", "created_at", "type", "due_date", "payment_amount", "overdue_amount", "remain_amount", "payment_date"]10/12/2019, 17:48:46: Number of passed names did not match number of header fields in the file
+["account_number", "amt"]

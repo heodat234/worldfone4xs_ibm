@@ -8,6 +8,7 @@ import sys
 import os
 import json
 import csv
+import traceback
 from pprint import pprint
 from datetime import datetime
 from datetime import date
@@ -49,7 +50,7 @@ try:
     day = today.day
     month = today.month
     year = today.year
-    fileName = "TOTAL DANH SACH KHOA THE ( START 30.11.2018 ).xlsx"
+    fileName = "DANH_SACH_KHOA_THE.xlsx"
     sep = ';'
     logDbName = "LO_Input_result_" + str(year) + str(month)
 
@@ -67,6 +68,7 @@ try:
         importLogInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': ObjectId(sys.argv[1])})
     except Exception as SysArgvError:
         if not os.path.isfile(ftpLocalUrl):
+            pprint(ftpLocalUrl)
             sys.exit()
 
         importLogInfo = {
@@ -167,6 +169,7 @@ try:
                         result = True
                         complete += 1
 
+    pprint(insertData)
     if(len(errorData) > 0):
         mongodbresult.remove_document(MONGO_COLLECTION=common.getSubUser(subUserType, ('Block_card_' + str(year) + str(month) + str(day))))
         mongodbresult.batch_insert(common.getSubUser(subUserType, ('Block_card_' + str(year) + str(month) + str(day))), errorData)
@@ -177,5 +180,6 @@ try:
         mongodb.update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': importLogId}, VALUE={'status': 1, 'complete_import': time.time(), 'total': total, 'complete': complete})
 
 except Exception as e:
-    log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')
-    pprint(str(e))
+    # log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')
+    # pprint(str(e))
+    print(traceback.format_exc())

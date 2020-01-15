@@ -5,7 +5,7 @@ Class Home extends WFF_Controller {
 	{
 		$this->_build_template();
 		$this->output->data["js"][] = KENDOUI_PATH . "js/kendo.timezones.min.js";
-		$data["viewAll"] = $this->session->userdata("isadmin") || $this->session->userdata("issupervisor");
+		$data["viewAll"] = TRUE;
 		$this->load->view('home', $data);
 	}
 }

@@ -28,6 +28,8 @@
 <div id="popup-contain"></div>
 <!-- Notification kendo in record.js -->
 <div id="play-notification"></div>
+<!-- Container btn click sound -->
+<div id="sound-contain" class="hidden"></div>
 <!-- Phone ring -->
 <div id="phone-ring-button" class="phone-ring-container" style="display: none">
     <div class="phonering-alo-phone phonering-alo-green">

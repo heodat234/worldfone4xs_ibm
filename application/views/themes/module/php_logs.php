@@ -5,7 +5,7 @@
             <!-- Modal Header -->
             <div class="modal-header text-center">
             	<button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h2 class="modal-title"><i class="fa fa-bug"></i> PHP LOG <span class="text-primary"><?= $file_name ?></span></h2>
+                <h2 class="modal-title"><i class="fa fa-bug"></i> PHP BUG <span class="text-primary"><?= $file_name ?></span></h2>
             </div>
             <!-- END Modal Header -->
 

@@ -1,4 +1,5 @@
 <script>
+
 var Config = {
     crudApi: `${ENV.vApi}`,
     templateApi: `${ENV.templateApi}`,
@@ -10,59 +11,82 @@ var Config = {
     model: {
         id: "id",
         fields: {
-        	paid_amount: {type: "number"},
-        	overdue_amount: {type: "number"},
-        	appear_count: {type: "number"},
-        	due_date:  {type: "date"},
-        	payment_date:  {type: "date"},
+            paid_amount: {type: "number"},
+            overdue_amount: {type: "number"},
+            appear_count: {type: "number"},
+            due_date:  {type: "date"},
         }
     },
     parse: function(res) {
-    	res.data.map(doc => {
-    		doc.due_date = doc.due_date ? new Date(doc.due_date * 1000) : null;
-    		doc.payment_date = doc.payment_date ? new Date(doc.payment_date * 1000) : null;
-    	})
-    	return res;
+        res.data.map(doc => {
+            doc.due_date = doc.due_date ? new Date(doc.due_date * 1000) : undefined;
+            if(typeof doc.payment_date == 'number')
+                doc.payment_date = doc.payment_date ? new Date(doc.payment_date * 1000) : undefined;
+            doc.created_at = doc.created_at ? new Date(doc.created_at * 1000) : undefined;
+        })
+        return res;
     },
     columns: [
-    	{
-    		field: "type",
-    		title: "@Type@"
-    	},
-    	{
-    		field: "account_number",
-    		title: "@Account number@"
-    	},
-    	{
-    		field: "due_date",
-    		title: "@Due date@",
-    		format: "{0: dd/MM/yy}",
-    	},
-    	{
-    		field: "overdue_days",
-    		title: "@Overdue days@"
-    	},
-    	{
-    		field: "overdue_amount",
-    		title: "@Overdue amount@"
-    	},
-    	{
-    		field: "payment_amount",
-    		title: "@Paid amount@"
-    	},
-    	{
-    		field: "payment_date",
-    		title: "@Payment date@",
-    		format: "{0: dd/MM/yy}",
-    	},
-    	{
-    		field: "debt_group",
-    		title: "@Debt group@"
-    	},
-    	{
-    		field: "appear_count",
-    		title: "@Time appear in queue@"
-    	}
+        {
+            field: "type",
+            title: "@Type@"
+        },
+        {
+            field: "account_number",
+            title: "@Account number@"
+        },
+        {
+            field: "due_date",
+            title: "@Due date@",
+            template: function(dataItem) {
+                if(typeof dataItem.due_date != 'undefined' && dataItem.due_date) {
+                    return gridDate(dataItem.due_date, 'dd/MM/yyyy')
+                }
+                else {
+                    return '<span></span>'
+                }
+            }
+        },
+        {
+            field: "overdue_days",
+            title: "@Overdue days@",
+            filterable: false,
+        },
+        {
+            field: "overdue_amount",
+            title: "@Overdue amount@",
+            template: data => gridInterger(data.overdue_amount)
+        },
+        {
+            field: "payment_amount",
+            title: "@Paid amount@",
+            template: data => gridInterger(data.payment_amount)
+        },
+        {
+            field: "payment_date",
+            title: "@Payment date@",
+            
+            template: function(dataItem) {
+                if(typeof dataItem.payment_date != 'undefined') {
+                    if(typeof dataItem.payment_date == 'string')
+                        return dataItem.payment_date[0]+ dataItem.payment_date[1] + '/' + dataItem.payment_date[2] + dataItem.payment_date[3] + '/' + dataItem.payment_date[4] + dataItem.payment_date[5];
+                    else{
+                        return gridDate(dataItem.payment_date, 'dd/MM/yyyy')
+                    }
+                }
+                else {
+                    return '<span></span>'
+                }
+            }
+        },
+        {
+            field: "debt_group",
+            title: "@Debt group@"
+        },
+        {
+            field: "appear_count",
+            title: "@Time appear in queue@"
+        }
     ],
 
     columns2: [
@@ -75,26 +99,29 @@ var Config = {
             title: "@Account number@"
         },
         {
-            field: "due_date",
-            title: "@Due date@",
-            format: "{0: dd/MM/yy}",
+            field: "amt",
+            title: "@Paid amount@",
+            template: data => gridInterger(data.amt)
         },
         {
-            field: "payment_amount",
-            title: "@Paid amount@"
+            field: "advance_money",
+            title: "@Advance money@",
+            template: data => gridInterger(data.advance_money ? data.advance_money : 0)
         },
         {
             field: "overdue_amount",
-            title: "@Overdue amount@"
+            title: "@Overdue amount@",
+            template: data => gridInterger(data.overdue_amount)
         },
         {
             field: "remain_amount",
-            title: "@Remain amount@"
+            title: "@Remain amount@",
+            template: data => gridInterger(data.remain_amount)
         },
         {
-            field: "payment_date",
+            field: "created_at",
             title: "@Payment date@",
-            format: "{0: dd/MM/yy}",
+            format: "{0: dd/MM/yyyy}",
         },
     ],
     filterable: KENDO.filterable
@@ -373,27 +400,27 @@ var Table = function() {
 <div class="container-fluid">
     <div class="row">
         <div class="col-sm-12" style=" overflow-y: auto; padding: 0">
-		    <!-- Table Styles Content -->
+            <!-- Table Styles Content -->
             <div style="padding: 10px; font-weight: bold">Temporary Payment</div>
             <div id="temporary_payment_grid"></div>
             <hr>
-		    <div id="grid"></div>
-		    <!-- END Table Styles Content -->
-		</div>
-		<div id="action-menu">
-		    <ul>
-		        <a href="javascript:void(0)" data-type="detail" onclick="detailData(this)"><li><i class="fa fa-exclamation-circle text-info"></i><span>@Detail@</span></li></a>
-		    	<li class="devide"></li>
-		        <a href="javascript:void(0)" data-type="delete" onclick="deleteDataItem(this)"><li><i class="fa fa-times-circle text-danger"></i><span>@Delete@</span></li></a>
-		    </ul>
-		</div>
+            <div id="grid"></div>
+            <!-- END Table Styles Content -->
+        </div>
+        <div id="action-menu">
+            <ul>
+                <a href="javascript:void(0)" data-type="detail" onclick="detailData(this)"><li><i class="fa fa-exclamation-circle text-info"></i><span>@Detail@</span></li></a>
+                <li class="devide"></li>
+                <a href="javascript:void(0)" data-type="delete" onclick="deleteDataItem(this)"><li><i class="fa fa-times-circle text-danger"></i><span>@Delete@</span></li></a>
+            </ul>
+        </div>
     </div>
 </div>
 <script type="text/javascript">
-	window.onload = function() {
+    window.onload = function() {
        <?php if(!empty($filter)) { ?>
         Config.filter = <?= $filter ?>;
     <?php } ?>
-		Table.init();
-	}
+        Table.init();
+    }
 </script>

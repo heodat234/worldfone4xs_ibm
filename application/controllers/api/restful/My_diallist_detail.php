@@ -18,7 +18,19 @@ Class My_diallist_detail extends WFF_Controller {
 		$request = json_decode($this->input->get("q"), TRUE);
 		$extension = $this->session->userdata("extension");
 		$match = array("assign" => $extension);
+		if(isset($request["diallist_id"])) {
+			$match["diallist_id"] = new MongoDB\BSON\ObjectId($request["diallist_id"]);
+		}
 		$response = $this->crud->read($this->collection, $request, [], $match);
+		foreach ($response['data'] as $key => &$value) {
+			if(isset($value['PRODGRP_ID'])){
+				$temp = $this->mongo_db->where('code', $value['PRODGRP_ID'])->getOne('LO_Product');
+				if(!empty($temp)){
+					$value['PRODGRP_ID'] = $temp['name'];
+				}
+			}
+			
+		}
 		echo json_encode($response);
 	}
 

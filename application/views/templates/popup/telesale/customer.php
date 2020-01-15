@@ -172,12 +172,13 @@
                                     <div class="form-group">
                                         <label class="control-label col-xs-4">Rate <i class="fa fa-info-circle text-info" data-role="tooltip" title="Add on interest / Rate"></i></label>
                                         <div class="col-xs-8">
-                                            <div class="input-group">
+                                            <input id="rate" data-role="combobox" data-text-field="text" data-value-field="value" data-clear-button="false" name="rate" data-value-primitive="true" data-bind="value: item.rate_text, events: {change: operandChange, dataBound: onDataBoundRate}, source: rateOption" style="width: 100%">
+                                            <!-- <div class="input-group">
 						                        <input data-role="numerictextbox" data-decimals="6" data-format="p4" data-spinners="false" data-round="4" data-factor="100" data-max="1" data-min="0" name="rate" data-bind="value: item.rate, events: {change: operandChange}" style="width: 100%">
 						                        <div class="input-group-addon">
 						                        	<b>%</b>
 						                        </div>
-						                    </div>
+						                    </div> -->
                                         </div>
                                     </div>
                                     <div class="form-group">
@@ -269,7 +270,7 @@ class diallistPopup1 extends Popup {
         this.item = responseObj;
 
         /* Lấy iframe chi tiết khách hàng */
-        var detailUrl = detailUrl = `${ENV.baseUrl}manage/telesalelist?omc=1#/detail_customer/${responseObj.id}`
+        var detailUrl = detailUrl = `${ENV.baseUrl}manage/telesalelist/solve?omc=1#/detail_customer/${responseObj.id}`
         this.assign({detailUrl: detailUrl}).open();
     }
 }
@@ -280,6 +281,7 @@ window.popupObservable = new diallistPopup1(callData);
 window.popupObservable.assign({
 	followUp: {},
     callCodeOption: dataSourceJsonData(["Call", "result"]),
+    rateOption: () => dataSourceDropDownList("Rate", ["text", "value"]),
     playRecording: function(e) {
         play(this._dataCall.calluuid);
     },
@@ -287,17 +289,31 @@ window.popupObservable.assign({
     rate: "Rate",
     term: "Term",
     operandChange: function(e) {
-    	var rate = this.get("item.rate"),
+        var rate_source = $("#rate").data("kendoComboBox");
+        var selectedIndex = rate_source.selectedIndex
+        if(selectedIndex == -1) {
+            this.set("item.rate", this.get("item.rate_text") / 100)
+            this.set("item.rate_text", parseFloat(this.get("item.rate_text")).toFixed(2) + "%")
+        }
+        else {
+            this.set("item.rate", this.get("item.rate_text"))
+        }
+        var rate = this.get("item.rate"),
     		loan_amount = this.get("item.loan_amount"),
-    		temp_term = this.get("item.temp_term");
+            temp_term = this.get("item.temp_term");
     	if(typeof rate == "number" && typeof loan_amount == "number" && typeof temp_term == "number") {
 	    	var monthlyPayment = loan_amount * (rate / (1 - (1 + rate) ** (-temp_term)));
 	    	this.set("item.monthlyPayment", Math.round(monthlyPayment));
     	}
     },
+    onDataBoundRate: function(e) {
+        if(!this.get('item.rate_text')) {
+            this.set('item.rate_text', this.get('item.rate'));
+        }
+    },
     save: function() {
         var data = this.item.toJSON();
-
+        data['calluuid'] = this._dataCall.calluuid;
         $.ajax({
             url: ENV.restApi + "telesalelist_solve/" + (data.id || "").toString(),
             type: "PUT",

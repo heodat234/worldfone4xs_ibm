@@ -34,6 +34,8 @@ var Config = Object.assign(Config, {
     parse(response) {
         response.data.map(function(doc) {
             doc.customer_info = (typeof doc.customer_info != 'undefined' && doc.customer_info) ? doc.customer_info : {};
+            doc.created_at = doc.created_at ? new Date(doc.created_at * 1000) : undefined;
+            doc.updated_at = doc.updated_at ? new Date(doc.updated_at * 1000) : undefined;
             return doc;
         });
         return response;
@@ -41,16 +43,16 @@ var Config = Object.assign(Config, {
     scrollable: true,
     columns: [{
         title: "@Telesale code@",
-        field: "customer_info.assign",
+        field: "assign",
         width: "150px",
         headerAttributes: { style: "white-space: normal"},
-        filterable: false,
+        filterable: true,
     },{
-        field: "customer_info.assign_name",
+        field: "assign_name",
         title: "@Telesale name@",
         width: "200px",
         headerAttributes: { style: "white-space: normal"},
-        filterable: false,
+        filterable: true,
     },{
         field: "status",
         title: "@Status@",
@@ -70,20 +72,26 @@ var Config = Object.assign(Config, {
         headerAttributes: { style: "white-space: normal"},
         filterable: true,
     },{
-        field: "customer_info.name",
+        field: "tele_name",
         title: "@Customer name@",
         width: "200px",
         headerAttributes: { style: "white-space: normal"},
-        filterable: false,
+        filterable: true,
     },{
-        field: "customer_info.phone",
+        field: "tele_phone",
         title: "@MP no.@",
         width: "150px",
         headerAttributes: { style: "white-space: normal"},
-        filterable: false,
+        filterable: true,
         template: function(dataItem) {
-            return gridPhone(dataItem['customer_info']['phone'], dataItem['customer_info']['id'], 'customer');
+            return (typeof dataItem['tele_phone'] !== 'undefined' && typeof dataItem['tele_id'] !==' undefined') ? gridPhone(dataItem['tele_phone'], dataItem['tele_id'], 'customer') : '<span></span>';
         }
+    },{
+        field: "tele_note",
+        title: "@Customer note@",
+        width: "200px",
+        headerAttributes: { style: "white-space: normal"},
+        filterable: true,
     },{
         field: "loan_amount",
         title: "@Loan amount@",
@@ -132,30 +140,21 @@ var Config = Object.assign(Config, {
         width: "150px",
         headerAttributes: { style: "white-space: normal"},
         filterable: true,
-    },
-    // {
-    //     field: "created_at",
-    //     title: "@Created at@",
-    //     width: "150px",
-    //     headerAttributes: { style: "white-space: normal"},
-    // },{
-    //     field: "updated_at",
-    //     title: "@Last modified@",
-    //     width: "150px",
-    //     headerAttributes: { style: "white-space: normal"},
-    // },{
-    //     field: "assigned_by",
-    //     title: "@Assigned by@",
-    //     width: "150px",
-    //     headerAttributes: { style: "white-space: normal"},
-    // },
-    // {
-    //     // Use uid to fix bug data-uid of row undefined
-    //     title: `<a class='btn btn-sm btn-circle btn-action btn-primary' onclick='return deleteDataItemChecked();'><i class='fa fa-times-circle'></i></a>`,
-    //     template: '<a role="button" class="btn btn-sm btn-circle btn-action btn-primary" data-uid="#: uid #"><i class="fa fa-ellipsis-v"></i></a>',
-    //     width: "50px"
-    // }
-    ],
+    },{
+        field: "last_modified",
+        title: "@Last modified@",
+        width: "150px",
+        headerAttributes: { style: "white-space: normal"},
+        filterable: true,
+        template: function(dataItem) {
+            if(typeof dataItem.updated_at != 'undefined') {
+                return gridDate(dataItem.updated_at);
+            }
+            else {
+                return gridDate(dataItem.created_at);
+            }
+        }
+    },],
 });
 </script>
 

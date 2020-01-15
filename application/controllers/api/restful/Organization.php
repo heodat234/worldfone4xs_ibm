@@ -110,6 +110,11 @@ Class Organization extends WFF_Controller {
 		if(empty($data["hasChild"]) && !empty($data["members"])) {
 			$data["type"] = "custom";
 			$data["name"] = trim($this->getParentTreeName($organization_id), "/");
+			$data["tree_lead"] = trim($this->getParentTreeLead($organization_id), "/");
+			if(empty($data["lead"]) && !empty($data["tree_lead"])) {
+				$leads = explode("/", $data["tree_lead"]);
+				$data["lead"] = $leads[count($leads) - 1];
+			}
 			if(isset($data["group_id"])) {
 				$group = $this->mongo_db->where_id($data["group_id"])->getOne($this->sub . "Group");
 				if($group) {
@@ -137,5 +142,14 @@ Class Organization extends WFF_Controller {
 		if(empty($doc["name"])) return "";
 		if(empty($doc["parent_id"])) return "";
 		return $this->getParentTreeName($doc["parent_id"]) . "/" . $doc["name"];
+	}
+
+	private function getParentTreeLead($id)
+	{
+		$doc = $this->mongo_db->where_id($id)->getOne($this->collection);
+		if(!$doc) return "";
+		$tree_lead = !empty($doc["parent_id"]) ? $this->getParentTreeLead($doc["parent_id"]) : "";
+		$lead = !empty($doc["lead"]) ? $doc["lead"] : "";
+		return $tree_lead . "/" . $lead;
 	}
 }

@@ -35,11 +35,17 @@ class Common:
         return '/var/www/html/' + projectName + '/' + path
 
     def convertStr(self, value, formatType=''):
-        try: 
-            result = str(value)
-            result = self.re.sub(' +', ' ', result)
-            result = result.lstrip()
-            result = result.rstrip()
+        try:
+            seperator = ', '
+            result = ''
+            if isinstance(value, list):
+                result = seperator.join(value)
+            else:
+                result = str(value)
+                result = self.re.sub(' +', ' ', result)
+                result = result.lstrip()
+                result = result.rstrip()
+
             return str(result)
         except Exception as e:
             str(e)
@@ -115,6 +121,12 @@ class Common:
     def convertDefault(self, value, formatType=''):
         return value
 
+    def convertDatetime(self, value, formatType="%d/%m/%Y %H:%M:%S"):
+        result = ''
+        if isinstance(value, int):
+            result = self.time.strftime(formatType, self.time.localtime(value))
+        return result
+
     def convertDataType(self, data, datatype='', formatType=''):
         switcher = {
             'string'        : self.convertStr,
@@ -128,16 +140,17 @@ class Common:
             'arrayObjectId' : self.convertDefault,
             'phone'         : self.convertDefault,
             'arrayPhone'    : self.convertDefault,
-            'name'          : self.convertDefault
+            'name'          : self.convertDefault,
+            'datetime'      : self.convertDatetime,
         }
         return switcher[datatype](data, formatType)
 
     def getDownloadFolder(self):
         wff_env = self.wff_env(self.base_url())
         
-        if wff_env in ['UAT']:
+        if wff_env in ['UAT', 'DEV']:
             # serverfolder = 'YYYYMMDD'
-            today = self.datetime.strptime('13/12/2019', "%d/%m/%Y").date()
+            today = self.datetime.strptime('13/01/2020', "%d/%m/%Y").date() 
             serverfolder = today.strftime("%Y%m%d")
         else:
             today = self.date.today()
@@ -171,3 +184,12 @@ class Common:
                 sysConfig = self.json.load(f)
                 wff_env = sysConfig['wff_env']
         return wff_env
+
+    def array_column(self, list_dict=[], value='', index=''):
+        try:
+            if index != '':
+                return map(lambda x: {x[index]: x[value]}, list_dict)
+            else:
+                return map(lambda x: x[value], list_dict)
+        except Exception as e:
+            return str(e)

@@ -15,6 +15,13 @@
 			</div>
 			<div class="form-group">
 				<button type="button" data-bind="click: addPrivilege" data-role="button"><b>@Add@ @privilege@</b></button>
+				<div class="checkbox-inline">
+					<label style="margin-top: 5px">
+				    	<input class="custom-checkbox" type="checkbox" data-bind="checked: item.default">
+				    	<span></span>
+				    	<span>@Default@</span>
+				    </label>
+				</div>
 	        </div>
 	        <div class="form-group">
 				<label>@Navigator@</label>

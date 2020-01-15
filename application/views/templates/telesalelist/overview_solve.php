@@ -13,7 +13,14 @@
         <button class="btn btn-sm btn-primary btn-save" data-type="action/reAssign" onclick="saveChangeAssign()">@Save@</button>
     </div>
 </div>
-<div class="col-sm-12 filter-mvvm" style="display: none; margin: 10px 0"></div>
+<div class="row" style="margin: 10px 0">
+	<div class="col-sm-2" id="page-widget"></div>
+	<div class="col-sm-9 filter-mvvm" style="display: none"></div>
+    <div class="col-sm-1" style=" margin: 10px 0; float: right; display: none">
+        <a role="button" class="btn btn-sm" onclick="saveAsExcel()"><i class="fa fa-file-excel-o"></i> <b>@Export@</b></a>
+    </div>
+</div>
+<!-- <div class="col-sm-12 filter-mvvm" style="display: none; margin: 10px 0"></div> -->
 <div class="col-sm-12" style="overflow-y: auto; padding: 0">
 	<div id="grid"></div>
 </div>
@@ -88,7 +95,7 @@
 
     }); 
 </script>
-<script src="<?= STEL_PATH.'js/table.js' ?>"></script>
+
 <script type="text/javascript">
     function gridPhone(data,id,type) {
         var html = "<span></span>";
@@ -133,13 +140,6 @@
     })
     telesaleFields.read().then(function(){
         var columns = telesaleFields.data().toJSON();
-        columns.unshift({
-            field: 'starttime_call',
-            title: "@Nearest Call@",
-            width: 150,
-            type:'timestamp',
-            filterable : false
-        });
         columns.map(col => {
             col.width = 130;
             switch (col.type) {
@@ -167,8 +167,13 @@
             width: 32,
             hidden: (PERMISSION.actions.includes("delete") || PERMISSION.actions.includes("reAssign"))  ? false : true
         });
+
+        Config.columns = columns;
         
-        Table.columns = columns;
+        var s = document.createElement("script");
+        s.type = "text/javascript";
+        s.src = "<?= STEL_PATH ?>js/table.js";
+        $("header").append(s);
         Table.init();
         Table.grid.bind("change", grid_change);
     })
@@ -258,5 +263,15 @@
 	$(document).on("click", ".grid-name", function() {
 		detailData($(this).closest("tr"));
 	})
+
+    function saveAsExcel() {
+        $.ajax({
+            url: ENV.vApi + 'telesalelist/exportExcel',
+            type: 'GET',
+            success: function(response) {
+                window.open(response.data, '_blank'); // <- This is what makes it open in a new window.
+            }
+        })
+    }
 	
 </script>

@@ -60,4 +60,11 @@ Class Cdr extends WFF_Controller {
         $this->output->data["js"][] = STEL_PATH . "js/admin/admin.js";
         $this->load->view('report/qc_by_agent_view');
     }
+
+    function summary()
+	{
+		$this->output->data["js"][] = STEL_PATH . "js/admin/admin.js";
+		$this->output->data["js"][] = KENDOUI_PATH . "js/jszip.min.js";
+        $this->load->view('report/cdr_summary_view');
+	}
 }

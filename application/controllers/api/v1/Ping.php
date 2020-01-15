@@ -46,7 +46,7 @@ Class Ping extends CI_Controller {
         	$agent_status = $this->last_agent_status();
         	$this->echoEvent("agent_status", json_encode($agent_status));
         }
-        if($this->events["chat_status"]) {
+        if($time % 2 == 0 && $this->events["chat_status"]) {
         	$chat_status = $this->get_chat_status();
         	$this->echoEvent("chat_status", json_encode($chat_status));
      	}  

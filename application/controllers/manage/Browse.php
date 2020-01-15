@@ -14,4 +14,11 @@ class Browse extends WFF_Controller {
 		$this->output->data["js"][] = STEL_PATH . "js/manage/browse.js";
         $this->load->view('manage/browse_view');
     }
+
+    // Use for LOAN JACCS
+    function paymentHistory() {
+        $this->output->data["css"][] = STEL_PATH . "css/table.css";
+        $this->output->data["js"][] = STEL_PATH . "js/table.js";
+        $this->load->view('LO/manage/payment_history_view');
+    }
 }

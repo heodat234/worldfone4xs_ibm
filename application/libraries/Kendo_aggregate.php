@@ -1,8 +1,8 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
 /********************************************************
  * * *    Kendo Query Convert to Aggregate Class    * * *
- * * *    				Version 1.1    				* * *
+ * * *    				Version 1.2    				* * *
  * * *    	Author: dung.huynh@southtelecom.vn    	* * *
  ********************************************************/
 
@@ -11,6 +11,7 @@
  * @uses: Set instance of Class. 
  * @example: var a = new Query(model); a.kendoQuery = queryObjectKendo
  * @return: (array) aggregate pipelines cho vao ham aggregate
+ * NEW: Add type datetime
  */
 
 Class Kendo_aggregate {
@@ -23,7 +24,7 @@ Class Kendo_aggregate {
     private $_default       = array(
         "sort"  => array("_id" => -1),
         "skip"  => 0,
-        "limit" => 20,
+        "limit" => 1000,
     );
 
 	private $OPERATORS      = array(
@@ -62,15 +63,7 @@ Class Kendo_aggregate {
 
     function get_total_aggregate() {
         $aggregate = $this->_aggregate;
-        $aggregate[] = array('$group' => array('_id' => null, 'total' => array('$sum' => 1)));
-        return $aggregate;
-    }
-
-    function get_total_aggregate_group() {
-        $aggregate = $this->_aggregate;
-//        $aggregate[] = array('$group' => array('_id' => $_id,));
         $aggregate[] = array('$count' => 'total');
-//        print_r($aggregate);
         return $aggregate;
     }
 
@@ -153,9 +146,9 @@ Class Kendo_aggregate {
 
     function paging() {
         if( isset($this->_kendo_query["take"], $this->_kendo_query["skip"]) ){
+            // By kendo query
             $this->_aggregate[] = array( '$skip' => (int) $this->_kendo_query["skip"] );
             $this->_aggregate[] = array( '$limit' => (int) $this->_kendo_query["take"] );
-
         } else {
             // Default paging
             $this->_aggregate[] = array( '$skip' => (int) $this->_default["skip"]);
@@ -313,7 +306,7 @@ Class Kendo_aggregate {
                             $where[$field][$mongoOperation] = (boolean) ($value == "true");
                             break;
 
-                        // Date filter
+                        // Timestamp filter
                         case "timestamp":
                             $mongoOperation = $this->OPERATORS[$filter["operator"]];
                             $where[$field] = array();
@@ -326,6 +319,15 @@ Class Kendo_aggregate {
                             else {
                                 $where[$field][$mongoOperation] = strtotime($timeString) - date('Z');
                             }
+                            break;
+
+                        // Datetime filter
+                        case "datetime":
+                            $mongoOperation = $this->OPERATORS[$filter["operator"]];
+                            $where[$field] = array();
+                            $timeString = preg_replace('/\([^)]*\)/', '', $value);
+                            if(!$timeString) throw new Exception("Maybe time value format wrong");
+                            $where[$field][$mongoOperation] = new MongoDB\BSON\UTCDateTime(strtotime($timeString) * 1000);
                             break;
 
                         // Int filter
@@ -342,22 +344,18 @@ Class Kendo_aggregate {
                             $where[$field][$mongoOperation] = (double) $value;
                             break;
 
+                        // Object Id filter
                         case "ObjectId":
                             $mongoOperation = $this->OPERATORS[$filter["operator"]];
                             $where[$field] = array();
                             $where[$field][$mongoOperation] = new MongoDB\BSON\ObjectId($value);
                             break;
 
-                        case "array":
-                            switch ($filter["operator"]) {
-                                case 'contains':
-                                    $mongoOperation = '$in';
-                                    break;
-                                
-                                default:
-                                    $mongoOperation = $this->OPERATORS[$filter["operator"]];
-                                    break;
-                            }
+                        // Array filter
+                        case "array": case "arrayObject": case "arrayPhone":
+                            if( isset($this->OPERATORS[$filter["operator"]]) ) {
+                                $mongoOperation = $this->OPERATORS[$filter["operator"]];
+                            } else $mongoOperation = '$in';
                             $where[$field] = array();
                             $where[$field][$mongoOperation] = (array) $value;
                             break;

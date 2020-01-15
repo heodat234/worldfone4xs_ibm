@@ -1,12 +1,10 @@
 <?php if (!defined('BASEPATH')) {exit('No direct script access allowed');}
 
 /* 
- * Copyright © 2014 South Telecom
+ * Copyright © 2019 South Telecom
  */
 
 class Record extends CI_Controller{
-
-    private $collection = "Config";
     public function __construct() {
         parent::__construct();
         @error_reporting(0);

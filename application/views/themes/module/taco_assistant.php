@@ -31,12 +31,20 @@
           		  location.href = "<?= fix_current_url() ?>?cmd_profiler=show";
               }, 2000)
           		break;
-            case "phplog": case "phplogs": case "php_logs":
+            case "phplog": case "phplogs": case "php_logs": case "phpbug":
               tacoRead("Now you will see php log");
               setTimeout(() => {
                 if(typeof messageArr[1] != 'undefined')
                   location.href = "<?= fix_current_url() ?>?cmd_php_logs=" +  messageArr[1];
                 else location.href = "<?= fix_current_url() ?>?cmd_php_logs=today";
+              }, 2000)
+              break;
+            case "jslog": case "jslogs": case "js_logs": case "jsbug":
+              tacoRead("Now you will see js log");
+              setTimeout(() => {
+                if(typeof messageArr[1] != 'undefined')
+                  location.href = "<?= fix_current_url() ?>?cmd_js_logs=" +  messageArr[1];
+                else location.href = "<?= fix_current_url() ?>?cmd_js_logs=today";
               }, 2000)
               break;
           	case "default": case "origin":

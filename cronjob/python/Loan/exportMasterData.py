@@ -26,15 +26,17 @@ now         = datetime.now()
 subUserType = 'LO'
 collection         = common.getSubUser(subUserType, 'Master_data_report')
 log         = open(base_url + "cronjob/python/Loan/log/exportMasterData_log.txt","a")
-fileOutput  = base_url + 'upload/loan/export/MasterData.xlsx' 
+
+
 try:
    data        = []
    insertData  = []
    resultData  = []
    errorData   = []
 
-   today = date.today()
-   # today = datetime.strptime('22/12/2019', "%d/%m/%Y").date()
+   # today = date.today()
+   today = datetime.strptime('31/12/2019', "%d/%m/%Y").date()
+
 
    day = today.day
    month = today.month
@@ -44,6 +46,7 @@ try:
 
    todayString = today.strftime("%d/%m/%Y")
    todayTimeStamp = int(time.mktime(time.strptime(str(todayString + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
+   endTodayTimeStamp = int(time.mktime(time.strptime(str(todayString + " 23:59:59"), "%d/%m/%Y %H:%M:%S")))
 
    startMonth = int(time.mktime(time.strptime(str('01/' + str(month) + '/' + str(year) + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
    endMonth = int(time.mktime(time.strptime(str(str(lastDayOfMonth) + '/' + str(month) + '/' + str(year) + " 23:59:59"), "%d/%m/%Y %H:%M:%S")))
@@ -54,12 +57,13 @@ try:
    if todayTimeStamp in listHoliday:
       sys.exit()
 
+   fileOutput  = base_url + 'upload/loan/export/MasterData_'+ today.strftime("%d%m%Y") +'.xlsx' 
 
    aggregate_acc = [
       {
           "$match":
           {
-              "createdAt": {'$gte' : todayTimeStamp},
+              "createdAt" : {'$gte' : todayTimeStamp,'$lte' : endTodayTimeStamp},
           }
       },
       {
@@ -70,7 +74,7 @@ try:
       }
    ]
    data = mongodb.aggregate_pipeline(MONGO_COLLECTION=collection,aggregate_pipeline=aggregate_acc)
-
+   
    df = pd.DataFrame(data, columns= ['group_id','account_number','cus_name','BIR_DT8','CUS_ID','FRELD8','product_name','LIC_NO','APPROV_LMT','TERM_ID','RPY_PRD','F_PDT','DT_MAT','current_balance','CURRENT_DPD','MOBILE_NO','WRK_REF','current_add','current_district','current_province','pernament_add','pernament_district','pernament_province','W_ORG','INT_RATE','OVER_DY','DATE_HANDOVER','license_plates_no','COMPANY'])
    # df.to_excel(writer,sheet_name='Daily',header=['CONTRACTNR','CLIENT_NAME','BIRTH_DATE','CIF','SIGNED_DATE','PRODUCTNAME','ID NO','CREDIT AMOUNT','INSTALLMENT NUMBER','INSTALMENT AMOUNT','DATE_FIRST_DUE','DATE_LAST_DUE','CURRENT_DEBT','CURRENT_DPD','PHONE NUMBER','REFERENCE PHONE','Current_ADDRESS (if any)','District','PROVINCE','PERNAMENT_ADDRESS','District','PROVINCE','PRINCIPAL','INTEREST/ year','DPD','DATE HANDOVER','lICENSE PLATES NO','COMPANY']) 
    writer = pd.ExcelWriter(fileOutput, engine='xlsxwriter')

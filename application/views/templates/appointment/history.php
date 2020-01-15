@@ -38,15 +38,7 @@
                                 },{
                                     'field': 'status',
                                     'title': '@Status@',
-                                    'template': function(dataItem) {
-                                        if(dataItem.status == 1) {
-                                            return '<h4 style=\'font-weight: bold\'>Success</h4>';
-                                        }else if(dataItem.status == 0) {
-                                            return '<h4 style=\'font-weight: bold\'>Fail</h4>';
-                                        }else if(dataItem.status == 2) {
-                                            return '<div class=\'col-sm-8\'><div class=\'progress\' data-role=\'progressbar\' data-min=\'0\' data-max=\'100\' data-value=\'false\'></div><div class=\'status-upload\'>Loading...</div></div><div class=\'col-sm-4 cancel-upload\'><a href=\'javascript:void(0)\' onclick=\'cancelUpload(this)\'>Cancel</a></div>';
-                                        }
-                                    },
+                                    'template': kendo.template($('#status-template').html()),
                                 },{
                                     // Use uid to fix bug data-uid of row undefined
                                     'template': '<a role=\'button\' class=\'btn btn-sm btn-circle btn-action\' style=\'background: yellow;\' data-uid=\'#: uid #\'><i class=\'fa fa-ellipsis-v\'></i></a>',
@@ -62,6 +54,16 @@
         </ul>
     </div>
 </div>
+
+<script id="status-template" type="text/x-kendo-template">
+    #if(status == 1) {#
+        <h4 style='font-weight: bold'>Success</h4>
+    #} else if(status == 0) {#
+        <h4 style='font-weight: bold'>Fail</h4>
+    #} else if(status == 2) {#
+        <div class='col-sm-8'><div class='progress' data-role='progressbar' data-min='0' data-max='100' data-value='false'></div><div class='status-upload'>Loading...</div></div><div class='col-sm-4 cancel-upload'><a href='javascript:void(0)' onclick='cancelUpload(#= JSON.stringify(id) #)'>Cancel</a></div>
+    #}#
+</script>
 
 <script id="rowTemplate" type="text/x-kendo-tmpl">
     #if(status === 0) {#
@@ -257,6 +259,19 @@ var appointmentHistory = function() {
     }
 }();
 appointmentHistory.init();
+
+function cancelUpload(id) {
+    $.ajax({
+        url: ENV.vApi + `appointment/update_import_log/${id}`,
+        data: kendo.stringify({'status': 0}),
+        error: errorDataSource,
+        contentType: "application/json; charset=utf-8",
+        type: "PUT",
+        success: function() {
+            $("#history-grid").data("kendoGrid").dataSource.read();
+        }
+    })
+}
 
 </script>
 <script type="text/javascript">

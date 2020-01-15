@@ -27,7 +27,8 @@ Class Block_card_report extends WFF_Controller {
     function read() {
         try {
             $request = json_decode($this->input->get("q"), TRUE);
-            $date = date('d-m-Y',strtotime("-1 days"));
+            $request['sort'] = array(array("field" => "index", "dir" => "asc"));
+            $date = date('d-m-Y');
             $match = array('createdAt' => array('$gte' => strtotime($date)));
             $data = $this->crud->read($this->collection, $request,array(),$match);
             echo json_encode($data);
@@ -38,7 +39,7 @@ Class Block_card_report extends WFF_Controller {
 
     function exportExcel() {
         $now = getdate();
-        $date = date('d-m-Y',strtotime("-1 days"));
+        $date = date('d-m-Y');
         // $month = (string)$now['mon'];
         $request = json_decode($this->input->get("q"), TRUE);
         $request = array('createdAt' => array('$gte' => strtotime($date)));

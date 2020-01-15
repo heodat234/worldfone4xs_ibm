@@ -38,7 +38,7 @@ try:
     listDebtGroup = []
     zaccfData = []
     today = date.today()
-    # today = datetime.strptime('21/12/2019', "%d/%m/%Y").date()
+    # today = datetime.strptime('05/01/2020', "%d/%m/%Y").date()
 
     day = today.day
     month = today.month
@@ -62,11 +62,13 @@ try:
     startMonth = int(time.mktime(time.strptime(str('01/' + str(month) + '/' + str(year) + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
     endMonth = int(time.mktime(time.strptime(str(str(lastDayOfMonth) + '/' + str(month) + '/' + str(year) + " 23:59:59"), "%d/%m/%Y %H:%M:%S")))
 
-    holidayOfMonth = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_off_sys'))
-    listHoliday = map(lambda offDateRow: {offDateRow['off_date']}, holidayOfMonth)
-
-    if todayTimeStamp in listHoliday:
+    holidayOfMonth = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_off_sys'), WHERE={'off_date': todayTimeStamp})
+    if holidayOfMonth != None:
         sys.exit()
+    # listHoliday = map(lambda offDateRow: {offDateRow['off_date']}, holidayOfMonth)
+
+    # if todayTimeStamp in listHoliday:
+    #     sys.exit()
 
     todayString = today.strftime("%d/%m/%Y")
     starttime = int(time.mktime(time.strptime(str(todayString + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
@@ -157,7 +159,7 @@ try:
             temp['weekOfMonth'] = weekOfMonth
             temp['type'] = 'sibs'
             temp['createdBy'] = 'system'
-            temp['createdAt'] = time.time()
+            temp['createdAt'] = todayTimeStamp
             mongodb.insert(MONGO_COLLECTION=collection, insert_data=temp)
 
     insertTotal = {
@@ -168,7 +170,7 @@ try:
         'weekOfMonth'   : weekOfMonth,
         'type'          : 'sibs',
         'createdBy'     : 'system',
-        'createdAt'     : time.time()
+        'createdAt'     : todayTimeStamp
     }
     insertTotalG2 = {
         'year'          : str(year),
@@ -178,7 +180,7 @@ try:
         'weekOfMonth'   : weekOfMonth,
         'type'          : 'sibs',
         'createdBy'     : 'system',
-        'createdAt'     : time.time()
+        'createdAt'     : todayTimeStamp
     }
     insertTotalG3 = {
         'year'          : str(year),
@@ -188,7 +190,7 @@ try:
         'weekOfMonth'   : weekOfMonth,
         'type'          : 'sibs',
         'createdBy'     : 'system',
-        'createdAt'     : time.time()
+        'createdAt'     : todayTimeStamp
     }
     insertTotal['group']       = 'Total'
     insertTotal['total_org']   = sum_org
@@ -210,27 +212,35 @@ try:
 
     # Card
     sbvData = []
-    aggregate_sbv = [
+    
+    aggregate_sbv_1 = [
+        {
+            "$project":
+            {
+                'pay': {'$sum' : [ '$ob_principal_sale', '$ob_principal_cash']},
+                'delinquency_group': 1
+            }
+        },
         {
             "$match":
             {
-                '$or' : [{
-                    'ob_principal_sale': {'$gt': 0},
-                    'ob_principal_cash' : {'$gt': 0}
-                }]
+                'pay': {'$gt' : 0}
             }
         },
         {
             "$group":
             {
-                "_id": '$first_due_group',
-                "total_ob_principal_sale": {'$sum': '$ob_principal_sale'},
-                "total_ob_principal_cash": {'$sum': '$ob_principal_cash'},
+                "_id": '$delinquency_group',
+                "total_ob_principal": {'$sum': '$pay'},
                 "count_data": {'$sum': 1},
             }
         }
     ]
-    sbvInfo = mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'SBV'),aggregate_pipeline=aggregate_sbv)
+    dataSBV = list(mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'SBV'),aggregate_pipeline=aggregate_sbv_1))
+       
+
+    # for sbv in dataSBV:
+    #     print(sbv)         
     sum_org = 0
     sum_acc = 0
     sum_org_g2 = 0
@@ -239,70 +249,46 @@ try:
     sum_acc_g3 = 0
     sum_org_B = 0
     sum_acc_B = 0
-    if sbvInfo is not None:
-        for sbv in sbvInfo:
-            if sbv['_id'] != None:
-                temp = sbv
-                total_org =  sbv['total_ob_principal_sale'] + sbv['total_ob_principal_cash']
+    if dataSBV is not None:
+        for sbv in dataSBV:
+            temp = sbv
+            total_org =  sbv['total_ob_principal']
 
-                temp['total_org'] = total_org
-                sum_org += total_org
-                sum_acc += sbv['count_data']
-                if sbv['_id'] != '01':
-                    sum_org_g2 += total_org
-                    sum_acc_g2 += sbv['count_data']
-                if  sbv['_id'] == '02':
-                    sum_org_B += total_org
-                    sum_acc_B += sbv['count_data']
+            temp['total_org'] = total_org
+            sum_org += total_org
+            sum_acc += sbv['count_data']
+            if sbv['_id'] != '01':
+                sum_org_g2 += total_org
+                sum_acc_g2 += sbv['count_data']
+            if  sbv['_id'] == '02':
+                sum_org_B += total_org
+                sum_acc_B += sbv['count_data']
 
-                sbvData.append(temp)
+            sbvData.append(temp)
 
     sum_org_g3 = sum_org_g2 - sum_org_B
     sum_acc_g3 = sum_acc_g2 - sum_acc_B
 
-    # print(sum_)
     # print(sum_acc_g2)
     # print(sum_acc_g3)
 
-    # aggregate_sbv = [
-    #     {
-    #         "$match":
-    #         {
-    #             '$or' : [{
-    #                 'ob_principal_sale': {'$gt': 0},
-    #                 'ob_principal_cash' : {'$gt': 0}
-    #             }]
-    #         }
-    #     },
-    #     {
-    #         "$group":
-    #         {
-    #             "_id": '$first_due_group',
-    #             "total_ob_principal_sale": {'$sum': '$ob_principal_sale'},
-    #             "total_ob_principal_cash": {'$sum': '$ob_principal_cash'},
-    #             "count_data": {'$sum': 1},
-    #         }
-    #     }
-    # ]
-    # sbvInfo = mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'SBV'),aggregate_pipeline=aggregate_sbv)
     if sbvData is not None:
         for sbv in sbvData:
-            if sbv['_id'] != None:
-                temp = {}
-                temp['group'] = sbv['_id']
-                temp['count_data'] = sbv['count_data']
-                temp['total_org'] = sbv['total_org']
-                temp['ratio'] = temp['total_org']/sum_org if sum_org != 0 else 0
-                temp['year'] = str(year)
-                temp['month'] = month
-                temp['weekday'] = weekday
-                temp['day'] = todayString
-                temp['weekOfMonth'] = weekOfMonth
-                temp['type'] = 'card'
-                temp['createdBy'] = 'system'
-                temp['createdAt'] = time.time()
-                # print(temp)
-                mongodb.insert(MONGO_COLLECTION=collection, insert_data=temp)
+            temp = {}
+            temp['group'] = sbv['_id']
+            temp['count_data'] = sbv['count_data']
+            temp['total_org'] = sbv['total_org']
+            temp['ratio'] = temp['total_org']/sum_org if sum_org != 0 else 0
+            temp['year'] = str(year)
+            temp['month'] = month
+            temp['weekday'] = weekday
+            temp['day'] = todayString
+            temp['weekOfMonth'] = weekOfMonth
+            temp['type'] = 'card'
+            temp['createdBy'] = 'system'
+            temp['createdAt'] = todayTimeStamp
+            # print(temp)
+            mongodb.insert(MONGO_COLLECTION=collection, insert_data=temp)
 
         insertTotal = {
             'year'          : str(year),
@@ -312,7 +298,7 @@ try:
             'weekOfMonth'   : weekOfMonth,
             'type'          : 'card',
             'createdBy'     : 'system',
-            'createdAt'     : time.time()
+            'createdAt'     : todayTimeStamp
         }
         insertTotalG2 = {
             'year'          : str(year),
@@ -322,7 +308,7 @@ try:
             'weekOfMonth'   : weekOfMonth,
             'type'          : 'card',
             'createdBy'     : 'system',
-            'createdAt'     : time.time()
+            'createdAt'     : todayTimeStamp
         }
         insertTotalG3 = {
             'year'          : str(year),
@@ -332,7 +318,7 @@ try:
             'weekOfMonth'   : weekOfMonth,
             'type'          : 'card',
             'createdBy'     : 'system',
-            'createdAt'     : time.time()
+            'createdAt'     : todayTimeStamp
         }
         insertTotal['group']       = 'Total'
         insertTotal['total_org']   = sum_org

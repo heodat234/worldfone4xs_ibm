@@ -86,7 +86,7 @@ var Config = {
     	{
     		field: "metadata",
     		template: data => {
-    			var html = `Length: <b>${data.metadata[0]}</b> characters<br>Time expire: <b>${gridTimestamp(data.metadata[1], "dd/MM/yy H:mm:ss")}</b>`;
+    			var html = `Length: <b>${data.metadata[0]}</b> characters<br>Time expire: <b>${gridTimestamp(Number(data.metadata[1]), "dd/MM/yy H:mm:ss")}</b>`;
     			return html;
     		}
     	},

@@ -7,6 +7,9 @@
     </ul>
 </div>
 <script>
+var todayMidnight = new Date();
+todayMidnight.setHours(0,0,0,0);
+
 var Config = {
     crudApi: `${ENV.restApi}`,
     templateApi: `${ENV.templateApi}`,
@@ -16,8 +19,18 @@ var Config = {
     model: {
         id: "id",
         fields: {
+        	count_detail: {type: "number"},
+        	createdAt: {type: "date"}
         }
     },
+    parse: function(res) {
+    	res.data.map(doc => {
+    		doc.createdAt = doc.createdAt ? new Date(doc.createdAt * 1000) : null;
+    	})
+    	return res;
+    },
+    filter: {field: "createdAt", operator: "gte", value: todayMidnight},
+    filterable: KENDO.filterable,
     columns: [{
             field: "name",
             title: "@Name@",
@@ -33,7 +46,7 @@ var Config = {
         },{
             field: "createdAt",
             title: "@Create at@",
-            template: dataItem => gridTimestamp(dataItem.createdAt)
+            format: "{0: dd/MM/yy HH:mm}"
         },{
             field: "createdBy",
             title: "@Create by@"

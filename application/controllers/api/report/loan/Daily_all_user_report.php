@@ -230,7 +230,16 @@ Class Daily_all_user_report extends CI_Controller {
             $style = array('font' => array('bold' => true), 'alignment' => array('horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER));
             $worksheet->getStyle("A$rowHeader_1:Y$rowHeader_2")->applyFromArray($style);
 
-
+            if(!empty($value['name'])) {
+               if(strpos($value['name'], 'G1') !== false || strpos($value['name'], 'G3') !== false) {
+                   continue;
+               }
+   
+               if(strpos($value['name'], 'G2') !== false) {
+                   $groupName = explode("/G2", $value['name']);
+                   $value['name'] = $groupName[0];
+               }
+           }
 
             if (isset($value['team_lead'])) {
                $worksheet->getStyle("A"."$row".":Y"."$row")->getFill()
@@ -251,7 +260,7 @@ Class Daily_all_user_report extends CI_Controller {
             }
             $worksheet->setCellValue("C".$row, $value['count_data']);
             $worksheet->setCellValue("D".$row, $value['unwork']);
-            $worksheet->setCellValue("E".$row, isset($value['talk_time']) ? $value['talk_time'] : 0);
+            $worksheet->setCellValue("E".$row, isset($value['talk_time']) ? round($value['talk_time']/60) : 0);
             $worksheet->setCellValue("F".$row, isset($value['total_call']) ? $value['total_call'] : 0);
             $worksheet->setCellValue("G".$row, isset($value['total_amount']) ? $value['total_amount'] : 0);
             $worksheet->setCellValue("H".$row, isset($value['count_spin']) ? $value['count_spin'] : 0);

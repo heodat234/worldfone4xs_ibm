@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-Class Diallist extends CI_Controller {
+Class Diallist extends WFF_Controller {
 
 	private $collection = "Diallist";
 	private $sub_collection = "Diallist_detail";
@@ -18,11 +18,18 @@ Class Diallist extends CI_Controller {
 	}
 
 	function read()
-	{
+	{ 
 		$this->load->library("crud");
 		$request = json_decode($this->input->get("q"), TRUE);
 
-		$response = $this->crud->read($this->collection, $request);
+		$match = [];
+		if(!in_array("viewall", $this->data["permission"]["actions"])) {
+            $extension = $this->session->userdata("extension");
+            $match["leader_assign"] = $extension;
+        }
+
+		$response = $this->crud->read($this->collection, $request, [], $match);
+
         // Change foreign_key
         $this->load->library("mongo_private");
         $jsondata_collection = set_sub_collection($this->jsondata_collection);
@@ -43,11 +50,11 @@ Class Diallist extends CI_Controller {
         foreach ($response["data"] as &$doc) {
         	if(isset($doc["type"])) $doc["type"] = isset($dialTypeToName[$doc["type"]]) ? $dialTypeToName[$doc["type"]] : $doc["type"];
         	$doc["count_detail"] = $this->mongo_db->where_object_id("diallist_id", $doc["id"])->count($this->sub_collection);
-        	$doc["assigns"] = $this->mongo_db->where_object_id("diallist_id", $doc["id"])->distinct($this->sub_collection, "assign");
+        	$doc["assigns"] = $this->mongo_db->where_object_id('diallist_id', $doc["id"])->distinct($this->sub_collection, 'assign');
         	$this->mongo_db->where_id($doc["id"])
         	->set("count_detail", $doc["count_detail"])
         	->set("assigns", $doc["assigns"])->update($this->collection);
-        }
+        } 
         // Result
 		echo json_encode($response);
 	}

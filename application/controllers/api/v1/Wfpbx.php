@@ -114,7 +114,7 @@ Class Wfpbx extends WFF_Controller {
 				$this->mongo_db->where(array("userextension" => $extension))
 				->delete_all($this->sub . $this->cdr_collection . "_realtime");
 			}
-			if( !in_array($agentstatus["statuscode"], [1,2,4]) ) throw new Exception("Your status is not available");
+			if( !in_array($agentstatus["statuscode"], [0,1,2,4]) ) throw new Exception("Your status is not available");
 
 			$responseArr = $this->pbx_model->make_call_2($extension, $phone, $dialid, $type);
 			if($responseArr != 200) throw new Exception("Call error");
@@ -130,6 +130,11 @@ Class Wfpbx extends WFF_Controller {
     	try {
     		$request = json_decode(file_get_contents('php://input'), TRUE);
     		$calluuid = !empty($request["calluuid"]) ? $request["calluuid"] : "";
+    		if(!$calluuid) {
+    			$this->load->model("call_model");
+    			$call = $this->call_model->get_current_call($this->session->userdata("extension"));
+    			$calluuid = isset($call["calluuid"]) ? $call["calluuid"] : "";
+    		}
     		$responseArr = $this->pbx_model->hangup($calluuid);
     		if($responseArr != 200) throw new Exception("@Hangup@ @error@: " . $responseArr);
     		$message = $this->language_model->translate("@Hangup@ @success@", "NOTIFICATION");
@@ -144,6 +149,11 @@ Class Wfpbx extends WFF_Controller {
     	try {
     		$request = json_decode(file_get_contents('php://input'), TRUE);
     		$calluuid = !empty($request["calluuid"]) ? $request["calluuid"] : "";
+    		if(!$calluuid) {
+    			$this->load->model("call_model");
+    			$call = $this->call_model->get_current_call($this->session->userdata("extension"));
+    			$calluuid = isset($call["calluuid"]) ? $call["calluuid"] : "";
+    		}
     		$extension = !empty($request["extension"]) ? $request["extension"] : "";
     		$responseArr = $this->pbx_model->transfer($calluuid, $extension);
     		if($responseArr != 200) throw new Exception("@Transfer@ @error@: " . $responseArr);

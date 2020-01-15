@@ -15,11 +15,25 @@ class Group_model extends CI_Model {
 
 	function members_from_lead($extension = null)
 	{
-		$doc = $this->mongo_db->where("lead", $extension)->getOne($this->collection);
-		$members = isset($doc["members"]) ? $doc["members"] : [];
-		if(!in_array($extension, $members)) {
-			$members[] = $extension;
+		$members = [$extension];
+		$groups = $this->mongo_db->where("lead", $extension)->get($this->collection);
+		if($groups) {
+			foreach ($groups as $group) {
+				if(!empty($group["members"])) {
+					foreach ($group["members"] as $ext) {
+						if(!in_array($ext, $members)) {
+							$members[] = $ext;
+						}
+					}
+				}
+			}
 		}
 		return $members;
+	}
+
+	function queues_of_extension($extension = null)
+	{
+		$queues = $this->mongo_db->where("members", $extension)->where("type", "queue")->distinct($this->collection, "queuename");
+		return $queues;
 	}
 }

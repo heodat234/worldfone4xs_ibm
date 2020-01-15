@@ -21,11 +21,14 @@ Class Telesalelist_solve extends WFF_Controller {
 	{
 		try {
 			$request = json_decode($this->input->get("q"), TRUE);
-			$where = array('assign' => $this->session->userdata("extension"));
+			$extension = $this->session->userdata("extension");
+			$where = array('assign' => $extension);
 			$response = $this->crud->read($this->collection, $request,'',$where);
 			foreach ($response['data'] as &$value) {
-				$call = $this->mongo_db->where(array('customernumber' => $value['phone']  ))->select(array('starttime'))->order_by(array('starttime' => -1))->getOne($this->call_collection);
-				$value['starttime_call'] = $call['starttime'];
+				if ( isset($value['updatedBy']) && $value['updatedBy'] != $extension )  {
+					$value['is_potential'] = false;
+					$value['result'] = '';
+				}
 			}
 			echo json_encode($response);
 		} catch (Exception $e) {
@@ -48,6 +51,10 @@ Class Telesalelist_solve extends WFF_Controller {
 		try {
 			$data = json_decode(file_get_contents('php://input'), TRUE);
 			$data["createdBy"]	=	$this->session->userdata("extension");
+			if(!empty($data["calluuid"])) {
+				$callInfo = $this->mongo_db->where(array('calluuid' => $data['calluuid']))->getOne($this->call_collection);
+				$data['starttime_call'] = (!empty($callInfo['starttime'])) ? $callInfo['starttime'] : null;
+			}
 			$result = $this->crud->create($this->collection, $data);
 			echo json_encode(array("status" => $result ? 1 : 0, "data" => [$result]));
 		} catch (Exception $e) {
@@ -74,6 +81,10 @@ Class Telesalelist_solve extends WFF_Controller {
 		try {
 			$data = json_decode(file_get_contents('php://input'), TRUE);
 			$data["updatedBy"]	=	$this->session->userdata("extension");
+			if(!empty($data["calluuid"])) {
+				$callInfo = $this->mongo_db->where(array('calluuid' => $data['calluuid']))->getOne($this->call_collection);
+				$data['starttime_call'] = (!empty($callInfo['starttime'])) ? $callInfo['starttime'] : null;
+			}
 			$result = $this->crud->where_id($id)->update($this->collection, array('$set' => $data));
 			// Write log update
 			$data["createdBy"]  =	$this->session->userdata("extension");

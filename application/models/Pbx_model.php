@@ -26,8 +26,22 @@ class Pbx_model extends CI_Model {
 		return $this->send("makecall2.php", $data);
     }
 
-	function pause_queue_member($queuename, $extension, $all = FALSE) {
-		if(!$queuename || !$extension) throw new Exception("Lack of input"); 
+    function make_call_3($dest, $phone, $dialid = "", $type = "", $callback_type = "queue") {
+    	// $callback_type is dest || queue
+    	if(!$dest || !$phone) throw new Exception("Lack of input");
+    	$data = array(
+			"callback" 		=> $dest,
+			"callto"		=> $phone,
+			"callback_type" => $callback_type
+		);
+		$data["dialid"] = base64_encode(json_encode(
+			array("dialid" => $dialid, "dialtype" => $type)
+		));
+		return $this->send("makecall3.php", $data);
+    }
+
+	function pause_queue_member($queuename = "", $extension, $all = FALSE) {
+		if(!$extension) throw new Exception("Lack of input"); 
 		$data = array(
 			"queuename" => $queuename,
 			"extension"	=> $extension
@@ -36,8 +50,8 @@ class Pbx_model extends CI_Model {
 		return $this->send("pauseQueueMember2.php", $data);
 	}
 
-	function unpause_queue_member($queuename, $extension, $all = FALSE) {
-		if(!$queuename || !$extension) throw new Exception("Lack of input"); 
+	function unpause_queue_member($queuename = "", $extension, $all = FALSE) {
+		if(!$extension) throw new Exception("Lack of input"); 
 		$data = array(
 			"queuename" => $queuename,
 			"extension"	=> $extension
@@ -175,7 +189,8 @@ class Pbx_model extends CI_Model {
 				"data"		=> $data,
 				"error"		=> $e->getMessage(),
 				"response"	=> isset($response) ? $response : "",
-				"time"		=> (new DateTime())->format('Y-m-d H:i:s')
+				"time"		=> (new DateTime())->format('Y-m-d H:i:s'),
+				"createdAt" => time()
 			);
 			$this->mongo_private->insert("PbxError", $error);
 		}

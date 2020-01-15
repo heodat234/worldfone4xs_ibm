@@ -80,3 +80,362 @@
 24/12/2019, 15:03:51: End Log
 24/12/2019, 20:50:47: Start Import
 24/12/2019, 20:51:19: End Log
+25/12/2019, 14:21:41: Start Import
+25/12/2019, 14:22:34: End Log
+25/12/2019, 15:48:27: Start Import
+25/12/2019, 15:48:27: name 'aggregate_pipeline1' is not defined
+25/12/2019, 16:17:36: Start Import
+25/12/2019, 16:18:52: End Log
+25/12/2019, 16:23:56: Start Import
+25/12/2019, 16:24:37: End Log
+25/12/2019, 16:28:27: Start Import
+25/12/2019, 16:28:27: 'phones'
+25/12/2019, 16:29:27: Start Import
+25/12/2019, 16:29:27: batch op errors occurred
+25/12/2019, 16:31:15: Start Import
+25/12/2019, 16:32:16: End Log
+25/12/2019, 16:32:35: Start Import
+25/12/2019, 16:33:12: End Log
+25/12/2019, 16:34:49: Start Import
+25/12/2019, 16:34:49: batch op errors occurred
+25/12/2019, 16:38:40: Start Import
+25/12/2019, 16:38:40: batch op errors occurred
+25/12/2019, 16:49:24: Start Import
+25/12/2019, 16:49:55: End Log
+25/12/2019, 16:57:15: Start Import
+25/12/2019, 16:57:15: batch op errors occurred
+25/12/2019, 16:59:53: Start Import
+25/12/2019, 16:59:53: batch op errors occurred
+25/12/2019, 17:08:15: Start Import
+25/12/2019, 17:08:15: name 'temp' is not defined
+25/12/2019, 17:30:59: Start Import
+25/12/2019, 17:30:59: batch op errors occurred
+25/12/2019, 17:33:37: Start Import
+25/12/2019, 17:34:18: End Log
+25/12/2019, 17:36:29: Start Import
+25/12/2019, 17:37:09: End Log
+25/12/2019, 17:54:28: Start Import
+25/12/2019, 17:55:07: End Log
+25/12/2019, 18:21:21: Start Import
+25/12/2019, 18:21:56: End Log
+25/12/2019, 18:37:44: Start Import
+25/12/2019, 18:37:44: 'approved_limit'
+25/12/2019, 19:40:55: Start Import
+25/12/2019, 19:40:55: 'approved_limit'
+25/12/2019, 19:42:39: Start Import
+25/12/2019, 19:42:39: 'interest_rate'
+25/12/2019, 19:46:24: Start Import
+25/12/2019, 19:46:55: End Log
+25/12/2019, 19:48:47: Start Import
+25/12/2019, 19:49:18: End Log
+25/12/2019, 19:50:15: Start Import
+25/12/2019, 19:50:19: End Log
+25/12/2019, 19:51:12: Start Import
+25/12/2019, 19:51:12: 'interest_rate'
+25/12/2019, 19:51:46: Start Import
+25/12/2019, 19:51:49: End Log
+25/12/2019, 20:27:05: Start Import
+25/12/2019, 20:27:05: 'account_number'
+25/12/2019, 20:27:27: Start Import
+25/12/2019, 20:27:31: End Log
+25/12/2019, 20:29:26: Start Import
+25/12/2019, 20:30:42: End Log
+25/12/2019, 21:41:44: Start Import
+25/12/2019, 21:41:48: End Log
+26/12/2019, 09:08:59: Start Import
+26/12/2019, 09:09:04: End Log
+26/12/2019, 09:47:26: Start Import
+26/12/2019, 09:47:26: name 'tdelta' is not defined
+26/12/2019, 09:47:47: Start Import
+26/12/2019, 09:47:52: End Log
+26/12/2019, 09:49:37: Start Import
+26/12/2019, 09:49:41: End Log
+26/12/2019, 10:24:34: Start Import
+26/12/2019, 10:24:34: '>=' not supported between instances of 'datetime.timedelta' and 'int'
+26/12/2019, 10:25:11: Start Import
+26/12/2019, 10:25:16: End Log
+26/12/2019, 10:34:51: Start Import
+26/12/2019, 10:36:47: End Log
+26/12/2019, 10:55:42: Start Import
+26/12/2019, 10:56:59: End Log
+26/12/2019, 11:08:47: Start Import
+26/12/2019, 11:10:03: End Log
+26/12/2019, 11:15:05: Start Import
+26/12/2019, 11:16:21: End Log
+26/12/2019, 11:37:17: Start Import
+26/12/2019, 11:37:17: $in needs an array
+26/12/2019, 11:41:00: Start Import
+26/12/2019, 11:41:00: $in needs an array
+26/12/2019, 11:42:47: Start Import
+26/12/2019, 11:42:47: $in needs an array
+26/12/2019, 11:49:05: Start Import
+26/12/2019, 11:59:18: End Log
+26/12/2019, 12:05:29: Start Import
+26/12/2019, 12:15:48: End Log
+26/12/2019, 13:31:01: Start Import
+26/12/2019, 13:31:28: End Log
+26/12/2019, 13:34:19: Start Import
+26/12/2019, 13:34:43: End Log
+26/12/2019, 13:40:49: Start Import
+26/12/2019, 13:41:13: End Log
+26/12/2019, 13:46:56: Start Import
+26/12/2019, 13:47:21: End Log
+26/12/2019, 13:50:16: Start Import
+26/12/2019, 13:50:38: End Log
+26/12/2019, 13:53:29: Start Import
+26/12/2019, 13:53:29: 'no'
+26/12/2019, 13:59:42: Start Import
+26/12/2019, 14:00:06: End Log
+26/12/2019, 14:03:21: Start Import
+26/12/2019, 14:03:44: End Log
+26/12/2019, 14:04:51: Start Import
+26/12/2019, 14:05:15: End Log
+26/12/2019, 14:07:12: Start Import
+26/12/2019, 14:07:12: 'license_no'
+26/12/2019, 14:09:02: Start Import
+26/12/2019, 14:09:25: End Log
+26/12/2019, 14:20:30: Start Import
+26/12/2019, 14:20:54: End Log
+26/12/2019, 14:29:36: Start Import
+26/12/2019, 14:30:00: End Log
+26/12/2019, 14:30:51: Start Import
+26/12/2019, 14:41:36: End Log
+26/12/2019, 14:48:06: Start Import
+26/12/2019, 14:58:49: End Log
+26/12/2019, 15:10:37: Start Import
+26/12/2019, 15:21:32: End Log
+26/12/2019, 15:22:06: Start Import
+26/12/2019, 15:32:46: End Log
+26/12/2019, 16:47:42: Start Import
+26/12/2019, 16:47:42: unsupported operand type(s) for -: 'int' and 'str'
+26/12/2019, 16:51:31: Start Import
+26/12/2019, 16:51:31: unsupported operand type(s) for -: 'int' and 'str'
+26/12/2019, 16:53:39: Start Import
+26/12/2019, 16:53:39: unsupported operand type(s) for -: 'int' and 'str'
+26/12/2019, 16:54:30: Start Import
+26/12/2019, 16:54:53: End Log
+26/12/2019, 16:56:13: Start Import
+26/12/2019, 16:56:13: name 'math' is not defined
+26/12/2019, 16:57:09: Start Import
+26/12/2019, 16:57:30: End Log
+26/12/2019, 17:10:11: Start Import
+26/12/2019, 17:10:38: End Log
+26/12/2019, 18:01:41: Start Import
+26/12/2019, 18:01:41: index 'account_number' cannot be applied to Cursor instances
+26/12/2019, 18:03:46: Start Import
+26/12/2019, 18:03:46: index 'account_number' cannot be applied to Cursor instances
+26/12/2019, 18:09:06: Start Import
+26/12/2019, 18:09:06: name 'zacc1' is not defined
+26/12/2019, 18:10:11: Start Import
+26/12/2019, 18:20:36: End Log
+27/12/2019, 15:16:41: Start Import
+27/12/2019, 15:16:41: index 'WRK_BRN' cannot be applied to Cursor instances
+27/12/2019, 15:18:04: Start Import
+27/12/2019, 15:18:04: 'NoneType' object is not subscriptable
+27/12/2019, 15:21:17: Start Import
+27/12/2019, 15:21:17: 'NoneType' object is not subscriptable
+27/12/2019, 15:33:51: Start Import
+27/12/2019, 15:33:51: 'name'
+27/12/2019, 15:35:00: Start Import
+27/12/2019, 15:35:00: batch op errors occurred
+27/12/2019, 15:36:22: Start Import
+27/12/2019, 15:36:22: batch op errors occurred
+27/12/2019, 15:39:33: Start Import
+27/12/2019, 15:39:33: name 'code_dealer' is not defined
+27/12/2019, 15:40:11: Start Import
+27/12/2019, 15:40:11: batch op errors occurred
+27/12/2019, 15:45:36: Start Import
+27/12/2019, 15:45:36: batch op errors occurred
+27/12/2019, 15:47:27: Start Import
+27/12/2019, 15:47:27: batch op errors occurred
+27/12/2019, 15:49:07: Start Import
+27/12/2019, 15:49:07: 'NP_DT8'
+27/12/2019, 16:06:07: Start Import
+27/12/2019, 16:06:07: batch op errors occurred
+27/12/2019, 16:07:17: Start Import
+27/12/2019, 16:07:17: batch op errors occurred
+27/12/2019, 16:08:36: Start Import
+27/12/2019, 16:08:36: batch op errors occurred
+27/12/2019, 16:10:23: Start Import
+27/12/2019, 16:10:23: batch op errors occurred
+27/12/2019, 16:11:56: Start Import
+27/12/2019, 16:12:22: End Log
+27/12/2019, 16:13:18: Start Import
+27/12/2019, 16:13:42: Start Import
+27/12/2019, 16:13:42: batch op errors occurred
+27/12/2019, 16:19:02: Start Import
+27/12/2019, 16:20:09: End Log
+27/12/2019, 16:24:45: Start Import
+27/12/2019, 16:25:15: End Log
+27/12/2019, 16:26:30: Start Import
+27/12/2019, 16:26:59: End Log
+27/12/2019, 16:28:25: Start Import
+27/12/2019, 16:28:56: End Log
+27/12/2019, 16:34:56: Start Import
+27/12/2019, 16:34:56: batch op errors occurred
+27/12/2019, 16:38:23: Start Import
+27/12/2019, 16:38:23: batch op errors occurred
+27/12/2019, 16:39:45: Start Import
+27/12/2019, 16:39:45: name 'temp1' is not defined
+27/12/2019, 16:40:12: Start Import
+27/12/2019, 16:40:12: batch op errors occurred
+27/12/2019, 16:42:37: Start Import
+27/12/2019, 16:42:37: batch op errors occurred
+27/12/2019, 16:46:15: Start Import
+27/12/2019, 16:46:15: batch op errors occurred
+27/12/2019, 16:47:50: Start Import
+27/12/2019, 16:47:50: batch op errors occurred
+27/12/2019, 16:50:03: Start Import
+27/12/2019, 16:50:03: batch op errors occurred
+27/12/2019, 16:54:03: Start Import
+27/12/2019, 16:54:34: End Log
+27/12/2019, 16:56:47: Start Import
+27/12/2019, 16:56:47: batch op errors occurred
+27/12/2019, 16:58:23: Start Import
+27/12/2019, 16:58:23: batch op errors occurred
+27/12/2019, 16:59:51: Start Import
+27/12/2019, 16:59:51: batch op errors occurred
+27/12/2019, 17:05:24: Start Import
+27/12/2019, 17:05:24: batch op errors occurred
+27/12/2019, 17:07:01: Start Import
+27/12/2019, 17:07:01: batch op errors occurred
+27/12/2019, 17:08:02: Start Import
+27/12/2019, 17:08:02: batch op errors occurred
+27/12/2019, 17:09:57: Start Import
+27/12/2019, 17:10:28: End Log
+27/12/2019, 17:11:36: Start Import
+27/12/2019, 17:12:04: End Log
+27/12/2019, 17:13:56: Start Import
+27/12/2019, 17:14:25: End Log
+27/12/2019, 17:15:03: Start Import
+27/12/2019, 17:15:30: End Log
+27/12/2019, 17:16:09: Start Import
+27/12/2019, 17:16:38: End Log
+27/12/2019, 17:17:21: Start Import
+27/12/2019, 17:17:48: End Log
+27/12/2019, 17:19:11: Start Import
+27/12/2019, 17:19:43: End Log
+27/12/2019, 17:20:59: Start Import
+27/12/2019, 17:20:59: 'NP_DT8'
+28/12/2019, 13:33:08: Start Import
+28/12/2019, 13:33:08: batch op errors occurred
+28/12/2019, 13:49:11: Start Import
+28/12/2019, 13:49:39: End Log
+28/12/2019, 13:50:45: Start Import
+28/12/2019, 13:50:45: batch op errors occurred
+28/12/2019, 14:06:08: Start Import
+28/12/2019, 14:06:08: batch op errors occurred
+28/12/2019, 18:26:10: Start Import
+28/12/2019, 18:26:10: batch op errors occurred
+28/12/2019, 18:41:08: Start Import
+28/12/2019, 18:54:31: End Log
+28/12/2019, 19:04:08: Start Import
+28/12/2019, 19:17:55: End Log
+30/12/2019, 14:06:49: Start Import
+30/12/2019, 14:22:06: End Log
+31/12/2019, 13:57:47: Start Import
+31/12/2019, 13:57:47: 'NoneType' object is not subscriptable
+31/12/2019, 14:02:59: Start Import
+31/12/2019, 14:02:59: 'NoneType' object is not subscriptable
+31/12/2019, 14:05:13: Start Import
+31/12/2019, 14:05:13: 'NoneType' object is not subscriptable
+31/12/2019, 14:06:59: Start Import
+31/12/2019, 14:24:39: End Log
+31/12/2019, 14:41:47: Start Import
+31/12/2019, 14:41:47: 'reason_nonpayment'
+31/12/2019, 14:48:10: Start Import
+31/12/2019, 14:48:10: 'reason_nonpayment'
+31/12/2019, 14:54:33: Start Import
+31/12/2019, 14:54:33: 'reason_nonpayment'
+31/12/2019, 15:01:07: Start Import
+31/12/2019, 15:01:07: 'reason_nonpayment'
+31/12/2019, 15:09:38: Start Import
+31/12/2019, 15:09:38: 'reason_nonpayment'
+31/12/2019, 15:36:49: Start Import
+31/12/2019, 15:36:49: name 'zaccf1' is not defined
+31/12/2019, 15:37:43: Start Import
+31/12/2019, 15:37:43: 'NoneType' object is not subscriptable
+31/12/2019, 15:38:44: Start Import
+31/12/2019, 15:38:44: 'reason_nonpayment'
+06/01/2020, 10:54:30: Start Import
+06/01/2020, 10:55:59: End Log
+06/01/2020, 10:57:39: Start Import
+06/01/2020, 10:59:01: End Log
+06/01/2020, 11:01:19: Start Import
+06/01/2020, 11:01:19: 'profession'
+06/01/2020, 11:05:40: Start Import
+06/01/2020, 11:05:40: 'profession'
+06/01/2020, 11:06:44: Start Import
+06/01/2020, 11:06:44: argument of type 'NoneType' is not iterable
+06/01/2020, 11:07:27: Start Import
+06/01/2020, 11:07:27: 'reason_nonpayment'
+06/01/2020, 11:11:49: Start Import
+06/01/2020, 11:11:49: Cursor not found, cursor id: 2952316476645
+06/01/2020, 11:24:11: Start Import
+06/01/2020, 11:24:11: argument of type 'NoneType' is not iterable
+06/01/2020, 11:27:13: Start Import
+06/01/2020, 11:27:13: argument of type 'NoneType' is not iterable
+06/01/2020, 11:29:50: Start Import
+06/01/2020, 11:52:44: Start Import
+06/01/2020, 11:53:11: Start Import
+06/01/2020, 11:53:19: Start Import
+06/01/2020, 11:53:46: End Log
+06/01/2020, 11:54:34: Start Import
+06/01/2020, 11:55:48: End Log
+06/01/2020, 11:59:14: Start Import
+06/01/2020, 12:00:44: End Log
+06/01/2020, 12:05:21: Start Import
+06/01/2020, 12:05:21: argument of type 'NoneType' is not iterable
+06/01/2020, 12:09:12: Start Import
+06/01/2020, 12:09:12: 'NoneType' object is not subscriptable
+06/01/2020, 14:16:37: Start Import
+06/01/2020, 14:23:56: Start Import
+06/01/2020, 14:24:10: Start Import
+06/01/2020, 14:24:10: argument of type 'NoneType' is not iterable
+06/01/2020, 14:27:18: Start Import
+06/01/2020, 14:27:18: 'reason_nonpayment'
+06/01/2020, 14:47:56: Start Import
+06/01/2020, 14:47:56: argument of type 'NoneType' is not iterable
+06/01/2020, 14:51:42: Start Import
+06/01/2020, 15:26:26: Start Import
+06/01/2020, 17:33:53: Start Import
+06/01/2020, 17:33:53: 'NoneType' object is not subscriptable
+06/01/2020, 17:36:50: Start Import
+06/01/2020, 17:36:50: 'NoneType' object is not subscriptable
+06/01/2020, 17:39:43: Start Import
+06/01/2020, 17:39:43: 'NoneType' object is not subscriptable
+06/01/2020, 17:41:37: Start Import
+06/01/2020, 17:41:37: 'NoneType' object is not subscriptable
+06/01/2020, 17:43:24: Start Import
+06/01/2020, 17:43:24: 'NoneType' object is not subscriptable
+06/01/2020, 17:45:22: Start Import
+06/01/2020, 17:45:22: argument of type 'NoneType' is not iterable
+06/01/2020, 17:47:38: Start Import
+06/01/2020, 17:47:38: argument of type 'NoneType' is not iterable
+07/01/2020, 08:36:38: Start Import
+07/01/2020, 08:37:45: End Log
+07/01/2020, 08:39:47: Start Import
+07/01/2020, 08:40:09: End Log
+07/01/2020, 08:41:13: Start Import
+07/01/2020, 08:41:13: 'bool' object is not iterable
+07/01/2020, 08:41:39: Start Import
+07/01/2020, 08:44:48: Start Import
+07/01/2020, 08:45:08: End Log
+07/01/2020, 08:47:19: Start Import
+07/01/2020, 09:01:32: Start Import
+07/01/2020, 09:15:09: Start Import
+07/01/2020, 09:15:09: name 'zaccf1' is not defined
+07/01/2020, 09:18:54: Start Import
+07/01/2020, 09:18:54: 'account_number'
+07/01/2020, 09:20:16: Start Import
+07/01/2020, 09:47:31: Start Import
+07/01/2020, 09:48:29: End Log
+07/01/2020, 09:56:08: Start Import
+07/01/2020, 10:31:22: Start Import
+07/01/2020, 10:41:40: Start Import
+08/01/2020, 08:57:35: Start Import
+08/01/2020, 09:00:13: Start Import
+08/01/2020, 09:02:13: Start Import
+08/01/2020, 10:02:44: End Log
+08/01/2020, 11:41:01: Start Import
+08/01/2020, 11:41:01: 'TERM_ID'

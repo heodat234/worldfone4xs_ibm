@@ -117,10 +117,8 @@
 					{text: "@Extension@", value: "userextension"},
 					{text: "@Direction@", value: "direction"},
 					{text: "@Result@", value: "disposition"},
-					{text: "Service level 1", value: "serviceLv1"},
-					{text: "Service level 1 @and@ 2", value: "serviceLv1-serviceLv2"},
-					{text: "Service level 1 @and@ @Extension@", value: "serviceLv1-userextension"},
 					{text: "@Extension@ @and@ @Result@", value: "userextension-disposition"},
+					{text: "@Direction@ @and@ @Result@", value: "direction-disposition"},
 				],
 				groupByChange: function(e) {
 					this.set('visibleReport', false);

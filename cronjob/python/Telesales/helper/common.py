@@ -90,7 +90,14 @@ class Common:
         return result
 
     def convertInt(self, value, formatType=''):
-        return int(value)
+        try:
+            if value in ['']:
+                value = 0
+            if isinstance(value, str):
+                value = value.replace(',', '')
+            return int(value)
+        except Exception as e:
+            str(e)
 
     def convertBoolean(self, value, formatType=''):
         return bool(value)
@@ -130,7 +137,7 @@ class Common:
         
         if wff_env in ['UAT']:
             # serverfolder = 'YYYYMMDD'
-            today = self.datetime.strptime('20/11/2019', "%d/%m/%Y").date()
+            today = self.datetime.strptime('17/12/2019', "%d/%m/%Y").date() 
             serverfolder = today.strftime("%Y%m%d")
         else:
             today = self.date.today()
@@ -140,9 +147,9 @@ class Common:
     def countWorkingDaysBetweendate(self, starttime, endtime, mongodb):
         count_days = 0
         while starttime <= endtime:
-            date = self.time.localtime(starttime)
+            date = self.datetime.fromtimestamp(starttime)
             isHoliday = mongodb.getOne(MONGO_COLLECTION='LO_Report_off_sys', WHERE={'off_date': starttime})
-            if isHoliday is None and date.weekday() not in [5, 6]:
+            if isHoliday is None:
                 count_days += 1
             starttime += 86400
         return count_days
@@ -164,3 +171,12 @@ class Common:
                 sysConfig = self.json.load(f)
                 wff_env = sysConfig['wff_env']
         return wff_env
+
+    def array_column(self, list_dict=[], value='', index=''):
+        try:
+            if index != '':
+                return map(lambda x: {x[index]: x[value]}, list_dict)
+            else:
+                return map(lambda x: x[value], list_dict)
+        except Exception as e:
+            return str(e)

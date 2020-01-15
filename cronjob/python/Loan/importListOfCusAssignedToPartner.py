@@ -87,8 +87,8 @@ try:
         importLogId = mongodb.insert(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), insert_data=importLogInfo) 
     
     models = _mongodb.get(MONGO_COLLECTION='Model', WHERE={'collection': collection}, SORT=[('index', 1)], SELECT=['index', 'collection', 'field', 'type', 'sub_type'], TAKE=1000)
-    
-    for model in models:
+
+    for model in list(models):
         modelColumns.append(model['field'])
         modelConverters[model['field']] = model['type']
         subtype = json.loads(model['sub_type'])
@@ -103,7 +103,7 @@ try:
         inputDataRaw = excel.getDataCSV(file_path=importLogInfo['file_path'], dtype='object', sep=';', header=0, names=modelColumns)
     else:
         inputDataRaw = excel.getDataExcel(file_path=importLogInfo['file_path'], dtype='object', active_sheet='Sheet1', header=0, names=modelColumns, na_values='')
-
+    
     inputData = inputDataRaw.to_dict('records')
     
     insertData = []

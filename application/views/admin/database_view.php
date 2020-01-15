@@ -49,6 +49,7 @@
                         data-bind="source: collections, events: {change: searchChange, select: searchSelect}" style="margin-right: 100px" />
                         <a role="button" class="btn btn-sm btn-alt btn-warning" href="javascript:void(0)" data-bind="click: deleteManyCollection, visible: item.srcCollection"><i class="hi hi-remove-circle"></i> <b>Delete many</b></a>
                         <a role="button" class="btn btn-sm btn-alt btn-danger" href="javascript:void(0)" data-bind="click: dropCollection, visible: item.srcCollection"><i class="hi hi-remove-circle"></i> <b>Drop</b></a>
+                        <a role="button" class="btn btn-sm btn-alt btn-info" href="javascript:void(0)" data-bind="click: dumpCollection, visible: item.srcCollection"><i class="fa fa-folder-o"></i> <b>Dump</b></a>
                     </div>
                     <h2><strong>Collection</strong></h2>
                 </div>
@@ -464,6 +465,19 @@ var Table = function() {
                     })
                 });
             },
+            dumpCollection: function(e) {
+                var dbname = this.get('dbname');
+                var item = this.get('item').toJSON();
+                $.ajax({
+                    url: ENV.reportApi + "database/mongodump_collection/" + dbname,
+                    data: {collection: item.srcCollection},
+                    success: (res) => {
+                        if(res.status) {
+                            notification.show(res.message, "success");
+                        } else notification.show("Error", "error");
+                    }
+                });
+            },
             openJsDB: function() {
                 openForm({title: "Run js db"});
                 kendo.destroy($("#right-form"));
@@ -655,6 +669,7 @@ var Table = function() {
     }
 
     function detailData(database, collection, columns = []) {
+        listIndexes(database, collection);
         if(Table.grid) {
             Table.grid.destroy();
             Table.grid = false;
@@ -689,9 +704,13 @@ var Table = function() {
                 Config.collection = collection;
                 Table.columns = Table.customColumns.concat(columns);
                 Table.init();
-                listIndexes(database, collection);
+            } else {
+                Config.database = database;
+                Config.collection = collection;
+                Table.columns = [{field: "unknown"}];
+                Table.init();
             }
-        })
+        });
     }
 
     function listIndexes(database, collection) {

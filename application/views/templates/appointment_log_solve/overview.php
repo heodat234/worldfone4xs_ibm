@@ -68,13 +68,13 @@ var Config = Object.assign(Config, {
     },{
         title: "@Customer@",
         columns: [{
-            field: "customer_info.id_no",
+            field: "id_no",
             title: "@National ID@",
             headerAttributes: { style: "white-space: normal"},
             width: "110px",
             filterable: true
         }, {
-            field: "customer_info.name",
+            field: "name",
             title: "@Name@",
             width: "200px",
             headerAttributes: { style: "white-space: normal"},
@@ -84,7 +84,7 @@ var Config = Object.assign(Config, {
             title: "@Phone@",
             width: "150px",
             headerAttributes: { style: "white-space: normal"},
-            filterable: true,
+            filterable: false,
             template: function(dataItem) {
                 return gridPhone(dataItem['customer_info']['phone'], dataItem['customer_info']['id'], 'customer');
             }
@@ -93,7 +93,7 @@ var Config = Object.assign(Config, {
             title: "@Note@",
             width: "200px",
             headerAttributes: { style: "white-space: normal"},
-            filterable: true
+            filterable: false
         }]
     },{
         field: "appointment_date",

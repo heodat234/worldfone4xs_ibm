@@ -52,6 +52,20 @@ Class Database extends WFF_Controller {
         return $output;
     }
 
+    function mongodump_collection($db)
+    {
+        $path = APPPATH . "database";
+        $collection = $this->input->get("collection");
+        $db_path = $path;
+        if($this->username) {
+            $command = "mongodump --username {$this->username} --password {$this->password} --authenticationDatabase admin --db $db --collection $collection --out $db_path";
+        } else {
+            $command = "mongodump --db $db --collection $collection --out $db_path";
+        }
+        $result = exec($command);
+        echo json_encode(array("status" => 1, "message" => "Restore success $db/$collection"));
+    }
+
     function mongorestore_collection($db)
     {
         $srcCollection = $this->input->get("srcCollection");
@@ -260,13 +274,15 @@ Class Database extends WFF_Controller {
     {
         try {
             $collection = $this->input->get("collection");
-            $where = $this->input->get("where");
+            $where_str = $this->input->get("where");
             if(!$database || !$collection) throw new Exception("Error Processing Request", 1);
             
-            $this->load->library("mongo_db");
-            $this->mongo_db->switch_db($database);
-
-            $result = $this->mongo_db->where($where)->delete_all($collection);
+            $where = $where_str ? json_decode($where_str, TRUE) : [];
+            if(is_array($where)) {
+                $this->load->library("mongo_db");
+                $this->mongo_db->switch_db($database);
+                $result = $this->mongo_db->where($where)->delete_all($collection);
+            }
 
             echo json_encode(array("status" => !empty($result) ? 1 : 0));
         } catch (Exception $e) {

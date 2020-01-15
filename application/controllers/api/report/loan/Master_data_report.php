@@ -19,7 +19,7 @@ Class Master_data_report extends WFF_Controller {
     {
         try {
             $request = json_decode($this->input->get("q"), TRUE);
-            $date = date('d-m-Y',strtotime("-1 days"));
+            $date = date('d-m-Y');
             
             $match = array('createdAt' => array('$gte' => strtotime($date)));
             $response = $this->crud->read($this->collection, $request,array(),$match);
@@ -41,8 +41,18 @@ Class Master_data_report extends WFF_Controller {
     }
     function downloadExcel()
     {
-        // shell_exec('PYTHONIOENCODING=utf-8 python3.6 /var/www/html/worldfone4xs_ibm/cronjob/python/Loan/exportMasterData.py  > /dev/null &');
-        $file_path = UPLOAD_PATH . "loan/export/MasterData.xlsx";
+        $date = getdate();
+        // print_r($date);exit;
+        $day = $date['mday'];
+        $month = $date['mon'];
+        if ($date['mday'] < 10) {
+            $day = '0'.(string)$date['mday'];
+        }
+        if ($date['mon'] < 10) {
+            $month = '0'.(string)$date['mon'];
+        }
+        // sleep(1800);
+        $file_path = UPLOAD_PATH . "loan/export/MasterData_". $day.$month.$date['year'] .".xlsx";
         echo json_encode(array("status" => 1, "data" => $file_path));
     }
 }

@@ -37,6 +37,12 @@
 			</div>
 			<div class="col-md-6">
 				<div class="form-group">
+			        <label class="control-label col-sm-4">@Group@</label>
+			        <div class="col-sm-8">
+			        	<span data-bind="text: item.group_name" style="vertical-align: -6px"></span>
+			        </div>
+			    </div>
+				<div class="form-group">
 			        <label class="control-label col-sm-4">@Agent name@</label>
 			        <div class="col-sm-8">
 			        	<span data-bind="text: item.agentname" style="vertical-align: -6px"></span>
@@ -275,6 +281,7 @@
 			},
 			save: function() {
 				var data = this.item.toJSON();
+					data.ringtone = (data.ringtone || '');
 				$.ajax({
 					url: ENV.vApi + "preference/update/" + ENV.extension,
 					type: "POST",

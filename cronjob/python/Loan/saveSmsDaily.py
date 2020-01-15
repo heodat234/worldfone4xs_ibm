@@ -84,7 +84,7 @@ try:
          temp['group']           = row['group_id']
          temp['phone']           = row['mobile_num']
          temp['name']            = row['cus_name']
-         temp['amount']          = row['overdue_amount_this_month']
+         temp['amount']          = float(row['overdue_amount_this_month']) - float(row['advance_balance'])
          temp['sending_date']    = now.strftime("%d/%m/%Y")
          temp['createdAt']       = time.time()
          insertData.append(temp)
@@ -106,14 +106,12 @@ try:
    for key,row in enumerate(PaymentData):
       temp = {}
       if 'account_number' in row.keys():
-         group = mongodb.getOne(MONGO_COLLECTION=group_collection,WHERE={'account_number':str(row['account_number'])},SELECT=['group'])
          temp['type']            = 'card'
          temp['stt']             = key
          temp['account_number']  = row['account_number']
-         if group != None:
-            temp['group']        = group['group']
-         else:
-            temp['group']        = ''
+         sbv_store = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'SBV_Stored'), WHERE={'contract_no': str(row['account_number'])},SELECT=['overdue_indicator'])
+         if sbv_store != None:
+            temp['group']                    = sbv_store['overdue_indicator']
          temp['phone']           = row['phone']
          temp['name']            = row['cus_name']
          temp['os']              = row['overdue_amt']

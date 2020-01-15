@@ -67,15 +67,17 @@ Class Loan_group_report extends WFF_Controller {
         for ($i=0; $i <= 31; $i++) {
             $cenvertedTime = date('Y-m-d',strtotime('+'.$i.' day',strtotime($startDay)));
             $getNextDate = getdate(strtotime($cenvertedTime));
-            if ($getNextDate['mon'] != $month) {
+            if ($getNextDate['mon'] != $getDate['mon']) {
                 break;
             }
             $weekday = $getNextDate['weekday'];
             $weekOfMonth = $this->weekOfMonth($cenvertedTime);
+            // print_r($month);exit();
             $getColRow  = $this->getColRow($weekOfMonth,$weekday);
             $col        = $getColRow['col'];
             $row        = $getColRow['row'];
             $nextDate = date('d/m/Y',strtotime($cenvertedTime));
+
             $worksheet->setCellValue($col . $row, $nextDate);
         }
         foreach ($data as $doc) {
@@ -120,7 +122,7 @@ Class Loan_group_report extends WFF_Controller {
         for ($i=0; $i <= 31; $i++) {
             $cenvertedTime = date('Y-m-d',strtotime('+'.$i.' day',strtotime($startDay)));
             $getNextDate = getdate(strtotime($cenvertedTime));
-            if ($getNextDate['mon'] != $month) {
+            if ($getNextDate['mon'] != $getDate['mon']) {
                 break;
             }
             $weekday = $getNextDate['weekday'];
@@ -199,31 +201,31 @@ Class Loan_group_report extends WFF_Controller {
                 break;
         }
         switch ($weekday) {
-            case  'Saturday':
+            case  'Sunday':
                 $col = 'C';
                 $colIndex = 3;
                 break;
-            case  'Sunday':
+            case  'Monday':
                 $col = 'F';
                 $colIndex = 6;
                 break;
-            case  'Monday':
+            case  'Tuesday':
                 $col = 'I';
                 $colIndex = 9;
                 break;
-            case  'Tuesday':
+            case  'Wednesday':
                 $col = 'L';
                 $colIndex = 12;
                 break;
-            case  'Wednesday':
+            case  'Thursday':
                 $col = 'O';
                 $colIndex = 15;
                 break;
-            case  'Thursday':
+            case  'Friday':
                 $col = 'R';
                 $colIndex = 18;
                 break;
-            case  'Friday':
+            case  'Saturday':
                 $col = 'U';
                 $colIndex = 21;
                 break;

@@ -16,7 +16,7 @@ Class Smsdaily_report extends WFF_Controller {
         header('Content-type: application/json');
         $this->load->library("crud");
         $this->collection = set_sub_collection($this->collection);
-        $date = date('d-m-Y',strtotime("-1 days"));
+        $date = date('d-m-Y');
         $this->date = strtotime($date);
     }
 
@@ -219,5 +219,20 @@ Class Smsdaily_report extends WFF_Controller {
         } catch (Exception $e) {
             echo json_encode(array("status" => 0, "message" => $e->getMessage()));
         }
+    }
+
+    function downloadExcel()
+    {
+        $date = getdate();
+        $day = $date['mday'];
+        $month = $date['mon'];
+        if ($date['mday'] < 10) {
+            $day = '0'.(string)$date['mday'];
+        }
+        if ($date['mon'] < 10) {
+            $month = '0'.(string)$date['mon'];
+        }
+        $file_path = UPLOAD_PATH . "loan/export/SMS Daily Report - SIBS_". $day.$month.$date['year'] .".xlsx";
+        echo json_encode(array("status" => 1, "data" => $file_path));
     }
 }

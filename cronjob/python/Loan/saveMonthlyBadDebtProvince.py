@@ -60,18 +60,19 @@ try:
         listDayOfMonth.append(str(format(startDayOfMonth, '02d')) + str(format(month, '02d')) + str(year))
         startDayOfMonth += 1
     
-    if todayTimeStamp in listHoliday:
-        sys.exit()
+    # if todayTimeStamp in listHoliday:
+    #     sys.exit()
 
     # Check hom nay co phai la ngay cuoi thang
-    if todayTimeStamp > endMonthStarttime or todayTimeStamp < endMonthEndtime:
-        sys.exit()
+    # if todayTimeStamp > endMonthStarttime or todayTimeStamp < endMonthEndtime:
+    #     sys.exit()
 
     todayString = today.strftime("%d/%m/%Y")
     starttime = int(time.mktime(time.strptime(str(todayString + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
     endtime = int(time.mktime(time.strptime(str(todayString + " 23:59:59"), "%d/%m/%Y %H:%M:%S")))
     
-    list_state = mongodb.get(common.getSubUser(subUserType, 'Province'))
+    list_state = list(mongodb.get(common.getSubUser(subUserType, 'Province')))
+    # pprint(list_state)
 
     for state_code, state_value in enumerate(list_state):
         temp = {}
@@ -161,6 +162,7 @@ try:
             }
         ]
         zaccfInfo = list(mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'ZACCF'),aggregate_pipeline=aggregate_zaccf))
+        # pprint(zaccfInfo)
         temp['province_id']                     = state_value['code']
         temp['province_name']                   = state_value['name']
         if zaccfInfo not in [None, []] and zaccfInfo[0] is not None:
@@ -170,7 +172,14 @@ try:
             temp['group_two_w_org_sibs']        = sum(map(lambda x: float(x), zaccfInfo[0]['group_two_w_org_sibs'])) if zaccfInfo[0]['group_two_w_org_sibs'] is not None else 0
             temp['group_two_plus_acc_sibs']     = zaccfInfo[0]['group_two_plus_acc_sibs'] if zaccfInfo[0]['group_two_plus_acc_sibs'] is not None else 0
             temp['group_two_plus_w_org_sibs']   = sum(map(lambda x: float(x), zaccfInfo[0]['group_two_plus_w_org_sibs'])) if zaccfInfo[0]['group_two_plus_w_org_sibs'] is not None else 0
-
+        else:
+            temp['release_acc_no_sibs'] = 0
+            temp['release_amt_sibs']
+            temp['group_two_acc_sibs'] = 0
+            temp['group_two_w_org_sibs'] = 0
+            temp['group_two_plus_acc_sibs'] = 0
+            temp['group_two_plus_w_org_sibs'] = 0
+        
         state_filter_sbv = str(int(state_value['code']))
         if len(state_filter_sbv) == 1:
             state_filter_sbv = '0' + state_filter_sbv
@@ -269,9 +278,12 @@ try:
         temp['bad_debt_ratio'] = (temp['group_two_plus_w_org_sibs'] + temp['group_two_plus_w_org_card']) / temp['total_amt'] if temp['total_amt'] != 0 else 0
 
         insertData.append(temp)
-        
+        # pprint(temp)
+    
+    # pprint(insertData)
+    sys.exit()
     mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertData)
     print('DONE')
 except Exception as e:
-    log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')
+    # log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')
     print(traceback.format_exc())

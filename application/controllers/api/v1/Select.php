@@ -28,6 +28,7 @@ Class Select extends WFF_Controller {
 				$select = [$request["field"]];
 			else $select = $request["field"]; 
 		}
+
 		$response = $this->crud->read($collection, $request, $select, $match);
 		echo json_encode($response);
 	}

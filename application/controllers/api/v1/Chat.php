@@ -13,6 +13,7 @@ Class Chat extends WFF_Controller {
 		header('Content-type: application/json; charset=utf-8');
 		$this->load->model("language_model");
 		$this->sub = set_sub_collection();
+        $this->load->library("crud");
 	}
 
     function change_status_chat() {
@@ -33,7 +34,6 @@ Class Chat extends WFF_Controller {
     function users() {
     	$request = json_decode($this->input->get("q"), TRUE);
     	$_db = $this->config->item("_mongo_db");
-    	$this->load->library("crud");
     	$this->crud->select_db($_db);
     	$match = array(
     		"lastpingtime" => array('$gt' => time() - 30)
@@ -46,7 +46,6 @@ Class Chat extends WFF_Controller {
     	try {
     		$extension = $this->session->userdata("extension");
     		$request = json_decode($this->input->get("q"), TRUE);
-    		$this->load->library("crud");
     		$response = $this->crud->read("Room", $request, [], ["members" => $extension]);
     		$todayMidnight = strtotime("today midnight");
     		foreach ($response["data"] as &$doc) {
@@ -139,7 +138,6 @@ Class Chat extends WFF_Controller {
 			$request = json_decode($this->input->get("q"), TRUE);
 			$room_id = isset($request["room_id"]) ? $request["room_id"] : "";
 			$collection = $room_id ? "Message_". $room_id : "Message";
-			$this->load->library("crud");
 			$date = $this->mongo_db->date();
 			$extension = $this->session->userdata("extension");
 			$response = $this->crud->read($collection, $request);
@@ -149,7 +147,7 @@ Class Chat extends WFF_Controller {
 					['$push' => ['read' => ["extension" => $extension, "createdAt" => $date]]]
 				);
 			}
-			echo json_encode($response);
+			echo json_encode($response, JSON_PARTIAL_OUTPUT_ON_ERROR);
 		} catch (Exception $e) {
 			echo json_encode(array("status" => 0, "message" => $e->getMessage()));
 		}
@@ -163,7 +161,6 @@ Class Chat extends WFF_Controller {
 			$room_id = isset($request["room_id"]) ? $request["room_id"] : "";
 			$collection = $room_id ? "Message_". $room_id : "Message";
 			$extension = $this->session->userdata("extension");
-			$this->load->library("crud");
 			$date = $this->mongo_db->date();
 			$this->crud->where_id($request["message_id"])->update($collection, 
 				['$push' => ['read' => ["extension" => $extension, "createdAt" => $date]]]

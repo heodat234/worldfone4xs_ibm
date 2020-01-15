@@ -1,13 +1,5 @@
 <?php
-
-if (!defined('BASEPATH')) {
-    exit('No direct script access allowed');
-}
-
-/*
- * Copyright © 2014 South Telecom
- */
-
+defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Data_library extends WFF_Controller {
 

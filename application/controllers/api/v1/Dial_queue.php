@@ -25,7 +25,7 @@ Class Dial_queue extends WFF_Controller {
 			if ($this->cache->get($cache_name)) {
 				throw new Exception("On process");
 			}
-			$this->cache->save($cache_name , TRUE, 30);
+			$this->cache->save($cache_name , 1, 10);
 	// -1st Spin: Touch Main phone number only 
 	// 	Priority rule:
 	// 		MAIN PRODUCT
@@ -59,7 +59,7 @@ Class Dial_queue extends WFF_Controller {
 					break;
 			}
 
-			$this->mongo_db->where_object_id("diallist_id" , $diallist_id)->update_all('LO_Diallist_detail', array('$set' => array('syncDialQueue' => true)));
+			/*$this->mongo_db->where_object_id("diallist_id" , $diallist_id)->update_all('LO_Diallist_detail', array('$set' => array('syncDialQueue' => true)));*/
 			echo json_encode(array("status" => 1, "count" => $count));
 			$this->cache->delete($cache_name);
 		} catch(Exception $e) {
@@ -71,6 +71,7 @@ Class Dial_queue extends WFF_Controller {
 		$idx 			= 0;
 		$arrData		= [];
 		$createdAt = $this->mongo_db->date();
+		$money = $this->mongo_db->where('type', $this->sub)->getOne($this->sub . 'Dial_config');
 
 //Priority rule 2:
 		$diallistDetailPrio2 = $this->mongo_db->select(array(),array('id'))->where(array(
@@ -82,7 +83,7 @@ Class Dial_queue extends WFF_Controller {
 		if(!empty($diallistDetailPrio2)):
 			foreach ($diallistDetailPrio2 as $key => $value) {
 
-				$checkConditionDoNotCall = $this->conditionDoNotCall($value);
+				$checkConditionDoNotCall = $this->conditionDoNotCall($value, $money);
 				if($checkConditionDoNotCall == 0) continue;
 
 				$temp 							= [];
@@ -97,6 +98,8 @@ Class Dial_queue extends WFF_Controller {
 
 				$arrData[] 						= $temp;
 				$idx++;
+
+				$this->mongo_db->where_id($value['id'])->update('LO_Diallist_detail', array('$set' => array('syncDialQueue' => true)));
 			}
 			if($arrData) $this->mongo_db->batch_insert('LO_Dial_queue', $arrData);
 		endif;
@@ -116,7 +119,7 @@ Class Dial_queue extends WFF_Controller {
 		if(!empty($diallistDetailPrio3)):
 			foreach ($diallistDetailPrio3 as $key => $value) {
 
-				$checkConditionDoNotCall = $this->conditionDoNotCall($value);
+				$checkConditionDoNotCall = $this->conditionDoNotCall($value, $money);
 				if($checkConditionDoNotCall == 0) continue;
 
 				$temp 							= [];
@@ -131,6 +134,8 @@ Class Dial_queue extends WFF_Controller {
 
 				$arrData[] 						= $temp;
 				$idx++;
+
+				$this->mongo_db->where_id($value['id'])->update('LO_Diallist_detail', array('$set' => array('syncDialQueue' => true)));
 			}
 			if($arrData) $this->mongo_db->batch_insert('LO_Dial_queue', $arrData);
 		endif;
@@ -149,7 +154,7 @@ Class Dial_queue extends WFF_Controller {
 		if(!empty($diallistDetailPrio4)):
 			foreach ($diallistDetailPrio4 as $key => $value) {
 
-				$checkConditionDoNotCall = $this->conditionDoNotCall($value);
+				$checkConditionDoNotCall = $this->conditionDoNotCall($value, $money);
 				if($checkConditionDoNotCall == 0) continue;
 
 				$temp 							= [];
@@ -164,6 +169,8 @@ Class Dial_queue extends WFF_Controller {
 
 				$arrData[] 						= $temp;
 				$idx++;
+
+				$this->mongo_db->where_id($value['id'])->update('LO_Diallist_detail', array('$set' => array('syncDialQueue' => true)));
 			}
 			if($arrData) $this->mongo_db->batch_insert('LO_Dial_queue', $arrData);
 		endif;
@@ -199,6 +206,8 @@ Class Dial_queue extends WFF_Controller {
 
 				$arrData[] 						= $temp;
 				$idx++;
+
+				$this->mongo_db->where_id($value['id'])->update('LO_Diallist_detail', array('$set' => array('syncDialQueue' => true)));
 			}
 			if($arrData) $this->mongo_db->batch_insert('LO_Dial_queue', $arrData);
 		endif;
@@ -215,13 +224,13 @@ Class Dial_queue extends WFF_Controller {
 		}
 	}
 
-	function conditionDoNotCall($data){
+	function conditionDoNotCall($data, $money){
 		if (isset($data['PRODGRP_ID'])):
 			if($data['PRODGRP_ID'] == '103' || $data['PRODGRP_ID'] == '602' || $data['PRODGRP_ID'] == '802')
 				return 1;
 
 			$check40k = $data["overdue_amount_this_month"] - $data["advance_balance"];
-			$money = $this->mongo_db->where('type', $this->sub)->getOne($this->sub . 'Dial_config');
+			
 			$money = isset($money["conditionDonotCall"]) ? $money["conditionDonotCall"] : 40000;
 			if($check40k < $money){
 				

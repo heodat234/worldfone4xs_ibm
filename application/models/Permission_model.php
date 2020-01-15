@@ -594,4 +594,11 @@ Class Permission_model extends CI_Model {
 		$this->crud->select_db();
 		return $response;
 	}
+
+	function add_api_to_navigator($uri, $api)
+	{
+		$this->load->library("mongo_private");
+		$response = $this->mongo_private->where(array("uri" => ['$in' => [$uri, $uri . "/"]]))->update("{$this->sub}Navigator", ['$addToSet'=>['apis'=>$api]]);
+		return $response;
+	}
 }

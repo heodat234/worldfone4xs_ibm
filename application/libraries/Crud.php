@@ -31,6 +31,12 @@ Class Crud {
         $this->CI->load->library("Mongo_db");
     }
 
+    public function switch_db($db = "")
+    {
+        $this->CI->mongo_db->switch_db($db);
+        return $this;
+    }
+
     public function select_db($db = "")
     {
         $this->CI->mongo_db->switch_db($db);
@@ -52,12 +58,7 @@ Class Crud {
 
         // Kendo to aggregate
         $Kendo_aggregate = new Kendo_aggregate($model);
-        if (!empty($match)) {
-            $Kendo_aggregate->set_kendo_query($kendo_query)->matching($match)->filtering();
-        }
-        else {
-            $Kendo_aggregate->set_kendo_query($kendo_query)->filtering();
-        }
+        $Kendo_aggregate->set_kendo_query($kendo_query)->matching($match)->filtering();
         // Get total
         $total_aggregate = $Kendo_aggregate->get_total_aggregate();
         $total_result = $this->CI->mongo_db->aggregate_pipeline($collection, $total_aggregate);
@@ -111,12 +112,12 @@ Class Crud {
         $inserted_data = $this->CI->mongo_db->insert($collection, $parse_doc);
         if($inserted_data && $object_id_to_string)
         {
-            $inserted_data = $this->convert_document_object_id($inserted_data);
+            $inserted_data = $this->convert_document($inserted_data);
         }
         return $inserted_data;
     }
 
-    function update($collection, $update)
+    function update($collection, $update, $options = [])
     {
         if( isset($update['$set']) )
         {
@@ -125,7 +126,7 @@ Class Crud {
             $parse_doc["updatedAt"] = (int) time();
             $update['$set'] = $parse_doc;
         }
-        return $this->CI->mongo_db->where($this->wheres)->update($collection, $update);
+        return $this->CI->mongo_db->where($this->wheres)->update($collection, $update, $options);
     }
 
     function delete($collection, $permanent = true)
@@ -162,20 +163,20 @@ Class Crud {
         if($object_id_to_string)
         {
             foreach ($data as &$doc) {
-                $doc = $this->convert_document_object_id($doc);
+                $doc = $this->convert_document($doc);
             }
         }
         $this->_clear();
         return $data;
     }
 
-    function getOne($collection, $selects = array(), $object_id_to_string = TRUE)
+    function getOne($collection, $selects = array(), $convert = TRUE)
     {
         $doc = $this->CI->mongo_db->where($this->wheres)->order_by($this->sorts)->select($selects)->getOne($collection);
         
-        if($object_id_to_string)
+        if($convert)
         {
-            $doc = $this->convert_document_object_id($doc);
+            $doc = $this->convert_document($doc, $collection);
         }
         $this->_clear();
         return $doc;
@@ -187,7 +188,7 @@ Class Crud {
         if($object_id_to_string)
         {
             foreach ($data as &$doc) {
-                $doc = $this->convert_document_object_id($doc);
+                $doc = $this->convert_document($doc);
             }
         }
         return $data;
@@ -201,13 +202,21 @@ Class Crud {
 
     function where_id($id)
     {
-        $this->wheres = array("_id" => new MongoDB\BSON\ObjectId($id));
+        if(strlen($id) === 24) {
+            $this->wheres["_id"] = new MongoDB\BSON\ObjectId($id);
+        } else {
+            $this->wheres["_id"] = $id;
+        }
         return $this;
     }
 
     function where_object_id($field, $id)
     {
-        $this->wheres[$field] = new MongoDB\BSON\ObjectId($id);
+        if(strlen($id) === 24) {
+            $this->wheres[$field] = new MongoDB\BSON\ObjectId($id);
+        } else {
+            $this->wheres[$field] = $id;
+        }
         return $this;
     }
 
@@ -241,7 +250,7 @@ Class Crud {
                         break;
                     
                     case 'timestamp':
-                        $value = strtotime(preg_replace('/\([^)]*\)/', '', $value));
+                        $value = is_string($value) ? strtotime(preg_replace('/\([^)]*\)/', '', $value)) : $value;
                         break;
 
                     case 'datetime':
@@ -301,14 +310,34 @@ Class Crud {
         return $model;
     }
 
-    function convert_document_object_id($doc)
+    function convert_document($doc, $collection = "")
     {
         if($doc)
         {
+            if($collection) 
+            {
+                $model = $this->build_model($collection);
+            }
+
             foreach ($doc as $field => &$value) {
+                // Mongo special value
                 if($value instanceof MongoDB\BSON\ObjectId)
                 {
                     $value = $value->__toString();
+                } elseif($value instanceof MongoDB\BSON\UTCDateTime) {
+                    $doc[$field] = date("c", $value->toDateTime()->getTimestamp());
+                }
+                // Convert by model
+                if(isset($model) && isset($model[$field])) 
+                {
+                    switch ($model[$field]["type"]) {
+                        case 'timestamp':
+                            $value = is_string($value) ? $value : date("c", $value);
+                            break;
+                        
+                        default:
+                            break;
+                    }
                 }
             }
         }

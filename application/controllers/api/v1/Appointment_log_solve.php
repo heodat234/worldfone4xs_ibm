@@ -14,7 +14,6 @@ Class Appointment_log_solve extends WFF_Controller {
         $this->load->library("Excel");
         $this->load->library("csv");
         $this->load->library('mongo_db');
-        $this->load->library('pheanstalk');
         $this->load->model('ftp_model');
 		$this->collection = set_sub_collection($this->collection);
     }

@@ -2,6 +2,7 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 class Callevent_model extends CI_Model {
 
+    private $sub = "";
     private $cdr = "worldfonepbxmanager";
     private $cdr_realtime = "worldfonepbxmanager_realtime";
     private $diallist_detail = "Diallist_detail";
@@ -9,18 +10,21 @@ class Callevent_model extends CI_Model {
     private $misscall = "misscall";
     private $config_collection = "ConfigType";
     private $user_collection = "User";
+    private $follow_up = "Follow_up";
 
     function __construct() {
         $this->load->library('mongo_db');
     }
 
     private function set_collection($sub) {
-        $this->cdr              = "{$sub}_{$this->cdr}";
-        $this->cdr_realtime     = "{$sub}_{$this->cdr_realtime}";
-        $this->diallist_detail  = "{$sub}_{$this->diallist_detail}";
-        $this->voicemails       = "{$sub}_{$this->voicemails}";
-        $this->misscall         = "{$sub}_{$this->misscall}";
-        $this->user_collection  = "{$sub}_{$this->user_collection}";
+        $this->sub                  = "{$sub}";
+        $this->cdr                  = "{$sub}_{$this->cdr}";
+        $this->cdr_realtime         = "{$sub}_{$this->cdr_realtime}";
+        $this->diallist_detail      = "{$sub}_{$this->diallist_detail}";
+        $this->voicemails           = "{$sub}_{$this->voicemails}";
+        $this->misscall             = "{$sub}_{$this->misscall}";
+        $this->user_collection      = "{$sub}_{$this->user_collection}";
+        $this->follow_up            = "{$sub}_{$this->follow_up}";
     }
 
     public function get_key($secret ) {
@@ -53,12 +57,16 @@ class Callevent_model extends CI_Model {
             return $this->mongo_db->where(array('calluuid' => $calluuid))->push("glide_extension",$userextension)->update($this->cdr);
         }
     }
-    public function unset_misscall($calluuid) {       
-        return $this->mongo_db->where(array('calluuid' => $calluuid))->delete($this->misscall);
-        
-    }
+
     public function check_misscall($customer_number){
-        return $this->mongo_db->where(array("customernumber"=>$customer_number))->delete_all($this->misscall);       
+        if( !empty($this->config_type["auto_delete_misscall"]) ) {
+            $this->mongo_db->where(array("customernumber"=>$customer_number))->delete_all($this->misscall);
+        }
+        if( !empty($this->config_type["auto_delete_followup"]) ) {
+            $this->mongo_db->where(array("phone"=>$customer_number))->delete_all($this->follow_up);
+        }
+        
+        return TRUE;       
     }
    
     public function update_cdr($data) {
@@ -100,8 +108,8 @@ class Callevent_model extends CI_Model {
     }
     
     public function delete_cdr($calluuid) {   
-        $this->mongo_db->where(array('calluuid' => $calluuid))->delete($this->cdr_realtime);    
-        return $this->mongo_db->where(array('calluuid' => $calluuid))->delete($this->cdr);
+        $this->mongo_db->where(array('calluuid' => $calluuid))->delete_all($this->cdr_realtime);    
+        return $this->mongo_db->where(array('calluuid' => $calluuid))->delete_all($this->cdr);
     }
     public function delete_cdr_realtime($calluuid) {
         $data = $this->mongo_db->where(array('calluuid' => $calluuid))->getOne($this->cdr_realtime);
@@ -111,6 +119,17 @@ class Callevent_model extends CI_Model {
         $WFF =& get_instance();
         $WFF->load->model("Interactive_model");
         $WFF->Interactive_model->create("call", "",  $data, $this->config_type);
+
+        // Update 07/12/2019 . Set group name and group id.
+        $this->load->library("mongo_private");
+        $user = $this->mongo_private->where(array('extension' => $data["userextension"]))->getOne($this->user_collection);
+
+        if( isset($user["group_name"]) ) {
+            $group_name = $user["group_name"];
+            $group_id = isset($user["group_id"]) ? $user["group_id"] : "";
+            $this->mongo_db->where(array('calluuid' => $calluuid))
+                ->set("group_name", $group_name)->set("group_id", $group_id)->update($this->cdr);
+        }
     }
 
     public function get_curentcall($calluuid) {
@@ -128,12 +147,6 @@ class Callevent_model extends CI_Model {
        
        return $this->mongo_db->where(array('customercode'=> null,'scheduled'=>null))->where_ne('connect_info',null)->limit(100)->get($this->cdr);
     }
-
-    public function updateCusname($customerid, $customername,$calluuid) { 
-        echo"updateCusname".$customerid;
-        $this->mongo_db->where(array('calluuid'=>$calluuid))->set(array('customername' => $customername,'customercode'=>$customerid,'scheduled'=>'done'))->update_all($this->cdr);
-        
-    }
     
     public function updateScheduled($calluuid) { 
         $this->mongo_db->where(array('calluuid'=>$calluuid))->set(array('scheduled'=>'done'))->update_all($this->cdr);
@@ -143,32 +156,99 @@ class Callevent_model extends CI_Model {
         return $this->mongo_db->insert($this->voicemails, $data);
     }
 
-    public function process_dialist($data_cdr, $secret) {
-        $dialid = $data_cdr['dialid'];    
-        $_id =  new MongoDB\BSON\ObjectId($dialid);
-        $fields = ["calluuid", "disposition", "userextension", "customernumber", "starttime", "causetxt"];
-        $callResult = array();
-        foreach ($fields as $field) {
-            if($field == "starttime") {
-                $callResult[$field] = isset($data_cdr[$field]) ? $data_cdr[$field] : 0;
-            } else $callResult[$field] = isset($data_cdr[$field]) ? $data_cdr[$field] : "";
+    public function process_dialist($data) {
+        if($this->sub == "LO") 
+        {
+            $diallist_detail_id = $data['dialid'];
+            $fields = ["calluuid", "disposition", "userextension", "customernumber", "starttime", "causetxt","waittimeinqueue", "dialtype"];
+            $callResult = array();
+            foreach ($fields as $field) {
+                if(in_array($field, ["starttime","waittimeinqueue"])) {
+                    $callResult[$field] = isset($data[$field]) ? $data[$field] : 0;
+                } else $callResult[$field] = isset($data[$field]) ? $data[$field] : "";
+            }
+            
+            $update = array(
+                '$inc' => array("tryCount" => 1), 
+                '$push' => array("callResult" => $callResult)
+            );
+            // Assign
+            if(isset($callResult["disposition"], $callResult["userextension"]) && $callResult["disposition"] == "ANSWERED") {
+                $update['$set'] = ["assign" => $callResult["userextension"]];
+            }
+            // Update diallist detail
+            $this->mongo_db->where_id($diallist_detail_id)->update($this->diallist_detail, $update);
+            // Remove in process
+            $this->handle_DialInProcess($data);
         }
-        // Update diallist detail
-        $this->mongo_db->where(array("_id" => $_id))->update($this->diallist_detail, array(
-            '$inc' => array("tryCount" => 1), 
-            '$addToSet' => array("callResult" => $callResult)
-        ));  
     }
 
-    public function put($secret,$callernum,$destnum,$interval,$urlDiallistId){
-        $this->load->library('beanstalk');
-        $callJob = new stdClass();
-        $callJob->secret = $secret;
-        $callJob->callernum = $callernum;
-        $callJob->destnum= $destnum;
-        $callJob->suburl=$urlDiallistId;
-        $callJob->startTimestamp = time() + $interval;
-        $this->mongo_db->insert("debugs",array("calljob"=>$callJob));
-        $this->beanstalk->queue->useTube("calljobs")->put(json_encode($callJob),0, $callJob->startTimestamp - time(),300);
+    public function handle_DialInProcess($data){
+        // Xay ra khi make call 2, user ko bat may
+        // Remove from process
+        if(isset($data['dialQueueId'])) {
+            $this->mongo_db->where(["dialQueueId" => $data['dialQueueId']])->delete_all("LO_Dial_in_process");
+        }       
+    }
+
+    public function handle_PutCDRs($data){
+        // Xay ra khi make call 3, KH ko bat may
+        // Insert cdr
+        $this->mongo_db->insert($this->cdr, $data);
+        // Xu ly dial queue
+        if(isset($data['dialQueueId'])) {
+            $dialQueueCollection = "LO_Dial_queue";
+            $dialQueue = $this->mongo_db->where_id($data['dialQueueId'])->getOne($dialQueueCollection);
+            if(!$dialQueue) return;
+            if(isset($dialQueue["diallistdetail_id"]) && isset($dialQueue["spin"]) && $dialQueue["spin"] == 1) {
+
+                $diallistDetailId = $dialQueue["diallistdetail_id"];
+
+                unset($dialQueue["id"], $dialQueue["called"], $dialQueue["calledAt"]);
+                $dialQueue["spin"] = 2;
+                $dialQueue["priority"] = 300;
+                $dialQueue["createdAt"] = $this->mongo_db->date();
+                $this->mongo_db->insert("LO_Dial_queue", $dialQueue);
+
+                // GET Diallist Detail
+                $diallistDetail = $this->mongo_db->where_id($diallistDetailId)->getOne("LO_Diallist_detail");
+                // Update Action code
+                $this->mongo_db->where_id($diallistDetailId)->set("action_code", "NOT")->update("LO_Diallist_detail");
+
+                // House_NO
+
+                if(!empty($diallistDetail["House_NO"]) && strlen($diallistDetail["House_NO"]) > 7) {
+                    $dialQueue["phone"] = $diallistDetail["House_NO"];
+                    $dialQueue["index"]++;
+                    $this->mongo_db->insert($dialQueueCollection, $dialQueue);
+                }
+
+                // REFERENCE
+
+                if(!empty($diallistDetail["LIC_NO"])) {
+                    $REFS = $this->mongo_db->where("LIC_NO", $diallistDetail["LIC_NO"])->get( "LO_Relationship" );
+                    foreach ($REFS as $doc) {
+                        if(!empty($doc["phone"]) && strlen($doc["phone"]) > 7) {
+                            $dialQueue["phone"] = $doc["phone"];
+                            $dialQueue["index"]++;
+                            $this->mongo_db->insert($dialQueueCollection, $dialQueue);
+                        }
+                    }
+                }
+
+                $this->mongo_db->where_id($dialQueue["diallistdetail_id"])->set("priority", $dialQueue["priority"])->update("LO_Diallist_detail");
+            }
+            if( isset($dialQueue["diallist_id"]) ) 
+            {
+                $diallist = $this->mongo_db->where_id($dialQueue["diallist_id"])->getOne("LO_Diallist");
+                if(!isset($diallist["group_id"])) return;
+
+                $group = $this->mongo_db->where_id($diallist["group_id"])->getOne("LO_Group");
+
+                if(!isset($group["name"])) return;
+
+                $this->mongo_db->where("calluuid", $data["calluuid"])->set("group_name", $group["name"])->update($this->cdr);
+            }
+        }       
     }
 }

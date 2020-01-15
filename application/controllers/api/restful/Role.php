@@ -76,6 +76,9 @@ Class Role extends CI_Controller {
 				}
 			}
 		}
+		if(!empty($data["default"])) {
+			$this->mongo_db->update_all($this->collection, array('$set' => ["default" => FALSE]));
+		}
 		$result = $this->crud->where_id($id)->update($this->collection, array('$set' => $data));
 		echo json_encode(array("status" => $result ? 1 : 0, "data" => []));
 	}

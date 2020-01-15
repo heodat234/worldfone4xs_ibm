@@ -45,10 +45,17 @@ Class Follow_up extends WFF_Controller {
 	function create()
 	{
 		try {
+			$extension = $this->session->userdata("extension");
+			$cache_id = $extension . "_save_follow_up";
+			$this->load->driver('cache', array('adapter' => 'memcached', 'backup' => 'file'));
+			if($this->cache->get($cache_id)) {
+				throw new Exception("@Already save@");
+			}
 			$data = json_decode(file_get_contents('php://input'), TRUE);
 			$data["foreign_id"] = 	isset($data["id"]) ? $data["id"] : null;
-			$data["createdBy"]	=	$this->session->userdata("extension");
+			$data["createdBy"]	=	$extension;
 			$result = $this->crud->create($this->collection, $data);
+			$this->cache->save($cache_id, 1, 5);
 			echo json_encode(array("status" => $result ? 1 : 0));
 		} catch (Exception $e) {
 			echo json_encode(array("status" => 0, "message" => $e->getMessage()));

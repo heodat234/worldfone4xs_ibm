@@ -155,7 +155,7 @@ Class Daily_prod_user_group_report extends WFF_Controller {
         $worksheet->getStyle("A3:C3")->applyFromArray($style);
 
         $worksheet->setCellValue('F3', 'Percentage');
-        $worksheet->setCellValue('G3', 'Account');
+        $worksheet->setCellValue('G3', 'Amount');
         $worksheet->setCellValue('H3', 'Gap (account)');
         $worksheet->getStyle("F3:H3")->getFill()
             ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
@@ -250,7 +250,7 @@ Class Daily_prod_user_group_report extends WFF_Controller {
 
         foreach($dataGroup1 as $key => $value) {
             if($prod_row != $value['product']) {
-                $worksheet->mergeCells('D' . $start_row_prod . ':D' . ($start_row - 1));
+                $worksheet->mergeCells('D' . $start_row_prod . ':D' . ($start_row-1) );
                 $worksheet->setCellValue('D' . $start_row_prod, $due_date);
 
                 $worksheet->mergeCells('C' . $start_row_prod . ':C' . ($start_row));
@@ -274,8 +274,8 @@ Class Daily_prod_user_group_report extends WFF_Controller {
                 $worksheet->setCellValue('R' . $start_row, (!empty($totalData['col_ratio_actual']) ? $totalData['col_ratio_actual'] : 0));
                 $worksheet->setCellValue('S' . $start_row, (!empty($totalData['flow_rate_actual']) ? $totalData['flow_rate_actual'] : 0));
 
-                $worksheet->getStyle('D' . $start_row . ':' . $this->stringFromColumnIndex($startAmt  + 5) . $start_row)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('DDEBF7');
-                $worksheet->getStyle('D' . $start_row . ':' . $this->stringFromColumnIndex($startAmt  + 5) . $start_row)->applyFromArray([
+                $worksheet->getStyle('D' . $start_row . ':U' . $start_row)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('DDEBF7');
+                $worksheet->getStyle('D' . $start_row . ':U' . $start_row)->applyFromArray([
                     'font'      => [
                         'bold'  => true
                     ]
@@ -414,6 +414,16 @@ Class Daily_prod_user_group_report extends WFF_Controller {
                 $start_row_debt_group = $start_row;
             }
 
+            if(!empty($value['team'])) {
+                // if(strpos($value['team'], 'G1') !== false || strpos($value['team'], 'G3') !== false) {
+                //     continue;
+                // }
+    
+                if(strpos($value['team'], 'G1') !== false) {
+                    $groupName = explode("/G1", $value['team']);
+                    $value['team'] = $groupName[0];
+                }
+            }
 
             $worksheet->setCellValue('E' . $start_row, $value['team']);
             $worksheet->setCellValue('F' . $start_row, (!empty($value['tar_per']) ? $value['tar_per'] : 0));
@@ -495,7 +505,7 @@ Class Daily_prod_user_group_report extends WFF_Controller {
                         }
 
                         $worksheet->mergeCells('B' . ($start_row + count($groupProduct['data']) + 3) . ':E' . ($start_row + count($groupProduct['data']) + 3));
-                        $worksheet->setCellValue('B' . ($start_row + count($groupProduct['data']) + 3), 'D-Total');
+                        $worksheet->setCellValue('B' . ($start_row + count($groupProduct['data']) + 3), $debt_group.'-Total');
                     }
 
                     $worksheet->mergeCells('A' . $start_row_debt_group . ':A' . ($start_row + 5));
@@ -532,6 +542,13 @@ Class Daily_prod_user_group_report extends WFF_Controller {
                     $worksheet->setCellValue('Q' . ($start_row + 1), (!empty($total['rem_actual']) ? $total['rem_actual'] : 0));
                     $worksheet->setCellValue('R' . ($start_row + 1), (!empty($total['col_ratio_actual']) ? $total['col_ratio_actual'] : 0));
                     $worksheet->setCellValue('S' . ($start_row + 1), (!empty($total['flow_rate_actual']) ? $total['flow_rate_actual'] : 0));
+
+                    $worksheet->getStyle('D' . ($start_row + 1) . ':U' . ($start_row + 1))->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('DDEBF7');
+                    $worksheet->getStyle('D' . ($start_row + 1) . ':U' . ($start_row + 1))->applyFromArray([
+                        'font'      => [
+                            'bold'  => true
+                        ]
+                    ]);
 
                     foreach($totalData as $totalKey => &$totalValue) {
                         $totalValue = 0;
@@ -715,7 +732,7 @@ Class Daily_prod_user_group_report extends WFF_Controller {
         $worksheet->getStyle("A3:C3")->applyFromArray($style);
 
         $worksheet->setCellValue('F3', 'Percentage');
-        $worksheet->setCellValue('G3', 'Account');
+        $worksheet->setCellValue('G3', 'Amount');
         $worksheet->setCellValue('H3', 'Gap (account)');
         $worksheet->getStyle("F3:H3")->getFill()
             ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
@@ -1069,7 +1086,7 @@ Class Daily_prod_user_group_report extends WFF_Controller {
                         }
 
                         $worksheet->mergeCells('B' . ($start_row + count($groupProduct['data']) + 3) . ':E' . ($start_row + count($groupProduct['data']) + 3));
-                        $worksheet->setCellValue('B' . ($start_row + count($groupProduct['data']) + 3), 'D-Total');
+                        $worksheet->setCellValue('B' . ($start_row + count($groupProduct['data']) + 3), $debt_group.'-Total');
                     }
 
                     $worksheet->mergeCells('A' . $start_row_debt_group . ':A' . ($start_row + 5));
@@ -1106,6 +1123,13 @@ Class Daily_prod_user_group_report extends WFF_Controller {
                     $worksheet->setCellValue('Q' . ($start_row + 1), (!empty($total['rem_actual']) ? $total['rem_actual'] : 0));
                     $worksheet->setCellValue('R' . ($start_row + 1), (!empty($total['col_ratio_actual']) ? $total['col_ratio_actual'] : 0));
                     $worksheet->setCellValue('S' . ($start_row + 1), (!empty($total['flow_rate_actual']) ? $total['flow_rate_actual'] : 0));
+
+                    $worksheet->getStyle('D' . ($start_row + 1) . ':U' . ($start_row + 1))->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('DDEBF7');
+                    $worksheet->getStyle('D' . ($start_row + 1) . ':U' . ($start_row + 1))->applyFromArray([
+                        'font'      => [
+                            'bold'  => true
+                        ]
+                    ]);
 
                     foreach($totalData as $totalKey => &$totalValue) {
                         $totalValue = 0;
@@ -1286,7 +1310,7 @@ Class Daily_prod_user_group_report extends WFF_Controller {
         $worksheet->getStyle("A3:C3")->applyFromArray($style);
 
         $worksheet->setCellValue('F3', 'Percentage');
-        $worksheet->setCellValue('G3', 'Account');
+        $worksheet->setCellValue('G3', 'Amount');
         $worksheet->setCellValue('H3', 'Gap (account)');
         $worksheet->getStyle("F3:H3")->getFill()
             ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
@@ -1367,16 +1391,16 @@ Class Daily_prod_user_group_report extends WFF_Controller {
         $start_row = 4;
 
         $start_row_debt_group = 4;
-        $debt_group = $dataGroup3[0]['debt_group'];
+        $debt_group = (!empty($dataGroup3[0]['debt_group'])) ? $dataGroup3[0]['debt_group'] : '';
 
         $start_row_due_date_code = 4;
-        $due_date_code = $dataGroup3[0]['due_date_code'];
+        $due_date_code = (!empty($dataGroup3[0]['due_date_code'])) ? $dataGroup3[0]['due_date_code'] : '';
 
         $start_row_prod = 4;
-        $prod_row = $dataGroup3[0]['product'];
+        $prod_row = (!empty($dataGroup3[0]['product'])) ? $dataGroup3[0]['product'] : '';
 
         $start_due_date = 4;
-        $due_date = date('d/m/Y', $dataGroup3[0]['due_date']);
+        $due_date = (!empty($dataGroup3[0]['due_date'])) ? date('d/m/Y', $dataGroup3[0]['due_date']) : '';
 
         foreach($dataGroup3 as $key => $value) {
             if($prod_row != $value['product']) {
@@ -1619,7 +1643,7 @@ Class Daily_prod_user_group_report extends WFF_Controller {
                         }
 
                         $worksheet->mergeCells('B' . ($start_row + count($groupProduct['data']) + 3) . ':E' . ($start_row + count($groupProduct['data']) + 3));
-                        $worksheet->setCellValue('B' . ($start_row + count($groupProduct['data']) + 3), 'D-Total');
+                        $worksheet->setCellValue('B' . ($start_row + count($groupProduct['data']) + 3), $debt_group.'-Total');
                     }
 
                     $worksheet->mergeCells('A' . $start_row_debt_group . ':A' . ($start_row + 5));
@@ -1655,6 +1679,13 @@ Class Daily_prod_user_group_report extends WFF_Controller {
                     $worksheet->setCellValue('P' . ($start_row + 1), (!empty($total['rem_os']) ? $total['rem_os'] : 0));
                     $worksheet->setCellValue('Q' . ($start_row + 1), (!empty($total['flow_rate_os']) ? $total['flow_rate_os'] : 0));
                     $worksheet->setCellValue('R' . ($start_row + 1), (!empty($total['col_ratio_os']) ? $total['col_ratio_os'] : 0));
+
+                    $worksheet->getStyle('D' . ($start_row + 1) . ':U' . ($start_row + 1))->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('DDEBF7');
+                    $worksheet->getStyle('D' . ($start_row + 1) . ':U' . ($start_row + 1))->applyFromArray([
+                        'font'      => [
+                            'bold'  => true
+                        ]
+                    ]);
 
                     foreach($totalData as $totalKey => &$totalValue) {
                         $totalValue = 0;

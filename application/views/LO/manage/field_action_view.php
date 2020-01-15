@@ -41,7 +41,7 @@ var Config = {
     		title: "@Site Address@"
     	},
     	{
-    		field: "staff_in_charge",
+    		field: "field_staff",
     		title: "@Name of Field Staff@"
     	},
     	{

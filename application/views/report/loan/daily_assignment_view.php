@@ -15,7 +15,7 @@
               <div class="form-group col-sm-4">
                 <label class="control-label col-xs-4">@Date@</label>
                 <div class="col-xs-8">
-                    <input id="start-date" data-role="datepicker" data-format="dd/MM/yyyy H:mm:ss" name="fromDateTime" data-bind="value: fromDateTime, events: {change: startDate}" disabled="">
+                    <input id="start-date" data-role="datepicker" data-format="dd/MM/yyyy" name="fromDateTime" data-bind="value: fromDateTime">
                 </div>
               </div>
               <!-- <div class="form-group col-sm-4">
@@ -23,10 +23,10 @@
                 <div class="col-xs-8">
                     <input id="end-date" data-role="datepicker" data-format="dd/MM/yyyy H:mm:ss" name="toDateTime" data-bind="value: toDateTime, events: {change: endDate}">
                 </div>
-              </div>
+              </div> -->
               <div class="form-group col-sm-4 text-center">
                   <button class="k-button" data-bind="click: search">@Search@</button>
-              </div> -->
+              </div>
           </div>
           <div class="row chart-page"  style="background-color: white">
 
@@ -52,7 +52,7 @@
                     var dataSource = this.dataSource = new kendo.data.DataSource({
                       serverPaging: true,
                       serverFiltering: true,
-                      pageSize: 5,
+                      pageSize: 10,
                       transport: {
                           read: ENV.reportApi + "loan/daily_assignment_report",
                           parameterMap: parameterMap
@@ -62,14 +62,40 @@
                           total: "total",
                           model: {
                               id: "id",
-                              fields: {
-                                  overdue_date: {type: "date"},
+                              // fields: {
+                              //     overdue_date: {type: "date"},
 
-                              }
+                              // }
                           },
                           parse: function (response) {
                               response.data.map(function(doc) {
-                                  doc.overdue_date = doc.overdue_date ? new Date(doc.overdue_date * 1000) : null;
+                                  if ($.isNumeric(doc.overdue_date)) {
+                                    doc.overdue_date = doc.overdue_date ? new Date(doc.overdue_date * 1000) : null;
+                                  }
+                                  // doc.overdue_date = doc.overdue_date ? new Date(doc.overdue_date * 1000) : null;
+                                  doc.created_date = doc.created_date ? new Date(doc.created_date * 1000) : null;
+                                  doc.ngay_guifc = doc.ngay_guifc ? new Date(doc.ngay_guifc * 1000) : null;
+                                  doc.ngay_nopdon_submitingdate = doc.ngay_nopdon_submitingdate ? new Date(doc.ngay_nopdon_submitingdate * 1000) : null;
+                                  doc.ngay_nop_tuap = doc.ngay_nop_tuap ? new Date(doc.ngay_nop_tuap * 1000) : null;
+                                  doc.ngay_nhanthongbao_thuly = doc.ngay_nhanthongbao_thuly ? new Date(doc.ngay_nhanthongbao_thuly * 1000) : null;
+                                  doc.ngay_hoagiai1 = doc.ngay_hoagiai1 ? new Date(doc.ngay_hoagiai1 * 1000) : null;
+                                  doc.ngay_hoagiai2 = doc.ngay_hoagiai2 ? new Date(doc.ngay_hoagiai2 * 1000) : null;
+                                  doc.ngay_hoagiai3 = doc.ngay_hoagiai3 ? new Date(doc.ngay_hoagiai3 * 1000) : null;
+                                  doc.ngay_xetxu_sotham = doc.ngay_xetxu_sotham ? new Date(doc.ngay_xetxu_sotham * 1000) : null;
+                                  doc.ngay_xetxu_phuctham = doc.ngay_xetxu_phuctham ? new Date(doc.ngay_xetxu_phuctham * 1000) : null;
+                                  doc.promised_date = doc.promised_date ? new Date(doc.promised_date * 1000) : null;
+                                  doc.ngay_gui_thu_thong_bao = doc.ngay_gui_thu_thong_bao ? new Date(doc.ngay_gui_thu_thong_bao * 1000) : null;
+                                  doc.ngay_dau_gia = doc.ngay_dau_gia ? new Date(doc.ngay_dau_gia * 1000) : null;
+                                  doc.ngay_trutien_giamdunogoc = doc.ngay_trutien_giamdunogoc ? new Date(doc.ngay_trutien_giamdunogoc * 1000) : null;
+                                  doc.ngay_guithuthongbao_hoantat_vaban_taisan = doc.ngay_guithuthongbao_hoantat_vaban_taisan ? new Date(doc.ngay_guithuthongbao_hoantat_vaban_taisan * 1000) : null;
+                                  doc.ngaytienve_tkkh_dot1 = doc.ngaytienve_tkkh_dot1 ? new Date(doc.ngaytienve_tkkh_dot1 * 1000) : null;
+                                  doc.ngayyeucau_itxoabill = doc.ngayyeucau_itxoabill ? new Date(doc.ngayyeucau_itxoabill * 1000) : null;
+                                  doc.ngaytrutien_dethanhtoanquahan = doc.ngaytrutien_dethanhtoanquahan ? new Date(doc.ngaytrutien_dethanhtoanquahan * 1000) : null;
+                                  doc.ngayguithu_thongbaohoantat_thuhoi_ts = doc.ngayguithu_thongbaohoantat_thuhoi_ts ? new Date(doc.ngayguithu_thongbaohoantat_thuhoi_ts * 1000) : null;
+                                  doc.ngayguithu_thongbao_xulydaugia = doc.ngayguithu_thongbao_xulydaugia ? new Date(doc.ngayguithu_thongbao_xulydaugia * 1000) : null;
+                                  doc.ngaytienve_tkkh_dotcuoi = doc.ngaytienve_tkkh_dotcuoi ? new Date(doc.ngaytienve_tkkh_dotcuoi * 1000) : null;
+                                  doc.ngaydenhan_kybill_cuoicung = doc.ngaydenhan_kybill_cuoicung ? new Date(doc.ngaydenhan_kybill_cuoicung * 1000) : null;
+                                  doc.payment_date = doc.payment_date ? new Date(doc.payment_date * 1000) : null;
                                   return doc;
                               })
                               return response;
@@ -79,7 +105,12 @@
 
                     var grid = this.grid = $("#grid").kendoGrid({
                       dataSource: dataSource,
-                      excel: {allPages: true, fileName: "Daily assignment report.xlsx"},
+                      excel: {
+                          fileName: "Daily assignment report.xlsx",
+                          filterable: true,
+                          allPages: true,
+                      },
+                      // excel: {allPages: true, fileName: "Daily assignment report.xlsx"},
                       // excelExport: function(e) {
                       //    var sheet = e.workbook.sheets[0];
                       //    for (var rowIndex = 1; rowIndex < sheet.rows.length; rowIndex++) {
@@ -153,12 +184,17 @@
                             },
                             {
                                 field: "chief",
-                                title: "Chief",
+                                title: "Team Lead",
                                 width: 150,
                             },
                             {
                                 field: "contacted",
                                 title: "Contacted number",
+                                width: 150,
+                            },
+                            {
+                                field: "connected",
+                                title: "Connected number",
                                 width: 150,
                             },
                             {
@@ -172,9 +208,15 @@
                                 width: 150,
                             },
                             {
+                                field: "note",
+                                title: "Note",
+                                width: 150,
+                            },
+                            {
                               title : "Tháng",
                               width : 150,
-                              field : "created_date"
+                              field : "created_date",
+                              template: dataItem => gridDate(dataItem.created_date)
                             },
                             {
                               title : "Số hợp đồng",
@@ -289,42 +331,50 @@
                             {
                               width : 150,
                               title : "Ngày gởi FC",
-                              field : "ngay_guifc"
+                              field : "ngay_guifc",
+                              template: dataItem => gridDate(dataItem.ngay_guifc)
                             },
                             {
                               width : 150,
                               title : "Ngày nộp đơn (Submiting date)",
-                              field : "ngay_nopdon_submitingdate"
+                              field : "ngay_nopdon_submitingdate",
+                              template: dataItem => gridDate(dataItem.ngay_nopdon_submitingdate)
                             },
                             {
                               width : 150,
                               title : "Ngày nộp TƯAP",
-                              field : "ngay_nop_tuap"
+                              field : "ngay_nop_tuap",
+                              template: dataItem => gridDate(dataItem.ngay_nop_tuap)
                             },
                             {
                               width : 150,
                               title : "Ngày nhận thông báo thụ lý",
-                              field : "ngay_nhanthongbao_thuly"
+                              field : "ngay_nhanthongbao_thuly",
+                              template: dataItem => gridDate(dataItem.ngay_nhanthongbao_thuly)
                             },
                             {
                               width : 150,
                               title : "Ngày hòa giải lần 1",
-                              field : "ngay_hoagiai1"
+                              field : "ngay_hoagiai1",
+                              template: dataItem => gridDate(dataItem.ngay_hoagiai1)
                             },
                             {
                               width : 150,
                               title : "Ngày hòa giải lần 2",
-                              field : "ngay_hoagiai2"
+                              field : "ngay_hoagiai2",
+                              template: dataItem => gridDate(dataItem.ngay_hoagiai2)
                             },
                             {
                               title : "Ngày hòa giải lần 3",
                               width : 150,
-                              field : "ngay_hoagiai3"
+                              field : "ngay_hoagiai3",
+                              template: dataItem => gridDate(dataItem.ngay_hoagiai3)
                             },
                             {
                               title : "Ngày xét xử sơ thẩm",
                               width : 150,
-                              field : "ngay_xetxu_sotham"
+                              field : "ngay_xetxu_sotham",
+                              template: dataItem => gridDate(dataItem.ngay_xetxu_sotham)
                             },
                             {
                               title : "Kháng cáo",
@@ -334,7 +384,8 @@
                             {
                               title : "Ngày xét xử phúc thẩm",
                               width : 150,
-                              field : "ngay_xetxu_phuctham"
+                              field : "ngay_xetxu_phuctham",
+                              template: dataItem => gridDate(dataItem.ngay_xetxu_phuctham)
                             },
                             {
                               title : "Theo dõi",
@@ -420,6 +471,7 @@
                               field : "promised_date",
                               title : "Ngày hứa trả",
                               width : 150,
+                              template: dataItem => gridDate(dataItem.promised_date)
                             },
                             {
                               field : "raaStatus",
@@ -429,12 +481,14 @@
                             {
                               field : "ngay_gui_thu_thong_bao",
                               title : "Ngày gửi thư thông báo định giá tài sản (nếu có)",
-                              width : 150
+                              width : 150,
+                              template: dataItem => gridDate(dataItem.ngay_gui_thu_thong_bao)
                             },
                             {
                               field : "ngay_dau_gia",
                               title : "Ngày đấu giá",
-                              width : 150
+                              width : 150,
+                              template: dataItem => gridDate(dataItem.ngay_dau_gia)
                             },
                             {
                               field : "sum_tien_con_lai_chuyen_ve_tkkh",
@@ -444,7 +498,8 @@
                             {
                               field : "ngay_trutien_giamdunogoc",
                               title : "Ngày trừ tiền để giảm dư nợ gốc sau khi xử lý tài sản",
-                              width : 150
+                              width : 150,
+                              template: dataItem => gridDate(dataItem.ngay_trutien_giamdunogoc)
                             },
                             {
                               field : "gia_ban",
@@ -454,7 +509,8 @@
                             {
                               title : "Ngày gửi thư thông báo hoàn tất xử lý và bán lại Tài sản thu hồi",
                               width : 150,
-                              field : "ngay_guithuthongbao_hoantat_vaban_taisan"
+                              field : "ngay_guithuthongbao_hoantat_vaban_taisan",
+                              template: dataItem => gridDate(dataItem.ngay_guithuthongbao_hoantat_vaban_taisan)
                             },
                             {
                               title : "Chi phí thẩm định giá",
@@ -464,12 +520,14 @@
                             {
                               title : "Ngày tiền về TK KH đợt 1",
                               width : 150,
-                              field : "ngaytienve_tkkh_dot1"
+                              field : "ngaytienve_tkkh_dot1",
+                              template: dataItem => gridDate(dataItem.ngaytienve_tkkh_dot1)
                             },
                             {
                               title : "Ngày yêu cầu IT xóa các bill và giữ lại 1 kỳ bill cuối",
                               width : 150,
-                              field : "ngayyeucau_itxoabill"
+                              field : "ngayyeucau_itxoabill",
+                              template: dataItem => gridDate(dataItem.ngayyeucau_itxoabill)
                             },
                             {
                               title : "Người thu hồi",
@@ -489,7 +547,8 @@
                             {
                               field : "ngaytrutien_dethanhtoanquahan",
                               title : "Ngày trừ tiền để thanh toán quá hạn sau khi xử lý tài sản",
-                              width : 150
+                              width : 150,
+                              template: dataItem => gridDate(dataItem.ngaytrutien_dethanhtoanquahan)
                             },
                             {
                               title : "Số tiền kỳ bill cuối cùng",
@@ -499,12 +558,14 @@
                             {
                               title : "Ngày gửi thư thông báo hoàn tất thu hồi TS (nếu có)",
                               width : 150,
-                              field : "ngayguithu_thongbaohoantat_thuhoi_ts"
+                              field : "ngayguithu_thongbaohoantat_thuhoi_ts",
+                              template: dataItem => gridDate(dataItem.ngayguithu_thongbaohoantat_thuhoi_ts)
                             },
                             {
                               title : "Ngày gửi thư thông báo xử lý TS thông qua đấu giá",
                               width : 150,
-                              field : "ngayguithu_thongbao_xulydaugia"
+                              field : "ngayguithu_thongbao_xulydaugia",
+                              template: dataItem => gridDate(dataItem.ngayguithu_thongbao_xulydaugia)
                             },
                             {
                               title : "Chi phí khác",
@@ -514,12 +575,14 @@
                             {
                               title : "Ngày tiền về TK KH đợt cuối (nếu có)",
                               width : 150,
-                              field : "ngaytienve_tkkh_dotcuoi"
+                              field : "ngaytienve_tkkh_dotcuoi",
+                              template: dataItem => gridDate(dataItem.ngaytienve_tkkh_dotcuoi)
                             },
                             {
                               field : "ngaydenhan_kybill_cuoicung",
                               title : "Ngày đến hạn của kỳ bill cuối cùng",
-                              width : 150
+                              width : 150,
+                              template: dataItem => gridDate(dataItem.ngaydenhan_kybill_cuoicung)
                             },
                             {
                               field : "death_info",
@@ -549,7 +612,8 @@
                             {
                               field : "payment_date",
                               title : "Payment date",
-                              width : 150
+                              width : 150,
+                              template: dataItem => gridDate(dataItem.payment_date)
                             },
                             {
                               field : "payment_person",
@@ -599,7 +663,7 @@
           var dateRange = 30;
           var nowDate = new Date();
           var date =  new Date();
-          date.setDate(nowDate.getDate() - 1);
+          // date.setDate(nowDate.getDate() - 1);
           var timeZoneOffset = date.getTimezoneOffset() * kendo.date.MS_PER_MINUTE;
           date.setHours(- timeZoneOffset / kendo.date.MS_PER_HOUR, 0, 0 ,0);
 
@@ -660,16 +724,16 @@
               },
               asyncSearch: async function() {
                 var field = "createdAt";
-                var fromDateTime = new Date(this.fromDateTime.getTime() - timeZoneOffset).toISOString();
-                  var toDateTime = new Date(this.toDateTime.getTime() - timeZoneOffset).toISOString();
+                var fromDateTime = new Date(this.fromDateTime.getTime()).toISOString();
+                var toDateTime = new Date(this.fromDateTime.getTime() + kendo.date.MS_PER_DAY -1).toISOString();
 
-                  var filter = {
-                      logic: "and",
-                      filters: [
-                          {field: field, operator: "gte", value: fromDateTime},
-                          {field: field, operator: "lte", value: toDateTime}
-                      ]
-                  };
+                var filter = {
+                    logic: "and",
+                    filters: [
+                        {field: field, operator: "gte", value: fromDateTime},
+                        {field: field, operator: "lte", value: toDateTime}
+                    ]
+                };
 
                 Table.dataSource.filter(filter);
 
@@ -686,6 +750,7 @@
                 url: ENV.reportApi + "loan/daily_assignment_report/downloadExcel",
                 type: 'POST',
                 dataType: 'json',
+                data: {date: $('#start-date').val()},
                 timeout: 30000
               })
               .done(function(response) {

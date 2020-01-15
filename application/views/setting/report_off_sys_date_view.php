@@ -26,7 +26,7 @@ var Config = {
             format: "{0: dd/MM/yyyy}",
             editor: function(container, options) {
                 var dateString = kendo.toString(options.model.date, "dd/MM/yyyy" );
-                $('<input id="off-date" data-text-field="' + options.field + '" data-value-field="' + options.field + '" data-bind="value:' + options.field + '" data-format="' + options.format + '"/>')
+                $('<input id="off-date" data-text-field="' + options.field + '" data-value-field="' + options.field + '" data-bind="value:' + options.field + '" data-format="' + options.format + '"  onkeydown="return false;"/>')
                     .appendTo(container)
                     .kendoDatePicker({});
             },

@@ -30,7 +30,17 @@ class Tool extends WFF_Controller {
         $this->output->data["js"][] = STEL_PATH . "js/chat/kendo.mychat.min.js";
         $this->output->data["js"][] = base_url() . "public/emojionearea/emojionearea.min.js";
         $this->output->data["css"][] = base_url() . "public/emojionearea/emojionearea.min.css";
-        $data["webSocketURL"] = (ENVIRONMENT == 'production') ? 'http://172.22.2.142:3000/' : 'http://192.168.16.130:3000/';
+        switch(ENVIRONMENT) {
+            case "production":
+                $data["webSocketURL"] = 'http://192.168.101.11:3000/';
+                break;
+            case "testing":
+                $data["webSocketURL"] = 'http://jaccschat.worldfone.vn/';
+                break;
+            default:
+                $data["webSocketURL"] = 'http://192.168.16.130:3000/';
+                break;
+        }
         $this->load->view('tool/chat_view', $data);
     }
 }

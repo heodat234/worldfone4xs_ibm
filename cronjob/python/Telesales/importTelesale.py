@@ -6,6 +6,7 @@ import calendar
 import time
 import ntpath
 import json
+import traceback
 from datetime import datetime
 from datetime import date
 # from xlsxwriter.utility import xl_rowcol_to_cell
@@ -19,10 +20,12 @@ from dateutil.parser import parse
 import os.path
 from os import path
 
-mongodb     = Mongodb("worldfone4xs")
-_mongodb    = Mongodb("_worldfone4xs")
-excel       = Excel()
 common      = Common()
+base_url = common.base_url()
+wff_env = common.wff_env(base_url)
+mongodb     = Mongodb("worldfone4xs", WFF_ENV=wff_env)
+_mongodb    = Mongodb("_worldfone4xs", WFF_ENV=wff_env)
+excel       = Excel()
 config      = Config()
 base_url    = config.base_url()
 subUserType = 'TS'
@@ -62,7 +65,7 @@ try:
    resultData  = []
    errorData   = []
 
-   headers = _mongodb.get(MONGO_COLLECTION='Model', WHERE={"collection": collection,'sub_type':{'$exists': 'true'}}, SELECT=['index', 'field','type'], SORT=([('index', 1)]))
+   headers = _mongodb.get(MONGO_COLLECTION='Model', WHERE={"collection": collection,'sub_type':{'$exists': 'true'}}, SELECT=['index', 'field', 'type', 'sub_type'], SORT=([('index', 1)]))
    headers = list(headers)
 
    users    = _mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'User'), WHERE=None, SELECT=['extension', 'agentname'], SORT=([('id', 1)]))
@@ -75,19 +78,24 @@ try:
 
    # fileName = importLogInfo['file_name']
    # filenameExtension = fileName.split('.')
-   dataLibrary = excel.getDataCSV(file_path=importLogInfo['file_path'],header=0, names=None, index_col=None, usecols=None, dtype=object, converters=None, skiprows=None, na_values=None, encoding='ISO-8859-1')
+   dataLibrary = excel.getDataCSV(file_path=importLogInfo['file_path'],header=0, sep=';', names=None, index_col=None, usecols=None, dtype=object, converters=None, skiprows=None, na_values=None, encoding='ISO-8859-1')
    # if(filenameExtension[1] == 'csv'):
    #    dataLibrary = excel.getDataCSV(file_path=importLogInfo['file_path'], dtype=object, sep='\t', lineterminator='\r', header=None, names=None, na_values='')
    # else:
    #    dataLibrary = excel.getDataExcel(file_path=importLogInfo['file_path'], header=0, names=None, na_values='')
 
    listDataLibrary = dataLibrary.values
+   pprint(listDataLibrary)
    for key,listCol in enumerate(listDataLibrary):
       temp = {}
       checkErr = False
       for idx,header in enumerate(headers):
-         if header['index'] == 26 or header['index'] == 27:
-            continue;
+         # pprint(idx)
+         # if header['index'] == 26 or header['index'] == 27:
+         #    continue;
+         if not header['sub_type'].strip() and 'import' in header['sub_type']:
+            continue
+
          if str(listDataLibrary[key][idx]) == 'nan':
             listDataLibrary[key][idx] = ''
          if header['type'] == 'int':
@@ -166,6 +174,7 @@ try:
             
          if header['field'] == 'assign' and value == '':
             temp['createdBy']  = ''
+            temp['assign_name']  = ''
 
          temp[header['field']]   = value
          temp['id_import']       = importLogId
@@ -198,4 +207,5 @@ try:
 
 except Exception as e:
    print(e)
+   print(traceback.format_exc())
    # log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')

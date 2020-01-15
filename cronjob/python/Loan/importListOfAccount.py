@@ -44,12 +44,13 @@ try:
     converters = {}
     insertData = []
     errorData = []
-    today = date.today()
-    # today = datetime.strptime('13/12/2019', "%d/%m/%Y").date()
+    # today = date.today()
+    today = datetime.strptime('09/01/2020', "%d/%m/%Y").date() 
     yesterday = today - timedelta(days=1)
     day = today.day
     month = today.month
     year = today.year
+    todayString = today.strftime("%d/%m/%Y")
     fileName = "LIST_OF_ACCOUNT_IN_COLLECTION_" + yesterday.strftime("%Y%m%d")
     sep = ','
     logDbName = "LO_Input_result_" + str(year) + str(month)
@@ -69,18 +70,17 @@ try:
         importLogId = str(sys.argv[1])
         importLogInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': ObjectId(sys.argv[1])})
     except Exception as SysArgvError:
-        # ftp.connect(host=ftpConfig['host'], username=ftpConfig['username'], password=ftpConfig['password'])
-        # ftp.downLoadFile(ftpLocalUrl, ftpInfo['filename'])
-        # ftp.close()
         if not os.path.isfile(ftpLocalUrl):
+            user_info = list(_mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'User'), SELECT={'extension'}))
+            user = common.array_column(user_info, 'extension')
             notification = {
-                'title'     : 'Import LIST OF ACCOUNT error',
+                'title'     : f'Import {fileName} error',
                 'active'    : True,
                 'icon'      : 'fa fa-exclamation-triangle',
                 'color'     : 'text-warning',
-                'content'   : f'Không có file <b style="font-size: 15px">{ftpLocalUrl}</b> hôm nay',
+                'content'   : f'Không có file import đầu ngày <b style="font-size: 15px">{ftpLocalUrl}</b>. Xin vui lòng thông báo cho bộ phận IT',
                 'link'      : '/manage/data/import_file',
-                'to'        : ['911'],
+                'to'        : list(user),
                 'notifyDate': datetime.utcnow(),
                 'createdBy' : 'System',
                 'createdAt' : time.time()
@@ -149,7 +149,8 @@ try:
                         listName = row[3:-6]
                         temp[modelColumns[2]] = ' '.join(listName)
                         temp['created_by'] = 'system'
-                        temp['created_at'] = time.time()
+                        # temp['created_at'] = time.time()
+                        temp['created_at'] = int(time.mktime(time.strptime(str(todayString + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
                         temp['import_id'] = str(importLogId)
 
                         if result == False:

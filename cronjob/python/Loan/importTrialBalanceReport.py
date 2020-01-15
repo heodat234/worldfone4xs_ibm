@@ -9,9 +9,9 @@ import sys
 import os
 import csv
 import json
+import traceback
 from pprint import pprint
-from datetime import datetime
-from datetime import date
+from datetime import datetime, timedelta, date
 from bson import ObjectId
 from dateutil import parser
 from helper.ftp import Ftp
@@ -45,12 +45,13 @@ try:
     insertData = []
     errorData = []
     today = date.today()
+    yesterday = today - timedelta(days=1)
     # today = datetime.strptime('20/11/2019', "%d/%m/%Y").date()
     day = today.day
     month = today.month
     year = today.year
-    # fileName = "LIST_OF_ACCOUNT_IN_COLLECTION_" + str(year) + str(month) + str(day)
-    fileName = "Trial_Balance_Report_Telling_Each_Account_Information_20191031.txt"
+    fileName = "Trial_Balance_Report_Telling_Each_Account_Information_" + yesterday.strftime("%Y%m%d") + '.txt'
+    # fileName = "Trial_Balance_Report_Telling_Each_Account_Information_20191031.txt"
     sep = ','
     logDbName = "LO_Input_result_" + str(year) + str(month)
 
@@ -67,6 +68,9 @@ try:
         importLogId = str(sys.argv[1])
         importLogInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': ObjectId(sys.argv[1])})
     except Exception as SysArgvError:
+        if not os.path.isfile(ftpLocalUrl):
+            pprint(ftpLocalUrl)
+            sys.exit()
         # ftp.connect(host=ftpConfig['host'], username=ftpConfig['username'], password=ftpConfig['password'])
         # ftp.downLoadFile(ftpLocalUrl, ftpInfo['filename'])
         # ftp.close()
@@ -113,10 +117,15 @@ try:
                 row = list(filter(None, rowRaw))
                 if len(row) > 1:
                     if isinstance(row[1], str) and len(row[1]) > 12 and row[1].isdigit():
+                        # pprint(row)
                         result = True
                         temp = {}
                         for keyCell, cell in enumerate(row):
                             try:
+                                # pprint(row)
+                                # pprint(keyCell)
+                                # pprint(modelColumns[keyCell])
+                                # pprint("---------------000------------------")
                                 temp[modelColumns[keyCell]] = common.convertDataType(data=cell, datatype=modelConverters1[keyCell], formatType=modelFormat1[keyCell])
                             except Exception as errorConvertType:
                                 temp['type'] = modelConverters1[keyCell]
@@ -142,5 +151,6 @@ try:
             mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertData)
         mongodb.update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': importLogId}, VALUE={'status': 1, 'complete_import': time.time()})
 except Exception as e:
-    log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')
-    pprint(str(e))
+    # log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')
+    # pprint(str(e))
+    pprint(traceback.format_exc())

@@ -8,6 +8,7 @@ import sys
 import os
 import json
 import csv
+import traceback
 from pprint import pprint
 from datetime import datetime
 from datetime import date
@@ -141,7 +142,7 @@ try:
                     if lnjc05Info is not None:
                         temp['type'] = 'ZACCF'
                         temp['overdue_amount'] = (lnjc05Info['overdue_amount_this_month']) if lnjc05Info['overdue_amount_this_month'] is not None else 0
-                        temp['advance_money'] = float(zaccf['B_ADV']) if zaccf['B_ADV'] is not None else 0
+                        temp['advance_money'] = float(zaccf['B_ADV']) if zaccf is not None and zaccf['B_ADV'] is not None else 0
                         temp['remain_amount'] = temp['overdue_amount'] - temp['amt'] - temp['advance_money']
                         
                     list_acc = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'List_of_account_in_collection'), WHERE={'account_number': temp['account_number']})
@@ -191,5 +192,6 @@ try:
         mongodb.update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': ObjectId(str(importLogId))}, VALUE={'status': 1, 'complete_import': time.time(), 'total': total, 'complete': complete})
 
 except Exception as e:
-    log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')
-    pprint(str(e))
+    # log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')
+    # pprint(str(e))
+    print(traceback.format_exc())

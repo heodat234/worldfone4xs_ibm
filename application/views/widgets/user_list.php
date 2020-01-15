@@ -2,7 +2,7 @@
     <a href="javascript:void(0)" class="btn btn-alt btn-sm btn-default" data-toggle="dropdown" data-bind="click: refreshList">
         <i class="gi gi-user"></i>
     </a>
-    <ul class="dropdown-menu dropdown-custom dropdown-options" style="min-width: 280px">
+    <ul class="dropdown-menu dropdown-custom dropdown-options" style="min-width: 280px; max-height: 80vh; overflow-y: scroll;">
         <li>
             <table class="text-right table table-striped" style="width: 100%; margin-bottom: 0">
                 <thead>
@@ -67,7 +67,7 @@
             <span class="gi gi-headset text-success"></span>
                 # break; 
             case 2: #
-            <span class="gi gi-earphone text-primary"></span>
+            <span class="gi gi-earphone text-info"></span>
                 # break; 
             case 4: #
                 <span class="gi gi-briefcase text-warning"></span>

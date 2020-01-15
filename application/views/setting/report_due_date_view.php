@@ -16,6 +16,7 @@ var Config = {
     	res.data.map(doc => {
     		doc.createdAt = new Date(doc.createdAt * 1000);
     		doc.due_date = new Date(doc.due_date * 1000);
+            doc.due_date_add_1 = new Date(doc.due_date_add_1 * 1000);
     	})
     	return res;
     },
@@ -25,10 +26,15 @@ var Config = {
             title: "@Due date@",
             format: "{0: dd/MM/yyyy}",
             editor: function(container, options) {
-                $('<input id="off-date" data-text-field="' + options.field + '" data-value-field="' + options.field + '" data-bind="value:' + options.field + '" data-format="' + options.format + '"/>')
+                $('<input id="off-date" data-text-field="' + options.field + '" data-value-field="' + options.field + '" data-bind="value:' + options.field + '" data-format="' + options.format + '" onkeydown="return false;"/>')
                     .appendTo(container)
                     .kendoDatePicker({});
             },
+        },{
+            field: "due_date_add_1",
+            title: "@Due date +1@",
+            format: "{0: dd/MM/yyyy}",
+            editor: (data) => readOnly,
         },{
             field: "debt_group",
             title: "@Debt group@",
@@ -52,7 +58,20 @@ var Config = {
                     .kendoDropDownList({
                         filter: "contains",
                         dataSource: dataSourceJsonData(['month', 'ofyear']),
-                        optionLabel: "@Choose@ @debt group@"
+                        optionLabel: "@Choose@ @month@"
+                    });
+            },
+        },{
+            field: "for_year",
+            title: "@For year@",
+            editor: function(container, options) {
+                console.log(options);
+                $('<input id="due-date" data-text-field="text" data-value-field="value" data-bind="value:' + options.field + '" data-format="' + options.format + '"/>')
+                    .appendTo(container)
+                    .kendoDropDownList({
+                        filter: "contains",
+                        dataSource: dataSourceJsonData(['year']),
+                        optionLabel: "@Choose@ @year@"
                     });
             },
         },{
@@ -76,7 +95,7 @@ var Config = {
 <!-- Table Styles Header -->
 <ul class="breadcrumb breadcrumb-top">
     <li>@Setting@</li>
-    <li>@Report@ @off system date@</li>
+    <li>@Due date@</li>
     <li class="pull-right none-breakcrumb" id="top-row">
     	<div class="btn-group btn-group-sm">
             <button class="btn btn-alt btn-default" onclick="addForm(this)">@Create@</button>

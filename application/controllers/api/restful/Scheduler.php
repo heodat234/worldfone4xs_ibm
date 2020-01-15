@@ -24,6 +24,37 @@ Class Scheduler extends WFF_Controller {
 		}
 	}
 
+	function LO_read()
+	{
+		try {
+			$data = [];
+			$due_dates = $this->mongo_db->get("LO_Report_due_date");
+			foreach ($due_dates as $doc) {
+				$row = [];
+				$row["title"] = $row["shift"] = "Due date (Group {$doc["debt_group"]})";
+				$row["start"] = $row["end"] = date("c", $doc["due_date"]);
+				$row["isAllDay"] = TRUE;
+				$data[] = $row;
+				$row = [];
+				$row["title"] = $row["shift"] = "Due date +1";
+				$row["start"] = $row["end"] = date("c", $doc["due_date_add_1"]);
+				$row["isAllDay"] = TRUE;
+				$data[] = $row;
+			}
+			$off_dates = $this->mongo_db->get("LO_Report_off_sys");
+			foreach ($off_dates as $doc) {
+				$row = [];
+				$row["title"] = $row["shift"] = "Off date";
+				$row["start"] = $row["end"] = date("c", $doc["off_date"]);
+				$row["isAllDay"] = TRUE;
+				$data[] = $row;
+			}
+			echo json_encode(["data"=>$data,"total"=>count($data)]);
+		} catch (Exception $e) {
+			echo json_encode(array("status" => 0, "message" => $e->getMessage()));
+		}
+	}
+
 	function detail($id)
 	{
 		try {

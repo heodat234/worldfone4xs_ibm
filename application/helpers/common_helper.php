@@ -6,9 +6,9 @@ defined('KENDOUI_PATH') OR define('KENDOUI_PATH', base_url('public/kendo/'));
 
 defined('STEL_PATH') OR define('STEL_PATH', base_url('public/stel/'));
 
-defined('RINGTONE_PATH') OR define('RINGTONE_PATH', 'public/ringtone/');
+defined('RINGTONE_PATH') OR define('RINGTONE_PATH', 'upload/ringtone/');
 
-defined('PICTURE_PATH') OR define('PICTURE_PATH', 'public/picture/');
+defined('PICTURE_PATH') OR define('PICTURE_PATH', 'upload/picture/');
 
 defined('UPLOAD_PATH') OR define('UPLOAD_PATH', 'upload/');
 
@@ -135,6 +135,14 @@ function set_sub_collection($collection = "") {
     $CI->load->library("session");
     $type = $CI->session->userdata("type");
     return $type ? "{$type}_{$collection}" : $collection;
+}
+
+function getCT($name = "", $delimeter = "_") {
+    $CI =& get_instance();
+    $CI->load->library("session");
+    $type = $CI->session->userdata("type");
+    if(!$name) return $type;
+    return $type ? "{$type}{$delimeter}{$name}" : $name;
 }
 
 function vn_to_str ($str, $slug_mode = false){

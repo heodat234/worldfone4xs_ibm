@@ -37,7 +37,7 @@
                                 logic: "and",
                                 filters: [
                                     {field: "active", operator: "eq", value: true},
-                                    {field: "to", operator: "eq", value: ENV.extension},
+                                    {field: "to", operator: "contains", value: ENV.extension},
                                     {field: "read.extension", operator: "neq", value: ENV.extension}
                                 ]
                             }
@@ -67,7 +67,9 @@
                         if(response.status) {
                             var link = $currentTarget.data("link");
                             if(link != "undefined") {
-                                window.open(link,'_blank','noopener');
+                                if(link[0] !== "/") {
+                                    eval(link);
+                                } else window.open(link,'_blank','noopener');
                             }
                             this.set("item.total", this.get("item.total") - 1);
                             this.set("item.data", this.get("item.data").filter(doc => doc.id != id));

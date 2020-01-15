@@ -152,4 +152,20 @@ Class Admin extends WFF_Controller {
 	{
 		$this->load->view('admin/websocket_view');
 	}
+
+	public function import()
+	{
+		$this->output->data["css"][] = STEL_PATH . "css/table.css";
+		$this->output->data["js"][] = STEL_PATH . "js/tools.js";
+		$this->load->view('admin/import_view');
+	}
+
+	public function current_call()
+	{
+		$types = ["ALL"];
+		$this->load->library("mongo_private");
+		$data["types"] = array_merge($types, $this->mongo_private->distinct("ConfigType", "type"));
+		$this->output->data["js"][] = KENDOUI_PATH . "js/kendo.timezones.min.js";
+		$this->load->view('admin/current_call_view', $data);
+	}
 }

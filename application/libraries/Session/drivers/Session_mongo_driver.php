@@ -124,7 +124,7 @@ class CI_Session_mongo_driver extends CI_Session_driver implements SessionHandle
     {
         // Initialize storage mechanism (connection)
         //prepare mongodb connection string
-        $dns = "mongodb://{$this->_mongo_config['location']}:{$this->_mongo_config['port']}/{$this->_mongo_config['db']}";
+        $dns = "mongodb://{$this->_mongo_config['location']}:{$this->_mongo_config['port']}/{$this->_mongo_config['db']}?authSource=admin";
 
         //perform connection.
         $authenticate = array();

@@ -133,7 +133,7 @@
                                 <img src="<?=PROUI_PATH?>img/placeholders/avatars/avatar.jpg" id="avatar-img" alt="avatar">
                             </a>
                         </div>
-                        <div class="sidebar-user-name"></div>
+                        <div class="sidebar-user-name" data-toggle="tooltip"></div>
                         <div class="sidebar-user-role" style="font-size: 12px"></div>
                         <div class="sidebar-user-links" id="sidebar-widget"></div>
                     </div>
@@ -151,23 +151,26 @@
         <!-- END Main Sidebar -->
 
         <script>
-            $("div.sidebar-user-name").text((ENV.agentname || '').toString());
-            $("div.sidebar-user-role").text((ENV.role_name || '').toString());
-            if(ENV.typename) {
-                ENV.brandTitle = ENV.typename;
-                $("a.sidebar-brand").addClass("text-center");
-            }
-            if(ENV.brandTitle) {
-                $brandTitle = $("a.sidebar-brand span.sidebar-nav-mini-hide");
-                $brandTitle.text(ENV.brandTitle);
-                document.title = ENV.brandTitle;
-                if(ENV.brandTitle.length > 7 && ENV.brandTitle.length < 14) $brandTitle.css("font-size", 23);
-                else if(ENV.brandTitle.length >= 14) $brandTitle.css("font-size", 13);
-            }
-            if(ENV.brandLogo) {
-                $("a.sidebar-brand img").attr("src", ENV.brandLogo);
-                $("link[rel='shortcut icon']").attr("href", ENV.brandLogo);
-            }
+            var sidebarInit = function() {
+                let agentName = (ENV.agentname || '');
+                $("div.sidebar-user-name").text(agentName).prop("title", agentName);
+                $("div.sidebar-user-role").text((ENV.role_name || ''));
+                if(ENV.typename) {
+                    ENV.brandTitle = ENV.typename;
+                    $("a.sidebar-brand").addClass("text-center");
+                }
+                if(ENV.brandTitle) {
+                    $brandTitle = $("a.sidebar-brand span.sidebar-nav-mini-hide");
+                    $brandTitle.text(ENV.brandTitle);
+                    document.title = ENV.brandTitle;
+                    if(ENV.brandTitle.length > 7 && ENV.brandTitle.length < 14) $brandTitle.css("font-size", 23);
+                    else if(ENV.brandTitle.length >= 14) $brandTitle.css("font-size", 13);
+                }
+                if(ENV.brandLogo) {
+                    $("a.sidebar-brand img").attr("src", ENV.brandLogo);
+                    $("link[rel='shortcut icon']").attr("href", ENV.brandLogo);
+                }
+            }();
         </script>
 
         <!-- Main Container -->

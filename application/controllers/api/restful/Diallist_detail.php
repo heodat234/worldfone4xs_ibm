@@ -16,22 +16,43 @@ Class Diallist_detail extends WFF_Controller {
 
 	function read()
 	{
-		$request = json_decode($this->input->get("q"), TRUE);
-		$response = $this->crud->read($this->collection, $request);
-		foreach ($response['data'] as $key => &$value) {
-			if(isset($value['PRODGRP_ID'])){
-				$temp = $this->mongo_db->where('code', $value['PRODGRP_ID'])->getOne('LO_Product');
-				if(!empty($temp)){
-					$value['PRODGRP_ID'] = $temp['name'];
-				}
+		try {
+			$request = json_decode($this->input->get("q"), TRUE);
+			$match = [];
+			if(isset($request["diallist_id"])) {
+				$match["diallist_id"] = new MongoDB\BSON\ObjectId($request["diallist_id"]);
 			}
+			$response = $this->crud->read($this->collection, $request, [], $match);
+
+			foreach ($response['data'] as $key => &$value) {
+				$last_dial_detail = $this->mongo_db->
+				where("account_number", $value['account_number'])->
+				where(array("createdAt" => array('$lte' => strtotime("today midnight"))))->
+				order_by(array('_id' => -1))->get('LO_Diallist_detail');
+				if(count($last_dial_detail) >0){
+					$last_dial_detail = $last_dial_detail[0];
+					$value['last_assign'] = isset($last_dial_detail["assign"]) ? $last_dial_detail['assign'] : '';
+					
+				}				
+
+				if(isset($value['PRODGRP_ID'])){
+					$temp = $this->mongo_db->where('code', $value['PRODGRP_ID'])->getOne('LO_Product');
+					if(!empty($temp)){
+						$value['PRODGRP_ID'] = $temp['name'];
+					}
+				}
+			
+			}
+			echo json_encode($response);
+		} catch (Exception $e) {
+			echo json_encode(array("status" => 0, "message" => $e->getMessage()));
 		}
-		echo json_encode($response);
 	}
 
 	function detail($id)
 	{
 		$response = $this->crud->where_id($id)->getOne($this->collection);
+		if(isset($response['action_code'])) unset($response['action_code']);
 		echo json_encode($response);
 	}
 
