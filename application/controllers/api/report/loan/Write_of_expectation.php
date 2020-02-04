@@ -8,7 +8,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Reader;
 Class Write_of_expectation extends WFF_Controller {
 
-    private $collection = "Write_of_report";
+    private $collection = "Write_of_expectation";
 
     function __construct()
     {
@@ -27,7 +27,7 @@ Class Write_of_expectation extends WFF_Controller {
             $request = json_decode($this->input->get("q"), TRUE);
             $request['sort'] = array(array("field" => "stt", "dir" => "asc"));
             $match = array('createdAt' => ['$gte' => $this->date]);
-            $response = $this->crud->read($this->collection, $request,[],$match);
+            $response = $this->crud->read($this->collection, $request);
             
             echo json_encode($response);
 

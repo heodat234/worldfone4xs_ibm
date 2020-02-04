@@ -77,7 +77,7 @@ try:
    for row in blook_acc:
       blockCard_arr = row['acc_blook_card']
 
-
+   i = 1
    # Account
    aggregate_acc = [
       {
@@ -110,7 +110,6 @@ try:
 
    accountInfo = mongodb.get(MONGO_COLLECTION=account_collection,WHERE={'account_number': {'$in' : account_number_arr, '$nin': blockCard_arr}})
    if accountInfo != None:
-      i = 1
       for acc_row in accountInfo:
          temp = {
             'index'           : i,
@@ -162,40 +161,62 @@ try:
               "detailSBV.license_no": {'$exists' : 'true'},
           }
       },{
-          "$group":
-          {
-              "_id": 'null',
-              "acc_arr": {'$push': '$account_number'},
-          }
+         "$project":
+         {
+            "cus_name": 1,
+            "detailSBV.contract_no": 1,
+            "group_id": 1
+         }
       }
+      # ,{
+      #     "$group":
+      #     {
+      #         "_id": 'null',
+      #         "acc_arr": {'$push': '$account_number'},
+      #     }
+      # }
    ]
    data_lnjc05 = mongodb.aggregate_pipeline(MONGO_COLLECTION=lnjc05_collection,aggregate_pipeline=aggregate_lnjc05)
    if data_lnjc05 != None:
       account_number_arr = []
       for row in data_lnjc05:
-         account_number_arr = row['acc_arr']
-
-   lnjc05Info = mongodb.get(MONGO_COLLECTION=lnjc05_collection,WHERE={'account_number': {'$in' : account_number_arr}})
-   if lnjc05Info != None:
-      for acc_row in lnjc05Info:
-         group = acc_row['group_id']
+         # account_number_arr = row['acc_arr']
+         for detail in row['detailSBV']:
+            acc = detail['contract_no']
          temp = {
             'index'           : i,
-            'account_number'  : acc_row['account_number'],
-            'name'            : acc_row['cus_name'],
+            'account_number'  : acc,
+            'name'            : row['cus_name'],
             'block'           : 'true',
             'accl'            : '',
-            'sibs'            : group,
+            'sibs'            : row['group_id'],
             'group'           : '',
             'createdBy'       : 'system',
             'createdAt'       : todayTimeStamp
          }
-
          insertData.append(temp)
          i += 1
 
+   # lnjc05Info = mongodb.get(MONGO_COLLECTION=lnjc05_collection,WHERE={'account_number': {'$in' : account_number_arr}})
+   # if lnjc05Info != None:
+   #    for acc_row in lnjc05Info:
+   #       group = acc_row['group_id']
+   #       temp = {
+   #          'index'           : i,
+   #          'account_number'  : acc_row['account_number'],
+   #          'name'            : acc_row['cus_name'],
+   #          'block'           : 'true',
+   #          'accl'            : '',
+   #          'sibs'            : group,
+   #          'group'           : '',
+   #          'createdBy'       : 'system',
+   #          'createdAt'       : todayTimeStamp
+   #       }
+
+   #       insertData.append(temp)
+   #       i += 1
+
    if len(insertData) > 0:
-      # mongodb.remove_document(MONGO_COLLECTION=collection)
       mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertData)
 
    now_end         = datetime.now()

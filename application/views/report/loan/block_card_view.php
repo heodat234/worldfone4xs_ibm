@@ -15,10 +15,10 @@
             <div class="form-group col-sm-4">
                <label class="control-label col-xs-4">@Date@</label>
                <div class="col-xs-8">
-                  <input id="start-date" data-role="datepicker" data-format="dd/MM/yyyy" name="fromDateTime" data-bind="value: fromDateTime" disabled="">
+                  <input id="start-date" data-role="datepicker" data-format="dd/MM/yyyy  H:mm:ss" name="fromDateTime" data-bind="value: fromDateTime" >
                </div>
             </div>
-            <!-- <div class="form-group col-sm-4">
+            <div class="form-group col-sm-4">
                <label class="control-label col-xs-4">@To date@</label>
                <div class="col-xs-8">
                   <input id="end-date" data-role="datepicker" data-format="dd/MM/yyyy H:mm:ss" name="toDateTime" data-bind="value: toDateTime, events: {change: endDate}">
@@ -26,7 +26,7 @@
             </div>
             <div class="form-group col-sm-4 text-center">
                 <button class="k-button" data-bind="click: search">@Search@</button>
-            </div> -->
+            </div>
         </div>
         <div class="row chart-page"  style="background-color: white">
 
@@ -235,9 +235,9 @@
                this.asyncSearch();
             },
              asyncSearch: async function() {
-               var field = "created_at";
-               var fromDateTime = new Date(this.fromDateTime.getTime() - timeZoneOffset).toISOString();
-                var toDateTime = new Date(this.toDateTime.getTime() - timeZoneOffset).toISOString();
+                var field = "createdAt";
+                var fromDateTime = this.fromDateTime.getTime() / 1000;
+                var toDateTime = this.toDateTime.getTime() / 1000;
 
                 var filter = {
                     logic: "and",
@@ -262,7 +262,8 @@
               url: Config.crudApi + 'loan/' + Config.collection+ "/exportExcel",
               type: 'POST',
               dataType: 'json',
-              timeout: 30000
+              timeout: 30000,
+              data: {startDate: $('#start-date').val(), endDate: $('#end-date').val()},
             })
             .done(function(response) {
               if (response.status == 1) {

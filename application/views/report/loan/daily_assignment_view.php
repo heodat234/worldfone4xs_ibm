@@ -105,6 +105,7 @@
 
                     var grid = this.grid = $("#grid").kendoGrid({
                       dataSource: dataSource,
+                      autoBind:false,
                       excel: {
                           fileName: "Daily assignment report.xlsx",
                           filterable: true,
@@ -724,9 +725,9 @@
               },
               asyncSearch: async function() {
                 var field = "createdAt";
-                var fromDateTime = new Date(this.fromDateTime.getTime()).toISOString();
-                var toDateTime = new Date(this.fromDateTime.getTime() + kendo.date.MS_PER_DAY -1).toISOString();
-
+                console.log(this.fromDateTime.getTime() / 1000)
+                var fromDateTime = this.fromDateTime.getTime() / 1000;
+                var toDateTime = fromDateTime + 86000;
                 var filter = {
                     logic: "and",
                     filters: [

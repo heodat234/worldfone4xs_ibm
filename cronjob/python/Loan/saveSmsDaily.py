@@ -57,22 +57,79 @@ try:
       sys.exit()
 
    # SIBS
-   count = mongodb.count(MONGO_COLLECTION=lnjc05_collection)
-   quotient = int(count)/10000
-   mod = int(count)%10000
-   if quotient != 0:
-      for x in range(int(quotient)):
-         result = mongodb.get(MONGO_COLLECTION=lnjc05_collection,
-          SELECT=['overdue_amount_this_month','advance_balance','installment_type','group_id','account_number','mobile_num','cus_name'],SORT=([('_id', -1)]),SKIP=int(x*10000), TAKE=int(10000))
-         for idx,row in enumerate(result):
-            if (float(row['overdue_amount_this_month']) - float(row['advance_balance']) > 40000) or (float(row['overdue_amount_this_month']) - float(row['advance_balance']) < 40000 and row['installment_type'] == 'n'):
-               data.append(row)
+   aggregate_acc = [
+      {
+           "$lookup":
+           {
+               "from": common.getSubUser(subUserType, 'ZACCF'),
+               "localField": "account_number",
+               "foreignField": "account_number",
+               "as": "detail"
+           }
+      },{
+          "$match":
+          {
+              "detail.PRODGRP_ID": {'$in': ['103','402','502','602','702','802','902']},
+          }
+      }
+   ]
+   data_acc = mongodb.aggregate_pipeline(MONGO_COLLECTION=lnjc05_collection,aggregate_pipeline=aggregate_acc)
+   if data_acc != None:
+      for key,row in enumerate(data_acc):
+         temp = {}
+         if 'account_number' in row.keys():
+            temp['type']            = 'sibs'
+            temp['stt']             = key
+            temp['account_number']  = row['account_number']
+            temp['group']           = row['group_id']
+            temp['phone']           = row['mobile_num']
+            temp['name']            = row['cus_name']
+            temp['amount']          = '{:,.0f}'.format(float(row['overdue_amount_this_month']) - float(row['advance_balance']))
+            temp['sending_date']    = now.strftime("%d/%m/%Y")
+            temp['createdAt']       = time.time()
+            insertData.append(temp)
 
-   if int(mod) > 0:
-      result = mongodb.get(MONGO_COLLECTION=lnjc05_collection,
-         SELECT=['overdue_amount_this_month','advance_balance','installment_type','group_id','account_number','mobile_num','cus_name'], SORT=([('_id', -1)]),SKIP=int(int(quotient)*10000), TAKE=int(mod))
-      for idx,row in enumerate(result):
-         if (float(row['overdue_amount_this_month']) - float(row['advance_balance']) > 40000) or (float(row['overdue_amount_this_month']) - float(row['advance_balance']) < 40000 and row['installment_type'] == 'n'):
+   aggregate_acc = [
+      {
+           "$lookup":
+           {
+               "from": common.getSubUser(subUserType, 'ZACCF'),
+               "localField": "account_number",
+               "foreignField": "account_number",
+               "as": "detail"
+           }
+      },{
+          "$match":
+          {
+              "detail.PRODGRP_ID": {'$in': ['103','402','502','602','702','802','902']},
+          }
+      },{
+          "$group":
+          {
+              "_id": 'null',
+              "acc_arr": {'$push': '$account_number'},
+          }
+      }
+   ]
+   data_acc_1 = mongodb.aggregate_pipeline(MONGO_COLLECTION=lnjc05_collection,aggregate_pipeline=aggregate_acc)
+   acc_arr = []
+   if data_acc_1 != None:
+      for row in data_acc_1:
+         acc_arr = row['acc_arr']
+
+
+   aggregate_acc_2 = [
+      {
+          "$match":
+          {
+              "account_number": {'$nin': acc_arr},
+          }
+      }
+   ]
+   data_acc_2 = mongodb.aggregate_pipeline(MONGO_COLLECTION=lnjc05_collection,aggregate_pipeline=aggregate_acc_2)
+   if data_acc_2 != None:
+      for row in data_acc_2:
+         if (float(row['overdue_amount_this_month']) - float(row['advance_balance']) > 40000) or (float(row['overdue_amount_this_month']) - float(row['advance_balance']) < 40000 and row['installment_type'] == 'n' and row['outstanding_principal'] > 0):
             data.append(row)
 
    for key,row in enumerate(data):
@@ -84,7 +141,7 @@ try:
          temp['group']           = row['group_id']
          temp['phone']           = row['mobile_num']
          temp['name']            = row['cus_name']
-         temp['amount']          = float(row['overdue_amount_this_month']) - float(row['advance_balance'])
+         temp['amount']          = '{:,.0f}'.format(float(row['overdue_amount_this_month']) - float(row['advance_balance']))
          temp['sending_date']    = now.strftime("%d/%m/%Y")
          temp['createdAt']       = time.time()
          insertData.append(temp)
@@ -109,13 +166,13 @@ try:
          temp['type']            = 'card'
          temp['stt']             = key
          temp['account_number']  = row['account_number']
-         sbv_store = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'SBV_Stored'), WHERE={'contract_no': str(row['account_number'])},SELECT=['overdue_indicator'])
+         sbv_store = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'SBV_Stored'), WHERE={'contract_no': str(row['account_number'])},SELECT=['overdue_indicator','kydue'])
          if sbv_store != None:
-            temp['group']                    = sbv_store['overdue_indicator']
+            temp['group']                    = sbv_store['overdue_indicator']+sbv_store['kydue']
          temp['phone']           = row['phone']
          temp['name']            = row['cus_name']
-         temp['os']              = row['overdue_amt']
-         temp['amount']          = row['cur_bal']
+         temp['os']              = '{:,.0f}'.format(float(row['overdue_amt']))
+         temp['amount']          = '{:,.0f}'.format(float(row['cur_bal']))
          temp['sending_date']    = now.strftime("%d/%m/%Y")
          temp['createdAt']       = time.time()
          insertData.append(temp)

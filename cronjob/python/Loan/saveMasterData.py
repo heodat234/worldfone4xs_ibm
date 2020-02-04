@@ -67,10 +67,6 @@ try:
    if holidayOfMonth != None:
       sys.exit()
 
-   # users = _mongodb.get(MONGO_COLLECTION=user_collection, SELECT=['extension','agentname'],SORT=([('_id', -1)]),SKIP=0, TAKE=200)
-   # money = float(1234123345.5)      #next you used format without printing, nor affecting value of "money"
-   # amountAsFormattedString = '{:,.2f}'.format(money)
-   # print( amountAsFormattedString )
 
    # SIBS
    aggregate_pipeline = [
@@ -111,7 +107,8 @@ try:
             row['MOBILE_NO']        = zaccf['MOBILE_NO']
             row['WRK_REF']          = zaccf['WRK_REF']+'; '+zaccf['WRK_REF1']+'; '+zaccf['WRK_REF2']+'; '+zaccf['WRK_REF3']+'; '+zaccf['WRK_REF4']+'; '+zaccf['WRK_REF5']
             row['W_ORG']            = '{:,.2f}'.format(float(zaccf['W_ORG']))
-            row['INT_RATE']         = zaccf['INT_RATE']
+            int_rate                = round(float(zaccf['INT_RATE']) * 100, 2) 
+            row['INT_RATE']         = str(int_rate) + '%'
             row['OVER_DY']          = zaccf['OVER_DY']
 
             product = mongodb.getOne(MONGO_COLLECTION=product_collection, WHERE={'code': str(zaccf['PRODGRP_ID'])},SELECT=['name'])
@@ -216,9 +213,10 @@ try:
    for row in cardData:
       if 'account_number' in row.keys():
          row['group_id'] = ''
-         sbv_store = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'SBV_Stored'), WHERE={'contract_no': str(row['account_number'])},SELECT=['overdue_indicator'])
+         sbv_store = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'SBV_Stored'), WHERE={'contract_no': str(row['account_number'])},SELECT=['overdue_indicator'],SORT=[("_id", -1)], SKIP=0, TAKE=1)
          if sbv_store != None:
-            row['group_id']                    = sbv_store['overdue_indicator']
+            for store in sbv_store:
+               row['group_id']                    = store['overdue_indicator']
 
          sbv = mongodb.getOne(MONGO_COLLECTION=sbv_collection, WHERE={'contract_no': str(row['account_number']), "created_at" : {'$gte' : todayTimeStamp,'$lte' : endTodayTimeStamp} },
             SELECT=['cif_birth_date','cus_no','open_card_date','card_type','license_no','approved_limit','address','ob_principal_sale','ob_principal_cash','interest_rate','overdue_days_no'])
@@ -236,7 +234,7 @@ try:
             row['APPROV_LMT']       = '{:,.2f}'.format(float(sbv['approved_limit']))
             row['current_add']      = sbv['address']
             row['W_ORG']            = '{:,.2f}'.format(float(sbv['ob_principal_sale']) + float(sbv['ob_principal_cash']))
-            row['INT_RATE']         = sbv['interest_rate']
+            row['INT_RATE']         = str(round(float(sbv['interest_rate']) * 100, 2)) + '%'  
             row['OVER_DY']          = sbv['overdue_days_no']
 
             if int(sbv['card_type']) < 100:

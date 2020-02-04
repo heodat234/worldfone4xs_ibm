@@ -103,7 +103,7 @@ var Table = function() {
                 resizable: true,
                 pageable: {
                     refresh: true,
-                    pageSizes: [5, 10, 20, 50, 100],
+                    pageSizes: [5, 10, 20, 50, 100, 1000],
                     input: true,
                     messages: KENDO.pageableMessages ? KENDO.pageableMessages : {}
                 },

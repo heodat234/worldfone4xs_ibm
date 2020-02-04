@@ -30,7 +30,11 @@ Class Block_card_report extends WFF_Controller {
             $request['sort'] = array(array("field" => "index", "dir" => "asc"));
             $date = date('d-m-Y');
             $match = array('createdAt' => array('$gte' => strtotime($date)));
-            $data = $this->crud->read($this->collection, $request,array(),$match);
+            if (isset($request['filter'])) {
+                $data = $this->crud->read($this->collection, $request);
+            }else{
+                $data = $this->crud->read($this->collection, $request,[],$match);
+            }
             echo json_encode($data);
         } catch (Exception $e) {
             echo json_encode(array("status" => 0, "message" => $e->getMessage()));
@@ -38,11 +42,10 @@ Class Block_card_report extends WFF_Controller {
     }
 
     function exportExcel() {
-        $now = getdate();
-        $date = date('d-m-Y');
-        // $month = (string)$now['mon'];
-        $request = json_decode($this->input->get("q"), TRUE);
-        $request = array('createdAt' => array('$gte' => strtotime($date)));
+        $request    = $this->input->post();
+        $start      =  strtotime(str_replace('/', '-', $request['startDate'])) ;
+        $end        = strtotime(str_replace('/', '-', $request['endDate'])) ;
+        $request = array('createdAt' => array('$gte' => $start, '$lte' => $end));
         $data = $this->crud->where($request)->order_by(array('index' => 'asc'))->get($this->collection,array('index','account_number','name','block','accl','sibs','group','createdAt'));
         // print_r($data);exit;
         $spreadsheet = new Spreadsheet();
@@ -158,7 +161,8 @@ Class Block_card_report extends WFF_Controller {
         foreach($data as $key => $value) {
                         
             $worksheet->setCellValue('A' . $start_row, $value['index']);
-            $worksheet->setCellValue('B' . $start_row, $value['account_number']);
+            $worksheet->setCellValueExplicit('B' . $start_row, $value['account_number'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            // $worksheet->setCellValue('B' . $start_row, $value['account_number']);
             $worksheet->setCellValue('C' . $start_row, $value['name']);
             $worksheet->setCellValue('D' . $start_row, 'No'); 
             $worksheet->setCellValue('E' . $start_row, ($value['block'] == 'true')? 'Yes' : 'No'); 

@@ -8,6 +8,7 @@ import time
 import sys
 import os
 import json
+import traceback
 from pprint import pprint
 from datetime import datetime
 from datetime import date, timedelta
@@ -31,14 +32,14 @@ ftp = Ftp()
 log = open(base_url + "cronjob/python/Loan/log/calDueDateValue.txt","a")
 now = datetime.now()
 subUserType = 'LO'
-collection = common.getSubUser(subUserType, 'Due_date_one_value')
+collection = common.getSubUser(subUserType, 'Due_date_next_date')
 try:
     insertData = []
     updateData = []
     listDebtGroup = []
     
     today = date.today()
-    # today = datetime.strptime('02/01/2020', "%d/%m/%Y").date()
+    today = datetime.strptime('14/01/2020', "%d/%m/%Y").date()
 
     day = today.day
     month = today.month
@@ -113,6 +114,9 @@ try:
                                 lastmonth = 12
                             else:
                                 lastmonth = month - 1 
+                        else:
+                            lastmonth = month
+
                         temp = {
                             'due_date'              : todayTimeStamp - 86400,
                             'due_date_one'          : todayTimeStamp,
@@ -203,12 +207,12 @@ try:
                         temp['created_by'] = 'system'
                         # pprint(temp)
                         # break
-                        mongodb.insert(MONGO_COLLECTION=common.getSubUser(subUserType, 'Due_date_next_date'), insert_data=temp)
+                        mongodb.insert(MONGO_COLLECTION=common.getSubUser(subUserType, 'Due_date_next_date_1'), insert_data=temp)
         
     
     dueDayOfMonth = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_due_date'), WHERE={'due_date_add_1': todayTimeStamp})
     if dueDayOfMonth != None:
-        groupInfo = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Group_product'), WHERE={'name': {"$regex": 'WO'},'debt_groups' : {'$exists': 'true'}})
+        groupInfo = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Group'), WHERE={'name': {"$regex": 'WO'},'debt_groups' : {'$exists': 'true'}})
         if groupInfo is not None:
             for groupCell in groupInfo:
                 temp = {
@@ -350,10 +354,10 @@ try:
                 else:
                     lastmonth = month - 1 
                 temp['for_month'] = str(lastmonth)
-                mongodb.insert(MONGO_COLLECTION=common.getSubUser(subUserType, 'Due_date_next_date'), insert_data=temp)
+                mongodb.insert(MONGO_COLLECTION=common.getSubUser(subUserType, 'Due_date_next_date_1'), insert_data=temp)
 
     pprint("DONE")
 except Exception as e:
     log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')
-    pprint(str(e))
+    print(traceback.format_exc())
         

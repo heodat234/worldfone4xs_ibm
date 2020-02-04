@@ -73,11 +73,11 @@ try:
    dataReport = []
    for row in data:
       temp = row
-      if 'os' in row.keys():
-         temp['os']      = '{:,.2f}'.format(float(row['os']))
+      # if 'os' in row.keys():
+      #    temp['os']      = '{:,.2f}'.format(float(row['os']))
 
-      if 'amount' in row.keys():
-         temp['amount']      = '{:,.2f}'.format(float(row['amount']))
+      # if 'amount' in row.keys():
+      #    temp['amount']      = '{:,.2f}'.format(float(row['amount']))
 
       dataReport.append(temp)
 

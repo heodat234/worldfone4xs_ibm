@@ -88,8 +88,7 @@ try:
                "overdue_amount_this_month": 1,
                'installment_type': 1,
                'advance_balance': 1,
-               'outstanding_principal': 1
-               
+               'outstanding_principal': 1,
            }
        }
    ]
@@ -111,7 +110,7 @@ try:
                             temp['No'] = count 
                             temp['Account_No'] = row['account_number']
                             temp['cus_name'] = row['cus_name']
-                            temp['Amount'] = row['overdue_amount_this_month']
+                            temp['Amount'] = '{:,.2f}'.format(float(row['overdue_amount_this_month']) - float(row['advance_balance']))
                             temp['Income'] = ''
                             temp['Expense'] = 'x'
                             temp['Group'] = row['group_id']
@@ -124,7 +123,7 @@ try:
                             temp['No'] = count 
                             temp['Account_No'] = row['account_number']
                             temp['cus_name'] = row['cus_name']
-                            temp['Amount'] = row['overdue_amount_this_month']
+                            temp['Amount'] = '{:,.2f}'.format(float(row['overdue_amount_this_month']) - float(row['advance_balance']))
                             temp['Income'] = ''
                             temp['Expense'] = 'x'
                             temp['Group'] = row['group_id']

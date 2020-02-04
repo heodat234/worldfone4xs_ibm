@@ -89,6 +89,7 @@
 </script>
 
 <script type="text/javascript">
+    kendo.culture("vi-VN");
     function girdBoolean(data) {
         return '<input type="checkbox"'+ ( data ? 'checked="checked"' : "" )+ 'class="chkbx" disabled />';
     }
@@ -138,7 +139,6 @@
                     break;
             }
         });
-        
         
         columns.unshift({
             selectable: true,

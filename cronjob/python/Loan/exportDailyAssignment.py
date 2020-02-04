@@ -26,7 +26,7 @@ _mongodb    = Mongodb(MONGODB="_worldfone4xs", WFF_ENV=wff_env)
 
 now         = datetime.now()
 subUserType = 'LO'
-collection         = common.getSubUser(subUserType, 'Daily_assignment_report')
+collection         = common.getSubUser(subUserType, 'Daily_assignment_report_112')
 log         = open(base_url + "cronjob/python/Loan/log/exportDailyAssignment_log.txt","a")
 log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': Start Import' + '\n')
 
@@ -39,7 +39,7 @@ try:
    errorData   = []
 
    today = date.today()
-   # today = datetime.strptime('13/01/2020', "%d/%m/%Y").date()
+   today = datetime.strptime('17/01/2020', "%d/%m/%Y").date()
 
    day = today.day
    month = today.month

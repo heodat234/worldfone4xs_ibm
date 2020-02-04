@@ -172,7 +172,7 @@
               Table.columns = columns;
               Table.init();
           });
-         var dateRange = 30;
+         var dateRange = 2;
          var nowDate = new Date();
          var date =  new Date(),
                timeZoneOffset = date.getTimezoneOffset() * kendo.date.MS_PER_MINUTE;
