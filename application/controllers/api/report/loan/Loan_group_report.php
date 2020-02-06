@@ -47,8 +47,8 @@ Class Loan_group_report extends WFF_Controller {
 
     function exportExcel()
     {
-        $startDay = date('Y-m-1');
-        $getDate = getdate();
+        $startDay = date('Y-m-1',strtotime("-1 days"));
+        $getDate = getdate(strtotime(date('Y-m-d',strtotime("-1 days"))));
         $month = $getDate['month'];
         $response = $this->crud->read($this->collection, array('take' => 1000,'skip' => 0),'', array('month' => $getDate['month'] ));
         if (isset($response['data'])) {

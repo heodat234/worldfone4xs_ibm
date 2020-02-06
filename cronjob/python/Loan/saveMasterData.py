@@ -48,7 +48,7 @@ try:
    errorData   = []
 
    today = date.today()
-   # today = datetime.strptime('02/01/2020', "%d/%m/%Y").date()
+   # today = datetime.strptime('14/01/2020', "%d/%m/%Y").date()
 
    day = today.day
    month = today.month
@@ -92,6 +92,9 @@ try:
    data = mongodb.aggregate_pipeline(MONGO_COLLECTION=lnjc05_collection,aggregate_pipeline=aggregate_pipeline)
    for row in data:
       if 'account_number' in row.keys():
+         row['APPROV_LMT']       = 0
+         row['RPY_PRD']       = 0
+         row['W_ORG']       = 0
          zaccf = mongodb.getOne(MONGO_COLLECTION=zaccf_collection, WHERE={'account_number': str(row['account_number']) },
             SELECT=['cif_birth_date','CUS_ID','FRELD8','PRODGRP_ID','LIC_NO','APPROV_LMT','TERM_ID','RPY_PRD','F_PDT','DT_MAT','MOBILE_NO','WRK_REF','WRK_REF1','WRK_REF2','WRK_REF3','WRK_REF4','WRK_REF5','W_ORG','INT_RATE','OVER_DY'])
          if zaccf != None:
@@ -99,14 +102,14 @@ try:
             row['CUS_ID']           = zaccf['CUS_ID']
             row['FRELD8']           = zaccf['FRELD8']
             row['LIC_NO']           = zaccf['LIC_NO']
-            row['APPROV_LMT']       = '{:,.2f}'.format(float(zaccf['APPROV_LMT']))
+            row['APPROV_LMT']       = float(zaccf['APPROV_LMT'])
             row['TERM_ID']          = zaccf['TERM_ID']
-            row['RPY_PRD']          = '{:,.2f}'.format(float(zaccf['RPY_PRD']))
+            row['RPY_PRD']          = float(zaccf['RPY_PRD'])
             row['F_PDT']            = str(zaccf['F_PDT'])
             row['DT_MAT']           = str(zaccf['DT_MAT'])
             row['MOBILE_NO']        = zaccf['MOBILE_NO']
             row['WRK_REF']          = zaccf['WRK_REF']+'; '+zaccf['WRK_REF1']+'; '+zaccf['WRK_REF2']+'; '+zaccf['WRK_REF3']+'; '+zaccf['WRK_REF4']+'; '+zaccf['WRK_REF5']
-            row['W_ORG']            = '{:,.2f}'.format(float(zaccf['W_ORG']))
+            row['W_ORG']            = float(zaccf['W_ORG'])
             int_rate                = round(float(zaccf['INT_RATE']) * 100, 2) 
             row['INT_RATE']         = str(int_rate) + '%'
             row['OVER_DY']          = zaccf['OVER_DY']
@@ -181,7 +184,7 @@ try:
                row['COMPANY']          += '-' + user['agentname']
                # print(row['COMPANY'])
          
-         row['current_balance'] = '{:,.2f}'.format(float(row['current_balance']))
+         row['current_balance'] = float(row['current_balance'])
          row.pop('_id')
          row.pop('officer_name')
          # row.pop('officer_id')
@@ -213,6 +216,9 @@ try:
    for row in cardData:
       if 'account_number' in row.keys():
          row['group_id'] = ''
+         row['APPROV_LMT']       = 0
+         row['RPY_PRD']       = 0
+         row['W_ORG']       = 0
          sbv_store = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'SBV_Stored'), WHERE={'contract_no': str(row['account_number'])},SELECT=['overdue_indicator'],SORT=[("_id", -1)], SKIP=0, TAKE=1)
          if sbv_store != None:
             for store in sbv_store:
@@ -231,9 +237,9 @@ try:
             row['CUS_ID']           = sbv['cus_no']
             row['FRELD8']           = sbv['open_card_date']
             row['LIC_NO']           = sbv['license_no']
-            row['APPROV_LMT']       = '{:,.2f}'.format(float(sbv['approved_limit']))
+            row['APPROV_LMT']       = float(sbv['approved_limit'])
             row['current_add']      = sbv['address']
-            row['W_ORG']            = '{:,.2f}'.format(float(sbv['ob_principal_sale']) + float(sbv['ob_principal_cash']))
+            row['W_ORG']            = float(sbv['ob_principal_sale']) + float(sbv['ob_principal_cash'])
             row['INT_RATE']         = str(round(float(sbv['interest_rate']) * 100, 2)) + '%'  
             row['OVER_DY']          = sbv['overdue_days_no']
 
@@ -323,7 +329,7 @@ try:
             row['group_id'] += '03'
 
          row['MOBILE_NO']      = row['phone']
-         row['current_balance'] = '{:,.2f}'.format(float(row['cur_bal']))
+         row['current_balance'] = float(row['cur_bal'])
          row.pop('_id')
          row.pop('overdue_date')
          row.pop('phone')

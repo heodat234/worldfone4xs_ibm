@@ -26,6 +26,7 @@ collection         = common.getSubUser(subUserType, 'Sms_daily_report')
 lnjc05_collection  = common.getSubUser(subUserType, 'LNJC05')
 group_collection     = common.getSubUser(subUserType, 'Group_card')
 account_collection   = common.getSubUser(subUserType, 'List_of_account_in_collection')
+config_collection         = common.getSubUser(subUserType, 'Dial_config')
 
 log         = open(base_url + "cronjob/python/Loan/log/SMSDaily_log.txt","a")
 log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': Start Import' + '\n')
@@ -56,6 +57,11 @@ try:
    if todayTimeStamp in listHoliday:
       sys.exit()
 
+
+
+   price = mongodb.getOne(MONGO_COLLECTION=config_collection, SELECT=['conditionDonotCall']) 
+
+
    # SIBS
    aggregate_acc = [
       {
@@ -84,7 +90,7 @@ try:
             temp['group']           = row['group_id']
             temp['phone']           = row['mobile_num']
             temp['name']            = row['cus_name']
-            temp['amount']          = '{:,.0f}'.format(float(row['overdue_amount_this_month']) - float(row['advance_balance']))
+            temp['amount']          = float(row['overdue_amount_this_month']) - float(row['advance_balance'])
             temp['sending_date']    = now.strftime("%d/%m/%Y")
             temp['createdAt']       = time.time()
             insertData.append(temp)
@@ -129,7 +135,7 @@ try:
    data_acc_2 = mongodb.aggregate_pipeline(MONGO_COLLECTION=lnjc05_collection,aggregate_pipeline=aggregate_acc_2)
    if data_acc_2 != None:
       for row in data_acc_2:
-         if (float(row['overdue_amount_this_month']) - float(row['advance_balance']) > 40000) or (float(row['overdue_amount_this_month']) - float(row['advance_balance']) < 40000 and row['installment_type'] == 'n' and row['outstanding_principal'] > 0):
+         if (float(row['overdue_amount_this_month']) - float(row['advance_balance']) > price['conditionDonotCall']) or (float(row['overdue_amount_this_month']) - float(row['advance_balance']) <= price['conditionDonotCall'] and row['installment_type'] == 'n' and row['outstanding_principal'] > 0):
             data.append(row)
 
    for key,row in enumerate(data):
@@ -141,10 +147,13 @@ try:
          temp['group']           = row['group_id']
          temp['phone']           = row['mobile_num']
          temp['name']            = row['cus_name']
-         temp['amount']          = '{:,.0f}'.format(float(row['overdue_amount_this_month']) - float(row['advance_balance']))
+         temp['amount']          = float(row['overdue_amount_this_month']) - float(row['advance_balance'])
          temp['sending_date']    = now.strftime("%d/%m/%Y")
          temp['createdAt']       = time.time()
          insertData.append(temp)
+
+
+
 
    # card
    count = mongodb.count(MONGO_COLLECTION=account_collection)
@@ -171,14 +180,16 @@ try:
             temp['group']                    = sbv_store['overdue_indicator']+sbv_store['kydue']
          temp['phone']           = row['phone']
          temp['name']            = row['cus_name']
-         temp['os']              = '{:,.0f}'.format(float(row['overdue_amt']))
-         temp['amount']          = '{:,.0f}'.format(float(row['cur_bal']))
+         temp['os']              = float(row['overdue_amt'])
+         temp['amount']          = float(row['cur_bal'])
          temp['sending_date']    = now.strftime("%d/%m/%Y")
          temp['createdAt']       = time.time()
          insertData.append(temp)
 
    if len(insertData) > 0:
       mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertData)
+
+
    now_end         = datetime.now()
    log.write(now_end.strftime("%d/%m/%Y, %H:%M:%S") + ': End Log' + '\n')
    print('DONE')

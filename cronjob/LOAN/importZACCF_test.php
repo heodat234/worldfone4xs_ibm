@@ -5,7 +5,7 @@ $queue = new Pheanstalk('127.0.0.1');
 
 //$inputFileName = "../../upload/ftp/telesales/ZACCF.csv";
 // $folder = date("Ymd"); //"20191120";
-$folder = '20200122'; //"20191120";
+$folder = '20200206'; //"20191120";
 $inputFileName = "/data/upload_file/{$folder}/ZACCF.txt";
 // echo $inputFileName;
 // exit();
@@ -109,7 +109,12 @@ while(!feof($file))
         $doc = [];
         if($header) {
             foreach ($header as $index => $field) {
+                if ($field == 'W_ORG') {
+                    $doc['W_ORG_1'] = isset($editedValue[$index]) ? (double)$editedValue[$index] : null;
+                }
                 $doc[$field] = isset($editedValue[$index]) ? $editedValue[$index] : null;
+                
+                
             }
         }
 

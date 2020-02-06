@@ -45,7 +45,7 @@ try:
    total = 0
    complete = 0
    today = date.today()
-   # today = datetime.strptime('20/11/2019', "%d/%m/%Y").date()
+   today = datetime.strptime('05/02/2020', "%d/%m/%Y").date()
    day = today.day
    month = today.month
    year = today.year
@@ -103,7 +103,7 @@ try:
                modelPosition[model['field']] = ''
                modelPosition1.append('')
    
-   pprint(modelColumns)
+   # pprint(modelColumns)
    filenameExtension = fileName.split('.')
 
    if len(filenameExtension) < 2:
@@ -113,7 +113,7 @@ try:
       if(filenameExtension[1] == 'csv'):
          inputDataRaw = excel.getDataCSV(file_path=importLogInfo['file_path'], dtype=object, sep=sep, header=0, skiprows=[1], names=modelColumns, na_values='')
       else:
-         inputDataRaw = excel.getDataExcel(file_path=importLogInfo['file_path'], active_sheet='Sheet2', skiprows=[1], header=0, names=modelColumns, na_values='')
+         inputDataRaw = excel.getDataExcel(file_path=importLogInfo['file_path'], active_sheet='Sheet1', skiprows=[1], header=0, names=modelColumns, na_values='')
          
       inputData = inputDataRaw.to_dict('records')
       
@@ -122,6 +122,8 @@ try:
          temp = {}
          result = True
          if row['so_hopdong'] not in ['', None]:
+               pprint(row)
+               break
                for cell in row:
                   try:
                      temp[cell] = common.convertDataType(data=row[cell], datatype=modelConverters[cell], formatType=modelFormat[cell])
@@ -130,6 +132,7 @@ try:
                      temp['type'] = modelConverters[cell]
                      temp['error_mesg'] = 'Sai kiểu dữ liệu nhập'
                      temp['result'] = 'error'
+                     # pprint(temp)
                      result = False
                temp['created_by'] = 'system'
                temp['created_at'] = time.time()
@@ -153,6 +156,7 @@ try:
                            try:
                               temp[modelColumns[keyCell]] = common.convertDataType(data=cell, datatype=modelConverters1[keyCell], formatType=modelFormat1[keyCell])
                            except Exception as errorConvertType:
+                              pprint(modelColumns[keyCell] + "_" + str(idx + 1))
                               temp['error_cell'] = modelColumns[keyCell] + "_" + str(idx + 1)
                               temp['type'] = modelConverters1[keyCell]
                               temp['error_mesg'] = 'Sai kiểu dữ liệu nhập'

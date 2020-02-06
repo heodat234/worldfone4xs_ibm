@@ -98,19 +98,19 @@ try:
    for row in data:
       if 'account_number' in row.keys():
         condition = row['overdue_amount_this_month'] - row['advance_balance']
-        if condition < price['conditionDonotCall']:
+        if condition <= price['conditionDonotCall']:
         
             zaccf = mongodb.getOne(MONGO_COLLECTION=zaccf_collection, WHERE={'account_number': str(row['account_number'])},
                 SELECT=['PRODGRP_ID'])    
             if zaccf != None:
-                if zaccf['PRODGRP_ID'] != "103" and zaccf['PRODGRP_ID'] != "502" and zaccf['PRODGRP_ID'] != "602" and zaccf['PRODGRP_ID'] != "702" and zaccf['PRODGRP_ID'] != "802":
+                if zaccf['PRODGRP_ID'] != "103" and zaccf['PRODGRP_ID'] != "402" and zaccf['PRODGRP_ID'] != "502" and zaccf['PRODGRP_ID'] != "602" and zaccf['PRODGRP_ID'] != "702" and zaccf['PRODGRP_ID'] != "802" and zaccf['PRODGRP_ID'] != "902":
                         count +=1
                         temp = {}
                         if row['installment_type'] =='n' and row['outstanding_principal'] == 0:
                             temp['No'] = count 
                             temp['Account_No'] = row['account_number']
                             temp['cus_name'] = row['cus_name']
-                            temp['Amount'] = '{:,.2f}'.format(float(row['overdue_amount_this_month']) - float(row['advance_balance']))
+                            temp['Amount'] = float(row['overdue_amount_this_month']) - float(row['advance_balance'])
                             temp['Income'] = ''
                             temp['Expense'] = 'x'
                             temp['Group'] = row['group_id']
@@ -123,7 +123,7 @@ try:
                             temp['No'] = count 
                             temp['Account_No'] = row['account_number']
                             temp['cus_name'] = row['cus_name']
-                            temp['Amount'] = '{:,.2f}'.format(float(row['overdue_amount_this_month']) - float(row['advance_balance']))
+                            temp['Amount'] = float(row['overdue_amount_this_month']) - float(row['advance_balance'])
                             temp['Income'] = ''
                             temp['Expense'] = 'x'
                             temp['Group'] = row['group_id']

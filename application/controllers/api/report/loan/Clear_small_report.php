@@ -169,7 +169,8 @@ Class Clear_small_report extends WFF_Controller {
             $worksheet->setCellValue('A' . $start_row, $index++);
             $worksheet->setCellValueExplicit('B' . $start_row, $value['Account_No'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
             $worksheet->setCellValue('C' . $start_row, $value['cus_name']);
-            $worksheet->setCellValue('D' . $start_row, $value['Amount']); 
+            $worksheet->setCellValueExplicit('D' . $start_row, $value['Amount'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
+            // $worksheet->setCellValue('D' . $start_row, number_format($value['Amount'])); 
             $worksheet->setCellValue('E' . $start_row, $value['Income']); 
 
             $worksheet->setCellValue('F' . $start_row, $value['Expense']);

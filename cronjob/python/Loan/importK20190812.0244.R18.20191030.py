@@ -8,6 +8,7 @@ import sys
 import os
 import json
 import csv
+import traceback
 from pprint import pprint
 from datetime import datetime
 from datetime import date
@@ -45,11 +46,11 @@ try:
     total = 0
     complete = 0
     today = date.today()
-    # today = datetime.strptime('20/11/2019', "%d/%m/%Y").date()
+    # today = datetime.strptime('05/02/2020', "%d/%m/%Y").date()
     day = today.day
     month = today.month
     year = today.year
-    fileName = "K20190812.0244.R18.xlsx"
+    fileName = "K20190812.0244.R18.xls"
     sep = ';'
     logDbName = "LO_Input_result_" + str(year) + str(month)
 
@@ -123,18 +124,18 @@ try:
 
     mongodb.remove_document(MONGO_COLLECTION=collection)
 
-    if filenameExtension[1] in ['csv', 'xlsx']:
-        if(filenameExtension[1] == 'csv'):
+    if filenameExtension[3] in ['csv', 'xls']:
+        if(filenameExtension[3] == 'csv'):
             inputDataRaw = excel.getDataCSV(file_path=importLogInfo['file_path'], dtype=object, sep=sep, header=None, names=modelColumns, na_values='')
         else:
-            inputDataRaw = excel.getDataExcel(file_path=importLogInfo['file_path'], header=None, names=modelColumns, na_values='')
+            inputDataRaw = excel.getDataExcel(file_path=importLogInfo['file_path'],active_sheet='LO TH', header=None, names=modelColumns, na_values='')
 
         inputData = inputDataRaw.to_dict('records')
         for idx, row in enumerate(inputData):
             total += 1
             temp = {}
             result = True
-            if row['account_number'] not in ['', None]:
+            if row['customer_number'] not in ['', None]:
                 for cell in row:
                     try:
                         temp[cell] = common.convertDataType(data=row[cell], datatype=modelConverters[cell], formatType=modelFormat[cell])
@@ -192,4 +193,4 @@ try:
 
 except Exception as e:
     log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')
-    pprint(str(e))
+    print(traceback.format_exc())

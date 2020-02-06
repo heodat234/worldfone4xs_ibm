@@ -5,8 +5,8 @@
         <li>SMS Daily SMS Report</li>
         <li class="pull-right none-breakcrumb" id="top-row">
             <div class="btn-group btn-group-sm">
-                <a role="button" class="btn btn-sm" onclick="saveAsExcel()"><i class="fa fa-file-excel-o"></i> <b>@Export@ SIBS</b></a>
-                <a role="button" class="btn btn-sm" onclick="Table_1.grid.saveAsExcel()"><i class="fa fa-file-excel-o"></i> <b>@Export@ Card</b></a>
+                <a role="button" class="btn btn-sm" onclick="saveAsExcel()"><i class="fa fa-file-excel-o"></i> <b>@Export@</b></a>
+                <!-- <a role="button" class="btn btn-sm" onclick="Table_1.grid.saveAsExcel()"><i class="fa fa-file-excel-o"></i> <b>@Export@ Card</b></a> -->
             </div>
         </li>
     </ul>

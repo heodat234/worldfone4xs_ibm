@@ -35,7 +35,7 @@ diallist_detail_collection  = common.getSubUser(subUserType, 'Diallist_detail')
 cdr_collection       = common.getSubUser(subUserType, 'worldfonepbxmanager')
 jsonData_collection  = common.getSubUser(subUserType, 'Jsondata')
 user_collection      = common.getSubUser(subUserType, 'User')
-wo_collection        = common.getSubUser(subUserType, 'WO_monthly')
+k2019_collection        = common.getSubUser(subUserType, 'K201908120244R18')
 log         = open(base_url + "cronjob/python/Loan/log/BlockCard_log.txt","a")
 log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': Start Import' + '\n')
 try:
@@ -157,8 +157,12 @@ try:
       },{
           "$match":
           {
-              "account_number" : {'$nin' : blockCard_arr},
               "detailSBV.license_no": {'$exists' : 'true'},
+          }
+      },{
+          "$match":
+          {
+              "detailSBV.contract_no" : {'$nin' : blockCard_arr},
           }
       },{
          "$project":
@@ -197,24 +201,73 @@ try:
          insertData.append(temp)
          i += 1
 
-   # lnjc05Info = mongodb.get(MONGO_COLLECTION=lnjc05_collection,WHERE={'account_number': {'$in' : account_number_arr}})
-   # if lnjc05Info != None:
-   #    for acc_row in lnjc05Info:
-   #       group = acc_row['group_id']
-   #       temp = {
-   #          'index'           : i,
-   #          'account_number'  : acc_row['account_number'],
-   #          'name'            : acc_row['cus_name'],
-   #          'block'           : 'true',
-   #          'accl'            : '',
-   #          'sibs'            : group,
-   #          'group'           : '',
-   #          'createdBy'       : 'system',
-   #          'createdAt'       : todayTimeStamp
-   #       }
 
-   #       insertData.append(temp)
-   #       i += 1
+
+
+
+
+
+   # k2019
+   aggregate_k2019 = [
+      {
+          "$match":
+          {
+              "nhom_cao_nhat_tai_tctd_khac": {'$gte' : 3},
+          }
+      },{
+           "$lookup":
+           {
+               "from": zaccf_collection,
+               "localField": "customer_number",
+               "foreignField": "CUS_ID",
+               "as": "detailZaccf"
+           }
+      },{
+           "$lookup":
+           {
+               "from": sbv_collection,
+               "localField": "detailZaccf.LIC_NO",
+               "foreignField": "license_no",
+               "as": "detailSBV"
+           }
+      },{
+          "$match":
+          {
+              "detailSBV.license_no": {'$exists' : 'true'},
+          }
+      },{
+          "$match":
+          {
+              "detailSBV.contract_no" : {'$nin' : blockCard_arr},
+          }
+      },{
+         "$project":
+         {
+            "name": 1,
+            "detailSBV.contract_no": 1,
+            "nhom_cao_nhat_tai_tctd_khac": 1
+         }
+      }
+   ]
+   data_k2019 = mongodb.aggregate_pipeline(MONGO_COLLECTION=k2019_collection,aggregate_pipeline=aggregate_k2019)
+   if data_k2019 != None:
+      account_number_arr = []
+      for row in data_k2019:
+         for detail in row['detailSBV']:
+            acc = detail['contract_no']
+         temp = {
+            'index'           : i,
+            'account_number'  : acc,
+            'name'            : row['name'],
+            'block'           : 'true',
+            'accl'            : '',
+            'sibs'            : '',
+            'group'           : row['nhom_cao_nhat_tai_tctd_khac'],
+            'createdBy'       : 'system',
+            'createdAt'       : todayTimeStamp
+         }
+         insertData.append(temp)
+         i += 1
 
    if len(insertData) > 0:
       mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertData)

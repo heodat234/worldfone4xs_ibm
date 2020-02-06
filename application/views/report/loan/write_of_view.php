@@ -79,6 +79,10 @@
                           parse: function (response) {
                               response.data.map(function(doc) {
                                   doc.Due_date = doc.Due_date ? new Date(doc.Due_date * 1000) : undefined;
+                                  doc.Release_amount = parseInt(doc.Release_amount)
+                                  doc.Off_balance = parseInt(doc.Off_balance)
+                                  doc.Current_balance = parseInt(doc.Current_balance)
+                                  doc.Interest_rate = parseFloat('0'+doc.Interest_rate)
                                   return doc;
                               })
                               return response;
@@ -93,7 +97,19 @@
                           filterable: true,
                           allPages: true,
                       },
-                     
+                      excelExport: function(e) {
+                        var sheet = e.workbook.sheets[0];
+                        for (var rowIndex = 1; rowIndex < sheet.rows.length; rowIndex++) {
+                          var row = sheet.rows[rowIndex];
+                          for (var cellIndex = 0; cellIndex < row.cells.length; cellIndex ++) {
+                            //whatever you want to do with cells
+                          }
+                          row.cells[5].format = "#,##0";
+                          row.cells[6].format = "0%";
+                          row.cells[8].format = "#,##0";
+                          row.cells[29].format = "#,##0";
+                        }
+                      },
                       resizable: true,
                       pageable: {
                           refresh: true,
@@ -251,7 +267,7 @@
                               width: 130
                           },
                           {
-                              field:"Outstanding_balance",
+                              field:"Current_balance",
                               title:"Outstanding balance",
                               width: 130
                           },

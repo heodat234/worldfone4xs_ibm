@@ -39,14 +39,15 @@ try:
     zaccfData = []
     today = date.today()
     # today = datetime.strptime('05/01/2020', "%d/%m/%Y").date()
+    yesterday = today - timedelta(days=1)
 
-    day = today.day
-    month = today.month
-    year = today.year
-    weekday = today.weekday()
+    day = yesterday.day
+    month = yesterday.month
+    year = yesterday.year
+    weekday = yesterday.weekday()
     lastDayOfMonth = calendar.monthrange(year, month)[1]
 
-    first_day = today.replace(day=1)
+    first_day = yesterday.replace(day=1)
 
     weekdayMonth = first_day.weekday()
     if weekdayMonth == 6:
@@ -70,9 +71,8 @@ try:
     # if todayTimeStamp in listHoliday:
     #     sys.exit()
 
-    todayString = today.strftime("%d/%m/%Y")
-    starttime = int(time.mktime(time.strptime(str(todayString + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
-    endtime = int(time.mktime(time.strptime(str(todayString + " 23:59:59"), "%d/%m/%Y %H:%M:%S")))
+    yesterdayString = yesterday.strftime("%d/%m/%Y")
+    
 
     mainProduct = {}
     mainProductRaw = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Product'))
@@ -80,22 +80,22 @@ try:
         mainProduct[prod['code']] = prod['name']
 
     
-    month = today.strftime("%B")
-    weekday = today.strftime("%A")
+    month = yesterday.strftime("%B")
+    weekday = yesterday.strftime("%A")
 
     # ZACCF
     aggregate_zaccf = [
         {
             "$match":
             {
-                "W_ORG": {'$ne': '0'},
+                "W_ORG_1": {'$gt': 0},
             }
         },{
             "$group":
             {
                 "_id": '$ODIND_FG',
-                "total_org": {'$sum': '$W_ORG'},
-                'W_ORG_arr': {'$push': '$W_ORG'},
+                "total_org": {'$sum': '$W_ORG_1'},
+                'W_ORG_arr': {'$push': '$W_ORG_1'},
                 "count_data": {'$sum': 1},
             }
         }
@@ -114,11 +114,11 @@ try:
         for zaccf in zaccfInfo:
             if zaccf['_id'] != None:
                 temp = zaccf
-                temp['total_org'] = 0
-                for orgInfo in zaccf['W_ORG_arr']:
-                    org = float(orgInfo)
-                    temp['total_org'] += org
-                # print(zaccf['total_org'])
+                # temp['total_org'] = 0
+                # for orgInfo in zaccf['W_ORG_arr']:
+                #     org = float(orgInfo)
+                #     temp['total_org'] += org
+                # # print(zaccf['total_org'])
                 zaccfData.append(temp)
 
         for zaccf in zaccfData:
@@ -155,7 +155,7 @@ try:
             temp['year'] = str(year)
             temp['month'] = month
             temp['weekday'] = weekday
-            temp['day'] = todayString
+            temp['day'] = yesterdayString
             temp['weekOfMonth'] = weekOfMonth
             temp['type'] = 'sibs'
             temp['createdBy'] = 'system'
@@ -166,7 +166,7 @@ try:
         'year'          : str(year),
         'month'         : month,
         'weekday'       : weekday,
-        'day'           : todayString,
+        'day'           : yesterdayString,
         'weekOfMonth'   : weekOfMonth,
         'type'          : 'sibs',
         'createdBy'     : 'system',
@@ -176,7 +176,7 @@ try:
         'year'          : str(year),
         'month'         : month,
         'weekday'       : weekday,
-        'day'           : todayString,
+        'day'           : yesterdayString,
         'weekOfMonth'   : weekOfMonth,
         'type'          : 'sibs',
         'createdBy'     : 'system',
@@ -186,7 +186,7 @@ try:
         'year'          : str(year),
         'month'         : month,
         'weekday'       : weekday,
-        'day'           : todayString,
+        'day'           : yesterdayString,
         'weekOfMonth'   : weekOfMonth,
         'type'          : 'sibs',
         'createdBy'     : 'system',
@@ -237,10 +237,7 @@ try:
         }
     ]
     dataSBV = list(mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'SBV'),aggregate_pipeline=aggregate_sbv_1))
-       
-
-    # for sbv in dataSBV:
-    #     print(sbv)         
+             
     sum_org = 0
     sum_acc = 0
     sum_org_g2 = 0
@@ -282,7 +279,7 @@ try:
             temp['year'] = str(year)
             temp['month'] = month
             temp['weekday'] = weekday
-            temp['day'] = todayString
+            temp['day'] = yesterdayString
             temp['weekOfMonth'] = weekOfMonth
             temp['type'] = 'card'
             temp['createdBy'] = 'system'
@@ -294,7 +291,7 @@ try:
             'year'          : str(year),
             'month'         : month,
             'weekday'       : weekday,
-            'day'           : todayString,
+            'day'           : yesterdayString,
             'weekOfMonth'   : weekOfMonth,
             'type'          : 'card',
             'createdBy'     : 'system',
@@ -304,7 +301,7 @@ try:
             'year'          : str(year),
             'month'         : month,
             'weekday'       : weekday,
-            'day'           : todayString,
+            'day'           : yesterdayString,
             'weekOfMonth'   : weekOfMonth,
             'type'          : 'card',
             'createdBy'     : 'system',
@@ -314,7 +311,7 @@ try:
             'year'          : str(year),
             'month'         : month,
             'weekday'       : weekday,
-            'day'           : todayString,
+            'day'           : yesterdayString,
             'weekOfMonth'   : weekOfMonth,
             'type'          : 'card',
             'createdBy'     : 'system',

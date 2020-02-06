@@ -104,3 +104,27 @@ else
    echo "Worldfone ScanJob service is running"
    exit 0
 fi
+
+if [ $(ps -ef | grep -v grep | grep importThuHoiXe.py | wc -l) -lt 1 ]; then
+   /usr/local/bin/python3.6 ${BASEDIR}/importThuHoiXe.py > /dev/null 2>&1 &
+   echo "RUN ${BASEDIR}/importThuHoiXe.py"
+else
+   echo "Worldfone ScanJob service is running"
+   exit 0
+fi
+
+if [ $(ps -ef | grep -v grep | grep importLawsuit.py | wc -l) -lt 1 ]; then
+   /usr/local/bin/python3.6 ${BASEDIR}/importLawsuit.py > /dev/null 2>&1 &
+   echo "RUN ${BASEDIR}/importLawsuit.py"
+else
+   echo "Worldfone ScanJob service is running"
+   exit 0
+fi
+
+if [ $(ps -ef | grep -v grep | grep importK20190812.0244.R18.20191030.py | wc -l) -lt 1 ]; then
+   /usr/local/bin/python3.6 ${BASEDIR}/importK20190812.0244.R18.20191030.py > /dev/null 2>&1 &
+   echo "RUN ${BASEDIR}/importK20190812.0244.R18.20191030.py"
+else
+   echo "Worldfone ScanJob service is running"
+   exit 0
+fi
