@@ -27,15 +27,10 @@ Class Block_card_report extends WFF_Controller {
     function read() {
         try {
             $request = json_decode($this->input->get("q"), TRUE);
-            $request['sort'] = array(array("field" => "index", "dir" => "asc"));
-            $date = date('d-m-Y');
-            $match = array('createdAt' => array('$gte' => strtotime($date)));
-            if (isset($request['filter'])) {
-                $data = $this->crud->read($this->collection, $request);
-            }else{
-                $data = $this->crud->read($this->collection, $request,[],$match);
-            }
-            echo json_encode($data);
+            $request['sort'] = array(array("field" => "report_date", "dir" => "asc"));
+            $response = $this->crud->read($this->collection, $request);
+            echo json_encode($response);
+
         } catch (Exception $e) {
             echo json_encode(array("status" => 0, "message" => $e->getMessage()));
         }
@@ -45,8 +40,8 @@ Class Block_card_report extends WFF_Controller {
         $request    = $this->input->post();
         $start      =  strtotime(str_replace('/', '-', $request['startDate'])) ;
         $end        = strtotime(str_replace('/', '-', $request['endDate'])) ;
-        $request = array('createdAt' => array('$gte' => $start, '$lte' => $end));
-        $data = $this->crud->where($request)->order_by(array('index' => 'asc'))->get($this->collection,array('index','account_number','name','block','accl','sibs','group','createdAt'));
+        $request = array('report_date' => array('$gte' => $start, '$lte' => $end));
+        $data = $this->crud->where($request)->order_by(array('index' => 'asc'))->get($this->collection,array('index','account_number','name','block','acll','sibs','group','report_date'));
         // print_r($data);exit;
         $spreadsheet = new Spreadsheet();
     	$spreadsheet->getProperties()
@@ -158,21 +153,23 @@ Class Block_card_report extends WFF_Controller {
 
         $start_row = 3;
 
+        $i = 1;
         foreach($data as $key => $value) {
                         
-            $worksheet->setCellValue('A' . $start_row, $value['index']);
+            $worksheet->setCellValue('A' . $start_row, $i);
             $worksheet->setCellValueExplicit('B' . $start_row, $value['account_number'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
             // $worksheet->setCellValue('B' . $start_row, $value['account_number']);
             $worksheet->setCellValue('C' . $start_row, $value['name']);
             $worksheet->setCellValue('D' . $start_row, 'No'); 
-            $worksheet->setCellValue('E' . $start_row, ($value['block'] == 'true')? 'Yes' : 'No'); 
+            $worksheet->setCellValue('E' . $start_row, 'Yes'); 
 
-            $worksheet->setCellValue('F' . $start_row, $value['accl']);
+            $worksheet->setCellValue('F' . $start_row, $value['acll']);
             $worksheet->setCellValue('G' . $start_row, $value['sibs']);
-            $worksheet->setCellValue('H' . $start_row, $value['group']);
-            $worksheet->setCellValue('I' . $start_row, date('d/m/Y',$value['createdAt']) );
+            $worksheet->setCellValue('H' . $start_row, $value['group_3_over_other_bank']);
+            $worksheet->setCellValue('I' . $start_row, date('d/m/Y',$value['report_date']) );
             
             $start_row += 1;
+            $i ++;
 
         }
 

@@ -8,7 +8,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Reader;
 Class Thu_hoi_xe_api_report extends WFF_Controller {
 
-    private $collection = "Thu_hoi_xe_report";
+    private $collection = "Thu_hoi_xe";
     private $model_collection = "Model";
 
     function __construct()
@@ -40,10 +40,10 @@ Class Thu_hoi_xe_api_report extends WFF_Controller {
 
         $match = array(
                  '$and' => array(
-                    array('createdAt'=> array( '$gte'=> $start, '$lte'=> $end))
+                    array('ngay_thu_hoi'=> array( '$gte'=> date('Y-m-d',$start), '$lte'=> date('Y-m-d',$end)))
                  )               
              );
-        $data = $this->crud->where($match)->order_by(array('No' => 'asc'))->get($this->collection);
+        $data = $this->crud->where($match)->order_by(array('ngay_thu_hoi' => 'asc'))->get($this->collection);
 
         $request = array (
           'take' => 50,
@@ -53,13 +53,12 @@ Class Thu_hoi_xe_api_report extends WFF_Controller {
         $match = array( "collection" => $this->collection, 'sub_type' => array('$exists' => 'true') );
         $this->crud->select_db($this->config->item("_mongo_db"));
         $response = $this->crud->read("Model", $request, ["index","field", "title", "type"], $match);
-        // print_r($data); exit;
         $response = $response['data'];
         foreach ($response as $key => $value) {
             $model[$value['field']] = $value;
         }
 
-        // print_r($data);exit;
+        // print_r($model);exit;
         $spreadsheet = new Spreadsheet();
         $spreadsheet->getProperties()
         ->setCreator("South Telecom")
@@ -87,7 +86,7 @@ Class Thu_hoi_xe_api_report extends WFF_Controller {
         $worksheet->getParent()->getDefaultStyle()->applyFromArray($style);
         $worksheet->getDefaultColumnDimension()->setWidth(30);
 
-        $worksheet->mergeCells('A1:AC1');
+        $worksheet->mergeCells('A1:AA1');
         $worksheet->setCellValue('A1', "DANH SÁCH XE THU HỒI ( 引き揚げバイクの管理簿 )");
         $worksheet->getStyle("A1")->getFill()
             ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID);
@@ -109,35 +108,38 @@ Class Thu_hoi_xe_api_report extends WFF_Controller {
         
         $worksheet->setCellValue('H2', "Tình trạng ( 状況 )");
 
-        $worksheet->setCellValue('I2', 'Giá bán ( 転売金額 )');
-        $worksheet->setCellValue('J2', "Người thu hồi");
+        // $worksheet->setCellValue('I2', 'Giá bán ( 転売金額 )');
+        $worksheet->setCellValue('I2', "Người thu hồi");
+        $worksheet->setCellValue('J2', "Ngày bán tài sản");
         $worksheet->setCellValue('K2', "Group");
-        $worksheet->setCellValue('L2', "Ngày gửi thư thông báo hoàn tất thu hồi tài sản (nếu có)");
-        $worksheet->setCellValue('M2', "Ngày gửi thư thông báo định giá tài sản (nếu có)");
+        // $worksheet->setCellValue('L2', "Ngày gửi thư thông báo hoàn tất thu hồi tài sản (nếu có)");
+        // $worksheet->setCellValue('M2', "Ngày gửi thư thông báo định giá tài sản (nếu có)");
     
-        $worksheet->setCellValue('N2', 'Tình trạng Sold/Paid off/Not sale/returned');
-        $worksheet->setCellValue('O2', "Ngày gửi thư thông báo hoàn tất xử lý & bán lại tài sản thu hồ");
-        $worksheet->setCellValue('P2', " Hình thức xử lý tài sản ");
-        $worksheet->setCellValue('Q2', "Ngày gửi thư thông báo xử lý tài sản thông qua đấu giá");
-        $worksheet->setCellValue('R2', "Ngày đấu giá");
+        // $worksheet->setCellValue('N2', 'Tình trạng Sold/Paid off/Not sale/returned');
+        // $worksheet->setCellValue('O2', "Ngày gửi thư thông báo hoàn tất xử lý & bán lại tài sản thu hồ");
+        $worksheet->setCellValue('L2', " Hình thức xử lý tài sản ");
+        $worksheet->setCellValue('M2', "Ngày gửi thư thông báo xử lý tài sản thông qua đấu giá");
+        $worksheet->setCellValue('N2', "Ngày đấu giá");
+        $worksheet->setCellValue('O2', "Giá bán 転売金額");
               
-        $worksheet->setCellValue('S2', 'Chi phí thẩm định giá');
-        $worksheet->setCellValue('T2', "Chi phí đấu giá");
-        $worksheet->setCellValue('U2', "Chi phí khác (gửi xe,…)");
-        $worksheet->setCellValue('V2', "Tổng số tiền còn lại chuyển về TK Khách hàng");
-        $worksheet->setCellValue('W2', "Ngày tiền về TK khách hàng đợt 1");
-        $worksheet->setCellValue('X2', "Ngày trừ tiền để thanh toán quá hạn sau khi xử lý tài sản");
+        $worksheet->setCellValue('P2', 'Chi phí thẩm định giá');
+        $worksheet->setCellValue('Q2', "Chi phí đấu giá");
+        $worksheet->setCellValue('R2', "Chi phí khác (gửi xe,…)");
+        $worksheet->setCellValue('S2', "Tổng số tiền còn lại chuyển về TK Khách hàng");
+        $worksheet->setCellValue('T2', "Ngày tiền về TK khách hàng đợt 1");
+        $worksheet->setCellValue('U2', "Ngày trừ tiền để thanh toán quá hạn sau khi xử lý tài sản");
     
-        $worksheet->setCellValue('Y2', 'Ngày tiền về TK khách hàng đợt cuối (nếu có)');
-        $worksheet->setCellValue('Z2', "Ngày trừ tiền để giảm dư nợ gốc sau khi xử lý tài sản");
-        $worksheet->setCellValue('AA2', "Ngày Yêu cầu IT xóa các bills và giữ lại 1 kỳ bill cuối");
+        $worksheet->setCellValue('V2', 'Ngày tiền về TK khách hàng đợt cuối (nếu có)');
+        $worksheet->setCellValue('W2', "Ngày trừ tiền để giảm dư nợ gốc sau khi xử lý tài sản");
+        $worksheet->setCellValue('X2', "Ngày Yêu cầu IT xóa các bills và giữ lại 1 kỳ bill cuối");
 
-        $worksheet->setCellValue('AB2', 'Số tiền kỳ bill cuối cùng');
+        $worksheet->setCellValue('Y2', 'Số tiền kỳ bill cuối cùng');
 
        
-        $worksheet->setCellValue('AC2', 'Ngày đến hạn của kỳ bills cuối cùng');
+        $worksheet->setCellValue('Z2', 'Ngày đến hạn của kỳ bills cuối cùng');
+        $worksheet->setCellValue('AA2', 'Curent status');
 
-        foreach(range('A','AC') as $columnID) {
+        foreach(range('A','AA') as $columnID) {
             $worksheet->getColumnDimension($columnID)->setAutoSize(true);
         }
         $headerStyle = array(
@@ -164,13 +166,13 @@ Class Thu_hoi_xe_api_report extends WFF_Controller {
         $maxCol = $col;
         if($data) {
             $row = 3;
-            $i = 0;
+            $i = 1;
             foreach ($data as $doc) {
                 // $worksheet->setCellValue('A' . $row, $i+1);
                 foreach ($doc as $field => $value) {
                     if(isset($fieldToCol[ $field ], $model[$field])) {
                         $col = $fieldToCol[ $field ];
-                        if($model[$field]['field']=='ngay_thu'){
+                        if($model[$field]['field']=='ngay_thu_hoi'){
                             if ($value != '') {
                                 $value = date("d/m/Y",strtotime($value));
                             }
@@ -197,6 +199,9 @@ Class Thu_hoi_xe_api_report extends WFF_Controller {
                             default:
                                 break;
                         }
+                        if ($field == 'no') {
+                           $worksheet->setCellValue('A' . $row, $i);
+                        }
                     }
                     
                 }
@@ -207,8 +212,8 @@ Class Thu_hoi_xe_api_report extends WFF_Controller {
         }
         
         $maxCell = $worksheet->getHighestRowAndColumn();
-        $worksheet->getStyle("A1:AC".$maxCell['row'])->applyFromArray($headerStyle);
-        $worksheet->getStyle("A1:AC".$maxCell['row'])->getBorders()
+        $worksheet->getStyle("A1:AA".$maxCell['row'])->applyFromArray($headerStyle);
+        $worksheet->getStyle("A1:AA".$maxCell['row'])->getBorders()
         ->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
         $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
         $file_path = UPLOAD_PATH . "loan/export/" . 'ThuHoiXeReport.xlsx';
@@ -216,112 +221,5 @@ Class Thu_hoi_xe_api_report extends WFF_Controller {
         echo json_encode(array("status" => 1, "data" => $file_path));
     }
 
-    // function saveAsExcel()
-    // {
-    //     try {
-    //         $request    = $this->input->post();
-    //         $start      = strtotime($request['startDate']);
-    //         $end        = strtotime(str_replace('/', '-', $request['endDate'])) ;
-                      
-    //         $match = array(
-    //                  '$and' => array(
-    //                     array('created_at'=> array( '$gte'=> $start, '$lte'=> $end))
-    //                  )               
-    //              );
-    //         $response = $this->crud->read($this->collection, array(),'');
-    //         $data = $response['data'];
-    //         $request = array (
-    //           'take' => 50,
-    //           'skip' => 0,
-    //           "sort" => array(array("field" => "index", "dir" => "asc"))
-    //         );
-    //         $match = array( "collection" => $this->collection, 'sub_type' => array('$exists' => 'true') );
-    //         $this->crud->select_db($this->config->item("_mongo_db"));
-    //         $response = $this->crud->read("Model", $request, ["index","field", "title", "type"], $match);
-    //         $response = $response['data'];
-    //         foreach ($response as $key => $value) {
-    //             $model[$value['field']] = $value;
-    //         }
-    //         // $this->excel->write($data,$model);
-
-    //         $filename = "Lawsuit.xlsx";
-    //         $file_template = "templateLawsuit.xlsx";
-
-    //         //  Tiến hành đọc file excel
-    //         $inputFileType = \PhpOffice\PhpSpreadsheet\IOFactory::identify(UPLOAD_PATH . "loan/template/" . $file_template);
-    //         /**  Create a new Reader of the type that has been identified  **/
-    //         $reader = \PhpOffice\PhpSpreadsheet\IOFactory::createReader($inputFileType);
-
-    //         // loads the whole workbook into a PHP object
-    //         $excelWorkbook = $reader->load(UPLOAD_PATH . "loan/template/" . $file_template);
-
-    //         // makes the sheet 'data' available as an object
-    //         $worksheet = $excelWorkbook->setActiveSheetIndex(0);
-
-    //         $fieldToCol = array();
-    //         // Title row
-    //         $col = "B";
-    //         $row = 1;
-    //         if($model) {
-    //             foreach ($model as $field => $prop) {
-    //                 $fieldToCol[ $field ] = $col;
-    //                 $col++;
-    //             }
-    //         } 
-    //         --$col;
-    //         $maxCol = $col;
-    //         if($data) {
-    //             $row = 3;
-    //             $i = 0;
-    //             foreach ($data as $doc) {
-    //                 $worksheet->setCellValue('A' . $row, $i+1);
-    //                 foreach ($doc as $field => $value) {
-    //                     if(isset($fieldToCol[ $field ], $model[$field]) ) {
-    //                         $col = $fieldToCol[ $field ];
-    //                         switch ($model[$field]["type"]) {
-    //                             case 'array': case 'arrayPhone': case 'arrayEmail':
-    //                                 $val = implode(",", $value);
-    //                                 $worksheet->setCellValueExplicit($col . $row, $val, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-    //                                 break;
-                                
-    //                             case 'string': case 'name': case 'phone': 
-    //                             case 'email':
-    //                                 $worksheet->setCellValueExplicit($col . $row, $value, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-    //                                 break;
-
-    //                             case 'boolean':
-    //                                 $worksheet->setCellValueExplicit($col . $row, $value, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_BOOLEAN);
-    //                                 break;
-
-
-    //                             case 'int': case 'double':
-    //                                 $worksheet->setCellValueExplicit($col . $row, $value, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
-    //                                 break;
-
-    //                             case 'timestamp':
-    //                                 if ($value != '') {
-    //                                     $value = date("d/m/Y",$value);
-    //                                 }
-    //                                 $worksheet->setCellValueExplicit($col . $row, $value, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-    //                                 break;
-
-    //                             default:
-    //                                 break;
-    //                         }
-    //                     }
-    //                 }
-    //                 $row++;
-    //                 $i++;
-    //             }
-    //         }
-            
-    //         $file_path = UPLOAD_PATH . "loan/export/" . $filename;
-    //         $objWriter = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($excelWorkbook, $inputFileType);
-    //         $objWriter->save($file_path);
-    //         echo json_encode(array("status" => 1, "data" => $file_path));
-    //         // var_dump($response);
-    //     } catch (Exception $e) {
-    //         echo json_encode(array("status" => 0, "message" => $e->getMessage()));
-    //     }
-    // }
+    
 }

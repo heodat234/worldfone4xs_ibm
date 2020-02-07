@@ -114,18 +114,19 @@ try:
          temp = {
             'index'           : i,
             'account_number'  : acc_row['account_number'],
-            'name'            : acc_row['cus_name'],
+            'customer_name'            : acc_row['cus_name'],
             'block'           : 'true',
-            'accl'            : '',
+            'acll'            : '',
             'sibs'            : '',
-            'group'           : '',
+            'group_3_over_other_bank'           : '',
             'createdBy'       : 'system',
+            'report_date'       : todayTimeStamp
             'createdAt'       : todayTimeStamp
          }
          groupInfo = mongodb.getOne(MONGO_COLLECTION=group_collection,WHERE={'account_number': acc_row['account_number']})
          if groupInfo  != None:
             group = groupInfo['group']
-            temp['accl'] = group
+            temp['acll'] = group
 
          insertData.append(temp)
          i += 1
@@ -190,12 +191,13 @@ try:
          temp = {
             'index'           : i,
             'account_number'  : acc,
-            'name'            : row['cus_name'],
+            'customer_name'            : row['cus_name'],
             'block'           : 'true',
-            'accl'            : '',
+            'acll'            : '',
             'sibs'            : row['group_id'],
-            'group'           : '',
+            'group_3_over_other_bank'           : '',
             'createdBy'       : 'system',
+            'report_date'       : todayTimeStamp
             'createdAt'       : todayTimeStamp
          }
          insertData.append(temp)
@@ -258,12 +260,13 @@ try:
          temp = {
             'index'           : i,
             'account_number'  : acc,
-            'name'            : row['name'],
+            'customer_name'            : row['name'],
             'block'           : 'true',
-            'accl'            : '',
+            'acll'            : '',
             'sibs'            : '',
-            'group'           : row['nhom_cao_nhat_tai_tctd_khac'],
+            'group_3_over_other_bank'           : row['nhom_cao_nhat_tai_tctd_khac'],
             'createdBy'       : 'system',
+            'report_date'       : todayTimeStamp
             'createdAt'       : todayTimeStamp
          }
          insertData.append(temp)

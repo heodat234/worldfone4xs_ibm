@@ -45,7 +45,7 @@ try:
     total = 0
     complete = 0
     today = date.today()
-    # today = datetime.strptime('20/11/2019', "%d/%m/%Y").date()
+    # today = datetime.strptime('05/02/2020', "%d/%m/%Y").date()
     day = today.day
     month = today.month
     year = today.year
@@ -115,7 +115,7 @@ try:
             inputDataRaw = excel.getDataExcel(file_path=importLogInfo['file_path'], header=0, names=modelColumns, na_values='')
 
         inputData = inputDataRaw.to_dict('records')
-        pprint(inputData)
+        # pprint(inputData)
         for idx, row in enumerate(inputData):
             total += 1
             temp = {}

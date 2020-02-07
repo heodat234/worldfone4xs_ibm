@@ -109,6 +109,9 @@ while(!feof($file))
         $doc = [];
         if($header) {
             foreach ($header as $index => $field) {
+                if ($field == 'W_ORG') {
+                    $doc['W_ORG_1'] = isset($editedValue[$index]) ? (double)$editedValue[$index] : null;
+                }
                 $doc[$field] = isset($editedValue[$index]) ? $editedValue[$index] : null;
             }
         }

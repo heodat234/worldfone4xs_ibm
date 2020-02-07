@@ -38,7 +38,7 @@ Class Lawsuit_report extends WFF_Controller {
         $end        = strtotime(str_replace('/', '-', $request['end'])) ;
         $match = array(
                  '$and' => array(
-                    array('created_at'=> array( '$gte'=> $start, '$lte'=> $end))
+                    array('created_date'=> array( '$gte'=> $start, '$lte'=> $end))
                  )               
              );
         $data = $this->crud->where($match)->order_by(array('index' => 'asc'))->get($this->collection);
@@ -56,7 +56,7 @@ Class Lawsuit_report extends WFF_Controller {
             $model[$value['field']] = $value;
         }
 
-        // print_r($data);exit;
+        // print_r($model);exit;
         $spreadsheet = new Spreadsheet();
         $spreadsheet->getProperties()
         ->setCreator("South Telecom")
@@ -280,9 +280,8 @@ Class Lawsuit_report extends WFF_Controller {
         $maxCol = $col;
         if($data) {
             $row = 3;
-            $i = 0;
+            $i = 1;
             foreach ($data as $doc) {
-                // $worksheet->setCellValue('A' . $row, $i+1);
                 foreach ($doc as $field => $value) {
                     if(isset($fieldToCol[ $field ], $model[$field])) {
                         $col = $fieldToCol[ $field ];
@@ -315,6 +314,9 @@ Class Lawsuit_report extends WFF_Controller {
 
                             default:
                                 break;
+                        }
+                        if ($field == 'stt') {
+                           $worksheet->setCellValue('A' . $row, $i);
                         }
                     }
                 }

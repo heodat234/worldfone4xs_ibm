@@ -1,3 +1,8 @@
+
+
+
+
+
 <div id="page-content">
     <!-- Table Styles Header -->
     <ul class="breadcrumb breadcrumb-top">
@@ -15,7 +20,7 @@
             <div class="form-group col-sm-4">
                <label class="control-label col-xs-4">@Date@</label>
                <div class="col-xs-8">
-                  <input id="start-date" data-role="datepicker" data-format="dd/MM/yyyy  H:mm:ss" name="fromDateTime" data-bind="value: fromDateTime" >
+                  <input id="start-date" data-role="datepicker" data-format="dd/MM/yyyy H:mm:ss" name="fromDateTime" data-bind="value: fromDateTime, events: {change: startDate}" >
                </div>
             </div>
             <div class="form-group col-sm-4">
@@ -44,81 +49,31 @@
         </ul>
     </div>
     <script>
-      function girdBoolean(data) {
-        return '<input type="checkbox"'+ ( data ? 'checked="checked"' : "" )+ 'class="chkbx" disabled />';
-      }
       var Config = {
           crudApi: `${ENV.reportApi}`,
           templateApi: `${ENV.templateApi}`,
           collection: "block_card_report",
-          observable: {
-              
-          },
-          model: {
-              id: "id",
-              fields: {
-                  
-              }
-          },
-          parse: function (response) {
-              response.data.map(function(doc) {
-                  doc.createdAt = doc.createdAt ? new Date(doc.createdAt * 1000) : undefined;
-                  return doc;
-              })
-              return response;
-          },
-          columns: [{
-              field: 'index',
-              title: "STT",
-              width: 80,
-          }, {
-              field: 'account_number',
-              title: "Số Hợp đồng",
-              width: 150,
-          }, {
-              field: 'name',
-              title: "Tên khách hàng",
-              width: 150,
-          }, {
-              title: 'Nội dung xử lý',
-              columns: [ {
-                  field: 'block',
-                  title: 'Block card',
-                  width: 80,
-                  template: dataItem => girdBoolean(dataItem.block),
-              }]
-          }, {
-              title: 'Remark',
-              columns: [{
-                  field: 'accl',
-                  title: 'ACCL',
-                  width: 80
-              }, {
-                  field: 'sibs',
-                  title: 'SIBS',
-                  width: 80
-              }, {
-                  field: 'group',
-                  title: "Group",
-                  width: 80
-              }]
-          }, {
-              field: 'createdAt',
-              title: "Report date",
-              width: 100,
-              template: dataItem => gridTimestamp(dataItem.createdAt,"dd/MM/yyyy"),
-          }],
-          filterable: KENDO.filterable
-      };
+      }
+
       var Table = function() {
          return {
               dataSource: {},
               grid: {},
+              columns: [],
+              formDate: 0,
+              toDate: 0,
               init: function() {
                   var dataSource = this.dataSource = new kendo.data.DataSource({
                      serverPaging: true,
                      serverFiltering: true,
                      pageSize: 10,
+                     filter: {
+                          logic: "and",
+                          filters: [
+                              {field: 'report_date', operator: "gte", value: this.fromDate},
+                              {field: 'report_date', operator: "lte", value: this.toDate}
+                          ]
+                     },
                      transport: {
                         read: {
                             url: Config.crudApi + 'loan/' + Config.collection + '/read'
@@ -128,7 +83,13 @@
                      schema: {
                         data: "data",
                         total: "total",
-                        
+                        parse: function (response) {
+                          response.data.map(function(doc, index) {
+                            doc.no = index
+                            return doc;
+                          })
+                          return response;
+                        }
                      }
                   });
 
@@ -150,7 +111,7 @@
                      pageable: true,
                      sortable: true,
                      scrollable: true,
-                     columns: Config.columns,
+                     columns: this.columns,
                       noRecords: {
                           template: `<h2 class='text-danger'>${KENDO.noRecords}</h2>`
                       }
@@ -167,21 +128,89 @@
                       return checkedIds;
                   }
 
-                 
+                  
               }
           }
       }();
       window.onload = function() {
-         Table.init();
          var dateRange = 30;
          var nowDate = new Date();
          var date =  new Date(),
                timeZoneOffset = date.getTimezoneOffset() * kendo.date.MS_PER_MINUTE;
                date.setHours(- timeZoneOffset / kendo.date.MS_PER_HOUR, 0, 0 ,0);
 
-         // var fromDate = new Date(date.getTime() + timeZoneOffset - (dateRange - 1) * 86400000);
-         var fromDate = new Date(date.getTime() + timeZoneOffset);
-         var toDate = new Date(date.getTime() + timeZoneOffset + kendo.date.MS_PER_DAY -1)
+         var fromDate = new Date(date.getTime() + timeZoneOffset - (dateRange - 1) * 86400000);
+         // var fromDate = new Date(date.getTime() + timeZoneOffset);
+         var toDate = new Date(date.getTime() + timeZoneOffset + kendo.date.MS_PER_DAY -1);
+
+         var lawsuitFields = new kendo.data.DataSource({
+              serverPaging: true,
+              serverFiltering: true,
+              serverSorting: true,
+              transport: {
+                  read: {
+                    url: `${ENV.vApi}model/read`,
+                    data:  {
+                        skip: 0,
+                        take: 50
+                    }
+                  },
+                  parameterMap: parameterMap
+              },
+              schema: {
+                  data: "data",
+                  parse: function(response) {
+                    response.data = response.data.filter(function(doc) {
+                      if(doc.sub_type) 
+                        doc.subType = JSON.parse(doc.sub_type);
+                      else doc.subType = {};
+                      return doc.subType.column;
+                    })
+                    return response;
+                  }
+                 
+              },
+              filter: {
+                  field: "collection",
+                  operator: "eq",
+                  value: (ENV.type ? ENV.type + "_" : "") + "Block_card_report"
+              },
+              page: 1,
+              sort: {field: "index", dir: "asc"}
+         })
+         lawsuitFields.read().then(function(){
+              var columns = lawsuitFields.data().toJSON();
+              columns.map(col => {
+                  switch (col.type) {
+                      // case "name":
+                      //     col.template = (dataItem) => gridName(dataItem[col.field]);
+                      //     break;
+                      case "phone": case "arrayPhone":
+                          col.template = (dataItem) => gridPhone(dataItem[col.field]);
+                          break;
+                      case "array":
+                          col.template = (dataItem) => gridArray(dataItem[col.field]);
+                          break;
+                      case "timestamp":
+                          col.template = (dataItem) => gridDate(dataItem[col.field] != '' ? new Date(dataItem[col.field] * 1000) : null,"dd/MM/yyyy");
+                          break;
+                      default:
+                          break;
+                  }
+              });
+              // columns.unshift({
+              //     selectable: true,
+              //     width: 32,
+              //     locked: true
+              // });
+               var fromDateTime = new Date(fromDate.getTime() - timeZoneOffset).toISOString();
+               var toDateTime = new Date(toDate.getTime() - timeZoneOffset).toISOString();
+               Table.columns = columns;
+               Table.fromDate = fromDateTime
+               Table.toDate = toDateTime
+               Table.init();
+         });
+         
          var observable = kendo.observable({
              trueVar: true,
              loading: false,
@@ -235,9 +264,9 @@
                this.asyncSearch();
             },
              asyncSearch: async function() {
-                var field = "createdAt";
-                var fromDateTime = this.fromDateTime.getTime() / 1000;
-                var toDateTime = this.toDateTime.getTime() / 1000;
+               var field = "report_date";
+               var fromDateTime = new Date(this.fromDateTime.getTime() - timeZoneOffset).toISOString();
+               var toDateTime = new Date(this.toDateTime.getTime() - timeZoneOffset).toISOString();
 
                 var filter = {
                     logic: "and",
@@ -259,11 +288,11 @@
     <script>
         function saveAsExcel() {
             $.ajax({
-              url: Config.crudApi + 'loan/' + Config.collection+ "/exportExcel",
+              url: ENV.reportApi + "loan/block_card_report/exportExcel",
+              data: {end : $("#end-date").val(), start : $("#start-date").val()},
               type: 'POST',
               dataType: 'json',
-              timeout: 30000,
-              data: {startDate: $('#start-date').val(), endDate: $('#end-date').val()},
+              timeout: 30000
             })
             .done(function(response) {
               if (response.status == 1) {

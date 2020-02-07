@@ -55,6 +55,13 @@
                      serverPaging: true,
                      serverFiltering: true,
                      pageSize: 20,
+                     filter: {
+                          logic: "and",
+                          filters: [
+                              {field: 'ngay_thu_hoi', operator: "gte", value: this.fromDate},
+                              {field: 'ngay_thu_hoi', operator: "lte", value: this.toDate}
+                          ]
+                     },
                      transport: {
                         read: ENV.reportApi + "loan/thu_hoi_xe_api_report",
                         parameterMap: parameterMap
@@ -62,6 +69,13 @@
                      schema: {
                         data: "data",
                         total: "total",
+                        parse: function (response) {
+                          response.data.map(function(doc, index) {
+                            doc.no = index
+                            return doc;
+                          })
+                          return response;
+                        }
                      },
                      sort: {field: "no", dir: "asc"}
                      
@@ -107,6 +121,15 @@
           }
       }();
       window.onload = function() {
+        var dateRange = 30;
+        var nowDate = new Date();
+        var date =  new Date(),
+             timeZoneOffset = date.getTimezoneOffset() * kendo.date.MS_PER_MINUTE;
+             date.setHours(- timeZoneOffset / kendo.date.MS_PER_HOUR, 0, 0 ,0);
+
+        var fromDate = new Date(date.getTime() + timeZoneOffset - (dateRange - 1) * 86400000);
+        // var fromDate = new Date(date.getTime() + timeZoneOffset);
+        var toDate = new Date(date.getTime() + timeZoneOffset + kendo.date.MS_PER_DAY -1)
          var lawsuitFields = new kendo.data.DataSource({
               serverPaging: true,
               serverFiltering: true,
@@ -137,7 +160,7 @@
               filter: {
                   field: "collection",
                   operator: "eq",
-                  value: (ENV.type ? ENV.type + "_" : "") + "Thu_hoi_xe_report"
+                  value: (ENV.type ? ENV.type + "_" : "") + "Thu_hoi_xe"
               },
               page: 1,
               sort: {field: "index", dir: "asc"}
@@ -149,11 +172,11 @@
                         case "no":
                             col.width = 50;
                             break;
-                        case "ngay_thu":
-                            col.width = 200;
-                            col.template = (dataItem) => gridDate(dataItem[col.field] != '' ? new Date(dataItem[col.field]) : null);
+                        case "ngay_thu_hoi":
+                            col.width = 100;
+                            col.template = (dataItem) => gridDate(dataItem[col.field] != '' ? new Date(dataItem[col.field]) : null,"dd/MM/yyyy");
                             break;    
-                        case "so_hop_dong":
+                        case "contract_no":
                             col.width = 200;
                             break;    
                         default:
@@ -169,24 +192,15 @@
                           break;
                   }
               });
-              columns.unshift({
-                  selectable: true,
-                  width: 32,
-                  locked: true
-              });
+              var fromDateTime = new Date(fromDate.getTime() - timeZoneOffset).toISOString();
+              var toDateTime = new Date(toDate.getTime() - timeZoneOffset).toISOString();
               Table.columns = columns;
+              Table.fromDate = fromDateTime
+              Table.toDate = toDateTime
               Table.init();
           });
-         var dateRange = 30;
-         var nowDate = new Date();
-         var date =  new Date(),
-               timeZoneOffset = date.getTimezoneOffset() * kendo.date.MS_PER_MINUTE;
-               date.setHours(- timeZoneOffset / kendo.date.MS_PER_HOUR, 0, 0 ,0);
-
-         // var fromDate = new Date(date.getTime() + timeZoneOffset - (dateRange - 1) * 86400000);
-         var fromDate = new Date(date.getTime() + timeZoneOffset);
-         var toDate = new Date(date.getTime() + timeZoneOffset + kendo.date.MS_PER_DAY -1)
-         var observable = kendo.observable({
+         
+          var observable = kendo.observable({
              trueVar: true,
              loading: false,
              visibleReport: false,
@@ -241,7 +255,7 @@
                this.asyncSearch();
             },
              asyncSearch: async function() {
-               var field = "createdAt";
+               var field = "ngay_thu_hoi";
                var fromDateTime = new Date(this.fromDateTime.getTime() - timeZoneOffset).toISOString();
                 var toDateTime = new Date(this.toDateTime.getTime() - timeZoneOffset).toISOString();
                 

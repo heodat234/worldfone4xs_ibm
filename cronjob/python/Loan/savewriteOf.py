@@ -503,7 +503,7 @@ try:
 
    # CARD
    aggregate_pipeline = [
-      { "$project": { 'account_number': 1, 'dateDifference' :{"$divide" : [{ "$subtract" : [todayTimeStamp,'$overdue_date']}, 84000]}  } },
+      { "$project": { 'account_number': 1, 'dateDifference' :{"$divide" : [{ "$subtract" : [endDayTimeStamp,'$overdue_date']}, 84000]}  } },
       { "$match" : {'dateDifference': {"$gte": 361} } },
       {
           "$group":

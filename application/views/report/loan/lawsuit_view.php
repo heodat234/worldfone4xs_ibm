@@ -49,11 +49,20 @@
               dataSource: {},
               grid: {},
               columns: [],
+              formDate: 0,
+              toDate: 0,
               init: function() {
                   var dataSource = this.dataSource = new kendo.data.DataSource({
                      serverPaging: true,
                      serverFiltering: true,
-                     pageSize: 5,
+                     pageSize: 10,
+                     filter: {
+                          logic: "and",
+                          filters: [
+                              {field: 'created_date', operator: "gte", value: this.fromDate},
+                              {field: 'created_date', operator: "lte", value: this.toDate}
+                          ]
+                     },
                      transport: {
                         read: ENV.reportApi + "loan/lawsuit_report",
                         parameterMap: parameterMap
@@ -104,6 +113,16 @@
           }
       }();
       window.onload = function() {
+         var dateRange = 90;
+         var nowDate = new Date();
+         var date =  new Date(),
+               timeZoneOffset = date.getTimezoneOffset() * kendo.date.MS_PER_MINUTE;
+               date.setHours(- timeZoneOffset / kendo.date.MS_PER_HOUR, 0, 0 ,0);
+
+         var fromDate = new Date(date.getTime() + timeZoneOffset - (dateRange - 1) * 86400000);
+         // var fromDate = new Date(date.getTime() + timeZoneOffset);
+         var toDate = new Date(date.getTime() + timeZoneOffset + kendo.date.MS_PER_DAY -1);
+
          var lawsuitFields = new kendo.data.DataSource({
               serverPaging: true,
               serverFiltering: true,
@@ -138,8 +157,8 @@
               },
               page: 1,
               sort: {field: "index", dir: "asc"}
-          })
-          lawsuitFields.read().then(function(){
+         })
+         lawsuitFields.read().then(function(){
               var columns = lawsuitFields.data().toJSON();
               columns.map(col => {
                   if (col.field == 'lawsuit_status') {
@@ -158,29 +177,25 @@
                           col.template = (dataItem) => gridArray(dataItem[col.field]);
                           break;
                       case "timestamp":
-                          col.template = (dataItem) => gridDate(dataItem[col.field] != '' ? new Date(dataItem[col.field] * 1000) : null);
+                          col.template = (dataItem) => gridDate(dataItem[col.field] != '' ? new Date(dataItem[col.field] * 1000) : null,"dd/MM/yyyy");
                           break;
                       default:
                           break;
                   }
               });
-              columns.unshift({
-                  selectable: true,
-                  width: 32,
-                  locked: true
-              });
-              Table.columns = columns;
-              Table.init();
-          });
-         var dateRange = 2;
-         var nowDate = new Date();
-         var date =  new Date(),
-               timeZoneOffset = date.getTimezoneOffset() * kendo.date.MS_PER_MINUTE;
-               date.setHours(- timeZoneOffset / kendo.date.MS_PER_HOUR, 0, 0 ,0);
-
-         // var fromDate = new Date(date.getTime() + timeZoneOffset - (dateRange - 1) * 86400000);
-         var fromDate = new Date(date.getTime() + timeZoneOffset);
-         var toDate = new Date(date.getTime() + timeZoneOffset + kendo.date.MS_PER_DAY -1)
+              // columns.unshift({
+              //     selectable: true,
+              //     width: 32,
+              //     locked: true
+              // });
+               var fromDateTime = new Date(fromDate.getTime() - timeZoneOffset).toISOString();
+               var toDateTime = new Date(toDate.getTime() - timeZoneOffset).toISOString();
+               Table.columns = columns;
+               Table.fromDate = fromDateTime
+               Table.toDate = toDateTime
+               Table.init();
+         });
+         
          var observable = kendo.observable({
              trueVar: true,
              loading: false,
@@ -234,9 +249,9 @@
                this.asyncSearch();
             },
              asyncSearch: async function() {
-               var field = "created_at";
+               var field = "created_date";
                var fromDateTime = new Date(this.fromDateTime.getTime() - timeZoneOffset).toISOString();
-                var toDateTime = new Date(this.toDateTime.getTime() - timeZoneOffset).toISOString();
+               var toDateTime = new Date(this.toDateTime.getTime() - timeZoneOffset).toISOString();
 
                 var filter = {
                     logic: "and",

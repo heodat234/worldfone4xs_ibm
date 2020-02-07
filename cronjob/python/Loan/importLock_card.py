@@ -30,7 +30,7 @@ _mongodb = Mongodb(MONGODB="_worldfone4xs", WFF_ENV=wff_env)
 log = open(base_url + "cronjob/python/Loan/log/importLockCard.txt","a")
 now = datetime.now()
 subUserType = 'LO'
-collection = common.getSubUser(subUserType, 'Block_card')
+collection = common.getSubUser(subUserType, 'Block_card_report')
 
 try:
     modelColumns = []
@@ -46,7 +46,7 @@ try:
     total = 0
     complete = 0
     today = date.today()
-    # today = datetime.strptime('20/11/2019', "%d/%m/%Y").date()
+    # today = datetime.strptime('05/02/2020', "%d/%m/%Y").date()
     day = today.day
     month = today.month
     year = today.year
@@ -114,10 +114,10 @@ try:
         if(filenameExtension[1] == 'csv'):
             inputDataRaw = excel.getDataCSV(file_path=importLogInfo['file_path'], dtype=object, sep=';', header=0, names=modelColumns, na_values='')
         else:
-            inputDataRaw = excel.getDataExcel(file_path=importLogInfo['file_path'], header=0, names=modelColumns, na_values='')
+            inputDataRaw = excel.getDataExcel(file_path=importLogInfo['file_path'], dtype='object', header=0, names=modelColumns, na_values='')
 
         inputData = inputDataRaw.to_dict('records')
-        pprint(inputData)
+        # pprint(inputData)
         for idx, row in enumerate(inputData):
             total += 1
             temp = {}
@@ -169,7 +169,7 @@ try:
                         result = True
                         complete += 1
 
-    pprint(insertData)
+    # pprint(errorData)
     if(len(errorData) > 0):
         mongodbresult.remove_document(MONGO_COLLECTION=common.getSubUser(subUserType, ('Block_card_' + str(year) + str(month) + str(day))))
         mongodbresult.batch_insert(common.getSubUser(subUserType, ('Block_card_' + str(year) + str(month) + str(day))), errorData)
@@ -177,6 +177,7 @@ try:
     else:
         if len(insertData) > 0:
             mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertData)
+            print('DONE')
         mongodb.update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': importLogId}, VALUE={'status': 1, 'complete_import': time.time(), 'total': total, 'complete': complete})
 
 except Exception as e:

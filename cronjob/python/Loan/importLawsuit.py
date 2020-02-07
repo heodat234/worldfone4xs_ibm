@@ -45,7 +45,7 @@ try:
    total = 0
    complete = 0
    today = date.today()
-   today = datetime.strptime('05/02/2020', "%d/%m/%Y").date()
+   # today = datetime.strptime('05/02/2020', "%d/%m/%Y").date()
    day = today.day
    month = today.month
    year = today.year
@@ -122,11 +122,16 @@ try:
          temp = {}
          result = True
          if row['so_hopdong'] not in ['', None]:
-               pprint(row)
-               break
+               # pprint(row)
+               # break
                for cell in row:
                   try:
-                     temp[cell] = common.convertDataType(data=row[cell], datatype=modelConverters[cell], formatType=modelFormat[cell])
+                     if modelConverters[cell] == 'timestamp':
+                        temp[cell] = common.convertDataType(data=row[cell], datatype=modelConverters[cell], formatType="%Y-%m-%d %H:%M:%S")
+                     else:
+                        temp[cell] = common.convertDataType(data=row[cell], datatype=modelConverters[cell], formatType=modelFormat[cell])
+
+                     # break
                   except Exception as errorConvertType:
                      temp['error_cell'] = cell + "_" + str(idx + 1)
                      temp['type'] = modelConverters[cell]

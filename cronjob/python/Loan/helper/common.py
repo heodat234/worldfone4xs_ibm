@@ -89,7 +89,7 @@ class Common:
     %% - a literal % character
     '''
     def convertTimestamp(self, value, formatString="%d/%m/%Y"):
-        if formatString in ["%d/%m/%Y", "%d/%m/%y", "%d-%m-%Y", "%d-%m-%y", "%d%m%Y", "%d%m%y"]:
+        if formatString in ["%d/%m/%Y", "%d/%m/%y", "%d-%m-%Y", "%d-%m-%y", "%d%m%Y", "%d%m%y", "%Y-%m-%d %H:%M:%S"]:
             if len(str(value)) < 6:
                 value = '0' + str(value)
         result = int(self.time.mktime(self.time.strptime(str(value), formatString)))
