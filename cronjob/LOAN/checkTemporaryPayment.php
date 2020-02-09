@@ -8,12 +8,15 @@ $mongo_db = new Mongo_db();
 $money = $mongo_db->where('type', 'LO_')->getOne('LO_Dial_config');
 $money = isset($money["conditionDonotCall"]) ? $money["conditionDonotCall"] : 40000;
 
+$today = strtotime('today midnight');
+
 $collection 	= "LO_Temporary_payment";
 $key_field 		= "account_number";
 
-$LO_Temporary_payment 	= $mongo_db->where(array('processed' => array('$exists' => false)))->get($collection);
+$LO_Temporary_payment 	= $mongo_db->where("processed", ['$exists' => false])->get($collection);
+// $LO_Temporary_payment   = $mongo_db->where('account_number', '66300000000477000')->get($collection);
 
-foreach ($LO_Temporary_payment as $doc) { 
+foreach ($LO_Temporary_payment as $doc) {
 	if(isset($doc['remain_amount'])){
 
 		if($doc['remain_amount'] < $money){
@@ -24,7 +27,7 @@ foreach ($LO_Temporary_payment as $doc) {
 				$dial_detail = $dial_detail[0];
 				$check = conditionDoNotCall($dial_detail);
 				if($check){
-					$mongo_db->where_id($dial_detail['id'])->update('LO_Diallist_detail', array('$set' => array('Donotcall' => 'Y')));
+					$mongo_db->where("account_number", $doc['account_number'])->where("created_at", ['$gte' => $today])->update_all('LO_Diallist_detail', array('$set' => array('Donotcall' => 'Y')));
 					$mongo_db->where("diallistdetail_id", $dial_detail['id'])->delete_all('LO_Dial_queue');
 				}
 			}
@@ -44,6 +47,8 @@ function conditionDoNotCall($data){
         }else if($data["installment_type"] != 'n' && $data["outstanding_principal"] > 0){
         	return true;
         }
+
+       	return false;
 
     endif;
 }

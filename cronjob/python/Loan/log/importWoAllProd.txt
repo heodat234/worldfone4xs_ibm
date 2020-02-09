@@ -1,3 +1,4 @@
 08/11/2019, 15:54:52: cannot specify names when specifying a multi-index header
 08/11/2019, 15:56:20: 'OFF_OSTD'
 11/12/2019, 15:48:57: 'NoneType' object has no attribute 'to_dict'
+06/02/2020, 17:52:56: 'NoneType' object has no attribute 'to_dict'

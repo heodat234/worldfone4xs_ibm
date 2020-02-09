@@ -18,12 +18,14 @@ foreach ($listofaccount as $key => $i_listofaccount) {
 	where("account_number", $i_listofaccount["account_number"])->
 	where(array('map_listofaccount' => array('$exists' => false)))->
 	get('LO_Report_input_payment_of_card');
+
 	if(empty($payment_card)) continue;
+
 	foreach ($payment_card as $k => $i_payment_card) {
 		if(!in_array($i_payment_card['code'], $arr_code)) continue;
 		$data["type"] 			= "CARD";
 		$data["account_number"] = $i_listofaccount["account_number"];
-
+		echo $data['account_number'] . PHP_EOL;
 		$data["payment_date"] 	= _isset($i_payment_card, 'posting_date');
 		$data["payment_amount"] = _isset($i_payment_card, "amount");
 

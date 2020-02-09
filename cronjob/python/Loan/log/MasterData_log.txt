@@ -187,3 +187,19 @@
 06/01/2020, 16:23:07: End Log
 06/01/2020, 16:26:45: Start Import
 06/01/2020, 16:26:45: End Log
+04/02/2020, 15:19:12: Start Import
+04/02/2020, 15:19:12: invalid literal for int() with base 10: '.501266000'
+04/02/2020, 15:19:41: Start Import
+04/02/2020, 15:19:41: invalid literal for int() with base 10: '0.501266000'
+04/02/2020, 15:19:58: Start Import
+04/02/2020, 15:19:58: End Log
+04/02/2020, 15:22:56: Start Import
+04/02/2020, 15:22:56: End Log
+05/02/2020, 11:31:09: Start Import
+05/02/2020, 11:31:09: End Log
+05/02/2020, 11:31:51: Start Import
+05/02/2020, 11:31:51: End Log
+05/02/2020, 11:32:57: Start Import
+05/02/2020, 11:36:56: End Log
+05/02/2020, 12:11:35: Start Import
+05/02/2020, 12:14:57: End Log

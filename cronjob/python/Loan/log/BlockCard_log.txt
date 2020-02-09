@@ -12,3 +12,38 @@
 06/01/2020, 12:15:07: End Log
 08/01/2020, 10:35:33: Start Import
 08/01/2020, 10:36:38: End Log
+04/02/2020, 16:56:02: Start Import
+04/02/2020, 16:56:02: 'list' object has no attribute 'keys'
+04/02/2020, 16:57:12: Start Import
+04/02/2020, 16:57:29: End Log
+04/02/2020, 16:59:18: Start Import
+04/02/2020, 16:59:18: 'list' object has no attribute 'keys'
+04/02/2020, 17:00:12: Start Import
+04/02/2020, 17:00:12: name 'i' is not defined
+04/02/2020, 17:00:57: Start Import
+04/02/2020, 17:00:57: list indices must be integers or slices, not str
+04/02/2020, 17:01:58: Start Import
+04/02/2020, 17:01:59: End Log
+04/02/2020, 17:04:04: Start Import
+04/02/2020, 17:04:04: list indices must be integers or slices, not str
+04/02/2020, 17:06:05: Start Import
+04/02/2020, 17:06:06: End Log
+04/02/2020, 17:06:40: Start Import
+04/02/2020, 17:06:40: End Log
+04/02/2020, 17:07:55: Start Import
+04/02/2020, 17:07:55: End Log
+04/02/2020, 17:08:54: Start Import
+04/02/2020, 17:08:54: End Log
+04/02/2020, 17:14:44: Start Import
+04/02/2020, 17:14:44: End Log
+04/02/2020, 17:14:55: Start Import
+04/02/2020, 17:14:55: End Log
+06/02/2020, 17:14:39: Start Import
+06/02/2020, 17:14:39: name 'k2019_collection' is not defined
+06/02/2020, 17:15:51: Start Import
+06/02/2020, 17:21:40: Start Import
+06/02/2020, 17:28:27: Start Import
+06/02/2020, 17:36:27: Start Import
+06/02/2020, 17:38:38: End Log
+06/02/2020, 17:39:12: Start Import
+06/02/2020, 17:39:13: End Log

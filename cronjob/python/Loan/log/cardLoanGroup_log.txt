@@ -393,3 +393,31 @@
 07/01/2020, 10:46:41: End Log
 07/01/2020, 10:50:21: Start Import
 07/01/2020, 10:50:31: End Log
+05/02/2020, 10:20:27: Start Import
+05/02/2020, 10:20:27: type object 'datetime.datetime' has no attribute 'timedelta'
+05/02/2020, 10:21:15: Start Import
+05/02/2020, 10:21:15: type object 'datetime.timedelta' has no attribute 'timedelta'
+05/02/2020, 10:22:07: Start Import
+05/02/2020, 10:22:07: name 'date' is not defined
+05/02/2020, 10:22:25: Start Import
+05/02/2020, 10:22:25: name 'timedelta' is not defined
+05/02/2020, 10:22:37: Start Import
+05/02/2020, 10:22:37: type object 'datetime.datetime' has no attribute 'timedelta'
+05/02/2020, 10:25:07: Start Import
+05/02/2020, 10:25:07: type object 'datetime.date' has no attribute 'timedelta'
+05/02/2020, 10:26:41: Start Import
+05/02/2020, 10:26:41: type object 'datetime.datetime' has no attribute 'timedelta'
+05/02/2020, 10:28:04: Start Import
+05/02/2020, 10:28:04: End Log
+05/02/2020, 10:33:29: Start Import
+05/02/2020, 10:33:32: End Log
+05/02/2020, 10:36:04: Start Import
+05/02/2020, 10:36:07: End Log
+05/02/2020, 10:37:36: Start Import
+05/02/2020, 10:37:39: End Log
+05/02/2020, 10:47:27: Start Import
+05/02/2020, 10:47:30: End Log
+06/02/2020, 10:50:01: Start Import
+06/02/2020, 10:50:04: End Log
+07/02/2020, 09:11:42: Start Import
+07/02/2020, 09:11:44: End Log

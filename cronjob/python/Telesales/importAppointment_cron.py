@@ -137,13 +137,14 @@ try:
                 if callingListInfo != None:
                     temp['assign'] = callingListInfo['assign'] if 'assign' in callingListInfo.keys() else ''
                     temp['assign_name'] = callingListInfo['assign_name'] if 'assign_name' in callingListInfo.keys() else ''
-                    temp['cus_name'] = callingListInfo['name'] if 'name' in callingListInfo.keys() else ''
-                    temp['cus_phone'] = callingListInfo['phone'] if 'phone' in callingListInfo.keys() else ''
-                    temp['cus_note'] = callingListInfo['note'] if 'note' in callingListInfo.keys() else ''
-                    temp['cus_id'] = str(callingListInfo['_id']) if '_id' in callingListInfo.keys() else ''
+                    temp['tele_name'] = callingListInfo['name'] if 'name' in callingListInfo.keys() else ''
+                    temp['tele_phone'] = callingListInfo['phone'] if 'phone' in callingListInfo.keys() else ''
+                    temp['tele_note'] = callingListInfo['note'] if 'note' in callingListInfo.keys() else ''
+                    temp['tele_id'] = str(callingListInfo['_id']) if '_id' in callingListInfo.keys() else ''
                 temp['created_by'] = 'system'
                 temp['created_at'] = time.time()
                 temp['import_id'] = str(importLogId)
+                temp['last_modified'] = time.time()
                 if(result == False):
                     errorData.append(temp)
                 else:

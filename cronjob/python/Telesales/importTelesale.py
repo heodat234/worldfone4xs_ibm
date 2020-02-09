@@ -78,84 +78,84 @@ try:
 
    # fileName = importLogInfo['file_name']
    # filenameExtension = fileName.split('.')
-   dataLibrary = excel.getDataCSV(file_path=importLogInfo['file_path'],header=0, sep=';', names=None, index_col=None, usecols=None, dtype=object, converters=None, skiprows=None, na_values=None, encoding='ISO-8859-1')
+   dataLibrary = excel.getDataCSV(file_path=importLogInfo['file_path'],header=0, names=None, index_col=None, usecols=None, dtype=object, converters=None, skiprows=None, na_values=None, encoding='ISO-8859-1')
    # if(filenameExtension[1] == 'csv'):
    #    dataLibrary = excel.getDataCSV(file_path=importLogInfo['file_path'], dtype=object, sep='\t', lineterminator='\r', header=None, names=None, na_values='')
    # else:
    #    dataLibrary = excel.getDataExcel(file_path=importLogInfo['file_path'], header=0, names=None, na_values='')
 
    listDataLibrary = dataLibrary.values
-   pprint(listDataLibrary)
    for key,listCol in enumerate(listDataLibrary):
       temp = {}
       checkErr = False
+      header_index = 0
       for idx,header in enumerate(headers):
          # pprint(idx)
          # if header['index'] == 26 or header['index'] == 27:
          #    continue;
-         if not header['sub_type'].strip() and 'import' in header['sub_type']:
+         if 'import' not in header['sub_type']:
             continue
 
-         if str(listDataLibrary[key][idx]) == 'nan':
-            listDataLibrary[key][idx] = ''
+         if str(listDataLibrary[key][header_index]) == 'nan':
+            listDataLibrary[key][header_index] = ''
          if header['type'] == 'int':
             try:
-               value = int(listDataLibrary[key][idx])
+               value = int(listDataLibrary[key][header_index])
             except ValueError:
                err = {}
                # err['cell'] =  xl_rowcol_to_cell(key, idx+1)
-               err['cell'] =  'Hàng: ' + str(key+2) + '; Cột: ' + str(idx+1)
+               err['cell'] =  'Hàng: ' + str(key+2) + '; Cột: ' + str(header_index+1)
                err['type'] = 'int';
                errorData.append(err);
                checkErr = True
-         if header['type'] == 'double' and str(listDataLibrary[key][idx]) != '0':
+         if header['type'] == 'double' and str(listDataLibrary[key][header_index]) != '0':
             try:
-               value = float(listDataLibrary[key][idx])
+               value = float(listDataLibrary[key][header_index])
             except Exception as e:
                err = {}
                # err['cell'] =  xl_rowcol_to_cell(key, idx+1)
-               err['cell'] =  'Hàng: ' + str(key+2) + '; Cột: ' + str(idx+1)
+               err['cell'] =  'Hàng: ' + str(key+2) + '; Cột: ' + str(header_index+1)
                err['type'] = 'double';
                errorData.append(err);
                checkErr = True
-         if header['type'] == 'double' and str(listDataLibrary[key][idx]) == '0': 
-            value = int(listDataLibrary[key][idx])
+         if header['type'] == 'double' and str(listDataLibrary[key][header_index]) == '0': 
+            value = int(listDataLibrary[key][header_index])
 
-         if header['type'] == 'timestamp' and str(listDataLibrary[key][idx]) != '':
+         if header['type'] == 'timestamp' and str(listDataLibrary[key][header_index]) != '':
             err = {}
             try:
-               value = int(time.mktime(time.strptime(listDataLibrary[key][idx], "%d/%m/%Y")))
+               value = int(time.mktime(time.strptime(listDataLibrary[key][header_index], "%d/%m/%Y")))
             except Exception as e:
                # err['cell'] =  xl_rowcol_to_cell(key, idx+1)
-               err['cell'] =  'Hàng: ' + str(key+2) + '; Cột: ' + str(idx+1)
+               err['cell'] =  'Hàng: ' + str(key+2) + '; Cột: ' + str(header_index+1)
                err['type'] = 'date'
                errorData.append(err)
                checkErr = True
          if header['type'] == 'phone':
             try:
-               value_int   = int(listDataLibrary[key][idx])
+               value_int   = int(listDataLibrary[key][header_index])
                value       = '0'+ str(value_int)
             except Exception as e:
                # err['cell'] =  xl_rowcol_to_cell(key, idx+1)
-               err['cell'] =  'Hàng: ' + str(key+2) + '; Cột: ' + str(idx+1)
+               err['cell'] =  'Hàng: ' + str(key+2) + '; Cột: ' + str(header_index+1)
                err['type'] = 'phone'
                errorData.append(err)
                checkErr = True
          if header['type'] == 'name':
-            value   = str(listDataLibrary[key][idx])
+            value   = str(listDataLibrary[key][header_index])
 
          if header['type'] == 'string' and header['field'] != 'id_no':
             try:
-               value_int   = int(listDataLibrary[key][idx])
+               value_int   = int(listDataLibrary[key][header_index])
                value       = str(value_int)
             except ValueError:
-               value       = str(listDataLibrary[key][idx])
+               value       = str(listDataLibrary[key][header_index])
          if header['type'] == 'string' and header['field'] == 'id_no':
-            value       = str(listDataLibrary[key][idx])
+            value       = str(listDataLibrary[key][header_index])
 
          if header['field'] == 'assign' and value != '':
             try:
-               value = str(int(listDataLibrary[key][idx]))
+               value = str(int(listDataLibrary[key][header_index]))
                temp['createdBy']  = 'Byfixed-Import'
                checkUser = False
                for user in users:
@@ -167,7 +167,7 @@ try:
                   value = ''
             except ValueError:
                # err['cell'] =  xl_rowcol_to_cell(key, idx)
-               err['cell'] =  'Hàng: ' + str(key+2) + '; Cột: ' + str(idx+1)
+               err['cell'] =  'Hàng: ' + str(key+2) + '; Cột: ' + str(header_index+1)
                err['type'] = 'int'
                errorData.append(err)
                checkErr = True
@@ -182,6 +182,7 @@ try:
          temp['createdAt']       = int(time.time())
          temp['updatedAt']       = int(time.time())
          temp['updatedBy']       = 'system'
+         header_index += 1
 
       if checkErr == False:
          try:
