@@ -32,3 +32,6 @@
 13/12/2019, 15:39:31: Authentication failed.
 13/12/2019, 15:41:50: Authentication failed.
 14/12/2019, 17:12:34: object of type 'Cursor' has no len()
+16/01/2020, 15:51:32: name 'lastmonth' is not defined
+16/01/2020, 15:53:14: name 'lastmonth' is not defined
+16/01/2020, 15:55:07: name 'lastmonth' is not defined

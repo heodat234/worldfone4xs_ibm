@@ -1,6 +1,16 @@
 <?php 
 $mongo_db = new Mongo_db();
 
+function getGroupMappingCampaign(){
+	$array = array(
+		'debt_type' => array('$regex' => 'card', '$options' => 'i'),
+		'debt_group' => 'Group A'
+	);
+	$group_mapping = mongoGetCustom($array, 'LO_Group_mapping_campaign');
+
+	return $group_mapping;
+}
+
 function getCusAssignPartner(){
 	global $mongo_db;
 	$arr_contractNo_partner = [];
@@ -13,7 +23,7 @@ function getCusAssignPartner(){
 
 function getListOfAccount(){
 	global $mongo_db;
-	$data = $mongo_db->get('LO_List_of_account_in_collection');
+	$data = $mongo_db->order_by(array('_id' => 1))->get('LO_List_of_account_in_collection');
 	return $data;
 }
 
@@ -30,6 +40,8 @@ function getSBV($contract_no, $kydue){
 		
 		$where 		= array('contract_no' => $temp, 'kydue' => $kydue);
 		$SBV_Stored = mongoGetOne_Custom($where, 'LO_SBV_Stored');
+	}else{
+		$SBV['license_no'] = trim($SBV['license_no']);
 	}
 	if(!empty($SBV) && !empty($SBV_Stored)){
 		$SBV["overdue_indicator"] = $SBV_Stored["overdue_indicator"];
@@ -58,6 +70,11 @@ function getOneCustomer($account_number){
 function mongoGet($field,$value, $collection){
 	global $mongo_db;
 	return $mongo_db->where($field, $value)->get($collection);
+}
+
+function mongoGetCustom($array, $collection){
+	global $mongo_db;
+	return $mongo_db->where($array)->get($collection);
 }
 
 function mongoGetOne($field,$value, $collection){

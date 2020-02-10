@@ -21,6 +21,7 @@ from helper.excel import Excel
 from helper.jaccs import Config
 from helper.common import Common
 from helper.mongodbaggregate import Mongodbaggregate
+from pathlib import Path
 
 mongodb = Mongodb("worldfone4xs")
 _mongodb = Mongodb("_worldfone4xs")
@@ -40,13 +41,17 @@ collection = common.getSubUser(subUserType, 'worldfonepbxmanager')
 
 try:
     today = date.today()
+    tomorrow = today + timedelta(days=1)
     day = today.day
     month = today.month
     year = today.year
     todayString = today.strftime("%d/%m/%Y")
+    tomorrowString = tomorrow.strftime("%Y%m%d")
     todayTimeStamp = int(time.mktime(time.strptime(str(todayString + " 00:00:00"), "%d/%m/%Y %H:%M:%S"))) # 86,399
 
-    fileOutput = base_url + 'upload/loan/export/CDR_' + today.strftime("%d%m%Y") + '.xlsx'
+    exportPath = f"/data/upload_file/export/{tomorrowString}"
+    Path(exportPath).mkdir(parents=True, exist_ok=True)
+    fileOutput = exportPath + '/CDR_' + today.strftime("%d%m%Y") + '.xlsx'
     workbook = xlsxwriter.Workbook(fileOutput)
     worksheet = workbook.add_worksheet()
     cell_format = workbook.add_format()

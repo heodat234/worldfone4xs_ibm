@@ -439,3 +439,71 @@
 08/01/2020, 10:02:44: End Log
 08/01/2020, 11:41:01: Start Import
 08/01/2020, 11:41:01: 'TERM_ID'
+16/01/2020, 10:41:07: Start Import
+16/01/2020, 10:41:07: name 'dateDifference' is not defined
+16/01/2020, 10:41:46: Start Import
+16/01/2020, 10:41:57: End Log
+16/01/2020, 10:42:13: Start Import
+16/01/2020, 10:42:13: End Log
+16/01/2020, 12:18:58: Start Import
+16/01/2020, 12:19:00: End Log
+16/01/2020, 12:20:38: Start Import
+16/01/2020, 12:20:39: End Log
+16/01/2020, 12:20:59: Start Import
+16/01/2020, 12:20:59: End Log
+16/01/2020, 12:22:18: Start Import
+16/01/2020, 12:22:19: End Log
+16/01/2020, 12:42:44: Start Import
+16/01/2020, 12:42:44: 'lic_no_arr'
+16/01/2020, 12:43:23: Start Import
+16/01/2020, 12:43:23: name 'zaccf1' is not defined
+16/01/2020, 12:44:15: Start Import
+16/01/2020, 12:44:15: name 'NP_DT8' is not defined
+16/01/2020, 12:45:54: Start Import
+16/01/2020, 12:45:54: 'str' object has no attribute 'strftime'
+16/01/2020, 12:55:01: Start Import
+16/01/2020, 12:55:01: 'str' object has no attribute 'strftime'
+16/01/2020, 12:56:52: Start Import
+16/01/2020, 12:56:52: 'str' object has no attribute 'strftime'
+16/01/2020, 13:00:35: Start Import
+16/01/2020, 13:00:35: unconverted data remains: 19
+16/01/2020, 13:01:26: Start Import
+16/01/2020, 13:01:26: unconverted data remains: 19
+16/01/2020, 13:03:04: Start Import
+16/01/2020, 13:03:04: time data '12-04-2019' does not match format '%d/%m/%Y'
+16/01/2020, 13:03:20: Start Import
+16/01/2020, 13:03:20: End Log
+16/01/2020, 13:03:37: Start Import
+16/01/2020, 13:03:37: End Log
+16/01/2020, 13:04:08: Start Import
+16/01/2020, 13:04:08: End Log
+16/01/2020, 13:05:17: Start Import
+16/01/2020, 13:05:17: 'outstanding_principal'
+16/01/2020, 13:06:11: Start Import
+16/01/2020, 13:06:11: argument of type 'NoneType' is not iterable
+16/01/2020, 13:27:33: Start Import
+16/01/2020, 13:27:47: End Log
+16/01/2020, 15:25:23: Start Import
+16/01/2020, 15:25:23: name 'product_collection' is not defined
+16/01/2020, 15:26:23: Start Import
+16/01/2020, 15:26:23: name 'dialist' is not defined
+16/01/2020, 15:28:20: Start Import
+16/01/2020, 15:28:20: 'profession'
+16/01/2020, 15:30:57: Start Import
+16/01/2020, 15:31:34: End Log
+16/01/2020, 15:40:21: Start Import
+16/01/2020, 15:40:51: End Log
+16/01/2020, 15:42:08: Start Import
+16/01/2020, 15:42:43: End Log
+05/02/2020, 17:20:45: Start Import
+05/02/2020, 17:20:45: End Log
+05/02/2020, 17:22:02: Start Import
+05/02/2020, 17:22:02: End Log
+05/02/2020, 17:23:02: Start Import
+05/02/2020, 17:23:02: End Log
+05/02/2020, 17:24:15: Start Import
+05/02/2020, 17:24:15: End Log
+05/02/2020, 18:19:42: Start Import
+05/02/2020, 18:19:42: name 'temp' is not defined
+05/02/2020, 18:20:01: Start Import
+05/02/2020, 18:20:01: End Log

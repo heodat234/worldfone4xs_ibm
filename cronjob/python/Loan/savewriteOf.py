@@ -99,7 +99,7 @@ try:
 
    # SIBS
    aggregate_pipeline = [
-      { "$project": { 'account_number': 1, 'dateDifference' :{"$divide" : [{ "$subtract" : [endDayTimeStamp,'$due_date']}, 84000]}  } },
+      { "$project": { 'account_number': 1, 'dateDifference' :{"$divide" : [{ "$subtract" : [endDayTimeStamp,'$due_date']}, 86400]}  } },
       { "$match" : {'dateDifference': {"$gte": 361} } },
       # {
       #    "$lookup":
@@ -118,7 +118,7 @@ try:
               # "lic_no_arr": {'$push': '$detail.LIC_NO'},
           }
       }
-      
+
    ]
    data = mongodb.aggregate_pipeline(MONGO_COLLECTION=lnjc05_collection,aggregate_pipeline=aggregate_pipeline)
 
@@ -172,14 +172,14 @@ try:
                      SELECT=['cndk_no'])
             code = mongodb.getOne(MONGO_COLLECTION=action_code_collection, WHERE={'account_number': str(row['account_number'])},
                      SELECT=['reason_nonpayment','action_code','raaStatus'])
-            
+
             countsite = mongodb.count(MONGO_COLLECTION=site_collection, WHERE={'contract_no': str(row['account_number'])})
-            
+
             countsiteFielder = mongodb.count(MONGO_COLLECTION=site_collection, WHERE={'contract_no': str(row['account_number']), 'field_staff': {'$nin': ['', 'null']} })
-            
+
             site = mongodb.get(MONGO_COLLECTION=site_collection, WHERE={'contract_no': str(row['account_number'])},
                      SELECT=['contract_no','report_date'],SORT=[("created_at", -1)], SKIP=0, TAKE=1)
-            
+
             # cdrInfo = mongodb.get(MONGO_COLLECTION=cdr_collection, WHERE={'customernumber': str(row['MOBILE_NO']), "direction" : "outbound"},
             #          SELECT=['starttime'],SORT=[("starttime", -1)], SKIP=0, TAKE=1)
 
@@ -203,11 +203,11 @@ try:
                   cdrInfo = mongodb.get(MONGO_COLLECTION=cdr_collection, WHERE={'customernumber': {'$in': phone}, "direction" : "outbound"},
                         SELECT=['starttime'],SORT=[("starttime", -1)], SKIP=0, TAKE=1)
 
-            
+
             litigation = mongodb.count(MONGO_COLLECTION=lawsuit_collection, WHERE={'so_hopdong': str(row['account_number'])})
 
             product = mongodb.getOne(MONGO_COLLECTION=product_collection, WHERE={'code': str(row['PRODGRP_ID'])},SELECT=['name'])
-            
+
 
             temp = {}
             temp['Account_number']  = row['account_number']
@@ -232,12 +232,12 @@ try:
 
             # d1       = NP_DT8.strftime(FMT)
             # d2       = F_PDT.strftime(FMT)
-            
+
 
             if lnjc05Info != None:
                temp['Group']        = lnjc05Info['group_id']
                temp['Name']         = lnjc05Info['cus_name']
-               temp['Due_date']     = lnjc05Info['due_date']  
+               temp['Due_date']     = lnjc05Info['due_date']
 
                due_date = datetime.fromtimestamp(lnjc05Info['due_date'])
                d1       = due_date.strftime(FMT)
@@ -245,7 +245,7 @@ try:
                tdelta   = datetime.strptime(d1, FMT) - datetime.strptime(F_PDT, FMT)
                kq       = tdelta.days /30
                temp['Actual_payment']  = round_down(kq,1)
-               
+
                # if 'outstanding_principal' in lnjc05Info.keys():
                #    temp['Off_balance'] = lnjc05Info['outstanding_principal']
                if 'current_balance' in lnjc05Info.keys():
@@ -282,21 +282,21 @@ try:
                   temp['Last_date_made_collections_call'] = starttime.strftime(FMT)
 
                   temp['Call']                  = '1'
-            
+
 
             if lnjc05Info != None:
-               temp['If_still_collectable']  = '1'               
+               temp['If_still_collectable']  = '1'
             else:
                temp['If_still_collectable']  = '2'
-               
+
 
             if litigation > 0:
                temp['Litigation']            = '1'
-            else: 
+            else:
                temp['Litigation']            = '3'
 
             if row['LIC_NO'] in lic_no_arr:
-               temp['SMS_sent']              = '1' 
+               temp['SMS_sent']              = '1'
                temp['Send_reminder_letter']  = '2'
                temp['Note']   = ''
                # today          = datetime.now()
@@ -305,8 +305,8 @@ try:
                # d2             = date_time.strftime(FMT)
                # tdelta         = datetime.strptime(d1, FMT) - datetime.strptime(d2, FMT)
                # temp['Note']   = tdelta.days
-            else: 
-               temp['SMS_sent']              = '3' 
+            else:
+               temp['SMS_sent']              = '3'
                temp['Send_reminder_letter']  = '3'
                temp['Note']   = '1'
 
@@ -315,8 +315,8 @@ try:
             if product != None:
                temp['Product_code']          = product['name']
             if companyInfo != None:
-               temp['Partner_name_company']  = companyInfo['COMPANY'] 
-            else: 
+               temp['Partner_name_company']  = companyInfo['COMPANY']
+            else:
                temp['Partner_name_company']  = ''
 
             temp['Phone']                 = row['MOBILE_NO']
@@ -333,7 +333,7 @@ try:
             insertData.append(temp)
 
 
-   
+
    aggregate_sbv = [
       {
           "$match":
@@ -356,14 +356,14 @@ try:
                      SELECT=['cndk_no'])
             code = mongodb.getOne(MONGO_COLLECTION=action_code_collection, WHERE={'account_number': str(row['contract_no'])},
                      SELECT=['reason_nonpayment','action_code','raaStatus'])
-            
+
             countsite = mongodb.count(MONGO_COLLECTION=site_collection, WHERE={'contract_no': str(row['contract_no'])})
-            
+
             countsiteFielder = mongodb.count(MONGO_COLLECTION=site_collection, WHERE={'contract_no': str(row['contract_no']), 'field_staff': {'$nin': ['', 'null']} })
-            
+
             site = mongodb.get(MONGO_COLLECTION=site_collection, WHERE={'contract_no': str(row['contract_no'])},
                      SELECT=['contract_no','report_date'],SORT=[("created_at", -1)], SKIP=0, TAKE=1)
-            
+
             # cdrInfo = mongodb.get(MONGO_COLLECTION=cdr_collection, WHERE={'customernumber': str(row['phone']), "direction" : "outbound"},
                      # SELECT=['starttime'],SORT=[("starttime", -1)], SKIP=0, TAKE=1)
 
@@ -412,9 +412,9 @@ try:
 
             if accountInfo != None:
                temp['Name']         = accountInfo['cus_name']
-               temp['Due_date']     = accountInfo['overdue_date']  
+               temp['Due_date']     = accountInfo['overdue_date']
                temp['Current_balance'] = accountInfo['cur_bal']
-            
+
             # if trialInfo != None:
             #    temp['Outstanding_balance']     = float(trialInfo['prin_retail_balance']) + float(trialInfo['prin_cash_balance'])
 
@@ -446,12 +446,12 @@ try:
                temp['If_still_collectable']  = '2'
 
             if litigation > 0:
-               temp['Litigation']              = '1' 
+               temp['Litigation']              = '1'
             else:
-               temp['Litigation']              = '3' 
+               temp['Litigation']              = '3'
 
             if row['license_no'] in lic_no_arr:
-               temp['SMS_sent']              = '1' 
+               temp['SMS_sent']              = '1'
                temp['Send_reminder_letter']  = '2'
                temp['Note']   = ''
                # today          = datetime.now()
@@ -460,9 +460,9 @@ try:
                # d2             = date_time.strftime(FMT)
                # tdelta         = datetime.strptime(d1, FMT) - datetime.strptime(d2, FMT)
                # temp['Note']   = tdelta.days
-            else: 
+            else:
                temp['Send_reminder_letter']  = '3'
-               temp['SMS_sent']              = '3' 
+               temp['SMS_sent']              = '3'
                temp['Note']   = '1'
 
             temp['Cus_ID']                = row['cus_no']
@@ -470,21 +470,21 @@ try:
                temp['Product_code'] = '301 - Credit Card'
             else:
                temp['Product_code'] = '302 - Cash Card'
-            
+
             if companyInfo != None:
-               temp['Partner_name_company']  = companyInfo['COMPANY'] 
-            else: 
+               temp['Partner_name_company']  = companyInfo['COMPANY']
+            else:
                temp['Partner_name_company']  = ''
 
             temp['Phone']       = row['phone']
 
             if zaccfInfo != None:
-               temp['Dealer_code']  = zaccfInfo['WRK_BRN'] 
+               temp['Dealer_code']  = zaccfInfo['WRK_BRN']
                lnjc05Info1 = mongodb.getOne(MONGO_COLLECTION=lnjc05_collection, WHERE={'dealer_no': str(zaccfInfo['WRK_BRN'])},
                   SELECT=['dealer_name'])
                if lnjc05Info1 != None:
                   temp['Dealer_name'] = lnjc05Info1['dealer_name']
-            else: 
+            else:
                temp['Dealer_code']  = ''
 
             # temp['time'] = tdelta.days
@@ -503,7 +503,7 @@ try:
 
    # CARD
    aggregate_pipeline = [
-      { "$project": { 'account_number': 1, 'dateDifference' :{"$divide" : [{ "$subtract" : [endDayTimeStamp,'$overdue_date']}, 84000]}  } },
+      { "$project": { 'account_number': 1, 'dateDifference' :{"$divide" : [{ "$subtract" : [endDayTimeStamp,'$overdue_date']}, 86400]}  } },
       { "$match" : {'dateDifference': {"$gte": 361} } },
       {
           "$group":
@@ -512,7 +512,7 @@ try:
               "account_arr": {'$push': '$account_number'},
           }
       }
-      
+
    ]
    data = mongodb.aggregate_pipeline(MONGO_COLLECTION=account_collection,aggregate_pipeline=aggregate_pipeline)
    account_arr = []
@@ -564,14 +564,14 @@ try:
                      SELECT=['cndk_no'])
             code = mongodb.getOne(MONGO_COLLECTION=action_code_collection, WHERE={'account_number': str(row['contract_no'])},
                      SELECT=['reason_nonpayment','action_code','raaStatus'])
-            
+
             countsite = mongodb.count(MONGO_COLLECTION=site_collection, WHERE={'contract_no': str(row['contract_no'])})
-            
+
             countsiteFielder = mongodb.count(MONGO_COLLECTION=site_collection, WHERE={'contract_no': str(row['contract_no']), 'field_staff': {'$nin': ['', 'null']} })
-            
+
             site = mongodb.get(MONGO_COLLECTION=site_collection, WHERE={'contract_no': str(row['contract_no'])},
                      SELECT=['contract_no','report_date'],SORT=[("created_at", -1)], SKIP=0, TAKE=1)
-            
+
             cdrInfo = mongodb.get(MONGO_COLLECTION=cdr_collection, WHERE={'customernumber': str(row['phone']), "direction" : "outbound"},
                      SELECT=['starttime'],SORT=[("starttime", -1)], SKIP=0, TAKE=1)
 
@@ -620,16 +620,16 @@ try:
 
             if accountInfo != None:
                temp['Name']         = accountInfo['cus_name']
-               temp['Due_date']     = accountInfo['overdue_date']  
+               temp['Due_date']     = accountInfo['overdue_date']
                temp['Current_balance'] = accountInfo['cur_bal']
-            
+
             # if trialInfo != None:
             #    temp['Outstanding_balance']     = float(trialInfo['prin_retail_balance']) + float(trialInfo['prin_cash_balance'])
 
 
             temp['MRC'] = invest['cndk_no'] if invest !=None else ''
             temp['Reason_of_uncollected'] = code['reason_nonpayment'] if code != None and 'reason_nonpayment' in code else ''
-            
+
             if customerInfo != None and 'secured_asset' in customerInfo.keys():
                temp['If_bike_is_defined'] = customerInfo['secured_asset']
 
@@ -652,14 +652,14 @@ try:
                temp['If_still_collectable']  = '1'
             else:
                temp['If_still_collectable']  = '2'
-               
+
             if litigation > 0:
                temp['Litigation']            = '1'
             else:
                temp['Litigation']            = '3'
 
             if row['license_no'] in lic_no_arr:
-               temp['SMS_sent']              = '1' 
+               temp['SMS_sent']              = '1'
                temp['Send_reminder_letter']  = '2'
                temp['Note']   = ''
                # today          = datetime.now()
@@ -668,8 +668,8 @@ try:
                # d2             = date_time.strftime(FMT)
                # tdelta         = datetime.strptime(d1, FMT) - datetime.strptime(d2, FMT)
                # temp['Note']   = tdelta.days
-            else: 
-               temp['SMS_sent']              = '3' 
+            else:
+               temp['SMS_sent']              = '3'
                temp['Send_reminder_letter']  = '3'
                temp['Note']   = '1'
 
@@ -679,21 +679,21 @@ try:
                temp['Product_code'] = '301 - Credit Card'
             else:
                temp['Product_code'] = '302 - Cash Card'
-            
+
             if companyInfo != None:
-               temp['Partner_name_company']  = companyInfo['COMPANY'] 
-            else: 
+               temp['Partner_name_company']  = companyInfo['COMPANY']
+            else:
                temp['Partner_name_company']  = ''
 
             temp['Phone']       = row['phone']
 
             if zaccfInfo != None:
-               temp['Dealer_code']  = zaccfInfo['WRK_BRN'] 
+               temp['Dealer_code']  = zaccfInfo['WRK_BRN']
                lnjc05Info1 = mongodb.getOne(MONGO_COLLECTION=lnjc05_collection, WHERE={'dealer_no': str(zaccfInfo['WRK_BRN'])},
                   SELECT=['dealer_name'])
                if lnjc05Info1 != None:
                   temp['Dealer_name'] = lnjc05Info1['dealer_name']
-            else: 
+            else:
                temp['Dealer_code']  = ''
 
             # temp['time'] = tdelta.days
@@ -724,14 +724,14 @@ try:
                      SELECT=['cndk_no'])
             code = mongodb.getOne(MONGO_COLLECTION=action_code_collection, WHERE={'account_number': str(row['account_number'])},
                      SELECT=['reason_nonpayment','action_code','raaStatus'])
-            
+
             countsite = mongodb.count(MONGO_COLLECTION=site_collection, WHERE={'contract_no': str(row['account_number'])})
-            
+
             countsiteFielder = mongodb.count(MONGO_COLLECTION=site_collection, WHERE={'contract_no': str(row['account_number']), 'field_staff': {'$nin': ['', 'null']} })
-            
+
             site = mongodb.get(MONGO_COLLECTION=site_collection, WHERE={'contract_no': str(row['account_number'])},
                      SELECT=['contract_no','report_date'],SORT=[("created_at", -1)], SKIP=0, TAKE=1)
-            
+
             cdrInfo = mongodb.get(MONGO_COLLECTION=cdr_collection, WHERE={'customernumber': str(row['MOBILE_NO']), "direction" : "outbound"},
                      SELECT=['starttime'],SORT=[("starttime", -1)], SKIP=0, TAKE=1)
 
@@ -783,12 +783,12 @@ try:
 
             # d1       = NP_DT8.strftime(FMT)
             # d2       = F_PDT.strftime(FMT)
-            
+
 
             if lnjc05Info != None:
                temp['Group']        = lnjc05Info['group_id']
                temp['Name']         = lnjc05Info['cus_name']
-               temp['Due_date']     = lnjc05Info['due_date']  
+               temp['Due_date']     = lnjc05Info['due_date']
 
                due_date = datetime.fromtimestamp(lnjc05Info['due_date'])
                d1       = due_date.strftime(FMT)
@@ -796,7 +796,7 @@ try:
                tdelta   = datetime.strptime(d1, FMT) - datetime.strptime(F_PDT, FMT)
                kq       = tdelta.days /30
                temp['Actual_payment']  = round_down(kq,1)
-               
+
                if 'current_balance' in lnjc05Info.keys():
                   temp['Current_balance'] = lnjc05Info['current_balance']
 
@@ -810,7 +810,7 @@ try:
 
             temp['MRC'] = invest['cndk_no'] if invest !=None else ''
             temp['Reason_of_uncollected'] = code['reason_nonpayment'] if code != None and 'reason_nonpayment' in code else ''
-            
+
             if customerInfo != None and 'secured_asset' in customerInfo.keys():
                temp['If_bike_is_defined'] = customerInfo['secured_asset']
 
@@ -835,12 +835,12 @@ try:
                temp['If_still_collectable']  = '2'
 
             if litigation > 0:
-               temp['Litigation']              = '1' 
+               temp['Litigation']              = '1'
             else:
-               temp['Litigation']              = '3' 
+               temp['Litigation']              = '3'
 
             if row['LIC_NO'] in lic_no_arr:
-               temp['SMS_sent']              = '1' 
+               temp['SMS_sent']              = '1'
                temp['Send_reminder_letter']  = '2'
                temp['Note'] = ''
                # today          = datetime.now()
@@ -849,19 +849,19 @@ try:
                # d2             = date_time.strftime(FMT)
                # tdelta         = datetime.strptime(d1, FMT) - datetime.strptime(d2, FMT)
                # temp['Note']   = tdelta.days
-            else: 
-               temp['SMS_sent']              = '1' 
+            else:
+               temp['SMS_sent']              = '1'
                temp['Send_reminder_letter']  = '3'
                temp['Note']   = '1'
 
 
             temp['Cus_ID']                = row['CUS_ID']
-            
+
             if product != None:
                temp['Product_code']          = product['name']
             if companyInfo != None:
-               temp['Partner_name_company']  = companyInfo['COMPANY'] 
-            else: 
+               temp['Partner_name_company']  = companyInfo['COMPANY']
+            else:
                temp['Partner_name_company']  = ''
 
             temp['Phone']                 = row['MOBILE_NO']
@@ -876,7 +876,7 @@ try:
             temp['createdBy'] = 'system'
             insertData.append(temp)
 
-            
+
 
    if len(insertData) > 0:
       # mongodb.remove_document(MONGO_COLLECTION=collection)

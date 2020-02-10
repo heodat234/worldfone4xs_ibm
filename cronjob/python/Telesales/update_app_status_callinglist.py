@@ -37,35 +37,35 @@ now = datetime.now()
 subUserType = 'TS'
 collection = common.getSubUser(subUserType, 'Telesalelist')
 
-try:
-    pprint("test")
-    # updateLastCallCallinglist()
-    listApp = list(mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Appointment')))
-    for appointment in listApp:
-        if 'cmnd' in appointment.keys():
-    #         # mongodb.batch_update(MONGO_COLLECTION=collection, WHERE={'id_no': appointment['cmnd']}, VALUE={'app_status': appointment['status']})
-            callingListInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Telesalelist'), WHERE={'id_no': appointment['cmnd']})
-            if callingListInfo != None:
-    #         #     if '_id' in callingListInfo.keys():
-    #         #         pprint(str(callingListInfo['_id']))
-    #         #     else:
-    #         #         pprint("None")
-    #
-                # Update thông tin khách hàng và thông tin nhân viên được assign cho appointment
-                # updateInfo = {
-                #     'assign': callingListInfo['assign'] if 'assign' in callingListInfo.keys() else '',
-                #     'assign_name': callingListInfo['assign_name'] if 'assign_name' in callingListInfo.keys() else '',
-                #     'tele_name': callingListInfo['name'] if 'name' in callingListInfo.keys() else '',
-                #     'tele_phone': callingListInfo['phone'] if 'phone' in callingListInfo.keys() else '',
-                #     'tele_note': callingListInfo['note'] if 'note' in callingListInfo.keys() else '',
-                #     'tele_id': str(callingListInfo['_id']) if '_id' in callingListInfo.keys() else ''
-                # }
-                # # pprint(updateInfo)
-                # mongodb.batch_update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Appointment'), WHERE={'cmnd': callingListInfo['id_no']}, VALUE=updateInfo)
+# try:
+#     pprint("test")
+#     # updateLastCallCallinglist()
+#     listApp = list(mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Appointment')))
+#     for appointment in listApp:
+#         if 'cmnd' in appointment.keys():
+#             # Update thong tin app_status vao calling list
+#             # mongodb.batch_update(MONGO_COLLECTION=collection, WHERE={'id_no': appointment['cmnd']}, VALUE={'app_status': appointment['status']})
+            
+#             # Update thông tin khách hàng và thông tin nhân viên được assign cho appointment
+#             # callingListInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Telesalelist'), WHERE={'id_no': appointment['cmnd']})
+#             # if callingListInfo != None:
+#             #     if '_id' in callingListInfo.keys():
+#             #         pprint(str(callingListInfo['_id']))
+#             #     else:
+#             #         pprint("None")
+#                 # updateInfo = {
+#                 #     'assign': callingListInfo['assign'] if 'assign' in callingListInfo.keys() else '',
+#                 #     'assign_name': callingListInfo['assign_name'] if 'assign_name' in callingListInfo.keys() else '',
+#                 #     'tele_name': callingListInfo['name'] if 'name' in callingListInfo.keys() else '',
+#                 #     'tele_phone': callingListInfo['phone'] if 'phone' in callingListInfo.keys() else '',
+#                 #     'tele_note': callingListInfo['note'] if 'note' in callingListInfo.keys() else '',
+#                 #     'tele_id': str(callingListInfo['_id']) if '_id' in callingListInfo.keys() else ''
+#                 # }
+#                 # mongodb.batch_update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Appointment'), WHERE={'cmnd': callingListInfo['id_no']}, VALUE=updateInfo)
 
-except Exception as e:
-    log.write(traceback.format_exc())
-    print(traceback.format_exc())
+# except Exception as e:
+#     log.write(traceback.format_exc())
+#     print(traceback.format_exc())
 
 
 # UPDATE LAST CALL CALLING LIST
@@ -79,3 +79,15 @@ except Exception as e:
 #                 pprint(cdrInfo)
 # except Exception as e:
 #     pprint(traceback.format_exc())
+
+# Update last_modified
+try:
+    listAppointment = mongodb.get("TS_Appointment")
+    for appointment in listAppointment:
+        if 'updated_at' not in appointment.keys():
+            mongodb.update(MONGO_COLLECTION='TS_Appointment', WHERE={'_id': appointment['_id']}, VALUE={'last_modified': appointment['created_at']})
+        else:
+            mongodb.update(MONGO_COLLECTION='TS_Appointment', WHERE={'_id': appointment['_id']}, VALUE={'last_modified': appointment['updated_at']})
+
+except Exception as e:
+    pprint(traceback.format_exc())

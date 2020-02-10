@@ -23,3 +23,5 @@
 30/12/2019, 22:02:58: 'NoneType' object has no attribute 'to_dict'
 30/12/2019, 22:11:10: 'NoneType' object has no attribute 'to_dict'
 30/12/2019, 22:19:22: 'NoneType' object has no attribute 'to_dict'
+06/02/2020, 17:52:56: 'NoneType' object has no attribute 'to_dict'
+06/02/2020, 18:02:20: 'NoneType' object has no attribute 'to_dict'

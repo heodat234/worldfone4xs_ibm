@@ -31,18 +31,18 @@ function importFrom_Loan_campaign_list($TYPE, $collection, $diallist_id, $index,
                     $data[$i]["assign"] = substr($data[$i]["officer_id"], -4);
                 }
             }else{
-                $last_assign = $mongo_db->where("account_number", $data[$i]["account_number"])->order_by(array('_id' => -1))->getOne('LO_Diallist_detail');
-                if(isset($last_assign['assign'])){
-                    if(in_array($last_assign['assign'], $members))
-                        $data[$i]["assign"] = $last_assign['assign'];
-                    else{
-                        $data[$i]["assign"] = isset($members[0]) ? $members[0] : null;
-                        $members            = reorder_array($members);
-                    }
-                }else{
-                    $data[$i]["assign"] = isset($members[0]) ? $members[0] : null;
-                    $members            = reorder_array($members);
+               $last_assign = $mongo_db->where("account_number", $data[$i]["account_number"])->order_by(array('_id' => -1))->getOne('LO_Diallist_detail');
+               if(isset($last_assign['assign'])){
+                if(in_array($last_assign['assign'], $members))
+                    $data[$i]["assign"] = $last_assign['assign'];
+                else{
+                   $data[$i]["assign"] = isset($members[0]) ? $members[0] : null;
+                   $members            = reorder_array($members);
                 }
+               }else{
+                   $data[$i]["assign"] = isset($members[0]) ? $members[0] : null;
+                   $members            = reorder_array($members);
+               }
             }
         }
 
@@ -63,7 +63,7 @@ function importFrom_Loan_campaign_list($TYPE, $collection, $diallist_id, $index,
    
 }
 
-function importFrom_Loan_campaign_listA($TYPE, $collection, $diallist_id, $index, $a_type, $members = null) {
+function importFrom_Loan_campaign_listA($TYPE, $collection, $diallist_id, $index, $g_type, $members = null) {
     global $mongo_db;
     $diallist_detail_collection = "LO_Diallist_detail";
     $money = $mongo_db->where('type', 'LO_')->getOne('LO_Dial_config');
@@ -73,7 +73,7 @@ function importFrom_Loan_campaign_listA($TYPE, $collection, $diallist_id, $index
     $i              = 0;
     $diallist_id    = new MongoDB\BSON\ObjectId($diallist_id);
     $phoneField     = getPhoneField($collection);
-    $data           = $mongo_db->where('A_type', $a_type)->get($collection);
+    $data           = $mongo_db->where('G_type', $g_type)->get($collection);
     
     $mongo_db->switch_db('worldfone4xs');
     for($i=0; $i < count($data); $i++){
@@ -83,7 +83,6 @@ function importFrom_Loan_campaign_listA($TYPE, $collection, $diallist_id, $index
 
         if($members != null){
             if($TYPE == 'SIBS'){
-                $mongo_db->switch_db('worldfone4xs');
                 $last_assign = $mongo_db->where("account_number", $data[$i]["account_number"])->order_by(array('_id' => -1))->getOne('LO_Diallist_detail');
                 if(isset($last_assign['assign'])){
                     if(in_array($last_assign['assign'], $members))
@@ -97,7 +96,6 @@ function importFrom_Loan_campaign_listA($TYPE, $collection, $diallist_id, $index
                 }
 
             }else{
-                $mongo_db->switch_db('worldfone4xs');
                 $last_assign = $mongo_db->where("account_number", $data[$i]["account_number"])->order_by(array('_id' => -1))->getOne('LO_Diallist_detail');
                 if(isset($last_assign['assign'])){
                     if(in_array($last_assign['assign'], $members))
@@ -129,6 +127,58 @@ function importFrom_Loan_campaign_listA($TYPE, $collection, $diallist_id, $index
         $mongo_db->batch_insert($diallist_detail_collection, $data);
    
 }
+
+function SIBS_createDiallistDetailFor_D_E($collection, $diallist_id, $index, $members = null) {
+    global $mongo_db;
+    $diallist_detail_collection = "LO_Diallist_detail";
+    $money = $mongo_db->where('type', 'LO_')->getOne('LO_Dial_config');
+
+    $mongo_db->switch_db('LOAN_campaign_list');
+
+    $i              = 0;
+    $diallist_id    = new MongoDB\BSON\ObjectId($diallist_id);
+    $phoneField     = getPhoneField($collection);
+    $data           = $mongo_db->get($collection);
+    $duedate_plus1_check = checkTodayIsDueDatePlus1($collection);
+
+    $mongo_db->switch_db('worldfone4xs');
+
+    for($i=0; $i < count($data); $i++){
+
+        $data[$i]['Donotcall'] = conditionDoNotCall($data[$i], $money) ? 'Y' : 'N';
+
+        if($members != null && $duedate_plus1_check == false){
+            $last_assign = $mongo_db->where("account_number", $data[$i]["account_number"])->order_by(array('_id' => -1))->getOne('LO_Diallist_detail');
+            if(isset($last_assign['assign'])){
+                if(in_array($last_assign['assign'], $members)){
+                    $data[$i]["assign"] = $last_assign['assign'];
+                }else{
+                    $data[$i]["assign"] = substr($data[$i]["officer_id"], -4);
+                }
+            }else{
+                $data[$i]["assign"] = substr($data[$i]["officer_id"], -4);
+            }
+        }else{
+            $data[$i]["assign"] = substr($data[$i]["officer_id"], -4);
+        }
+
+        $data[$i]["diallist_id"] = $diallist_id;
+        $data[$i]["createdBy"] = 'System';
+        $data[$i]["createdAt"] = time();
+        $data[$i]["index"] = ++$index;
+        $data[$i]["priority"] = 99;
+        $data[$i]["from"] = $collection;
+        if(isset($data[$i][$phoneField]) && !empty($data[$i][$phoneField])) {
+            $data[$i]["phone"] = ((string)$data[$i][$phoneField][0] == '0') ? (string) $data[$i][$phoneField] : '0'. $data[$i][$phoneField];
+        }
+
+    }
+    $mongo_db->switch_db('worldfone4xs');
+    if(!empty($data))
+        $mongo_db->batch_insert($diallist_detail_collection, $data);
+   
+}
+
 function reorder_array($array){
     $result = [];
     
@@ -172,4 +222,28 @@ function conditionDoNotCall($data, $money){
         }
 
     endif;
+}
+
+function checkTodayIsDueDatePlus1($collection){
+    global $mongo_db;
+    $midnight = strtotime('today midnight');
+
+    $time1 = $midnight -1000;
+    $time2 = $midnight + 86000;
+
+    $check_duedate_plus1 = $mongo_db->where("due_date_add_1", ['$gte' => $time1, '$lte' => $time2])->getOne('LO_Report_due_date');
+
+    if(empty($check_duedate_plus1)) return false;
+    if(isset($check_duedate_plus1['debt_group'])){
+        $check_E = 'E' . $check_duedate_plus1['debt_group'];
+        $check_D = 'D' . $check_duedate_plus1['debt_group'];
+        if(strpos($collection, $check_E) !== false){
+            return true;
+        }
+
+        if(strpos($collection, $check_D) !== false){
+            return true;
+        }
+    }
+    return false;
 }

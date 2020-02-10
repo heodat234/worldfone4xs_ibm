@@ -19,3 +19,5 @@
 12/12/2019, 16:30:24: 'tongcong_dunokhoikien.1'
 12/12/2019, 16:36:28: Authentication failed.
 12/12/2019, 16:39:25: Authentication failed.
+06/02/2020, 10:29:11: 'NoneType' object has no attribute 'to_dict'
+06/02/2020, 11:21:38: 'NoneType' object has no attribute 'to_dict'

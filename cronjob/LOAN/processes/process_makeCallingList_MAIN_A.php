@@ -43,26 +43,17 @@ function removeAssigned($arr_contractNo_partner, $arrData, $fieldNo, $type)
     $result = [];
     foreach ($arrData as $key => $value) {
         if ($type == 'A') {
-            // $_temp = time() - $value['due_date'];
-            // $overdue_days = floor($_temp / (3600 * 24));
+            $_temp = time() - $value['due_date'];
+            $overdue_days = floor($_temp / (3600 * 24));
 
-            // if ($overdue_days >= 1 && $overdue_days <= 6) {
-            //     $value['G_type'] = 'G1';
-            // } else if ($overdue_days >= 7 && $overdue_days <= 19) {
-            //     $value['G_type'] = 'G2';
-            // } else if ($overdue_days >= 20 && $overdue_days <= 31) {
-            //     $value['G_type'] = 'G3';
-            // } else {
-            //     $value['G_type'] = '>31';
-            // }
-
-            $check = (int)date('d', $value['due_date']);
-            if($check >= 12 && $check <= 21){
-                $value['A_type'] = 'A01';
-            }else if($check >= 22 && $check <= 27){
-                $value['A_type'] = 'A02';
-            }else{
-                $value['A_type'] = 'A03';
+            if ($overdue_days >= 1 && $overdue_days <= 6) {
+                $value['G_type'] = 'G1';
+            } else if ($overdue_days >= 7 && $overdue_days <= 19) {
+                $value['G_type'] = 'G2';
+            } else if ($overdue_days >= 20 && $overdue_days <= 40) {
+                $value['G_type'] = 'G3';
+            } else {
+                $value['G_type'] = '>40';
             }
         }
         if (isset($value[$fieldNo])) {

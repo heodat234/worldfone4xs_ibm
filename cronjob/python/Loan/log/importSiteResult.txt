@@ -1,0 +1,1 @@
+06/02/2020, 17:52:56: 'NoneType' object has no attribute 'to_dict'

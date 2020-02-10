@@ -20,7 +20,7 @@ function func_getKyDue($overdue_date){
   $check = (int)date('d', $overdue_date);
   if($check >= 12 && $check <= 21){
     $kydue = '01';
-  }else if($check >= 22 && $check <= 27){
+  }else if($check >= 22 && $check <= 30){
     $kydue = '02';
   }else{
     $kydue = '03';
@@ -34,7 +34,7 @@ function func_define_A_type($param_overdue_date){
   $check = (int)date('d', $param_overdue_date);
   if($check >= 12 && $check <= 21){
     $kydue = 'A01';
-  }else if($check >= 22 && $check <= 27){
+  }else if($check >= 22 && $check <= 30){
     $kydue = 'A02';
   }else{
     $kydue = 'A03';
@@ -51,10 +51,10 @@ function func_define_G_type($param_overdue_date){
     return 'G1';
   }else if($overdue_days >= 7 && $overdue_days <= 19){
     return 'G2';
-  }else if($overdue_days >= 20 && $overdue_days <= 31){
+  }else if($overdue_days >= 20 && $overdue_days <= 40){
     return 'G3';
   }else{
-    return '>31';
+    return '>40';
   }
 }
 
@@ -104,7 +104,19 @@ function func_createRelationshipTable($zaccf, $account_number){
  }
 
  return $phoneArr;
+}
 
+function func_reorder_array($array){
+    $result = [];
+    
+    if(count($array) <= 1) return $array;
+    $temp = $array[0];
+    for($i=0; $i< count($array) -1;$i++){
+        $result[$i] = $array[$i+1];
+    }
+    $result[count($array) - 1] = $temp;
+
+    return $result;
 }
 
 

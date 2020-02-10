@@ -6,6 +6,7 @@ import calendar
 import time
 import ntpath
 import json
+import traceback
 from datetime import datetime
 from datetime import date
 # from xlsxwriter.utility import xl_rowcol_to_cell
@@ -19,12 +20,13 @@ from dateutil.parser import parse
 import os.path
 from os import path
 
-mongodb     = Mongodb("worldfone4xs")
-_mongodb    = Mongodb("_worldfone4xs")
-excel       = Excel()
 common      = Common()
+base_url = common.base_url()
+wff_env = common.wff_env(base_url)
+mongodb     = Mongodb("worldfone4xs", wff_env)
+_mongodb    = Mongodb("_worldfone4xs", wff_env)
+excel       = Excel()
 config      = Config()
-base_url    = config.base_url()
 subUserType = 'TS'
 collection  = common.getSubUser(subUserType, 'Datalibrary')
 now         = datetime.now()
@@ -72,8 +74,10 @@ try:
       checkErr = False
       for idx,header in enumerate(headers):
          err = {}
-         if header['index'] == 23:
-            continue;
+         if header['index'] == 27:
+            pprint(header)
+            continue
+
          if str(listDataLibrary[key][idx]) == 'nan':
             listDataLibrary[key][idx] = ''
          if header['type'] == 'int':
@@ -145,4 +149,5 @@ try:
 
 except Exception as e:
    pprint(e)
+   print(traceback.format_exc())
    # log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')

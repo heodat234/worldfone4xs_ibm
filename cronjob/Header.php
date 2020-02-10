@@ -2,9 +2,9 @@
 define('BASEPATH', pathinfo(__FILE__, PATHINFO_BASENAME));
 error_reporting(-1);
 ini_set('display_errors', 1);
-ini_set("log_errors", 1);
+// ini_set("log_errors", 1);
 $app_path = dirname(__DIR__);
-ini_set("error_log", $app_path . "/PHP_errors.log");
+// ini_set("error_log", $app_path . "/PHP_errors.log");
 
 require_once $app_path . "/vendor/autoload.php";
 require_once "Mongo_db.php";
