@@ -78,11 +78,11 @@ try:
    startMonth = int(time.mktime(time.strptime(str('01/' + str(month) + '/' + str(year) + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
    endMonth = int(time.mktime(time.strptime(str(str(lastDayOfMonth) + '/' + str(month) + '/' + str(year) + " 23:59:59"), "%d/%m/%Y %H:%M:%S")))
 
-   holidayOfMonth = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_off_sys'))
-   listHoliday = map(lambda offDateRow: {offDateRow['off_date']}, holidayOfMonth)
+   # holidayOfMonth = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_off_sys'))
+   # listHoliday = map(lambda offDateRow: {offDateRow['off_date']}, holidayOfMonth)
 
-   if todayTimeStamp in listHoliday:
-      sys.exit()
+   # if todayTimeStamp in listHoliday:
+   #    sys.exit()
 
    # listDay = [28,29,30,31,1,2,3,4,5]
    # if day not in listDay:
@@ -96,20 +96,12 @@ try:
 
    users = _mongodb.get(MONGO_COLLECTION=user_collection, SELECT=['extension','agentname'],SORT=([('_id', -1)]),SKIP=0, TAKE=200)
 
-
+   
    # SIBS
+   # List cmnd >361
    aggregate_pipeline = [
       { "$project": { 'account_number': 1, 'dateDifference' :{"$divide" : [{ "$subtract" : [endDayTimeStamp,'$due_date']}, 86400]}  } },
       { "$match" : {'dateDifference': {"$gte": 361} } },
-      # {
-      #    "$lookup":
-      #      {
-      #        "from": zaccf_collection,
-      #        "localField": 'account_number',
-      #        "foreignField": 'account_number',
-      #        "as": 'detail'
-      #      }
-      # },
       {
           "$group":
           {
@@ -150,6 +142,60 @@ try:
       for row in data_zaccf1:
          lic_no_arr = row['lic_no_arr']
 
+
+
+   # CARD
+   # List cmnd >361
+   aggregate_pipeline = [
+      { "$project": { 'account_number': 1, 'dateDifference' :{"$divide" : [{ "$subtract" : [endDayTimeStamp,'$overdue_date']}, 86400]}  } },
+      { "$match" : {'dateDifference': {"$gte": 361} } },
+      {
+          "$group":
+          {
+              "_id": 'null',
+              "account_arr": {'$push': '$account_number'},
+          }
+      }
+
+   ]
+   data = mongodb.aggregate_pipeline(MONGO_COLLECTION=account_collection,aggregate_pipeline=aggregate_pipeline)
+   account_arr_card = []
+   if data != None:
+      for row in data:
+         account_arr_card = row['account_arr']
+         # print(account_arr)
+
+
+   aggregate_sbv = [
+      {
+          "$match":
+          {
+              "contract_no": {'$in' : account_arr_card},
+          }
+      },
+      {
+          "$group":
+          {
+              "_id": 'null',
+              "lic_no_arr": {'$push': '$license_no'},
+          }
+      }
+   ]
+   data_sbv1 = mongodb.aggregate_pipeline(MONGO_COLLECTION=sbv_collection,aggregate_pipeline=aggregate_sbv)
+   lic_no_arr_card = []
+   if data_sbv1 != None:
+      for row in data_sbv1:
+         lic_no_arr_card = row['lic_no_arr']
+         # print(lic_no_arr)
+
+
+
+
+
+
+
+
+   # SIBS
    aggregate_zaccf = [
       {
           "$match":
@@ -212,7 +258,7 @@ try:
             temp = {}
             temp['Account_number']  = row['account_number']
             temp['Name']            = row['name']
-            temp['Release_date']    = row['FRELD8']
+            temp['Release_date']    = row['FRELD8'][0:2]+'/'+row['FRELD8'][2:4]+'/'+row['FRELD8'][4:8]
             temp['Release_amount']  = row['APPROV_LMT']
             temp['Interest_rate']   = row['INT_RATE']
             temp['Loan_Term']       = row['TERM_ID']
@@ -244,7 +290,7 @@ try:
                # d2       = F_PDT.strftime(FMT)
                tdelta   = datetime.strptime(d1, FMT) - datetime.strptime(F_PDT, FMT)
                kq       = tdelta.days /30
-               temp['Actual_payment']  = round_down(kq,1)
+               temp['Actual_payment']  = round_down(kq,0)
 
                # if 'outstanding_principal' in lnjc05Info.keys():
                #    temp['Off_balance'] = lnjc05Info['outstanding_principal']
@@ -254,7 +300,7 @@ try:
             else:
                tdelta   = datetime.strptime(NP_DT8, FMT) - datetime.strptime(F_PDT, FMT)
                kq       = tdelta.days /30
-               temp['Actual_payment']  = round_down(kq,1)
+               temp['Actual_payment']  = round_down(kq,0)
 
             if customerInfo != None and 'profession' in customerInfo.keys():
                temp['Profession'] = customerInfo['profession']
@@ -266,7 +312,7 @@ try:
             # else:
             #    cod = ''
             if customerInfo != None and 'secured_asset' in customerInfo.keys():
-               temp['If_bike_is_defined'] = customerInfo['secured_asset']
+               temp['If_bike_is_defined'] = "Yes" if customerInfo['secured_asset'] ==  'True' else 'No'
             # temp['If_bike_is_defined'] =  cod
             temp['If_site_visit_made'] = "Yes" if countsite > 0 else 'No'
             temp['If_there_is_fielder_in_location'] = "Yes" if countsiteFielder > 0 else 'No'
@@ -295,7 +341,7 @@ try:
             else:
                temp['Litigation']            = '3'
 
-            if row['LIC_NO'] in lic_no_arr:
+            if row['account_number'] in account_arr:
                temp['SMS_sent']              = '1'
                temp['Send_reminder_letter']  = '2'
                temp['Note']   = ''
@@ -307,15 +353,19 @@ try:
                # temp['Note']   = tdelta.days
             else:
                temp['SMS_sent']              = '3'
-               temp['Send_reminder_letter']  = '3'
+               if 'Group' in temp.keys() and temp['Group'].find('A') == -1:
+                  temp['Send_reminder_letter']  = '2'
+               else:
+                  temp['Send_reminder_letter']  = '3'
                temp['Note']   = '1'
 
-            temp['Cus_ID']                = row['CUS_ID']
+            temp['Cus_ID']                = row['LIC_NO']
 
             if product != None:
                temp['Product_code']          = product['name']
             if companyInfo != None:
                temp['Partner_name_company']  = companyInfo['COMPANY']
+               temp['Call']                  = '1'
             else:
                temp['Partner_name_company']  = ''
 
@@ -338,14 +388,14 @@ try:
       {
           "$match":
           {
-              "license_no": {'$in' : lic_no_arr},
+              "license_no": {'$in' : lic_no_arr, '$nin' : lic_no_arr_card},
           }
       }
    ]
    data_sbv = mongodb.aggregate_pipeline(MONGO_COLLECTION=sbv_collection,aggregate_pipeline=aggregate_sbv)
    if data_sbv != None:
       for row in data_sbv:
-         if 'account_number' in row.keys():
+         if 'contract_no' in row.keys():
             # print(row['account_number'])
             accountInfo = mongodb.getOne(MONGO_COLLECTION=account_collection, WHERE={'account_number': str(row['contract_no'])},
                SELECT=['cus_name','overdue_date','cur_bal'])
@@ -395,9 +445,14 @@ try:
 
             litigation = mongodb.count(MONGO_COLLECTION=lawsuit_collection, WHERE={'so_hopdong': str(row['contract_no'])})
 
+            sbv_stored = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'SBV_Stored'), WHERE={'contract_no': str(row['contract_no'])},SELECT=['overdue_indicator','kydue'],SORT=[("_id", -1)], SKIP=0, TAKE=1)
+            
 
             temp = {}
-            temp['Group']           = row['delinquency_group']
+            if sbv_stored != None:
+              for store in sbv_stored:
+                temp['Group']                 = store['overdue_indicator'] + store['kydue']
+
             temp['Account_number']  = row['contract_no']
             temp['Name']            = row['name']
             # temp['Release_date']    = row['FRELD8']
@@ -414,7 +469,8 @@ try:
                temp['Name']         = accountInfo['cus_name']
                temp['Due_date']     = accountInfo['overdue_date']
                temp['Current_balance'] = accountInfo['cur_bal']
-
+            # else:
+            #    temp['Current_balance'] = -1
             # if trialInfo != None:
             #    temp['Outstanding_balance']     = float(trialInfo['prin_retail_balance']) + float(trialInfo['prin_cash_balance'])
 
@@ -423,7 +479,7 @@ try:
             temp['Reason_of_uncollected'] = code['reason_nonpayment'] if code != None and 'reason_nonpayment' in code else ''
 
             if customerInfo != None and 'secured_asset' in customerInfo.keys():
-               temp['If_bike_is_defined'] = customerInfo['secured_asset']
+               temp['If_bike_is_defined'] = "Yes" if customerInfo['secured_asset'] ==  'True' else 'No'
 
             # temp['If_bike_is_defined'] =  cod
             temp['If_site_visit_made'] = "Yes" if countsite > 0 else 'No'
@@ -450,7 +506,7 @@ try:
             else:
                temp['Litigation']              = '3'
 
-            if row['license_no'] in lic_no_arr:
+            if row['contract_no'] in account_arr:
                temp['SMS_sent']              = '1'
                temp['Send_reminder_letter']  = '2'
                temp['Note']   = ''
@@ -461,11 +517,14 @@ try:
                # tdelta         = datetime.strptime(d1, FMT) - datetime.strptime(d2, FMT)
                # temp['Note']   = tdelta.days
             else:
-               temp['Send_reminder_letter']  = '3'
+               if 'Group' in temp.keys() and temp['Group'].find('A') == -1:
+                  temp['Send_reminder_letter']  = '2'
+               else:
+                  temp['Send_reminder_letter']  = '3'
                temp['SMS_sent']              = '3'
                temp['Note']   = '1'
 
-            temp['Cus_ID']                = row['cus_no']
+            temp['Cus_ID']                = row['license_no']
             if int(row['card_type']) < 100:
                temp['Product_code'] = '301 - Credit Card'
             else:
@@ -473,6 +532,7 @@ try:
 
             if companyInfo != None:
                temp['Partner_name_company']  = companyInfo['COMPANY']
+               temp['Call']                  = '1'
             else:
                temp['Partner_name_company']  = ''
 
@@ -502,59 +562,18 @@ try:
 
 
    # CARD
-   aggregate_pipeline = [
-      { "$project": { 'account_number': 1, 'dateDifference' :{"$divide" : [{ "$subtract" : [endDayTimeStamp,'$overdue_date']}, 86400]}  } },
-      { "$match" : {'dateDifference': {"$gte": 361} } },
-      {
-          "$group":
-          {
-              "_id": 'null',
-              "account_arr": {'$push': '$account_number'},
-          }
-      }
-
-   ]
-   data = mongodb.aggregate_pipeline(MONGO_COLLECTION=account_collection,aggregate_pipeline=aggregate_pipeline)
-   account_arr = []
-   if data != None:
-      for row in data:
-         account_arr = row['account_arr']
-
-
    aggregate_sbv = [
       {
           "$match":
           {
-              "contract_no": {'$in' : account_arr},
-          }
-      },
-      {
-          "$group":
-          {
-              "_id": 'null',
-              "lic_no_arr": {'$push': '$license_no'},
-          }
-      }
-   ]
-   data_sbv1 = mongodb.aggregate_pipeline(MONGO_COLLECTION=sbv_collection,aggregate_pipeline=aggregate_sbv)
-   lic_no_arr = []
-   if data_sbv1 != None:
-      for row in data_sbv1:
-         lic_no_arr = row['lic_no_arr']
-         # print(lic_no_arr)
-
-   aggregate_sbv = [
-      {
-          "$match":
-          {
-              "license_no": {'$in' : lic_no_arr},
+              "license_no": {'$in' : lic_no_arr_card},
           }
       }
    ]
    data_sbv = mongodb.aggregate_pipeline(MONGO_COLLECTION=sbv_collection,aggregate_pipeline=aggregate_sbv)
    if data_sbv != None:
       for row in data_sbv:
-         if 'account_number' in row.keys():
+         if 'contract_no' in row.keys():
             accountInfo = mongodb.getOne(MONGO_COLLECTION=account_collection, WHERE={'account_number': str(row['contract_no'])},
                SELECT=['cus_name','overdue_date','cur_bal'])
 
@@ -603,9 +622,13 @@ try:
 
             litigation = mongodb.count(MONGO_COLLECTION=lawsuit_collection, WHERE={'so_hopdong': str(row['contract_no'])})
 
-
+            sbv_stored = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'SBV_Stored'), WHERE={'contract_no': str(row['contract_no'])},SELECT=['overdue_indicator','kydue'],SORT=[("_id", -1)], SKIP=0, TAKE=1)
+            
             temp = {}
-            temp['Group']           = row['delinquency_group']
+            if sbv_stored != None:
+              for store in sbv_stored:
+                temp['Group']                 = store['overdue_indicator'] + store['kydue']
+
             temp['Account_number']  = row['contract_no']
             temp['Name']            = row['name']
             # temp['Release_date']    = row['FRELD8']
@@ -622,7 +645,8 @@ try:
                temp['Name']         = accountInfo['cus_name']
                temp['Due_date']     = accountInfo['overdue_date']
                temp['Current_balance'] = accountInfo['cur_bal']
-
+            # else:
+            #    temp['Current_balance'] = -1
             # if trialInfo != None:
             #    temp['Outstanding_balance']     = float(trialInfo['prin_retail_balance']) + float(trialInfo['prin_cash_balance'])
 
@@ -631,7 +655,7 @@ try:
             temp['Reason_of_uncollected'] = code['reason_nonpayment'] if code != None and 'reason_nonpayment' in code else ''
 
             if customerInfo != None and 'secured_asset' in customerInfo.keys():
-               temp['If_bike_is_defined'] = customerInfo['secured_asset']
+               temp['If_bike_is_defined'] = "Yes" if customerInfo['secured_asset'] ==  'True' else 'No'
 
             # temp['If_bike_is_defined'] =  cod
             temp['If_site_visit_made'] = "Yes" if countsite > 0 else 'No'
@@ -658,7 +682,7 @@ try:
             else:
                temp['Litigation']            = '3'
 
-            if row['license_no'] in lic_no_arr:
+            if row['contract_no'] in account_arr_card:
                temp['SMS_sent']              = '1'
                temp['Send_reminder_letter']  = '2'
                temp['Note']   = ''
@@ -670,10 +694,13 @@ try:
                # temp['Note']   = tdelta.days
             else:
                temp['SMS_sent']              = '3'
-               temp['Send_reminder_letter']  = '3'
+               if 'Group' in temp.keys() and temp['Group'].find('A') == -1:
+                  temp['Send_reminder_letter']  = '2'
+               else:
+                  temp['Send_reminder_letter']  = '3'
                temp['Note']   = '1'
 
-            temp['Cus_ID']                = row['cus_no']
+            temp['Cus_ID']                = row['license_no']
 
             if int(row['card_type']) < 100:
                temp['Product_code'] = '301 - Credit Card'
@@ -682,6 +709,7 @@ try:
 
             if companyInfo != None:
                temp['Partner_name_company']  = companyInfo['COMPANY']
+               temp['Call']                  = '1'
             else:
                temp['Partner_name_company']  = ''
 
@@ -707,7 +735,7 @@ try:
       {
           "$match":
           {
-              "LIC_NO": {'$in' : lic_no_arr},
+              "LIC_NO": {'$in' : lic_no_arr_card,  '$nin' : lic_no_arr},
           }
       }
    ]
@@ -763,7 +791,7 @@ try:
             temp = {}
             temp['Account_number']  = row['account_number']
             temp['Name']            = row['name']
-            temp['Release_date']    = row['FRELD8']
+            temp['Release_date']    = row['FRELD8'][0:2]+'/'+row['FRELD8'][2:4]+'/'+row['FRELD8'][4:8]
             temp['Release_amount']  = row['APPROV_LMT']
             temp['Interest_rate']   = row['INT_RATE']
             temp['Loan_Term']       = row['TERM_ID']
@@ -795,7 +823,7 @@ try:
                # d2       = F_PDT.strftime(FMT)
                tdelta   = datetime.strptime(d1, FMT) - datetime.strptime(F_PDT, FMT)
                kq       = tdelta.days /30
-               temp['Actual_payment']  = round_down(kq,1)
+               temp['Actual_payment']  = round_down(kq,0)
 
                if 'current_balance' in lnjc05Info.keys():
                   temp['Current_balance'] = lnjc05Info['current_balance']
@@ -803,7 +831,7 @@ try:
             else:
                tdelta   = datetime.strptime(NP_DT8, FMT) - datetime.strptime(F_PDT, FMT)
                kq       = tdelta.days /30
-               temp['Actual_payment']  = round_down(kq,1)
+               temp['Actual_payment']  = round_down(kq,0)
 
             if customerInfo != None and 'profession' in customerInfo.keys():
                temp['Profession'] = customerInfo['profession']
@@ -812,7 +840,7 @@ try:
             temp['Reason_of_uncollected'] = code['reason_nonpayment'] if code != None and 'reason_nonpayment' in code else ''
 
             if customerInfo != None and 'secured_asset' in customerInfo.keys():
-               temp['If_bike_is_defined'] = customerInfo['secured_asset']
+               temp['If_bike_is_defined'] = "Yes" if customerInfo['secured_asset'] ==  'True' else 'No'
 
             # temp['If_bike_is_defined'] =  cod
             temp['If_site_visit_made'] = "Yes" if countsite > 0 else 'No'
@@ -839,7 +867,7 @@ try:
             else:
                temp['Litigation']              = '3'
 
-            if row['LIC_NO'] in lic_no_arr:
+            if row['account_number'] in account_arr_card:
                temp['SMS_sent']              = '1'
                temp['Send_reminder_letter']  = '2'
                temp['Note'] = ''
@@ -851,16 +879,20 @@ try:
                # temp['Note']   = tdelta.days
             else:
                temp['SMS_sent']              = '1'
-               temp['Send_reminder_letter']  = '3'
+               if 'Group' in temp.keys() and temp['Group'].find('A') == -1:
+                  temp['Send_reminder_letter']  = '2'
+               else:
+                  temp['Send_reminder_letter']  = '3'
                temp['Note']   = '1'
 
 
-            temp['Cus_ID']                = row['CUS_ID']
+            temp['Cus_ID']                = row['LIC_NO']
 
             if product != None:
                temp['Product_code']          = product['name']
             if companyInfo != None:
                temp['Partner_name_company']  = companyInfo['COMPANY']
+               temp['Call']                  = '1'
             else:
                temp['Partner_name_company']  = ''
 
@@ -898,10 +930,10 @@ try:
 
          if row['Note'] == '':
             temp = {}
-            temp['Note'] = row['Product_code']
-            mongodb.batch_update( MONGO_COLLECTION=collection, WHERE={'LIC_NO': str(row['LIC_NO']) }, VALUE=temp)
-            temp['Note'] = ''
-            mongodb.update( MONGO_COLLECTION=collection, WHERE={'Account_number': str(row['Account_number']) }, VALUE=temp)
+            temp['Note'] = 'Follow' + row['Product_code']
+            mongodb.batch_update( MONGO_COLLECTION=collection, WHERE={'LIC_NO': str(row['LIC_NO']), 'Note': '1' }, VALUE=temp)
+            # temp['Note'] = ''
+            # mongodb.update( MONGO_COLLECTION=collection, WHERE={'Account_number': str(row['Account_number']) }, VALUE=temp)
 
 
 

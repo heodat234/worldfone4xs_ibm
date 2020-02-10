@@ -38,10 +38,10 @@ Class Block_card_report extends WFF_Controller {
 
     function exportExcel() {
         $request    = $this->input->post();
-        $start      =  strtotime(str_replace('/', '-', $request['startDate'])) ;
-        $end        = strtotime(str_replace('/', '-', $request['endDate'])) ;
+        $start      =  strtotime(str_replace('/', '-', $request['start'])) ;
+        $end        = strtotime(str_replace('/', '-', $request['end'])) ;
         $request = array('report_date' => array('$gte' => $start, '$lte' => $end));
-        $data = $this->crud->where($request)->order_by(array('index' => 'asc'))->get($this->collection,array('index','account_number','name','block','acll','sibs','group','report_date'));
+        $data = $this->crud->where($request)->order_by(array('index' => 'asc'))->get($this->collection,array('index','account_number','customer_name','block','acll','sibs','group_3_over_other_bank','report_date'));
         // print_r($data);exit;
         $spreadsheet = new Spreadsheet();
     	$spreadsheet->getProperties()
@@ -159,7 +159,7 @@ Class Block_card_report extends WFF_Controller {
             $worksheet->setCellValue('A' . $start_row, $i);
             $worksheet->setCellValueExplicit('B' . $start_row, $value['account_number'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
             // $worksheet->setCellValue('B' . $start_row, $value['account_number']);
-            $worksheet->setCellValue('C' . $start_row, $value['name']);
+            $worksheet->setCellValue('C' . $start_row, $value['customer_name']);
             $worksheet->setCellValue('D' . $start_row, 'No'); 
             $worksheet->setCellValue('E' . $start_row, 'Yes'); 
 

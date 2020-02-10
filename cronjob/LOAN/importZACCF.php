@@ -101,7 +101,7 @@ while(!feof($file))
     if(!empty($temp)) {
 
         // Condition data
-    	$editedValue = array_slice($temp, $startColumn, $endColumn + 1 - $startColumn);
+        $editedValue = array_slice($temp, $startColumn, $endColumn + 1 - $startColumn);
         //if(empty($editedValue[$endColumn-1-$startColumn])) continue;
         //if(!strpos($editedValue[$endColumn -1-$startColumn], "/")) continue;
         if(empty($editedValue[5])) continue;
@@ -112,7 +112,7 @@ while(!feof($file))
                 if ($field == 'W_ORG') {
                     $doc['W_ORG_1'] = isset($editedValue[$index]) ? (double)$editedValue[$index] : null;
                 }
-                $doc[$field] = isset($editedValue[$index]) ? $editedValue[$index] : null;
+                $doc[$field] = isset($editedValue[$index]) ? mb_convert_encoding($editedValue[$index], 'ISO-8859-1', 'UTF-8') : null;
             }
         }
 

@@ -232,7 +232,7 @@ Class Smsdaily_report extends WFF_Controller {
         if ($date['mon'] < 10) {
             $month = '0'.(string)$date['mon'];
         }
-        $file_path = UPLOAD_PATH . "loan/export/SMS Daily Report - SIBS_". $day.$month.$date['year'] .".xlsx";
+        $file_path = UPLOAD_PATH . "loan/export/SMS Daily Report_". $day.$month.$date['year'] .".xlsx";
         echo json_encode(array("status" => 1, "data" => $file_path));
     }
 }

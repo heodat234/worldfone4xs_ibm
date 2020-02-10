@@ -6,6 +6,7 @@ import time
 import ntpath
 import json
 import calendar
+import traceback
 from helper.mongod import Mongodb
 from datetime import datetime
 from datetime import date
@@ -44,7 +45,7 @@ try:
    now         = datetime.now()
 
    today = date.today()
-   # today = datetime.strptime('04/01/2020', "%d/%m/%Y").date()
+   # today = datetime.strptime('03/02/2020', "%d/%m/%Y").date()
 
    day = today.day
    month = today.month
@@ -91,7 +92,7 @@ try:
       },{
           "$match":
           {
-              "detail.kydue": '02',
+              "detail.overdue_indicator": 'B',
           }
       },{
           "$group":
@@ -120,13 +121,13 @@ try:
             'sibs'            : '',
             'group_3_over_other_bank'           : '',
             'createdBy'       : 'system',
-            'report_date'       : todayTimeStamp
+            'report_date'       : todayTimeStamp,
             'createdAt'       : todayTimeStamp
          }
-         groupInfo = mongodb.getOne(MONGO_COLLECTION=group_collection,WHERE={'account_number': acc_row['account_number']})
-         if groupInfo  != None:
-            group = groupInfo['group']
-            temp['acll'] = group
+         sbv_stored = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'SBV_Stored'), WHERE={'contract_no': str(acc_row['account_number'])},SELECT=['overdue_indicator','kydue'],SORT=[("_id", -1)], SKIP=0, TAKE=1)
+         if sbv_stored != None:
+            for store in sbv_stored:
+               temp['acll']                 = store['overdue_indicator'] + store['kydue']
 
          insertData.append(temp)
          i += 1
@@ -197,7 +198,7 @@ try:
             'sibs'            : row['group_id'],
             'group_3_over_other_bank'           : '',
             'createdBy'       : 'system',
-            'report_date'       : todayTimeStamp
+            'report_date'       : todayTimeStamp,
             'createdAt'       : todayTimeStamp
          }
          insertData.append(temp)
@@ -266,7 +267,7 @@ try:
             'sibs'            : '',
             'group_3_over_other_bank'           : row['nhom_cao_nhat_tai_tctd_khac'],
             'createdBy'       : 'system',
-            'report_date'       : todayTimeStamp
+            'report_date'       : todayTimeStamp,
             'createdAt'       : todayTimeStamp
          }
          insertData.append(temp)
@@ -279,5 +280,5 @@ try:
    log.write(now_end.strftime("%d/%m/%Y, %H:%M:%S") + ': End Log' + '\n')
    print('DONE')
 except Exception as e:
-   pprint(e)
+   print(traceback.format_exc())
    log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')

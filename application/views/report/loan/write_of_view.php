@@ -79,8 +79,8 @@
                           parse: function (response) {
                               response.data.map(function(doc) {
                                   doc.Due_date = doc.Due_date ? new Date(doc.Due_date * 1000) : undefined;
-                                  doc.Release_amount = parseInt(doc.Release_amount)
-                                  doc.Off_balance = parseInt(doc.Off_balance)
+                                  doc.Release_amount = parseFloat('0'+doc.Release_amount)
+                                  doc.Off_balance = parseFloat('0'+doc.Off_balance)
                                   doc.Current_balance = parseInt(doc.Current_balance)
                                   doc.Interest_rate = parseFloat('0'+doc.Interest_rate)
                                   return doc;
@@ -306,14 +306,14 @@
         }();
         window.onload = function() {
           $("#start-date").kendoDatePicker({
-            disableDates: function (date) {
-                var disabled = [6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27];
-                if (date && disabled.indexOf(date.getDate()) > -1 ) {
-                    return true;
-                } else {
-                    return false;
-                }
-            }
+            // disableDates: function (date) {
+            //     var disabled = [6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27];
+            //     if (date && disabled.indexOf(date.getDate()) > -1 ) {
+            //         return true;
+            //     } else {
+            //         return false;
+            //     }
+            // }
         });
           
           var dateRange = 30;

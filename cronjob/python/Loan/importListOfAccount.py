@@ -45,7 +45,7 @@ try:
     insertData = []
     errorData = []
     today = date.today()
-    # today = datetime.strptime('17/12/2019', "%d/%m/%Y").date() 
+    # today = datetime.strptime('03/02/2020', "%d/%m/%Y").date() 
     yesterday = today - timedelta(days=1)
     day = today.day
     month = today.month
