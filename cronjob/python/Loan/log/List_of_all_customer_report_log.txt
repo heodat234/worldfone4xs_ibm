@@ -1,0 +1,13 @@
+11/02/2020, 16:06:20: Writing 15 cols but got 14 aliases
+11/02/2020, 16:09:25: Writing 15 cols but got 14 aliases
+11/02/2020, 16:16:53: End Log
+11/02/2020, 16:32:32: not enough values to unpack (expected 2, got 1)
+11/02/2020, 16:46:22: End Log
+11/02/2020, 16:53:42: End Log
+11/02/2020, 17:17:38: End Log
+11/02/2020, 17:38:14: End Log
+11/02/2020, 17:48:01: End Log
+11/02/2020, 19:59:54: End Log
+12/02/2020, 11:31:58: End Log
+12/02/2020, 11:43:24: End Log
+12/02/2020, 13:05:22: End Log

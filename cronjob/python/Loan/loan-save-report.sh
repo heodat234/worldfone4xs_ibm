@@ -65,17 +65,17 @@ fi
 #    exit 0
 # fi
 
-# if [ $(ps -ef | grep -v grep | saveSmsDaily.py | wc -l) -lt 1 ]; then
-#    /usr/local/bin/python3.6 $BASEDIR/saveSmsDaily.py > /dev/null 2>&1 &
-#    echo "RUN $BASEDIR/saveSmsDaily.py"
-# else
-#    echo "Worldfone ScanJob service is running"
-#    exit 0
-# fi
+if [ $(ps -ef | grep -v grep | grep savewriteOf.py | wc -l) -lt 1 ]; then
+   /usr/local/bin/python3.6 ${BASEDIR}/savewriteOf.py > /dev/null 2>&1 &
+   echo "RUN ${BASEDIR}/savewriteOf.py"
+else
+   echo "Worldfone ScanJob service is running"
+   exit 0
+fi
 
-# if [ $(ps -ef | grep -v grep | grep saveCardLoanGroupReport.py | wc -l) -lt 1 ]; then
-#    /usr/local/bin/python3.6 $BASEDIR/saveCardLoanGroupReport.py > /dev/null 2>&1 &
-#    echo "RUN $BASEDIR/saveCardLoanGroupReport.py"
+# if [ $(ps -ef | grep -v grep | grep thuhoixe_report.py | wc -l) -lt 1 ]; then
+#    /usr/local/bin/python3.6 $BASEDIR/thuhoixe_report.py > /dev/null 2>&1 &
+#    echo "RUN $BASEDIR/thuhoixe_report.py"
 # else
 #    echo "Worldfone ScanJob service is running"
 #    exit 0

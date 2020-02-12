@@ -1,0 +1,51 @@
+10/02/2020, 11:19:47: Start Import
+10/02/2020, 11:20:07: End Log
+10/02/2020, 11:24:03: Start Import
+10/02/2020, 11:24:33: End Log
+10/02/2020, 12:28:15: Start Import
+10/02/2020, 12:28:39: End Log
+10/02/2020, 13:18:06: Start Import
+10/02/2020, 13:18:29: End Log
+10/02/2020, 16:10:45: Start Import
+10/02/2020, 16:11:14: End Log
+11/02/2020, 17:59:57: Start Import
+11/02/2020, 18:00:52: End Log
+11/02/2020, 18:02:59: Start Import
+11/02/2020, 18:03:31: End Log
+11/02/2020, 19:40:15: Start Import
+11/02/2020, 19:40:15: invalid literal for int() with base 10: '.00'
+11/02/2020, 19:40:47: Start Import
+11/02/2020, 19:40:47: invalid literal for int() with base 10: '.00'
+11/02/2020, 19:41:15: Start Import
+11/02/2020, 19:41:15: invalid literal for int() with base 10: '.00'
+11/02/2020, 19:41:28: Start Import
+11/02/2020, 19:41:28: invalid literal for int() with base 10: '.00'
+11/02/2020, 19:48:17: Start Import
+11/02/2020, 19:48:17: invalid literal for int() with base 10: '.415200000'
+11/02/2020, 19:49:23: Start Import
+11/02/2020, 19:49:53: End Log
+12/02/2020, 11:00:56: Start Import
+12/02/2020, 11:01:27: End Log
+12/02/2020, 11:09:35: Start Import
+12/02/2020, 11:36:55: Start Import
+12/02/2020, 11:38:11: End Log
+12/02/2020, 12:24:51: Start Import
+12/02/2020, 12:24:51: 'license_no'
+12/02/2020, 12:30:30: Start Import
+12/02/2020, 12:30:58: End Log
+12/02/2020, 12:32:08: Start Import
+12/02/2020, 12:32:37: End Log
+12/02/2020, 12:33:19: Start Import
+12/02/2020, 12:33:19: 'license_no'
+12/02/2020, 12:37:23: Start Import
+12/02/2020, 12:37:23: 'license_no'
+12/02/2020, 12:38:38: Start Import
+12/02/2020, 12:38:38: 'license_no'
+12/02/2020, 12:43:47: Start Import
+12/02/2020, 12:43:47: name 'insertData1' is not defined
+12/02/2020, 12:47:42: Start Import
+12/02/2020, 12:49:01: End Log
+12/02/2020, 12:53:20: Start Import
+12/02/2020, 12:55:01: End Log
+12/02/2020, 12:57:55: Start Import
+12/02/2020, 12:59:40: End Log

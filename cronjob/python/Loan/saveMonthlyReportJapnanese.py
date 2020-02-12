@@ -79,6 +79,7 @@ try:
 
     listDayOfMonth = []
     startDayOfMonth = 1
+   
     while startDayOfMonth <= lastDayOfMonth:
         listDayOfMonth.append(str(format(startDayOfMonth, '02d')) + str(format(month, '02d')) + str(year))
         startDayOfMonth += 1
@@ -259,20 +260,22 @@ try:
                     temp_total['product_name'] = product_value['name']
                     temp_total['created_at'] = time.time()
                     temp_total['created_by'] = 'system'
-                    temp_total['index'] = '2'
+                    temp_total['index'] = '1'
                     if total_detail == 'acc':
+                        
                         temp_total['this_month'] = zaccfInfo[0]['this_month_acc']
                         total_total_acc += temp_total['this_month']
                         lastMonthInfoTotal = mongodb.getOne(common.getSubUser(subUserType, 'Collection_factors_total'), WHERE={'created_at': {'$gte': endLastMonthStarttime, '$lte': endLastMonthEndtime}, 'detail': 'acc', 'product_code': product_value['code']})
                         temp_total['last_month'] = lastMonthInfoTotal['this_month'] if lastMonthInfoTotal is not None and lastMonthInfoTotal['this_month'] is not None else 0
                     else:
+                        
                         temp_total['this_month'] = sum(map(lambda x: float(x), zaccfInfo[0]['this_month_amt'])) if zaccfInfo[0]['this_month_amt'] is not None else 0
                         total_total_amt += temp_total['this_month']
                         temp_total_amt_zaccf = temp_total['this_month']
                         lastMonthInfoTotal = mongodb.getOne(common.getSubUser(subUserType, 'Collection_factors_total'), WHERE={'created_at': {'$gte': endLastMonthStarttime, '$lte': endLastMonthEndtime}, 'detail': 'amt', 'product_code': product_value['code']})
                         temp_total['last_month'] = lastMonthInfoTotal['this_month'] if lastMonthInfoTotal is not None and lastMonthInfoTotal['this_month'] is not None else 0
                     insertDataTotal.append(temp_total)
-                pprint(temp_total_amt_zaccf)
+                
                 temp_2 = {
                     'index'         : '1b',
                     'type_detail'   : 'group_b',
@@ -724,25 +727,25 @@ try:
             if sbvInfo not in [None, []] and sbvInfo[0] is not None:
                 temp_total_amt_sbv = 0
                 for total_detail in total_list_value:
-                    temp_total = {}
-                    temp_total['detail'] = total_detail
-                    temp_total['product_code'] = product_value['code']
-                    temp_total['product_name'] = product_value['name']
-                    temp_total['created_at'] = time.time()
-                    temp_total['created_by'] = 'system'
-                    temp_total['index'] = '2'
+                    temp_total1 = {}
+                    temp_total1['detail'] = total_detail
+                    temp_total1['product_code'] = product_value['code']
+                    temp_total1['product_name'] = product_value['name']
+                    temp_total1['created_at'] = time.time()
+                    temp_total1['created_by'] = 'system'
+                    temp_total1['index'] = '1'
                     if total_detail == 'acc':
-                        temp_total['this_month'] = sbvInfo[0]['this_month_acc']
+                        temp_total1['this_month'] = sbvInfo[0]['this_month_acc']
                         lastMonthInfoTotal = mongodb.getOne(common.getSubUser(subUserType, 'Collection_factors_total'), WHERE={'created_at': {'$gte': endLastMonthStarttime, '$lte': endLastMonthEndtime}, 'detail': 'acc', 'product_code': product_value['code']})
-                        temp_total['last_month'] = lastMonthInfoTotal['this_month'] if lastMonthInfoTotal is not None and lastMonthInfoTotal['this_month'] is not None else 0
-                        total_total_acc += temp_total['this_month']
+                        temp_total1['last_month'] = lastMonthInfoTotal['this_month'] if lastMonthInfoTotal is not None and lastMonthInfoTotal['this_month'] is not None else 0
+                        total_total_acc += temp_total1['this_month']
                     else:
-                        temp_total['this_month'] = sbvInfo[0]['this_month_amt']
+                        temp_total1['this_month'] = sbvInfo[0]['this_month_amt']
                         lastMonthInfoTotal = mongodb.getOne(common.getSubUser(subUserType, 'Collection_factors_total'), WHERE={'created_at': {'$gte': endLastMonthStarttime, '$lte': endLastMonthEndtime}, 'detail': 'amt', 'product_code': product_value['code']})
-                        temp_total['last_month'] = lastMonthInfoTotal['this_month'] if lastMonthInfoTotal is not None and lastMonthInfoTotal['this_month'] is not None else 0
-                        total_total_amt += temp_total['this_month']
-                        temp_total_amt_sbv = temp_total['this_month']
-                    insertDataTotal.append(temp_total)
+                        temp_total1['last_month'] = lastMonthInfoTotal['this_month'] if lastMonthInfoTotal is not None and lastMonthInfoTotal['this_month'] is not None else 0
+                        total_total_amt += temp_total1['this_month']
+                        temp_total_amt_sbv = temp_total1['this_month']
+                    insertDataTotal.append(temp_total1)
 
                 temp_2 = {
                     'index'         : '1b',
@@ -758,8 +761,8 @@ try:
                 total_g_b_acc += temp_2['this_month_acc']
                 total_g_b_amt += temp_2['this_month_amt']
                 lastMonthInfoTotal = mongodb.getOne(common.getSubUser(subUserType, 'Collection_factors_detail'), WHERE={'created_at': {'$gte': endLastMonthStarttime, '$lte': endLastMonthEndtime}, 'product_code': product_value['code'], 'type_detail': 'group_b'})
-                temp_total['last_month_acc'] = lastMonthInfoTotal['this_month_acc'] if lastMonthInfoTotal is not None and lastMonthInfoTotal['this_month_acc'] is not None else 0
-                temp_total['last_month_amt'] = lastMonthInfoTotal['this_month_amt'] if lastMonthInfoTotal is not None and lastMonthInfoTotal['this_month_amt'] is not None else 0
+                temp_total1['last_month_acc'] = lastMonthInfoTotal['this_month_acc'] if lastMonthInfoTotal is not None and lastMonthInfoTotal['this_month_acc'] is not None else 0
+                temp_total1['last_month_amt'] = lastMonthInfoTotal['this_month_amt'] if lastMonthInfoTotal is not None and lastMonthInfoTotal['this_month_amt'] is not None else 0
                 insertDataDetail.append(temp_2)
 
                 temp_3 = {
@@ -776,8 +779,8 @@ try:
                 total_g_c_acc += temp_3['this_month_acc']
                 total_g_c_amt += temp_3['this_month_amt']
                 lastMonthInfoTotal = mongodb.getOne(common.getSubUser(subUserType, 'Collection_factors_detail'), WHERE={'created_at': {'$gte': endLastMonthStarttime, '$lte': endLastMonthEndtime}, 'product_code': product_value['code'], 'type_detail': 'group_c'})
-                temp_total['last_month_acc'] = lastMonthInfoTotal['this_month_acc'] if lastMonthInfoTotal is not None and lastMonthInfoTotal['this_month_acc'] is not None else 0
-                temp_total['last_month_amt'] = lastMonthInfoTotal['this_month_amt'] if lastMonthInfoTotal is not None and lastMonthInfoTotal['this_month_amt'] is not None else 0
+                temp_total1['last_month_acc'] = lastMonthInfoTotal['this_month_acc'] if lastMonthInfoTotal is not None and lastMonthInfoTotal['this_month_acc'] is not None else 0
+                temp_total1['last_month_amt'] = lastMonthInfoTotal['this_month_amt'] if lastMonthInfoTotal is not None and lastMonthInfoTotal['this_month_amt'] is not None else 0
                 insertDataDetail.append(temp_3)
 
                 temp_4 = {
@@ -794,8 +797,8 @@ try:
                 total_g_d_acc += temp_4['this_month_acc']
                 total_g_d_amt += temp_4['this_month_amt']
                 lastMonthInfoTotal = mongodb.getOne(common.getSubUser(subUserType, 'Collection_factors_detail'), WHERE={'created_at': {'$gte': endLastMonthStarttime, '$lte': endLastMonthEndtime}, 'product_code': product_value['code'], 'type_detail': 'group_d'})
-                temp_total['last_month_acc'] = lastMonthInfoTotal['this_month_acc'] if lastMonthInfoTotal is not None and lastMonthInfoTotal['this_month_acc'] is not None else 0
-                temp_total['last_month_amt'] = lastMonthInfoTotal['this_month_amt'] if lastMonthInfoTotal is not None and lastMonthInfoTotal['this_month_amt'] is not None else 0
+                temp_total1['last_month_acc'] = lastMonthInfoTotal['this_month_acc'] if lastMonthInfoTotal is not None and lastMonthInfoTotal['this_month_acc'] is not None else 0
+                temp_total1['last_month_amt'] = lastMonthInfoTotal['this_month_amt'] if lastMonthInfoTotal is not None and lastMonthInfoTotal['this_month_amt'] is not None else 0
                 insertDataDetail.append(temp_4)
 
                 temp_5 = {
@@ -839,8 +842,8 @@ try:
                 total_g_b_plus_acc += temp_2_plus['this_month_acc']
                 total_g_b_plus_amt += temp_2_plus['this_month_amt']
                 lastMonthInfoTotal = mongodb.getOne(common.getSubUser(subUserType, 'Collection_factors_detail'), WHERE={'created_at': {'$gte': endLastMonthStarttime, '$lte': endLastMonthEndtime}, 'product_code': product_value['code'], 'type_detail': 'group_b_plus'})
-                temp_total['last_month_acc'] = lastMonthInfoTotal['this_month_acc'] if lastMonthInfoTotal is not None and lastMonthInfoTotal['this_month_acc'] is not None else 0
-                temp_total['last_month_amt'] = lastMonthInfoTotal['this_month_amt'] if lastMonthInfoTotal is not None and lastMonthInfoTotal['this_month_amt'] is not None else 0
+                temp_total1['last_month_acc'] = lastMonthInfoTotal['this_month_acc'] if lastMonthInfoTotal is not None and lastMonthInfoTotal['this_month_acc'] is not None else 0
+                temp_total1['last_month_amt'] = lastMonthInfoTotal['this_month_amt'] if lastMonthInfoTotal is not None and lastMonthInfoTotal['this_month_amt'] is not None else 0
                 insertDataDetail.append(temp_2_plus)
 
                 if product_code == 0:
@@ -866,8 +869,8 @@ try:
                         'created_by'    : 'system'
                     }
                 lastMonthInfoTotal = mongodb.getOne(common.getSubUser(subUserType, 'Collection_factors_detail'), WHERE={'created_at': {'$gte': endLastMonthStarttime, '$lte': endLastMonthEndtime}, 'product_code': product_value['code'], 'type_detail': 'group_b_plus_ratio'})
-                temp_total['last_month_acc'] = lastMonthInfoTotal['this_month_acc'] if lastMonthInfoTotal is not None and lastMonthInfoTotal['this_month_acc'] is not None else 0
-                temp_total['last_month_amt'] = lastMonthInfoTotal['this_month_amt'] if lastMonthInfoTotal is not None and lastMonthInfoTotal['this_month_amt'] is not None else 0
+                temp_total1['last_month_acc'] = lastMonthInfoTotal['this_month_acc'] if lastMonthInfoTotal is not None and lastMonthInfoTotal['this_month_acc'] is not None else 0
+                temp_total1['last_month_amt'] = lastMonthInfoTotal['this_month_amt'] if lastMonthInfoTotal is not None and lastMonthInfoTotal['this_month_amt'] is not None else 0
                 insertDataDetail.append(temp_2_ratio)
 
                 temp_3_plus = {
@@ -884,8 +887,8 @@ try:
                 total_g_c_plus_acc += temp_3_plus['this_month_acc']
                 total_g_c_plus_amt += temp_3_plus['this_month_amt']
                 lastMonthInfoTotal = mongodb.getOne(common.getSubUser(subUserType, 'Collection_factors_detail'), WHERE={'created_at': {'$gte': endLastMonthStarttime, '$lte': endLastMonthEndtime}, 'product_code': product_value['code'], 'type_detail': 'group_c_plus'})
-                temp_total['last_month_acc'] = lastMonthInfoTotal['this_month_acc'] if lastMonthInfoTotal is not None and lastMonthInfoTotal['this_month_acc'] is not None else 0
-                temp_total['last_month_amt'] = lastMonthInfoTotal['this_month_amt'] if lastMonthInfoTotal is not None and lastMonthInfoTotal['this_month_amt'] is not None else 0
+                temp_total1['last_month_acc'] = lastMonthInfoTotal['this_month_acc'] if lastMonthInfoTotal is not None and lastMonthInfoTotal['this_month_acc'] is not None else 0
+                temp_total1['last_month_amt'] = lastMonthInfoTotal['this_month_amt'] if lastMonthInfoTotal is not None and lastMonthInfoTotal['this_month_amt'] is not None else 0
                 insertDataDetail.append(temp_3_plus)
 
                 if product_code == 0:
@@ -911,8 +914,8 @@ try:
                         'created_by'    : 'system',
                     }
                 lastMonthInfoTotal = mongodb.getOne(common.getSubUser(subUserType, 'Collection_factors_detail'), WHERE={'created_at': {'$gte': endLastMonthStarttime, '$lte': endLastMonthEndtime}, 'product_code': product_value['code'], 'type_detail': 'group_c_plus_ratio'})
-                temp_total['last_month_acc'] = lastMonthInfoTotal['this_month_acc'] if lastMonthInfoTotal is not None and lastMonthInfoTotal['this_month_acc'] is not None else 0
-                temp_total['last_month_amt'] = lastMonthInfoTotal['this_month_amt'] if lastMonthInfoTotal is not None and lastMonthInfoTotal['this_month_amt'] is not None else 0
+                temp_total1['last_month_acc'] = lastMonthInfoTotal['this_month_acc'] if lastMonthInfoTotal is not None and lastMonthInfoTotal['this_month_acc'] is not None else 0
+                temp_total1['last_month_amt'] = lastMonthInfoTotal['this_month_amt'] if lastMonthInfoTotal is not None and lastMonthInfoTotal['this_month_amt'] is not None else 0
                 insertDataDetail.append(temp_3_ratio)
     
     insertDataTotal.append({
@@ -928,7 +931,7 @@ try:
     })
 
     insertDataTotal.append({
-        'index'         : '1',
+        'index'         : '2',
         'type_detail'   : 'total_total_amt',
         'detail'        : 'amt',
         'detail_name'   : '債権残高 (O/S principal)',

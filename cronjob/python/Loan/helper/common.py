@@ -148,7 +148,7 @@ class Common:
     def getDownloadFolder(self):
         wff_env = self.wff_env(self.base_url())
         
-        if wff_env in ['UAT', 'DEV']:
+        if wff_env in ['UAT','DEV']:
             # serverfolder = 'YYYYMMDD'
             today = self.datetime.strptime('03/02/2020', "%d/%m/%Y").date() 
             serverfolder = today.strftime("%Y%m%d")

@@ -40,9 +40,11 @@ k2019_collection        = common.getSubUser(subUserType, 'K201908120244R18')
 log         = open(base_url + "cronjob/python/Loan/log/BlockCard_log.txt","a")
 log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': Start Import' + '\n')
 try:
-   data        = []
-   insertData  = []
-   now         = datetime.now()
+   data           = []
+   insertData     = []
+   acc_card       = []
+   acc_sibs       = []
+   acc_k2019      = []
 
    today = date.today()
    # today = datetime.strptime('03/02/2020', "%d/%m/%Y").date()
@@ -115,7 +117,7 @@ try:
          temp = {
             'index'           : i,
             'account_number'  : acc_row['account_number'],
-            'customer_name'            : acc_row['cus_name'],
+            'customer_name'   : acc_row['cus_name'],
             'block'           : 'true',
             'acll'            : '',
             'sibs'            : '',
@@ -128,9 +130,9 @@ try:
          if sbv_stored != None:
             for store in sbv_stored:
                temp['acll']                 = store['overdue_indicator'] + store['kydue']
-
          insertData.append(temp)
          i += 1
+
 
 
    # lnjc05
@@ -162,14 +164,16 @@ try:
               "detailSBV.license_no": {'$exists' : 'true'},
           }
       },{
-          "$match":
-          {
-              "detailSBV.contract_no" : {'$nin' : blockCard_arr},
-          }
-      },{
+      #     "$match":
+      #     {
+      #         "detailSBV.contract_no" : {'$nin' : blockCard_arr},
+      #     }
+      # },{
          "$project":
          {
+
             "cus_name": 1,
+            # "account_number": 1,
             "detailSBV.contract_no": 1,
             "group_id": 1
          }
@@ -178,7 +182,7 @@ try:
       #     "$group":
       #     {
       #         "_id": 'null',
-      #         "acc_arr": {'$push': '$account_number'},
+      #         "acc_arr": {'$push': '$detailSBV.contract_no'},
       #     }
       # }
    ]
@@ -186,23 +190,32 @@ try:
    if data_lnjc05 != None:
       account_number_arr = []
       for row in data_lnjc05:
-         # account_number_arr = row['acc_arr']
          for detail in row['detailSBV']:
             acc = detail['contract_no']
-         temp = {
-            'index'           : i,
-            'account_number'  : acc,
-            'customer_name'            : row['cus_name'],
-            'block'           : 'true',
-            'acll'            : '',
-            'sibs'            : row['group_id'],
-            'group_3_over_other_bank'           : '',
-            'createdBy'       : 'system',
-            'report_date'       : todayTimeStamp,
-            'createdAt'       : todayTimeStamp
-         }
-         insertData.append(temp)
-         i += 1
+            # print(acc)
+            temp = {
+               'index'           : i,
+               'account_number'  : acc,
+               'customer_name'            : row['cus_name'],
+               'block'           : 'true',
+               'acll'            : '',
+               'sibs'            : row['group_id'],
+               'group_3_over_other_bank'           : '',
+               'createdBy'       : 'system',
+               'report_date'       : todayTimeStamp,
+               'createdAt'       : todayTimeStamp
+            }
+            count = mongodb.count(MONGO_COLLECTION=collection, WHERE={'account_number': str(acc)})
+            if count <= 0:
+               checkSIBS = 0
+               for row_ins in insertData:
+                  if acc == row_ins['account_number']:
+                     row_ins['sibs'] = row['group_id']
+                     checkSIBS = 1
+               if checkSIBS == 0:
+                  insertData.append(temp)
+                  i += 1
+               
 
 
 
@@ -239,11 +252,11 @@ try:
               "detailSBV.license_no": {'$exists' : 'true'},
           }
       },{
-          "$match":
-          {
-              "detailSBV.contract_no" : {'$nin' : blockCard_arr},
-          }
-      },{
+      #     "$match":
+      #     {
+      #         "detailSBV.contract_no" : {'$nin' : blockCard_arr},
+      #     }
+      # },{
          "$project":
          {
             "name": 1,
@@ -258,20 +271,29 @@ try:
       for row in data_k2019:
          for detail in row['detailSBV']:
             acc = detail['contract_no']
-         temp = {
-            'index'           : i,
-            'account_number'  : acc,
-            'customer_name'            : row['name'],
-            'block'           : 'true',
-            'acll'            : '',
-            'sibs'            : '',
-            'group_3_over_other_bank'           : row['nhom_cao_nhat_tai_tctd_khac'],
-            'createdBy'       : 'system',
-            'report_date'       : todayTimeStamp,
-            'createdAt'       : todayTimeStamp
-         }
-         insertData.append(temp)
-         i += 1
+            temp = {
+               'index'           : i,
+               'account_number'  : acc,
+               'customer_name'            : row['name'],
+               'block'           : 'true',
+               'acll'            : '',
+               'sibs'            : '',
+               'group_3_over_other_bank'           : row['nhom_cao_nhat_tai_tctd_khac'],
+               'createdBy'       : 'system',
+               'report_date'       : todayTimeStamp,
+               'createdAt'       : todayTimeStamp
+            }
+            count = mongodb.count(MONGO_COLLECTION=collection, WHERE={'account_number': str(acc)})
+            if count <= 0:
+               checkK2019 = 0
+               for row_ins in insertData:
+                  if acc == row_ins['account_number']:
+                     row_ins['group_3_over_other_bank'] = row['nhom_cao_nhat_tai_tctd_khac']
+                     checkK2019 = 1
+               if checkK2019 == 0:
+                  insertData.append(temp)
+                  i += 1
+               
 
    if len(insertData) > 0:
       mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertData)

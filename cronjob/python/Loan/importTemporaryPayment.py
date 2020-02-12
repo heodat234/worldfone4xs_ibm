@@ -60,7 +60,7 @@ try:
         mongodbresult = Mongodb(logDbName, wff_env)
     
     ftpLocalUrl = common.getDownloadFolder() + fileName
-
+    
     try:
         sys.argv[1]
         importLogId = str(sys.argv[1])

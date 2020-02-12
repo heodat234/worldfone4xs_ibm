@@ -1,1 +1,2 @@
 06/02/2020, 17:52:56: 'NoneType' object has no attribute 'to_dict'
+11/02/2020, 11:03:48: 'NoneType' object has no attribute 'to_dict'

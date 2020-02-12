@@ -49,3 +49,4 @@ else
    echo "Worldfone ScanJob service is running"
    exit 0
 fi
+

@@ -5,6 +5,7 @@ class Mongodb:
     def __init__(self, MONGODB, WFF_ENV=''):
         import pymongo
         import bson
+        import traceback
         self.bson = bson
         self.pymongo = pymongo
         if WFF_ENV in ['UAT', 'DEV']:
@@ -21,9 +22,12 @@ class Mongodb:
             self.connection[DB_NAME]
 
     def create_col(self, COL_NAME=''):
-        collist = self.db.list_collection_names()
-        if COL_NAME not in collist:
-            self.db[COL_NAME]
+        try:
+            collist = self.db.list_collection_names()
+            if COL_NAME not in collist:
+                self.db[COL_NAME]
+        except Exception as e:
+            print(traceback.format_exc())
 
     def get(self, MONGO_COLLECTION='', WHERE=None, SELECT=None, SORT=[("$natural", 1)], SKIP=0, TAKE=0):
         collection = self.db[MONGO_COLLECTION]
@@ -85,3 +89,8 @@ class Mongodb:
     def getDistinct(self, MONGO_COLLECTION='' , SELECT=None, WHERE=None):
         collection = self.db[MONGO_COLLECTION]
         return collection.distinct(SELECT, WHERE)
+
+    def renameCollection(self, old_name='', new_name=''):
+        collist = self.db.list_collection_names()
+        if old_name in collist:
+            collection = self.db[old_name].rename(new_name)

@@ -172,3 +172,11 @@
 09/01/2020, 15:37:32: End Log
 09/01/2020, 15:37:54: Start Import
 09/01/2020, 15:37:57: End Log
+10/02/2020, 10:14:21: Start Import
+10/02/2020, 10:14:21: name 'phone_spin_arr' is not defined
+10/02/2020, 10:20:34: Start Import
+10/02/2020, 10:20:38: End Log
+10/02/2020, 10:22:42: Start Import
+10/02/2020, 10:22:46: End Log
+10/02/2020, 11:23:44: Start Import
+10/02/2020, 11:29:24: End Log

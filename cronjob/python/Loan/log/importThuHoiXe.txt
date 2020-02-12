@@ -1,3 +1,88 @@
-13/12/2019, 18:33:44: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)
-13/12/2019, 18:34:21: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)
-07/02/2020, 15:10:47: 'NoneType' object has no attribute 'to_dict'
+12/02/2020, 11:45:34: Traceback (most recent call last):
+  File "/var/www/html/worldfone4xs_ibm/cronjob/python/Loan/importThuHoiXe.py", line 109, in <module>
+    log.write(filenameExtension)
+TypeError: write() argument must be str, not list
+
+["DANH SACH THU HOI XE", "xlsx"]12/02/2020, 11:46:35: Traceback (most recent call last):
+  File "/var/www/html/worldfone4xs_ibm/cronjob/python/Loan/importThuHoiXe.py", line 120, in <module>
+    inputData = inputDataRaw.to_dict('records')
+AttributeError: 'NoneType' object has no attribute 'to_dict'
+
+null12/02/2020, 11:59:25: Traceback (most recent call last):
+  File "/var/www/html/worldfone4xs_ibm/cronjob/python/Loan/importThuHoiXe.py", line 120, in <module>
+    inputData = inputDataRaw.to_dict('records')
+AttributeError: 'NoneType' object has no attribute 'to_dict'
+
+null12/02/2020, 12:03:16: Traceback (most recent call last):
+  File "/var/www/html/worldfone4xs_ibm/cronjob/python/Loan/importThuHoiXe.py", line 120, in <module>
+    inputData = inputDataRaw.to_dict('records')
+AttributeError: 'NoneType' object has no attribute 'to_dict'
+
+null12/02/2020, 12:43:17: Traceback (most recent call last):
+  File "/var/www/html/worldfone4xs_ibm/cronjob/python/Loan/importThuHoiXe.py", line 120, in <module>
+    inputData = inputDataRaw.to_dict('records')
+AttributeError: 'NoneType' object has no attribute 'to_dict'
+
+12/02/2020, 12:47:46: Traceback (most recent call last):
+  File "/var/www/html/worldfone4xs_ibm/cronjob/python/Loan/importThuHoiXe.py", line 118, in <module>
+    log.write(json.dumps(inputDataRaw))
+  File "/usr/local/lib/python3.6/json/__init__.py", line 231, in dumps
+    return _default_encoder.encode(obj)
+  File "/usr/local/lib/python3.6/json/encoder.py", line 199, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "/usr/local/lib/python3.6/json/encoder.py", line 257, in iterencode
+    return _iterencode(o, 0)
+  File "/usr/local/lib/python3.6/json/encoder.py", line 180, in default
+    o.__class__.__name__)
+TypeError: Object of type 'DataFrame' is not JSON serializable
+
+12/02/2020, 12:49:20: Traceback (most recent call last):
+  File "/var/www/html/worldfone4xs_ibm/cronjob/python/Loan/importThuHoiXe.py", line 118, in <module>
+    log.write(json.dumps(inputDataRaw))
+  File "/usr/local/lib/python3.6/json/__init__.py", line 231, in dumps
+    return _default_encoder.encode(obj)
+  File "/usr/local/lib/python3.6/json/encoder.py", line 199, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "/usr/local/lib/python3.6/json/encoder.py", line 257, in iterencode
+    return _iterencode(o, 0)
+  File "/usr/local/lib/python3.6/json/encoder.py", line 180, in default
+    o.__class__.__name__)
+TypeError: Object of type 'DataFrame' is not JSON serializable
+
+12/02/2020, 12:52:47: Traceback (most recent call last):
+  File "/var/www/html/worldfone4xs_ibm/cronjob/python/Loan/importThuHoiXe.py", line 119, in <module>
+    log.write(json.dumps(inputDataRaw))
+  File "/usr/local/lib/python3.6/json/__init__.py", line 231, in dumps
+    return _default_encoder.encode(obj)
+  File "/usr/local/lib/python3.6/json/encoder.py", line 199, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "/usr/local/lib/python3.6/json/encoder.py", line 257, in iterencode
+    return _iterencode(o, 0)
+  File "/usr/local/lib/python3.6/json/encoder.py", line 180, in default
+    o.__class__.__name__)
+TypeError: Object of type 'DataFrame' is not JSON serializable
+
+12/02/2020, 12:53:06: Traceback (most recent call last):
+  File "/var/www/html/worldfone4xs_ibm/cronjob/python/Loan/importThuHoiXe.py", line 119, in <module>
+    log.write(json.dumps(inputDataRaw))
+  File "/usr/local/lib/python3.6/json/__init__.py", line 231, in dumps
+    return _default_encoder.encode(obj)
+  File "/usr/local/lib/python3.6/json/encoder.py", line 199, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "/usr/local/lib/python3.6/json/encoder.py", line 257, in iterencode
+    return _iterencode(o, 0)
+  File "/usr/local/lib/python3.6/json/encoder.py", line 180, in default
+    o.__class__.__name__)
+TypeError: Object of type 'DataFrame' is not JSON serializable
+
+12/02/2020, 12:54:57: Traceback (most recent call last):
+  File "/var/www/html/worldfone4xs_ibm/cronjob/python/Loan/importThuHoiXe.py", line 119, in <module>
+    pprint(inputDataRaw)
+  File "/usr/local/lib/python3.6/pprint.py", line 53, in pprint
+    printer.pprint(object)
+  File "/usr/local/lib/python3.6/pprint.py", line 139, in pprint
+    self._format(object, self._stream, 0, 0, {}, 0)
+  File "/usr/local/lib/python3.6/pprint.py", line 176, in _format
+    stream.write(rep)
+UnicodeEncodeError: 'ascii' codec can't encode character '\xf4' in position 1785: ordinal not in range(128)
+

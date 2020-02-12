@@ -27,7 +27,7 @@ base_url = common.base_url()
 wff_env = common.wff_env(base_url)
 mongodb = Mongodb(MONGODB="worldfone4xs", WFF_ENV=wff_env)
 _mongodb = Mongodb(MONGODB="_worldfone4xs", WFF_ENV=wff_env)
-log = open(base_url + "cronjob/python/Loan/log/importlnjc05.txt","a")
+log = open(base_url + "cronjob/python/Loan/log/importK20190812.txt","a")
 now = datetime.now()
 subUserType = 'LO'
 collection = common.getSubUser(subUserType, 'K201908120244R18')

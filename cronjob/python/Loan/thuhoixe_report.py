@@ -28,7 +28,7 @@ _mongodb    = Mongodb(MONGODB="_worldfone4xs", WFF_ENV=wff_env)
 now         = datetime.now()
 subUserType = 'LO'
 
-collection           = common.getSubUser(subUserType, 'Thu_hoi_xe_report')
+collection           = common.getSubUser(subUserType, 'Thu_hoi_xe')
 
 
 action_collection     = common.getSubUser(subUserType, 'Action_code')

@@ -164,4 +164,5 @@ try:
    print('DONE')
 except Exception as e:
    pprint(e)
+   traceback.print_exc()
    log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')

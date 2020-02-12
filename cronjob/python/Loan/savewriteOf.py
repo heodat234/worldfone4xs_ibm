@@ -10,7 +10,7 @@ import traceback
 import math
 from helper.mongod import Mongodb
 from datetime import datetime
-from datetime import date
+from datetime import date, timedelta
 from pprint import pprint
 from bson import ObjectId
 from helper.common import Common
@@ -20,9 +20,9 @@ from calendar import monthrange
 
 
 # help round down
-def round_down(n, decimals=0):
-    multiplier = 10 ** decimals
-    return math.floor(n * multiplier) / multiplier
+# def round_down(n, decimals=0):
+#     multiplier = 10 ** decimals
+#     return math.floor(n * multiplier) / multiplier
 #help
 common      = Common()
 base_url    = common.base_url()
@@ -52,6 +52,7 @@ trial_collection          = common.getSubUser(subUserType, 'Trial_balance_report
 product_collection        = common.getSubUser(subUserType, 'Product')
 diallist_collection       = common.getSubUser(subUserType, 'Diallist_detail')
 lawsuit_collection        = common.getSubUser(subUserType, 'Lawsuit')
+thuhoixe_collection        = common.getSubUser(subUserType, 'Thu_hoi_xe')
 
 log         = open(base_url + "cronjob/python/Loan/log/WriteOf_log.txt","a")
 log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': Start Import' + '\n')
@@ -186,7 +187,6 @@ try:
    if data_sbv1 != None:
       for row in data_sbv1:
          lic_no_arr_card = row['lic_no_arr']
-         # print(lic_no_arr)
 
 
 
@@ -253,6 +253,8 @@ try:
             litigation = mongodb.count(MONGO_COLLECTION=lawsuit_collection, WHERE={'so_hopdong': str(row['account_number'])})
 
             product = mongodb.getOne(MONGO_COLLECTION=product_collection, WHERE={'code': str(row['PRODGRP_ID'])},SELECT=['name'])
+            
+            thuhoixe = mongodb.getOne(MONGO_COLLECTION=thuhoixe_collection, WHERE={'contract_no': str(row['account_number'])},SELECT=['ngay_thu_hoi'])
 
 
             temp = {}
@@ -290,7 +292,7 @@ try:
                # d2       = F_PDT.strftime(FMT)
                tdelta   = datetime.strptime(d1, FMT) - datetime.strptime(F_PDT, FMT)
                kq       = tdelta.days /30
-               temp['Actual_payment']  = round_down(kq,0)
+               temp['Actual_payment']  = round(kq,0)
 
                # if 'outstanding_principal' in lnjc05Info.keys():
                #    temp['Off_balance'] = lnjc05Info['outstanding_principal']
@@ -300,7 +302,15 @@ try:
             else:
                tdelta   = datetime.strptime(NP_DT8, FMT) - datetime.strptime(F_PDT, FMT)
                kq       = tdelta.days /30
-               temp['Actual_payment']  = round_down(kq,0)
+               temp['Actual_payment']  = round(kq,0)
+
+               if int(row['NP_DT8']) != 0:
+                  if len(str(row['NP_DT8'])) == 7:
+                     row['NP_DT8'] = '0'+str(row['NP_DT8'])
+                  NP_DT8 = str(row['NP_DT8'])
+                  statement_date = NP_DT8[0:2]+'/'+NP_DT8[2:4]+'/'+NP_DT8[4:8]
+                  statement_date = datetime.strptime(statement_date, "%d/%m/%Y").date() 
+                  temp['Due_date']     = int(time.mktime(time.strptime(str(statement_date.strftime("%d/%m/%Y") + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
 
             if customerInfo != None and 'profession' in customerInfo.keys():
                temp['Profession'] = customerInfo['profession']
@@ -313,6 +323,10 @@ try:
             #    cod = ''
             if customerInfo != None and 'secured_asset' in customerInfo.keys():
                temp['If_bike_is_defined'] = "Yes" if customerInfo['secured_asset'] ==  'True' else 'No'
+
+            if thuhoixe != None:
+               temp['If_bike_is_defined']  = 'Đã thu hồi - ' + thuhoixe['ngay_thu_hoi']
+
             # temp['If_bike_is_defined'] =  cod
             temp['If_site_visit_made'] = "Yes" if countsite > 0 else 'No'
             temp['If_there_is_fielder_in_location'] = "Yes" if countsiteFielder > 0 else 'No'
@@ -331,9 +345,9 @@ try:
 
 
             if lnjc05Info != None:
-               temp['If_still_collectable']  = '1'
-            else:
                temp['If_still_collectable']  = '2'
+            else:
+               temp['If_still_collectable']  = '1'
 
 
             if litigation > 0:
@@ -396,7 +410,6 @@ try:
    if data_sbv != None:
       for row in data_sbv:
          if 'contract_no' in row.keys():
-            # print(row['account_number'])
             accountInfo = mongodb.getOne(MONGO_COLLECTION=account_collection, WHERE={'account_number': str(row['contract_no'])},
                SELECT=['cus_name','overdue_date','cur_bal'])
 
@@ -444,19 +457,15 @@ try:
                         SELECT=['starttime'],SORT=[("starttime", -1)], SKIP=0, TAKE=1)
 
             litigation = mongodb.count(MONGO_COLLECTION=lawsuit_collection, WHERE={'so_hopdong': str(row['contract_no'])})
-
-            sbv_stored = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'SBV_Stored'), WHERE={'contract_no': str(row['contract_no'])},SELECT=['overdue_indicator','kydue'],SORT=[("_id", -1)], SKIP=0, TAKE=1)
             
+            thuhoixe = mongodb.getOne(MONGO_COLLECTION=thuhoixe_collection, WHERE={'contract_no': str(row['contract_no'])},SELECT=['ngay_thu_hoi'])
 
             temp = {}
-            if sbv_stored != None:
-              for store in sbv_stored:
-                temp['Group']                 = store['overdue_indicator'] + store['kydue']
 
             temp['Account_number']  = row['contract_no']
             temp['Name']            = row['name']
             # temp['Release_date']    = row['FRELD8']
-            temp['Release_amount']  = row['approved_limit']
+            # temp['Release_amount']  = row['approved_limit']
             temp['Interest_rate']   = row['interest_rate']
             temp['LIC_NO']          = row['license_no']
 
@@ -469,8 +478,19 @@ try:
                temp['Name']         = accountInfo['cus_name']
                temp['Due_date']     = accountInfo['overdue_date']
                temp['Current_balance'] = accountInfo['cur_bal']
-            # else:
-            #    temp['Current_balance'] = -1
+               sbv_stored = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'SBV_Stored'), WHERE={'contract_no': str(row['contract_no'])},SELECT=['overdue_indicator','kydue'],SORT=[("_id", -1)], SKIP=0, TAKE=1)
+               if sbv_stored != None:
+                  for store in sbv_stored:
+                     temp['Group']                 = store['overdue_indicator'] + store['kydue']
+            else:
+               if int(row['statement_date']) != 0:
+                  if len(str(row['statement_date'])) == 7:
+                     row['statement_date'] = '0'+str(row['statement_date'])
+                  statement_date = str(row['statement_date'])
+                  statement_date = statement_date[0:2]+'/'+statement_date[2:4]+'/'+statement_date[4:8]
+                  statement_date = datetime.strptime(statement_date, "%d/%m/%Y").date() 
+                  Due_date = statement_date + timedelta(days=20)
+                  temp['Due_date']     = int(time.mktime(time.strptime(str(Due_date.strftime("%d/%m/%Y") + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
             # if trialInfo != None:
             #    temp['Outstanding_balance']     = float(trialInfo['prin_retail_balance']) + float(trialInfo['prin_cash_balance'])
 
@@ -480,6 +500,9 @@ try:
 
             if customerInfo != None and 'secured_asset' in customerInfo.keys():
                temp['If_bike_is_defined'] = "Yes" if customerInfo['secured_asset'] ==  'True' else 'No'
+
+            if thuhoixe != None:
+               temp['If_bike_is_defined']  = 'Đã thu hồi - ' + thuhoixe['ngay_thu_hoi']
 
             # temp['If_bike_is_defined'] =  cod
             temp['If_site_visit_made'] = "Yes" if countsite > 0 else 'No'
@@ -497,9 +520,9 @@ try:
                   temp['Call']                  = '1'
 
             if accountInfo != None:
-               temp['If_still_collectable']  = '1'
-            else:
                temp['If_still_collectable']  = '2'
+            else:
+               temp['If_still_collectable']  = '1'
 
             if litigation > 0:
                temp['Litigation']              = '1'
@@ -510,6 +533,7 @@ try:
                temp['SMS_sent']              = '1'
                temp['Send_reminder_letter']  = '2'
                temp['Note']   = ''
+
                # today          = datetime.now()
                # d1             = today.strftime(FMT)
                # date_time      = datetime.fromtimestamp(accountInfo['overdue_date'])
@@ -547,9 +571,9 @@ try:
             else:
                temp['Dealer_code']  = ''
 
-            # temp['time'] = tdelta.days
             temp['createdAt'] = time.time()
             temp['createdBy'] = 'system'
+
             insertData.append(temp)
 
 
@@ -621,18 +645,15 @@ try:
                         SELECT=['starttime'],SORT=[("starttime", -1)], SKIP=0, TAKE=1)
 
             litigation = mongodb.count(MONGO_COLLECTION=lawsuit_collection, WHERE={'so_hopdong': str(row['contract_no'])})
-
-            sbv_stored = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'SBV_Stored'), WHERE={'contract_no': str(row['contract_no'])},SELECT=['overdue_indicator','kydue'],SORT=[("_id", -1)], SKIP=0, TAKE=1)
             
+            thuhoixe = mongodb.getOne(MONGO_COLLECTION=thuhoixe_collection, WHERE={'contract_no': str(row['contract_no'])},SELECT=['ngay_thu_hoi'])
+
             temp = {}
-            if sbv_stored != None:
-              for store in sbv_stored:
-                temp['Group']                 = store['overdue_indicator'] + store['kydue']
 
             temp['Account_number']  = row['contract_no']
             temp['Name']            = row['name']
             # temp['Release_date']    = row['FRELD8']
-            temp['Release_amount']  = row['approved_limit']
+            # temp['Release_amount']  = row['approved_limit']
             temp['Interest_rate']   = row['interest_rate']
             temp['LIC_NO']          = row['license_no']
 
@@ -645,8 +666,20 @@ try:
                temp['Name']         = accountInfo['cus_name']
                temp['Due_date']     = accountInfo['overdue_date']
                temp['Current_balance'] = accountInfo['cur_bal']
-            # else:
-            #    temp['Current_balance'] = -1
+               sbv_stored = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'SBV_Stored'), WHERE={'contract_no': str(row['contract_no'])},SELECT=['overdue_indicator','kydue'],SORT=[("_id", -1)], SKIP=0, TAKE=1)
+               if sbv_stored != None:
+                  for store in sbv_stored:
+                     temp['Group']                 = store['overdue_indicator'] + store['kydue']
+            else:
+               if int(row['statement_date']) != 0:
+                  if len(str(row['statement_date'])) == 7:
+                     row['statement_date'] = '0'+str(row['statement_date'])
+                  statement_date = str(row['statement_date'])
+                  statement_date = statement_date[0:2]+'/'+statement_date[2:4]+'/'+statement_date[4:8]
+                  statement_date = datetime.strptime(statement_date, "%d/%m/%Y").date() 
+                  Due_date = statement_date + timedelta(days=20)
+                  temp['Due_date']     = int(time.mktime(time.strptime(str(Due_date.strftime("%d/%m/%Y") + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
+
             # if trialInfo != None:
             #    temp['Outstanding_balance']     = float(trialInfo['prin_retail_balance']) + float(trialInfo['prin_cash_balance'])
 
@@ -656,6 +689,9 @@ try:
 
             if customerInfo != None and 'secured_asset' in customerInfo.keys():
                temp['If_bike_is_defined'] = "Yes" if customerInfo['secured_asset'] ==  'True' else 'No'
+
+            if thuhoixe != None:
+               temp['If_bike_is_defined']  = 'Đã thu hồi - ' + thuhoixe['ngay_thu_hoi']
 
             # temp['If_bike_is_defined'] =  cod
             temp['If_site_visit_made'] = "Yes" if countsite > 0 else 'No'
@@ -673,9 +709,9 @@ try:
                   temp['Call']                  = '1'
 
             if accountInfo != None:
-               temp['If_still_collectable']  = '1'
-            else:
                temp['If_still_collectable']  = '2'
+            else:
+               temp['If_still_collectable']  = '1'
 
             if litigation > 0:
                temp['Litigation']            = '1'
@@ -724,9 +760,9 @@ try:
             else:
                temp['Dealer_code']  = ''
 
-            # temp['time'] = tdelta.days
             temp['createdAt'] = time.time()
             temp['createdBy'] = 'system'
+
             insertData.append(temp)
 
 
@@ -788,6 +824,8 @@ try:
 
             product = mongodb.getOne(MONGO_COLLECTION=product_collection, WHERE={'code': str(row['PRODGRP_ID'])},SELECT=['name'])
 
+            thuhoixe = mongodb.getOne(MONGO_COLLECTION=thuhoixe_collection, WHERE={'contract_no': str(row['account_number'])},SELECT=['ngay_thu_hoi'])
+
             temp = {}
             temp['Account_number']  = row['account_number']
             temp['Name']            = row['name']
@@ -823,7 +861,7 @@ try:
                # d2       = F_PDT.strftime(FMT)
                tdelta   = datetime.strptime(d1, FMT) - datetime.strptime(F_PDT, FMT)
                kq       = tdelta.days /30
-               temp['Actual_payment']  = round_down(kq,0)
+               temp['Actual_payment']  = round(kq,0)
 
                if 'current_balance' in lnjc05Info.keys():
                   temp['Current_balance'] = lnjc05Info['current_balance']
@@ -831,7 +869,15 @@ try:
             else:
                tdelta   = datetime.strptime(NP_DT8, FMT) - datetime.strptime(F_PDT, FMT)
                kq       = tdelta.days /30
-               temp['Actual_payment']  = round_down(kq,0)
+               temp['Actual_payment']  = round(kq,0)
+
+               if int(row['NP_DT8']) != 0:
+                  if len(str(row['NP_DT8'])) == 7:
+                     row['NP_DT8'] = '0'+str(row['NP_DT8'])
+                  NP_DT8 = str(row['NP_DT8'])
+                  statement_date = NP_DT8[0:2]+'/'+NP_DT8[2:4]+'/'+NP_DT8[4:8]
+                  statement_date = datetime.strptime(statement_date, "%d/%m/%Y").date() 
+                  temp['Due_date']     = int(time.mktime(time.strptime(str(statement_date.strftime("%d/%m/%Y") + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
 
             if customerInfo != None and 'profession' in customerInfo.keys():
                temp['Profession'] = customerInfo['profession']
@@ -841,6 +887,9 @@ try:
 
             if customerInfo != None and 'secured_asset' in customerInfo.keys():
                temp['If_bike_is_defined'] = "Yes" if customerInfo['secured_asset'] ==  'True' else 'No'
+
+            if thuhoixe != None:
+               temp['If_bike_is_defined']  = 'Đã thu hồi - ' + thuhoixe['ngay_thu_hoi']
 
             # temp['If_bike_is_defined'] =  cod
             temp['If_site_visit_made'] = "Yes" if countsite > 0 else 'No'
@@ -858,9 +907,9 @@ try:
                   temp['Call']                  = '1'
 
             if lnjc05Info != None:
-               temp['If_still_collectable']  = '1'
-            else:
                temp['If_still_collectable']  = '2'
+            else:
+               temp['If_still_collectable']  = '1'
 
             if litigation > 0:
                temp['Litigation']              = '1'
@@ -878,7 +927,7 @@ try:
                # tdelta         = datetime.strptime(d1, FMT) - datetime.strptime(d2, FMT)
                # temp['Note']   = tdelta.days
             else:
-               temp['SMS_sent']              = '1'
+               temp['SMS_sent']              = '3'
                if 'Group' in temp.keys() and temp['Group'].find('A') == -1:
                   temp['Send_reminder_letter']  = '2'
                else:
@@ -930,7 +979,7 @@ try:
 
          if row['Note'] == '':
             temp = {}
-            temp['Note'] = 'Follow' + row['Product_code']
+            temp['Note'] = 'Follow ' + row['Product_code']
             mongodb.batch_update( MONGO_COLLECTION=collection, WHERE={'LIC_NO': str(row['LIC_NO']), 'Note': '1' }, VALUE=temp)
             # temp['Note'] = ''
             # mongodb.update( MONGO_COLLECTION=collection, WHERE={'Account_number': str(row['Account_number']) }, VALUE=temp)

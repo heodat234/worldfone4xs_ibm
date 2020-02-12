@@ -54,6 +54,8 @@ try:
     # fileName = "Trial_Balance_Report_Telling_Each_Account_Information_20191031.txt"
     sep = ','
     logDbName = "LO_Input_result_" + str(year) + str(month)
+    total = 0
+    complete = 0
 
     if day == 1:
         mongodb.create_db(DB_NAME=logDbName)
@@ -117,6 +119,7 @@ try:
                 row = list(filter(None, rowRaw))
                 if len(row) > 1:
                     if isinstance(row[1], str) and len(row[1]) > 12 and row[1].isdigit():
+                        total += 1
                         # pprint(row)
                         result = True
                         temp = {}
@@ -141,15 +144,16 @@ try:
                         else:
                             insertData.append(temp)
                             result = True
+                            complete += 1
                     
     if(len(errorData) > 0):
         mongodbresult.remove_document(MONGO_COLLECTION=common.getSubUser(subUserType, ('Trial_balance_report_' + str(year) + str(month) + str(day))))
         mongodbresult.batch_insert(common.getSubUser(subUserType, ('Trial_balance_report_' + str(year) + str(month) + str(day))), errorData)
-        mongodb.update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': importLogId}, VALUE={'status': 0, 'complete_import': time.time()})
+        mongodb.update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': importLogId}, VALUE={'status': 0, 'complete_import': time.time(), 'total': total, 'complete': complete})
     else:
         if len(insertData) > 0:
             mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertData)
-        mongodb.update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': importLogId}, VALUE={'status': 1, 'complete_import': time.time()})
+        mongodb.update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': importLogId}, VALUE={'status': 1, 'complete_import': time.time(), 'total': total, 'complete': complete})
 except Exception as e:
     # log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')
     # pprint(str(e))

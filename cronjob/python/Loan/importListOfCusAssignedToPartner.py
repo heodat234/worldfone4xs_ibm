@@ -8,6 +8,7 @@ import time
 import sys
 import os
 import json
+import traceback
 from pprint import pprint
 from datetime import datetime, timedelta
 from datetime import date
@@ -105,6 +106,7 @@ try:
         inputDataRaw = excel.getDataExcel(file_path=importLogInfo['file_path'], dtype='object', active_sheet='Sheet1', header=0, names=modelColumns, na_values='')
     
     inputData = inputDataRaw.to_dict('records')
+    # pprint(inputData)
     
     insertData = []
     updateDate = []
@@ -133,7 +135,6 @@ try:
             if(result == False):
                 errorData.append(temp)
             else:
-                temp['result'] = 'success'
                 checkInfo = mongodb.getOne(MONGO_COLLECTION=collection, WHERE={'CONTRACTNR': temp['CONTRACTNR']})
                 if checkInfo is not None:
                     updateDate.append(temp)
@@ -143,18 +144,17 @@ try:
                 complete += 1
 
     if(len(errorData) > 0):
-        mongodb.batch_insert(common.getSubUser(subUserType, 'Cus_assigned_partner_result'), errorData)
+        mongodbresult.remove_document(MONGO_COLLECTION=common.getSubUser(subUserType, ('Cus_assigned_partner_' + str(year) + str(month) + str(day))))
+        mongodbresult.batch_insert(common.getSubUser(subUserType, ('Cus_assigned_partner_' + str(year) + str(month) + str(day))), errorData)
         mongodb.update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': importLogId}, VALUE={'status': 0, 'complete_import': time.time(), 'total': total, 'complete': complete})
     else:
         if len(insertData) > 0:
             mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertData)
-            mongodb.batch_insert(common.getSubUser(subUserType, 'Cus_assigned_partner_result'), insert_data=insertData)
-        
         if len(updateDate) > 0:
             for updateD in updateDate:
                 mongodb.update(MONGO_COLLECTION=collection, WHERE={'CONTRACTNR': temp['CONTRACTNR']}, VALUE=temp)
-            mongodb.batch_insert(common.getSubUser(subUserType, 'Cus_assigned_partner_result'), insert_data=updateDate)
         mongodb.update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': importLogId}, VALUE={'status': 1, 'complete_import': time.time(), 'total': total, 'complete': complete})
 except Exception as e:
     log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')
+    print(traceback.format_exc())
     pprint(str(e))
