@@ -36,8 +36,8 @@ collection = common.getSubUser(subUserType, 'Monthly_bad_debt_province')
 try:
     total = 0
     complete = 0
-    today = date.today()
-    # today = datetime.strptime('13/12/2019', "%d/%m/%Y").date()
+    # today = date.today()
+    today = datetime.strptime('01/01/2020', "%d/%m/%Y").date()
     yesterday = today - timedelta(days=1)
     day = today.day
     month = today.month
@@ -174,7 +174,7 @@ try:
             temp['group_two_plus_w_org_sibs']   = sum(map(lambda x: float(x), zaccfInfo[0]['group_two_plus_w_org_sibs'])) if zaccfInfo[0]['group_two_plus_w_org_sibs'] is not None else 0
         else:
             temp['release_acc_no_sibs'] = 0
-            temp['release_amt_sibs']
+            temp['release_amt_sibs'] = 0
             temp['group_two_acc_sibs'] = 0
             temp['group_two_w_org_sibs'] = 0
             temp['group_two_plus_acc_sibs'] = 0
@@ -281,7 +281,7 @@ try:
         # pprint(temp)
     
     # pprint(insertData)
-    sys.exit()
+    # sys.exit()
     mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertData)
     print('DONE')
 except Exception as e:

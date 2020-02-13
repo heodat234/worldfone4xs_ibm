@@ -9,7 +9,7 @@ import calendar
 import traceback
 from helper.mongod import Mongodb
 from datetime import datetime
-from datetime import date
+from datetime import date,timedelta
 from pprint import pprint
 from bson import ObjectId
 from helper.common import Common
@@ -23,14 +23,19 @@ _mongodb    = Mongodb(MONGODB="_worldfone4xs", WFF_ENV=wff_env)
 now         = datetime.now()
 subUserType = 'LO'
 collection         = common.getSubUser(subUserType, 'Daily_payment_report')
-lnjc05_collection  = common.getSubUser(subUserType, 'LNJC05')
+lnjc05_collection  = common.getSubUser(subUserType, 'LNJC05_yesterday')
 ln3206_collection  = common.getSubUser(subUserType, 'LN3206F')
-zaccf_collection   = common.getSubUser(subUserType, 'ZACCF')
+zaccf_collection   = common.getSubUser(subUserType, 'ZACCF_yesterday')
 product_collection   = common.getSubUser(subUserType, 'Product')
-sbv_collection       = common.getSubUser(subUserType, 'SBV')
-group_collection     = common.getSubUser(subUserType, 'Group_card')
-account_collection   = common.getSubUser(subUserType, 'List_of_account_in_collection')
+sbv_collection       = common.getSubUser(subUserType, 'SBV_yesterday')
+store_collection     = common.getSubUser(subUserType, 'SBV_Stored')
+account_collection   = common.getSubUser(subUserType, 'List_of_account_in_collection_yesterday')
 payment_of_card_collection  = common.getSubUser(subUserType, 'Report_input_payment_of_card')
+diallist_collection  = common.getSubUser(subUserType, 'Diallist_detail')
+user_collection      = common.getSubUser(subUserType, 'User_product')
+
+
+
 log         = open(base_url + "cronjob/python/Loan/log/DailyPayment_log.txt","a")
 log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': Start Import' + '\n')
 
@@ -62,6 +67,13 @@ try:
    if todayTimeStamp in listHoliday:
       sys.exit()
 
+   yesterday = today - timedelta(days=1)
+   yesterdayString = yesterday.strftime("%d/%m/%Y")
+   yesterdayTimeStamp = int(time.mktime(time.strptime(str(yesterdayString + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
+   endYesterdayTimeStamp = int(time.mktime(time.strptime(str(yesterdayString + " 23:59:59"), "%d/%m/%Y %H:%M:%S")))
+
+
+
    i = 1
    # LN3206F
    aggregate_pipeline = [
@@ -69,6 +81,7 @@ try:
            "$match":
            {
                'created_at': {'$gte' : todayTimeStamp,'$lte' : endTodayTimeStamp},
+               'code': '10'
            }
        },
        {
@@ -87,26 +100,20 @@ try:
          zaccf = mongodb.getOne(MONGO_COLLECTION=zaccf_collection, WHERE={'account_number': str(row['account_number'])},SELECT=['name','rpy_prn','RPY_INT','RPY_FEE','PRODGRP_ID'])
          if zaccf != None:
             row['name']             = zaccf['name']
-            row['paid_principal']   = zaccf['rpy_prn']
-            row['paid_interest']    = zaccf['RPY_INT']
-            row['RPY_FEE']          = zaccf['RPY_FEE']
+            row['paid_principal']   = int(float(zaccf['rpy_prn']))
+            row['paid_interest']    = int(float(zaccf['RPY_INT']))
+            row['RPY_FEE']          = int(float(zaccf['RPY_FEE']))
             product = mongodb.getOne(MONGO_COLLECTION=product_collection, WHERE={'code': str(zaccf['PRODGRP_ID'])},SELECT=['name'])
             if product != None:
                row['product_name'] = product['name']
             else:
                row['product_name'] = ''
-         # else:
-         #    row['name']             = ''
-         #    row['paid_principal']   = ''
-         #    row['paid_interest']    = ''
-         #    row['RPY_FEE']          = ''
-         #    row['product_name']     = ''
 
          if len(str(row['date'])) == 5:
             row['date']       = '0'+str(row['date'])
          date                 = str(row['date'])
          d1                   = date[0:2]+'/'+date[2:4]+'/'+date[4:6]
-         row['payment_date']  = d1
+         row['payment_date']  = int(time.mktime(time.strptime(str(d1 + " 00:00:00"), "%d/%m/%y %H:%M:%S")))
 
          lnjc05 = mongodb.getOne(MONGO_COLLECTION=lnjc05_collection, WHERE={'account_number': str(row['account_number'])},SELECT=['due_date','group_id'])
          if lnjc05 != None:
@@ -115,32 +122,39 @@ try:
             d2       = date_time.strftime('%d/%m/%y')
             tdelta   = datetime.strptime(d1, '%d/%m/%y') - datetime.strptime(d2, '%d/%m/%y')
             row['num_of_overdue_day'] = tdelta.days
-            row['due_date']   = d2
-         else:
-            row['due_date']            = ''
-            row['group']               = ''
-            row['num_of_overdue_day']  = ''
-      row['pic'] = ''
-      row['note'] = ''
-      row.pop('_id')
-      row.pop('date')
-      row['stt'] = i
-      row['createdAt'] = int(todayTimeStamp)
-      row['createdBy'] = 'system'
-      insertData.append(row)
-      i += 1
-      # break
+            row['due_date']   = lnjc05['due_date']
+
+         diallistInfo = mongodb.getOne(MONGO_COLLECTION=diallist_collection, WHERE={'account_number': str(row['account_number']), 'createdAt': {'$gte' : yesterdayTimeStamp,'$lte' : endYesterdayTimeStamp} },
+                     SELECT=['assign'])
+         if diallistInfo != None:
+            if 'assign' in diallistInfo.keys():
+               users = _mongodb.getOne(MONGO_COLLECTION=user_collection,WHERE={'extension': str(diallistInfo['assign'])}, SELECT=['extension','agentname'])
+               if users != None:
+                  row['pic'] = diallistInfo['assign'] + ' - ' + users['agentname']
+
+         
+         row['note'] = ''
+         row.pop('_id')
+         row.pop('date')
+         # row['stt'] = i
+         row['createdAt'] = int(yesterdayTimeStamp)
+         row['createdBy'] = 'system'
+         insertData.append(row)
+         i += 1
+         # break
 
    if len(insertData) > 0:
       mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertData)
 
 
    # Report_input_payment_of_card
+   code = ['2000','2100','2700']
    aggregate_pipeline = [
        {
            "$match":
            {
                'created_at': {'$gte' : todayTimeStamp,'$lte' : endTodayTimeStamp},
+               '$or' : [ { "code" : '2000' }, {"code" : '2100' }, {"code" : '2700'}]
            }
        },
        {
@@ -159,48 +173,51 @@ try:
          sbv = mongodb.getOne(MONGO_COLLECTION=sbv_collection, WHERE={'contract_no': str(row['account_number'])},SELECT=['name','repayment_principal','repayment_interest','repayment_fees','card_type'])
          if sbv != None:
             row['name']             = sbv['name']
-            row['paid_principal']   = sbv['repayment_principal']
-            row['paid_interest']    = sbv['repayment_interest']
-            row['RPY_FEE']          = sbv['repayment_fees']
+            row['paid_principal']   = int(float(sbv['repayment_principal']))
+            row['paid_interest']    = int(float(sbv['repayment_interest']))
+            row['RPY_FEE']          = int(float(sbv['repayment_fees']))
             product = mongodb.getOne(MONGO_COLLECTION=product_collection, WHERE={'code': str(sbv['card_type'])},SELECT=['name'])
             if product != None:
                row['product_name'] = product['name']
             else:
                row['product_name'] = ''
-         else:
-            row['name']             = ''
-            row['paid_principal']   = ''
-            row['paid_interest']    = ''
-            row['RPY_FEE']          = ''
-            row['product_name']     = ''
 
          row['effective_date'] = str(int(float(row['effective_date'])))
          if len(str(row['effective_date'])) == 5:
             row['effective_date']       = '0'+str(row['effective_date'])
          date                 = str(row['effective_date'])
          d1                   = date[0:2]+'/'+date[2:4]+'/'+date[4:6]
-         row['payment_date']  = d1
+         row['payment_date']  = int(time.mktime(time.strptime(str(d1 + " 00:00:00"), "%d/%m/%y %H:%M:%S")))
 
-         group = mongodb.getOne(MONGO_COLLECTION=group_collection, WHERE={'account_number': str(row['account_number'])},SELECT=['group'])
-         if group != None:
-            row['group'] = group['group']
+         sbv_stored = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'SBV_Stored'), WHERE={'contract_no': str(row['account_number'])},SELECT=['overdue_indicator','kydue'],SORT=[("_id", -1)], SKIP=0, TAKE=1)
+         if sbv_stored != None:
+            for store in sbv_stored:
+               row['group']                 = store['overdue_indicator'] + store['kydue']
 
          account = mongodb.getOne(MONGO_COLLECTION=account_collection, WHERE={'account_number': str(row['account_number'])},SELECT=['overdue_date'])
          if account != None:
             date_time   = datetime.fromtimestamp(account['overdue_date'])
             d2          = date_time.strftime('%d/%m/%y')
-            row['due_date']   = d2
+            row['due_date']   = account['overdue_date']
             tdelta   = datetime.strptime(d1, '%d/%m/%y') - datetime.strptime(d2, '%d/%m/%y')
             row['num_of_overdue_day'] = tdelta.days
 
+         diallistInfo = mongodb.getOne(MONGO_COLLECTION=diallist_collection, WHERE={'account_number': str(row['account_number']), 'createdAt': {'$gte' : yesterdayTimeStamp,'$lte' : endYesterdayTimeStamp} },
+                     SELECT=['assign'])
+         if diallistInfo != None:
+            if 'assign' in diallistInfo.keys():
+               users = _mongodb.getOne(MONGO_COLLECTION=user_collection,WHERE={'extension': str(diallistInfo['assign'])}, SELECT=['extension','agentname'])
+               if users != None:
+                  row['pic'] = diallistInfo['assign'] + ' - ' + users['agentname']
+
+
          row['amt'] = row['amount']
-         row['pic'] = ''
          row['note'] = ''
          row.pop('_id')
          row.pop('effective_date')
          row.pop('amount')
-         row['stt'] = i
-         row['createdAt'] = int(todayTimeStamp)
+         # row['stt'] = i
+         row['createdAt'] = int(yesterdayTimeStamp)
          row['createdBy'] = 'system'
          insertDataPayment.append(row)
          i += 1

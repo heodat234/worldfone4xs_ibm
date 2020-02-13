@@ -253,6 +253,7 @@ try:
             zaccfInfo = list(mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'ZACCF'),aggregate_pipeline=aggregate_zaccf))
             if zaccfInfo not in [None, []] and zaccfInfo[0] is not None:
                 temp_total_amt_zaccf = 0
+                
                 for total_detail in total_list_value:
                     temp_total = {}
                     temp_total['detail'] = total_detail

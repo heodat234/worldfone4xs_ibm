@@ -127,6 +127,10 @@
                                 field: "unwork",
                                 title: "Unwork accounts",
                                 width: 100,
+                            },{
+                                field: "work",
+                                title: "Work accounts",
+                                width: 100,
                             },
                             {
                                 field: "talk_time",
@@ -136,24 +140,24 @@
                             {
                                 title: "Contacted",
                                 columns: [{
-                                    field: 'total_call',
+                                    field: 'count_contacted',
                                     title: 'No.of accounts',
                                     width: 80
                                 }, {
-                                    field: 'total_amount',
+                                    field: 'contacted_amount',
                                     title: 'No.of amount',
                                     width: 80
                                 }]
                             },
                             {
-                                title: "Spin",
+                                title: "Call made",
                                 columns: [{
-                                    field: 'count_spin',
-                                    title: 'No.of accounts',
+                                    field: 'number_of_call',
+                                    title: 'Number of call',
                                     width: 80
                                 }, {
-                                    field: 'spin_amount',
-                                    title: 'No.of amount',
+                                    field: 'total_call',
+                                    title: 'Total call made include drop call',
                                     width: 80
                                 }]
                             },
@@ -193,18 +197,26 @@
                                     width: 80
                                 }, {
                                     field: 'count_paid_promise',
-                                    title: 'No.of accounts (keep promise to pay)',
+                                    title: 'No.of accounts (keep promise to pay today)',
                                     width: 80
                                 }, {
                                     field: 'paid_amount_promise',
+                                    title: 'Actual Amount received (keep promise to pay today)',
+                                    width: 80
+                                }, {
+                                    field: 'count_ptp_all_days',
+                                    title: 'No.of accounts (keep promise to pay)',
+                                    width: 80
+                                }, {
+                                    field: 'paid_amount_all_days',
                                     title: 'Actual Amount received (keep promise to pay)',
                                     width: 80
                                 }]
                             },
                             {
-                                title: "Spin rate",
+                                title: "Call made rate",
                                 columns: [{
-                                    field: 'spin_rate',
+                                    field: 'call_rate',
                                     title: 'Account',
                                     width: 80
                                 }]

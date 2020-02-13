@@ -15,7 +15,7 @@
                 <div class="form-group col-sm-4">
                 <label class="control-label col-xs-4">@Date@</label>
                 <div class="col-xs-8">
-                    <input id="start-date" data-role="datepicker" data-format="dd/MM/yyyy" name="fromDateTime" data-bind="value: fromDateTime" disabled="">
+                    <input id="start-date" data-role="datepicker" data-format="dd/MM/yyyy" name="fromDateTime" data-bind="value: fromDateTime" >
                 </div>
                 </div>
                 <!-- <div class="form-group col-sm-4">
@@ -23,10 +23,10 @@
                 <div class="col-xs-8">
                     <input id="end-date" data-role="datepicker" data-format="dd/MM/yyyy H:mm:ss" name="toDateTime" data-bind="value: toDateTime, events: {change: endDate}">
                 </div>
-                </div>
+                </div> -->
                 <div class="form-group col-sm-4 text-center">
                     <button class="k-button" data-bind="click: search">@Search@</button>
-                </div> -->
+                </div>
             </div>
             <h3 class="col-sm-12 text-center" style="margin-bottom: 20px;color: #27ae60">DAILY PAYMENT REPORT</h3>
             <div class="row chart-page"  style="background-color: white">
@@ -49,15 +49,20 @@
             return {
                 dataSource: {},
                 grid: {},
+                fromDate: 0,
                 init: function() {
                     var dataSource = this.dataSource = new kendo.data.DataSource({
                         serverPaging: true,
                         serverFiltering: true,
                         serverSorting: true,
                         pageSize: 10,
-                        sort: {
-                        field: "stt", dir: "asc"
-                    },
+                        filter: {
+                              logic: "and",
+                              filters: [
+                                  {field: 'createdAt', operator: "gte", value: this.fromDate},
+                              ]
+                        },
+                        
                         transport: {
                             read: ENV.reportApi + "loan/daily_payment_report",
                             parameterMap: parameterMap
@@ -65,7 +70,14 @@
                         schema: {
                             data: "data",
                             total: "total",
-
+                          //   parse: function (response) {
+                          //     response.data.map(function(doc) {
+                          //         doc.due_date = doc.due_date ? new Date(doc.due_date * 1000) : undefined;
+                          //         doc.payment_date = doc.payment_date ? new Date(doc.payment_date * 1000) : undefined;
+                          //         return doc;
+                          //     })
+                          //     return response;
+                          // },
                         }
                     });
 
@@ -89,10 +101,6 @@
                         scrollable: true,
                         columns: [
                         {
-                            field: "stt",
-                            title: "No",
-                            width: 70
-                        },{
                             field: "account_number",
                             title: "ACCOUNT NUMBER",
                             width: 150
@@ -103,12 +111,12 @@
                         },{
                             field: "due_date",
                             title: "OVERDUE DATE",
-                            // template: dataItem => gridTimestamp(dataItem.due_date),
+                            template: dataItem => gridTimestamp(dataItem.due_date),
                             width: 130
                         },{
                             field: "payment_date",
                             title: "PAYMENT DATE",
-                            // template: dataItem => gridTimestamp(dataItem.payment_date),
+                            template: dataItem => gridTimestamp(dataItem.payment_date),
                             width: 130
                         },{
                             field: "amt",
@@ -225,7 +233,7 @@
             }
         }();
         window.onload = function() {
-            Table.init();
+            
             var dateRange = 30;
             var nowDate = new Date();
             var date =  new Date();
@@ -235,6 +243,9 @@
 
             var fromDate = new Date(date.getTime() + timeZoneOffset );
             var toDate = new Date(date.getTime() + timeZoneOffset + kendo.date.MS_PER_DAY -1)
+
+            Table.fromDate = fromDate.getTime() / 1000;
+            Table.init();
             var observable = kendo.observable({
                 trueVar: true,
                 loading: false,
@@ -288,9 +299,9 @@
                 this.asyncSearch();
                 },
                 asyncSearch: async function() {
-                var field = "created_at";
-                var fromDateTime = new Date(this.fromDateTime.getTime() - timeZoneOffset).toISOString();
-                    var toDateTime = new Date(this.toDateTime.getTime() - timeZoneOffset).toISOString();
+                    var field = "createdAt";
+                    var fromDateTime = this.fromDateTime.getTime() / 1000;
+                    var toDateTime = fromDateTime + 86000;
 
                     var filter = {
                         logic: "and",
@@ -315,6 +326,7 @@
                 url: ENV.reportApi + "loan/daily_payment_report/downloadExcel",
                 type: 'POST',
                 dataType: 'json',
+                data: {date: $('#start-date').val()},
                 timeout: 30000
                 })
                 .done(function(response) {

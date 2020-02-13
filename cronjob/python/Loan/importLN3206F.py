@@ -45,7 +45,7 @@ try:
     total = 0
     complete = 0
     # today = date.today()
-    today = datetime.strptime('07/01/2020', "%d/%m/%Y").date()
+    today = datetime.strptime('13/02/2020', "%d/%m/%Y").date()
     day = today.day
     month = today.month
     year = today.year
