@@ -4,8 +4,8 @@ use Pheanstalk\Pheanstalk;
 $queue = new Pheanstalk('127.0.0.1');
 
 //$inputFileName = "../../upload/ftp/telesales/ZACCF.csv";
-$folder = date("Ymd"); //"20191120";
-// $folder = '20191213'; //"20191120";
+// $folder = date("Ymd"); //"20191120";
+$folder = '20200101'; //"20191120";
 $inputFileName = "/data/upload_file/{$folder}/ZACCF.txt";
 // echo $inputFileName;
 // exit();

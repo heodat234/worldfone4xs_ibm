@@ -28,11 +28,12 @@ _mongodb    = Mongodb(MONGODB="_worldfone4xs", WFF_ENV=wff_env)
 
 subUserType = 'LO'
 collection                      = common.getSubUser(subUserType, 'Daily_all_user_report')
-group_collection                = common.getSubUser(subUserType, 'Group_product')
+group_collection                = common.getSubUser(subUserType, 'Group')
 product_collection              = common.getSubUser(subUserType, 'Product')
 report_due_date_collection      = common.getSubUser(subUserType, 'Report_due_date')
-user_collection                 = common.getSubUser(subUserType, 'User_product')
+user_collection                 = common.getSubUser(subUserType, 'User')
 jsondata_collection             = common.getSubUser(subUserType, 'Jsondata')
+diallist_collection             = common.getSubUser(subUserType, 'Diallist')
 diallist_detail_collection      = common.getSubUser(subUserType, 'Diallist_detail')
 cdr_collection                  = common.getSubUser(subUserType, 'worldfonepbxmanager')
 action_code_collection          = common.getSubUser(subUserType, 'Action_code')
@@ -50,9 +51,10 @@ try:
     insertData = []
     insertDataTotal = []
     listDebtGroup = []
+    code = ['2000','2100','2700']
 
     today = date.today()
-    # today = datetime.strptime('06/02/2020', "%d/%m/%Y").date()
+    # today = datetime.strptime('13/02/2020', "%d/%m/%Y").date()
 
     day = today.day
     month = today.month
@@ -96,1172 +98,1476 @@ try:
     listGroupProductRaw = _mongodb.getOne(MONGO_COLLECTION=jsondata_collection, WHERE={'tags': ['group', 'debt', 'product']})
     listGroupProduct = listGroupProductRaw['data']
 
-    # users = _mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'User'), SELECT=['extension','agentname'],SORT=([('_id', -1)]),SKIP=0, TAKE=500)
     
     checkGroupA = 'false'
     for debtGroupCell in list(listDebtGroup):
         if debtGroupCell[0:1] == 'A' and checkGroupA == 'false':
+          i = 1
+          for groupProduct in list(listGroupProduct):
+              leaders = []
+              groups = mongodb.get(MONGO_COLLECTION=group_collection, WHERE={'name' : {'$regex' : groupProduct['value']} },SELECT=['name','lead'])
+              for group in groups:
+                if group['name'].find('A') != -1:
+                  leaders.append(group['lead']) if 'lead' in group.keys() else ''
+
+              list_set = set(leaders) 
+              unique_leaders = (list(list_set)) 
+
+              for lead in unique_leaders:
+                  teams = mongodb.get(MONGO_COLLECTION=group_collection, WHERE={'lead': lead ,'name' : {'$regex' : groupProduct['value']} })
+                  if teams != None:
+                      groupTeam = []
+                      name = ''
+                      for team in teams:
+                          name1 =  team['name']
+                          groupTeam += team['members']
+
+                      list_members = set(groupTeam) 
+                      unique_members = (list(list_members))
+
+                      name = name1.replace("/G1", "")
+                      name = name.replace("/G2", "")
+                      name = name.replace("/G3", "")
+
+                      print(name)
+                      temp = {
+                          'name'           : name,
+                          'group'          : debtGroupCell[0:1],
+                          'team'           : i,
+                          'date'           : todayTimeStamp,
+                          'extension'      : lead,
+                          'team_lead'      : 'true',
+                          'count_data'     : 0,
+                          'unwork'            : 0,
+                          'work'              : 0,
+                          'talk_time'         : 0,
+                          'count_contacted'   : 0,
+                          'contacted_amount'  : 0,
+                          'number_of_call'    : 0,
+                          'total_call'        : 0,
+                          'count_conn'        : 0,
+                          'conn_amount'       : 0,
+                          'count_paid'        : 0,
+                          'paid_amount'       : 0,
+                          'ptp_amount'        : 0,
+                          'count_ptp'         : 0,
+                          'paid_amount_promise'       : 0,
+                          'count_paid_promise'        : 0,
+                          'count_ptp_all_days'        : 0,
+                          'paid_amount_all_days'      : 0,
+                      }
+
+                      # members
+                      member_arr = []
+                      count_member = len(unique_members)
+                      for member in list(unique_members):
+                          temp_member = {
+                              'name'           : '',
+                              'group'          : debtGroupCell[0:1],
+                              'team'           : i,
+                              'date'           : todayTimeStamp,
+                              'extension'      : member,
+                              'count_data'     : 0,
+                              'unwork'            : 0,
+                              'work'              : 0,
+                              'talk_time'         : 0,
+                              'count_contacted'   : 0,
+                              'contacted_amount'  : 0,
+                              'number_of_call'    : 0,
+                              'total_call'        : 0,
+                              'count_conn'        : 0,
+                              'conn_amount'       : 0,
+                              'count_paid'        : 0,
+                              'paid_amount'       : 0,
+                              'ptp_amount'        : 0,
+                              'count_ptp'         : 0,
+                              'paid_amount_promise'       : 0,
+                              'count_paid_promise'        : 0,
+                              'count_ptp_all_days'        : 0,
+                              'paid_amount_all_days'      : 0,
+                          }
+                          users = _mongodb.getOne(MONGO_COLLECTION=user_collection,WHERE={'extension': str(member)}, SELECT=['extension','agentname'])
+                          if users != None:
+                              temp_member['name'] = users['agentname']
+
+                          # account assign
+                          aggregate_diallist = [
+                              {
+                                  "$match":
+                                  {
+                                      "createdAt": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
+                                      "assign": str(member),
+                                  }
+                              },{
+                                  "$group":
+                                  {
+                                      "_id": 'null',
+                                      "acc_arr": {'$addToSet': '$account_number'},
+                                      "count_data": {'$sum': 1}
+                                  }
+                              }
+                          ]
+                          diallistData = mongodb.aggregate_pipeline(MONGO_COLLECTION=diallist_detail_collection,aggregate_pipeline=aggregate_diallist)
+                          account_assign_arr = []
+                          if diallistData != None:
+                              for row in diallistData:
+                                  temp_member['count_data']   = row['count_data']
+                                  account_assign_arr          = row['acc_arr']
+                          
+
+                          # unwork
+                          aggregate_diallist = [
+                              {
+                                  "$match":
+                                  {
+                                      "createdAt": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
+                                      "assigns": str(member),
+                                      "mode" : "manual"
+                                  }
+                              },{
+                                  "$group":
+                                  {
+                                      "_id": 'null',
+                                      "diallist_id_arr": {'$push': '$_id'},
+                                  }
+                              }
+                          ]
+                          diallistData = mongodb.aggregate_pipeline(MONGO_COLLECTION=diallist_collection,aggregate_pipeline=aggregate_diallist)
+                          diallist_id_arr = []
+                          if diallistData != None:
+                              for row in diallistData:
+                                  diallist_id_arr          = row['diallist_id_arr']
+
+                          aggregate_diallist = [
+                              {
+                                  "$match":
+                                  {
+                                      "createdAt": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
+                                      "diallist_id": {'$in' : diallist_id_arr},
+                                      "assign": str(member)
+                                  }
+                              },{
+                                  "$group":
+                                  {
+                                      "_id": 'null',
+                                      "count_acc_manual": {'$sum': 1}
+                                  }
+                              }
+                          ]
+                          diallistData_1 = mongodb.aggregate_pipeline(MONGO_COLLECTION=diallist_detail_collection,aggregate_pipeline=aggregate_diallist)
+                          count_acc_manual = 0
+                          if diallistData_1 != None:
+                              for row in diallistData_1:
+                                  count_acc_manual          = row['count_acc_manual']
+
+
+                          aggregate_cdr_manual = [
+                              {
+                                  "$match":
+                                  {
+                                      "starttime": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
+                                      "userextension": str(member),
+                                      "dialtype" : "manual"
+                                  }
+                              },{
+                                  "$group":
+                                  {
+                                      "_id": 'null',
+                                      "count_conn": {'$sum': 1},
+                                      "phone_manual_arr": {'$addToSet': '$customernumber'},
+                                  }
+                              }
+                          ]
+                          cdrManualData = mongodb.aggregate_pipeline(MONGO_COLLECTION=cdr_collection,aggregate_pipeline=aggregate_cdr_manual)
+                          phone_manual_arr = []
+                          if cdrManualData != None:
+                              for row in cdrManualData:
+                                  phone_manual_arr            = row['phone_manual_arr']
+
+                          aggregate_cdr_manual_1 = [
+                              {
+                                  "$match":
+                                  {
+                                      "createdAt": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
+                                      "assign" : str(member),
+                                      '$or' : [ { "mobile_num" : {'$in' : phone_manual_arr} }, {"phone" : {'$in' : phone_manual_arr} }, {"other_phones" : {'$in' : phone_manual_arr}}]
+                                  }
+                              },{
+                                  "$group":
+                                  {
+                                      "_id": 'null',
+                                      "count_acc_manual_cdr": {'$sum': 1}
+                                  }
+                              }
+                          ]
+                          accountData1 = mongodb.aggregate_pipeline(MONGO_COLLECTION=diallist_detail_collection,aggregate_pipeline=aggregate_cdr_manual_1)
+                          count_acc_manual_cdr = 0
+                          if accountData1 != None:
+                              for row in accountData1:
+                                  count_acc_manual_cdr          = row['count_acc_manual_cdr']
+
+                          temp_member['unwork']             = count_acc_manual - count_acc_manual_cdr
+                          temp_member['work']               = temp_member['count_data'] - temp_member['unwork']
+
+
+                          # talk time
+                          aggregate_cdr = [
+                              {
+                                  "$match":
+                                  {
+                                      "starttime" : {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
+                                      "direction" : "outbound",
+                                      "userextension": str(member),
+                                  }
+                              },{
+                                  "$group":
+                                  {
+                                      "_id": 'null',
+                                      "talk_time": {'$sum': '$billduration'},
+                                  }
+                              }
+                          ]
+                          cdrData = mongodb.aggregate_pipeline(MONGO_COLLECTION=cdr_collection,aggregate_pipeline=aggregate_cdr)
+                          
+                          disposition_arr = []
+                          if cdrData != None:
+                              for row in cdrData:
+                                  temp_member['talk_time']            = row['talk_time']
+
+                          # contacted
+                          count_contacted = 0
+                          customernumber_arr = []
+                          for acc_assign in account_assign_arr:
+                              diallistInfo = mongodb.getOne(MONGO_COLLECTION=diallist_detail_collection, WHERE={'account_number': str(acc_assign), "createdAt": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp} },
+                                              SELECT=['mobile_num','phone','other_phones'])
+
+                              phone = []
+                              cdrInfo = 0
+                              if diallistInfo != None:
+                                if 'mobile_num' in diallistInfo.keys():
+                                  phone.append(diallistInfo['mobile_num'])
+                                if 'phone' in diallistInfo.keys():
+                                  phone.append(diallistInfo['phone'])
+                                if 'other_phones' in diallistInfo.keys():
+                                  phone += diallistInfo['other_phones']
+
+                                cdrInfo = mongodb.count(MONGO_COLLECTION=cdr_collection, WHERE={'customernumber': {'$in': phone}, "direction" : "outbound", "userextension": str(member), "starttime": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp}} )
+                                if cdrInfo > 0:
+                                  count_contacted += 1
+                                  customernumber_arr.append(acc_assign)
+
+                          temp_member['count_contacted']           = count_contacted
+
+                          # call made
+                          calMade = mongodb.count(MONGO_COLLECTION=cdr_collection, WHERE={'disposition': 'ANSWERED', "direction" : "outbound", "userextension": str(member), "starttime": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp}} )
+                          if calMade > 0:
+                            temp_member['number_of_call'] = calMade
+
+                          totalCall = mongodb.count(MONGO_COLLECTION=cdr_collection, WHERE={ "direction" : "outbound", "userextension": str(member), "starttime": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp}} )
+                          if totalCall > 0:
+                            temp_member['total_call'] = totalCall
+
+
+                          # connected
+                          action_code = ['PTP', 'CHECK', 'LM', 'PTP Today']
+                          aggregate_cdr_ans = [
+                              {
+                                  "$match":
+                                  {
+                                      "starttime": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
+                                      "userextension": str(member),
+                                      "disposition" : 'ANSWERED',
+                                      '$or' : [ { 'action_code' :  {'$in' : action_code}}, {'customer.action_code' :  {'$in' : action_code}}]
+                                  }
+                              },{
+                                  "$group":
+                                  {
+                                      "_id": 'null',
+                                      "count_conn": {'$sum': 1},
+                                      "phone_ans_arr": {'$addToSet': '$customernumber'},
+                                  }
+                              }
+                          ]
+                          cdrAnsData = mongodb.aggregate_pipeline(MONGO_COLLECTION=cdr_collection,aggregate_pipeline=aggregate_cdr_ans)
+                          phone_ans_arr = []
+                          if cdrAnsData != None:
+                              for row in cdrAnsData:
+                                  phone_ans_arr            = row['phone_ans_arr']
+                                  temp_member['count_conn'] = row['count_conn']
+
+                          aggregate_cdr_ans_1 = [
+                              {
+                                  "$match":
+                                  {
+                                      "createdAt": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
+                                      "assign" : str(member),
+                                      '$or' : [ { "mobile_num" : {'$in' : phone_ans_arr} }, {"phone" : {'$in' : phone_ans_arr} }, {"other_phones" : {'$in' : phone_ans_arr}}]
+                                  }
+                              },{
+                                  "$group":
+                                  {
+                                      "_id": 'null',
+                                      "account_ans_arr": {'$addToSet': '$customernumber'},
+                                  }
+                              }
+                          ]
+                          accountData = mongodb.aggregate_pipeline(MONGO_COLLECTION=diallist_detail_collection,aggregate_pipeline=aggregate_cdr_ans_1)
+                          acc_ans_arr = []
+                          if accountData != None:
+                              for row in accountData:
+                                  acc_ans_arr            = row['account_ans_arr']
+
+
+
+                          # PTP
+                          aggregate_ptp = [
+                              {
+                                  "$match":
+                                  {
+                                      "createdAt": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
+                                      "account_number": {'$in': account_assign_arr},
+                                      '$or' : [ { 'action_code' :  'PTP'}, {'action_code' :  'PTP Today'}, {'action_code' :  'CHECK'}]
+                                  }
+                              },{
+                                  "$group":
+                                  {
+                                      "_id": 'null',
+                                      "acc_arr": {'$addToSet': '$account_number'},
+                                      "count_data": {'$sum': 1}
+                                  }
+                              }
+                          ]
+                          ptpData = mongodb.aggregate_pipeline(MONGO_COLLECTION=diallist_detail_collection,aggregate_pipeline=aggregate_ptp)
+                          account_ptp_arr = []
+                          if ptpData != None:
+                            for row in ptpData:
+                                account_ptp_arr                     = row['acc_arr']
+                                temp_member['count_ptp']            = row['count_data']
+
+
+                          # PTP all days
+                          aggregate_ptp = [
+                              {
+                                  "$match":
+                                  {
+                                      "account_number": {'$in': account_assign_arr},
+                                      '$or' : [ { 'action_code' :  'PTP'}, {'action_code' :  'PTP Today'}, {'action_code' :  'CHECK'}]
+                                  }
+                              },{
+                                  "$group":
+                                  {
+                                      "_id": 'null',
+                                      "acc_arr": {'$addToSet': '$account_number'},
+                                      # "count_data": {'$sum': 1}
+                                  }
+                              }
+                          ]
+                          ptpData = mongodb.aggregate_pipeline(MONGO_COLLECTION=diallist_detail_collection,aggregate_pipeline=aggregate_ptp)
+                          account_ptp_all_days_arr = []
+                          if ptpData != None:
+                            for row in ptpData:
+                                account_ptp_all_days_arr            = row['acc_arr']
+                                # temp_member['count_ptp']            = row['count_data']
+                          
+
+                          if groupProduct['value'] == 'SIBS':
+                              aggregate_cdr_amt = [
+                                  {
+                                      "$match":
+                                      {
+                                          "account_number": {'$in': customernumber_arr},
+                                      }
+                                  },{
+                                      "$group":
+                                      {
+                                          "_id": 'null',
+                                          "contacted_amount": {'$sum': '$current_balance'},
+
+                                      }
+                                  }
+                              ]
+                              cdrAmountData = mongodb.aggregate_pipeline(MONGO_COLLECTION=lnjc05_yesterday_collection,aggregate_pipeline=aggregate_cdr_amt)
+                              if cdrAmountData != None:
+                                  for row in cdrAmountData:
+                                      temp_member['contacted_amount']            = row['contacted_amount']
+
+                              # amount of connected
+                              aggregate_amt_ans = [
+                                  {
+                                      "$match":
+                                      {
+                                          "account_number": {'$in': acc_ans_arr},
+                                      }
+                                  },{
+                                      "$group":
+                                      {
+                                          "_id": 'null',
+                                          "conn_amount": {'$sum': '$current_balance'},
+                                      }
+                                  }
+                              ]
+                              amtAnsData = mongodb.aggregate_pipeline(MONGO_COLLECTION=lnjc05_yesterday_collection,aggregate_pipeline=aggregate_amt_ans)
+                              if amtAnsData != None:
+                                  for row in amtAnsData:
+                                      temp_member['conn_amount']            = row['conn_amount']
+
+                              # PTP amount
+                              aggregate_ptp_amt = [
+                                  {
+                                      "$match":
+                                      {
+                                          "account_number": {'$in': account_ptp_arr},
+                                      }
+                                  },{
+                                      "$group":
+                                      {
+                                          "_id": 'null',
+                                          "ptp_amount": {'$sum': '$current_balance'},
+                                      }
+                                  }
+                              ]
+                              ptpAmtData = mongodb.aggregate_pipeline(MONGO_COLLECTION=lnjc05_yesterday_collection,aggregate_pipeline=aggregate_ptp_amt)
+                              if ptpAmtData != None:
+                                  for row in ptpAmtData:
+                                      temp_member['ptp_amount']           = row['ptp_amount']
+
+
+                              # PTP paid 
+                              aggregate_paid_promise = [
+                                  {
+                                      "$match":
+                                      {
+                                          "created_at": {'$gte': todayTimeStamp, '$lte': endTodayTimeStamp},
+                                          "account_number": {'$in': account_ptp_arr},
+                                          "code" : '10'
+                                      }
+                                  },{
+                                      "$group":
+                                      {
+                                          "_id": 'null',
+                                          "paid_amount_promise": {'$sum': '$amt'},
+                                          "count_paid_promise": {'$addToSet': '$account_number'},
+                                      }
+                                  }
+                              ]
+                              paidPromiseData = mongodb.aggregate_pipeline(MONGO_COLLECTION=ln3206f_collection,aggregate_pipeline=aggregate_paid_promise)
+                              if paidPromiseData != None:
+                                  for row in paidPromiseData:
+                                      temp_member['count_paid_promise']            = len(row['count_paid_promise'] )
+                                      temp_member['paid_amount_promise']           = row['paid_amount_promise']
+
+                              # print(account_ptp_arr)
+                              # PTP all days
+                              aggregate_paid_all_days = [
+                                  {
+                                      "$match":
+                                      {
+                                          "created_at": {'$gte': todayTimeStamp, '$lte': endTodayTimeStamp},
+                                          "account_number": {'$in': account_ptp_all_days_arr},
+                                          "code" : '10'
+                                      }
+                                  },{
+                                      "$group":
+                                      {
+                                          "_id": 'null',
+                                          "paid_amount_promise": {'$sum': '$amt'},
+                                          "count_paid_promise": {'$addToSet': '$account_number'},
+                                      }
+                                  }
+                              ]
+                              paidAllDaysData = mongodb.aggregate_pipeline(MONGO_COLLECTION=ln3206f_collection,aggregate_pipeline=aggregate_paid_all_days)
+                              if paidAllDaysData != None:
+                                  for row in paidAllDaysData:
+                                      temp_member['count_ptp_all_days']            = len(row['count_paid_promise'] )
+                                      temp_member['paid_amount_all_days']           = row['paid_amount_promise']
+
+
+
+                              # paid
+                              aggregate_paid = [
+                                  {
+                                      "$match":
+                                      {
+                                          "created_at": {'$gte': todayTimeStamp, '$lte': endTodayTimeStamp},
+                                          "account_number": {'$in': account_assign_arr},
+                                          "code" : '10'
+                                      }
+                                  },{
+                                      "$group":
+                                      {
+                                          "_id": 'null',
+                                          "paid_amount": {'$sum': '$amt'},
+                                          "count_paid": {'$addToSet': '$account_number'},
+                                      }
+                                  }
+                              ]
+                              paidPromiseData = mongodb.aggregate_pipeline(MONGO_COLLECTION=ln3206f_collection,aggregate_pipeline=aggregate_paid)
+                              if paidPromiseData != None:
+                                  for row in paidPromiseData:
+                                      temp_member['count_paid']            = len(row['count_paid'] )
+                                      temp_member['paid_amount']           = row['paid_amount']
+
+
+
+                          if groupProduct['value'] == 'Card':
+                              aggregate_cdr_amt = [
+                                  {
+                                      "$match":
+                                      {
+                                          "account_number": {'$in': customernumber_arr},
+                                      }
+                                  },{
+                                      "$group":
+                                      {
+                                          "_id": 'null',
+                                          "contacted_amount": {'$sum': '$cur_bal'},
+
+                                      }
+                                  }
+                              ]
+                              cdrAmountData = mongodb.aggregate_pipeline(MONGO_COLLECTION=list_of_account_yesterday_collection,aggregate_pipeline=aggregate_cdr_amt)
+                              if cdrAmountData != None:
+                                  for row in cdrAmountData:
+                                      temp_member['contacted_amount']            = row['contacted_amount']
+
+                             
+                              # amount of connected
+                              aggregate_amt_ans = [
+                                  {
+                                      "$match":
+                                      {
+                                          "account_number": {'$in': acc_ans_arr},
+                                      }
+                                  },{
+                                      "$group":
+                                      {
+                                          "_id": 'null',
+                                          "conn_amount": {'$sum': '$cur_bal'},
+                                      }
+                                  }
+                              ]
+                              amtAnsData = mongodb.aggregate_pipeline(MONGO_COLLECTION=list_of_account_yesterday_collection,aggregate_pipeline=aggregate_amt_ans)
+                              if amtAnsData != None:
+                                  for row in amtAnsData:
+                                      temp_member['conn_amount']            = row['conn_amount']
+
+
+                              aggregate_ptp_amt = [
+                                  {
+                                      "$match":
+                                      {
+                                          "account_number": {'$in': account_ptp_arr},
+                                      }
+                                  },{
+                                      "$group":
+                                      {
+                                          "_id": 'null',
+                                          "ptp_amount": {'$sum': '$cur_bal'},
+                                      }
+                                  }
+                              ]
+                              ptpAmtData = mongodb.aggregate_pipeline(MONGO_COLLECTION=list_of_account_yesterday_collection,aggregate_pipeline=aggregate_ptp_amt)
+                              if ptpAmtData != None:
+                                  for row in ptpAmtData:
+                                      temp_member['ptp_amount']           = row['ptp_amount']
+
+                              
+                              temp_member['count_paid_promise']  = 0
+                              temp_member['paid_amount_promise'] = 0
+                              for acc_ptp in account_ptp_arr:
+                                aggregate_paid_ptp = [
+                                    {
+                                        "$match":
+                                        {
+                                            "created_at": {'$gte': todayTimeStamp, '$lte': endTodayTimeStamp},
+                                            "account_number": acc_ptp,
+                                            "code" : {'$in' : code},
+                                        }
+                                    },
+                                    {
+                                        "$project":
+                                        {
+                                            "account_number" : 1,
+                                            "amount" : 1,
+                                            "code" : 1,
+                                        }
+                                    }
+                                ]
+                                paidPTPData = mongodb.aggregate_pipeline(MONGO_COLLECTION=gl_collection,aggregate_pipeline=aggregate_paid_ptp)
+                                code_2000 = 0
+                                code_2700 = 0
+                                sum_code = 0
+                                if paidPTPData != None:
+                                    for row in paidPTPData:
+                                      if row['code'] == '2000' or row['code'] == '2100':
+                                        code_2000 += row['amount']
+                                      else:
+                                        code_2700 += row['amount']
+                                    sum_code = code_2000 - code_2700
+                                    if sum_code > 0:
+                                      temp_member['count_paid_promise'] += 1
+                                      temp_member['paid_amount_promise'] += sum_code
+
+
+
+                              # PTP all days
+                              temp_member['count_ptp_all_days']  = 0
+                              temp_member['paid_amount_all_days'] = 0
+                              for acc_ptp_all_day in account_ptp_all_days_arr:
+                                aggregate_paid_all_days = [
+                                    {
+                                        "$match":
+                                        {
+                                            "created_at": {'$gte': todayTimeStamp, '$lte': endTodayTimeStamp},
+                                            "account_number": acc_ptp_all_day,
+                                            "code" : {'$in' : code},
+                                        }
+                                    },
+                                    {
+                                        "$project":
+                                        {
+                                            "account_number" : 1,
+                                            "amount" : 1,
+                                            "code" : 1,
+                                        }
+                                    }
+                                ]
+                                paidPTPAllDayData = mongodb.aggregate_pipeline(MONGO_COLLECTION=gl_collection,aggregate_pipeline=aggregate_paid_all_days)
+                                code_2000 = 0
+                                code_2700 = 0
+                                sum_code = 0
+                                if paidPTPAllDayData != None:
+                                    for row in paidPTPAllDayData:
+                                      if row['code'] == '2000' or row['code'] == '2100':
+                                        code_2000 += row['amount']
+                                      else:
+                                        code_2700 += row['amount']
+                                    sum_code = code_2000 - code_2700
+                                    if sum_code > 0:
+                                      temp_member['count_ptp_all_days'] += 1
+                                      temp_member['paid_amount_all_days'] += sum_code
+
+
+
+                              # paid
+                              temp_member['count_paid']  = 0
+                              temp_member['paid_amount'] = 0
+                              for acc_assign in account_assign_arr:
+                                aggregate_paid = [
+                                    {
+                                        "$match":
+                                        {
+                                            "created_at": {'$gte': todayTimeStamp, '$lte': endTodayTimeStamp},
+                                            "account_number": acc_assign,
+                                            "code" : {'$in' : code},
+                                        }
+                                    },
+                                    {
+                                        "$project":
+                                        {
+                                            "account_number" : 1,
+                                            "amount" : 1,
+                                            "code" : 1,
+                                        }
+                                    }
+                                ]
+                                paidAssignData = mongodb.aggregate_pipeline(MONGO_COLLECTION=gl_collection,aggregate_pipeline=aggregate_paid)
+                                code_2000 = 0
+                                code_2700 = 0
+                                sum_code = 0
+                                if paidAssignData != None:
+                                    for row in paidAssignData:
+                                      if row['code'] == '2000' or row['code'] == '2100':
+                                        code_2000 += row['amount']
+                                      else:
+                                        code_2700 += row['amount']
+                                    sum_code = code_2000 - code_2700
+                                    if sum_code > 0:
+                                      temp_member['count_paid'] += 1
+                                      temp_member['paid_amount'] += sum_code
+
+
+
+                          temp['count_data']      += temp_member['count_data'];
+                          temp['unwork']          += temp_member['unwork'];
+                          temp['work']            += temp_member['work'];
+                          temp['talk_time']       += temp_member['talk_time'];
+                          temp['count_contacted'] += temp_member['count_contacted'];
+                          temp['contacted_amount']    += temp_member['contacted_amount'];
+                          temp['conn_amount']     += temp_member['conn_amount'];
+                          temp['count_conn']      += temp_member['count_conn'];
+                          temp['number_of_call']  += temp_member['number_of_call'];
+                          temp['total_call']      += temp_member['total_call'];
+                          temp['count_ptp']       += temp_member['count_ptp'];
+                          temp['ptp_amount']      += temp_member['ptp_amount'];
+                          temp['count_paid']      += temp_member['count_paid'];
+                          temp['paid_amount']     += temp_member['paid_amount'];
+                          temp['count_paid_promise']      += temp_member['count_paid_promise'];
+                          temp['paid_amount_promise']     += temp_member['paid_amount_promise'];
+                          temp['count_ptp_all_days']      += temp_member['count_ptp_all_days']
+                          temp['paid_amount_all_days']     += temp_member['paid_amount_all_days']
+
+
+                          temp_member['call_rate']     = temp_member['number_of_call']/temp_member['count_contacted'] if temp_member['count_contacted'] != 0 else 0
+                          temp_member['ptp_rate_acc']  = temp_member['count_ptp']/temp_member['count_contacted'] if temp_member['count_contacted'] != 0 else 0
+                          temp_member['ptp_rate_amt']  = temp_member['ptp_amount']/temp_member['contacted_amount'] if temp_member['contacted_amount'] != 0  else 0
+                          temp_member['paid_rate_acc'] = temp_member['count_paid_promise']/temp_member['count_ptp'] if temp_member['count_ptp'] != 0 else 0
+                          temp_member['paid_rate_amt'] = temp_member['paid_amount_promise']/temp_member['ptp_amount'] if temp_member['ptp_amount'] != 0 else 0
+                          temp_member['conn_rate']     = temp_member['count_conn']/temp_member['count_contacted'] if temp_member['count_contacted'] != 0 else 0
+                          temp_member['collect_ratio_acc'] = temp_member['count_paid']/temp_member['count_contacted'] if temp_member['count_contacted'] != 0 else 0
+                          temp_member['collect_ratio_amt'] = temp_member['paid_amount']/temp_member['contacted_amount'] if temp_member['contacted_amount'] != 0 else 0
+                          temp_member['createdAt'] = todayTimeStamp
+                          temp_member['createdBy'] = 'system'
+                          temp_member['for_month'] = month
+
+                          # pprint(temp_member)
+                          member_arr.append(temp_member)
+
+                      temp['call_rate']     = temp['number_of_call']/temp['count_contacted']  if temp['count_contacted'] != 0 else 0
+                      temp['ptp_rate_acc']  = temp['count_ptp']/temp['count_contacted']  if temp['count_contacted'] != 0 else 0
+                      temp['ptp_rate_amt']  = temp['ptp_amount']/temp['contacted_amount']  if temp['contacted_amount'] != 0 else 0
+                      temp['paid_rate_acc'] = temp['count_paid_promise']/temp['count_ptp']  if temp['count_ptp'] != 0 else 0
+                      temp['paid_rate_amt'] = temp['paid_amount_promise']/temp['ptp_amount'] if temp['ptp_amount'] != 0 else 0
+                      temp['conn_rate']     = temp['count_conn']/temp['count_contacted'] if temp['count_contacted'] != 0 else 0
+                      temp['collect_ratio_acc'] = temp['count_paid']/temp['count_contacted']  if temp['count_contacted'] != 0 else 0
+                      temp['collect_ratio_amt'] = temp['paid_amount']/temp['contacted_amount']  if temp['contacted_amount'] != 0 else 0
+                      temp['createdAt'] = todayTimeStamp
+                      temp['createdBy'] = 'system'
+                      temp['for_month'] = month
+
+
+                      insertData.append(temp)
+                      insertData += member_arr;
+
+                      i += 1
+
+          checkGroupA = 'true'
+
+
+        if debtGroupCell[0:1] != 'A' and debtGroupCell[0:1] != 'F':
             i = 1
-            dueDayOfMonth = mongodb.getOne(MONGO_COLLECTION=report_due_date_collection, WHERE={'for_month': str(month), 'debt_group': debtGroupCell[1:3]})
             for groupProduct in list(listGroupProduct):
-                leaders = []
-                groups = mongodb.get(MONGO_COLLECTION=group_collection, WHERE={'name' : {'$regex' : groupProduct['value']}, 'debt_groups': debtGroupCell[0:3]},SELECT=['lead'])
-                for group in groups:
-                    leaders.append(group['lead']) if 'lead' in group.keys() else ''
+                teams = mongodb.getOne(MONGO_COLLECTION=group_collection, WHERE={'name' : {'$regex' : groupProduct['value']} , 'debt_groups': debtGroupCell[0:3]})
+                if teams != None:
+                      groupTeam = []
+                      name = ''
 
-                list_set = set(leaders) 
-                unique_leaders = (list(list_set)) 
+                      print(teams['name'])
+                      temp = {
+                          'name'           : teams['name'],
+                          'group'          : debtGroupCell[0:1],
+                          'team'           : i,
+                          'date'           : todayTimeStamp,
+                          'extension'      : lead,
+                          'team_lead'      : 'true',
+                          'count_data'     : 0,
+                          'unwork'            : 0,
+                          'work'              : 0,
+                          'talk_time'         : 0,
+                          'count_contacted'   : 0,
+                          'contacted_amount'  : 0,
+                          'number_of_call'    : 0,
+                          'total_call'        : 0,
+                          'count_conn'        : 0,
+                          'conn_amount'       : 0,
+                          'count_paid'        : 0,
+                          'paid_amount'       : 0,
+                          'ptp_amount'        : 0,
+                          'count_ptp'         : 0,
+                          'paid_amount_promise'       : 0,
+                          'count_paid_promise'        : 0,
+                          'count_ptp_all_days'        : 0,
+                          'paid_amount_all_days'      : 0,
+                      }
 
-                for lead in unique_leaders:
-                    # print(lead)
-                    teams = mongodb.get(MONGO_COLLECTION=group_collection, WHERE={'lead': lead ,'name' : {'$regex' : groupProduct['value']} , 'debt_groups': debtGroupCell[0:3]})
-                    if teams != None:
-                        groupTeam = []
-                        name = ''
-                        for team in teams:
-                            name1 =  team['name']
-                            groupTeam += team['members']
+                      # members
+                      member_arr = []
+                      count_member = len(unique_members)
+                      for member in team['members']:
+                          temp_member = {
+                              'name'           : '',
+                              'group'          : debtGroupCell[0:1],
+                              'team'           : i,
+                              'date'           : todayTimeStamp,
+                              'extension'      : member,
+                              'count_data'     : 0,
+                              'unwork'            : 0,
+                              'work'              : 0,
+                              'talk_time'         : 0,
+                              'count_contacted'   : 0,
+                              'contacted_amount'  : 0,
+                              'number_of_call'    : 0,
+                              'total_call'        : 0,
+                              'count_conn'        : 0,
+                              'conn_amount'       : 0,
+                              'count_paid'        : 0,
+                              'paid_amount'       : 0,
+                              'ptp_amount'        : 0,
+                              'count_ptp'         : 0,
+                              'paid_amount_promise'       : 0,
+                              'count_paid_promise'        : 0,
+                              'count_ptp_all_days'        : 0,
+                              'paid_amount_all_days'      : 0,
+                          }
+                          users = _mongodb.getOne(MONGO_COLLECTION=user_collection,WHERE={'extension': str(member)}, SELECT=['extension','agentname'])
+                          if users != None:
+                              temp_member['name'] = users['agentname']
 
-                        list_members = set(groupTeam) 
-                        unique_members = (list(list_members))
+                          # account assign
+                          aggregate_diallist = [
+                              {
+                                  "$match":
+                                  {
+                                      "createdAt": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
+                                      "assign": str(member),
+                                  }
+                              },{
+                                  "$group":
+                                  {
+                                      "_id": 'null',
+                                      "acc_arr": {'$addToSet': '$account_number'},
+                                      "count_data": {'$sum': 1}
+                                  }
+                              }
+                          ]
+                          diallistData = mongodb.aggregate_pipeline(MONGO_COLLECTION=diallist_detail_collection,aggregate_pipeline=aggregate_diallist)
+                          account_assign_arr = []
+                          if diallistData != None:
+                              for row in diallistData:
+                                  temp_member['count_data']   = row['count_data']
+                                  account_assign_arr          = row['acc_arr']
+                          
 
-                        name = name1.replace("/G1", "")
-                        name = name.replace("/G2", "")
-                        name = name.replace("/G3", "")
-                        temp = {
-                            'name'           : name,
-                            'group'          : debtGroupCell[0:1],
-                            'team'           : i,
-                            'date'           : todayTimeStamp,
-                            'extension'      : lead,
-                            'team_lead'      : 'true',
-                            'count_data'     : 0,
-                            'unwork'            : 0,
-                            'work'              : 0,
-                            'talk_time'         : 0,
-                            'count_contacted'   : 0,
-                            'contacted_amount'  : 0,
-                            'number_of_call'    : 0,
-                            'total_call'        : 0,
-                            'count_conn'        : 0,
-                            'conn_amount'       : 0,
-                            'count_paid'        : 0,
-                            'paid_amount'       : 0,
-                            'ptp_amount'        : 0,
-                            'count_ptp'         : 0,
-                            'paid_amount_promise'       : 0,
-                            'count_paid_promise'        : 0,
-                            'count_ptp_all_days'        : 0,
-                            'paid_amount_all_days'      : 0,
-                        }
+                          # unwork
+                          aggregate_diallist = [
+                              {
+                                  "$match":
+                                  {
+                                      "createdAt": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
+                                      "assigns": str(member),
+                                      "mode" : "manual"
+                                  }
+                              },{
+                                  "$group":
+                                  {
+                                      "_id": 'null',
+                                      "diallist_id_arr": {'$push': '$_id'},
+                                  }
+                              }
+                          ]
+                          diallistData = mongodb.aggregate_pipeline(MONGO_COLLECTION=diallist_collection,aggregate_pipeline=aggregate_diallist)
+                          diallist_id_arr = []
+                          if diallistData != None:
+                              for row in diallistData:
+                                  diallist_id_arr          = row['diallist_id_arr']
 
-                        if todayTimeStamp < dueDayOfMonth['due_date_add_1']:
-                            dueDayLastMonth = mongodb.getOne(MONGO_COLLECTION=report_due_date_collection, WHERE={'for_month': str(month - 1), 'debt_group': debtGroupCell[1:3]})
-                            temp['due_date'] = dueDayLastMonth['due_date'] if dueDayLastMonth is not None else ''
-                        else:
-                            temp['due_date'] = dueDayOfMonth['due_date']
-
-                        # members
-                        member_arr = []
-                        count_member = len(unique_members)
-                        for member in list(unique_members):
-                            temp_member = {
-                                'name'           : '',
-                                'group'          : debtGroupCell[0:1],
-                                'team'           : i,
-                                'date'           : todayTimeStamp,
-                                'extension'      : member,
-                                'count_data'     : 0,
-                                'unwork'            : 0,
-                                'work'              : 0,
-                                'talk_time'         : 0,
-                                'count_contacted'   : 0,
-                                'contacted_amount'  : 0,
-                                'number_of_call'    : 0,
-                                'total_call'        : 0,
-                                'count_conn'        : 0,
-                                'conn_amount'       : 0,
-                                'count_paid'        : 0,
-                                'paid_amount'       : 0,
-                                'ptp_amount'        : 0,
-                                'count_ptp'         : 0,
-                                'paid_amount_promise'       : 0,
-                                'count_paid_promise'        : 0,
-                                'count_ptp_all_days'        : 0,
-                                'paid_amount_all_days'      : 0,
-                            }
-                            users = _mongodb.getOne(MONGO_COLLECTION=user_collection,WHERE={'extension': str(member)}, SELECT=['extension','agentname'])
-                            if users != None:
-                                temp_member['name'] = users['agentname']
-
-                            # account assign
-                            aggregate_diallist = [
-                                {
-                                    "$match":
-                                    {
-                                        "createdAt": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
-                                        "assign": str(member),
-                                    }
-                                },{
-                                    "$group":
-                                    {
-                                        "_id": 'null',
-                                        "acc_arr": {'$addToSet': '$account_number'},
-                                        "count_data": {'$sum': 1}
-                                    }
-                                }
-                            ]
-                            diallistData = mongodb.aggregate_pipeline(MONGO_COLLECTION=diallist_detail_collection,aggregate_pipeline=aggregate_diallist)
-                            account_assign_arr = []
-                            if diallistData != None:
-                                for row in diallistData:
-                                    temp_member['count_data']   = row['count_data']
-                                    account_assign_arr          = row['acc_arr']
-
-                            temp['account_assign_arr'] = account_assign_arr
-                            
-                            # unwork
-                            aggregate_unwork = [
-                                {
-                                    "$match":
-                                    {
-                                        "createdAt": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
-                                        "assign": str(member),
-                                        "tryCount" : {'$exists' : 'false'}
-                                    }
-                                },{
-                                    "$group":
-                                    {
-                                        "_id": 'null',
-                                        "count_unwork": {'$sum': 1},
-                                    }
-                                }
-                            ]
-                            unworkData = mongodb.aggregate_pipeline(MONGO_COLLECTION=diallist_detail_collection,aggregate_pipeline=aggregate_unwork)
-                            if unworkData != None:
-                                for row in unworkData:
-                                    temp_member['unwork']            = row['count_unwork']
-
-                            temp_member['work']            = temp_member['count_data'] - temp_member['unwork']
+                          aggregate_diallist = [
+                              {
+                                  "$match":
+                                  {
+                                      "createdAt": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
+                                      "diallist_id": {'$in' : diallist_id_arr},
+                                      "assign": str(member)
+                                  }
+                              },{
+                                  "$group":
+                                  {
+                                      "_id": 'null',
+                                      "count_acc_manual": {'$sum': 1}
+                                  }
+                              }
+                          ]
+                          diallistData_1 = mongodb.aggregate_pipeline(MONGO_COLLECTION=diallist_detail_collection,aggregate_pipeline=aggregate_diallist)
+                          count_acc_manual = 0
+                          if diallistData_1 != None:
+                              for row in diallistData_1:
+                                  count_acc_manual          = row['count_acc_manual']
 
 
-                            # talk time
-                            aggregate_cdr = [
-                                {
-                                    "$match":
-                                    {
-                                        "starttime" : {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
-                                        "direction" : "outbound",
-                                        "userextension": str(member),
-                                    }
-                                },{
-                                    "$group":
-                                    {
-                                        "_id": 'null',
-                                        "talk_time": {'$sum': '$billduration'},
-                                    }
-                                }
-                            ]
-                            cdrData = mongodb.aggregate_pipeline(MONGO_COLLECTION=cdr_collection,aggregate_pipeline=aggregate_cdr)
-                            
-                            disposition_arr = []
-                            if cdrData != None:
-                                for row in cdrData:
-                                    temp_member['talk_time']            = row['talk_time']
+                          aggregate_cdr_manual = [
+                              {
+                                  "$match":
+                                  {
+                                      "starttime": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
+                                      "userextension": str(member),
+                                      "dialtype" : "manual"
+                                  }
+                              },{
+                                  "$group":
+                                  {
+                                      "_id": 'null',
+                                      "count_conn": {'$sum': 1},
+                                      "phone_manual_arr": {'$addToSet': '$customernumber'},
+                                  }
+                              }
+                          ]
+                          cdrManualData = mongodb.aggregate_pipeline(MONGO_COLLECTION=cdr_collection,aggregate_pipeline=aggregate_cdr_manual)
+                          phone_manual_arr = []
+                          if cdrManualData != None:
+                              for row in cdrManualData:
+                                  phone_manual_arr            = row['phone_manual_arr']
 
-                            # contacted
-                            count_contacted = 0
-                            customernumber_arr = []
-                            for acc_assign in account_assign_arr:
-                                diallistInfo = mongodb.getOne(MONGO_COLLECTION=diallist_detail_collection, WHERE={'account_number': str(acc_assign), "createdAt": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp} },
-                                                SELECT=['mobile_num','phone','other_phones'])
+                          aggregate_cdr_manual_1 = [
+                              {
+                                  "$match":
+                                  {
+                                      "createdAt": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
+                                      "assign" : str(member),
+                                      '$or' : [ { "mobile_num" : {'$in' : phone_manual_arr} }, {"phone" : {'$in' : phone_manual_arr} }, {"other_phones" : {'$in' : phone_manual_arr}}]
+                                  }
+                              },{
+                                  "$group":
+                                  {
+                                      "_id": 'null',
+                                      "count_acc_manual_cdr": {'$sum': 1}
+                                  }
+                              }
+                          ]
+                          accountData1 = mongodb.aggregate_pipeline(MONGO_COLLECTION=diallist_detail_collection,aggregate_pipeline=aggregate_cdr_manual_1)
+                          count_acc_manual_cdr = 0
+                          if accountData1 != None:
+                              for row in accountData1:
+                                  count_acc_manual_cdr          = row['count_acc_manual_cdr']
 
-                                phone = []
-                                cdrInfo = 0
-                                if diallistInfo != None:
-                                  if 'mobile_num' in diallistInfo.keys():
-                                    phone.append(diallistInfo['mobile_num'])
-                                  if 'phone' in diallistInfo.keys():
-                                    phone.append(diallistInfo['phone'])
-                                  if 'other_phones' in diallistInfo.keys():
-                                    phone += diallistInfo['other_phones']
-
-                                  cdrInfo = mongodb.count(MONGO_COLLECTION=cdr_collection, WHERE={'customernumber': {'$in': phone}, "direction" : "outbound", "userextension": str(member), "starttime": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp}} )
-                                  if cdrInfo > 0:
-                                    count_contacted += 1
-                                    customernumber_arr.append(acc_assign)
-
-                            temp_member['count_contacted']           = count_contacted
-
-                            # call made
-                            calMade = mongodb.count(MONGO_COLLECTION=cdr_collection, WHERE={'disposition': 'ANSWERED', "direction" : "outbound", "userextension": str(member), "starttime": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp}} )
-                            if calMade > 0:
-                              temp_member['number_of_call'] = calMade
-
-                            totalCall = mongodb.count(MONGO_COLLECTION=cdr_collection, WHERE={ "direction" : "outbound", "userextension": str(member), "starttime": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp}} )
-                            if totalCall > 0:
-                              temp_member['total_call'] = totalCall
+                          temp_member['unwork']             = count_acc_manual - count_acc_manual_cdr
+                          temp_member['work']               = temp_member['count_data'] - temp_member['unwork']
 
 
-                            # connected
-                            action_code = ['PTP', 'CHECK', 'LM', 'PTP Today']
-                            aggregate_cdr_ans = [
-                                {
-                                    "$match":
-                                    {
-                                        "starttime": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
-                                        "userextension": str(member),
-                                        "disposition" : 'ANSWERED',
-                                        '$or' : [ { 'action_code' :  {'$in' : action_code}}, {'customer.action_code' :  {'$in' : action_code}}]
-                                    }
-                                },{
-                                    "$group":
-                                    {
-                                        "_id": 'null',
-                                        "count_conn": {'$sum': 1},
-                                        "phone_ans_arr": {'$addToSet': '$customernumber'},
-                                    }
-                                }
-                            ]
-                            cdrAnsData = mongodb.aggregate_pipeline(MONGO_COLLECTION=cdr_collection,aggregate_pipeline=aggregate_cdr_ans)
-                            phone_ans_arr = []
-                            if cdrAnsData != None:
-                                for row in cdrAnsData:
-                                    phone_ans_arr            = row['phone_ans_arr']
-                                    temp_member['count_conn'] = row['count_conn']
+                          # talk time
+                          aggregate_cdr = [
+                              {
+                                  "$match":
+                                  {
+                                      "starttime" : {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
+                                      "direction" : "outbound",
+                                      "userextension": str(member),
+                                  }
+                              },{
+                                  "$group":
+                                  {
+                                      "_id": 'null',
+                                      "talk_time": {'$sum': '$billduration'},
+                                  }
+                              }
+                          ]
+                          cdrData = mongodb.aggregate_pipeline(MONGO_COLLECTION=cdr_collection,aggregate_pipeline=aggregate_cdr)
+                          
+                          disposition_arr = []
+                          if cdrData != None:
+                              for row in cdrData:
+                                  temp_member['talk_time']            = row['talk_time']
 
-                            aggregate_cdr_ans_1 = [
-                                {
-                                    "$match":
-                                    {
-                                        "createdAt": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
-                                        "assign" : str(member),
-                                        '$or' : [ { "mobile_num" : {'$in' : phone_ans_arr} }, {"phone" : {'$in' : phone_ans_arr} }, {"other_phones" : {'$in' : phone_ans_arr}}]
-                                    }
-                                },{
-                                    "$group":
-                                    {
-                                        "_id": 'null',
-                                        "account_ans_arr": {'$addToSet': '$customernumber'},
-                                    }
-                                }
-                            ]
-                            accountData = mongodb.aggregate_pipeline(MONGO_COLLECTION=diallist_detail_collection,aggregate_pipeline=aggregate_cdr_ans_1)
-                            acc_ans_arr = []
-                            if accountData != None:
-                                for row in accountData:
-                                    acc_ans_arr            = row['account_ans_arr']
+                          # contacted
+                          count_contacted = 0
+                          customernumber_arr = []
+                          for acc_assign in account_assign_arr:
+                              diallistInfo = mongodb.getOne(MONGO_COLLECTION=diallist_detail_collection, WHERE={'account_number': str(acc_assign), "createdAt": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp} },
+                                              SELECT=['mobile_num','phone','other_phones'])
 
+                              phone = []
+                              cdrInfo = 0
+                              if diallistInfo != None:
+                                if 'mobile_num' in diallistInfo.keys():
+                                  phone.append(diallistInfo['mobile_num'])
+                                if 'phone' in diallistInfo.keys():
+                                  phone.append(diallistInfo['phone'])
+                                if 'other_phones' in diallistInfo.keys():
+                                  phone += diallistInfo['other_phones']
 
+                                cdrInfo = mongodb.count(MONGO_COLLECTION=cdr_collection, WHERE={'customernumber': {'$in': phone}, "direction" : "outbound", "userextension": str(member), "starttime": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp}} )
+                                if cdrInfo > 0:
+                                  count_contacted += 1
+                                  customernumber_arr.append(acc_assign)
 
-                            # PTP
-                            aggregate_ptp = [
-                                {
-                                    "$match":
-                                    {
-                                        "createdAt": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
-                                        "account_number": {'$in': account_assign_arr},
-                                        '$or' : [ { 'action_code' :  'PTP'}, {'action_code' :  'PTP Today'}, {'action_code' :  'CHECK'}]
-                                    }
-                                },{
-                                    "$group":
-                                    {
-                                        "_id": 'null',
-                                        "acc_arr": {'$addToSet': '$account_number'},
-                                        "count_data": {'$sum': 1}
-                                    }
-                                }
-                            ]
-                            ptpData = mongodb.aggregate_pipeline(MONGO_COLLECTION=diallist_detail_collection,aggregate_pipeline=aggregate_ptp)
-                            account_ptp_arr = []
-                            if ptpData != None:
-                              for row in ptpData:
-                                  account_ptp_arr                     = row['acc_arr']
-                                  temp_member['count_ptp']            = row['count_data']
+                          temp_member['count_contacted']           = count_contacted
+
+                          # call made
+                          calMade = mongodb.count(MONGO_COLLECTION=cdr_collection, WHERE={'disposition': 'ANSWERED', "direction" : "outbound", "userextension": str(member), "starttime": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp}} )
+                          if calMade > 0:
+                            temp_member['number_of_call'] = calMade
+
+                          totalCall = mongodb.count(MONGO_COLLECTION=cdr_collection, WHERE={ "direction" : "outbound", "userextension": str(member), "starttime": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp}} )
+                          if totalCall > 0:
+                            temp_member['total_call'] = totalCall
 
 
-                            # PTP all days
-                            aggregate_ptp = [
-                                {
-                                    "$match":
-                                    {
-                                        "account_number": {'$in': account_assign_arr},
-                                        '$or' : [ { 'action_code' :  'PTP'}, {'action_code' :  'PTP Today'}, {'action_code' :  'CHECK'}]
-                                    }
-                                },{
-                                    "$group":
-                                    {
-                                        "_id": 'null',
-                                        "acc_arr": {'$addToSet': '$account_number'},
-                                        # "count_data": {'$sum': 1}
-                                    }
-                                }
-                            ]
-                            ptpData = mongodb.aggregate_pipeline(MONGO_COLLECTION=diallist_detail_collection,aggregate_pipeline=aggregate_ptp)
-                            account_ptp_all_days_arr = []
-                            if ptpData != None:
-                              for row in ptpData:
-                                  account_ptp_all_days_arr            = row['acc_arr']
-                                  # temp_member['count_ptp']            = row['count_data']
-                            
+                          # connected
+                          action_code = ['PTP', 'CHECK', 'LM', 'PTP Today']
+                          aggregate_cdr_ans = [
+                              {
+                                  "$match":
+                                  {
+                                      "starttime": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
+                                      "userextension": str(member),
+                                      "disposition" : 'ANSWERED',
+                                      '$or' : [ { 'action_code' :  {'$in' : action_code}}, {'customer.action_code' :  {'$in' : action_code}}]
+                                  }
+                              },{
+                                  "$group":
+                                  {
+                                      "_id": 'null',
+                                      "count_conn": {'$sum': 1},
+                                      "phone_ans_arr": {'$addToSet': '$customernumber'},
+                                  }
+                              }
+                          ]
+                          cdrAnsData = mongodb.aggregate_pipeline(MONGO_COLLECTION=cdr_collection,aggregate_pipeline=aggregate_cdr_ans)
+                          phone_ans_arr = []
+                          if cdrAnsData != None:
+                              for row in cdrAnsData:
+                                  phone_ans_arr            = row['phone_ans_arr']
+                                  temp_member['count_conn'] = row['count_conn']
 
-                            if groupProduct['value'] == 'SIBS':
-                                aggregate_cdr_amt = [
-                                    {
-                                        "$match":
-                                        {
-                                            "account_number": {'$in': customernumber_arr},
-                                        }
-                                    },{
-                                        "$group":
-                                        {
-                                            "_id": 'null',
-                                            "contacted_amount": {'$sum': '$current_balance'},
-
-                                        }
-                                    }
-                                ]
-                                cdrAmountData = mongodb.aggregate_pipeline(MONGO_COLLECTION=lnjc05_yesterday_collection,aggregate_pipeline=aggregate_cdr_amt)
-                                if cdrAmountData != None:
-                                    for row in cdrAmountData:
-                                        temp_member['contacted_amount']            = row['contacted_amount']
-
-                                # amount of connected
-                                aggregate_amt_ans = [
-                                    {
-                                        "$match":
-                                        {
-                                            "account_number": {'$in': acc_ans_arr},
-                                        }
-                                    },{
-                                        "$group":
-                                        {
-                                            "_id": 'null',
-                                            "conn_amount": {'$sum': '$current_balance'},
-                                        }
-                                    }
-                                ]
-                                amtAnsData = mongodb.aggregate_pipeline(MONGO_COLLECTION=lnjc05_yesterday_collection,aggregate_pipeline=aggregate_amt_ans)
-                                if amtAnsData != None:
-                                    for row in amtAnsData:
-                                        temp_member['conn_amount']            = row['conn_amount']
-
-                                # PTP amount
-                                aggregate_ptp_amt = [
-                                    {
-                                        "$match":
-                                        {
-                                            "account_number": {'$in': account_ptp_arr},
-                                        }
-                                    },{
-                                        "$group":
-                                        {
-                                            "_id": 'null',
-                                            "ptp_amount": {'$sum': '$current_balance'},
-                                        }
-                                    }
-                                ]
-                                ptpAmtData = mongodb.aggregate_pipeline(MONGO_COLLECTION=lnjc05_yesterday_collection,aggregate_pipeline=aggregate_ptp_amt)
-                                if ptpAmtData != None:
-                                    for row in ptpAmtData:
-                                        temp_member['ptp_amount']           = row['ptp_amount']
+                          aggregate_cdr_ans_1 = [
+                              {
+                                  "$match":
+                                  {
+                                      "createdAt": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
+                                      "assign" : str(member),
+                                      '$or' : [ { "mobile_num" : {'$in' : phone_ans_arr} }, {"phone" : {'$in' : phone_ans_arr} }, {"other_phones" : {'$in' : phone_ans_arr}}]
+                                  }
+                              },{
+                                  "$group":
+                                  {
+                                      "_id": 'null',
+                                      "account_ans_arr": {'$addToSet': '$customernumber'},
+                                  }
+                              }
+                          ]
+                          accountData = mongodb.aggregate_pipeline(MONGO_COLLECTION=diallist_detail_collection,aggregate_pipeline=aggregate_cdr_ans_1)
+                          acc_ans_arr = []
+                          if accountData != None:
+                              for row in accountData:
+                                  acc_ans_arr            = row['account_ans_arr']
 
 
-                                # PTP paid 
-                                aggregate_paid_promise = [
+
+                          # PTP
+                          aggregate_ptp = [
+                              {
+                                  "$match":
+                                  {
+                                      "createdAt": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
+                                      "account_number": {'$in': account_assign_arr},
+                                      '$or' : [ { 'action_code' :  'PTP'}, {'action_code' :  'PTP Today'}, {'action_code' :  'CHECK'}]
+                                  }
+                              },{
+                                  "$group":
+                                  {
+                                      "_id": 'null',
+                                      "acc_arr": {'$addToSet': '$account_number'},
+                                      "count_data": {'$sum': 1}
+                                  }
+                              }
+                          ]
+                          ptpData = mongodb.aggregate_pipeline(MONGO_COLLECTION=diallist_detail_collection,aggregate_pipeline=aggregate_ptp)
+                          account_ptp_arr = []
+                          if ptpData != None:
+                            for row in ptpData:
+                                account_ptp_arr                     = row['acc_arr']
+                                temp_member['count_ptp']            = row['count_data']
+
+
+                          # PTP all days
+                          aggregate_ptp = [
+                              {
+                                  "$match":
+                                  {
+                                      "account_number": {'$in': account_assign_arr},
+                                      '$or' : [ { 'action_code' :  'PTP'}, {'action_code' :  'PTP Today'}, {'action_code' :  'CHECK'}]
+                                  }
+                              },{
+                                  "$group":
+                                  {
+                                      "_id": 'null',
+                                      "acc_arr": {'$addToSet': '$account_number'},
+                                  }
+                              }
+                          ]
+                          ptpData = mongodb.aggregate_pipeline(MONGO_COLLECTION=diallist_detail_collection,aggregate_pipeline=aggregate_ptp)
+                          account_ptp_all_days_arr = []
+                          if ptpData != None:
+                            for row in ptpData:
+                                account_ptp_all_days_arr            = row['acc_arr']
+                          
+
+                          if groupProduct['value'] == 'SIBS':
+                              aggregate_cdr_amt = [
+                                  {
+                                      "$match":
+                                      {
+                                          "account_number": {'$in': customernumber_arr},
+                                      }
+                                  },{
+                                      "$group":
+                                      {
+                                          "_id": 'null',
+                                          "contacted_amount": {'$sum': '$current_balance'},
+
+                                      }
+                                  }
+                              ]
+                              cdrAmountData = mongodb.aggregate_pipeline(MONGO_COLLECTION=lnjc05_yesterday_collection,aggregate_pipeline=aggregate_cdr_amt)
+                              if cdrAmountData != None:
+                                  for row in cdrAmountData:
+                                      temp_member['contacted_amount']            = row['contacted_amount']
+
+                              # amount of connected
+                              aggregate_amt_ans = [
+                                  {
+                                      "$match":
+                                      {
+                                          "account_number": {'$in': acc_ans_arr},
+                                      }
+                                  },{
+                                      "$group":
+                                      {
+                                          "_id": 'null',
+                                          "conn_amount": {'$sum': '$current_balance'},
+                                      }
+                                  }
+                              ]
+                              amtAnsData = mongodb.aggregate_pipeline(MONGO_COLLECTION=lnjc05_yesterday_collection,aggregate_pipeline=aggregate_amt_ans)
+                              if amtAnsData != None:
+                                  for row in amtAnsData:
+                                      temp_member['conn_amount']            = row['conn_amount']
+
+                              # PTP amount
+                              aggregate_ptp_amt = [
+                                  {
+                                      "$match":
+                                      {
+                                          "account_number": {'$in': account_ptp_arr},
+                                      }
+                                  },{
+                                      "$group":
+                                      {
+                                          "_id": 'null',
+                                          "ptp_amount": {'$sum': '$current_balance'},
+                                      }
+                                  }
+                              ]
+                              ptpAmtData = mongodb.aggregate_pipeline(MONGO_COLLECTION=lnjc05_yesterday_collection,aggregate_pipeline=aggregate_ptp_amt)
+                              if ptpAmtData != None:
+                                  for row in ptpAmtData:
+                                      temp_member['ptp_amount']           = row['ptp_amount']
+
+
+                              # PTP paid 
+                              aggregate_paid_promise = [
+                                  {
+                                      "$match":
+                                      {
+                                          "created_at": {'$gte': todayTimeStamp, '$lte': endTodayTimeStamp},
+                                          "account_number": {'$in': account_ptp_arr},
+                                          "code" : '10'
+                                      }
+                                  },{
+                                      "$group":
+                                      {
+                                          "_id": 'null',
+                                          "paid_amount_promise": {'$sum': '$amt'},
+                                          "count_paid_promise": {'$addToSet': '$account_number'},
+                                      }
+                                  }
+                              ]
+                              paidPromiseData = mongodb.aggregate_pipeline(MONGO_COLLECTION=ln3206f_collection,aggregate_pipeline=aggregate_paid_promise)
+                              if paidPromiseData != None:
+                                  for row in paidPromiseData:
+                                      temp_member['count_paid_promise']            = len(row['count_paid_promise'] )
+                                      temp_member['paid_amount_promise']           = row['paid_amount_promise']
+
+                              
+                              # PTP all days
+                              aggregate_paid_all_days = [
+                                  {
+                                      "$match":
+                                      {
+                                          "created_at": {'$gte': todayTimeStamp, '$lte': endTodayTimeStamp},
+                                          "account_number": {'$in': account_ptp_all_days_arr},
+                                          "code" : '10'
+                                      }
+                                  },{
+                                      "$group":
+                                      {
+                                          "_id": 'null',
+                                          "paid_amount_promise": {'$sum': '$amt'},
+                                          "count_paid_promise": {'$addToSet': '$account_number'},
+                                      }
+                                  }
+                              ]
+                              paidAllDaysData = mongodb.aggregate_pipeline(MONGO_COLLECTION=ln3206f_collection,aggregate_pipeline=aggregate_paid_all_days)
+                              if paidAllDaysData != None:
+                                  for row in paidAllDaysData:
+                                      temp_member['count_ptp_all_days']            = len(row['count_paid_promise'] )
+                                      temp_member['paid_amount_all_days']           = row['paid_amount_promise']
+
+
+
+                              # paid
+                              aggregate_paid = [
+                                  {
+                                      "$match":
+                                      {
+                                          "created_at": {'$gte': todayTimeStamp, '$lte': endTodayTimeStamp},
+                                          "account_number": {'$in': account_assign_arr},
+                                          "code" : '10'
+                                      }
+                                  },{
+                                      "$group":
+                                      {
+                                          "_id": 'null',
+                                          "paid_amount": {'$sum': '$amt'},
+                                          "count_paid": {'$addToSet': '$account_number'},
+                                      }
+                                  }
+                              ]
+                              paidPromiseData = mongodb.aggregate_pipeline(MONGO_COLLECTION=ln3206f_collection,aggregate_pipeline=aggregate_paid)
+                              if paidPromiseData != None:
+                                  for row in paidPromiseData:
+                                      temp_member['count_paid']            = len(row['count_paid'] )
+                                      temp_member['paid_amount']           = row['paid_amount']
+
+
+
+
+
+
+
+
+
+                          if groupProduct['value'] == 'Card':
+                              aggregate_cdr_amt = [
+                                  {
+                                      "$match":
+                                      {
+                                          "account_number": {'$in': customernumber_arr},
+                                      }
+                                  },{
+                                      "$group":
+                                      {
+                                          "_id": 'null',
+                                          "contacted_amount": {'$sum': '$cur_bal'},
+
+                                      }
+                                  }
+                              ]
+                              cdrAmountData = mongodb.aggregate_pipeline(MONGO_COLLECTION=list_of_account_yesterday_collection,aggregate_pipeline=aggregate_cdr_amt)
+                              if cdrAmountData != None:
+                                  for row in cdrAmountData:
+                                      temp_member['contacted_amount']            = row['contacted_amount']
+
+                             
+                              # amount of connected
+                              aggregate_amt_ans = [
+                                  {
+                                      "$match":
+                                      {
+                                          "account_number": {'$in': acc_ans_arr},
+                                      }
+                                  },{
+                                      "$group":
+                                      {
+                                          "_id": 'null',
+                                          "conn_amount": {'$sum': '$cur_bal'},
+                                      }
+                                  }
+                              ]
+                              amtAnsData = mongodb.aggregate_pipeline(MONGO_COLLECTION=list_of_account_yesterday_collection,aggregate_pipeline=aggregate_amt_ans)
+                              if amtAnsData != None:
+                                  for row in amtAnsData:
+                                      temp_member['conn_amount']            = row['conn_amount']
+
+
+                              aggregate_ptp_amt = [
+                                  {
+                                      "$match":
+                                      {
+                                          "account_number": {'$in': account_ptp_arr},
+                                      }
+                                  },{
+                                      "$group":
+                                      {
+                                          "_id": 'null',
+                                          "ptp_amount": {'$sum': '$cur_bal'},
+                                      }
+                                  }
+                              ]
+                              ptpAmtData = mongodb.aggregate_pipeline(MONGO_COLLECTION=list_of_account_yesterday_collection,aggregate_pipeline=aggregate_ptp_amt)
+                              if ptpAmtData != None:
+                                  for row in ptpAmtData:
+                                      temp_member['ptp_amount']           = row['ptp_amount']
+
+                              
+
+                              temp_member['count_paid_promise']  = 0
+                              temp_member['paid_amount_promise'] = 0
+                              for acc_ptp in account_ptp_arr:
+                                aggregate_paid_ptp = [
                                     {
                                         "$match":
                                         {
                                             "created_at": {'$gte': todayTimeStamp, '$lte': endTodayTimeStamp},
-                                            "account_number": {'$in': account_ptp_arr}
+                                            "account_number": acc_ptp,
+                                            "code" : {'$in' : code},
                                         }
-                                    },{
-                                        "$group":
+                                    },
+                                    {
+                                        "$project":
                                         {
-                                            "_id": 'null',
-                                            "paid_amount_promise": {'$sum': '$amt'},
-                                            "count_paid_promise": {'$addToSet': '$account_number'},
+                                            "account_number" : 1,
+                                            "amount" : 1,
+                                            "code" : 1,
                                         }
                                     }
                                 ]
-                                paidPromiseData = mongodb.aggregate_pipeline(MONGO_COLLECTION=ln3206f_collection,aggregate_pipeline=aggregate_paid_promise)
-                                if paidPromiseData != None:
-                                    for row in paidPromiseData:
-                                        temp_member['count_paid_promise']            = len(row['count_paid_promise'] )
-                                        temp_member['paid_amount_promise']           = row['paid_amount_promise']
+                                paidPTPData = mongodb.aggregate_pipeline(MONGO_COLLECTION=gl_collection,aggregate_pipeline=aggregate_paid_ptp)
+                                code_2000 = 0
+                                code_2700 = 0
+                                sum_code = 0
+                                if paidPTPData != None:
+                                    for row in paidPTPData:
+                                      if row['code'] == '2000' or row['code'] == '2100':
+                                        code_2000 += row['amount']
+                                      else:
+                                        code_2700 += row['amount']
+                                    sum_code = code_2000 - code_2700
+                                    if sum_code > 0:
+                                      temp_member['count_paid_promise'] += 1
+                                      temp_member['paid_amount_promise'] += sum_code
 
-                                
-                                # PTP all days
+
+
+                              # PTP all days
+                              temp_member['count_ptp_all_days']  = 0
+                              temp_member['paid_amount_all_days'] = 0
+                              for acc_ptp_all_day in account_ptp_all_days_arr:
                                 aggregate_paid_all_days = [
                                     {
                                         "$match":
                                         {
                                             "created_at": {'$gte': todayTimeStamp, '$lte': endTodayTimeStamp},
-                                            "account_number": {'$in': account_ptp_all_days_arr}
+                                            "account_number": acc_ptp_all_day,
+                                            "code" : {'$in' : code},
                                         }
-                                    },{
-                                        "$group":
+                                    },
+                                    {
+                                        "$project":
                                         {
-                                            "_id": 'null',
-                                            "paid_amount_promise": {'$sum': '$amt'},
-                                            "count_paid_promise": {'$addToSet': '$account_number'},
+                                            "account_number" : 1,
+                                            "amount" : 1,
+                                            "code" : 1,
                                         }
                                     }
                                 ]
-                                paidAllDaysData = mongodb.aggregate_pipeline(MONGO_COLLECTION=ln3206f_collection,aggregate_pipeline=aggregate_paid_all_days)
-                                if paidAllDaysData != None:
-                                    for row in paidAllDaysData:
-                                        temp_member['count_ptp_all_days']            = len(row['count_paid_promise'] )
-                                        temp_member['paid_amount_all_days']           = row['paid_amount_promise']
+                                paidPTPAllDayData = mongodb.aggregate_pipeline(MONGO_COLLECTION=gl_collection,aggregate_pipeline=aggregate_paid_all_days)
+                                code_2000 = 0
+                                code_2700 = 0
+                                sum_code = 0
+                                if paidPTPAllDayData != None:
+                                    for row in paidPTPAllDayData:
+                                      if row['code'] == '2000' or row['code'] == '2100':
+                                        code_2000 += row['amount']
+                                      else:
+                                        code_2700 += row['amount']
+                                    sum_code = code_2000 - code_2700
+                                    if sum_code > 0:
+                                      temp_member['count_ptp_all_days'] += 1
+                                      temp_member['paid_amount_all_days'] += sum_code
 
 
 
-                                # paid
+                              # paid
+                              temp_member['count_paid']  = 0
+                              temp_member['paid_amount'] = 0
+                              for acc_assign in account_assign_arr:
                                 aggregate_paid = [
                                     {
                                         "$match":
                                         {
                                             "created_at": {'$gte': todayTimeStamp, '$lte': endTodayTimeStamp},
-                                            "account_number": {'$in': account_assign_arr},
+                                            "account_number": acc_assign,
+                                            "code" : {'$in' : code},
                                         }
-                                    },{
-                                        "$group":
-                                        {
-                                            "_id": 'null',
-                                            "paid_amount": {'$sum': '$amt'},
-                                            "count_paid": {'$addToSet': '$account_number'},
-                                        }
-                                    }
-                                ]
-                                paidPromiseData = mongodb.aggregate_pipeline(MONGO_COLLECTION=ln3206f_collection,aggregate_pipeline=aggregate_paid)
-                                if paidPromiseData != None:
-                                    for row in paidPromiseData:
-                                        temp_member['count_paid']            = len(row['count_paid'] )
-                                        temp_member['paid_amount']           = row['paid_amount']
-
-
-
-
-
-
-
-
-
-                            if groupProduct['value'] == 'Card':
-                                aggregate_cdr_amt = [
+                                    },
                                     {
-                                        "$match":
+                                        "$project":
                                         {
-                                            "account_number": {'$in': customernumber_arr},
-                                        }
-                                    },{
-                                        "$group":
-                                        {
-                                            "_id": 'null',
-                                            "contacted_amount": {'$sum': '$cur_bal'},
-
+                                            "account_number" : 1,
+                                            "amount" : 1,
+                                            "code" : 1,
                                         }
                                     }
                                 ]
-                                cdrAmountData = mongodb.aggregate_pipeline(MONGO_COLLECTION=list_of_account_yesterday_collection,aggregate_pipeline=aggregate_cdr_amt)
-                                if cdrAmountData != None:
-                                    for row in cdrAmountData:
-                                        temp_member['contacted_amount']            = row['contacted_amount']
-
-                               
-                                # amount of connected
-                                aggregate_amt_ans = [
-                                    {
-                                        "$match":
-                                        {
-                                            "account_number": {'$in': acc_ans_arr},
-                                        }
-                                    },{
-                                        "$group":
-                                        {
-                                            "_id": 'null',
-                                            "conn_amount": {'$sum': '$cur_bal'},
-                                        }
-                                    }
-                                ]
-                                amtAnsData = mongodb.aggregate_pipeline(MONGO_COLLECTION=list_of_account_yesterday_collection,aggregate_pipeline=aggregate_amt_ans)
-                                if amtAnsData != None:
-                                    for row in amtAnsData:
-                                        temp_member['conn_amount']            = row['conn_amount']
+                                paidAssignData = mongodb.aggregate_pipeline(MONGO_COLLECTION=gl_collection,aggregate_pipeline=aggregate_paid)
+                                code_2000 = 0
+                                code_2700 = 0
+                                sum_code = 0
+                                if paidAssignData != None:
+                                    for row in paidAssignData:
+                                      if row['code'] == '2000' or row['code'] == '2100':
+                                        code_2000 += row['amount']
+                                      else:
+                                        code_2700 += row['amount']
+                                    sum_code = code_2000 - code_2700
+                                    if sum_code > 0:
+                                      temp_member['count_paid'] += 1
+                                      temp_member['paid_amount'] += sum_code
 
 
-                                aggregate_ptp_amt = [
-                                    {
-                                        "$match":
-                                        {
-                                            "account_number": {'$in': account_ptp_arr},
-                                        }
-                                    },{
-                                        "$group":
-                                        {
-                                            "_id": 'null',
-                                            "ptp_amount": {'$sum': '$cur_bal'},
-                                        }
-                                    }
-                                ]
-                                ptpAmtData = mongodb.aggregate_pipeline(MONGO_COLLECTION=list_of_account_yesterday_collection,aggregate_pipeline=aggregate_ptp_amt)
-                                if ptpAmtData != None:
-                                    for row in ptpAmtData:
-                                        temp_member['ptp_amount']           = row['ptp_amount']
-
-                                aggregate_paid_promise = [
-                                    {
-                                        "$match":
-                                        {
-                                            "created_at": {'$gte': todayTimeStamp, '$lte': endTodayTimeStamp},
-                                            "account_number": {'$in': account_ptp_arr},
-                                        }
-                                    },{
-                                        "$group":
-                                        {
-                                            "_id": 'null',
-                                            "paid_amount_promise": {'$sum': '$amount'},
-                                            "count_paid_promise": {'$addToSet': '$account_number'},
-                                        }
-                                    }
-                                ]
-                                paidPromiseData = mongodb.aggregate_pipeline(MONGO_COLLECTION=gl_collection,aggregate_pipeline=aggregate_paid_promise)
-                                if paidPromiseData != None:
-                                    for row in paidPromiseData:
-                                        temp_member['count_paid_promise']            = len(row['count_paid_promise'] )
-                                        temp_member['paid_amount_promise']           = row['paid_amount_promise']
+                          temp['count_data']      += temp_member['count_data'];
+                          temp['unwork']          += temp_member['unwork'];
+                          temp['work']            += temp_member['work'];
+                          temp['talk_time']       += temp_member['talk_time'];
+                          temp['count_contacted'] += temp_member['count_contacted'];
+                          temp['contacted_amount']    += temp_member['contacted_amount'];
+                          temp['conn_amount']     += temp_member['conn_amount'];
+                          temp['count_conn']      += temp_member['count_conn'];
+                          temp['number_of_call']  += temp_member['number_of_call'];
+                          temp['total_call']      += temp_member['total_call'];
+                          temp['count_ptp']       += temp_member['count_ptp'];
+                          temp['ptp_amount']      += temp_member['ptp_amount'];
+                          temp['count_paid']      += temp_member['count_paid'];
+                          temp['paid_amount']     += temp_member['paid_amount'];
+                          temp['count_paid_promise']      += temp_member['count_paid_promise'];
+                          temp['paid_amount_promise']     += temp_member['paid_amount_promise'];
+                          temp['count_ptp_all_days']      += temp_member['count_ptp_all_days']
+                          temp['paid_amount_all_days']    += temp_member['paid_amount_all_days']
 
 
-                                # PTP all days
-                                aggregate_paid_all_days = [
-                                    {
-                                        "$match":
-                                        {
-                                            "created_at": {'$gte': todayTimeStamp, '$lte': endTodayTimeStamp},
-                                            "account_number": {'$in': account_ptp_all_days_arr}
-                                        }
-                                    },{
-                                        "$group":
-                                        {
-                                            "_id": 'null',
-                                            "paid_amount_promise": {'$sum': '$amt'},
-                                            "count_paid_promise": {'$addToSet': '$account_number'},
-                                        }
-                                    }
-                                ]
-                                paidAllDaysData = mongodb.aggregate_pipeline(MONGO_COLLECTION=gl_collection,aggregate_pipeline=aggregate_paid_all_days)
-                                if paidAllDaysData != None:
-                                    for row in paidAllDaysData:
-                                        temp_member['count_ptp_all_days']            = len(row['count_paid_promise'] )
-                                        temp_member['paid_amount_all_days']           = row['paid_amount_promise']
+                          temp_member['call_rate']     = temp_member['number_of_call']/temp_member['count_contacted'] if temp_member['count_contacted'] != 0 else 0
+                          temp_member['ptp_rate_acc']  = temp_member['count_ptp']/temp_member['count_contacted'] if temp_member['count_contacted'] != 0 else 0
+                          temp_member['ptp_rate_amt']  = temp_member['ptp_amount']/temp_member['contacted_amount'] if temp_member['contacted_amount'] != 0  else 0
+                          temp_member['paid_rate_acc'] = temp_member['count_paid_promise']/temp_member['count_ptp'] if temp_member['count_ptp'] != 0 else 0
+                          temp_member['paid_rate_amt'] = temp_member['paid_amount_promise']/temp_member['ptp_amount'] if temp_member['ptp_amount'] != 0 else 0
+                          temp_member['conn_rate']     = temp_member['count_conn']/temp_member['count_contacted'] if temp_member['count_contacted'] != 0 else 0
+                          temp_member['collect_ratio_acc'] = temp_member['count_paid']/temp_member['count_contacted'] if temp_member['count_contacted'] != 0 else 0
+                          temp_member['collect_ratio_amt'] = temp_member['paid_amount']/temp_member['contacted_amount'] if temp_member['contacted_amount'] != 0 else 0
+                          temp_member['createdAt'] = todayTimeStamp
+                          temp_member['createdBy'] = 'system'
+                          temp_member['for_month'] = month
+
+                          # pprint(temp_member)
+                          member_arr.append(temp_member)
+
+                      temp['call_rate']     = temp['number_of_call']/temp['count_contacted']  if temp['count_contacted'] != 0 else 0
+                      temp['ptp_rate_acc']  = temp['count_ptp']/temp['count_contacted']  if temp['count_contacted'] != 0 else 0
+                      temp['ptp_rate_amt']  = temp['ptp_amount']/temp['contacted_amount']  if temp['contacted_amount'] != 0 else 0
+                      temp['paid_rate_acc'] = temp['count_paid_promise']/temp['count_ptp']  if temp['count_ptp'] != 0 else 0
+                      temp['paid_rate_amt'] = temp['paid_amount_promise']/temp['ptp_amount']  if temp['ptp_amount'] != 0 else 0
+                      temp['conn_rate']     = temp['count_conn']/temp['count_contacted'] if temp['count_contacted'] != 0 else 0
+                      temp['collect_ratio_acc'] = temp['count_paid']/temp['count_contacted']  if temp['count_contacted'] != 0 else 0
+                      temp['collect_ratio_amt'] = temp['paid_amount']/temp['contacted_amount']  if temp['contacted_amount'] != 0 else 0
+                      temp['createdAt'] = todayTimeStamp
+                      temp['createdBy'] = 'system'
+                      temp['for_month'] = month
 
 
+                      insertData.append(temp)
+                      insertData += member_arr;
 
-                                # paid
-                                aggregate_paid = [
-                                    {
-                                        "$match":
-                                        {
-                                            "created_at": {'$gte': todayTimeStamp, '$lte': endTodayTimeStamp},
-                                            "account_number": {'$in': account_assign_arr},
-                                        }
-                                    },{
-                                        "$group":
-                                        {
-                                            "_id": 'null',
-                                            "paid_amount": {'$sum': '$amount'},
-                                            "count_paid": {'$addToSet': '$account_number'},
-                                        }
-                                    }
-                                ]
-                                paidPromiseData = mongodb.aggregate_pipeline(MONGO_COLLECTION=gl_collection,aggregate_pipeline=aggregate_paid)
-                                if paidPromiseData != None:
-                                    for row in paidPromiseData:
-                                        temp_member['count_paid']            = len(row['count_paid'] )
-                                        temp_member['paid_amount']           = row['paid_amount']
+                      i += 1
 
-
-                            temp['count_data']      += temp_member['count_data'];
-                            temp['unwork']          += temp_member['unwork'];
-                            temp['work']            += temp_member['work'];
-                            temp['talk_time']       += temp_member['talk_time'];
-                            temp['count_contacted'] += temp_member['count_contacted'];
-                            temp['contacted_amount']    += temp_member['contacted_amount'];
-                            temp['conn_amount']     += temp_member['conn_amount'];
-                            temp['count_conn']      += temp_member['count_conn'];
-                            temp['number_of_call']  += temp_member['number_of_call'];
-                            temp['total_call']      += temp_member['total_call'];
-                            temp['count_ptp']       += temp_member['count_ptp'];
-                            temp['ptp_amount']      += temp_member['ptp_amount'];
-                            temp['count_paid']      += temp_member['count_paid'];
-                            temp['paid_amount']     += temp_member['paid_amount'];
-                            temp['count_paid_promise']      += temp_member['count_paid_promise'];
-                            temp['paid_amount_promise']     += temp_member['count_paid_promise'];
-
-
-                            temp_member['call_rate']     = temp_member['number_of_call']/temp_member['count_contacted'] if temp_member['count_contacted'] != 0 else 0
-                            temp_member['ptp_rate_acc']  = temp_member['count_ptp']/temp_member['count_contacted'] if temp_member['count_contacted'] != 0 else 0
-                            temp_member['ptp_rate_amt']  = temp_member['ptp_amount']/temp_member['contacted_amount'] if temp_member['contacted_amount'] != 0  else 0
-                            temp_member['paid_rate_acc'] = temp_member['count_paid_promise']/temp_member['count_ptp'] if temp_member['count_ptp'] != 0 else 0
-                            temp_member['paid_rate_amt'] = temp_member['paid_amount_promise']/temp_member['ptp_amount'] if temp_member['ptp_amount'] != 0 else 0
-                            temp_member['conn_rate']     = temp_member['count_conn']/temp_member['count_contacted'] if temp_member['count_contacted'] != 0 else 0
-                            temp_member['collect_ratio_acc'] = temp_member['count_paid']/temp_member['count_contacted'] if temp_member['count_contacted'] != 0 else 0
-                            temp_member['collect_ratio_amt'] = temp_member['paid_amount']/temp_member['contacted_amount'] if temp_member['contacted_amount'] != 0 else 0
-                            temp_member['createdAt'] = todayTimeStamp
-                            temp_member['createdBy'] = 'system'
-                            temp_member['for_month'] = month
-
-                            pprint(temp_member)
-                            member_arr.append(temp_member)
-
-                        temp['call_rate']     = temp['number_of_call']/temp['count_contacted']  if temp['count_contacted'] != 0 else 0
-                        temp['ptp_rate_acc']  = temp['count_ptp']/temp['count_contacted']  if temp['count_contacted'] != 0 else 0
-                        temp['ptp_rate_amt']  = temp['ptp_amount']/temp['contacted_amount']  if temp['contacted_amount'] != 0 else 0
-                        temp['paid_rate_acc'] = temp['count_paid_promise']/temp['count_ptp']  if temp['count_ptp'] != 0 else 0
-                        temp['paid_rate_amt'] = temp['paid_amount_promise']/temp['ptp_amount']  if temp['ptp_amount'] != 0 else 0
-                        temp['conn_rate']     = temp['count_conn']/temp['count_contacted'] if temp['count_contacted'] != 0 else 0
-                        temp['collect_ratio_acc'] = temp['count_paid']/temp['count_contacted']  if temp['count_contacted'] != 0 else 0
-                        temp['collect_ratio_amt'] = temp['paid_amount']/temp['contacted_amount']  if temp['contacted_amount'] != 0 else 0
-                        temp['createdAt'] = todayTimeStamp
-                        temp['createdBy'] = 'system'
-                        temp['for_month'] = month
-
-
-                        insertData.append(temp)
-                        insertData += member_arr;
-
-                        i += 1
-
-
-            # checkGroupA = 'true'
-
-
-                checkGroupA = 'true'
-                # break
-        
-
-        # if debtGroupCell[0:1] != 'A' and debtGroupCell[0:1] != 'F':
-        #     i = 1
-        #     dueDayOfMonth = mongodb.getOne(MONGO_COLLECTION=report_due_date_collection, WHERE={'for_month': str(month), 'debt_group': debtGroupCell[1:3]})
-        #     for groupProduct in list(listGroupProduct):
-        #         teams = mongodb.getOne(MONGO_COLLECTION=group_collection, WHERE={'name' : {'$regex' : groupProduct['value']} , 'debt_groups': debtGroupCell[0:3]})
-        #         # print(debtGroupCell[0:3])
-        #         if teams != None:
-        #             temp = {
-        #                 'name'           : teams['name'],
-        #                 'group'          : debtGroupCell[0:1],
-        #                 'team'           : i,
-        #                 'date'           : todayTimeStamp,
-        #                 'extension'      : teams['lead'],
-        #                 'team_lead'      : 'true',
-        #                 'count_data'     : 0,
-        #                 'unwork'            : 0,
-        #                 'talk_time'         : 0,
-        #                 'total_call'        : 0,
-        #                 'total_amount'      : 0,
-        #                 'count_spin'        : 0,
-        #                 'spin_amount'       : 0,
-        #                 'count_conn'        : 0,
-        #                 'conn_amount'       : 0,
-        #                 'count_paid'        : 0,
-        #                 'paid_amount'       : 0,
-        #                 'ptp_amount'        : 0,
-        #                 'count_ptp'         : 0,
-        #                 'paid_amount_promise'       : 0,
-        #                 'count_paid_promise'        : 0,
-        #             }
-        #             if todayTimeStamp < dueDayOfMonth['due_date_add_1']:
-        #                 dueDayLastMonth = mongodb.getOne(MONGO_COLLECTION=report_due_date_collection, WHERE={'for_month': str(month - 1), 'debt_group': debtGroupCell[1:3]})
-        #                 temp['due_date'] = dueDayLastMonth['due_date'] if dueDayLastMonth is not None else ''
-        #                 #Lay gia tri no vao ngay due date + 1#
-        #                 # incidenceInfo = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Due_date_next_date'), WHERE={'for_month': str(month - 1),  'debt_group': debtGroupCell[0:1],'due_date_code': debtGroupCell[1:3],'product':groupProduct['text']})
-        #                 #Lay gia tri no vao ngay due date + 1#
-        #             else:
-        #                 temp['due_date'] = dueDayOfMonth['due_date']
-        #                 # incidenceInfo = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Due_date_next_date'), WHERE={'for_month': str(month), 'debt_group': debtGroupCell[0:1],'due_date_code': debtGroupCell[1:3],'product':groupProduct['text']})
-
-
-        #             # members
-        #             member_arr = []
-        #             count_member = len(teams['members'])
-        #             for member in list(teams['members']):
-        #                 temp_member = {
-        #                     'name'           : '',
-        #                     'group'          : debtGroupCell[0:1],
-        #                     'team'           : i,
-        #                     'date'           : todayTimeStamp,
-        #                     'extension'      : member,
-        #                     'count_data'     : 0,
-        #                     'unwork'            : 0,
-        #                     'talk_time'         : 0,
-        #                     'total_call'        : 0,
-        #                     'total_amount'      : 0,
-        #                     'count_spin'        : 0,
-        #                     'spin_amount'       : 0,
-        #                     'count_conn'        : 0,
-        #                     'conn_amount'       : 0,
-        #                     'count_paid'        : 0,
-        #                     'paid_amount'       : 0,
-        #                     'ptp_amount'        : 0,
-        #                     'count_ptp'         : 0,
-        #                     'paid_amount_promise'       : 0,
-        #                     'count_paid_promise'        : 0,
-        #                 }
-        #                 users = _mongodb.getOne(MONGO_COLLECTION=user_collection,WHERE={'extension': str(member)}, SELECT=['extension','agentname'])
-        #                 if users != None:
-        #                     temp_member['name'] = users['agentname']
-
-                        
-        #                 aggregate_diallist = [
-        #                     {
-        #                         "$match":
-        #                         {
-        #                             "createdAt": {'$gte': todayTimeStamp, '$lte': endTodayTimeStamp},
-        #                             "assign": str(member),
-        #                         }
-        #                     },{
-        #                         "$group":
-        #                         {
-        #                             "_id": 'null',
-        #                             "acc_arr": {'$addToSet': '$account_number'},
-        #                             "count_data": {'$sum': 1}
-        #                         }
-        #                     }
-        #                 ]
-        #                 diallistData = mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'Diallist_detail'),aggregate_pipeline=aggregate_diallist)
-        #                 acc_arr = []
-        #                 if diallistData != None:
-        #                     for row in diallistData:
-        #                         temp_member['count_data']   = row['count_data']
-        #                         acc_arr          = row['acc_arr']
-                       
-        #                 aggregate_unwork = [
-        #                     {
-        #                         "$match":
-        #                         {
-        #                             "createdAt": {'$gte': todayTimeStamp, '$lte': endTodayTimeStamp},
-        #                             "assign": str(member),
-        #                             "tryCount" : {'$exists' : 'false'}
-        #                         }
-        #                     },{
-        #                         "$group":
-        #                         {
-        #                             "_id": 'null',
-        #                             "count_unwork": {'$sum': 1},
-        #                         }
-        #                     }
-        #                 ]
-        #                 unworkData = mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'Diallist_detail'),aggregate_pipeline=aggregate_unwork)
-        #                 if unworkData != None:
-        #                     for row in unworkData:
-        #                         temp_member['unwork']            = row['count_unwork']
-
-        #                 aggregate_ptp = [
-        #                     {
-        #                         "$match":
-        #                         {
-        #                             "createdAt": {'$gte': todayTimeStamp, '$lte': endTodayTimeStamp},
-        #                             "account_number": {'$in': acc_arr},
-        #                             '$or' : [ { 'action_code' :  'PTP'}, {'action_code' :  'PTP Today'}]
-        #                         }
-        #                     },{
-        #                         "$group":
-        #                         {
-        #                             "_id": 'null',
-        #                             "acc_arr": {'$addToSet': '$account_number'},
-        #                             "count_data": {'$sum': 1}
-        #                         }
-        #                     }
-        #                 ]
-        #                 ptpData = mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'Action_code'),aggregate_pipeline=aggregate_ptp)
-        #                 account_ptp_arr = []
-        #                 if ptpData != None:
-        #                     for row in ptpData:
-        #                         account_ptp_arr           = row['acc_arr']
-        #                         temp_member['count_ptp']  = row['count_data']
-
-
-        #                 aggregate_cdr = [
-        #                     {
-        #                         "$match":
-        #                         {
-        #                             "starttime": {'$gte': todayTimeStamp, '$lte': endTodayTimeStamp},
-        #                             "userextension": str(member),
-        #                         }
-        #                     },{
-        #                         "$group":
-        #                         {
-        #                             "_id": 'null',
-        #                             "talk_time": {'$sum': '$billduration'},
-        #                             "total_call": {'$sum': 1},
-        #                             "customernumber_arr": {'$addToSet': '$customernumber'},
-        #                             "phone_arr": {'$push': '$customernumber'},
-        #                         }
-        #                     }
-        #                 ]
-        #                 cdrData = mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'worldfonepbxmanager'),aggregate_pipeline=aggregate_cdr)
-        #                 customernumber_arr = []
-        #                 phone_arr = []
-        #                 disposition_arr = []
-        #                 if cdrData != None:
-        #                     for row in cdrData:
-        #                         temp_member['talk_time']            = row['talk_time']
-        #                         temp_member['total_call']           = row['total_call']
-        #                         customernumber_arr                  = row['customernumber_arr']
-        #                         phone_arr                           = row['phone_arr']
-
-
-        #                 # spin
-        #                 count_spin = 0
-        #                 account_spin_arr = []
-        #                 for account in acc_arr:
-        #                     spinData = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Diallist_detail'),WHERE={"createdAt": {'$gte': todayTimeStamp, '$lte': endTodayTimeStamp}, "account_number": str(account), "callResult": {'$exists' :  'true'}},SELECT=['callResult'])
-        #                     call_number = []
-        #                     if spinData != None:
-        #                         for call in list(spinData['callResult']):
-        #                             call_number.append(call['customernumber'])
-        #                         list_call = set(call_number) 
-        #                         unique_call = list(list_call)
-        #                         if len(unique_call) > 1:
-        #                             count_spin += 1
-        #                             account_spin_arr.append(account)
-                        
-        #                 temp_member['count_spin'] = count_spin
-
-
-
-        #                  # connected
-        #                 aggregate_cdr_ans = [
-        #                     {
-        #                         "$match":
-        #                         {
-        #                             "starttime": {'$gte': todayTimeStamp, '$lte': endTodayTimeStamp},
-        #                             "userextension": str(member),
-        #                             "disposition" : 'ANSWERED'
-        #                         }
-        #                     },{
-        #                         "$group":
-        #                         {
-        #                             "_id": 'null',
-        #                             "count_conn": {'$sum': 1},
-        #                             "phone_ans_arr": {'$addToSet': '$customernumber'},
-        #                         }
-        #                     }
-        #                 ]
-        #                 cdrAnsData = mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'worldfonepbxmanager'),aggregate_pipeline=aggregate_cdr_ans)
-        #                 phone_ans_arr = []
-        #                 if cdrAnsData != None:
-        #                     for row in cdrAnsData:
-        #                         phone_ans_arr            = row['phone_ans_arr']
-        #                         temp_member['count_conn'] = row['count_conn']
-
-
-        #                 temp_member['unwork'] = len(set(customernumber_arr)^set(phone_ans_arr))
-
-        #                 if groupProduct['value'] == 'SIBS':
-        #                     aggregate_ptp_amt = [
-        #                         {
-        #                             "$match":
-        #                             {
-        #                                 "account_number": {'$in': account_ptp_arr},
-        #                             }
-        #                         },{
-        #                             "$group":
-        #                             {
-        #                                 "_id": 'null',
-        #                                 "ptp_amount": {'$sum': '$current_balance'},
-        #                             }
-        #                         }
-        #                     ]
-        #                     ptpAmtData = mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'LNJC05'),aggregate_pipeline=aggregate_ptp_amt)
-        #                     if ptpAmtData != None:
-        #                         for row in ptpAmtData:
-        #                             # temp_member['count_ptp']            = len(account_ptp_arr)
-        #                             temp_member['ptp_amount']           = row['ptp_amount']
-
-        #                     aggregate_paid_promise = [
-        #                         {
-        #                             "$match":
-        #                             {
-        #                                 "created_at": {'$gte': todayTimeStamp, '$lte': endTodayTimeStamp},
-        #                                 "account_number": {'$in': account_ptp_arr},
-        #                             }
-        #                         },{
-        #                             "$group":
-        #                             {
-        #                                 "_id": 'null',
-        #                                 "paid_amount_promise": {'$sum': '$amt'},
-        #                                 "count_paid_promise": {'$addToSet': '$account_number'},
-        #                             }
-        #                         }
-        #                     ]
-        #                     paidPromiseData = mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'LN3206F'),aggregate_pipeline=aggregate_paid_promise)
-        #                     if paidPromiseData != None:
-        #                         for row in paidPromiseData:
-        #                             temp_member['count_paid_promise']            = len(row['count_paid_promise'] )
-        #                             temp_member['paid_amount_promise']           = row['paid_amount_promise']
-
-
-        #                     # paid
-        #                     aggregate_paid = [
-        #                         {
-        #                             "$match":
-        #                             {
-        #                                 "created_at": {'$gte': todayTimeStamp, '$lte': endTodayTimeStamp},
-        #                                 "account_number": {'$in': acc_arr},
-        #                             }
-        #                         },{
-        #                             "$group":
-        #                             {
-        #                                 "_id": 'null',
-        #                                 "paid_amount": {'$sum': '$amt'},
-        #                                 "count_paid": {'$addToSet': '$account_number'},
-        #                             }
-        #                         }
-        #                     ]
-        #                     paidPromiseData = mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'LN3206F'),aggregate_pipeline=aggregate_paid)
-        #                     if paidPromiseData != None:
-        #                         for row in paidPromiseData:
-        #                             temp_member['count_paid']            = len(row['count_paid'] )
-        #                             temp_member['paid_amount']           = row['paid_amount']
-
-        #                     aggregate_cdr_amt = [
-        #                         {
-        #                             "$match":
-        #                             {
-        #                                 "mobile_num": {'$in': customernumber_arr},
-        #                             }
-        #                         },{
-        #                             "$group":
-        #                             {
-        #                                 "_id": 'null',
-        #                                 "total_amount": {'$sum': '$current_balance'},
-
-        #                             }
-        #                         }
-        #                     ]
-        #                     cdrAmountData = mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'LNJC05'),aggregate_pipeline=aggregate_cdr_amt)
-        #                     if cdrAmountData != None:
-        #                         for row in cdrAmountData:
-        #                             temp_member['total_amount']            = row['total_amount']
-
-        #                     # spin
-        #                     aggregate_spin = [
-        #                         {
-        #                             "$match":
-        #                             {
-        #                                 "account_number": {'$in': account_spin_arr},
-        #                             }
-        #                         },{
-        #                             "$group":
-        #                             {
-        #                                 "_id": 'null',
-        #                                 "spin_amount": {'$sum': '$current_balance'},
-
-        #                             }
-        #                         }
-        #                     ]
-        #                     spinData = mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'LNJC05'),aggregate_pipeline=aggregate_spin)
-        #                     if spinData != None:
-        #                         for row in spinData:
-        #                             temp_member['spin_amount']            = row['spin_amount']
-
-        #                     aggregate_amt_ans = [
-        #                         {
-        #                             "$match":
-        #                             {
-        #                                 "mobile_num": {'$in': phone_ans_arr},
-        #                             }
-        #                         },{
-        #                             "$group":
-        #                             {
-        #                                 "_id": 'null',
-        #                                 "conn_amount": {'$sum': '$current_balance'},
-        #                             }
-        #                         }
-        #                     ]
-        #                     amtAnsData = mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'LNJC05'),aggregate_pipeline=aggregate_amt_ans)
-        #                     if amtAnsData != None:
-        #                         for row in amtAnsData:
-        #                             temp_member['conn_amount']            = row['conn_amount']
-
-        #                 if groupProduct['value'] == 'Card':
-        #                     aggregate_ptp_amt = [
-        #                         {
-        #                             "$match":
-        #                             {
-        #                                 "account_number": {'$in': account_ptp_arr},
-        #                             }
-        #                         },{
-        #                             "$group":
-        #                             {
-        #                                 "_id": 'null',
-        #                                 "ptp_amount": {'$sum': '$cur_bal'},
-        #                             }
-        #                         }
-        #                     ]
-        #                     ptpAmtData = mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'List_of_account_in_collection'),aggregate_pipeline=aggregate_ptp_amt)
-        #                     if ptpAmtData != None:
-        #                         for row in ptpAmtData:
-        #                             # temp_member['count_ptp']            = len(account_ptp_arr)
-        #                             temp_member['ptp_amount']           = row['ptp_amount']
-
-        #                     aggregate_paid_promise = [
-        #                         {
-        #                             "$match":
-        #                             {
-        #                                 "created_at": {'$gte': todayTimeStamp, '$lte': endTodayTimeStamp},
-        #                                 "account_number": {'$in': account_ptp_arr},
-        #                             }
-        #                         },{
-        #                             "$group":
-        #                             {
-        #                                 "_id": 'null',
-        #                                 "paid_amount_promise": {'$sum': '$amount'},
-        #                                 "count_paid_promise": {'$addToSet': '$account_number'},
-        #                             }
-        #                         }
-        #                     ]
-        #                     paidPromiseData = mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_input_payment_of_card'),aggregate_pipeline=aggregate_paid_promise)
-        #                     if paidPromiseData != None:
-        #                         for row in paidPromiseData:
-        #                             temp_member['count_paid_promise']            = len(row['count_paid_promise'] )
-        #                             temp_member['paid_amount_promise']           = row['paid_amount_promise']
-
-
-        #                     # paid
-        #                     aggregate_paid = [
-        #                         {
-        #                             "$match":
-        #                             {
-        #                                 "created_at": {'$gte': todayTimeStamp, '$lte': endTodayTimeStamp},
-        #                                 "account_number": {'$in': acc_arr},
-        #                             }
-        #                         },{
-        #                             "$group":
-        #                             {
-        #                                 "_id": 'null',
-        #                                 "paid_amount": {'$sum': '$amount'},
-        #                                 "count_paid": {'$addToSet': '$account_number'},
-        #                             }
-        #                         }
-        #                     ]
-        #                     paidPromiseData = mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_input_payment_of_card'),aggregate_pipeline=aggregate_paid)
-        #                     if paidPromiseData != None:
-        #                         for row in paidPromiseData:
-        #                             temp_member['count_paid']            = len(row['count_paid'] )
-        #                             temp_member['paid_amount']           = row['paid_amount']
-
-        #                     aggregate_cdr_amt = [
-        #                         {
-        #                             "$match":
-        #                             {
-        #                                 "phone": {'$in': customernumber_arr},
-        #                             }
-        #                         },{
-        #                             "$group":
-        #                             {
-        #                                 "_id": 'null',
-        #                                 "total_amount": {'$sum': '$cur_bal'},
-        #                             }
-        #                         }
-        #                     ]
-        #                     cdrAmountData = mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'List_of_account_in_collection'),aggregate_pipeline=aggregate_cdr_amt)
-        #                     if cdrAmountData != None:
-        #                         for row in cdrAmountData:
-        #                             temp_member['total_amount']            = row['total_amount']
-
-        #                     # spin
-        #                     aggregate_spin = [
-        #                         {
-        #                             "$match":
-        #                             {
-        #                                 "account_number": {'$in': account_spin_arr},
-        #                             }
-        #                         },{
-        #                             "$group":
-        #                             {
-        #                                 "_id": 'null',
-        #                                 "spin_amount": {'$sum': '$cur_bal'},
-
-        #                             }
-        #                         }
-        #                     ]
-        #                     spinData = mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'List_of_account_in_collection'),aggregate_pipeline=aggregate_spin)
-        #                     if spinData != None:
-        #                         for row in spinData:
-        #                             temp_member['spin_amount']            = row['spin_amount']
-
-        #                     aggregate_amt_ans = [
-        #                         {
-        #                             "$match":
-        #                             {
-        #                                 "phone": {'$in': phone_ans_arr},
-        #                             }
-        #                         },{
-        #                             "$group":
-        #                             {
-        #                                 "_id": 'null',
-        #                                 "conn_amount": {'$sum': '$cur_bal'},
-        #                             }
-        #                         }
-        #                     ]
-        #                     amtAnsData = mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'List_of_account_in_collection'),aggregate_pipeline=aggregate_amt_ans)
-        #                     if amtAnsData != None:
-        #                         for row in amtAnsData:
-        #                             temp_member['conn_amount']            = row['conn_amount']
-
-
-        #                 temp['count_data']      += temp_member['count_data'];
-        #                 temp['unwork']          += temp_member['unwork'];
-        #                 temp['talk_time']       += temp_member['talk_time'];
-        #                 temp['total_call']      += temp_member['total_call'];
-        #                 temp['total_amount']    += temp_member['total_amount'];
-        #                 temp['conn_amount']     += temp_member['conn_amount'];
-        #                 temp['count_conn']      += temp_member['count_conn'];
-        #                 temp['spin_amount']     += temp_member['spin_amount'];
-        #                 temp['count_spin']      += temp_member['count_spin'];
-        #                 temp['count_ptp']       += temp_member['count_ptp'];
-        #                 temp['ptp_amount']      += temp_member['ptp_amount'];
-        #                 temp['count_paid']      += temp_member['count_paid'];
-        #                 temp['paid_amount']     += temp_member['paid_amount'];
-        #                 temp['count_paid_promise']      += temp_member['count_paid_promise'];
-        #                 temp['paid_amount_promise']     += temp_member['count_paid_promise'];
-
-
-        #                 temp_member['spin_rate']     = temp_member['count_spin']/temp_member['total_call'] if temp_member['total_call'] != 0 else 0
-        #                 temp_member['ptp_rate_acc']  = temp_member['count_ptp']/temp_member['total_call'] if temp_member['total_call'] != 0 else 0
-        #                 temp_member['ptp_rate_amt']  = temp_member['ptp_amount']/temp_member['total_amount'] if temp_member['total_amount'] != 0  else 0
-        #                 temp_member['paid_rate_acc'] = temp_member['count_paid_promise']/temp_member['count_ptp'] if temp_member['count_ptp'] != 0 else 0
-        #                 temp_member['paid_rate_amt'] = temp_member['paid_amount_promise']/temp_member['ptp_amount'] if temp_member['ptp_amount'] != 0 else 0
-        #                 temp_member['conn_rate']     = temp_member['count_conn']/temp_member['total_call'] if temp_member['total_call'] != 0 else 0
-        #                 temp_member['collect_ratio_acc'] = temp_member['count_paid']/temp_member['total_call'] if temp_member['total_call'] != 0 else 0
-        #                 temp_member['collect_ratio_amt'] = temp_member['paid_amount']/temp_member['total_amount'] if temp_member['total_amount'] != 0 else 0
-        #                 temp_member['createdAt'] = todayTimeStamp
-        #                 temp_member['createdBy'] = 'system'
-        #                 temp_member['for_month'] = month
-
-        #                 member_arr.append(temp_member)
-
-        #             temp['spin_rate']     = temp['count_spin']/temp['total_call']  if temp['total_call'] != 0 else 0
-        #             temp['ptp_rate_acc']  = temp['count_ptp']/temp['total_call']  if temp['total_call'] != 0 else 0
-        #             temp['ptp_rate_amt']  = temp['ptp_amount']/temp['total_amount']  if temp['total_amount'] != 0 else 0
-        #             temp['paid_rate_acc'] = temp['count_paid_promise']/temp['count_ptp']  if temp['count_ptp'] != 0 else 0
-        #             temp['paid_rate_amt'] = temp['paid_amount_promise']/temp['ptp_amount']  if temp['ptp_amount'] != 0 else 0
-        #             temp['conn_rate']     = temp['count_conn']/temp['total_call'] if temp['total_call'] != 0 else 0
-        #             temp['collect_ratio_acc'] = temp['count_paid']/temp['total_call']  if temp['total_call'] != 0 else 0
-        #             temp['collect_ratio_amt'] = temp['paid_amount']/temp['total_amount']  if temp['total_amount'] != 0 else 0
-        #             temp['createdAt'] = todayTimeStamp
-        #             temp['createdBy'] = 'system'
-        #             temp['for_month'] = month
-
-        #             insertData.append(temp)
-        #             insertData += member_arr;
-
-        #             i += 1
-
-
-    
 
 
     # # WO

@@ -139,9 +139,10 @@ function SIBS_createDiallistDetailFor_D_E($collection, $diallist_id, $index, $me
     $diallist_id    = new MongoDB\BSON\ObjectId($diallist_id);
     $phoneField     = getPhoneField($collection);
     $data           = $mongo_db->get($collection);
+    
+    $mongo_db->switch_db('worldfone4xs');
     $duedate_plus1_check = checkTodayIsDueDatePlus1($collection);
 
-    $mongo_db->switch_db('worldfone4xs');
 
     for($i=0; $i < count($data); $i++){
 

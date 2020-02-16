@@ -31,7 +31,7 @@ try:
    errorData   = []
 
    today = date.today()
-   # today = datetime.strptime('22/12/2019', "%d/%m/%Y").date()
+   today = datetime.strptime('13/02/2020', "%d/%m/%Y").date()
 
    day = today.day
    month = today.month
@@ -54,14 +54,15 @@ try:
    yesterday   = today - timedelta(days=1)
    yesterdayString = yesterday.strftime("%d/%m/%Y")
    yesterdayTimeStamp = int(time.mktime(time.strptime(str(yesterdayString + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
-   
+   endYesterdayTimeStamp = int(time.mktime(time.strptime(str(yesterdayString + " 23:59:59"), "%d/%m/%Y %H:%M:%S")))
+
    fileOutput  = base_url + 'upload/loan/export/DailyPayment_'+ yesterday.strftime("%d%m%Y") +'.xlsx'
 
    aggregate_acc = [
       {
           "$match":
           {
-              "createdAt": {'$gte' : yesterdayTimeStamp},
+              "createdAt": {'$gte' : yesterdayTimeStamp, '$lte' : endYesterdayTimeStamp},
           }
       },
       {
@@ -74,7 +75,9 @@ try:
    data = mongodb.aggregate_pipeline(MONGO_COLLECTION=collection,aggregate_pipeline=aggregate_acc)
    dataReport = []
    for row in data:
+      temp = {}
       temp = row
+      print(temp['product_name'])
       try:
          if 'due_date' in row.keys():
             date_time = datetime.fromtimestamp(int(row['due_date']))
@@ -92,7 +95,6 @@ try:
       dataReport.append(temp)
 
    df = pd.DataFrame(dataReport, columns= ['account_number','name','due_date','payment_date','amt','paid_principal','paid_interest','RPY_FEE','group','num_of_overdue_day','pic','product_name','note'])
-   # df.to_excel(fileOutput,sheet_name='Daily',header=['AC NUMBER','NAME','OVERDUE DATE','PAYMENT DATE','AMOUNT','PAID PRINCIPAL','PAID INTEREST','PAID LATE CHARGE & FEE','GROUP','NUMBER OF OVERDUE DAYS','PIC','PRODUCT','NOTE']) 
 
    # Create a Pandas Excel writer using XlsxWriter as the engine.
    writer = pd.ExcelWriter(fileOutput, engine='xlsxwriter')

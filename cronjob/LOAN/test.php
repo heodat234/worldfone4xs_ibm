@@ -1,48 +1,34 @@
 <?php
+$inputFileName = "/data/upload_file/20200213/ZACCF.txt";
 
-ini_set("log_errors", 1);
-error_reporting(E_ALL);
-ini_set("error_log", "/var/www/html/worldfone4xs_ibm/cronjob/LOAN/autoCreateDial_Logs.txt");
+$delimiter = ";";
+$length = 0;
+$startColumn = 0;
+$endColumn = 9;
+$count = 0;
 
-echo $test['123'];
-exit;
+$file = fopen($inputFileName, "r");
 
-require_once dirname(__DIR__) . "/Header.php";
-use Pheanstalk\Pheanstalk;
+$collection = "LO_ZACCF";
 
-$queue = new Pheanstalk('127.0.0.1');
-$mongo_db = new Mongo_db();
+$key_field = "account_number";
+$key_field_2 = "CUS_ID";
 
-ini_set('memory_limit', '-1');
-$arr_contractNo_partner = [];
+$starttime = microtime(true);
 
-$cus_assigned_partner = $mongo_db->get('LO_Cus_assigned_partner');
-foreach ($cus_assigned_partner as $key => $value) {
-    $arr_contractNo_partner[] = $value['CONTRACTNR'];
-}
-echo 't1: ' . round(microtime(true) * 1000) . '//ram: ' . convert(memory_get_usage()) . PHP_EOL;
-if (in_array('28030000186994', $arr_contractNo_partner)) {
-// if ($arr_contractNo_partner['771030000001258000']) {
-    echo 'true';
-} else {
-    echo 'false';
-}
-godown();
-// if (in_array('21030000001724000', $arr_contractNo_partner)) {
-//     echo 'true';
-// } else {
-//     echo 'false';
-// }
-godown();
-echo 't2: ' . round(microtime(true) * 1000) . '//ram: ' . convert(memory_get_usage()) . PHP_EOL;
-
-function convert($size)
-{
-    $unit = array('b', 'kb', 'mb', 'gb', 'tb', 'pb');
-    return @round($size / pow(1024, ($i = floor(log($size, 1024)))), 2) . ' ' . $unit[$i];
-}
-
-function godown()
-{
+// Import
+echo "START" . PHP_EOL;
+while (!feof($file)) {
+    $temp = fgetcsv($file, $length, $delimiter);
+    ++$count;
+    echo "NO.{$count}\t";
     echo PHP_EOL;
 }
+
+fclose($file);
+
+$endtime = microtime(true);
+echo PHP_EOL . "TIME EXECUTE: " . ($endtime - $starttime) . " Seconds";
+echo PHP_EOL . "RAM USAGE: " . memory_get_usage() . " Bytes";
+echo PHP_EOL . "TOTAL: " . $count . " Records";
+echo PHP_EOL . "END" . PHP_EOL;

@@ -55,7 +55,7 @@ Class Daily_all_user_report extends CI_Controller {
     function read() {
         try {
             $request = json_decode($this->input->get("q"), TRUE);
-            $date = date('d-m-Y',strtotime("-1 days"));
+            $date = date('d-m-Y',strtotime("-2 days"));
             
             $match = array('createdAt' => array('$gte' => strtotime($date)));
             $data = $this->crud->read($this->collection, $request,array(),$match);
@@ -69,7 +69,7 @@ Class Daily_all_user_report extends CI_Controller {
    function exportExcel()
    {
       $now = getdate();
-      $date = date('d-m-Y',strtotime("-1 days"));
+      $date = date('d-m-Y',strtotime("-2 days"));
 
       $request = array('createdAt' => array('$gte' => strtotime($date)));
       $data = $this->mongo_db->where($request)->get($this->collection);
@@ -173,62 +173,70 @@ Class Daily_all_user_report extends CI_Controller {
             $worksheet->getColumnDimension('C')->setAutoSize(true);
             $worksheet->mergeCells("D$rowHeader_1:D$rowHeader_2")->setCellValue("D$rowHeader_1", "Unwork accounts");
             $worksheet->getColumnDimension('D')->setAutoSize(true);
-            $worksheet->mergeCells("E$rowHeader_1:E$rowHeader_2")->setCellValue("E$rowHeader_1", "Talk time (minutes)");
+            $worksheet->mergeCells("E$rowHeader_1:E$rowHeader_2")->setCellValue("E$rowHeader_1", "Work accounts");
             $worksheet->getColumnDimension('E')->setAutoSize(true);
-            $worksheet->mergeCells("F$rowHeader_1:G$rowHeader_1")->setCellValue("F$rowHeader_1", "Contacted");
-            $worksheet->setCellValue("F$rowHeader_2", "No.of accounts");
-            $worksheet->setCellValue("G$rowHeader_2", "No.of amount");
+            $worksheet->mergeCells("F$rowHeader_1:F$rowHeader_2")->setCellValue("F$rowHeader_1", "Talk time (minutes)");
             $worksheet->getColumnDimension('F')->setAutoSize(true);
+
+            $worksheet->mergeCells("G$rowHeader_1:H$rowHeader_1")->setCellValue("G$rowHeader_1", "Contacted");
+            $worksheet->setCellValue("G$rowHeader_2", "No.of accounts");
+            $worksheet->setCellValue("H$rowHeader_2", "No.of amount");
             $worksheet->getColumnDimension('G')->setAutoSize(true);
-            $worksheet->mergeCells("H$rowHeader_1:I$rowHeader_1")->setCellValue("H$rowHeader_1", "Spin");
-            $worksheet->setCellValue("H$rowHeader_2", "No.of accounts");
-            $worksheet->setCellValue("I$rowHeader_2", "No.of amount");
             $worksheet->getColumnDimension('H')->setAutoSize(true);
+            $worksheet->mergeCells("I$rowHeader_1:J$rowHeader_1")->setCellValue("I$rowHeader_1", "Call made");
+            $worksheet->setCellValue("I$rowHeader_2", "Number of call");
+            $worksheet->setCellValue("J$rowHeader_2", "Total call made include drop call");
             $worksheet->getColumnDimension('I')->setAutoSize(true);
-            $worksheet->mergeCells("J$rowHeader_1:K$rowHeader_1")->setCellValue("J$rowHeader_1", "Promise to pay");
-            $worksheet->setCellValue("J$rowHeader_2", "No.of accounts");
-            $worksheet->setCellValue("K$rowHeader_2", "No.of amount");
             $worksheet->getColumnDimension('J')->setAutoSize(true);
+            $worksheet->mergeCells("K$rowHeader_1:L$rowHeader_1")->setCellValue("K$rowHeader_1", "Promise to pay");
+            $worksheet->setCellValue("K$rowHeader_2", "No.of accounts");
+            $worksheet->setCellValue("L$rowHeader_2", "No.of amount");
             $worksheet->getColumnDimension('K')->setAutoSize(true);
-            $worksheet->mergeCells("L$rowHeader_1:M$rowHeader_1")->setCellValue("L$rowHeader_1", "Connected");
-            $worksheet->setCellValue("L$rowHeader_2", "No.of accounts");
-            $worksheet->setCellValue("M$rowHeader_2", "No.of amount");
             $worksheet->getColumnDimension('L')->setAutoSize(true);
+            $worksheet->mergeCells("M$rowHeader_1:N$rowHeader_1")->setCellValue("M$rowHeader_1", "Connected");
+            $worksheet->setCellValue("M$rowHeader_2", "No.of accounts");
+            $worksheet->setCellValue("N$rowHeader_2", "No.of amount");
             $worksheet->getColumnDimension('M')->setAutoSize(true);
-            $worksheet->mergeCells("N$rowHeader_1:Q$rowHeader_1")->setCellValue("N$rowHeader_1", "Paid");
-            $worksheet->setCellValue("N$rowHeader_2", "No.of accounts");
-            $worksheet->setCellValue("O$rowHeader_2", "Actual Amount received");
-            $worksheet->setCellValue("P$rowHeader_2", "No.of accounts (keep promise to pay)");
-            $worksheet->setCellValue("Q$rowHeader_2", "Actual Amount received (keep promise to pay)");
-            $worksheet->setCellValue("R$rowHeader_1", "Spin rate");
-            $worksheet->setCellValue("R$rowHeader_2", "Account");
             $worksheet->getColumnDimension('N')->setAutoSize(true);
+            $worksheet->mergeCells("O$rowHeader_1:T$rowHeader_1")->setCellValue("O$rowHeader_1", "Paid");
+            $worksheet->setCellValue("O$rowHeader_2", "No.of accounts");
+            $worksheet->setCellValue("P$rowHeader_2", "Actual Amount received");
+            $worksheet->setCellValue("Q$rowHeader_2", "No.of accounts (keep promise to pay today)");
+            $worksheet->setCellValue("R$rowHeader_2", "Actual Amount received (keep promise to pay today)");
+            $worksheet->setCellValue("S$rowHeader_2", "No.of accounts (keep promise to pay)");
+            $worksheet->setCellValue("T$rowHeader_2", "Actual Amount received (keep promise to pay)");
+            $worksheet->setCellValue("U$rowHeader_1", "Call made rate");
+            $worksheet->setCellValue("U$rowHeader_2", "Account");
             $worksheet->getColumnDimension('O')->setAutoSize(true);
             $worksheet->getColumnDimension('P')->setAutoSize(true);
             $worksheet->getColumnDimension('Q')->setAutoSize(true);
             $worksheet->getColumnDimension('R')->setAutoSize(true);
-            $worksheet->mergeCells("S$rowHeader_1:V$rowHeader_1")->setCellValue("S$rowHeader_1", "PTP rate");
-            $worksheet->setCellValue("S$rowHeader_2", "PTP rate (Promised accounts)");
-            $worksheet->setCellValue("T$rowHeader_2", "PTP rate (PromisedAmount)");
-            $worksheet->setCellValue("U$rowHeader_2", "PTP rate (total paid accounts)");
-            $worksheet->setCellValue("V$rowHeader_2", "PTP rate (total paid amount)");
-            $worksheet->setCellValue("W$rowHeader_1", "Connected rate");
-            $worksheet->setCellValue("W$rowHeader_2", "Account");
             $worksheet->getColumnDimension('S')->setAutoSize(true);
             $worksheet->getColumnDimension('T')->setAutoSize(true);
             $worksheet->getColumnDimension('U')->setAutoSize(true);
+            $worksheet->mergeCells("V$rowHeader_1:Y$rowHeader_1")->setCellValue("V$rowHeader_1", "PTP rate");
+            $worksheet->setCellValue("V$rowHeader_2", "PTP rate (Promised accounts)");
+            $worksheet->setCellValue("W$rowHeader_2", "PTP rate (PromisedAmount)");
+            $worksheet->setCellValue("X$rowHeader_2", "PTP rate (total paid accounts)");
+            $worksheet->setCellValue("Y$rowHeader_2", "PTP rate (total paid amount)");
+            $worksheet->setCellValue("Z$rowHeader_1", "Connected rate");
+            $worksheet->setCellValue("Z$rowHeader_2", "Account");
             $worksheet->getColumnDimension('V')->setAutoSize(true);
             $worksheet->getColumnDimension('W')->setAutoSize(true);
-            $worksheet->mergeCells("X$rowHeader_1:Y$rowHeader_1")->setCellValue("X$rowHeader_1", "Collected ratio");
-            $worksheet->setCellValue("X$rowHeader_2", "Account");
-            $worksheet->setCellValue("Y$rowHeader_2", "Amount");
+            $worksheet->getColumnDimension('X')->setAutoSize(true);
             $worksheet->getColumnDimension('Y')->setAutoSize(true);
+            $worksheet->getColumnDimension('Z')->setAutoSize(true);
+            $worksheet->mergeCells("AA$rowHeader_1:AB$rowHeader_1")->setCellValue("AA$rowHeader_1", "Collected ratio");
+            $worksheet->setCellValue("AA$rowHeader_2", "Account");
+            $worksheet->setCellValue("AB$rowHeader_2", "Amount");
+            $worksheet->getColumnDimension('AA')->setAutoSize(true);
+            $worksheet->getColumnDimension('AB')->setAutoSize(true);
 
-            $worksheet->getStyle("A$rowHeader_1:Y$rowHeader_2")->getFill()
+            $worksheet->getStyle("A$rowHeader_1:AB$rowHeader_2")->getFill()
             ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
             ->getStartColor()->setRGB('FFFF00');
             $style = array('font' => array('bold' => true), 'alignment' => array('horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER));
-            $worksheet->getStyle("A$rowHeader_1:Y$rowHeader_2")->applyFromArray($style);
+            $worksheet->getStyle("A$rowHeader_1:AB$rowHeader_2")->applyFromArray($style);
 
             if(!empty($value['name'])) {
                if(strpos($value['name'], 'G1') !== false || strpos($value['name'], 'G3') !== false) {
@@ -242,7 +250,7 @@ Class Daily_all_user_report extends CI_Controller {
            }
 
             if (isset($value['team_lead'])) {
-               $worksheet->getStyle("A"."$row".":Y"."$row")->getFill()
+               $worksheet->getStyle("A"."$row".":AB"."$row")->getFill()
                   ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
                   ->getStartColor()->setRGB('FCE4D6');
                   $team = $value['team'];
@@ -260,35 +268,46 @@ Class Daily_all_user_report extends CI_Controller {
             }
             $worksheet->setCellValue("C".$row, $value['count_data']);
             $worksheet->setCellValue("D".$row, $value['unwork']);
-            $worksheet->setCellValue("E".$row, isset($value['talk_time']) ? round($value['talk_time']/60) : 0);
-            $worksheet->setCellValue("F".$row, isset($value['total_call']) ? $value['total_call'] : 0);
-            $worksheet->setCellValue("G".$row, isset($value['total_amount']) ? $value['total_amount'] : 0);
-            $worksheet->setCellValue("H".$row, isset($value['count_spin']) ? $value['count_spin'] : 0);
-            $worksheet->setCellValue("I".$row, isset($value['spin_amount']) ? $value['spin_amount'] : 0);
-            $worksheet->setCellValue("J".$row, isset($value['count_ptp']) ? $value['count_ptp'] : 0);
-            $worksheet->setCellValue("K".$row, isset($value['ptp_amount']) ? $value['ptp_amount'] : 0);
-            $worksheet->setCellValue("L".$row, isset($value['count_conn']) ? $value['count_conn'] : 0);
-            $worksheet->setCellValue("M".$row, isset($value['conn_amount']) ? $value['conn_amount'] : 0);
-            $worksheet->setCellValue("N".$row, isset($value['count_paid']) ? $value['count_paid'] : 0);
-            $worksheet->setCellValue("O".$row, isset($value['paid_amount']) ? $value['paid_amount'] : 0);
-            $worksheet->setCellValue("P".$row, isset($value['count_paid_promise']) ? $value['count_paid_promise'] : 0);
-            $worksheet->setCellValue("Q".$row, isset($value['paid_amount_promise']) ? $value['paid_amount_promise'] : 0);
-            $worksheet->setCellValue("R".$row, isset($value['spin_rate']) ? $value['spin_rate'] : 0);
-            $worksheet->setCellValue("S".$row, isset($value['ptp_rate_acc']) ? $value['ptp_rate_acc'] : 0);
-            $worksheet->setCellValue("T".$row, isset($value['ptp_rate_amt']) ? $value['ptp_rate_amt'] : 0);
-            $worksheet->setCellValue("U".$row, isset($value['paid_rate_acc']) ? $value['paid_rate_acc'] : 0);
-            $worksheet->setCellValue("V".$row, isset($value['paid_rate_amt']) ? $value['paid_rate_amt'] : 0);
-            $worksheet->setCellValue("W".$row, isset($value['conn_rate']) ? $value['conn_rate'] : 0);
-            $worksheet->setCellValue("X".$row, isset($value['collect_ratio_acc']) ? $value['collect_ratio_acc'] : 0);
-            $worksheet->setCellValue("Y".$row, isset($value['collect_ratio_amt']) ? $value['collect_ratio_amt'] : 0);
+            $worksheet->setCellValue("E".$row, $value['work']);
+            $worksheet->setCellValue("F".$row, isset($value['talk_time']) ? round($value['talk_time']/60) : 0);
+            $worksheet->setCellValue("G".$row, isset($value['count_contacted']) ? $value['count_contacted'] : 0);
+            $worksheet->setCellValue("H".$row, isset($value['contacted_amount']) ? $value['contacted_amount'] : 0);
+            $worksheet->setCellValue("I".$row, isset($value['number_of_call']) ? $value['number_of_call'] : 0);
+            $worksheet->setCellValue("J".$row, isset($value['total_call']) ? $value['total_call'] : 0);
+            $worksheet->setCellValue("K".$row, isset($value['count_ptp']) ? $value['count_ptp'] : 0);
+            $worksheet->setCellValue("L".$row, isset($value['ptp_amount']) ? $value['ptp_amount'] : 0);
+            $worksheet->setCellValue("M".$row, isset($value['count_conn']) ? $value['count_conn'] : 0);
+            $worksheet->setCellValue("N".$row, isset($value['conn_amount']) ? $value['conn_amount'] : 0);
+            $worksheet->setCellValue("O".$row, isset($value['count_paid']) ? $value['count_paid'] : 0);
+            $worksheet->setCellValue("P".$row, isset($value['paid_amount']) ? $value['paid_amount'] : 0);
+            $worksheet->setCellValue("Q".$row, isset($value['count_paid_promise']) ? $value['count_paid_promise'] : 0);
+            $worksheet->setCellValue("R".$row, isset($value['paid_amount_promise']) ? $value['paid_amount_promise'] : 0);
+            $worksheet->setCellValue("S".$row, isset($value['count_ptp_all_days']) ? $value['count_ptp_all_days'] : 0);
+            $worksheet->setCellValue("T".$row, isset($value['paid_amount_all_days']) ? $value['paid_amount_all_days'] : 0);
+            $worksheet->setCellValue("U".$row, isset($value['call_rate']) ? $value['call_rate'] : 0);
+            $worksheet->setCellValue("V".$row, isset($value['ptp_rate_acc']) ? $value['ptp_rate_acc'] : 0);
+            $worksheet->setCellValue("W".$row, isset($value['ptp_rate_amt']) ? $value['ptp_rate_amt'] : 0);
+            $worksheet->setCellValue("X".$row, isset($value['paid_rate_acc']) ? $value['paid_rate_acc'] : 0);
+            $worksheet->setCellValue("Y".$row, isset($value['paid_rate_amt']) ? $value['paid_rate_amt'] : 0);
+            $worksheet->setCellValue("Z".$row, isset($value['conn_rate']) ? $value['conn_rate'] : 0);
+            $worksheet->setCellValue("AA".$row, isset($value['collect_ratio_acc']) ? $value['collect_ratio_acc'] : 0);
+            $worksheet->setCellValue("AB".$row, isset($value['collect_ratio_amt']) ? $value['collect_ratio_amt'] : 0);
             $row++;
 
 
          }
       }
-      $total_row = count($data)+13;
-      $worksheet->getStyle("A1:Y$total_row")->getBorders()
+      $total_row = count($data)+11;
+      $worksheet->getStyle("A1:AB$total_row")->getBorders()
       ->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+
+      $worksheet->getStyle("C4:T$total_row")
+              ->getNumberFormat()
+              ->setFormatCode('#,##0');
+
+      $worksheet->getStyle("U4:AB$total_row")
+              ->getNumberFormat()
+              ->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_PERCENTAGE_00);
 
       $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
       $file_path = UPLOAD_PATH . "loan/export/" . $filename;

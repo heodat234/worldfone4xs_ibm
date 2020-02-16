@@ -46,7 +46,7 @@ try:
    insertDataPayment = []
 
    today = date.today()
-   # today = datetime.strptime('03/01/2020', "%d/%m/%Y").date()
+   # today = datetime.strptime('13/02/2020', "%d/%m/%Y").date()
 
    day = today.day
    month = today.month
@@ -107,7 +107,7 @@ try:
             if product != None:
                row['product_name'] = product['name']
             else:
-               row['product_name'] = ''
+              row['product_name'] = ''
 
          if len(str(row['date'])) == 5:
             row['date']       = '0'+str(row['date'])
@@ -148,13 +148,13 @@ try:
 
 
    # Report_input_payment_of_card
-   code = ['2000','2100','2700']
+   code = ['2000','2100']
    aggregate_pipeline = [
        {
            "$match":
            {
                'created_at': {'$gte' : todayTimeStamp,'$lte' : endTodayTimeStamp},
-               '$or' : [ { "code" : '2000' }, {"code" : '2100' }, {"code" : '2700'}]
+               '$or' : [ { "code" : '2000' }, {"code" : '2100' }]
            }
        },
        {
@@ -176,11 +176,14 @@ try:
             row['paid_principal']   = int(float(sbv['repayment_principal']))
             row['paid_interest']    = int(float(sbv['repayment_interest']))
             row['RPY_FEE']          = int(float(sbv['repayment_fees']))
-            product = mongodb.getOne(MONGO_COLLECTION=product_collection, WHERE={'code': str(sbv['card_type'])},SELECT=['name'])
-            if product != None:
-               row['product_name'] = product['name']
+            if int(sbv['card_type']) < 100:
+              row['product_name'] = '301 – Credit card'
             else:
-               row['product_name'] = ''
+              row['product_name'] = '302 – Cash card'
+            # product_card = mongodb.getOne(MONGO_COLLECTION=product_collection, WHERE={'code': product_id },SELECT=['name'])
+            # if product != None:
+            #    row['product_name'] = product['name']
+
 
          row['effective_date'] = str(int(float(row['effective_date'])))
          if len(str(row['effective_date'])) == 5:
