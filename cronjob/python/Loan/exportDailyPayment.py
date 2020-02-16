@@ -77,18 +77,18 @@ try:
    for row in data:
       temp = {}
       temp = row
-      print(temp['product_name'])
+      # print(temp['product_name'])
       try:
          if 'due_date' in row.keys():
             date_time = datetime.fromtimestamp(int(row['due_date']))
-            temp['due_date']      = date_time.strftime('%d-%m-%Y')
+            temp['due_date']      = date_time.strftime('%d/%m/%Y')
       except Exception as e:
          temp['due_date']      = row['due_date']
 
       if 'payment_date' in row.keys():
          if row['payment_date'] != None:
             date_time = datetime.fromtimestamp(row['payment_date'])
-            temp['payment_date']      = date_time.strftime('%d-%m-%Y')
+            temp['payment_date']      = date_time.strftime('%d/%m/%Y')
          else:
             temp['payment_date']      = ''
 
@@ -100,14 +100,15 @@ try:
    writer = pd.ExcelWriter(fileOutput, engine='xlsxwriter')
 
    # Convert the dataframe to an XlsxWriter Excel object.
-   df.to_excel(writer,sheet_name='Sheet1',header=['AC NUMBER','NAME','OVERDUE DATE','PAYMENT DATE','AMOUNT','PAID PRINCIPAL','PAID INTEREST','PAID LATE CHARGE & FEE','GROUP','NUMBER OF OVERDUE DAYS','PIC','PRODUCT','NOTE']) 
-   
+   df.to_excel(writer,sheet_name='Sheet1',header=['AC NUMBER','NAME','OVERDUE DATE','PAYMENT DATE','AMOUNT','PAID PRINCIPAL','PAID INTEREST','PAID LATE CHARGE & FEE','GROUP','NUMBER OF OVERDUE DAYS','PIC','PRODUCT','NOTE'])
+
    # Get the xlsxwriter workbook and worksheet objects.
    workbook  = writer.book
    worksheet = writer.sheets['Sheet1']
 
    # Add some cell formats.
    format1 = workbook.add_format({'num_format': '#,##0', 'bottom':1, 'top':1, 'left':1, 'right':1})
+   format2 = workbook.add_format({'num_format': 'dd/mm/yyyy', 'bottom':1, 'top':1, 'left':1, 'right':1})
    # format2 = workbook.add_format({'num_format': '0%'})
    border_fmt = workbook.add_format({'bottom':1, 'top':1, 'left':1, 'right':1})
 
@@ -116,8 +117,7 @@ try:
    worksheet.set_column('A:N', 20, border_fmt)
 
    worksheet.set_column('F:I', 20, format1)
-   # worksheet.set_column('H:H', 20, format1)
-   # worksheet.set_column('I:I', 20, format1)
+   worksheet.set_column('D:E', 20, format2)
 
    writer.save()
 
