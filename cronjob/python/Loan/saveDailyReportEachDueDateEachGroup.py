@@ -417,32 +417,65 @@ try:
                         for sbv in sbvInfo:
                             ob_principal_today = float(sbv['sale_total']) + float(sbv['cash_total'])
 
+
+
                     code = ['2000','2100','2700']
+                    acc_arr = []
                     aggregate_gl = [
-                        {
-                            "$match":
-                            {
-                                "created_at": {'$gte': temp['due_date'],'$lte': todayTimeStamp},
-                                "account_number": {'$in' : acc_arr},
-                                'code' : {'$in' : code}
-                            }
-                        },{
-                            "$group":
-                            {
-                                "_id": 'null',
-                                "count_data" : {'$addToSet' : 'account_number'},
-                                "total_amt": {'$sum': '$amount'},
-                            }
-                        }
+                       {
+                           "$match":
+                           {
+                               'created_at': {'$gte' : temp['due_date'],'$lte' : todayTimeStamp},
+                               'code' : {'$in' : code}
+                           }
+                       },
+                       {
+                           "$group":
+                           {
+                               "_id": 'null',
+                               "acc_arr": {'$addToSet' : '$account_number'},
+                           }
+                       }
                     ]
-                    glInfo = mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_input_payment_of_card'),aggregate_pipeline=aggregate_gl)
-                    if glInfo is not None:
-                        for gl in glInfo:
-                            temp['col'] = len(gl['count_data'])
-                            temp['amt'] = gl['total_amt']
+                    accData = mongodb.aggregate_pipeline(MONGO_COLLECTION=payment_of_card_collection,aggregate_pipeline=aggregate_gl)
+                    if accData != None:
+                      for row in accData:
+                         accData = row['acc_arr']
+
+                    for acc in accData:
+                      aggregate_gl = [
+                          {
+                              "$match":
+                              {
+                                  "created_at": {'$gte': temp['due_date'],'$lte': todayTimeStamp},
+                                  "account_number": acc,
+                                  'code' : {'$in' : code}
+                              }
+                          },{
+                              "$project":
+                              {
+                                   "account_number" : 1,
+                                   "amount" : 1,
+                                   "code" : 1,
+                              }
+                          }
+                      ]
+                      glInfo = mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_input_payment_of_card'),aggregate_pipeline=aggregate_gl)
+                      code_2000 = 0
+                      code_2700 = 0
+                      sum_amount = 0
+                      if glInfo != None:
+                         for row in glInfo:
+                            if row['code'] == '2000' or row['code'] == '2100':
+                               code_2000 += row['amount']
+                            else:
+                               code_2700 += row['amount']
+                         sum_amount = code_2000 - code_2700
+                         if sum_amount > 0:
+                          temp['col'] += 1
+                          temp['amt'] += sum_amount
 
 
-                    # temp['col']         = temp['inci'] - col_today
                     temp['col_prici']   = temp['inci_ob_principal'] - ob_principal_today
                     temp['col_amt']     = temp['inci_amt'] - amt_today
 
