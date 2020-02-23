@@ -3,7 +3,7 @@
 	<div class="col-sm-9 filter-mvvm" style="display: none"></div>
 </div>
 <div class="row">
-	<div class="col-sm-12" style="height: 80vh;">
+	<div class="col-sm-12">
 	    <!-- Table Styles Content -->
 	    <div id="grid"></div>
 	    <!-- END Table Styles Content -->
@@ -30,6 +30,11 @@
 var Config = Object.assign(Config, {
     model: {
         id: "id",
+        fields: {
+            appointment_date: {type: 'date'},
+            created_at: {type: 'date'},
+            updated_at: {type: 'date'}
+        } 
     },
     parse(response) {
         response.data.map(function(doc) {
@@ -42,6 +47,7 @@ var Config = Object.assign(Config, {
         return response;
     },
     scrollable: true,
+    sort: [{field: 'appointment_date', dir: 'desc'}],
     columns: [{
         // Use uid to fix bug data-uid of row undefined
         title: ``,
@@ -52,7 +58,7 @@ var Config = Object.assign(Config, {
         field: "created_at",
         headerAttributes: { style: "white-space: normal"},
         width: "110px",
-        filterable: false,
+        filterable: true,
         template: data => gridDate(data.created_at),
     },{
         title: "@Telesale code@",
@@ -102,7 +108,7 @@ var Config = Object.assign(Config, {
         headerAttributes: { style: "white-space: normal"},
         width: "150px",
         template: data => gridDate(data.appointment_date, "dd/MM/yyyy"),
-        filterable: false
+        filterable: true
     },{
         title: "@Loan Counter@",
         columns: [{
@@ -159,18 +165,13 @@ var Config = Object.assign(Config, {
             }
         }]
     }, {
-        field: "last_modified",
+        field: "updated_at",
         title: "@Last modified@",
         width: "150px",
         headerAttributes: { style: "white-space: normal"},
         filterable: true,
-        template: function(dataItem) {
-            if(typeof dataItem.updated_at != 'undefined') {
-                return gridDate(dataItem.updated_at);
-            }
-            else {
-                return gridDate(dataItem.created_at);
-            }
+        template: (dataItem) => {
+            return gridDate(dataItem.updated_at, 'dd/MM/yyyy HH:mm:ss');
         }
     },],
 });
@@ -223,7 +224,43 @@ var Config = Object.assign(Config, {
 		detailData($(this).closest("tr"));
 	});
 
+    kendo.culture("vi-VN");
     Table.init();
+
+    async function addForm() {
+        var formHtml = await $.ajax({
+            url: Config.templateApi + Config.collection + "/form",
+            error: errorDataSource
+        });
+        var model = Object.assign(Config.observable, {
+            item: {},
+            save: function() {
+                var item = this.get('item');
+                if(typeof this.item.appointment_date === 'undefined' || this.item.appointment_date === '' || this.item.appointment_date === null) {
+                    notification.show("Xin vui lòng chọn ngày lịch hẹn.", 'error');
+                    return false;
+                }
+                var appointment_date = new Date(this.item.appointment_date);
+                appointment_date.setHours(0, 0, 0, 0);
+                item.appointment_date = appointment_date.getTime() / 1000;
+                $.ajax({
+                    url: ENV.vApi + "appointment_log/create",
+                    data: kendo.stringify(item.toJSON()),
+                    error: errorDataSource,
+                    contentType: "application/json; charset=utf-8",
+                    type: "PUT",
+                    success: function() {
+                        closeForm();
+                        Table.dataSource.sync().then(() => {Table.dataSource.read()});
+                    }
+                });
+            }
+        });
+        kendo.destroy($("#right-form"));
+        $("#right-form").empty();
+        var kendoView = new kendo.View(formHtml, { wrap: false, model: model, evalTemplate: false });
+        kendoView.render($("#right-form"));
+    }
 
     async function editForm(ele) {
         var dataItem = Table.dataSource.getByUid($(ele).data("uid")),
@@ -239,6 +276,10 @@ var Config = Object.assign(Config, {
         var model = Object.assign(Config.observable, {
             item: dataItemFull,
             save: function() {
+                if(typeof this.item.appointment_date === 'undefined' || this.item.appointment_date === '' || this.item.appointment_date === null) {
+                    notification.show("Xin vui lòng chọn ngày lịch hẹn.", 'error');
+                    return false;
+                }
                 var item = this.get('item');
                 if(typeof item.appointment_date == 'string') {
                     appointment_date_raw = item.appointment_date.split('/');

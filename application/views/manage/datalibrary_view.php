@@ -46,6 +46,14 @@
         filterable: KENDO.filterable
     }
     window.onload = function() {
+        <?php if(!empty($filter)) { ?>
+            Config.filter = <?= $filter ?>;
+            Config.autoBind = true;
+            Config.refresh = true;
+        <?php } else { ?>
+            Config.autoBind = false;
+            Config.refresh = false;
+        <?php } ?>
         var layoutViewModel = kendo.observable({
             breadcrumb: "",
             activeArray: [],
@@ -167,7 +175,7 @@
             item: {},
             save: function() {
                 Table.dataSource.add(this.item);
-                Table.dataSource.sync().then(() => {Table.dataSource.read()});
+                // Table.dataSource.sync().then(() => {Table.dataSource.read()});
             }
         });
         kendo.destroy($("#right-form"));
@@ -209,7 +217,7 @@
                 <ul class="dropdown-menu dropdown-custom dropdown-options" data-bind="source: telesaleList" data-template="detail-dropdown-template">
 			    </ul>
                 <button href="#/import" data-type="action/import" class="btn btn-alt btn-default" data-bind="click: goTo, css: {active: activeArray[2]}">@Import@</button>
-                <button class="btn btn-alt btn-default" onclick="openForm({title: '@Add@ @Customer@', width: 700}); addForm(this)">@Create@</button>
+                <button style="display: none" class="btn btn-alt btn-default" onclick="openForm({title: '@Add@ @Customer@', width: 700}); addForm(this)">@Create@</button>
                 <button href="#/history" data-type="action/importhistory" class="btn btn-alt btn-default" data-bind="click: goTo, css: {active: activeArray[3]}">@Import History@</button>
             </div>
         </li>

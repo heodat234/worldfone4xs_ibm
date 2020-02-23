@@ -1,7 +1,7 @@
 <?php $id = $this->input->get("id") ?>
 <div class="col-sm-3" style="margin: 10px 0" id="page-widget"></div>
 <div class="col-sm-9 change-mvvm" style=" margin: 10px 0;">
-    <div class="col-sm-1"><a role="button" data-type="action/delete" class="btn btn-alt btn-sm btn-primary" data-toggle="dropdown" onclick="removeRow(this)"><i class="fa fa-remove"></i> <b>@Remove@</b></a></div>
+    <div class="col-sm-1"><a role="button" data-type="action/delete" class="btn btn-alt btn-sm btn-primary" data-toggle="dropdown" onclick="deleteDataItemChecked()"><i class="fa fa-remove"></i> <b>@Remove@</b></a></div>
     <div class="col-sm-2" style="text-align: right;margin-top: 6px;"><label>Re-Assign</label></div>
     <div class="col-sm-4" class="form-group">
         <input data-role="dropdownlist"
@@ -112,7 +112,7 @@
             value: (ENV.type ? ENV.type + "_" : "") + "Telesalelist"
         },
         page: 1,
-        pageSize: 30,
+        pageSize: 100,
         sort: {field: "index", dir: "asc"}
     })
     telesaleFields.read().then(function(){
@@ -252,4 +252,52 @@
             }
         })
     }
+
+    function deleteDataItemChecked() {
+		var checkIds = Table.grid.selectedKeyNames();
+		if(checkIds.length) {
+			swal({
+			    title: "@Are you sure@?",
+			    text: "@Once deleted, you will not be able to recover these documents@!",
+			    icon: "warning",
+			    buttons: true,
+			    dangerMode: true,
+		    })
+		    .then((willDelete) => {
+				if (willDelete) {
+                    var listContract = [];
+					checkIds.forEach(uid => {
+						var dataItem = Table.dataSource.getByUid(uid);
+                        listContract.push(dataItem.contract_no)
+					    // Table.dataSource.remove(dataItem);
+					    // Table.dataSource.sync();
+					})
+                    $.ajax({
+                        url: ENV.vApi + 'telesalelist/delete_manay_by_acc',
+                        type: "POST",
+                        data: JSON.stringify(listContract),
+                        contentType: "application/json; charset=utf-8",
+                        dataType: 'JSON',
+                        success: (response) => {
+                            if(response.status == 1) {
+                                notification.show("Delete success!", "success");
+                                Table.dataSource.read();
+                            }
+                            else{
+                                notification.show("Delete fail", 'error')
+                            }
+                        },
+                        error: errorDataSource
+                    });
+                    console.log(listContract)
+				}
+		    });
+		} else {
+			swal({
+				title: "@No row is checked@!",
+			    text: "@Please check least one row to remove@",
+			    icon: "error"
+			});
+		}
+	}
 </script>

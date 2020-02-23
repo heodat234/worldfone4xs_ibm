@@ -48,6 +48,13 @@ Class Telesalelist extends WFF_Controller {
 	{
 		try {
 			$response = $this->crud->where_id($id)->getOne($this->collection);
+			if(!empty($response)) {
+				$dataLibrary = $this->mongo_db->where(array('contract_no' => $response['contract_no']))->getOne(set_sub_collection('Datalibrary'));
+				if(!empty($dataLibrary)) {
+					$response['dl_assign'] = (!empty($dataLibrary['assign'])) ? $dataLibrary['assign'] : $response['assign'];
+					$response['dl_assign_name'] = (!empty($dataLibrary['assign_name'])) ? $dataLibrary['assign_name'] : $response['dl_assign'];
+				}
+			}
 			echo json_encode($response);
 		} catch (Exception $e) {
 			echo json_encode(array("status" => 0, "message" => $e->getMessage()));

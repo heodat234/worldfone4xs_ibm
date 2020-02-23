@@ -184,13 +184,13 @@
                     <div class="row form-horizontal main-product-container">
                         <div class="col-sm-4">
                             <div class="form-group">
-                                <label class="control-label col-xs-4">Contract No. <span id="main-product-count"></span></label>
+                                <label class="control-label col-xs-4">Contract No. <span id="main-product-count_detail_customer"></span></label>
                                 <div class="col-xs-8">
-                                    <input data-role="dropdownlist" name="contractNo"
+                                    <input id="main-contract-no" data-role="dropdownlist" name="contractNo"
                                         data-value-primitive="true"
                                         data-text-field="account_number"
                                         data-value-field="account_number"                  
-                                        data-bind="value: mainProduct.account_number, source: mainProductOption, events: {change: mainProductChange}" 
+                                        data-bind="value: mainProduct.account_number, source: mainProductOption, events: {cascade: mainProductChange, dataBound: onDataBoundAccNo}" 
                                         style="width: 100%"/>
                                 </div>
                             </div>
@@ -333,13 +333,13 @@
                     <div class="row form-horizontal card-container">
                         <div class="col-sm-4">
                             <div class="form-group">
-                                <label class="control-label col-xs-4">Contract No. <span id="card-count"></span></label>
+                                <label class="control-label col-xs-4">Contract No. <span id="card-count_detail_customer"></span></label>
                                 <div class="col-xs-8">
                                     <input data-role="dropdownlist" name="contract_no"
                                         data-value-primitive="true"
                                         data-text-field="contract_no"
                                         data-value-field="contract_no"                  
-                                        data-bind="value: card.account_number, source: cardOption, events: {change: cardChange}" 
+                                        data-bind="value: card.account_number, source: cardOption, events: {cascade: cardChange, dataBound: onDataBoundContractCard}" 
                                         style="width: 100%"/>
                                 </div>
                             </div>
@@ -455,10 +455,10 @@
                     </div>
                 </div>
             </div>
-            <div style="padding: 0; overflow-x: hidden; overflow-y: hidden; min-height: 100%" id="payment_history-content"></div>
-            <div style="padding: 0; overflow-x: hidden; overflow-y: hidden; min-height: 100%" id="field_action-content"></div>
-            <div style="padding: 0; overflow-x: hidden; overflow-y: hidden; min-height: 100%" id="lawsuit-content"></div>
-            <div style="padding: 0; overflow-x: hidden; overflow-y: hidden; min-height: 100%" id="cross_sell-content"></div>
+            <div style="padding: 0; overflow-x: hidden; overflow-y: hidden; min-height: 100%" id="payment_history-content_detail_customer"></div>
+            <div style="padding: 0; overflow-x: hidden; overflow-y: hidden; min-height: 100%" id="field_action-content_detail_customer"></div>
+            <div style="padding: 0; overflow-x: hidden; overflow-y: hidden; min-height: 100%" id="lawsuit-content_detail_customer"></div>
+            <div style="padding: 0; overflow-x: hidden; overflow-y: hidden; min-height: 100%" id="cross_sell-content_detail_customer"></div>
         </div>
     </div>
 
@@ -893,7 +893,7 @@ var Detail = function() {
                 ]
             });
             var query = httpBuildQuery({filter: filter, omc: 1});
-            var $content = $("#payment_history-content");
+            var $content = $("#payment_history-content_detail_customer");
             if(!$content.find("iframe").length)
                 $content.append(`<iframe src='${ENV.baseUrl}manage/data/payment_history?${query}' style="width: 100%; height: 500px; border: 0"></iframe>`);
         },
@@ -905,7 +905,7 @@ var Detail = function() {
                 ]
             });
             var query = httpBuildQuery({filter: filter, omc: 1});
-            var $content = $("#field_action-content");
+            var $content = $("#field_action-content_detail_customer");
             if(!$content.find("iframe").length)
                 $content.append(`<iframe src='${ENV.baseUrl}manage/data/field_action?${query}' style="width: 100%; height: 500px; border: 0"></iframe>`);
         },
@@ -917,7 +917,7 @@ var Detail = function() {
                 ]
             });
             var query = httpBuildQuery({filter: filter, omc: 1});
-            var $content = $("#lawsuit-content");
+            var $content = $("#lawsuit-content_detail_customer");
             if(!$content.find("iframe").length)
                 $content.append(`<iframe src='${ENV.baseUrl}manage/data/lawsuit_history?${query}' style="width: 100%; height: 500px; border: 0"></iframe>`);
         },
@@ -929,7 +929,7 @@ var Detail = function() {
                 ]
             });
             var query = httpBuildQuery({filter: filter, omc: 1});
-            var $content = $("#cross_sell-content");
+            var $content = $("#cross_sell-content_detail_customer");
             if(!$content.find("iframe").length)
                 $content.append(`<iframe src='${ENV.baseUrl}manage/data/cross_sell?${query}' style="width: 100%; height: 500px; border: 0"></iframe>`);
         },
@@ -979,7 +979,26 @@ var Detail = function() {
             }
             
         },
+        onDataBoundAccNo: function(e) {
+            var mainContractNo = $("#main-contract-no").data("kendoDropDownList");
+            if(typeof mainContractNo != 'undefined'){
+                var mainContractNoDB = mainContractNo.dataSource.data();
+                if(mainContractNoDB.length > 0) {
+                    mainContractNo.select(0);
+                }
+            }
+        },
 
+        onDataBoundContractCard: function(e) {
+            var cardContractNo = $("#card-contract-no").data("kendoDropDownList");
+            if(typeof cardContractNo != 'undefined'){
+                var contractNoDB = cardContractNo.dataSource.data();
+                if(contractNoDB.length > 0) {
+                    cardContractNo.select(0);
+                }
+            }
+        },
+        
         removeRef: function(e) {
             swal({
                 title: `${NOTIFICATION.checkSure}?`,
@@ -1115,7 +1134,7 @@ var Detail = function() {
 
             this.model.mainProductOption = new kendo.data.DataSource({
                 serverFiltering: true,
-                filter: {field: "CUS_ID", operator: "eq", value: dataItemFull.LIC_NO},
+                filter: {field: "LIC_NO", operator: "eq", value: dataItemFull.LIC_NO},
                 transport: {
                     read: ENV.restApi + "main_product",
                     parameterMap: parameterMap
@@ -1124,7 +1143,7 @@ var Detail = function() {
                     data: "data",
                     total: "total",
                     parse: function(res) {
-                        $("#main-product-count").html('<span class="text-danger">(' + res.total + ')</span>');
+                        $("#main-product-count_detail_customer").html('<span class="text-danger">(' + res.total + ')</span>');
                         if(!res.total) $(".main-product-container").addClass("hidden");
                         return res;
                     }
@@ -1142,7 +1161,7 @@ var Detail = function() {
                     data: "data",
                     total: "total",
                     parse: function(res) {
-                        $("#card-count").html('<span class="text-danger">(' + res.total + ')</span>');
+                        $("#card-count_detail_customer").html('<span class="text-danger">(' + res.total + ')</span>');
                         if(!res.total) $(".card-container").addClass("hidden");
                         return res;
                     }

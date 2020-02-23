@@ -31,6 +31,7 @@ Class Group extends WFF_Controller {
 		$data = json_decode(file_get_contents('php://input'), TRUE);
 		$data["createdBy"]	=	$this->session->userdata("extension");
 		$result = $this->crud->create($this->collection, $data);
+		$this->createGroupMappingCampaign($result);
 		echo json_encode(array("status" => $result ? 1 : 0, "data" => [$result]));
 	}
 
@@ -44,7 +45,20 @@ Class Group extends WFF_Controller {
 
 	function delete($id)
 	{
+		$this->deleteGroupMappingCampaign($id);
 		$result = $this->crud->where_id($id)->delete($this->collection, TRUE);
 		echo json_encode(array("status" => $result ? 1 : 0, "data" => []));
+	}
+
+	function createGroupMappingCampaign($data){
+		$param['name'] = $data['name'];
+		$param['debt_type'] = $data['debt_type'];
+		$param['debt_group'] = $data['debt_group'];
+		$this->crud->create('LO_Group_mapping_campaign', $param);
+	}
+
+	function deleteGroupMappingCampaign($id){
+		$group = $this->crud->where_id($id)->getOne($this->collection);
+		$this->mongo_db->where('name', $group['name'])->delete('LO_Group_mapping_campaign');
 	}
 }

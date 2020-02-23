@@ -1,34 +1,24 @@
 <?php
-$inputFileName = "/data/upload_file/20200213/ZACCF.txt";
 
-$delimiter = ";";
-$length = 0;
-$startColumn = 0;
-$endColumn = 9;
-$count = 0;
+shell_exec('curl "http://127.0.0.1:7777/wfpbx/pbxevents?secret=a357e8e5fbce92dd44269146416b0b4d&callstatus=Dialing&calluuid=1581674134.10&direction=outbound&callernumber=999&destinationnumber=0986322412&agentname=ADMIN+TEST&starttime=20200214T165548&dnis=0862858729&calltype=Outbound_non-ACD&version=3"');
 
-$file = fopen($inputFileName, "r");
+// function Fibonacci($number)
+// {
 
-$collection = "LO_ZACCF";
+//     if ($number == 0) {
+//         return 0;
+//     } else if ($number == 1) {
+//         return 1;
+//     } else {
+//         return (Fibonacci($number - 1) +
+//             Fibonacci($number - 2));
+//     }
 
-$key_field = "account_number";
-$key_field_2 = "CUS_ID";
+// }
 
-$starttime = microtime(true);
+// $number = 100;
+// $starttime = microtime(true);
+// echo Fibonacci($number);
 
-// Import
-echo "START" . PHP_EOL;
-while (!feof($file)) {
-    $temp = fgetcsv($file, $length, $delimiter);
-    ++$count;
-    echo "NO.{$count}\t";
-    echo PHP_EOL;
-}
-
-fclose($file);
-
-$endtime = microtime(true);
-echo PHP_EOL . "TIME EXECUTE: " . ($endtime - $starttime) . " Seconds";
-echo PHP_EOL . "RAM USAGE: " . memory_get_usage() . " Bytes";
-echo PHP_EOL . "TOTAL: " . $count . " Records";
-echo PHP_EOL . "END" . PHP_EOL;
+// $endtime = microtime(true);
+// echo PHP_EOL . ($endtime - $starttime) . PHP_EOL;

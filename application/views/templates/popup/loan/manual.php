@@ -32,7 +32,7 @@
                             <i class="fa fa-phone-square"></i><b> @CDR@</b>
                         </li>
                         <div class="pull-right">
-                            <span data-bind="text: phone" style="font-size: 18px; vertical-align: -2px" class="text-primary"></span>
+                            <span id="phone_showed" data-bind="text: phone" style="font-size: 18px; vertical-align: -2px" class="text-primary"></span>
                             <a data-role="button" data-bind="click: playRecording, visible: _dataCall.record_file_name" title="Recording" style="vertical-align: 2px">
                                 <i class="fa fa-play"></i>
                             </a>
@@ -316,6 +316,12 @@
                                             <label class="control-label col-xs-4">@Staff in Charge@</label>
                                             <div class="col-xs-8">
                                                 <p class="form-control-static" data-bind="text: mainProduct.staff_in_charge"></p>
+                                            </div>
+                                        </div>
+                                        <div class="form-group" data-bind="visible: collapseMain">
+                                            <label class="control-label col-xs-4">@License plate@</label>
+                                            <div class="col-xs-8">
+                                                <p class="form-control-static" data-bind="text: mainProduct.biensoxe"></p>
                                             </div>
                                         </div>
                                     </div>
@@ -810,6 +816,8 @@ window.popupObservable.assign({
     callThisPhone: function(e) {
         let diallistDetailId = this._dataCall[this._fieldId];
         let phone = $(e.currentTarget).data("phone");
+        // $('#phone_showed').text(phone);
+        this.set('phone', phone);
         startPopup({dialid:diallistDetailId,customernumber:phone,dialtype:"manual",direction:"outbound"})
         makeCall(phone, diallistDetailId, "manual");
     },
@@ -850,7 +858,8 @@ window.popupObservable.assign({
                     phone: this.get("phone"),
                     account_number: this.get("call.debt_account"),
                     id: data.id,
-                    collection: "Diallist_detail"
+                    collection: "Diallist_detail",
+                    calluuid: (window.popupObservable.dataCall.calluuid != undefined) ? window.popupObservable.dataCall.calluuid : 'repopup'
                 });
                 $.ajax({
                     url: ENV.restApi + "follow_up",
@@ -990,7 +999,7 @@ window.popupObservable.assign({
         var query = httpBuildQuery({filter: filter, omc: 1});
         var $content = $("#cdr-content");
         if(!$content.find("iframe").length)
-            $content.append(`<iframe src='${ENV.baseUrl}manage/cdr?${query}' style="width: 100%; height: 500px; border: 0"></iframe>`);
+            $content.append(`<iframe src='${ENV.baseUrl}manage/cdr?${query}' style="width: 100%; height: 1100px; border: 0"></iframe>`);
     },
 
     openNotes: function(e) {
@@ -1006,12 +1015,17 @@ window.popupObservable.assign({
             $content.append(`<iframe src='${ENV.baseUrl}manage/data/note?${query}' style="width: 100%; height: 500px; border: 0"></iframe>`);
     },
 
-    openPaymentHistory: function(e) { 
+    openPaymentHistory: function(e) {
+        var value_arr = [this.item.account_number.substring(2)];
+
+        if(this.card.contract_no != undefined){
+            value_arr.push(String(this.card.contract_no));
+        }
         var filter = JSON.stringify({
             logic: "or",
             filters: [
                 {field: "account_number", operator: "eq", value: this.item.account_number},
-                {field: "account_number", operator: "eq", value: this.item.account_number.substring(2)},
+                {field: "account_number", operator: "in", value: value_arr },
             ]
         });
         var query = httpBuildQuery({filter: filter, omc: 1});

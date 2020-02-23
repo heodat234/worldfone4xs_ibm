@@ -2,6 +2,29 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 Class Widget extends CI_Controller {
+
+    private $cache_enable = TRUE;
+    private $cache_minutes = 1;
+
+    function __construct() 
+    {
+        parent::__construct();
+        $this->load->library("session");
+        if($this->cache_enable) 
+        {
+            $type = getCT();
+            if($type) 
+            {
+                $path = APPPATH . "cache/{$type}/";
+                if (!@file_exists($path)) 
+                { 
+                    @mkdir($path, 0755);
+                }
+                $this->config->set_item('cache_path', $path);
+            }
+            $this->output->cache($this->cache_minutes);
+        }
+    }
 	
 	function headerbar()
 	{
@@ -26,7 +49,6 @@ Class Widget extends CI_Controller {
 
 	private function _widgets($type)
     {
-        $this->load->library("session");
         $sub            = set_sub_collection();
         $time_cache     = $this->config->item("wff_time_cache");
         // Cache file

@@ -47,7 +47,7 @@ try:
     total = 0
     complete = 0
     # today = date.today()
-    today = datetime.strptime('13/02/2020', "%d/%m/%Y").date()
+    # today = datetime.strptime('14/02/2020', "%d/%m/%Y").date()
     yesterday = today - timedelta(days=1)
     day = today.day
     month = today.month
@@ -62,7 +62,7 @@ try:
         mongodbresult = Mongodb(logDbName, wff_env)
     else:
         mongodbresult = Mongodb(logDbName, wff_env)
-    
+
     ftpLocalUrl = common.getDownloadFolder() + fileName
 
     try:
@@ -89,16 +89,16 @@ try:
             sys.exit()
 
         importLogInfo = {
-            'collection'    : collection, 
+            'collection'    : collection,
             'begin_import'  : time.time(),
             'file_name'     : fileName,
-            'file_path'     : ftpLocalUrl, 
+            'file_path'     : ftpLocalUrl,
             'source'        : 'ftp',
             'status'        : 2,
             'command'       : '/usr/local/bin/python3.6 ' + base_url + "cronjob/python/Loan/importReportInputPaymentOfCard.py > /dev/null &",
             'created_by'    : 'system'
         }
-        importLogId = mongodb.insert(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), insert_data=importLogInfo) 
+        importLogId = mongodb.insert(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), insert_data=importLogInfo)
 
     models = _mongodb.get(MONGO_COLLECTION='Model', WHERE={'collection': collection}, SORT=[('index', 1)], SELECT=['index', 'collection', 'field', 'type', 'sub_type'], TAKE=40)
 
@@ -122,7 +122,7 @@ try:
             modelPosition1.append('')
 
     filenameExtension = fileName.split('.')
-    
+
     mongodb.remove_document(MONGO_COLLECTION=collection)
 
     if filenameExtension[1] in ['csv', 'xlsx']:
@@ -185,7 +185,7 @@ try:
                         insertData.append(temp)
                         result = True
                         complete += 1
-    
+
     if(len(errorData) > 0):
         mongodbresult.remove_document(MONGO_COLLECTION=common.getSubUser(subUserType, ('gl_' + str(year) + str(month) + str(day))))
         mongodbresult.batch_insert(common.getSubUser(subUserType, ('gl_' + str(year) + str(month) + str(day))), errorData)

@@ -8,8 +8,14 @@
 <ul class="breadcrumb breadcrumb-top">
     <li>@Home@</li>
     <li class="pull-right none-breakcrumb">
-        <div class="input-group-btn column-widget">
-            <a role="button" class="btn btn-sm dropdown-toggle" data-toggle="dropdown" onclick="openHomeScheduler(this)"><i class="gi gi-calendar"></i> <b>@Calendar@</b></a>
+        <div class="input-group-btn">
+            <a role="button" class="btn btn-sm btn-danger btn-alt dropdown-toggle" data-toggle="dropdown" onclick="openHomeNews(this)"><i class="fa fa-file-text"></i> <b>@News@</b></a>
+            <div class="dropdown-menu dropdown-menu-right" style="width: 80vw; max-height: 80vh; overflow-y: scroll;">
+                <div id="news-container"></div>
+            </div>
+        </div>
+        <div class="input-group-btn">
+            <a role="button" class="btn btn-sm btn-info btn-alt dropdown-toggle" data-toggle="dropdown" onclick="openHomeScheduler(this)"><i class="gi gi-calendar"></i> <b>@Calendar@</b></a>
             <div class="dropdown-menu dropdown-menu-right" style="width: 80vw; max-height: 80vh; overflow-y: scroll;">
                 <div style="width: 100%;">
                     <div class="onoffswitch" id="all-scheduler-switch">
@@ -271,6 +277,11 @@
         $("#myonoffswitch").on("change", function(e) {
             $scheduler.data("kendoScheduler").dataSource.filter(e.currentTarget.checked ? {} : {field: "ownerId", operator: "eq", value: ENV.extension});
         })
+    }
+
+    function openHomeNews(ele) {
+        $(ele).toggleClass("keepopen");
+        $("#news-container").html(`<iframe src="${ENV.baseUrl + 'tool/post?omc=1'}" style="width: 100%; min-height: 75vh; border: 0"></iframe>`)
     }
 </script>
 

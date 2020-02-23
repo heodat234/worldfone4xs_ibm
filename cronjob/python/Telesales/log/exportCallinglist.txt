@@ -38,3 +38,11 @@ Traceback (most recent call last):
   File "/var/www/html/worldfone4xs_ibm/cronjob/python/Telesales/update_app_status_callinglist.py", line 41, in <module>
     updateLastCallCallinglist()
 NameError: name 'updateLastCallCallinglist' is not defined
+Traceback (most recent call last):
+  File "/var/www/html/worldfone4xs_ibm/cronjob/python/Telesales/saveTelesaleList.py", line 46, in <module>
+    model = list(_mongodb.get(MONGO_COLLECTION='Model', WHERE={'collection' : collection, 'sub_type': {'$ne': None}}), SORT=[('index', 1)])
+TypeError: list() takes at most 1 argument (2 given)
+Traceback (most recent call last):
+  File "/var/www/html/worldfone4xs_ibm/cronjob/python/Telesales/saveTelesaleList.py", line 46, in <module>
+    model = list(_mongodb.get(MONGO_COLLECTION='Model', WHERE={'collection' : collection, 'sub_type': {'$ne': None}}), SORT=[('index', 1)])
+TypeError: list() takes at most 1 argument (2 given)

@@ -44,7 +44,6 @@ Class WFF_Controller extends CI_Controller
 
     public function _build_template($only_main_content = NULL) {
         $data = $this->data;
-
         if($only_main_content === NULL) {
             $only_main_content = (bool) $this->input->get("omc");
         }
@@ -64,9 +63,11 @@ Class WFF_Controller extends CI_Controller
         $data['page_head'] = $this->load->view('themes/proui/page_head', $data, TRUE);
         $data['page_footer'] = $this->load->view('themes/proui/page_footer', $data, TRUE);
 
+
         $data['js'] = $data['css'] = array();
         // JQUERY
         $data['js_nodefer'][] = KENDOUI_PATH . "js/jquery.min.js";
+
         /*
          * PROUI CSS -- from template_start
          * bootstrap.min.css -- Bootstrap is included in its original form, unaltered
@@ -98,7 +99,7 @@ Class WFF_Controller extends CI_Controller
         /* 
          * KENDOUI JS
          */
-        $kendoui_js = array('kendo.all.min.js');
+        $kendoui_js = array('kendo.all.min.js', 'cultures/kendo.culture.vi-VN.min.js');
         foreach($kendoui_js as $value) {
             $data['js'][] = KENDOUI_PATH."js/{$value}";
         }
@@ -143,9 +144,11 @@ Class WFF_Controller extends CI_Controller
         /*
          * Use Template to render default
          */
+
         $this->output->set_template('proui');
 
         $this->output->data = $data;
+        // print_r($this->output->data);exit;
     }
 
     protected function check_page_module() {

@@ -45,7 +45,7 @@ try:
     insertData = []
     errorData = []
     today = date.today()
-    today = datetime.strptime('03/02/2020', "%d/%m/%Y").date() 
+    # today = datetime.strptime('13/02/2020', "%d/%m/%Y").date()
     yesterday = today - timedelta(days=1)
     day = today.day
     month = today.month
@@ -61,9 +61,9 @@ try:
         mongodbresult = Mongodb(logDbName, wff_env)
     else:
         mongodbresult = Mongodb(logDbName, wff_env)
-    
+
     ftpLocalUrl = common.getDownloadFolder() + fileName
-    
+
     try:
         sys.argv[1]
         importLogId = str(sys.argv[1])
@@ -86,18 +86,18 @@ try:
             }
             mongodb.insert(MONGO_COLLECTION=common.getSubUser(subUserType, 'Notification'), insert_data=notification)
             sys.exit()
-        
+
         importLogInfo = {
-            'collection'    : collection, 
+            'collection'    : collection,
             'begin_import'  : time.time(),
             'file_name'     : fileName,
-            'file_path'     : ftpLocalUrl, 
+            'file_path'     : ftpLocalUrl,
             'source'        : 'ftp',
             'status'        : 2,
             'command'       : '/usr/local/bin/python3.6 ' + base_url + "cronjob/python/Loan/importListOfAccount.py > /dev/null &",
             'created_by'    : 'system'
         }
-        importLogId = mongodb.insert(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), insert_data=importLogInfo) 
+        importLogId = mongodb.insert(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), insert_data=importLogInfo)
 
     models = _mongodb.get(MONGO_COLLECTION='Model', WHERE={'collection': collection, 'sub_type': {'$ne': None}}, SORT=[('index', 1)], SELECT=['index', 'collection', 'field', 'type', 'sub_type'], TAKE=1000)
     for model in models:
@@ -158,7 +158,7 @@ try:
                             result = True
                             complete += 1
 
-                    
+
     if(len(errorData) > 0):
         mongodbresult.remove_document(MONGO_COLLECTION=common.getSubUser(subUserType, ('LIST_OF_ACCOUNT_IN_COLLECTION_' + str(year) + str(month) + str(day))))
         mongodbresult.batch_insert(common.getSubUser(subUserType, ('LIST_OF_ACCOUNT_IN_COLLECTION_' + str(year) + str(month) + str(day))), errorData)

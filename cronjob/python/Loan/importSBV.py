@@ -31,7 +31,7 @@ try:
     log = open(base_url + "cronjob/python/Loan/log/importSBV.txt","a")
     now = datetime.now()
     subUserType = 'LO'
-    collection = common.getSubUser(subUserType, 'SBV')
+    collection = common.getSubUser(subUserType, 'SBV_14012020')
 
     modelColumns = []
     modelConverters = {}
@@ -46,7 +46,7 @@ try:
     total = 0
     complete = 0
     # today = date.today()
-    today = datetime.strptime('03/02/2020', "%d/%m/%Y").date()
+    today = datetime.strptime('14/01/2020', "%d/%m/%Y").date()
     yesterday = today - timedelta(days=1)
     day = today.day
     month = today.month
@@ -61,7 +61,7 @@ try:
         mongodbresult = Mongodb(logDbName, wff_env)
     else:
         mongodbresult = Mongodb(logDbName, wff_env)
-    
+
     ftpLocalUrl = common.getDownloadFolder() + fileName
 
     try:
@@ -88,10 +88,10 @@ try:
             sys.exit()
 
         importLogInfo = {
-            'collection'    : collection, 
+            'collection'    : collection,
             'begin_import'  : time.time(),
             'file_name'     : fileName,
-            'file_path'     : ftpLocalUrl, 
+            'file_path'     : ftpLocalUrl,
             'source'        : 'ftp',
             'status'        : 2,
             'command'       : '/usr/local/bin/python3.6 ' + base_url + "cronjob/python/Loan/importSBV.py > /dev/null &",
@@ -99,8 +99,8 @@ try:
         }
         importLogId = mongodb.insert(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), insert_data=importLogInfo)
 
-    models = _mongodb.get(MONGO_COLLECTION='Model', WHERE={'collection': collection}, SORT=[('index', 1)], SELECT=['index', 'collection', 'field', 'type', 'sub_type'], TAKE=1000)
-    
+    models = _mongodb.get(MONGO_COLLECTION='Model', WHERE={'collection': common.getSubUser(subUserType, 'SBV')}, SORT=[('index', 1)], SELECT=['index', 'collection', 'field', 'type', 'sub_type'], TAKE=1000)
+
     for model in models:
         modelColumns.append(model['field'])
         modelConverters[model['field']] = model['type']
@@ -120,7 +120,7 @@ try:
             else:
                 modelPosition[model['field']] = ''
                 modelPosition1.append('')
-            
+
     filenameExtension = fileName.split('.')
 
     mongodb.remove_document(MONGO_COLLECTION=collection)

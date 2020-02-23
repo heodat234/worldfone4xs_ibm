@@ -61,3 +61,760 @@
 13/02/2020, 12:13:18: Start Import
 13/02/2020, 12:13:26: Start Import
 13/02/2020, 12:19:11: Start Import
+13/02/2020, 14:35:17: Start Import
+13/02/2020, 14:36:13: Start Import
+13/02/2020, 14:36:44: Start Import
+13/02/2020, 14:36:49: End Log
+13/02/2020, 14:37:41: Start Import
+13/02/2020, 14:37:47: End Log
+13/02/2020, 14:39:16: Start Import
+13/02/2020, 14:39:21: End Log
+13/02/2020, 14:39:44: Start Import
+13/02/2020, 14:39:49: End Log
+13/02/2020, 14:41:36: Start Import
+13/02/2020, 14:41:36: An object representing an expression must have exactly one field: { $or: [ { $eq: [ "$Loan_Group", "01" ] }, { $eq: [ "$Loan_Group", "A" ] } ], $PRODGRP_ID: "101" }
+13/02/2020, 14:44:44: Start Import
+13/02/2020, 14:44:44: Unrecognized expression '$PRODGRP_ID'
+13/02/2020, 15:15:04: Start Import
+13/02/2020, 15:15:09: End Log
+13/02/2020, 15:15:42: Start Import
+13/02/2020, 15:15:42: The field 'PRODGRP_ID' must be an accumulator object
+13/02/2020, 15:16:47: Start Import
+13/02/2020, 15:16:52: End Log
+13/02/2020, 15:17:49: Start Import
+13/02/2020, 15:17:54: End Log
+13/02/2020, 15:25:43: Start Import
+13/02/2020, 15:25:48: End Log
+13/02/2020, 15:34:02: Start Import
+13/02/2020, 15:34:02: unsupported operand type(s) for /: 'str' and 'str'
+13/02/2020, 15:39:07: Start Import
+13/02/2020, 15:39:07: The $divide accumulator is a unary operator
+13/02/2020, 15:41:05: Start Import
+13/02/2020, 15:41:05: The $divide accumulator is a unary operator
+13/02/2020, 15:49:57: Start Import
+13/02/2020, 15:49:57: The $divide accumulator is a unary operator
+13/02/2020, 15:50:30: Start Import
+13/02/2020, 15:50:30: The $divide accumulator is a unary operator
+13/02/2020, 15:55:45: Start Import
+13/02/2020, 15:55:56: End Log
+13/02/2020, 15:57:02: Start Import
+13/02/2020, 15:57:08: End Log
+13/02/2020, 15:58:15: Start Import
+13/02/2020, 15:58:20: End Log
+13/02/2020, 15:59:48: Start Import
+13/02/2020, 15:59:54: End Log
+13/02/2020, 16:12:20: Start Import
+13/02/2020, 16:12:20: The field name '$product_value['code']' cannot be an operator name
+13/02/2020, 16:12:26: Start Import
+13/02/2020, 16:12:31: End Log
+13/02/2020, 16:30:35: Start Import
+13/02/2020, 16:30:59: End Log
+13/02/2020, 16:36:11: Start Import
+13/02/2020, 16:36:30: End Log
+13/02/2020, 16:36:58: Start Import
+13/02/2020, 16:37:17: End Log
+13/02/2020, 16:42:57: Start Import
+13/02/2020, 16:42:57: name 'group' is not defined
+13/02/2020, 16:43:27: Start Import
+13/02/2020, 16:43:33: End Log
+13/02/2020, 16:46:33: Start Import
+13/02/2020, 16:46:38: End Log
+13/02/2020, 16:47:25: Start Import
+13/02/2020, 16:47:30: End Log
+13/02/2020, 16:47:32: Start Import
+13/02/2020, 16:47:37: End Log
+13/02/2020, 16:47:52: Start Import
+13/02/2020, 16:47:52: list indices must be integers or slices, not str
+13/02/2020, 16:48:40: Start Import
+13/02/2020, 16:48:40: list indices must be integers or slices, not str
+13/02/2020, 16:49:48: Start Import
+13/02/2020, 16:49:48: list indices must be integers or slices, not str
+13/02/2020, 16:52:40: Start Import
+13/02/2020, 16:52:46: End Log
+13/02/2020, 16:56:52: Start Import
+13/02/2020, 16:56:52: End Log
+13/02/2020, 16:57:01: Start Import
+13/02/2020, 16:57:01: End Log
+13/02/2020, 16:57:34: Start Import
+13/02/2020, 16:57:39: End Log
+13/02/2020, 17:02:53: Start Import
+13/02/2020, 17:02:58: End Log
+13/02/2020, 17:03:43: Start Import
+13/02/2020, 17:03:49: End Log
+13/02/2020, 17:04:46: Start Import
+13/02/2020, 17:04:52: End Log
+13/02/2020, 17:14:47: Start Import
+13/02/2020, 17:15:35: End Log
+13/02/2020, 17:16:23: Start Import
+13/02/2020, 17:17:10: End Log
+14/02/2020, 09:28:26: Start Import
+14/02/2020, 09:28:26: must be str, not dict
+14/02/2020, 09:28:33: Start Import
+14/02/2020, 09:29:15: End Log
+14/02/2020, 09:41:06: Start Import
+14/02/2020, 09:41:06: The field name 'gr1.101' cannot contain '.'
+14/02/2020, 09:41:39: Start Import
+14/02/2020, 09:41:44: End Log
+14/02/2020, 09:47:59: Start Import
+14/02/2020, 09:48:04: End Log
+14/02/2020, 10:35:13: Start Import
+14/02/2020, 10:35:22: End Log
+14/02/2020, 10:47:48: Start Import
+14/02/2020, 10:47:48: a group specification must include an _id
+14/02/2020, 10:47:58: Start Import
+14/02/2020, 10:48:44: End Log
+14/02/2020, 10:49:36: Start Import
+14/02/2020, 10:49:36: The field 'group' must be an accumulator object
+14/02/2020, 10:49:50: Start Import
+14/02/2020, 10:49:50: The field 'group' must be an accumulator object
+14/02/2020, 10:52:20: Start Import
+14/02/2020, 10:53:03: End Log
+14/02/2020, 10:53:36: Start Import
+14/02/2020, 10:54:20: End Log
+14/02/2020, 11:08:21: Start Import
+14/02/2020, 11:08:21: list indices must be integers or slices, not str
+14/02/2020, 11:09:17: Start Import
+14/02/2020, 11:09:17: list indices must be integers or slices, not str
+14/02/2020, 11:09:46: Start Import
+14/02/2020, 11:10:33: End Log
+14/02/2020, 11:12:37: Start Import
+14/02/2020, 11:12:37: dictionary update sequence element #0 has length 4; 2 is required
+14/02/2020, 11:13:07: Start Import
+14/02/2020, 11:13:07: 'list' object has no attribute 'update'
+14/02/2020, 11:13:24: Start Import
+14/02/2020, 11:13:24: 'list' object has no attribute 'update'
+14/02/2020, 11:15:51: Start Import
+14/02/2020, 11:16:28: Start Import
+14/02/2020, 11:17:18: End Log
+14/02/2020, 11:18:24: Start Import
+14/02/2020, 11:18:50: Start Import
+14/02/2020, 11:18:50: 'list' object has no attribute 'update'
+14/02/2020, 11:19:34: Start Import
+14/02/2020, 11:19:34: 'list' object has no attribute 'update'
+14/02/2020, 11:19:50: Start Import
+14/02/2020, 11:20:34: End Log
+14/02/2020, 11:20:47: Start Import
+14/02/2020, 11:20:47: name 'temp_group1' is not defined
+14/02/2020, 11:21:24: Start Import
+14/02/2020, 11:21:24: name 'temp_group1' is not defined
+14/02/2020, 11:21:54: Start Import
+14/02/2020, 11:26:11: Start Import
+14/02/2020, 11:26:57: End Log
+14/02/2020, 11:27:51: Start Import
+14/02/2020, 11:28:36: End Log
+14/02/2020, 11:33:33: Start Import
+14/02/2020, 11:33:33: 'int' object is not iterable
+14/02/2020, 11:34:08: Start Import
+14/02/2020, 11:34:08: 'int' object is not iterable
+14/02/2020, 11:34:53: Start Import
+14/02/2020, 11:35:16: End Log
+14/02/2020, 11:36:10: Start Import
+14/02/2020, 11:36:33: End Log
+14/02/2020, 11:37:59: Start Import
+14/02/2020, 11:38:21: End Log
+14/02/2020, 11:40:04: Start Import
+14/02/2020, 11:40:24: End Log
+14/02/2020, 11:43:36: Start Import
+14/02/2020, 11:43:57: End Log
+14/02/2020, 11:45:27: Start Import
+14/02/2020, 11:45:48: End Log
+14/02/2020, 11:47:48: Start Import
+14/02/2020, 11:48:37: End Log
+14/02/2020, 11:49:10: Start Import
+14/02/2020, 11:50:00: End Log
+14/02/2020, 11:51:00: Start Import
+14/02/2020, 11:51:00: 'int' object is not iterable
+14/02/2020, 13:08:57: Start Import
+14/02/2020, 13:09:48: End Log
+14/02/2020, 13:16:40: Start Import
+14/02/2020, 13:16:40: '101'
+14/02/2020, 13:17:15: Start Import
+14/02/2020, 13:17:15: '101'
+14/02/2020, 13:21:01: Start Import
+14/02/2020, 13:21:01: '101'
+14/02/2020, 13:22:38: Start Import
+14/02/2020, 13:22:38: '101'
+14/02/2020, 13:24:57: Start Import
+14/02/2020, 13:24:57: '101'
+14/02/2020, 13:32:39: Start Import
+14/02/2020, 13:32:39: '101'
+14/02/2020, 13:36:03: Start Import
+14/02/2020, 13:36:03: '101'
+14/02/2020, 13:37:25: Start Import
+14/02/2020, 13:37:25: '101'
+14/02/2020, 13:38:19: Start Import
+14/02/2020, 13:38:19: '101'
+14/02/2020, 13:39:05: Start Import
+14/02/2020, 13:40:00: Start Import
+14/02/2020, 13:40:00: '101'
+14/02/2020, 13:41:01: Start Import
+14/02/2020, 13:41:01: '101'
+14/02/2020, 13:43:15: Start Import
+14/02/2020, 13:43:49: Start Import
+14/02/2020, 13:43:49: '101'
+14/02/2020, 14:02:01: Start Import
+14/02/2020, 14:02:01: 'NoneType' object is not subscriptable
+14/02/2020, 14:07:16: Start Import
+14/02/2020, 14:07:16: 'NoneType' object is not subscriptable
+14/02/2020, 14:13:14: Start Import
+14/02/2020, 14:13:14: 'NoneType' object is not subscriptable
+14/02/2020, 14:20:54: Start Import
+14/02/2020, 14:20:54: 'NoneType' object is not subscriptable
+14/02/2020, 14:29:21: Start Import
+14/02/2020, 14:29:58: Start Import
+14/02/2020, 14:31:22: Start Import
+14/02/2020, 14:31:22: 'NoneType' object is not subscriptable
+14/02/2020, 14:37:17: Start Import
+14/02/2020, 14:49:01: Start Import
+14/02/2020, 14:50:09: End Log
+14/02/2020, 14:51:40: Start Import
+14/02/2020, 14:52:40: End Log
+14/02/2020, 15:18:58: Start Import
+14/02/2020, 15:21:22: End Log
+14/02/2020, 15:23:29: Start Import
+14/02/2020, 15:23:29: '101'
+14/02/2020, 15:24:17: Start Import
+14/02/2020, 15:24:17: '101'
+14/02/2020, 15:30:58: Start Import
+14/02/2020, 15:30:58: '101'
+14/02/2020, 15:31:36: Start Import
+14/02/2020, 15:32:50: Start Import
+14/02/2020, 15:33:40: End Log
+14/02/2020, 15:33:56: Start Import
+14/02/2020, 15:34:49: End Log
+14/02/2020, 15:34:51: Start Import
+14/02/2020, 15:35:27: Start Import
+14/02/2020, 15:36:20: End Log
+14/02/2020, 15:36:24: Start Import
+14/02/2020, 15:36:24: '101'
+14/02/2020, 15:37:02: Start Import
+14/02/2020, 15:37:54: End Log
+14/02/2020, 15:38:12: Start Import
+14/02/2020, 15:39:05: End Log
+14/02/2020, 15:39:30: Start Import
+14/02/2020, 15:40:24: End Log
+14/02/2020, 15:42:30: Start Import
+14/02/2020, 15:43:22: End Log
+14/02/2020, 15:44:52: Start Import
+14/02/2020, 15:45:52: End Log
+14/02/2020, 16:00:37: Start Import
+14/02/2020, 16:02:57: End Log
+14/02/2020, 16:14:00: Start Import
+14/02/2020, 16:16:40: End Log
+14/02/2020, 16:22:16: Start Import
+14/02/2020, 16:25:44: End Log
+14/02/2020, 16:26:54: Start Import
+14/02/2020, 16:27:45: End Log
+14/02/2020, 16:28:42: Start Import
+14/02/2020, 16:29:28: End Log
+14/02/2020, 16:45:05: Start Import
+14/02/2020, 16:45:05: list index out of range
+14/02/2020, 16:45:55: Start Import
+14/02/2020, 16:45:55: list index out of range
+14/02/2020, 16:46:44: Start Import
+14/02/2020, 16:52:12: Start Import
+14/02/2020, 16:53:34: Start Import
+14/02/2020, 16:54:45: Start Import
+14/02/2020, 16:55:35: End Log
+14/02/2020, 16:57:27: Start Import
+14/02/2020, 16:57:27: '101'
+14/02/2020, 16:58:06: Start Import
+14/02/2020, 16:58:06: '101'
+14/02/2020, 17:01:25: Start Import
+14/02/2020, 17:02:15: End Log
+14/02/2020, 17:25:29: Start Import
+14/02/2020, 17:26:10: Start Import
+14/02/2020, 17:26:56: End Log
+14/02/2020, 17:27:47: Start Import
+14/02/2020, 17:28:35: End Log
+14/02/2020, 17:29:44: Start Import
+14/02/2020, 17:30:29: End Log
+14/02/2020, 17:34:52: Start Import
+14/02/2020, 17:34:52: '301'
+14/02/2020, 17:36:52: Start Import
+14/02/2020, 17:36:52: '301'
+14/02/2020, 17:46:34: Start Import
+14/02/2020, 17:46:34: name 'insertData1' is not defined
+14/02/2020, 17:47:06: Start Import
+14/02/2020, 17:47:06: name 'temp1' is not defined
+14/02/2020, 17:47:29: Start Import
+14/02/2020, 17:47:29: '301'
+14/02/2020, 17:48:42: Start Import
+14/02/2020, 17:48:42: name 'otal_report' is not defined
+14/02/2020, 17:49:32: Start Import
+14/02/2020, 17:49:32: documents must be a non-empty list
+14/02/2020, 19:00:24: Start Import
+14/02/2020, 19:00:24: list indices must be integers or slices, not str
+14/02/2020, 19:01:11: Start Import
+14/02/2020, 19:01:11: list indices must be integers or slices, not str
+14/02/2020, 19:23:51: Start Import
+14/02/2020, 19:25:24: Start Import
+14/02/2020, 19:26:18: Start Import
+14/02/2020, 19:27:03: Start Import
+14/02/2020, 19:27:46: End Log
+14/02/2020, 19:28:17: Start Import
+14/02/2020, 19:29:08: Start Import
+14/02/2020, 19:29:49: Start Import
+14/02/2020, 19:30:33: End Log
+14/02/2020, 19:31:21: Start Import
+14/02/2020, 19:32:23: Start Import
+14/02/2020, 19:33:06: End Log
+14/02/2020, 19:33:15: Start Import
+14/02/2020, 19:34:00: End Log
+14/02/2020, 19:34:30: Start Import
+14/02/2020, 19:34:30: unhashable type: 'dict'
+14/02/2020, 19:35:36: Start Import
+14/02/2020, 19:35:36: argument of type 'NoneType' is not iterable
+14/02/2020, 19:36:04: Start Import
+14/02/2020, 19:36:52: End Log
+15/02/2020, 10:25:24: Start Import
+15/02/2020, 10:26:05: Start Import
+15/02/2020, 10:26:52: End Log
+15/02/2020, 10:27:05: Start Import
+15/02/2020, 10:27:52: End Log
+15/02/2020, 10:29:42: Start Import
+15/02/2020, 10:29:42: documents must be a non-empty list
+15/02/2020, 10:31:50: Start Import
+15/02/2020, 10:32:37: End Log
+15/02/2020, 10:36:57: Start Import
+15/02/2020, 10:37:41: End Log
+15/02/2020, 10:41:31: Start Import
+15/02/2020, 10:41:31: key must be an instance of str
+15/02/2020, 10:43:27: Start Import
+15/02/2020, 10:43:27: key must be an instance of str
+15/02/2020, 10:44:30: Start Import
+15/02/2020, 10:44:30: name 'group' is not defined
+15/02/2020, 10:44:45: Start Import
+15/02/2020, 10:44:45: End Log
+15/02/2020, 10:50:17: Start Import
+15/02/2020, 10:50:17: End Log
+15/02/2020, 10:52:53: Start Import
+15/02/2020, 10:52:53: End Log
+15/02/2020, 10:56:00: Start Import
+15/02/2020, 10:56:00: End Log
+15/02/2020, 10:59:31: Start Import
+15/02/2020, 10:59:31: End Log
+15/02/2020, 11:02:41: Start Import
+15/02/2020, 11:02:41: End Log
+15/02/2020, 11:04:42: Start Import
+15/02/2020, 11:04:42: 'total101'
+15/02/2020, 11:05:34: Start Import
+15/02/2020, 11:05:34: End Log
+15/02/2020, 11:15:51: Start Import
+15/02/2020, 11:15:51: End Log
+15/02/2020, 11:18:02: Start Import
+15/02/2020, 11:18:02: End Log
+15/02/2020, 11:22:22: Start Import
+15/02/2020, 11:22:22: End Log
+15/02/2020, 11:22:42: Start Import
+15/02/2020, 11:22:42: End Log
+15/02/2020, 19:55:17: Start Import
+15/02/2020, 19:56:03: End Log
+15/02/2020, 19:56:37: Start Import
+15/02/2020, 19:56:37: End Log
+15/02/2020, 20:00:31: Start Import
+15/02/2020, 20:00:31: End Log
+15/02/2020, 20:01:02: Start Import
+15/02/2020, 20:01:02: End Log
+15/02/2020, 20:03:00: Start Import
+15/02/2020, 20:03:00: End Log
+15/02/2020, 20:04:42: Start Import
+15/02/2020, 20:04:42: End Log
+15/02/2020, 20:05:50: Start Import
+15/02/2020, 20:05:50: collection names must not start or end with '.': 'LO_List_of_all_customer_total_report_temp.'
+15/02/2020, 20:05:56: Start Import
+15/02/2020, 20:05:56: collection names must not start or end with '.': 'LO_List_of_all_customer_total_report_temp.'
+15/02/2020, 20:06:38: Start Import
+15/02/2020, 20:06:38: End Log
+15/02/2020, 20:07:11: Start Import
+15/02/2020, 20:07:11: End Log
+15/02/2020, 20:07:31: Start Import
+15/02/2020, 20:07:31: name 'temp1' is not defined
+15/02/2020, 20:08:19: Start Import
+15/02/2020, 20:08:19: name 'temp1' is not defined
+15/02/2020, 20:08:44: Start Import
+15/02/2020, 20:08:44: End Log
+17/02/2020, 09:58:29: Start Import
+17/02/2020, 09:59:19: End Log
+17/02/2020, 10:03:54: Start Import
+17/02/2020, 10:04:40: End Log
+17/02/2020, 10:06:04: Start Import
+17/02/2020, 10:07:35: Start Import
+17/02/2020, 10:07:35: Expression $cond takes exactly 3 arguments. 2 were passed in.
+17/02/2020, 10:09:50: Start Import
+17/02/2020, 10:10:41: End Log
+17/02/2020, 10:13:02: Start Import
+17/02/2020, 10:13:52: End Log
+17/02/2020, 10:24:46: Start Import
+17/02/2020, 10:24:46: 'total_101'
+17/02/2020, 10:25:20: Start Import
+17/02/2020, 10:25:20: 'g_101'
+17/02/2020, 10:29:42: Start Import
+17/02/2020, 10:29:42: 'g_101'
+17/02/2020, 10:30:18: Start Import
+17/02/2020, 10:30:18: 'g_101'
+17/02/2020, 10:30:45: Start Import
+17/02/2020, 10:30:45: 'g101'
+17/02/2020, 10:36:26: Start Import
+17/02/2020, 10:36:26: 'g101'
+17/02/2020, 10:40:33: Start Import
+17/02/2020, 10:40:33: 'g101'
+17/02/2020, 10:40:57: Start Import
+17/02/2020, 10:40:58: End Log
+17/02/2020, 10:48:46: Start Import
+17/02/2020, 10:48:47: End Log
+17/02/2020, 10:49:31: Start Import
+17/02/2020, 10:49:31: End Log
+17/02/2020, 10:50:28: Start Import
+17/02/2020, 10:50:28: End Log
+17/02/2020, 11:22:00: Start Import
+17/02/2020, 11:22:51: End Log
+17/02/2020, 11:24:38: Start Import
+17/02/2020, 11:25:27: End Log
+17/02/2020, 11:29:06: Start Import
+17/02/2020, 11:29:54: End Log
+17/02/2020, 11:35:23: Start Import
+17/02/2020, 11:35:23: End Log
+17/02/2020, 11:43:11: Start Import
+17/02/2020, 11:43:11: End Log
+17/02/2020, 11:45:32: Start Import
+17/02/2020, 11:46:21: End Log
+17/02/2020, 11:49:24: Start Import
+17/02/2020, 11:49:24: 't_g'
+17/02/2020, 11:50:30: Start Import
+17/02/2020, 11:50:30: End Log
+17/02/2020, 11:57:30: Start Import
+17/02/2020, 11:58:25: End Log
+17/02/2020, 12:12:06: Start Import
+17/02/2020, 12:12:06: End Log
+17/02/2020, 14:54:42: Start Import
+17/02/2020, 14:55:34: End Log
+17/02/2020, 14:55:56: Start Import
+17/02/2020, 14:55:56: End Log
+18/02/2020, 10:09:19: Start Import
+18/02/2020, 10:09:19: 'g101'
+18/02/2020, 10:09:58: Start Import
+18/02/2020, 10:10:51: End Log
+18/02/2020, 10:15:14: Start Import
+18/02/2020, 10:15:14: End Log
+18/02/2020, 11:47:44: Start Import
+18/02/2020, 11:47:44: name 'product_value' is not defined
+18/02/2020, 11:48:20: Start Import
+18/02/2020, 11:48:20: name 'product_value1' is not defined
+18/02/2020, 11:48:31: Start Import
+18/02/2020, 11:48:31: name 'product_value' is not defined
+18/02/2020, 11:48:44: Start Import
+18/02/2020, 11:48:44: The $cond accumulator is a unary operator
+18/02/2020, 11:49:14: Start Import
+18/02/2020, 11:49:14: The $cond accumulator is a unary operator
+18/02/2020, 11:55:06: Start Import
+18/02/2020, 11:55:06: The $cond accumulator is a unary operator
+18/02/2020, 11:56:09: Start Import
+18/02/2020, 11:56:09: The $cond accumulator is a unary operator
+18/02/2020, 11:59:25: Start Import
+18/02/2020, 11:59:25: The $cond accumulator is a unary operator
+18/02/2020, 12:07:52: Start Import
+18/02/2020, 12:07:52: End Log
+18/02/2020, 12:14:07: Start Import
+18/02/2020, 12:14:07: End Log
+18/02/2020, 12:58:42: Start Import
+18/02/2020, 12:58:42: End Log
+18/02/2020, 13:13:41: Start Import
+18/02/2020, 13:13:41: End Log
+18/02/2020, 13:13:59: Start Import
+18/02/2020, 13:13:59: End Log
+18/02/2020, 13:16:40: Start Import
+18/02/2020, 13:16:40: 'code'
+18/02/2020, 13:16:56: Start Import
+18/02/2020, 13:18:13: Start Import
+18/02/2020, 13:18:13: End Log
+18/02/2020, 13:19:26: Start Import
+18/02/2020, 13:19:26: End Log
+18/02/2020, 13:19:43: Start Import
+18/02/2020, 13:19:44: End Log
+18/02/2020, 13:24:08: Start Import
+18/02/2020, 13:24:08: End Log
+18/02/2020, 13:25:03: Start Import
+18/02/2020, 13:25:03: End Log
+18/02/2020, 13:53:57: Start Import
+18/02/2020, 13:53:57: End Log
+18/02/2020, 13:57:52: Start Import
+18/02/2020, 13:57:52: End Log
+18/02/2020, 13:58:49: Start Import
+18/02/2020, 13:58:49: End Log
+18/02/2020, 13:59:36: Start Import
+18/02/2020, 13:59:36: End Log
+18/02/2020, 14:01:53: Start Import
+18/02/2020, 14:01:53: End Log
+18/02/2020, 14:03:09: Start Import
+18/02/2020, 14:03:09: End Log
+18/02/2020, 14:03:51: Start Import
+18/02/2020, 14:03:51: name 'temp1' is not defined
+18/02/2020, 14:04:09: Start Import
+18/02/2020, 14:04:09: End Log
+18/02/2020, 14:05:33: Start Import
+18/02/2020, 14:05:33: End Log
+18/02/2020, 14:06:19: Start Import
+18/02/2020, 14:06:19: End Log
+18/02/2020, 14:08:37: Start Import
+18/02/2020, 14:08:37: name 'list_product1' is not defined
+18/02/2020, 14:08:47: Start Import
+18/02/2020, 14:08:47: End Log
+18/02/2020, 14:12:55: Start Import
+18/02/2020, 14:18:52: Start Import
+18/02/2020, 14:18:52: The field 'g2_101' must be an accumulator object
+18/02/2020, 14:18:55: Start Import
+18/02/2020, 14:18:55: The field 'g2_101' must be an accumulator object
+18/02/2020, 14:21:26: Start Import
+18/02/2020, 14:21:26: name 'product_value' is not defined
+18/02/2020, 14:21:38: Start Import
+18/02/2020, 14:21:38: 'total_101'
+18/02/2020, 14:22:17: Start Import
+18/02/2020, 14:22:17: End Log
+18/02/2020, 14:22:24: Start Import
+18/02/2020, 14:22:24: End Log
+18/02/2020, 14:23:17: Start Import
+18/02/2020, 14:23:17: End Log
+18/02/2020, 14:23:52: Start Import
+18/02/2020, 14:23:52: End Log
+18/02/2020, 14:26:36: Start Import
+18/02/2020, 14:26:36: The field 'g101' must be an accumulator object
+18/02/2020, 14:27:34: Start Import
+18/02/2020, 14:27:34: cannot encode object: {'$g101'}, of type: <class 'set'>
+18/02/2020, 14:27:39: Start Import
+18/02/2020, 14:27:39: cannot encode object: {'$g101'}, of type: <class 'set'>
+18/02/2020, 14:27:54: Start Import
+18/02/2020, 14:27:54: The field 'g101' must be an accumulator object
+18/02/2020, 14:28:12: Start Import
+18/02/2020, 14:28:12: The field 'g_101' must be an accumulator object
+18/02/2020, 14:36:39: Start Import
+18/02/2020, 14:36:39: End Log
+18/02/2020, 14:49:07: Start Import
+18/02/2020, 14:49:07: name 'group' is not defined
+18/02/2020, 14:49:28: Start Import
+18/02/2020, 14:49:44: End Log
+18/02/2020, 15:09:18: Start Import
+18/02/2020, 15:09:18: name 'group' is not defined
+18/02/2020, 15:09:55: Start Import
+18/02/2020, 15:10:11: End Log
+18/02/2020, 15:10:42: Start Import
+18/02/2020, 15:10:58: End Log
+18/02/2020, 15:11:43: Start Import
+18/02/2020, 15:11:58: End Log
+18/02/2020, 15:16:46: Start Import
+18/02/2020, 15:16:46: End Log
+18/02/2020, 16:53:39: Start Import
+18/02/2020, 16:53:39: End Log
+18/02/2020, 16:56:31: Start Import
+18/02/2020, 16:56:31: End Log
+18/02/2020, 17:00:32: Start Import
+18/02/2020, 17:00:32: End Log
+18/02/2020, 17:03:35: Start Import
+18/02/2020, 17:03:35: End Log
+18/02/2020, 17:08:19: Start Import
+18/02/2020, 17:08:19: End Log
+18/02/2020, 17:10:32: Start Import
+18/02/2020, 17:10:32: can't $divide by zero
+18/02/2020, 17:11:55: Start Import
+18/02/2020, 17:11:55: can't $divide by zero
+18/02/2020, 17:21:42: Start Import
+18/02/2020, 17:21:42: End Log
+18/02/2020, 17:22:24: Start Import
+18/02/2020, 17:22:24: End Log
+18/02/2020, 17:22:41: Start Import
+18/02/2020, 17:22:41: End Log
+18/02/2020, 17:23:34: Start Import
+18/02/2020, 17:23:34: End Log
+18/02/2020, 17:25:47: Start Import
+18/02/2020, 17:25:47: End Log
+18/02/2020, 17:28:23: Start Import
+18/02/2020, 17:28:23: End Log
+18/02/2020, 17:32:40: Start Import
+18/02/2020, 17:32:40: End Log
+18/02/2020, 17:34:41: Start Import
+18/02/2020, 17:34:41: End Log
+18/02/2020, 17:37:02: Start Import
+18/02/2020, 17:37:02: 'dict' object has no attribute 'key'
+18/02/2020, 17:37:15: Start Import
+18/02/2020, 17:37:16: End Log
+18/02/2020, 17:37:35: Start Import
+18/02/2020, 17:37:35: End Log
+18/02/2020, 17:38:09: Start Import
+18/02/2020, 17:38:09: End Log
+18/02/2020, 17:38:41: Start Import
+18/02/2020, 17:38:41: 'in <string>' requires string as left operand, not dict_keys
+18/02/2020, 17:39:28: Start Import
+18/02/2020, 17:39:28: End Log
+18/02/2020, 17:42:15: Start Import
+18/02/2020, 17:42:15: End Log
+18/02/2020, 17:43:14: Start Import
+18/02/2020, 17:43:14: End Log
+18/02/2020, 17:43:32: Start Import
+18/02/2020, 17:43:32: End Log
+18/02/2020, 17:43:45: Start Import
+18/02/2020, 17:43:45: End Log
+18/02/2020, 17:44:02: Start Import
+18/02/2020, 17:44:02: End Log
+18/02/2020, 17:44:12: Start Import
+18/02/2020, 17:44:12: End Log
+18/02/2020, 17:44:23: Start Import
+18/02/2020, 17:44:23: End Log
+18/02/2020, 17:45:21: Start Import
+18/02/2020, 17:45:21: End Log
+18/02/2020, 17:45:30: Start Import
+18/02/2020, 17:45:30: End Log
+18/02/2020, 19:01:54: Start Import
+18/02/2020, 19:01:54: End Log
+18/02/2020, 19:02:05: Start Import
+18/02/2020, 19:02:05: End Log
+18/02/2020, 19:02:08: Start Import
+18/02/2020, 19:02:08: End Log
+18/02/2020, 19:03:08: Start Import
+18/02/2020, 19:03:08: End Log
+18/02/2020, 19:04:22: Start Import
+18/02/2020, 19:04:22: End Log
+18/02/2020, 19:05:20: Start Import
+18/02/2020, 19:05:20: End Log
+18/02/2020, 19:05:49: Start Import
+18/02/2020, 19:05:49: End Log
+18/02/2020, 19:06:12: Start Import
+18/02/2020, 19:06:12: End Log
+18/02/2020, 19:06:48: Start Import
+18/02/2020, 19:06:48: End Log
+18/02/2020, 19:07:31: Start Import
+18/02/2020, 19:07:31: End Log
+18/02/2020, 19:08:55: Start Import
+18/02/2020, 19:08:55: End Log
+18/02/2020, 19:09:08: Start Import
+18/02/2020, 19:09:08: End Log
+18/02/2020, 19:13:50: Start Import
+18/02/2020, 19:13:50: End Log
+18/02/2020, 19:16:36: Start Import
+18/02/2020, 19:16:36: End Log
+18/02/2020, 19:16:53: Start Import
+18/02/2020, 19:16:53: End Log
+18/02/2020, 19:19:18: Start Import
+18/02/2020, 19:19:18: End Log
+18/02/2020, 19:19:33: Start Import
+18/02/2020, 19:19:33: End Log
+18/02/2020, 19:19:55: Start Import
+18/02/2020, 19:19:55: End Log
+18/02/2020, 19:20:51: Start Import
+18/02/2020, 19:20:51: End Log
+18/02/2020, 19:21:16: Start Import
+18/02/2020, 19:21:16: End Log
+18/02/2020, 19:28:30: Start Import
+18/02/2020, 19:28:30: End Log
+18/02/2020, 19:32:07: Start Import
+18/02/2020, 19:32:07: End Log
+18/02/2020, 19:40:47: Start Import
+18/02/2020, 19:40:47: End Log
+18/02/2020, 19:43:26: Start Import
+18/02/2020, 19:43:26: End Log
+18/02/2020, 19:45:45: Start Import
+18/02/2020, 19:45:45: End Log
+18/02/2020, 19:46:59: Start Import
+18/02/2020, 19:46:59: End Log
+18/02/2020, 19:47:34: Start Import
+18/02/2020, 19:47:34: End Log
+18/02/2020, 19:57:41: Start Import
+18/02/2020, 19:57:41: End Log
+18/02/2020, 20:01:55: Start Import
+18/02/2020, 20:01:55: End Log
+18/02/2020, 20:06:18: Start Import
+18/02/2020, 20:06:18: End Log
+18/02/2020, 20:11:14: Start Import
+18/02/2020, 20:11:14: End Log
+18/02/2020, 20:14:22: Start Import
+18/02/2020, 20:14:23: End Log
+18/02/2020, 20:16:50: Start Import
+18/02/2020, 20:16:50: End Log
+18/02/2020, 20:21:31: Start Import
+18/02/2020, 20:21:31: End Log
+18/02/2020, 20:22:31: Start Import
+18/02/2020, 20:22:32: End Log
+18/02/2020, 20:23:32: Start Import
+18/02/2020, 20:23:32: End Log
+18/02/2020, 20:26:14: Start Import
+18/02/2020, 20:26:14: End Log
+18/02/2020, 20:34:06: Start Import
+18/02/2020, 20:34:07: End Log
+18/02/2020, 20:58:35: Start Import
+18/02/2020, 20:58:36: End Log
+18/02/2020, 21:00:25: Start Import
+18/02/2020, 21:00:25: End Log
+18/02/2020, 21:14:02: Start Import
+18/02/2020, 21:14:02: batch op errors occurred
+18/02/2020, 21:15:11: Start Import
+18/02/2020, 21:15:12: End Log
+18/02/2020, 21:22:49: Start Import
+18/02/2020, 21:22:49: End Log
+19/02/2020, 10:10:33: Start Import
+19/02/2020, 10:10:33: unsupported operand type(s) for *: 'NoneType' and 'int'
+19/02/2020, 10:12:26: Start Import
+19/02/2020, 10:12:26: End Log
+19/02/2020, 10:29:53: Start Import
+19/02/2020, 10:29:54: End Log
+19/02/2020, 10:35:14: Start Import
+19/02/2020, 10:35:14: End Log
+19/02/2020, 10:37:27: Start Import
+19/02/2020, 10:37:27: 'g2_g101'
+19/02/2020, 10:38:15: Start Import
+19/02/2020, 10:38:15: End Log
+19/02/2020, 10:39:41: Start Import
+19/02/2020, 10:39:41: 'total_101'
+19/02/2020, 10:41:12: Start Import
+19/02/2020, 10:41:12: 'total_101'
+19/02/2020, 10:46:33: Start Import
+19/02/2020, 10:46:33: 'total_101'
+19/02/2020, 10:47:57: Start Import
+19/02/2020, 10:47:58: End Log
+19/02/2020, 10:49:01: Start Import
+19/02/2020, 10:49:01: End Log
+19/02/2020, 10:49:32: Start Import
+19/02/2020, 10:49:32: End Log
+19/02/2020, 10:52:04: Start Import
+19/02/2020, 10:52:04: End Log
+19/02/2020, 11:02:55: Start Import
+19/02/2020, 11:02:55: End Log
+19/02/2020, 11:04:02: Start Import
+19/02/2020, 11:04:02: End Log
+19/02/2020, 11:09:59: Start Import
+19/02/2020, 11:09:59: End Log
+19/02/2020, 11:12:38: Start Import
+19/02/2020, 11:12:38: End Log
+19/02/2020, 11:13:36: Start Import
+19/02/2020, 11:13:36: End Log
+19/02/2020, 11:19:42: Start Import
+19/02/2020, 11:19:42: End Log
+19/02/2020, 11:20:39: Start Import
+19/02/2020, 11:21:10: Start Import
+19/02/2020, 11:23:31: End Log
+19/02/2020, 11:24:58: Start Import
+19/02/2020, 11:27:03: Start Import
+19/02/2020, 11:29:24: End Log
+19/02/2020, 11:30:27: Start Import
+19/02/2020, 11:30:27: End Log
+19/02/2020, 11:31:41: Start Import
+19/02/2020, 11:31:41: End Log
+19/02/2020, 11:31:45: Start Import
+19/02/2020, 11:34:04: End Log
+19/02/2020, 11:36:10: Start Import
+19/02/2020, 11:38:44: End Log
+19/02/2020, 11:41:21: Start Import
+19/02/2020, 11:44:54: End Log
+19/02/2020, 11:45:15: Start Import
+19/02/2020, 11:45:15: End Log
+19/02/2020, 16:17:43: Start Import
+19/02/2020, 16:18:52: End Log
+19/02/2020, 16:19:08: Start Import
+19/02/2020, 16:19:09: End Log
+21/02/2020, 10:46:45: Start Import
+21/02/2020, 10:46:45: End Log
+21/02/2020, 10:47:35: Start Import
+21/02/2020, 10:47:35: End Log
+21/02/2020, 10:55:19: Start Import
+21/02/2020, 10:57:31: End Log
+21/02/2020, 13:44:39: Start Import
+21/02/2020, 13:46:20: End Log
+21/02/2020, 15:52:36: Start Import

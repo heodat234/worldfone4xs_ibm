@@ -14,7 +14,7 @@ Class Disbursement extends WFF_Controller {
         $this->load->library("Excel");
         $this->load->library("csv");
         $this->load->library('mongo_db');
-        $this->load->library('pheanstalk');
+        // $this->load->library('pheanstalk');
         $this->load->model('ftp_model');
         $this->load->model('user_model');
 		$this->collection = set_sub_collection($this->collection);
@@ -54,7 +54,7 @@ Class Disbursement extends WFF_Controller {
                 $columnIndex = $this->excel->stringFromColumnIndex($key + 1);
                 $columnStringByIndex[$value] = $columnIndex;
             }
-            $data = $this->excel->convert($filepath, $convert, 0, 1000000, 'AB', $titleRow = 0);
+            $data = $this->excel->convert($filepath, $convert, 0, 1000000, 'AD', $titleRow = 0);
             $extension = $this->session->userdata("extension");
             $errorMesg = '';
             $errorCount = 0;
@@ -108,8 +108,9 @@ Class Disbursement extends WFF_Controller {
             else {
                 $this->mongo_db->where_id($importLogResult['id'])->set(array('complete_import' => $endtime, 'status' => 1, 'id' => $importLogResult['id']))->update(set_sub_collection('Import'));
                 $this->mongo_db->batch_insert(set_sub_collection('Disbursement_import_result'), $importData);
-                $this->mongo_db->batch_insert($this->collection, $importData);
-
+                foreach($importData as $key => $value) {
+                    $this->mongo_db->where(array('acc_no' => $value['acc_no']))->update($this->collection, $value, array('upsert' => true));
+                }
             }
             echo json_encode(array("status" => ($errorCount === 0) ? 1 : 0));
         } catch (Exception $e) {
@@ -260,6 +261,16 @@ Class Disbursement extends WFF_Controller {
             $data["updated_by"]  =   $this->session->userdata("extension");
             $data['updated_at'] = time();
             $result = $this->crud->where_id($id)->update(set_sub_collection("Import"), array('$set' => $data));
+            echo json_encode(array("status" => $result ? 1 : 0, "data" => []));
+        } catch (Exception $e) {
+            echo json_encode(array("status" => 0, "message" => $e->getMessage()));
+        }
+    }
+
+    function delete_manay_by_acc() {
+        try {
+            $data = json_decode(file_get_contents('php://input'), TRUE);
+            $result = $this->crud->where(array('acc_no' => array('$in' => $data)))->delete_all($this->collection, TRUE);
             echo json_encode(array("status" => $result ? 1 : 0, "data" => []));
         } catch (Exception $e) {
             echo json_encode(array("status" => 0, "message" => $e->getMessage()));

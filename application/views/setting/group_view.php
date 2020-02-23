@@ -4,18 +4,27 @@ var Config = {
     templateApi: `${ENV.templateApi}`,
     collection: "group",
     observable: {
-    	trueVar: true,
+        trueVar: true,
     },
     model: {
         id: "id",
         fields: {
-            name: {type: "string", defaultValue: ""},
-            queue: {type: "string"},
-            members: {type: "object"},
-            queues: {type: "object"}
+            name: {
+                type: "string",
+                defaultValue: ""
+            },
+            queue: {
+                type: "string"
+            },
+            members: {
+                type: "object"
+            },
+            queues: {
+                type: "object"
+            }
         }
     }
-}; 
+};
 </script>
 
 <!-- Table Styles Header -->
@@ -31,7 +40,8 @@ var Config = {
             <div class="row">
                 <h4 class="text-center" style="margin: 20px 0 10px">
                     <span style="font-weight: 500">QUEUE @CALL CENTER@</span>
-                    <a style="font-size: 14px" data-role="button" data-icon="refresh" data-bind="click: updateQueueMembers"><b>@Update@</b></a>
+                    <a style="font-size: 14px" data-role="button" data-icon="refresh"
+                        data-bind="click: updateQueueMembers"><b>@Update@</b></a>
                 </h4>
             </div>
             <div class="row">
@@ -42,9 +52,8 @@ var Config = {
             <div class="row">
                 <div class="col-xs-12">
                     <!-- Table Styles Content -->
-                    <div data-role="listview" id="listview"
-                     data-template="queue-group-template"
-                     data-bind="source: dataSourceQueue"></div>
+                    <div data-role="listview" id="listview" data-template="queue-group-template"
+                        data-bind="source: dataSourceQueue"></div>
                     <!-- END Table Styles Content -->
                 </div>
             </div>
@@ -63,13 +72,14 @@ var Config = {
             <div class="row">
                 <div class="col-xs-12">
                     <!-- Table Styles Content -->
-                    <div data-role="listview" id="listview2"
-                     data-template="custom-group-template"
-                     data-bind="source: dataSourceCustom"></div>
+                    <div data-role="listview" id="listview2" data-template="custom-group-template"
+                        data-bind="source: dataSourceCustom"></div>
                     <!-- END Table Styles Content -->
                 </div>
                 <div class="col-xs-12 text-center">
-                    <button data-role="button" data-icon="add" onclick="openForm({title: `@Add@ @Custom group@`,width: 500}); addForm(this)" href="javascript:void(0)" class="btn btn-sm"><b>@Add@ @new@</b></button>
+                    <button data-role="button" data-icon="add"
+                        onclick="openForm({title: `@Add@ @Custom group@`,width: 500}); addForm(this)"
+                        href="javascript:void(0)" class="btn btn-sm"><b>@Add@ @new@</b></button>
                 </div>
             </div>
         </div>
@@ -78,8 +88,12 @@ var Config = {
 
 <div id="action-menu" style="width: 200px">
     <ul>
-        <a href="javascript:void(0)" data-type="update" onclick="editQueueMembers(this)"><li><i class="fa fa-pencil-square-o text-warning"></i><span>@Edit@ @Members@</span></li></a>
-        <a class="hidden" href="javascript:void(0)" data-type="delete" onclick="deleteDataItem(this)"><li><i class="fa fa-times-circle text-danger"></i><span>@Delete@</span></li></a>
+        <a href="javascript:void(0)" data-type="update" onclick="editQueueMembers(this)">
+            <li><i class="fa fa-pencil-square-o text-warning"></i><span>@Edit@ @Members@</span></li>
+        </a>
+        <a class="hidden" href="javascript:void(0)" data-type="delete" onclick="deleteDataItem(this)">
+            <li><i class="fa fa-times-circle text-danger"></i><span>@Delete@</span></li>
+        </a>
     </ul>
 </div>
 <!-- END Page Content -->
@@ -115,21 +129,21 @@ var Config = {
             data-filter="contains"
             data-text-field="name"
             data-value-field="id"
-            data-value-primitive="true"            
-            data-bind="value: customGroups, source: relatedDataSourceCustom, visible: isEdit, events: {select: customGroupsSelect}" 
+            data-value-primitive="true"
+            data-bind="value: customGroups, source: relatedDataSourceCustom, visible: isEdit, events: {select: customGroupsSelect}"
             style="width: 100%"></select>
         <br>
         <label>@Members@: </label>
         <span data-bind="invisible: isEdit" class="member-array">#= gridMembers(data.members) #</span>
         <div data-bind="visible: isEdit">
-            <select data-role="multiselect" 
+            <select data-role="multiselect"
             data-text-field="extension"
             data-value-field="extension"
             data-item-template="itemGroupTemplate"
             data-tag-template="tagGroupTemplate"
             data-clear-button="false"
             data-value-primitive="true"
-            data-auto-bind="false"  
+            data-auto-bind="false"
             data-bind="value: members, source: membersOption, events: {select: membersSelect, deselect: membersDeselect}"></select>
         </div>
     </div>
@@ -139,7 +153,7 @@ var Config = {
         <span class="check-active">
             <i class="fa fa-creative-commons text-primary"></i>
         </span>
-        <span class="group-name" data-bind="text: name"></span>
+        <span class="group-name check-trung" data-bind="text: name"></span>
         <div class="pull-right">
             <a class="k-button btn-edit" href="javascript:void(0)" data-bind="click: editCustomGroup, attr: {data-uid: uid}">
                 <i class="fa fa-pencil-square-o text-warning"></i>&nbsp;
@@ -165,61 +179,67 @@ var Config = {
     </div>
 </script>
 <style type="text/css">
-    #allview:not(.editable) .btn-edit {
-        display: none;
-    }
-    .k-widget.k-listview {
-        background-color: inherit;
-    }
-    .view-container {
-    	border-radius: 5px;
-        border: 1px solid lightgray;
-        padding: 10px 20px;
-        width: 95%;
-        background-color: white;
-        margin-bottom: 5px;
-    }
-    .view-container span {
-        font-size: 18px;
-    }
-    [data-role=listview] {
-        border: 0;
-    }
-    .queue-array span, .member-array span {
-		font-size: 12px;
-		vertical-align: -3px;
-	}
-	.check-active {
-	}
+#allview:not(.editable) .btn-edit {
+    display: none;
+}
 
-    .dropdown-header {
-        border-width: 0 0 1px 0;
-        text-transform: uppercase;
-    }
+.k-widget.k-listview {
+    background-color: inherit;
+}
 
-    .dropdown-header > span {
-        display: inline-block;
-        padding: 10px;
-    }
+.view-container {
+    border-radius: 5px;
+    border: 1px solid lightgray;
+    padding: 10px 20px;
+    width: 95%;
+    background-color: white;
+    margin-bottom: 5px;
+}
 
-    .selected-value {
-        display: inline-block;
-        vertical-align: middle;
-        width: 18px;
-        height: 18px;
-        background-size: 100%;
-        margin-right: 5px;
-        border-radius: 50%;
-    }
+.view-container span {
+    font-size: 18px;
+}
 
-    .member-element {
-        display: inline-block; 
-        border: 1px solid ghostwhite; 
-        border-radius: 5px; 
-        padding: 4px; 
-        font-size: 14px;
-        background-color: lightgray;
-    }
+[data-role=listview] {
+    border: 0;
+}
+
+.queue-array span,
+.member-array span {
+    font-size: 12px;
+    vertical-align: -3px;
+}
+
+.check-active {}
+
+.dropdown-header {
+    border-width: 0 0 1px 0;
+    text-transform: uppercase;
+}
+
+.dropdown-header>span {
+    display: inline-block;
+    padding: 10px;
+}
+
+.selected-value {
+    display: inline-block;
+    vertical-align: middle;
+    width: 18px;
+    height: 18px;
+    background-size: 100%;
+    margin-right: 5px;
+    border-radius: 50%;
+}
+
+.member-element {
+    display: inline-block;
+    border: 1px solid ghostwhite;
+    border-radius: 5px;
+    padding: 4px;
+    font-size: 14px;
+    background-color: lightgray;
+}
 </style>
 
 <script id="itemGroupTemplate" type="text/x-kendo-template">
@@ -231,275 +251,305 @@ var Config = {
 </script>
 
 <script type="text/javascript">
-
-    var List = function() {
-        return {
-            dataSourceQueue: {},
-            dataSourceCustom: {},
-            relatedDataSourceCustom: {},
-            listview: {},
-            columns: Config.columns,
-            init: function() {
-                var dataSourceQueue = this.dataSourceQueue = new kendo.data.DataSource({
-                    filter: {field: "type", operator: "eq", value: "queue"},
-                    serverFiltering: true,
-                    serverPaging: true,
-                    serverSorting: true,
-                    serverGrouping: false,
-                    pageSize: 100,
-                    batch: false,
-                    schema: {
-                        data: function(response) {
-                            return response.data;
-                        },
-                        total: "total",
-                        model: Config.model,
+var List = function() {
+    return {
+        dataSourceQueue: {},
+        dataSourceCustom: {},
+        relatedDataSourceCustom: {},
+        listview: {},
+        columns: Config.columns,
+        init: function() {
+            var dataSourceQueue = this.dataSourceQueue = new kendo.data.DataSource({
+                filter: {
+                    field: "type",
+                    operator: "eq",
+                    value: "queue"
+                },
+                serverFiltering: true,
+                serverPaging: true,
+                serverSorting: true,
+                serverGrouping: false,
+                pageSize: 100,
+                batch: false,
+                schema: {
+                    data: function(response) {
+                        return response.data;
                     },
-                    transport: {
-                        read: {
-                            url: Config.crudApi + Config.collection,
-                        },
-                        update: {
-                            url: function(data) {
-                                return Config.crudApi + Config.collection + "/" + data.id;
-                            },
-                            type: "PUT",
-                            contentType: "application/json; charset=utf-8"
-                        },
-                        create: {
-                            url: Config.crudApi + Config.collection,
-                            type: "POST",
-                            contentType: "application/json; charset=utf-8"
-                        },
-                        destroy: {
-                            url: function(data) {
-                                return Config.crudApi + Config.collection + "/" + data.id;
-                            },
-                            type: "DELETE"
-                        },
-                        parameterMap: parameterMap
+                    total: "total",
+                    model: Config.model,
+                },
+                transport: {
+                    read: {
+                        url: Config.crudApi + Config.collection,
                     },
-                    sync: syncDataSource,
-                    error: errorDataSource
-                });
-
-                var dataSourceCustom = this.dataSourceCustom = new kendo.data.DataSource({
-                    filter: {field: "type", operator: "eq", value: "custom"},
-                    serverFiltering: true,
-                    serverPaging: true,
-                    serverSorting: true,
-                    serverGrouping: false,
-                    pageSize: 100,
-                    batch: false,
-                    schema: {
-                        data: function(response) {
-                            return response.data;
+                    update: {
+                        url: function(data) {
+                            return Config.crudApi + Config.collection + "/" + data.id;
                         },
-                        total: "total",
-                        model: Config.model,
+                        type: "PUT",
+                        contentType: "application/json; charset=utf-8"
                     },
-                    transport: {
-                        read: {
-                            url: Config.crudApi + Config.collection,
-                        },
-                        update: {
-                            url: function(data) {
-                                return Config.crudApi + Config.collection + "/" + data.id;
-                            },
-                            type: "PUT",
-                            contentType: "application/json; charset=utf-8"
-                        },
-                        create: {
-                            url: Config.crudApi + Config.collection,
-                            type: "POST",
-                            contentType: "application/json; charset=utf-8"
-                        },
-                        destroy: {
-                            url: function(data) {
-                                return Config.crudApi + Config.collection + "/" + data.id;
-                            },
-                            type: "DELETE"
-                        },
-                        parameterMap: parameterMap
+                    create: {
+                        url: Config.crudApi + Config.collection,
+                        type: "POST",
+                        contentType: "application/json; charset=utf-8"
                     },
-                    sync: syncDataSource,
-                    error: errorDataSource
-                });
-
-                var relatedDataSourceCustom = this.relatedDataSourceCustom = new kendo.data.DataSource({
-                    filter: {field: "type", operator: "eq", value: "custom"},
-                    serverFiltering: true,
-                    serverPaging: true,
-                    serverSorting: true,
-                    serverGrouping: false,
-                    pageSize: 100,
-                    batch: false,
-                    schema: {
-                        data: function(response) {
-                            return response.data;
+                    destroy: {
+                        url: function(data) {
+                            return Config.crudApi + Config.collection + "/" + data.id;
                         },
-                        total: "total",
-                        model: Config.model,
+                        type: "DELETE"
                     },
-                    transport: {
-                        read: {
-                            url: Config.crudApi + Config.collection,
-                        },
-                        update: {
-                            url: function(data) {
-                                return Config.crudApi + Config.collection + "/" + data.id;
-                            },
-                            type: "PUT",
-                            contentType: "application/json; charset=utf-8"
-                        },
-                        create: {
-                            url: Config.crudApi + Config.collection,
-                            type: "POST",
-                            contentType: "application/json; charset=utf-8"
-                        },
-                        destroy: {
-                            url: function(data) {
-                                return Config.crudApi + Config.collection + "/" + data.id;
-                            },
-                            type: "DELETE"
-                        },
-                        parameterMap: parameterMap
+                    parameterMap: parameterMap
+                },
+                sync: syncDataSource,
+                error: errorDataSource
+            });
+
+            var dataSourceCustom = this.dataSourceCustom = new kendo.data.DataSource({
+                filter: {
+                    field: "type",
+                    operator: "eq",
+                    value: "custom"
+                },
+                serverFiltering: true,
+                serverPaging: true,
+                serverSorting: true,
+                serverGrouping: false,
+                pageSize: 100,
+                batch: false,
+                schema: {
+                    data: function(response) {
+                        return response.data;
                     },
-                    sync: syncDataSource,
-                    error: errorDataSource
-                });
+                    total: "total",
+                    model: Config.model,
+                },
+                transport: {
+                    read: {
+                        url: Config.crudApi + Config.collection,
+                    },
+                    update: {
+                        url: function(data) {
+                            return Config.crudApi + Config.collection + "/" + data.id;
+                        },
+                        type: "PUT",
+                        contentType: "application/json; charset=utf-8"
+                    },
+                    create: {
+                        url: Config.crudApi + Config.collection,
+                        type: "POST",
+                        contentType: "application/json; charset=utf-8"
+                    },
+                    destroy: {
+                        url: function(data) {
+                            return Config.crudApi + Config.collection + "/" + data.id;
+                        },
+                        type: "DELETE"
+                    },
+                    parameterMap: parameterMap
+                },
+                sync: syncDataSource,
+                error: errorDataSource
+            });
 
-                var observable = this.observable = Object.assign({
-                    dataSourceQueue: dataSourceQueue,
-                    dataSourceCustom: dataSourceCustom,
-                    relatedDataSourceCustom: relatedDataSourceCustom,
-                }, Config.observable)
+            var relatedDataSourceCustom = this.relatedDataSourceCustom = new kendo.data.DataSource({
+                filter: {
+                    field: "type",
+                    operator: "eq",
+                    value: "custom"
+                },
+                serverFiltering: true,
+                serverPaging: true,
+                serverSorting: true,
+                serverGrouping: false,
+                pageSize: 100,
+                batch: false,
+                schema: {
+                    data: function(response) {
+                        return response.data;
+                    },
+                    total: "total",
+                    model: Config.model,
+                },
+                transport: {
+                    read: {
+                        url: Config.crudApi + Config.collection,
+                    },
+                    update: {
+                        url: function(data) {
+                            return Config.crudApi + Config.collection + "/" + data.id;
+                        },
+                        type: "PUT",
+                        contentType: "application/json; charset=utf-8"
+                    },
+                    create: {
+                        url: Config.crudApi + Config.collection,
+                        type: "POST",
+                        contentType: "application/json; charset=utf-8"
+                    },
+                    destroy: {
+                        url: function(data) {
+                            return Config.crudApi + Config.collection + "/" + data.id;
+                        },
+                        type: "DELETE"
+                    },
+                    parameterMap: parameterMap
+                },
+                sync: syncDataSource,
+                error: errorDataSource
+            });
 
-                kendo.bind($("#allview"), observable)
+            var observable = this.observable = Object.assign({
+                dataSourceQueue: dataSourceQueue,
+                dataSourceCustom: dataSourceCustom,
+                relatedDataSourceCustom: relatedDataSourceCustom,
+            }, Config.observable)
 
-                /*
-                 * Right Click Menu
-                 */
-                var menu = $("#action-menu");
+            kendo.bind($("#allview"), observable)
 
-                $("html").on("click", function() {menu.hide()});
+            /*
+             * Right Click Menu
+             */
+            var menu = $("#action-menu");
 
-                /*$(document).on("click", "#listview a.btn-action", function(e){
-                    let row = $(e.target).closest("div.view-container");
-                    e.pageX -= 20;
-                    showMenu(e, row);
-                });*/
+            $("html").on("click", function() {
+                menu.hide()
+            });
 
-                function showMenu(e, that) {
-                    //hide menu if already shown
-                    menu.hide(); 
+            /*$(document).on("click", "#listview a.btn-action", function(e){
+                let row = $(e.target).closest("div.view-container");
+                e.pageX -= 20;
+                showMenu(e, row);
+            });*/
 
-                    //Get id value of document
-                    var uid = $(that).data('uid');
-                    if(uid)
-                    {
-                        menu.find("a[data-type=read], a[data-type=update], a[data-type=delete]").data('uid',uid);
+            function showMenu(e, that) {
+                //hide menu if already shown
+                menu.hide();
 
-                        //get x and y values of the click event
-                        var pageX = e.pageX;
-                        var pageY = e.pageY;
+                //Get id value of document
+                var uid = $(that).data('uid');
+                if (uid) {
+                    menu.find("a[data-type=read], a[data-type=update], a[data-type=delete]").data('uid', uid);
 
-                        //position menu div near mouse cliked area
-                        menu.css({top: pageY , left: pageX});
+                    //get x and y values of the click event
+                    var pageX = e.pageX;
+                    var pageY = e.pageY;
 
-                        var mwidth = menu.width();
-                        var mheight = menu.height();
-                        var screenWidth = $(window).width();
-                        var screenHeight = $(window).height();
+                    //position menu div near mouse cliked area
+                    menu.css({
+                        top: pageY,
+                        left: pageX
+                    });
 
-                        //if window is scrolled
-                        var scrTop = $(window).scrollTop();
+                    var mwidth = menu.width();
+                    var mheight = menu.height();
+                    var screenWidth = $(window).width();
+                    var screenHeight = $(window).height();
 
-                        //if the menu is close to right edge of the window
-                        if(pageX+mwidth > screenWidth){
-                        menu.css({left:pageX-mwidth});
-                        }
+                    //if window is scrolled
+                    var scrTop = $(window).scrollTop();
 
-                        //if the menu is close to bottom edge of the window
-                        if(pageY+mheight > screenHeight+scrTop){
-                        menu.css({top:pageY-mheight});
-                        }
-                        
-                        //finally show the menu
-                        menu.show();     
+                    //if the menu is close to right edge of the window
+                    if (pageX + mwidth > screenWidth) {
+                        menu.css({
+                            left: pageX - mwidth
+                        });
                     }
+
+                    //if the menu is close to bottom edge of the window
+                    if (pageY + mheight > screenHeight + scrTop) {
+                        menu.css({
+                            top: pageY - mheight
+                        });
+                    }
+
+                    //finally show the menu
+                    menu.show();
                 }
             }
         }
-    }();
+    }
+}();
 
-    window.onload = function() {
-        Config.observable = Object.assign({
-            editable: true,
-            typeOption: ["queue", "custom"],
-            typeChange: function(e) {
-                let type = e.sender.value();
-                if(type == "queue") {
-                    this.set("visibleQueues", true);
-                    this.set("visibleMembers", false);
-                } else {
-                    this.set("visibleQueues", false);
-                    this.set("visibleMembers", true);
-                    this.membersOption.read();
-                }
-            },
-            queuesOption: new kendo.data.DataSource({
-                transport: {
-                    read: ENV.vApi + "select/queues",
-                    parameterMap: parameterMap
-                },
-                schema: {
-                    data: "data"
-                }
-            }),
-            editQueue: function(e) {
-                var uid = $(e.currentTarget).data("uid"),
-                    dataItem = List.dataSourceQueue.getByUid(uid);
-                this.set("selectedQueue", dataItem.queuename);
-                dataItem.set("isEdit", true);
-                this.set("editable", false);
+window.onload = function() {
+    Config.observable = Object.assign({
+        editable: true,
+        typeOption: ["queue", "custom"],
+        typeChange: function(e) {
+            let type = e.sender.value();
+            if (type == "queue") {
+                this.set("visibleQueues", true);
+                this.set("visibleMembers", false);
+            } else {
+                this.set("visibleQueues", false);
+                this.set("visibleMembers", true);
                 this.membersOption.read();
+            }
+        },
+        queuesOption: new kendo.data.DataSource({
+            transport: {
+                read: ENV.vApi + "select/queues",
+                parameterMap: parameterMap
             },
-            leadOption: dataSourceDropDownListPrivate("User", ["extension", "agentname"], {role_name: {$ne: "Agent"}}, function(res) {
-                        res.data.unshift({extension: null, agentname: "@None@"});
-                        return res;
-            }),
-            membersOption: new kendo.data.DataSource({
-                transport: {
-                    read: ENV.vApi + "select/queuemembers",
-                    parameterMap: parameterMap
-                },
-                schema: {
-                    data: "data",
-                    total: "total"
-                }
-            }),
-            customGroupsSelect: function(e) {
-                var queuename = this.get("selectedQueue");
-                var members = e.dataItem.members.toJSON();
-                members.forEach(extension => {
-                    $.ajax({
-                        url: ENV.vApi + "wfpbx/change_queue_member/add",
-                        data: JSON.stringify({extension: extension, queuename: queuename}),
-                        contentType: "application/json; charset=utf-8",
-                        type: "POST",
-                        success: function(res) {
-                            notification.show(res.message, res.status ? "success" : "error");
-                        }
-                    })
+            schema: {
+                data: "data"
+            }
+        }),
+        editQueue: function(e) {
+            var uid = $(e.currentTarget).data("uid"),
+                dataItem = List.dataSourceQueue.getByUid(uid);
+            this.set("selectedQueue", dataItem.queuename);
+            dataItem.set("isEdit", true);
+            this.set("editable", false);
+            this.membersOption.read();
+        },
+        leadOption: dataSourceDropDownListPrivate("User", ["extension", "agentname"], {
+            role_name: {
+                $ne: "Agent"
+            }
+        }, function(res) {
+            res.data.unshift({
+                extension: null,
+                agentname: "@None@"
+            });
+            return res;
+        }),
+        membersOption: new kendo.data.DataSource({
+            transport: {
+                read: ENV.vApi + "select/queuemembers",
+                parameterMap: parameterMap
+            },
+            schema: {
+                data: "data",
+                total: "total"
+            }
+        }),
+        customGroupsSelect: function(e) {
+            var queuename = this.get("selectedQueue");
+            var members = e.dataItem.members.toJSON();
+            members.forEach(extension => {
+                $.ajax({
+                    url: ENV.vApi + "wfpbx/change_queue_member/add",
+                    data: JSON.stringify({
+                        extension: extension,
+                        queuename: queuename
+                    }),
+                    contentType: "application/json; charset=utf-8",
+                    type: "POST",
+                    success: function(res) {
+                        notification.show(res.message, res.status ? "success" :
+                            "error");
+                    }
                 })
-            },
-            membersSelect: function(e) {
-                var extension = e.dataItem.extension,
-                    agentname = e.dataItem.agentname,
-                    queuename = this.get("selectedQueue"),
-                    members = e.sender.value();
-                swal({
+            })
+        },
+        membersSelect: function(e) {
+            var extension = e.dataItem.extension,
+                agentname = e.dataItem.agentname,
+                queuename = this.get("selectedQueue"),
+                members = e.sender.value();
+            swal({
                     title: `@Are you sure@?`,
                     text: `@Add@ ${extension} (${agentname}) @at@ queue ${queuename}`,
                     icon: "warning",
@@ -510,27 +560,32 @@ var Config = {
                     if (sure) {
                         $.ajax({
                             url: ENV.vApi + "wfpbx/change_queue_member/add",
-                            data: JSON.stringify({extension: extension, queuename: queuename}),
+                            data: JSON.stringify({
+                                extension: extension,
+                                queuename: queuename
+                            }),
                             contentType: "application/json; charset=utf-8",
                             type: "POST",
                             success: function(res) {
-                                if(res.status) {
-                                    notification.show(`@Add@ ${extension} (${agentname}) @at@ queue ${queuename}`, "success");
+                                if (res.status) {
+                                    notification.show(
+                                        `@Add@ ${extension} (${agentname}) @at@ queue ${queuename}`,
+                                        "success");
                                 } else {
                                     e.sender.value(members);
                                     notification.show(res.message, "error");
                                 }
                             }
-                        })  
+                        })
                     }
                 });
-            },
-            membersDeselect: function(e) {
-                var extension = e.dataItem.extension,
-                    agentname = e.dataItem.agentname,
-                    queuename = this.get("selectedQueue"),
-                    members = e.sender.value();
-                swal({
+        },
+        membersDeselect: function(e) {
+            var extension = e.dataItem.extension,
+                agentname = e.dataItem.agentname,
+                queuename = this.get("selectedQueue"),
+                members = e.sender.value();
+            swal({
                     title: `@Are you sure@?`,
                     text: `@Remove@ ${extension} (${agentname}) @from@ queue ${queuename}`,
                     icon: "warning",
@@ -541,26 +596,31 @@ var Config = {
                     if (sure) {
                         $.ajax({
                             url: ENV.vApi + "wfpbx/change_queue_member/remove",
-                            data: JSON.stringify({extension: extension, queuename: queuename}),
+                            data: JSON.stringify({
+                                extension: extension,
+                                queuename: queuename
+                            }),
                             contentType: "application/json; charset=utf-8",
                             type: "POST",
                             success: function(res) {
-                                if(res.status) {
-                                    notification.show(`@Remove@ ${extension} (${agentname}) @from@ queue ${queuename}`, "success");
+                                if (res.status) {
+                                    notification.show(
+                                        `@Remove@ ${extension} (${agentname}) @from@ queue ${queuename}`,
+                                        "success");
                                 } else {
                                     e.sender.value(members);
                                     notification.show(res.message, "error");
                                 }
                             }
-                        }) 
+                        })
                     }
                 });
-            },
-            saveQueue: function(e) {
-                var uid = $(e.currentTarget).data("uid"),
-                    dataItem = List.dataSourceQueue.getByUid(uid);
-                if(dataItem.dirtyFields.name || dataItem.dirtyFields.customGroups) {
-                    swal({
+        },
+        saveQueue: function(e) {
+            var uid = $(e.currentTarget).data("uid"),
+                dataItem = List.dataSourceQueue.getByUid(uid);
+            if (dataItem.dirtyFields.name || dataItem.dirtyFields.customGroups) {
+                swal({
                         title: `@Are you sure@?`,
                         text: `@Save@ @this change@`,
                         icon: "warning",
@@ -571,11 +631,14 @@ var Config = {
                         if (sure) {
                             $.ajax({
                                 url: ENV.restApi + "group/" + dataItem.id,
-                                data: JSON.stringify({name: dataItem.name, customGroups: dataItem.customGroups}),
+                                data: JSON.stringify({
+                                    name: dataItem.name,
+                                    customGroups: dataItem.customGroups
+                                }),
                                 contentType: "application/json; charset=utf-8",
                                 type: "PUT",
                                 success: (res) => {
-                                    if(res.status) {
+                                    if (res.status) {
                                         this.set("editable", true);
                                         notification.show(`@Success@`, "success");
                                     } else notification.show(res.message, "error");
@@ -583,218 +646,315 @@ var Config = {
                             })
                         }
                     });
-                } else {
-                    List.dataSourceQueue.read();
-                    this.set("editable", true);
-                } 
-            },
-            cancelQueue: function(e) {
-                var dataItem = List.dataSourceQueue.getByUid($(e.currentTarget).data("uid"));
-                dataItem.set("isEdit", false);
+            } else {
+                List.dataSourceQueue.read();
                 this.set("editable", true);
-            },
-            editCustomGroup: function(e) {
-                openForm({title: "@Edit@ @Custom group@", width: 500});
-                editForm(e.currentTarget)
-            },
-            updateQueueMembers: function(e) {
-                $.get({
-                    url: ENV.vApi + "wfpbx/updateQueueMembers",
-                    timeout: 10000, 
-                    success: (res) => {
-                        notification.show(res.message, res.status ? "success" : "error");
-                        this.dataSourceQueue.read();
-                    }
-                })
-            },
-        }, Config.observable);
-
-        List.init();
-
-        var inputQueue = document.getElementById("filter-queue");
-        // Execute a function when the user releases a key on the keyboard
-        inputQueue.addEventListener("keyup", function(event1) {
-            $("#listview").data('kendoListView').dataSource.filter({
-                logic: 'and',
-                filters: [{
-                    logic: 'or',
-                    filters:[
-                        {
-                            field: 'queuename',
-                            operator: 'contains',
-                            value: inputQueue.value,
-                            ignoreCase: true
-                        }, 
-                        {
-                            field: 'queues',
-                            operator: 'in',
-                            value: inputQueue.value
-                        },
-                        {
-                            field: 'members',
-                            operator: 'in',
-                            value: inputQueue.value
-                        }
-                    ]
-                }, {
-                    field: "type", 
-                    operator: "eq", 
-                    value: "queue"
-                }]
-            });
-        });
-
-        var inputCustom = document.getElementById("filter-custom-group");
-        // Execute a function when the user releases a key on the keyboard
-        inputCustom.addEventListener("keyup", function(event) {
-            $("#listview2").data('kendoListView').dataSource.filter({
-                logic: 'and',
-                filters: [{
-                    logic: 'or',
-                    filters:[
-                        {
-                            field: 'name',
-                            operator: 'contains',
-                            value: inputCustom.value,
-                            ignoreCase: true
-                        }, 
-                        {
-                            field: 'members',
-                            operator: 'in',
-                            value: inputCustom.value
-                        },
-                        {
-                            field: 'lead',
-                            operator: 'eq',
-                            value: inputCustom.value
-                        }
-                    ]
-                }, {
-                    field: "type", 
-                    operator: "eq", 
-                    value: "custom"
-                }]
-            });
-        });
-    }
-
-    function gridCustomGroups(data = []) {
-        var template = [];
-        if(data && data.length) {
-            template = $.map($.makeArray(data), function(value, index) {
-                return `<img src="/api/v1/group/getImageNameById/${value}" style="height: 18px; padding: 2px; background-color: ghostwhite" class="img-thumbnail">`;
-            });
-        }
-        return template.join(' ');
-    }
-
-    function gridMembers(data = []) {
-        var bs_color = HELPER.bsColors,
-            template = [];
-        if(data && data.length) {
-            template = $.map($.makeArray(data), function(value, index) {
-                return "<div class=\"member-element\"><span class=\"selected-value\" style=\"background-image: url('/api/v1/avatar/agent/"+value+"')\"></span><b>"+value+"</b> ("+convertExtensionToAgentname[value]+")</div>";
-            });
-        }
-        return template.join(' ');
-    }
-
-    async function editForm(ele) {
-        var dataItem = List.dataSourceCustom.getByUid($(ele).data("uid")),
-            formHtml = await $.ajax({
-                url: Config.templateApi + Config.collection + "/form",
-                error: errorDataSource
-            });
-
-        dataItem.linkToQueues = await $.get(ENV.vApi + Config.collection + "/getQueuesLinkToGroupId/" + dataItem.id);
-        var model = Object.assign(Config.observable, {
-            item: dataItem,
-            membersCustomSelect: function(e) {
-                var extension = e.dataItem.extension,
-                    agentname = e.dataItem.agentname,
-                    queues = this.get("item.linkToQueues"),
-                    members = e.sender.value();
-
-                if(queues && queues.length) {
-                    queues.forEach(queuename => {
-                        $.ajax({
-                            url: ENV.vApi + "wfpbx/change_queue_member/add",
-                            data: JSON.stringify({extension: extension, queuename: queuename}),
-                            contentType: "application/json; charset=utf-8",
-                            type: "POST",
-                            success: (res) => {
-                                if(res.status) {
-                                    notification.show(`@Add@ ${extension} (${agentname}) @at@ queue ${queuename}`, "success");
-                                    List.dataSourceQueue.read();
-                                }
-                            }
-                        }) 
-                    })
-                }
-                setTimeout(() => List.dataSourceCustom.sync(), 100);
-            },
-            membersCustomDeselect: function(e) {
-                var extension = e.dataItem.extension,
-                    agentname = e.dataItem.agentname,
-                    queues = this.get("item.linkToQueues"),
-                    members = e.sender.value();
-
-                if(queues && queues.length) {
-                    queues.forEach(queuename => {
-                        $.ajax({
-                            url: ENV.vApi + "wfpbx/change_queue_member/remove",
-                            data: JSON.stringify({extension: extension, queuename: queuename}),
-                            contentType: "application/json; charset=utf-8",
-                            type: "POST",
-                            success: (res) => {
-                                if(res.status) {
-                                    notification.show(`@Remove@ ${extension} (${agentname}) @from@ queue ${queuename}`, "success");
-                                    List.dataSourceQueue.read();
-                                }
-                            }
-                        })
-                    })
-                }
-                setTimeout(() => List.dataSourceCustom.sync(), 100);
-            },
-            save: function() {
-                List.dataSourceCustom.sync().then(() => {List.dataSourceCustom.read()});
-                closeForm();
-            },
-            cancel: function() {
-                List.dataSourceCustom.read();
-                closeForm();
             }
-        });
-        kendo.destroy($("#right-form"));
-        $("#right-form").empty();
-        var kendoView = new kendo.View(formHtml, { wrap: false, model: model, evalTemplate: false });
-        kendoView.render($("#right-form"));
-    }
+        },
+        cancelQueue: function(e) {
+            var dataItem = List.dataSourceQueue.getByUid($(e.currentTarget).data("uid"));
+            dataItem.set("isEdit", false);
+            this.set("editable", true);
+        },
+        editCustomGroup: function(e) {
+            openForm({
+                title: "@Edit@ @Custom group@",
+                width: 500
+            });
+            editForm(e.currentTarget)
+        },
+        updateQueueMembers: function(e) {
+            $.get({
+                url: ENV.vApi + "wfpbx/updateQueueMembers",
+                timeout: 10000,
+                success: (res) => {
+                    notification.show(res.message, res.status ? "success" : "error");
+                    this.dataSourceQueue.read();
+                }
+            })
+        },
+    }, Config.observable);
 
-    async function addForm() {
-        var formHtml = await $.ajax({
+    List.init();
+
+    var inputQueue = document.getElementById("filter-queue");
+    // Execute a function when the user releases a key on the keyboard
+    inputQueue.addEventListener("keyup", function(event1) {
+        $("#listview").data('kendoListView').dataSource.filter({
+            logic: 'and',
+            filters: [{
+                logic: 'or',
+                filters: [{
+                        field: 'queuename',
+                        operator: 'contains',
+                        value: inputQueue.value,
+                        ignoreCase: true
+                    },
+                    {
+                        field: 'queues',
+                        operator: 'in',
+                        value: inputQueue.value
+                    },
+                    {
+                        field: 'members',
+                        operator: 'in',
+                        value: inputQueue.value
+                    }
+                ]
+            }, {
+                field: "type",
+                operator: "eq",
+                value: "queue"
+            }]
+        });
+    });
+
+    var inputCustom = document.getElementById("filter-custom-group");
+    // Execute a function when the user releases a key on the keyboard
+    inputCustom.addEventListener("keyup", function(event) {
+        $("#listview2").data('kendoListView').dataSource.filter({
+            logic: 'and',
+            filters: [{
+                logic: 'or',
+                filters: [{
+                        field: 'name',
+                        operator: 'contains',
+                        value: inputCustom.value,
+                        ignoreCase: true
+                    },
+                    {
+                        field: 'members',
+                        operator: 'in',
+                        value: inputCustom.value
+                    },
+                    {
+                        field: 'lead',
+                        operator: 'eq',
+                        value: inputCustom.value
+                    }
+                ]
+            }, {
+                field: "type",
+                operator: "eq",
+                value: "custom"
+            }]
+        });
+    });
+}
+
+function gridCustomGroups(data = []) {
+    var template = [];
+    if (data && data.length) {
+        template = $.map($.makeArray(data), function(value, index) {
+            return `<img src="/api/v1/group/getImageNameById/${value}" style="height: 18px; padding: 2px; background-color: ghostwhite" class="img-thumbnail">`;
+        });
+    }
+    return template.join(' ');
+}
+
+function gridMembers(data = []) {
+    var bs_color = HELPER.bsColors,
+        template = [];
+    if (data && data.length) {
+        template = $.map($.makeArray(data), function(value, index) {
+            return "<div class=\"member-element\"><span class=\"selected-value\" style=\"background-image: url('/api/v1/avatar/agent/" +
+                value + "')\"></span><b>" + value + "</b> (" + convertExtensionToAgentname[value] + ")</div>";
+        });
+    }
+    return template.join(' ');
+}
+
+async function editForm(ele) {
+    var dataItem = List.dataSourceCustom.getByUid($(ele).data("uid")),
+        formHtml = await $.ajax({
             url: Config.templateApi + Config.collection + "/form",
             error: errorDataSource
         });
-        var model = Object.assign(Config.observable, {
-            item: {type: "custom"},
-            membersCustomSelect: () => {},
-            membersCustomDeselect: () => {},
-            save: function() {
-                List.dataSourceCustom.add(this.item);
-                List.dataSourceCustom.sync().then(() => {List.dataSourceCustom.read()});
-                closeForm();
-            }
-        });
-        kendo.destroy($("#right-form"));
-        $("#right-form").empty();
-        var kendoView = new kendo.View(formHtml, { wrap: false, model: model, evalTemplate: false });
-        kendoView.render($("#right-form"));
-    }
 
-    function deleteDataItem(ele) {
-        swal({
+    dataItem.linkToQueues = await $.get(ENV.vApi + Config.collection + "/getQueuesLinkToGroupId/" + dataItem.id);
+    var model = Object.assign(Config.observable, {
+        item: dataItem,
+        membersCustomSelect: function(e) {
+            var extension = e.dataItem.extension,
+                agentname = e.dataItem.agentname,
+                queues = this.get("item.linkToQueues"),
+                members = e.sender.value();
+
+            if (queues && queues.length) {
+                queues.forEach(queuename => {
+                    $.ajax({
+                        url: ENV.vApi + "wfpbx/change_queue_member/add",
+                        data: JSON.stringify({
+                            extension: extension,
+                            queuename: queuename
+                        }),
+                        contentType: "application/json; charset=utf-8",
+                        type: "POST",
+                        success: (res) => {
+                            if (res.status) {
+                                notification.show(
+                                    `@Add@ ${extension} (${agentname}) @at@ queue ${queuename}`,
+                                    "success");
+                                List.dataSourceQueue.read();
+                            }
+                        }
+                    })
+                })
+            }
+            setTimeout(() => List.dataSourceCustom.sync(), 100);
+        },
+        membersCustomDeselect: function(e) {
+            var extension = e.dataItem.extension,
+                agentname = e.dataItem.agentname,
+                queues = this.get("item.linkToQueues"),
+                members = e.sender.value();
+
+            if (queues && queues.length) {
+                queues.forEach(queuename => {
+                    $.ajax({
+                        url: ENV.vApi + "wfpbx/change_queue_member/remove",
+                        data: JSON.stringify({
+                            extension: extension,
+                            queuename: queuename
+                        }),
+                        contentType: "application/json; charset=utf-8",
+                        type: "POST",
+                        success: (res) => {
+                            if (res.status) {
+                                notification.show(
+                                    `@Remove@ ${extension} (${agentname}) @from@ queue ${queuename}`,
+                                    "success");
+                                List.dataSourceQueue.read();
+                            }
+                        }
+                    })
+                })
+            }
+            setTimeout(() => List.dataSourceCustom.sync(), 100);
+        },
+        save: function() {
+            List.dataSourceCustom.sync().then(() => {
+                List.dataSourceCustom.read()
+            });
+            closeForm();
+        },
+        cancel: function() {
+            List.dataSourceCustom.read();
+            closeForm();
+        }
+    });
+    kendo.destroy($("#right-form"));
+    $("#right-form").empty();
+    var kendoView = new kendo.View(formHtml, {
+        wrap: false,
+        model: model,
+        evalTemplate: false
+    });
+    kendoView.render($("#right-form"));
+}
+
+async function addForm() {
+    var formHtml = await $.ajax({
+        url: Config.templateApi + Config.collection + "/add_form",
+        error: errorDataSource
+    });
+    var model = Object.assign(Config.observable, {
+        item: {
+            type: "custom",
+            active: false,
+            group_active: false,
+            show_team_leader_name: false,
+            show_B_plus_duedate_type: false,
+            debtTypeOptions: ["SIBS", "CARD"],
+            debtGroupOptions: ["Group A", "Group B", "Group C", "Group D", "Group E"],
+            duedateTypeOptions: ["G1", "G2", "G3"],
+            B_plus_duedateTypeOptions: [],
+            debtTypeSelect: function(e) {
+                this.item.set("group_active", true)
+            },
+            debtGroupSelect: function(e) {
+                if (e.dataItem == "Group A") {
+                    this.item.set("show_team_leader_name", true);
+                    this.item.set("show_B_plus_duedate_type", false);
+                } else {
+                    this.item.set("show_team_leader_name", false);
+                    this.item.set("show_B_plus_duedate_type", true);
+                }
+                switch (e.dataItem) {
+                    case "Group B":
+                        this.item.set("B_plus_duedateTypeOptions", ["B01", "B02", "B03"]);
+                        break;
+                    case "Group C":
+                        this.item.set("B_plus_duedateTypeOptions", ["C01", "C02", "C03"]);
+                        break;
+                    case "Group D":
+                        this.item.set("B_plus_duedateTypeOptions", ["D01", "D02", "D03"]);
+                        break;
+                    case "Group E":
+                        this.item.set("B_plus_duedateTypeOptions", ["E01", "E02", "E03"]);
+                        break;
+                }
+            },
+            updateItemName: function() {
+                var temp = this.item.debt_type != undefined ? this.item.debt_type : '';
+                if(this.item.debt_group != undefined){
+                    temp += '/' + this.item.debt_group;
+                    switch (this.item.debt_group) {
+                        case "Group A":
+                            var team_leader_name = this.item.team_leader_name != undefined ? this.item.team_leader_name : '';
+                            var duedate_type = this.item.duedate_type != undefined ? this.item.duedate_type : '';
+                            temp += '/' + team_leader_name;
+                            temp += '/' + duedate_type;
+                            break;
+                        case "Group B":
+                        case "Group C":
+                        case "Group D":
+                        case "Group E":
+                            var B_plus_duedate_type = this.item.B_plus_duedate_type != undefined ? this.item.B_plus_duedate_type : '';
+                            temp += '/' + B_plus_duedate_type;
+                            break;
+                    }
+                }
+                this.item.set("name", temp);
+            }
+        },
+        membersCustomSelect: () => {},
+        membersCustomDeselect: () => {},
+        save: function() {
+            var group_name_check = this.item.name;
+            var check_trung = false;
+            $('.check-trung').each(function(){
+                if(group_name_check === $(this).text()){
+                    check_trung = true;
+                    return false;
+                }
+            })
+            if(check_trung){
+                notification.show("Tên Group bị trùng!!!");
+                return false;
+            }
+            List.dataSourceCustom.add(this.item);
+            List.dataSourceCustom.sync().then(() => {
+                List.dataSourceCustom.read()
+            });
+            closeForm();
+
+        },
+
+    });
+    kendo.destroy($("#right-form"));
+
+    $("#right-form").empty();
+    var kendoView = new kendo.View(formHtml, {
+        wrap: false,
+        model: model,
+        evalTemplate: false
+    });
+    kendoView.render($("#right-form"));
+}
+
+function deleteDataItem(ele) {
+    swal({
             title: "Are you sure?",
             text: "Once deleted, you will not be able to recover this document!",
             icon: "warning",
@@ -809,5 +969,5 @@ var Config = {
                 List.dataSourceCustom.sync();
             }
         });
-    }
+}
 </script>

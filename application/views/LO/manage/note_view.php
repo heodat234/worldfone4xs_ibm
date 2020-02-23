@@ -93,3 +93,9 @@ window.onload = function() {
         <a href="javascript:void(0)" data-type="action/detail" class="hidden"><li><i class="fa fa-exclamation-circle text-info"></i><span>@Detail@</span></li></a>
     </ul>
 </div>
+
+<style type="text/css" media="screen">
+	#grid .k-grid-content{
+		height: 350px;
+	}	
+</style>

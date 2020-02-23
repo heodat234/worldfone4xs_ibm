@@ -3,11 +3,12 @@
     <div class="row">
         <div id="side-form" style="width: 50%">
             <div class="form-group">
-                <label>@Date@</label>
+                <label>@Date@ 1</label>
                 <input data-role="datepicker"
                        data-bind="value: item.appointment_date"
                        data-format="dd/MM/yyyy"
-                       style="width: 100%"/>
+                       style="width: 100%"
+                       required validationMessage="Empty!!!"/>
             </div>
             <div class="form-group">
                 <label>@Area@</label>
@@ -192,6 +193,11 @@
         },
         save: function() {
             var item = this.get('item');
+            console.log(this.item.appointment_date);
+            if(typeof this.item.appointment_date === 'undefined' || this.item.appointment_date === '' || this.item.appointment_date === null) {
+                notification.show("Xin vui lòng chọn ngày lịch hẹn.", 'error');
+                return false;
+            }
             var appointment_date = new Date(this.item.appointment_date);
             appointment_date.setHours(0, 0, 0, 0);
             item.appointment_date = appointment_date.getTime() / 1000;

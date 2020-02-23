@@ -116,4 +116,22 @@ Class Telesalelist_solve extends WFF_Controller {
 		$output = shell_exec($command);
 		echo json_encode(array('status' => 2, "message" => "Xuất dữ liệu... Xin vui lòng chờ trong giây lát"));
 	}
+
+	function updateByCif($cif) {
+		try {
+			$data = json_decode(file_get_contents('php://input'), TRUE);
+			$data["updatedBy"]	=	$this->session->userdata("extension");
+			if(!empty($data["calluuid"])) {
+				$callInfo = $this->mongo_db->where(array('calluuid' => $data['calluuid']))->getOne(set_sub_collection('worldfonepbxmanager'));
+				$data['starttime_call'] = (!empty($callInfo['starttime'])) ? $callInfo['starttime'] : null;
+			}
+			$result = $this->crud->where(array('cif' => $cif))->update($this->collection, array('$set' => $data));
+			// Write log update
+			$data["createdBy"]  =	$this->session->userdata("extension");
+			$this->crud->create($this->collection . "_log", $data);
+			echo json_encode(array("status" => $result ? 1 : 0, "data" => []));
+		} catch (Exception $e) {
+			echo json_encode(array("status" => 0, "message" => $e->getMessage()));
+		}
+	}
 }

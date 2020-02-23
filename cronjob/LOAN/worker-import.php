@@ -51,14 +51,14 @@ function runQueue() {
                     }
                     if($mongo_db->where($where)->getOne($jData["collection"])) {
                         if(!isset($doc["updatedAt"])) 
-                            $doc["updatedAt"] = time();
-                            // $doc['updatedAt'] = strtotime('01/01/2020 10:59:59');
+                            // $doc["updatedAt"] = time();
+                            $doc['updatedAt'] = strtotime('14-01-2020 10:59:59');
                         $doc["updatedBy"] = "System";
                         $result = $mongo_db->where($where)->set($doc)->update($jData["collection"]);
                     } else {
                         if(!isset($doc["createdAt"])) 
-                            $doc["createdAt"] = time();
-                            // $doc['createdAt'] = strtotime('01/01/2020 10:59:59');
+                            // $doc["createdAt"] = time();
+                            $doc['createdAt'] = strtotime('14-01-2020 10:59:59');
                         $doc["createdBy"] = "System";
                         $result = $mongo_db->insert($jData["collection"], $doc);
                     }

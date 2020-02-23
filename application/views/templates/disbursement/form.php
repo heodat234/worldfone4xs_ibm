@@ -21,6 +21,14 @@
                 <label>@Branch@</label>
                 <input class="k-textbox" style="width: 100%" data-bind="value: item.bank_branch">
             </div>
+            <div class="form-group" data-bind="visible: isAdmin">
+                <label>@Disbursed@</label>
+                <input type="checkbox" data-bind="checked: item.disbursed" />
+            </div>
+            <div class="form-group">
+                <label>@Note@</label>
+                <textarea data-bind="value: item.note" class="k-textbox" style="height: 50px; width: 100%;"></textarea>
+            </div>
         </div>
 	</div>
 	<div class="row side-form-bottom">
@@ -34,6 +42,14 @@
 <script type="text/javascript">
     Config.observable = Object.assign(Config.observable, {
         locationOption: () => dataSourceJsonData(["SC", "Dealer", "location"]),
+        isAdmin: function(e) {
+            if(ENV.role_name == 'Admin - Manager') {
+                return true
+            }
+            else {
+                return false
+            }
+        }
     });
 
     $(document).ready(function() {

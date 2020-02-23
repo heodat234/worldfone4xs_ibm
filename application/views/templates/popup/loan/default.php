@@ -309,6 +309,12 @@
                                                 <p class="form-control-static" data-bind="text: mainProduct.staff_in_charge"></p>
                                             </div>
                                         </div>
+                                         <div class="form-group" data-bind="visible: collapseMain">
+                                            <label class="control-label col-xs-4">@License plate@</label>
+                                            <div class="col-xs-8">
+                                                <p class="form-control-static" data-bind="text: mainProduct.biensoxe"></p>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="row text-center" style="position: absolute; bottom: 0; left: 50%"> 
@@ -567,6 +573,10 @@ class diallistPopupManual extends Popup {
 
     async init(fieldId) {
         var fieldIdValue = this._dataCall[this._fieldId];
+        // console.log(ENV.extension)
+        // if(ENV.extension == '911'){
+        //     $('#popup-window').parent().find('.k-window-titlebar,.k-window-actions').css('backgroundColor', 'black');
+        // }
         /* Lấy dữ liệu */
         var responseObj = await $.get(ENV.vApi + `popup/get_customer_by_phone`, {phone: fieldIdValue});
 
@@ -583,7 +593,14 @@ class diallistPopupManual extends Popup {
                     serverFiltering: true,
                     filter: {field: "LIC_NO", operator: "eq", value: customer.LIC_NO},
                     transport: {
-                        read: ENV.restApi + "relationship",
+                        read: {
+                            url: ENV.restApi + "relationship"
+                        },
+                        create: {
+                            url: ENV.restApi + "relationship",
+                            type: "POST",
+                            contentType: "application/json; charset=utf-8"
+                        },
                         parameterMap: parameterMap
                     },
                     schema: {
@@ -665,7 +682,14 @@ class diallistPopupManual extends Popup {
                             serverFiltering: true,
                             filter: {field: "LIC_NO", operator: "eq", value: customer.LIC_NO},
                             transport: {
-                                read: ENV.restApi + "relationship",
+                              read: {
+                                url: ENV.restApi + "relationship"
+                            },
+                            create: {
+                                url: ENV.restApi + "relationship",
+                                type: "POST",
+                                contentType: "application/json; charset=utf-8"
+                            },
                                 parameterMap: parameterMap
                             },
                             schema: {
@@ -742,7 +766,9 @@ window.popupObservable.assign({
     mainProduct: {},
     card: {},
     call: {},
+    action: {},
     collapseMain: false,
+    reason_nonpayment_note: false,
     collapseCard: false,
     btnCollapseMain: "@See more@",
     btnCollapseCard: "@See more@",
@@ -775,7 +801,10 @@ window.popupObservable.assign({
                 $("#filling-form").html(kendoView.render());
                 break;
             case "2":
-                this.set("visibleFillingForm", false);
+                this.set("visibleFillingForm", true);
+                var HTML = await $.get(ENV.templateApi + "action_code/type" + actionType);
+                var kendoView = new kendo.View(HTML, { model: this, template: false, wrap: false });
+                $("#filling-form").html(kendoView.render());
                 break;
             case "3":
                 this.set("visibleFillingForm", true);
@@ -914,6 +943,45 @@ window.popupObservable.assign({
                 })
             }
 
+            var data_action_code                = this.action;
+            data_action_code['calluuid']        = (window.popupObservable._dataCall.calluuid) ? window.popupObservable._dataCall.calluuid : '';
+            data_action_code['LIC_NO']          = (this.item.LIC_NO) ? this.item.LIC_NO : '';
+            data_action_code['account_number']  = (this.item.account_number) ? this.item.account_number : '';
+            data_action_code['action_code']     = (this.call.action_code) ? this.call.action_code : '';
+            data_action_code['account_type']    = (this.call.account_type) ? this.call.account_type : '';
+            data_action_code['note']            = (this.note) ? this.note : '';
+            this.relationshipDataSource.sync();
+            $.ajax({
+                url: ENV.restApi + "action_code",
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                data: kendo.stringify(data_action_code),
+                success: (response) => {
+                    if(response.status) {
+                        syncDataSource();
+                        let actionCodeData = this.get("actionCodeData") || [];
+                        actionCodeData.push(data_action_code);
+                        this.set("actionCodeData", actionCodeData);
+                    }
+                },
+                error: errorDataSource
+            })
+
+            if(data_action_code['action_code'] == 'LAWSUIT') {
+                $.ajax({
+                    url: ENV.restApi + "lawsuit",
+                    type: "POST",
+                    contentType: "application/json; charset=utf-8",
+                    data: kendo.stringify(this.get("action")),
+                    success: (response) => {
+                        if(response.status) {
+                            console.log('Import lawsuit');
+                        }
+                    },
+                    error: errorDataSource
+                })
+            }
+
             this.closePopup();
             }
          
@@ -949,14 +1017,14 @@ window.popupObservable.assign({
         var query = httpBuildQuery({filter: filter, omc: 1});
         var $content = $("#cdr-content");
         if(!$content.find("iframe").length)
-            $content.append(`<iframe src='${ENV.baseUrl}manage/cdr?${query}' style="width: 100%; height: 500px; border: 0"></iframe>`);
+            $content.append(`<iframe src='${ENV.baseUrl}manage/cdr?${query}' style="width: 100%; height: 900px; border: 0"></iframe>`);
     },
 
     openNotes: function(e) {
         var filter = JSON.stringify({
             logic: "and",
             filters: [
-                {field: "foreign_id", operator: "eq", value: this.get("item.LIC_NO")}
+                {field: "foreign_id", operator: "eq", value: this.get("item.LIC_NO").trim()}
             ]
         });
         var query = httpBuildQuery({filter: filter, omc: 1});
@@ -966,13 +1034,18 @@ window.popupObservable.assign({
     },
 
     openPaymentHistory: function(e) { 
-        var filter = JSON.stringify({
-            logic: "or",
-            filters: [
-                {field: "account_number", operator: "eq", value: this.item.account_number},
-                {field: "account_number", operator: "eq", value: this.item.account_number.substring(2)},
-            ]
-        });
+      var value_arr = [this.item.account_number.substring(2)];
+
+      if(this.card.contract_no != undefined){
+        value_arr.push(String(this.card.contract_no));
+    }
+    var filter = JSON.stringify({
+        logic: "or",
+        filters: [
+        {field: "account_number", operator: "eq", value: this.item.account_number},
+        {field: "account_number", operator: "in", value: value_arr },
+        ]
+    });
         var query = httpBuildQuery({filter: filter, omc: 1});
         var $content = $("#payment_history-content");
         if(!$content.find("iframe").length)
@@ -1009,7 +1082,7 @@ window.popupObservable.assign({
         var filter = JSON.stringify({
             logic: "and",
             filters: [
-                {field: "LIC_NO", operator: "eq", value: this.item.LIC_NO}
+                {field: "LIC_NO", operator: "eq", value: this.item.LIC_NO.trim()}
             ]
         });
         var query = httpBuildQuery({filter: filter, omc: 1});
@@ -1026,12 +1099,12 @@ window.popupObservable.assign({
     nonePaymentOption: dataSourceJsonData(["Actioncode", "reasonnonpayment"]),
 
     onChangeReasonNonePayment: function(e) {
-        if(this.get('item.reason_nonpayment') == 'others') {
-            this.set('reason_nonpayment_note', true);
-        }
-        else {
-            this.set('reason_nonpayment_note', false);
-        }
+        // if(this.get('item.reason_nonpayment') == 'others') {
+        //     this.set('reason_nonpayment_note', true);
+        // }
+        // else {
+        //     this.set('reason_nonpayment_note', false);
+        // }
     },
 
     onDataBoundDebtAcc: function(e) {

@@ -42,6 +42,9 @@ Class Disbursement extends WFF_Controller {
         try {
             $this->load->library("crud");
             $data = json_decode(file_get_contents('php://input'), TRUE);
+            if(!empty($data['disbursed'])) {
+                $data['disbursed'] = 'X';
+            }
             $data["created_at"]	= time();
             $data["created_by"]	= $this->session->userdata("extension");
             $result = $this->crud->create($this->collection, $data);
@@ -55,6 +58,12 @@ Class Disbursement extends WFF_Controller {
     {
         try {
             $data = json_decode(file_get_contents('php://input'), TRUE);
+            if(!empty($data['disbursed'])) {
+                $data['disbursed'] = 'X';
+            }
+            else {
+                $data['disbursed'] = '';
+            }
             $data["updated_by"]  = $this->session->userdata("extension");
             $data["updated_at"]  = date('m/d/Y h:i:s a', time());
             $result = $this->crud->where_id($id)->update($this->collection, array('$set' => $data));

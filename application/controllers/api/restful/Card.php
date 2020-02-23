@@ -45,7 +45,7 @@ Class Card extends WFF_Controller {
 					}else{
 						$kydue = '03';
 					}
-					$sbv_stored = $this->mongo_db->where('contract_no', $listofacc['account_number'])->getOne('LO_SBV_Stored');
+					$sbv_stored = $this->mongo_db->where('contract_no', $listofacc['account_number'])->order_by(array('_id' => -1))->getOne('LO_SBV_Stored');
 					if(!empty($sbv_stored)){
 						if(isset($sbv_stored['overdue_indicator'])){
 							$value['overdue_indicator'] = $sbv_stored['overdue_indicator'];
@@ -90,7 +90,7 @@ Class Card extends WFF_Controller {
 		$count = 0;
 		$payment_historys 	= $this->mongo_db->where(array("account_number" => $account_number))->get('LO_Payment_history');
 		foreach ($payment_historys as $i_key => $i_payment) {
-			if($i_payment['"payment_amount"'] <= $i_payment['overdue_amount']) continue;
+			if($i_payment["payment_amount"] <= $i_payment['overdue_amount']) continue;
 
 			if(gettype($i_payment['payment_date']) == 'string'){
                     // 271219 -> 27/12/2019

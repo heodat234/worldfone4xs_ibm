@@ -92,7 +92,7 @@ Class Telesalelist extends WFF_Controller {
 		}
 	}
 
-	function update_import_log($id) {
+	function update_import_log($id) { 
         try {
             $data = json_decode(file_get_contents('php://input'), TRUE);
             $data['complete_import'] = time();
@@ -111,4 +111,14 @@ Class Telesalelist extends WFF_Controller {
 		$url = 'upload/telesales/export/' . 'Calling_list_' . $date . '.xlsx';
 		echo json_encode(array('status' => 1, 'data' => $url));
 	}
+
+	function delete_manay_by_acc() {
+        try {
+            $data = json_decode(file_get_contents('php://input'), TRUE);
+            $result = $this->crud->where(array('contract_no' => array('$in' => $data)))->delete_all($this->collection, TRUE);
+            echo json_encode(array("status" => $result ? 1 : 0, "data" => []));
+        } catch (Exception $e) {
+            echo json_encode(array("status" => 0, "message" => $e->getMessage()));
+        }
+    }
 }

@@ -2,10 +2,31 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 Class Nav extends CI_Controller {
+
+    private $cache_enable = TRUE;
+    private $cache_minutes = 1;
+
 	function index()
 	{
 		$this->load->library("authentication");
-		$nav = $this->authentication->get_nav();
+        $nav = $this->authentication->get_nav();
+
+        if($this->cache_enable) 
+        {
+            $this->load->library("session");
+            $extension = $this->session->userdata("extension");
+            if($extension) 
+            {
+                $path = APPPATH . "cache/{$extension}/";
+                if (!@file_exists($path)) 
+                { 
+                    @mkdir($path, 0755);
+                }
+                $this->config->set_item('cache_path', $path);
+            }
+            $this->output->cache($this->cache_minutes);
+        }
+        
 		$data["template"] = array("active_page" => $this->input->get("currentUri"));
 		$data["primary_nav"] = $nav;
 		$this->load->view("templates/sidebar/nav", $data);

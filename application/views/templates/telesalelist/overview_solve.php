@@ -97,6 +97,7 @@
 </script>
 
 <script type="text/javascript">
+    kendo.culture("vi-VN");
     function gridPhone(data,id,type) {
         var html = "<span></span>";
         if(data) {
@@ -135,7 +136,7 @@
             value: (ENV.type ? ENV.type + "_" : "") + "Telesalelist"
         },
         page: 1,
-        pageSize: 30,
+        pageSize: 100,
         sort: {field: "index", dir: "asc"}
     })
     telesaleFields.read().then(function(){

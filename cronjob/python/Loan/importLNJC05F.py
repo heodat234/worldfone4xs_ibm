@@ -29,7 +29,7 @@ _mongodb = Mongodb(MONGODB="_worldfone4xs", WFF_ENV=wff_env)
 log = open(base_url + "cronjob/python/Loan/log/importlnjc05.txt","a")
 now = datetime.now()
 subUserType = 'LO'
-collection = common.getSubUser(subUserType, 'LNJC05')
+collection = common.getSubUser(subUserType, 'LNJC05_14012020')
 
 try:
     modelColumns = []
@@ -44,8 +44,8 @@ try:
     errorData = []
     total = 0
     complete = 0
-    today = date.today()
-    today = datetime.strptime('03/02/2020', "%d/%m/%Y").date()
+    # today = date.today()
+    today = datetime.strptime('14/01/2020', "%d/%m/%Y").date()
     day = today.day
     month = today.month
     year = today.year
@@ -59,7 +59,7 @@ try:
         mongodbresult = Mongodb(logDbName, WFF_ENV=wff_env)
     else:
         mongodbresult = Mongodb(logDbName, WFF_ENV=wff_env)
-    
+
     ftpLocalUrl = common.getDownloadFolder() + fileName
 
     try:
@@ -86,10 +86,10 @@ try:
             sys.exit()
 
         importLogInfo = {
-            'collection'    : collection, 
+            'collection'    : collection,
             'begin_import'  : time.time(),
             'file_name'     : fileName,
-            'file_path'     : ftpLocalUrl, 
+            'file_path'     : ftpLocalUrl,
             'source'        : 'ftp',
             'status'        : 2,
             'command'       : '/usr/local/bin/python3.6 ' + base_url + "cronjob/python/Loan/importLNJC05.py > /dev/null &",
@@ -97,7 +97,7 @@ try:
         }
         importLogId = mongodb.insert(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), insert_data=importLogInfo)
 
-    models = _mongodb.get(MONGO_COLLECTION='Model', WHERE={'collection': collection}, SORT=[('index', 1)], SELECT=['index', 'collection', 'field', 'type', 'sub_type'])
+    models = _mongodb.get(MONGO_COLLECTION='Model', WHERE={'collection': common.getSubUser(subUserType, 'LNJC05')}, SORT=[('index', 1)], SELECT=['index', 'collection', 'field', 'type', 'sub_type'])
 
     for model in models:
         if 'sub_type' in model.keys():

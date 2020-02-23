@@ -81,6 +81,8 @@ Class Telesalelist_solve extends WFF_Controller {
 		try {
 			$data = json_decode(file_get_contents('php://input'), TRUE);
 			$data["updatedBy"]	=	$this->session->userdata("extension");
+			unset($data['assigning']);
+			unset($data['assigning_name']);
 			if(!empty($data["calluuid"])) {
 				$callInfo = $this->mongo_db->where(array('calluuid' => $data['calluuid']))->getOne($this->call_collection);
 				$data['starttime_call'] = (!empty($callInfo['starttime'])) ? $callInfo['starttime'] : null;

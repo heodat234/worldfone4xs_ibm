@@ -127,6 +127,7 @@
         schema: {
             data: "data",
             parse: function(response) {
+                console.log(response.data);
                 response.data.map(doc => {
                     if(doc.sub_type)
                         doc.subType = JSON.parse(doc.sub_type);
@@ -145,7 +146,7 @@
             value: (ENV.type ? ENV.type + "_" : "") + "Disbursement"
         },
         sort: {field: "index", dir: "asc"},
-        pageSize: 31,
+        // pageSize: 31,
     })
     customerFields.read().then(function(){
         var columns = customerFields.data().toJSON();
@@ -160,7 +161,7 @@
                     read: {
                         url: ENV.reportApi + "excecuteExcel/read",
                         data: {
-                            limit_column: "AB",
+                            limit_column: "AD",
                             pageSize: null
                         }
                     }
@@ -227,6 +228,8 @@
                                 'c24': data[prop][24],
                                 'c25': data[prop][25],
                                 'c26': data[prop][26],
+                                'c27': data[prop][27],
+                                'c28': data[prop][28],
                             });
                         }
 
@@ -314,7 +317,7 @@
                 read: {
                     url: ENV.reportApi + "excecuteExcel/read",
                     data: {
-                        limit_column: "AB",
+                        limit_column: "AD",
                         pageSize: null,
                         filepath: filepath
                     }
@@ -371,6 +374,8 @@
                         'c24': data[prop][24],
                         'c25': data[prop][25],
                         'c26': data[prop][26],
+                        'c27': data[prop][27],
+                        'c28': data[prop][28],
                     });
                 }
 

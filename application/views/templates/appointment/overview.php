@@ -30,11 +30,17 @@
 var Config = Object.assign(Config, {
     model: {
         id: "id",
+        fields: {
+            last_modified: {type: 'date'},
+            created_at: {type: 'date'},
+            updated_at: {type: 'date'}
+        }
     },
     parse(response) {
         response.data.map(function(doc) {
             doc.created_at = doc.created_at ? new Date(doc.created_at * 1000) : undefined;
             doc.updated_at = doc.updated_at ? new Date(doc.updated_at * 1000) : undefined;
+            doc.last_modified = doc.last_modified ? new Date(doc.last_modified * 1000): undefined;
             return doc;
         });
         return response;
@@ -145,13 +151,8 @@ var Config = Object.assign(Config, {
         width: "150px",
         headerAttributes: { style: "white-space: normal"},
         filterable: true,
-        template: function(dataItem) {
-            if(typeof dataItem.updated_at != 'undefined') {
-                return gridDate(dataItem.updated_at);
-            }
-            else {
-                return gridDate(dataItem.created_at);
-            }
+        template: (dataItem) => {
+            return gridDate(dataItem.last_modified, "dd/MM/yyyy HH:mm:ss");
         }
     },],
 });
@@ -203,6 +204,6 @@ var Config = Object.assign(Config, {
 	$(document).on("click", ".grid-name", function() {
 		detailData($(this).closest("tr"));
 	});
-
+    kendo.culture("vi-VN");
     Table.init();
 </script>

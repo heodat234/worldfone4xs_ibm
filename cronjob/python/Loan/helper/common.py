@@ -107,7 +107,7 @@ class Common:
 
     def convertBoolean(self, value, formatType=''):
         return bool(value)
-    
+
     def convertDouble(self, value, formatType=''):
         try:
             if value in ['']:
@@ -147,10 +147,10 @@ class Common:
 
     def getDownloadFolder(self):
         wff_env = self.wff_env(self.base_url())
-        
+
         if wff_env in ['UAT','DEV']:
             # serverfolder = 'YYYYMMDD'
-            today = self.datetime.strptime('01/01/2020', "%d/%m/%Y").date() 
+            today = self.datetime.strptime('14/01/2020', "%d/%m/%Y").date()
             serverfolder = today.strftime("%Y%m%d")
         else:
             today = self.date.today()

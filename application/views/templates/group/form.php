@@ -10,7 +10,7 @@
 	        </div>
 	        <div class="form-group">
 				<label>@Group name@</label>
-				<input class="k-textbox" style="width: 100%" data-bind="value: item.name, enabled: item.active">
+				<input class="k-textbox" readonly="true" style="width: 100%" data-bind="value: item.name, enabled: item.active">
 			</div>
 			<div class="form-group">
 				<label>@Lead@</label>

@@ -22,6 +22,7 @@ Class Activity extends CI_Controller {
     			foreach ($data as $doc) {
 	                $id = $doc["id"];
 	                unset($doc["id"]);
+	                $doc["createdDate"] = $this->mongo_db->date();
 	                $this->mongo_db->insert($this->collection . "_log", $doc);
 	                $this->mongo_db->where_id($id)->delete($this->collection);
 	            }

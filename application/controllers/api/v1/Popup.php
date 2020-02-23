@@ -30,6 +30,27 @@ Class Popup extends WFF_Controller {
 			if(!$phone) throw new Exception("Error Processing Request", 1);
 			
 			$customers = $this->mongo_db->where(array("phone" => $phone))->get("{$this->sub}Telesalelist");
+			if(empty($customers)) {
+				$customers = $this->mongo_db->where(array("mobile_phone_no" => $phone))->get("{$this->sub}Datalibrary");
+				foreach($customers as &$customer) {
+					$customer['phone'] = $customer['mobile_phone_no'];
+					$customer['name'] = $customer['customer_name'];
+					$customer['dl_assign'] = (!empty($customer['assign'])) ? $customer['assign'] : '';
+					$customer['dl_assign_name'] = (!empty($customer['assign_name'])) ? $customer['assign_name'] : $customer['dl_assign'];
+					$customer['is_data_library_list'] = true;
+				}
+			}
+			else {
+				if(!empty($customers)) {
+					foreach($customers as &$customer) {
+						$dataLibrary = $this->mongo_db->where(array('contract_no' => $customer['contract_no']))->getOne("{$this->sub}Datalibrary");
+						if(!empty($dataLibrary)) {
+							$customer['dl_assign'] = (!empty($dataLibrary['assign'])) ? $dataLibrary['assign'] : $customer['assign'];
+							$customer['dl_assign_name'] = (!empty($dataLibrary['assign_name'])) ? $dataLibrary['assign_name'] : $customer['dl_assign'];
+						}
+					}
+				}
+			}
 			echo json_encode(array("status" => 1, "data" => $customers, "total" => count($customers)));
 		} catch (Exception $e) {
             echo json_encode(array("status" => 0, "message" => $e->getMessage()));

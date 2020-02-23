@@ -55,7 +55,7 @@ Class Daily_all_user_report extends CI_Controller {
     function read() {
         try {
             $request = json_decode($this->input->get("q"), TRUE);
-            $date = date('d-m-Y',strtotime("-2 days"));
+            $date = date('d-m-Y',strtotime("-0 days"));
             
             $match = array('createdAt' => array('$gte' => strtotime($date)));
             $data = $this->crud->read($this->collection, $request,array(),$match);
@@ -69,7 +69,7 @@ Class Daily_all_user_report extends CI_Controller {
    function exportExcel()
    {
       $now = getdate();
-      $date = date('d-m-Y',strtotime("-2 days"));
+      $date = date('d-m-Y',strtotime("-0 days"));
 
       $request = array('createdAt' => array('$gte' => strtotime($date)));
       $data = $this->mongo_db->where($request)->get($this->collection);

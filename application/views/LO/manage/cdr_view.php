@@ -257,15 +257,12 @@ var Table = function() {
     if(filterStorage) {
         Config.filter = filterStorage;
     } else {
-        let today = new Date(),
-            tomorrow = new Date();
+        let today = new Date();
             today.setHours(0,0,0,0);
-            tomorrow.setHours(24,0,0,0);
         Config.filter = {
             logic: "and",
             filters: [
-                {field: "starttime", operator: "gte", value: today},
-                {field: "starttime", operator: "lte", value: tomorrow}
+                {field: "starttime", operator: "gte", value: today}
             ]
         };
     }

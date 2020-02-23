@@ -13,18 +13,29 @@ var Config = {
         dir: "asc"
     }],
     columns: [{
-            selectable: true,
-            width: 32,
-            hidden: true
-        },{
-            field: "text",
-            title: "@Rate@",
-        },{
-            title: `@Action@`,
-            command: [{name: "edit", text: "@Edit@"}, {name: "destroy", text: "@Delete@"}],
-            width: 200
-        }]
-}; 
+        selectable: true,
+        width: 32,
+        hidden: true
+    },{
+        field: "text",
+        title: "@Rate@",
+        format: "{0:p5}",
+        editor: discountEditor,
+    },{
+        title: `@Action@`,
+        command: [{name: "edit", text: "@Edit@"}, {name: "destroy", text: "@Delete@"}],
+        width: 200
+    }]
+};
+
+function discountEditor (container, options) {
+    $('<input data-bind="value:' + options.field + '"/>')
+        .appendTo(container)
+        .kendoNumericTextBox({
+        decimals: 7,
+        format: "p5"
+        });
+}
 </script>
 
 <!-- Page content -->

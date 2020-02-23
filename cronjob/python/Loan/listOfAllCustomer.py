@@ -19,6 +19,10 @@ from helper.jaccs import Config
 def round_down(n, decimals=0):
     multiplier = 10 ** decimals
     return math.floor(n * multiplier) / multiplier
+
+# Python code to merge dict using update() method 
+def Merge(dict1, dict2): 
+    return(dict2.update(dict1))         
 #help
 common      = Common()
 base_url    = common.base_url()
@@ -29,6 +33,7 @@ now         = datetime.now()
 subUserType = 'LO'
 
 collection           = common.getSubUser(subUserType, 'List_of_all_customer_report')
+collection1          = common.getSubUser(subUserType, 'List_of_all_customer_total_report_temp')
 
 zaccf_collection     = common.getSubUser(subUserType, 'ZACCF')
 sbv_collection            = common.getSubUser(subUserType, 'SBV')
@@ -42,18 +47,21 @@ try:
     data        = []
     cardData        = []
     insertData  = []
-    list_group = ['1','2','3','4','5']
+    insertData1  = []
+    list_group = ["01","02","03","04","05","A","B","C","D","E"]
     list_group_total = ['G2','G2~','G3~']
     resultData  = []
     errorData   = []
 
-    g1 = 0
-    g2 = 0
-    g3 = 0
-    g4 = 0
-    g5 = 0
-
+    gr1 = 0
+    gr2 = 0
+    gr3 = 0
+    gr4 = 0
+    gr5 = 0
+    g2 = 1
+    total = 0
     today = date.today()
+    
     # today = datetime.strptime('12/10/2019', "%d/%m/%Y").date()
 
     day = today.day
@@ -64,135 +72,301 @@ try:
 
     todayString = today.strftime("%d/%m/%Y")
     todayTimeStamp = int(time.mktime(time.strptime(str(todayString + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
-
+    endTodayTimeStamp = int(time.mktime(time.strptime(str(todayString + " 23:59:59"), "%d/%m/%Y %H:%M:%S")))
+    
     startMonth = int(time.mktime(time.strptime(str('01/' + str(month) + '/' + str(year) + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
     endMonth = int(time.mktime(time.strptime(str(str(lastDayOfMonth) + '/' + str(month) + '/' + str(year) + " 23:59:59"), "%d/%m/%Y %H:%M:%S")))
 
-    holidayOfMonth = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_off_sys'))
-    listHoliday = map(lambda offDateRow: {offDateRow['off_date']}, holidayOfMonth)
+    # holidayOfMonth = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_off_sys'))
+    # listHoliday = map(lambda offDateRow: {offDateRow['off_date']}, holidayOfMonth)
 
-    if todayTimeStamp in listHoliday:
+    if day != lastDayOfMonth:
+      print('stop!')  
       sys.exit()
-
-    users = _mongodb.get(MONGO_COLLECTION=user_collection, SELECT=['extension','agentname'],SORT=([('_id', -1)]),SKIP=0, TAKE=200)
 
 
    # Zaccf
-#     aggregate_zaccf = [
-#         {
-#            "$match":
-#            {
-#                'created_at': {'$gte' : startMonth,'$lte' : endMonth},
-#            }
-#        },
-#        {
-#            "$project":
-#            {    
-#             #    col field
-#                "account_number": 1,
-#                "CUS_ID"        : 1,
-#                "name"          : 1,
-#                "ODIND_FG"      : 1,
-#                "CAR_ID"        : 1,
-#                "TERM_ID"       : 1,
-#                "W_ORG"         : 1,
-#                "PRODGRP_ID"    : 1,
-#                "LIC_NO"        : 1,
-#                "INT_RATE"      : 1,
-#                "WRK_BRN"       : 1,
-#                "STAT_CD"       : 1
+    aggregate_zaccf = [
+        {
+           "$match":
+           {
+               'createdAt': {'$gte' : todayTimeStamp,'$lte' : endTodayTimeStamp},
+           }
+       },
+       {
+                "$lookup":
+                {
+                "from": product_collection,
+                "localField":"PRODGRP_ID",
+                "foreignField": "code",
+                "as" : "product"
+                }
+        },
+       {
+           "$project":
+           {    
+            #    col field
+               "account_number": 1,
+               "CUS_ID"        : 1,
+               "name"          : 1,
+               "ODIND_FG"      : 1,
+               "CAR_ID"        : 1,
+               "TERM_ID"       : 1,
+               "W_ORG"         : 1,
+               "PRODGRP_ID"    : 1,
+               "PRODGRP_NAME"    : "$product.name",
+               "LIC_NO"        : 1,
+               "INT_RATE"      : 1,
+               "WRK_BRN"       : 1,
+               "STAT_CD"       : 1
 
                
-#            }
-#        }
-#    ]
-#     data = mongodb.aggregate_pipeline(MONGO_COLLECTION=zaccf_collection,aggregate_pipeline=aggregate_zaccf)
- 
-#     for row in data:
-#       if 'account_number' in row.keys():
-#             temp = {}
-#             temp['DT_TX'] = now.strftime("%d/%m/%Y")
-#             temp['ACC_ID'] = row['account_number']
-#             temp['CUS_ID'] = row['CUS_ID']
-#             temp['CUS_NM'] = row['name']
-#             temp['Loan_Group'] = row['ODIND_FG']
-#             temp['CAR_ID'] = row['CAR_ID']
-#             temp['TERM_ID'] = row['TERM_ID']
-#             temp['W_ORG'] = int(float(row['W_ORG']))
-#             temp['TOTAL_ACC'] = '1'
-#             temp['TOTAL_CUS'] = '1'
-#             temp['PRODGRP_ID'] = row['PRODGRP_ID']
-#             temp['LIC_NO'] =  row['LIC_NO']
-#             temp['interest_rate'] = float(row['INT_RATE'])*100
-#             temp['Dealer_code'] = row['WRK_BRN']
-#             temp['Province_code'] = row['STAT_CD']
-#             temp['createdAt'] = time.time()   
-#             temp['createdBy'] = 'system'   
-#             insertData.append(temp)
+           }
+       }
+   ]
+    data = mongodb.aggregate_pipeline(MONGO_COLLECTION=zaccf_collection,aggregate_pipeline=aggregate_zaccf)
     
-# # sbv
-#     aggregate_sbv = [
+    for row in data:
+      if 'account_number' in row.keys():
         
-#         {
-#             "$project":
-#             {
-#             #    col field
-#                 "contract_no"            : 1,
-#                 "cus_no"                 : 1,
-#                 "name"                   : 1,
-#                 "delinquency_group"      : 1,
-#                 "CAR_ID"                 : 1,
-#                 "ob_principal_sale"      : 1,
-#                 "ob_principal_cash"      : 1,
-#                 "card_type"              : 1,
-#                 "license_no"             : 1,
-#                 "interest_rate"          : 1,
-#                 "state"                  : 1
+            temp = {}
+            temp['DT_TX'] = now.strftime("%d/%m/%Y")
+            temp['ACC_ID'] = row['account_number']
+            temp['CUS_ID'] = row['CUS_ID']
+            temp['CUS_NM'] = row['name']
+            temp['Loan_Group'] = row['ODIND_FG']
+            temp['CAR_ID'] = row['CAR_ID']
+            temp['TERM_ID'] = row['TERM_ID']
+            temp['W_ORG'] = int(float(row['W_ORG']))
+            temp['TOTAL_ACC'] = '1'
+            temp['TOTAL_CUS'] = '1'
+            temp['PRODGRP_CODE'] = row['PRODGRP_ID']
+            temp['PRODGRP_ID'] = row['PRODGRP_NAME']
+            temp['LIC_NO'] =  row['LIC_NO']
+            temp['interest_rate'] = float(row['INT_RATE'])*100
+            temp['Dealer_code'] = row['WRK_BRN']
+            temp['Province_code'] = row['STAT_CD']
+            temp['createdAt'] = time.time()   
+            temp['createdBy'] = 'system'   
+            insertData.append(temp)
+    
+#  # sbv
+    aggregate_sbv = [
+        
+        {
+            "$project":
+            {
+            #    col field
+                "contract_no"            : 1,
+                "cus_no"                 : 1,
+                "name"                   : 1,
+                "delinquency_group"      : 1,
+                "CAR_ID"                 : 1,
+                "ob_principal_sale"      : 1,
+                "ob_principal_cash"      : 1,
+                "card_type"              : 1,
+                "license_no"             : 1,
+                "interest_rate"          : 1,
+                "state"                  : 1
                 
 
                 
-#             }
-#         }
-#     ]
-#     data1 = mongodb.aggregate_pipeline(MONGO_COLLECTION=sbv_collection,aggregate_pipeline=aggregate_sbv)
+            }
+        }
+    ]
+    data1 = mongodb.aggregate_pipeline(MONGO_COLLECTION=sbv_collection,aggregate_pipeline=aggregate_sbv)
 
 
-#     for row1 in data1:
-#         temp1 = {}
-#         zaccf = mongodb.getOne(MONGO_COLLECTION=zaccf_collection, WHERE={'LIC_NO': row1['license_no']},SELECT=['WRK_BRN']) 
-#         if 'contract_no' in row1.keys():
+    for row1 in data1:
+        temp1 = {}
+        zaccf = mongodb.getOne(MONGO_COLLECTION=zaccf_collection, WHERE={'LIC_NO': row1['license_no']},SELECT=['WRK_BRN'])
+        if 'contract_no' in row1.keys():
           
                 
-#             temp1['DT_TX'] = now.strftime("%d/%m/%Y")
-#             temp1['ACC_ID'] = row1['contract_no']
-#             temp1['CUS_ID'] = row1['cus_no']
-#             temp1['CUS_NM'] = row1['name']
-#             temp1['Loan_Group'] = row1['delinquency_group']
-#             temp1['CAR_ID'] = ''
-#             temp1['TERM_ID'] = ''
-#             temp1['W_ORG'] = int(row1['ob_principal_sale']) + int(row1['ob_principal_cash'])
-#             temp1['TOTAL_ACC'] = '1'
-#             temp1['TOTAL_CUS'] = '1'
-#             temp1['PRODGRP_ID'] = "301" if int(row1['card_type']) < 100 else "302"
-#             temp1['LIC_NO'] =  row1['license_no']
-#             temp1['interest_rate'] = float(row1['interest_rate']) *100
-#             temp1['Dealer_code'] = ''
-#             temp1['Province_code'] = row1['state']
-#             temp1['createdAt'] = time.time()   
-#             temp1['createdBy'] = 'system'   
-#             insertData.append(temp1)
+            temp1['DT_TX'] = now.strftime("%d/%m/%Y")
+            temp1['ACC_ID'] = row1['contract_no']
+            temp1['CUS_ID'] = row1['cus_no']
+            temp1['CUS_NM'] = row1['name']
+            temp1['Loan_Group'] = row1['delinquency_group']
+            temp1['CAR_ID'] = ''
+            temp1['TERM_ID'] = ''
+            temp1['W_ORG'] = int(row1['ob_principal_sale']) + int(row1['ob_principal_cash'])
+            temp1['TOTAL_ACC'] = '1'
+            temp1['TOTAL_CUS'] = '1'
+            temp1['PRODGRP_CODE'] = "301" if int(row1['card_type']) < 100 else "302"
+            temp1['PRODGRP_ID'] = ["301 – Credit card"] if int(row1['card_type']) < 100 else ["302 – Cash card"]
+            temp1['LIC_NO'] =  row1['license_no']
+            temp1['interest_rate'] = float(row1['interest_rate']) *100
+            temp1['Dealer_code'] = ''
+            temp1['Province_code'] = row1['state']
+            temp1['createdAt'] = time.time()   
+            temp1['createdBy'] = 'system'   
+            insertData.append(temp1)
+    if len(insertData) > 0:
+    #   mongodb.remove_document(MONGO_COLLECTION=collection)
+        mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertData)
+    
+    for group in list_group:
+        temp_group = {}
+    
+        list_product = mongodb.get(common.getSubUser(subUserType, 'Product'), SORT=[("code", 1)])
+        for product_code, product_value in enumerate(list_product):
+            
+            aggregate_sum = [
+                    {
+                        "$match"                            : {
+                            'Loan_Group'                    : group,
+                            "$and"                           : [{
+                                "createdAt"                 : {
+                                    "$gte"                  : todayTimeStamp,
+                                    "$lte"                  : endTodayTimeStamp
+                                },
+                            }] 
+                        }
+                    }, 
+                    {
+                        "$group"                            : {
+                            "_id"                           : None,
+                            "g"+product_value['code']            : {
+                                "$sum"                      : {
+                                    "$cond"                 : [
+                                        {
+                                            '$or'          : [
+                                                {"$eq"      : ["$PRODGRP_CODE", product_value['code'] ]},
+                                               
+                                            ],
+                                        },
+                                        1,
+                                        0
+                                    ]
+                                }
+                            },
+                           "amount_"+product_value['code']            : {
+                                "$sum"                      : {
+                                    "$cond"                 : [
+                                        {
+                                            '$or'          : [
+                                                {"$eq"      : ["$PRODGRP_CODE", product_value['code'] ]},
+                                               
+                                            ],
+                                        },
+                                        "$W_ORG",
+                                        0
+                                    ]
+                                }
+                            },
+                            "t_g"+group         :{
+                                "$sum"  : {
+                                    "$cond"                 : [
+                                        {
+                                            '$or'          : [
+                                                {"$eq"      : ["$Loan_Group", group ]},
+                                               
+                                            ],
+                                        },
+                                        1,
+                                        0
+                                    ]
 
+                                }
+                            },
+
+                            "t_a"+group         :{
+                                "$sum"  : {
+                                    "$cond"                 : [
+                                        {
+                                            '$or'          : [
+                                                {"$eq"      : ["$Loan_Group", group ]},
+                                               
+                                            ],
+                                        },
+                                        "$W_ORG",
+                                        0
+                                    ]
+
+                                }
+                            },
+                        }
+                    },
+                    {
+                    "$project"              :{
+                            "group"         : group,
+                            "product"       :   product_value['code'],  
+                            "g"+product_value['code']          :   "$g"+product_value['code'],
+                            "a"+product_value['code']          :   "$amount_"+product_value['code'],
+                            "t_g"+group                        :    "$t_g"+group,
+                            "t_a"+group                        :    "$t_a"+group 
+                            
+                            # "total"         :   "$total",
+                            # "g2"               : {
+                            #     "$divide"      : ["$gr2","$total"]
+                            # }
+                    }
+                    }
+                ]
+            
+            total_report = list(mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'List_of_all_customer_report'),aggregate_pipeline=aggregate_sum))
+            if total_report not in [None, []] and total_report[0] is not None:
+                    
+                    temp_group['group'] = group
+                    temp_group["g"+product_value['code']] = total_report[0]["g"+product_value['code']]
+                    temp_group["a"+product_value['code']] = total_report[0]["a"+product_value['code']]
+                    temp_group['t_g']             =   total_report[0]["t_g"+group]
+                    temp_group['t_a']             =   total_report[0]["t_a"+group]
+                    temp_group['createdAt'] = time.time()
+                    if total_report[0]['group'] == "A":  
+                        temp_group['group'] = "01"
+                        temp_group["g"+product_value['code']] =  total_report[0]["g"+product_value['code']]  
+                        temp_group["a"+product_value['code']] = total_report[0]["a"+product_value['code']]  
+                        temp_group['t_g']             =   total_report[0]["t_g"+group]
+                        temp_group['t_a']             =   total_report[0]["t_a"+group]
+                        temp_group['createdAt'] = time.time()
+                    elif total_report[0]['group'] == "B":  
+                        temp_group['group'] = "02"
+                        temp_group["g"+product_value['code']] =  total_report[0]["g"+product_value['code']] 
+                        temp_group["a"+product_value['code']] =  total_report[0]["a"+product_value['code']]
+                        temp_group['t_g']             =   total_report[0]["t_g"+group]
+                        temp_group['t_a']             =   total_report[0]["t_a"+group]
+                        temp_group['createdAt'] = time.time()  
+                    elif total_report[0]['group'] == "C":  
+                        temp_group['group'] = "03"
+                        temp_group["g"+product_value['code']] =  total_report[0]["g"+product_value['code']] 
+                        temp_group["a"+product_value['code']] =  total_report[0]["a"+product_value['code']]  
+                        temp_group['t_g']             =   total_report[0]["t_g"+group]
+                        temp_group['t_a']             =   total_report[0]["t_a"+group]
+                        temp_group['createdAt'] = time.time()
+                    elif total_report[0]['group'] == "D":  
+                        temp_group['group'] = "04"
+                        temp_group["g"+product_value['code']] = total_report[0]["g"+product_value['code']]  
+                        temp_group["a"+product_value['code']] =  total_report[0]["a"+product_value['code']]
+                        temp_group['t_g']             =   total_report[0]["t_g"+group]
+                        temp_group['t_a']             =   total_report[0]["t_a"+group]
+                        temp_group['createdAt'] = time.time()  
+                    elif total_report[0]['group'] == "E":  
+                        temp_group['group'] = "05"
+                        temp_group["g"+product_value['code']] =  total_report[0]["g"+product_value['code']] 
+                        temp_group["a"+product_value['code']] =  total_report[0]["a"+product_value['code']] 
+                        temp_group['t_g']             =   total_report[0]["t_g"+group]
+                        temp_group['t_a']             =   total_report[0]["t_a"+group]
+                        temp_group['createdAt'] = time.time()
+            # insertData1.append(temp_group) 
+        if temp_group !={}:
+            insertData1.append(temp_group)      
+              
+         
+
+    tt_temp ={}
     list_product = mongodb.get(common.getSubUser(subUserType, 'Product'), SORT=[("code", 1)])
     for product_code, product_value in enumerate(list_product):
-        temp_group = {}
-        aggregate_sum = [
+            
+        aggregate_tt = [
                 {
                     "$match"                            : {
-                        'PRODGRP_ID'                    : product_value['code'],
-                        "$or"                           : [{
+                        
+                        "$and"                           : [{
                             "createdAt"                 : {
-                                "$gte"                  : startMonth,
-                                "$lte"                  : endMonth
+                                "$gte"                  : todayTimeStamp,
+                                "$lte"                  : endTodayTimeStamp
                             },
                         }] 
                     }
@@ -200,87 +374,76 @@ try:
                 {
                     "$group"                            : {
                         "_id"                           : None,
-                        
-                        "g1"            : {
+                        "g"+product_value['code']            : {
                             "$sum"                      : {
                                 "$cond"                 : [
                                     {
                                         '$or'          : [
-                                            {"$eq"      : ["$Loan_Group", '1']},
-                                            {"$eq"      : ["$Loan_Group", "A"]}
-                                        ]
+                                            {"$eq"      : ["$PRODGRP_CODE", product_value['code'] ]},
+                                            
+                                        ],
                                     },
                                     1,
                                     0
                                 ]
                             }
                         },
-                        "g2"            : {
-                            "$sum"                     : {
-                                "$cond"                 : [
-                                    {
-                                        '$or'          : [
-                                            {"$eq"      : ["$Loan_Group", "2"]},
-                                            {"$eq"      : ["$Loan_Group", "B"]},
-                                        ]
-                                    },
-                                    1,0
-                                ]
-                            }
-                        },
-                        "g3"            : {
+                        "amount_"+product_value['code']            : {
                             "$sum"                      : {
                                 "$cond"                 : [
                                     {
                                         '$or'          : [
-                                          {"$eq"      : ["$Loan_Group", "3"]},
-                                            {"$eq"      : ["$Loan_Group", "C"]},
-                                        ]
+                                            {"$eq"      : ["$PRODGRP_CODE", product_value['code'] ]},
+                                            
+                                        ],
                                     },
-                                    1,
+                                    "$W_ORG",
                                     0
                                 ]
                             }
                         },
-                        "g4"            : {
-                            "$sum"                     : {
-                                "$cond"                 : [
-                                    {
-                                        '$or'          : [
-                                          {"$eq"      : ["$Loan_Group", "4"]},
-                                            {"$eq"      : ["$Loan_Group", "D"]},
-                                        ]
-                                    },
-                                    1,0
-                                ]
-                            }
+                        "t_g"         :{
+                            "$sum"  : 1
+                             
+
                         },
-                        "g5"            : {
-                            "$sum"                      : {
-                                "$cond"                 : [
-                                    {
-                                       '$or'          : [
-                                          {"$eq"      : ["$Loan_Group", "5"]},
-                                            {"$eq"      : ["$Loan_Group", "E"]},
-                                        ]
-                                    },
-                                    1,
-                                    0
-                                ]
-                            }
-                        }
+
+                        "t_a":{
+                            "$sum"  : "$W_ORG"
+                             
+
+                        },
                     }
+                },
+                {
+                "$project"              :{
+                       
+                          
+                        "g"+product_value['code']          :   "$g"+product_value['code'],
+                        "a"+product_value['code']          :   "$amount_"+product_value['code'],
+                        "t_g"                        :    "$t_g",
+                        "t_a"                        :    "$t_a" 
+                        
+                        # "total"         :   "$total",
+                        # "g2"               : {
+                        #     "$divide"      : ["$gr2","$total"]
+                        # }
+                }
                 }
             ]
         
-        total_report = list(mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'List_of_all_customer_report'),aggregate_pipeline=aggregate_sum))
-        print(total_report)
-        sys.exit()
+        total_report1 = list(mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'List_of_all_customer_report'),aggregate_pipeline=aggregate_tt))
+        if total_report1 not in [None, []] and total_report1[0] is not None: 
+            tt_temp['group'] ="TOTAL"
+            tt_temp["g"+product_value['code']] = total_report1[0]["g"+product_value['code']]
+            tt_temp["a"+product_value['code']] = total_report1[0]["a"+product_value['code']]
+            tt_temp['t_g']             =   total_report1[0]["t_g"]
+            tt_temp['t_a']             =   total_report1[0]["t_a"]
+    insertData1.append(tt_temp)
 
-
-    if len(insertData) > 0:
-    #   mongodb.remove_document(MONGO_COLLECTION=collection)
-      mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertData)
+    
+    if len(insertData1) > 0:
+      mongodb.batch_insert(MONGO_COLLECTION=collection1, insert_data=insertData1)
     now_end         = datetime.now()
     log.write(now_end.strftime("%d/%m/%Y, %H:%M:%S") + ': End Log' + '\n')
     print('DONE')
@@ -289,3 +452,4 @@ except Exception as e:
     traceback.print_exc()
     log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')
 
+   

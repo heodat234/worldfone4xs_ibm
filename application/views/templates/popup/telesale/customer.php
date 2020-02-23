@@ -13,11 +13,14 @@
                         <li class="k-state-active">
                             <i class="fa fa-user"></i><b> OBJECT INFOMATION</b>
                         </li>
-                        <li data-bind="visible: detailUrl, click: openDetail">
+                        <li data-bind="visible: isCallinglistCus, click: openDetail">
                             <i class="gi gi-vcard"></i><b> CUSTOMER DETAIL</b>
                         </li>
                         <li data-bind="click: openCdr">
                             <i class="fa fa-phone-square"></i><b> CDR</b>
+                        </li>
+                        <li data-bind="click: openDatalibrary, invisible: item.assign">
+                            <i class="fa fa-book"></i><b> Data library</b>
                         </li>
                         <div class="pull-right">
                             <span data-bind="text: phone" style="font-size: 18px; vertical-align: -2px" class="text-primary"></span>
@@ -37,6 +40,16 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label class="control-label col-xs-4">@Assign@</label>
+                                        <div class="col-xs-8">
+                                            <div data-bind="visible: isNewData"><button style="vertical-align: -7px" data-role="button" data-icon="edit" data-bind="click: assigning">New - Xin data</button></div>
+                                            <div data-bind="visible: item.dl_assign"><span style="vertical-align: -7px" data-bind="text: item.dl_assign_name"></span></div>
+                                            <div data-bind="visible: item.assigning"><span style="vertical-align: -7px" data-bind="text: item.assigning_name"></span><span style="vertical-align: -7px"> - Chờ duyệt</span></div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                             <div class="row form-horizontal">
                                 <div class="col-sm-5">
@@ -49,7 +62,7 @@
 						                        <div class="input-group-addon" style="border: 0">
 						                        	<label style="margin-bottom: 0; cursor: pointer">
 						                        		<input type="checkbox" class="hidden" data-bind="checked: enableName">
-						                        		<span class="fa fa-pencil"></span>
+						                        		<!-- <span class="fa fa-pencil"></span> -->
 						                        	</label>
 						                        </div>
 						                    </div>
@@ -72,7 +85,7 @@
 						                        <div class="input-group-addon" style="border: 0">
 						                        	<label style="margin-bottom: 0; cursor: pointer">
 						                        		<input type="checkbox" class="hidden" data-bind="checked: enableBirthday">
-						                        		<span class="fa fa-pencil"></span>
+						                        		<!-- <span class="fa fa-pencil"></span> -->
 						                        	</label>
 						                        </div>
 						                    </div>
@@ -87,11 +100,19 @@
 						                        <div class="input-group-addon" style="border: 0">
 						                        	<label style="margin-bottom: 0; cursor: pointer">
 						                        		<input type="checkbox" class="hidden" data-bind="checked: enablePhone">
-						                        		<span class="fa fa-pencil"></span>
+						                        		<!-- <span class="fa fa-pencil"></span> -->
 						                        	</label>
 						                        </div>
 						                    </div>
 					                	</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-xs-4">@Preference Phone@</label>
+                                        <div class="col-xs-8">
+                                            <div class="input-group">
+                                                <span style="vertical-align: -7px" data-bind="text: item.phone_ref"></span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-sm-4">
@@ -167,6 +188,24 @@
                                             <span data-format="n0" style="vertical-align: -7px" data-bind="text: item.balance"></span>
                                         </div>
                                     </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-xs-4">Old loan</label>
+                                        <div class="col-xs-8">
+                                            <span data-format="n0" style="vertical-align: -7px" data-bind="text: item.old_loan"></span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-xs-4">Old monthly payment</label>
+                                        <div class="col-xs-8">
+                                            <span data-format="n0" style="vertical-align: -7px" data-bind="text: item.old_monthly_payment"></span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-xs-4">Dealer name</label>
+                                        <div class="col-xs-8">
+                                            <span data-format="n0" style="vertical-align: -7px" data-bind="text: item.dealer_name"></span>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="col-sm-4">
                                     <div class="form-group">
@@ -222,14 +261,16 @@
                                 </div>
                             </div>
                             <div class="row text-center">
-                                <button data-role="button" class="btn-primary" data-icon="calendar" data-bind="click: makeAppointment">@Make appointment@</button>
-                                <button data-role="button" data-icon="save" data-bind="click: save">@Save@</button>
+                                <button data-role="button" class="btn-primary" data-icon="calendar" data-bind="click: makeAppointment, visible: isSavePopup">@Make appointment@</button>
+                                <button data-role="button" data-icon="save" data-bind="click: save, visible: isSavePopup">@Save@</button>
                             </div>
                         </div>
                     </div>
                     <div style="padding: 0; overflow-x: hidden; overflow-y: hidden; min-height: 100%" id="customer-detail-content">
                     </div>
                     <div style="padding: 0; overflow-x: hidden; overflow-y: hidden; min-height: 100%" id="cdr-content">
+                    </div>
+                    <div style="padding: 0; overflow-x: hidden; overflow-y: hidden; min-height: 100%" id="data-library-content">
                     </div>
                 </div>
             </div>
@@ -292,13 +333,13 @@ window.popupObservable.assign({
         var rate_source = $("#rate").data("kendoComboBox");
         var selectedIndex = rate_source.selectedIndex
         if(selectedIndex == -1) {
-            this.set("item.rate", this.get("item.rate_text") / 100)
+            this.set("item.rate", (parseFloat(this.get("item.rate_text").replace('%','')) / 100).toFixed(4))
             this.set("item.rate_text", parseFloat(this.get("item.rate_text")).toFixed(2) + "%")
         }
         else {
             this.set("item.rate", this.get("item.rate_text"))
         }
-        var rate = this.get("item.rate"),
+        var rate = parseFloat(this.get("item.rate")),
     		loan_amount = this.get("item.loan_amount"),
             temp_term = this.get("item.temp_term");
     	if(typeof rate == "number" && typeof loan_amount == "number" && typeof temp_term == "number") {
@@ -313,9 +354,20 @@ window.popupObservable.assign({
     },
     save: function() {
         var data = this.item.toJSON();
-        data['calluuid'] = this._dataCall.calluuid;
+        data['calluuid'] = window.popupObservable._dataCall.calluuid;
         $.ajax({
-            url: ENV.restApi + "telesalelist_solve/" + (data.id || "").toString(),
+            url: ENV.vApi + "telesalelist_solve/updateByCif/" + (data.cif || "").toString(),
+            type: "PUT",
+            contentType: "application/json; charset=utf-8",
+            data: kendo.stringify(data),
+            success: (response) => {
+                if(response.status)
+                    syncDataSource();
+            },
+            error: errorDataSource
+        });
+        $.ajax({
+            url: ENV.restApi + "data_library/" + (data.id || "").toString(),
             type: "PUT",
             contentType: "application/json; charset=utf-8",
             data: kendo.stringify(data),
@@ -380,6 +432,59 @@ window.popupObservable.assign({
         var $content = $("#cdr-content");
         if(!$content.find("iframe").length)
             $content.append(`<iframe src='${ENV.baseUrl}manage/cdr?${query}' style="width: 100%; height: 500px; border: 0"></iframe>`);
+    },
+    openDatalibrary: function(e) {
+        var filter = JSON.stringify({
+            logic: "and",
+            filters: [
+                {field: "mobile_phone_no", operator: "eq", value: this.item.phone}
+            ]
+        });
+        var query = httpBuildQuery({filter: filter, omc: 1});
+        var $content = $("#data-library-content");
+        if(!$content.find("iframe").length)
+            $content.append(`<iframe src='${ENV.baseUrl}manage/data_library?${query}' style="width: 100%; height: 500px; border: 0"></iframe>`);
+    },
+    assigning: function(e) {
+        var assigning_data = this.item;
+        assigning_data.calluuid = this._dataCall.calluuid;
+        $.ajax({
+            url: ENV.vApi + "telesalelist_assigning/requestAssign",
+            type: "PUT",
+            contentType: "application/json; charset=utf-8",
+            data: kendo.stringify(assigning_data),
+            success: (response) => {
+                if(response.status) {
+                    notification.show(response.message, 'success');
+                }
+                else {
+                    notification.show(response.message, 'error');
+                }
+            },
+            // error: errorDataSource
+        });
+    },
+    isNewData: function(e) {
+        if(!this.get('item.assign') && !this.get('item.assigning') && this.get('item.id')) {
+            return true
+        }
+        else return false
+    },
+    isCallinglistCus: function(e) {
+        if(this.get('detailUrl') && !this.get('item.is_data_library_list')) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    },
+    isSavePopup: function(e) {
+        if(ENV.extension == this.get('item.assign') || ENV.role_name == 'Admin - Manager') {
+            return true;
+        }
+        else {
+            return false;
+        }
     }
 })
 window.popupObservable.init();

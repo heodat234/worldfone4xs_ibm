@@ -36,9 +36,6 @@
 				<label>@Mobile Phone No.@</label>
 				<input class="k-textbox" style="width: 100%" data-bind="value: item.phone">
 			</div>
-			
-		</div>
-		<div id="main-form" style="width: 50%" data-width="50%">
 			<div class="form-group" data-field="@Email@">
 				<label>@Product(MB/CE/PL)@</label>
 				<input class="k-textbox" style="width: 100%" data-bind="value: item.product">
@@ -56,6 +53,8 @@
 				<label>@Term(Latest Loan)@</label>
 				<input class="k-textbox" style="width: 100%" data-bind="value: item.term">
 			</div>
+		</div>
+		<div id="main-form" style="width: 50%" data-width="50%">
 			<div class="form-group" data-field="@Email@">
 				<label>@Balance(Latest Loan)@</label>
 				<input class="k-textbox" style="width: 100%" data-bind="value: item.balance">
@@ -109,6 +108,22 @@
 			<div class="form-group" >
 				<label>Potential</label>
 				<input type="checkbox" style="width: 50%" data-bind="checked: item.is_potential" class="chkbx" />
+			</div>
+			<div class="form-group" data-field="@Email@">
+				<label>@Old loan@</label>
+				<input class="k-textbox" style="width: 100%" data-bind="value: item.old_loan">
+			</div>
+			<div class="form-group" data-field="@Email@">
+				<label>@Old monthly payment@</label>
+				<input class="k-textbox" style="width: 100%" data-bind="value: item.old_monthly_payment">
+			</div>
+			<div class="form-group" data-field="@Email@">
+				<label>@Dealer name@</label>
+				<input class="k-textbox" data-bind="value: item.dealer_name" style="width: 100%"/>
+			</div>
+			<div class="form-group" data-field="@Email@">
+				<label>@Phone reference@</label>
+				<input class="k-textbox" style="width: 100%" data-bind="value: item.phone_ref">
 			</div>
 	    </div>
 	</div>

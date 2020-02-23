@@ -24,6 +24,9 @@ Class Payment_history extends WFF_Controller {
                 if(gettype($doc['payment_date']) == 'string'){
                     // 271219 -> 27/12/2019
                     $payment_date = $doc['payment_date'];
+                    if(strlen($doc['payment_date']) == 5){
+                        $doc['payment_date'] = '0' . $doc['payment_date'];
+                    }
                     $newstr = substr_replace($payment_date, $this_year, 4, 0);
                     $newstr = substr_replace($newstr, "/", 2, 0);
                     $newstr = substr_replace($newstr, "/",5, 0);

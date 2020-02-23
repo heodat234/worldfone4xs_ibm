@@ -46,8 +46,12 @@ Class Manage_create_calling_list extends WFF_Controller {
 		$this->load->library("mongo_db");
 		$data['LNCJ05'] = $this->mongo_db->count('LO_LNJC05');
 		$data['ListOfAccount'] = $this->mongo_db->count('LO_List_of_account_in_collection');
-		$data['Zaccf'] = date('d-m-Y H:i:s',$this->mongo_db->order_by(array('_id' => -1))->getOne('LO_ZACCF')['createdAt']);
-		$data['SBV'] = date('d-m-Y H:i:s',$this->mongo_db->order_by(array('_id' => -1))->getOne('LO_SBV')['created_at']);
+
+		$count_zaccf =  $this->mongo_db->count('LO_ZACCF');
+		$count_sbv =  $this->mongo_db->count('LO_SBV');
+
+		$data['Zaccf'] = date('d-m-Y H:i:s',$this->mongo_db->order_by(array('_id' => -1))->getOne('LO_ZACCF')['createdAt']) . '<br>Total: ' . $count_zaccf;
+		$data['SBV'] = date('d-m-Y H:i:s',$this->mongo_db->order_by(array('_id' => -1))->getOne('LO_SBV')['created_at']) . '<br>Total: ' . $count_sbv;
 
 		$result = [];
 		foreach ($data as $key => $value) {
@@ -67,7 +71,7 @@ Class Manage_create_calling_list extends WFF_Controller {
 		$listCol = $this->mongo_db->listCollections();
 		$this->mongo_db->switch_db('worldfone4xs');
 		foreach ($listCol as $key => $col) {
-			$checkSIBS = strpos((string)$col, 'SIBS_JIVF') !== false ? true : false;
+			$checkSIBS = strpos((string)$col, 'SIBS') !== false ? true : false;
 			if($checkSIBS){
 				$SIBS++;
 			}

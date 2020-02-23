@@ -267,7 +267,8 @@ try:
                                   {
                                       "starttime": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
                                       "userextension": str(member),
-                                      "dialtype" : "manual"
+                                      '$or' : [ { "dialtype" : {'$in' : ['manual', '']} }, {"dialtype" : {'$exists' : 'false'} }],
+                                      "direction" : "outbound"
                                   }
                               },{
                                   "$group":
@@ -377,7 +378,8 @@ try:
                                       "starttime": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
                                       "userextension": str(member),
                                       "disposition" : 'ANSWERED',
-                                      '$or' : [ { 'action_code' :  {'$in' : action_code}}, {'customer.action_code' :  {'$in' : action_code}}]
+                                      "direction" : "outbound"
+                                      # '$or' : [ { 'action_code' :  {'$in' : action_code}}, {'customer.action_code' :  {'$in' : action_code}}]
                                   }
                               },{
                                   "$group":
@@ -393,7 +395,6 @@ try:
                           if cdrAnsData != None:
                               for row in cdrAnsData:
                                   phone_ans_arr            = row['phone_ans_arr']
-                                  temp_member['count_conn'] = row['count_conn']
 
                           aggregate_cdr_ans_1 = [
                               {
@@ -401,13 +402,14 @@ try:
                                   {
                                       "createdAt": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
                                       "assign" : str(member),
+                                      "action_code" : {'$in' : action_code},
                                       '$or' : [ { "mobile_num" : {'$in' : phone_ans_arr} }, {"phone" : {'$in' : phone_ans_arr} }, {"other_phones" : {'$in' : phone_ans_arr}}]
                                   }
                               },{
                                   "$group":
                                   {
                                       "_id": 'null',
-                                      "account_ans_arr": {'$addToSet': '$customernumber'},
+                                      "account_ans_arr": {'$addToSet': '$account_number'},
                                   }
                               }
                           ]
@@ -415,7 +417,8 @@ try:
                           acc_ans_arr = []
                           if accountData != None:
                               for row in accountData:
-                                  acc_ans_arr            = row['account_ans_arr']
+                                  acc_ans_arr               = row['account_ans_arr']
+                                  temp_member['count_conn'] = len(row['account_ans_arr'])
 
 
 
@@ -882,8 +885,8 @@ try:
 
                       # members
                       member_arr = []
-                      count_member = len(unique_members)
-                      for member in team['members']:
+                      # count_member = len(unique_members)
+                      for member in teams['members']:
                           temp_member = {
                               'name'           : '',
                               'group'          : debtGroupCell[0:1],
@@ -990,7 +993,8 @@ try:
                                   {
                                       "starttime": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
                                       "userextension": str(member),
-                                      "dialtype" : "manual"
+                                      '$or' : [ { "dialtype" : {'$in' : ['manual', '']} }, {"dialtype" : {'$exists' : 'false'} }],
+                                      "direction" : "outbound"
                                   }
                               },{
                                   "$group":
@@ -1100,7 +1104,7 @@ try:
                                       "starttime": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
                                       "userextension": str(member),
                                       "disposition" : 'ANSWERED',
-                                      '$or' : [ { 'action_code' :  {'$in' : action_code}}, {'customer.action_code' :  {'$in' : action_code}}]
+                                      # '$or' : [ { 'action_code' :  {'$in' : action_code}}, {'customer.action_code' :  {'$in' : action_code}}]
                                   }
                               },{
                                   "$group":
@@ -1116,7 +1120,6 @@ try:
                           if cdrAnsData != None:
                               for row in cdrAnsData:
                                   phone_ans_arr            = row['phone_ans_arr']
-                                  temp_member['count_conn'] = row['count_conn']
 
                           aggregate_cdr_ans_1 = [
                               {
@@ -1124,13 +1127,14 @@ try:
                                   {
                                       "createdAt": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
                                       "assign" : str(member),
+                                      "action_code" : {'$in' : action_code},
                                       '$or' : [ { "mobile_num" : {'$in' : phone_ans_arr} }, {"phone" : {'$in' : phone_ans_arr} }, {"other_phones" : {'$in' : phone_ans_arr}}]
                                   }
                               },{
                                   "$group":
                                   {
                                       "_id": 'null',
-                                      "account_ans_arr": {'$addToSet': '$customernumber'},
+                                      "account_ans_arr": {'$addToSet': '$account_number'},
                                   }
                               }
                           ]
@@ -1138,8 +1142,8 @@ try:
                           acc_ans_arr = []
                           if accountData != None:
                               for row in accountData:
-                                  acc_ans_arr            = row['account_ans_arr']
-
+                                  acc_ans_arr               = row['account_ans_arr']
+                                  temp_member['count_conn'] = len(row['account_ans_arr'])
 
 
                           # PTP

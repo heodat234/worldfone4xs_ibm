@@ -1,0 +1,8 @@
+16/02/2020, 14:55:07: Authentication failed.
+16/02/2020, 15:17:25: unsupported operand type(s) for +: 'int' and 'str'
+21/02/2020, 15:28:30: type object 'datetime.datetime' has no attribute 'datetime'
+21/02/2020, 15:28:34: type object 'datetime.datetime' has no attribute 'datetime'
+21/02/2020, 15:30:11: type object 'datetime.datetime' has no attribute 'datetime'
+21/02/2020, 15:30:53: type object 'datetime.datetime' has no attribute 'datetime'
+21/02/2020, 15:31:09: type object 'datetime.datetime' has no attribute 'datetime'
+21/02/2020, 15:31:54: type object 'datetime.datetime' has no attribute 'datetime'

@@ -70,6 +70,15 @@
                      schema: {
                         data: "data",
                         total: "total",
+                        parse: function(response) {
+                            response.data.map(doc => {
+                                doc.tongcong_hopdong = doc.nogoc_hopdong + doc.lai_hopdong;
+                                doc.tongcong_sotiendathanhtoan = doc.nogoc_sotiendathanhtoan + doc.lai_sotiendathanhtoan + doc.phat_sotiendathanhtoan;
+                                doc.tongcong_dunokhoikien = doc.nogoc_dunokhoikien + doc.lai_dunokhoikien + doc.phat_dunokhoikien + doc.phitattoan_dunokhoikien;
+                                doc.tamung_anphi = doc.tongcong_dunokhoikien * 0.025;
+                            });
+                            return response;
+                        }
                      }
                   });
 

@@ -28,6 +28,20 @@ Class Diallist extends WFF_Controller {
             $match["leader_assign"] = $extension;
         }
 
+        if(isset($request['filter'])){
+        	$request['filter']['filters'][] = array('field' => 'createdAt', 'operator' => 'gte', 'value' => 'today midnight');
+        }else{
+        	$request['filter'] = array();
+        	$request['filter'] = array(
+        		'logic' => 'and',
+        		'filters' => array(
+        			'0' => array('field' => 'createdAt', 'operator' => 'gte', 'value' => 'today midnight')
+        		)
+        	);
+        }
+     
+        // print_r($request);exit;
+
 		$response = $this->crud->read($this->collection, $request, [], $match);
 
         // Change foreign_key

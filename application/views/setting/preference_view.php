@@ -49,6 +49,12 @@
 			        </div>
 			    </div>
 			    <div class="form-group">
+			        <label class="control-label col-sm-4">@Staff Id@</label>
+			        <div class="col-sm-8">
+			        	<span data-bind="text: item.staffid" style="vertical-align: -6px"></span>
+			        </div>
+			    </div>
+			    <div class="form-group">
 			        <label class="control-label col-sm-4">@Full name@</label>
 			        <div class="col-sm-8">
 			        	<div class="input-group">

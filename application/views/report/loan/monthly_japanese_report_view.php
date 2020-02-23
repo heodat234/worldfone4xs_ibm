@@ -15,7 +15,7 @@
         <div class="form-group col-sm-3">
             <label class="control-label col-xs-3">@Date@</label>
             <div class="col-xs-8">
-                <input id="start-date" data-role="datepicker" data-format="dd/MM/yyyy" name="fromDateTime" data-bind="value: fromDateTime, events: {change: startDate}" disabled="">
+                <input id="start-date" data-role="datepicker" data-format="MM/yyyy" data-start="year" data-depth="year" name="fromDateTime" data-bind="value: fromDateTime, events: {change: onChangeDate}">
             </div>
         </div>
         <!-- <div class="form-group col-sm-4">
@@ -81,231 +81,333 @@
     var Table = function() {
         return {
             dataSource: {},
+            dataSource_total: {},
+            dataSource_detail: {},
             grid_total: {},
             grid_detail: {},
             init: function() {
-                var dataSource_total = this.dataSource = new kendo.data.DataSource({
-                    serverPaging: true,
-                    serverFiltering: true,
-                    serverSorting: true,
-                    sort: [{field: 'detail', dir: 'asc'}, {field: 'index', dir: 'asc'}, {field: 'product_code', dir: 'asc'}],
-                    pageSize: 10,
-                    transport: {
-                    read: ENV.reportApi + "loan/monthly_japanese_report/read_total",
-                    parameterMap: parameterMap
-                    },
-                    schema: {
-                    data: "data",
-                    total: "total",
-                    parse: function (response) {
-                        i = 1;
-                        response.data.map(function(doc) {
-                            doc.date = new Date().toLocaleDateString();
-                            doc.stt = i;
-                            i = i + 1;
-                            doc.last_month = gridInterger(doc.last_month)
-                            doc.this_month = gridInterger(doc.this_month)
-                            return doc;
-                        })
-                            return response;
-                    },
-                    }
-                });
-
-                var dataSource_detail = this.dataSource = new kendo.data.DataSource({
-                    serverPaging: true,
-                    serverFiltering: true,
-                    serverSorting: true,
-                    sort: [{field: 'index', dir: 'asc'}, {field: 'product_code', dir: 'asc'}],
-                    pageSize: 10,
-                    transport: {
-                    read: ENV.reportApi + "loan/monthly_japanese_report/read_detail",
-                    parameterMap: parameterMap
-                    },
-                    schema: {
-                    data: "data",
-                    total: "total",
-                    parse: function (response) {
-                        i = 1;
-                        response.data.map(function(doc) {
-                            doc.date = new Date().toLocaleDateString();
-                            doc.stt = i;
-                            i = i + 1;
-                            doc.this_month_acc = gridInterger(doc.this_month_acc);
-                            doc.this_month_amt = gridInterger(doc.this_month_amt);
-                            doc.last_month_acc = gridInterger(doc.last_month_acc);
-                            doc.last_month_amt = gridInterger(doc.last_month_amt);
-                            return doc;
-                        })
-                            return response;
-                    },
-                    }
-                });
-
-                var grid_total = this.grid = $("#grid_total").kendoGrid({
-                    dataSource: dataSource_total,
-                    toolbar: ["excel"],
-                    excel: {allPages: true},
-                    excelExport: function(e) {
-                    var sheet = e.workbook.sheets[0];
-                    for (var rowIndex = 1; rowIndex < sheet.rows.length; rowIndex++) {
-                        var row = sheet.rows[rowIndex];
-                        for (var cellIndex = 0; cellIndex < row.cells.length; cellIndex ++) {
-                            if(row.cells[cellIndex].value instanceof Date) {
-                                row.cells[cellIndex].format = "dd-MM-yy hh:mm:ss"
-                            }
+                var date =  new Date();
+                date.setHours(0, 0 ,0, 0);
+                date.setDate(1);
+                var fromDate = date.getTime() / 1000;
+                var lastDateOfMonth = kendo.date.lastDayOfMonth(new Date());
+                var toDate = lastDateOfMonth.getTime() / 1000;
+                if(typeof fromDate != 'undefined' && typeof toDate != 'undefined') {
+                    var dataSource_total = this.dataSource_total = new kendo.data.DataSource({
+                        serverPaging: true,
+                        serverFiltering: true,
+                        serverSorting: true,
+                        sort: [{field: 'detail', dir: 'asc'}, {field: 'index', dir: 'asc'}, {field: 'product_code', dir: 'asc'}],
+                        filter: [{
+                            field: 'created_at',
+                            operator: 'gte',
+                            value: fromDate
+                        }, {
+                            field: 'created_at',
+                            operator: 'lte',
+                            value: toDate
+                        }],
+                        pageSize: 10,
+                        transport: {
+                        read: ENV.reportApi + "loan/monthly_japanese_report/read_total",
+                        parameterMap: parameterMap
+                        },
+                        schema: {
+                        data: "data",
+                        total: "total",
+                        parse: function (response) {
+                            i = 1;
+                            response.data.map(function(doc) {
+                                doc.date = new Date().toLocaleDateString();
+                                doc.stt = i;
+                                i = i + 1;
+                                // doc.last_month = gridInterger(doc.last_month)
+                                // doc.this_month = gridInterger(doc.this_month)
+                                return doc;
+                            })
+                                return response;
+                        },
                         }
-                    }
-                    },
-                    resizable: true,
-                    pageable: true,
-                    sortable: true,
-                    scrollable: true,
-                    columns: [{
-                        field: 'detail_name',
-                        title: ' '
-                    }, {
-                        field: 'product_name',
-                        title: ' '
-                    }, {
-                        field: 'last_month',
-                        title: 'Last month'
-                    }, {
-                        field: 'this_month',
-                        title: 'This month'
-                    }],
-                    noRecords: {
-                        template: `<h2 class='text-danger'>${KENDO.noRecords}</h2>`
-                    }
-                }).data("kendoGrid");
+                    });
 
-                var grid_detail = this.grid = $("#grid_detail").kendoGrid({
-                    dataSource: dataSource_detail,
-                    toolbar: ["excel"],
-                    excel: {allPages: true},
-                    excelExport: function(e) {
-                    var sheet = e.workbook.sheets[0];
-                    for (var rowIndex = 1; rowIndex < sheet.rows.length; rowIndex++) {
-                        var row = sheet.rows[rowIndex];
-                        for (var cellIndex = 0; cellIndex < row.cells.length; cellIndex ++) {
-                            if(row.cells[cellIndex].value instanceof Date) {
-                                row.cells[cellIndex].format = "dd-MM-yy hh:mm:ss"
-                            }
+                    var dataSource_detail = this.dataSource_detail = new kendo.data.DataSource({
+                        serverPaging: true,
+                        serverFiltering: true,
+                        serverSorting: true,
+                        sort: [{field: 'index', dir: 'asc'}, {field: 'product_code', dir: 'asc'}],
+                        filter: [{
+                            field: 'created_at',
+                            operator: 'gte',
+                            value: fromDate
+                        }, {
+                            field: 'created_at',
+                            operator: 'lte',
+                            value: toDate
+                        }],
+                        pageSize: 10,
+                        transport: {
+                        read: ENV.reportApi + "loan/monthly_japanese_report/read_detail",
+                        parameterMap: parameterMap
+                        },
+                        schema: {
+                        data: "data",
+                        total: "total",
+                        parse: function (response) {
+                            i = 1;
+                            response.data.map(function(doc) {
+                                doc.date = new Date().toLocaleDateString();
+                                doc.stt = i;
+                                i = i + 1;
+                                // doc.this_month_acc = gridInterger(doc.this_month_acc);
+                                // doc.this_month_amt = gridInterger(doc.this_month_amt);
+                                // doc.last_month_acc = gridInterger(doc.last_month_acc);
+                                // doc.last_month_amt = gridInterger(doc.last_month_amt);
+                                return doc;
+                            })
+                                return response;
+                        },
                         }
-                    }
-                    },
-                    resizable: true,
-                    pageable: true,
-                    sortable: true,
-                    scrollable: true,
-                    columns: [{
-                        field: 'group_name',
-                        title: ' '
-                    }, {
-                        field: 'product_name',
-                        title: ' '
-                    }, {
-                        title: 'Last month',
+                    });
+                    var d = new Date();
+                    var date = d.getDate();
+                    var month = d.getMonth() + 1; // Since getMonth() returns month from 0-11 not 1-12
+                    var year = d.getFullYear();
+                    var dateStr = date + "-" + month + "-" + year;
+                    var grid_total = this.grid = $("#grid_total").kendoGrid({
+                        dataSource: dataSource_total,
+                        toolbar: ["excel"],
+                        excel: {
+                            allPages: true,
+                            fileName: "MONTHLY JAPANESE REPORT TOTAL "+dateStr+".xlsx", 
+                            filterable: true
+                        },
+                        excelExport: function(e) {
+                            
+                            var sheet = e.workbook.sheets[0];
+                            var row = sheet.rows[0];
+                            
+                        for (var rowIndex = 0; rowIndex < sheet.rows.length; rowIndex++) {
+                          var row = sheet.rows[rowIndex];   
+                            
+                          for (var cellIndex = 0; cellIndex < row.cells.length; cellIndex ++) {
+                              if (cellIndex!=0){
+                                row.cells[cellIndex].borderRight = "3"
+                                row.cells[cellIndex].borderLeft = "3"
+                                row.cells[cellIndex].borderBottom = "3"
+                                row.cells[cellIndex].borderTop = "3"
+                              }
+                            if (rowIndex ==0){
+                                row.cells[cellIndex].bold = true
+                            }
+                            if (rowIndex !=0  && cellIndex>=row.cells.length-2){
+                                row.cells[cellIndex].format = "[Black]#,##0_);[Red]0.0);0"
+                              }
+                              
+                            var rowin = (sheet.rows.length - 1);
+                            if (rowIndex==rowin || rowIndex ==rowin/2){
+                                row.cells[cellIndex].bold = true
+                                row.cells[cellIndex].borderBottom = "medium"
+                               
+                            }
+                                  
+                              
+                              if (rowIndex == 0){
+                                row.cells[cellIndex].background = "#008738";
+                              }
+                              
+                              
+                          }
+                        }
+                     },
+                        resizable: true,
+                        pageable: true,
+                        sortable: true,
+                        scrollable: true,
                         columns: [{
-                            field: 'last_month_acc',
+                            field: 'detail_name',
                             title: ' '
                         }, {
-                            field: 'last_month_amt',
-                            title: ' '
-                        }]
-                    }, {
-                        title: 'This month',
-                        columns: [{
-                            field: 'this_month_acc',
+                            field: 'product_name',
                             title: ' '
                         }, {
-                            field: 'this_month_amt',
+                            field: 'last_month',
+                            title: 'Last month',
+                            format: "{0:n0}"
+                        }, {
+                            field: 'this_month',
+                            title: 'This month',
+                            format: "{0:n0}"
+                        }],
+                        noRecords: {
+                            template: `<h2 class='text-danger'>${KENDO.noRecords}</h2>`
+                        }
+                    }).data("kendoGrid");
+                    
+                    var grid_detail = this.grid = $("#grid_detail").kendoGrid({
+                        dataSource: dataSource_detail,
+                        toolbar: ["excel"],
+                        excel: {
+                            allPages: true,
+                            fileName: "MONTHLY JAPANESE REPORT GROUP "+dateStr+".xlsx", 
+                            filterable: true
+                        },
+                        excelExport: function(e) {
+                            var sheet = e.workbook.sheets[0];
+                            var row = sheet.rows[0];
+                            
+                            for (var rowIndex = 0; rowIndex < sheet.rows.length; rowIndex++) {
+                            var row = sheet.rows[rowIndex];   
+                                
+                            for (var cellIndex = 0; cellIndex < row.cells.length; cellIndex ++) {
+                                if (cellIndex!=0){
+                                    row.cells[cellIndex].borderRight = "3"
+                                    row.cells[cellIndex].borderLeft = "3"
+                                    row.cells[cellIndex].borderBottom = "3"
+                                    row.cells[cellIndex].borderTop = "3"
+                                }
+                                if (rowIndex ==0){
+                                    row.cells[cellIndex].bold = true
+                                }
+                                if (rowIndex !=0  && cellIndex>=row.cells.length-2){
+                                    row.cells[cellIndex].format = "[Black]#,##0_);[Red]0.0);0"
+                                }
+                                
+                                var rowin = (sheet.rows.length - 1);
+                                if (rowIndex==rowin || rowIndex ==rowin/2){
+                                    row.cells[cellIndex].bold = true
+                                    row.cells[cellIndex].borderBottom = "medium"
+                                
+                                }
+                                    
+                                
+                                if (rowIndex == 0){
+                                    row.cells[cellIndex].background = "#008738";
+                                }
+                                
+                                
+                            }
+                            }
+                         },
+                        resizable: true,
+                        pageable: true,
+                        sortable: true,
+                        scrollable: true,
+                        columns: [{
+                            field: 'group_name',
                             title: ' '
-                        }]
-                    }],
-                    noRecords: {
-                        template: `<h2 class='text-danger'>${KENDO.noRecords}</h2>`
-                    }
-                }).data("kendoGrid");
-
-                grid_total.selectedKeyNames = function() {
-                    var items = this.select(),
-                        that = this,
-                        checkedIds = [];
-                    $.each(items, function(){
-                        if(that.dataItem(this))
-                            checkedIds.push(that.dataItem(this).uid);
-                    })
-                    return checkedIds;
-                }
-
-                grid_detail.selectedKeyNames = function() {
-                    var items = this.select(),
-                        that = this,
-                        checkedIds = [];
-                    $.each(items, function(){
-                        if(that.dataItem(this))
-                            checkedIds.push(that.dataItem(this).uid);
-                    })
-                    return checkedIds;
-                }
-
-                /*
-                * Right Click Menu
-                */
-                var menu = $("#action-menu");
-                if(!menu.length) return;
-
-                $("html").on("click", function() {menu.hide()});
-
-                $(document).on("click", "#grid tr[role=row] a.btn-action", function(e){
-                    let btna = $(e.target);
-                    let row = $(e.target).closest("tr");
-                    e.pageX -= 20;
-                    showMenu(e, row, btna);
-                });
-
-                function showMenu(e, that,btna) {
-                    //hide menu if already shown
-                    menu.hide();
-
-                    //Get id value of document
-                    var uid = $(that).data('uid');
-                    var fltnumber = btna.data('flt');
-                    var date = btna.data('date');
-                    if(uid)
-                    {
-                        menu.find("a").data('uid',uid);
-                        menu.find("a").data('fltnumber',fltnumber);
-                        menu.find("a").data('date',date);
-                        menu.find("a").data('dpt',btna.data('dpt'));
-                        menu.find("a").data('arv',btna.data('arv'));
-                        //get x and y values of the click event
-                        var pageX = e.pageX;
-                        var pageY = e.pageY;
-
-                        //position menu div near mouse cliked area
-                        menu.css({top: pageY , left: pageX});
-
-                        var mwidth = menu.width();
-                        var mheight = menu.height();
-                        var screenWidth = $(window).width();
-                        var screenHeight = $(window).height();
-
-                        //if window is scrolled
-                        var scrTop = $(window).scrollTop();
-
-                        //if the menu is close to right edge of the window
-                        if(pageX+mwidth > screenWidth){
-                        menu.css({left:pageX-mwidth});
+                        }, {
+                            field: 'product_name',
+                            title: ' '
+                        }, {
+                            title: 'Last month',
+                            columns: [{
+                                field: 'last_month_acc',
+                                title: ' ',
+                                format: "{0:n0}"
+                            }, {
+                                field: 'last_month_amt',
+                                title: ' ',
+                                format: "{0:n0}"
+                            }]
+                        }, {
+                            title: 'This month',
+                            columns: [{
+                                field: 'this_month_acc',
+                                title: ' ',
+                                format: "{0:n0}"
+                            }, {
+                                field: 'this_month_amt',
+                                title: ' ',
+                                format: "{0:n0}"
+                            }]
+                        }],
+                        noRecords: {
+                            template: `<h2 class='text-danger'>${KENDO.noRecords}</h2>`
                         }
-                        //if the menu is close to bottom edge of the window
-                        if(pageY+mheight > screenHeight+scrTop){
-                        menu.css({top:pageY-mheight});
-                        }
-                        //finally show the menu
-                        menu.show();
+                    }).data("kendoGrid");
+
+                    grid_total.selectedKeyNames = function() {
+                        var items = this.select(),
+                            that = this,
+                            checkedIds = [];
+                        $.each(items, function(){
+                            if(that.dataItem(this))
+                                checkedIds.push(that.dataItem(this).uid);
+                        })
+                        return checkedIds;
                     }
+
+                    grid_detail.selectedKeyNames = function() {
+                        var items = this.select(),
+                            that = this,
+                            checkedIds = [];
+                        $.each(items, function(){
+                            if(that.dataItem(this))
+                                checkedIds.push(that.dataItem(this).uid);
+                        })
+                        return checkedIds;
+                    }
+
+                    /*
+                    * Right Click Menu
+                    */
+                    var menu = $("#action-menu");
+                    if(!menu.length) return;
+
+                    $("html").on("click", function() {menu.hide()});
+
+                    $(document).on("click", "#grid tr[role=row] a.btn-action", function(e){
+                        let btna = $(e.target);
+                        let row = $(e.target).closest("tr");
+                        e.pageX -= 20;
+                        showMenu(e, row, btna);
+                    });
+
+                    function showMenu(e, that,btna) {
+                        //hide menu if already shown
+                        menu.hide();
+
+                        //Get id value of document
+                        var uid = $(that).data('uid');
+                        var fltnumber = btna.data('flt');
+                        var date = btna.data('date');
+                        if(uid)
+                        {
+                            menu.find("a").data('uid',uid);
+                            menu.find("a").data('fltnumber',fltnumber);
+                            menu.find("a").data('date',date);
+                            menu.find("a").data('dpt',btna.data('dpt'));
+                            menu.find("a").data('arv',btna.data('arv'));
+                            //get x and y values of the click event
+                            var pageX = e.pageX;
+                            var pageY = e.pageY;
+
+                            //position menu div near mouse cliked area
+                            menu.css({top: pageY , left: pageX});
+
+                            var mwidth = menu.width();
+                            var mheight = menu.height();
+                            var screenWidth = $(window).width();
+                            var screenHeight = $(window).height();
+
+                            //if window is scrolled
+                            var scrTop = $(window).scrollTop();
+
+                            //if the menu is close to right edge of the window
+                            if(pageX+mwidth > screenWidth){
+                            menu.css({left:pageX-mwidth});
+                            }
+                            //if the menu is close to bottom edge of the window
+                            if(pageY+mheight > screenHeight+scrTop){
+                            menu.css({top:pageY-mheight});
+                            }
+                            //finally show the menu
+                            menu.show();
+                        }
+                    }
+                }
+                else {
+                    setTimeout(this.init, 100);
                 }
             }
         }
@@ -319,64 +421,34 @@
             date.setHours(- timeZoneOffset / kendo.date.MS_PER_HOUR, 0, 0 ,0);
 
         // var fromDate = new Date(date.getTime() + timeZoneOffset - (dateRange - 1) * 86400000);
-        var fromDate = new Date(date.getTime() + timeZoneOffset);
-        var toDate = new Date(date.getTime() + timeZoneOffset + kendo.date.MS_PER_DAY -1)
         var observable = kendo.observable({
             trueVar: true,
             loading: false,
             visibleReport: false,
-            visibleNoData: false,
-        fromDateTime: fromDate,
-        toDateTime: toDate,
-        filterField: "",
-        cif:"",
-        loanContract: "",
-        nationalID: "",
-        fromDate: kendo.toString(fromDate, "dd/MM/yyyy H:mm"),
-        toDate: kendo.toString(toDate, "dd/MM/yyyy H:mm"),
-
-        search: function() {
-            this.set("fromDate", kendo.toString(this.get("fromDateTime"), "dd/MM/yyyy H:mm"));
-            this.set("toDate", kendo.toString(this.get("toDateTime"), "dd/MM/yyyy H:mm"));
-            this.asyncSearch();
-        },
-            asyncSearch: async function() {
-            var field = "created_at";
-            var fromDateTime = new Date(this.fromDateTime.getTime() - timeZoneOffset).toISOString();
-            var toDateTime = new Date(this.toDateTime.getTime() - timeZoneOffset).toISOString();
-            var cif = this.cif;
-            var loanContract = this.loanContract;
-            var nationalID = this.nationalID;
-            var field_1 = 'CUS_ID';
-            var field_2 = 'account_number';
-            var field_3 = 'LIC_NO';
-
-            if (cif != '') {
-                filter_1 = {field: field_1, operator: "eq", value: cif};
-            }else{
-                filter_1 = {field: field_1, operator: "neq", value: cif};
-            }
-            if (loanContract != '') {
-                filter_2 = {field: field_2, operator: "eq", value: loanContract};
-            }else{
-                filter_2 = {field: field_2, operator: "neq", value: loanContract};
-            }
-            if (nationalID != '') {
-                filter_3 = {field: field_3, operator: "eq", value: nationalID};
-            }else{
-                filter_3 = {field: field_3, operator: "neq", value: nationalID};
-            }
-            var filter = {
-                logic: "and",
-                filters: [
-                    filter_1,filter_2,filter_3
-                ]
-            };
-
-            Table.dataSource.filter(filter);
-
-        },
-        })
+            visibleNoData: false, 
+            filterField: "",
+            cif:"",
+            loanContract: "",
+            nationalID: "",
+            onChangeDate: function() {
+                var date =  this.fromDateTime;
+                date.setDate(1);
+                var fromDate = date.getTime() / 1000;
+                var lastDateOfMonth = kendo.date.lastDayOfMonth(this.fromDateTime);
+                var toDate = lastDateOfMonth.getTime() / 1000;
+                filter = [{
+                        field: 'created_at',
+                        operator: 'gte',
+                        value: fromDate
+                    }, {
+                        field: 'created_at',
+                        operator: 'lte',
+                        value: toDate
+                    }];
+                Table.dataSource_total.filter(filter);
+                Table.dataSource_detail.filter(filter);
+            },
+        });
         kendo.bind($(".mvvm"), observable);
     };
 

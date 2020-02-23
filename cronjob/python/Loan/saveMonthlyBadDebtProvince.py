@@ -37,7 +37,7 @@ try:
     total = 0
     complete = 0
     # today = date.today()
-    today = datetime.strptime('01/01/2020', "%d/%m/%Y").date()
+    today = datetime.strptime('01/02/2020', "%d/%m/%Y").date()
     yesterday = today - timedelta(days=1)
     day = today.day
     month = today.month
@@ -48,24 +48,32 @@ try:
     todayString = today.strftime("%d/%m/%Y")
     todayTimeStamp = int(time.mktime(time.strptime(str(todayString + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
     startMonth = int(time.mktime(time.strptime(str('01/' + str(month) + '/' + str(year) + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
-    endMonth = int(time.mktime(time.strptime(str(str(lastDayOfMonth) + '/' + str(month) + '/' + str(year) + " 23:59:59"), "%d/%m/%Y %H:%M:%S")))
-    endMonthEndtime = int(time.mktime(time.strptime(str(str(lastDayOfMonth) + '/' + str(month) + '/' + str(year) + " 23:59:59"), "%d/%m/%Y %H:%M:%S")))
-    endMonthStarttime = endMonthEndtime - 86399
+    startMonthStarttime = startMonth
+    startMonthEndtime = int(time.mktime(time.strptime(str('01/' + str(month) + '/' + str(year) + " 23:59:59"), "%d/%m/%Y %H:%M:%S")))
+    
+    first = today.replace(day=1)
+    lastMonthLastDate = first - timedelta(days=1)
+    lastMonthMonth = lastMonthLastDate.month
+    lastMonthYear = lastMonthLastDate.year
+    lastMonthStarttime = int(time.mktime(time.strptime(str('01/' + str(lastMonthMonth) + '/' + str(lastMonthYear) + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
+    lastMonthEndtime = int(time.mktime(time.strptime(str(str(lastMonthLastDate.day) + '/' + str(lastMonthMonth) + '/' + str(lastMonthYear) + " 23:59:59"), "%d/%m/%Y %H:%M:%S")))
+
     holidayOfMonth = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_off_sys'))
     listHoliday = map(lambda offDateRow: {offDateRow['off_date']}, holidayOfMonth)
 
     listDayOfMonth = []
     startDayOfMonth = 1
-    while startDayOfMonth <= lastDayOfMonth:
-        listDayOfMonth.append(str(format(startDayOfMonth, '02d')) + str(format(month, '02d')) + str(year))
+    while startDayOfMonth <= int(lastMonthLastDate.day):
+        listDayOfMonth.append(str(format(startDayOfMonth, '02d')) + str(format(lastMonthMonth, '02d')) + str(lastMonthYear))
         startDayOfMonth += 1
     
     # if todayTimeStamp in listHoliday:
     #     sys.exit()
 
     # Check hom nay co phai la ngay cuoi thang
-    # if todayTimeStamp > endMonthStarttime or todayTimeStamp < endMonthEndtime:
-    #     sys.exit()
+    if not (todayTimeStamp >= startMonthStarttime and todayTimeStamp <= startMonthEndtime):
+        pprint('khong phai ngay 1')
+        sys.exit()
 
     todayString = today.strftime("%d/%m/%Y")
     starttime = int(time.mktime(time.strptime(str(todayString + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
@@ -112,7 +120,17 @@ try:
                         }
                     },
                     "release_amt_sibs"              : {
-                        "$push"                     : "$APPROV_LMT"
+                        '$push'                     : {
+                            '$cond'                 : [
+                                {
+                                    '$and'          : [
+                                        {"$in"      : ["$FRELD8", listDayOfMonth]},
+                                    ]
+                                },
+                                '$APPROV_LMT',
+                                '0'
+                            ]
+                        }
                     },
                     "group_two_acc_sibs"            : {
                         '$sum'                      : {
@@ -132,7 +150,7 @@ try:
                                     '$eq'           : ['$ODIND_FG', 'B']
                                 },
                                 '$W_ORG',
-                                0
+                                '0'
                             ]
                         }
                     },
@@ -151,10 +169,10 @@ try:
                         '$push'                     : {
                             '$cond'                 : [
                                 {
-                                    '$eq'           : ['$ODIND_FG', ['C', 'D', 'E']]
+                                    '$in'           : ['$ODIND_FG', ['C', 'D', 'E']]
                                 },
                                 '$W_ORG',
-                                0
+                                '0'
                             ]
                         }
                     },
@@ -162,7 +180,6 @@ try:
             }
         ]
         zaccfInfo = list(mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'ZACCF'),aggregate_pipeline=aggregate_zaccf))
-        # pprint(zaccfInfo)
         temp['province_id']                     = state_value['code']
         temp['province_name']                   = state_value['name']
         if zaccfInfo not in [None, []] and zaccfInfo[0] is not None:
@@ -208,13 +225,23 @@ try:
                         }
                     },
                     'release_amt_card'          : {
-                        '$sum'                  : '$approved_limit'
+                        '$sum'                  : {
+                            '$cond'             : [
+                                {
+                                    '$and'      : [
+                                        {"$in"  : ["$open_card_date", listDayOfMonth]},
+                                    ]
+                                },
+                                '$approved_limit',
+                                0
+                            ]
+                        }
                     },
                     "group_two_acc_card"        : {
                         '$sum'                  : {
                             '$cond'             : [
                                 {
-                                    '$eq'       : ['$overdue_indicator', 'B']
+                                    '$eq'       : ['$delinquency_group', '02']
                                 },
                                 1,
                                 0
@@ -225,10 +252,10 @@ try:
                         '$sum'                  : {
                             '$cond'             : [
                                 {
-                                    '$eq'       : ['$overdue_indicator', 'B']
+                                    '$eq'       : ['$delinquency_group', '02']
                                 },
                                 {'$add'         : ['$ob_principal_sale', '$ob_principal_cash']},
-                                0
+                                '0'
                             ]
                         }
                     },
@@ -236,7 +263,7 @@ try:
                         '$sum'                  : {
                             '$cond'             : [
                                 {
-                                    '$in'       : ['$overdue_indicator', ['C', 'D', 'E']]
+                                    '$in'       : ['$delinquency_group', ['03', '04', '05']]
                                 },
                                 1,
                                 0
@@ -247,10 +274,10 @@ try:
                         '$sum'                  : {
                             '$cond'             : [
                                 {
-                                    '$eq'       : ['$overdue_indicator', ['C', 'D', 'E']]
+                                    '$in'       : ['$delinquency_group', ['03', '04', '05']]
                                 },
                                 {'$add'         : ['$ob_principal_sale', '$ob_principal_cash']},
-                                0
+                                '0'
                             ]
                         }
                     },
@@ -276,7 +303,8 @@ try:
         temp['bad_debt_ratio_sibs'] = temp['group_two_plus_w_org_sibs'] / temp['total_amt_sibs'] if temp['total_amt_sibs'] != 0 else 0
         temp['bad_debt_ratio_card'] = temp['group_two_plus_w_org_card'] / temp['total_amt_card'] if temp['total_amt_card'] != 0 else 0
         temp['bad_debt_ratio'] = (temp['group_two_plus_w_org_sibs'] + temp['group_two_plus_w_org_card']) / temp['total_amt'] if temp['total_amt'] != 0 else 0
-
+        temp['created_at'] = todayTimeStamp
+        # temp['created_at'] = time.time()
         insertData.append(temp)
         # pprint(temp)
     

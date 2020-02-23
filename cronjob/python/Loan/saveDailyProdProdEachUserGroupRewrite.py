@@ -105,10 +105,10 @@ try:
                         dueDayLastMonth = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_due_date'), WHERE={'for_month': str(lastMonth), 'debt_group': debtGroupCell[1:3]})
                         temp['due_date'] = dueDayLastMonth['due_date'] if dueDayLastMonth is not None else ''
                         #Lay gia tri no vao ngay due date + 1#
-                        incidenceInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Due_date_next_date'), WHERE={'for_month': str(lastMonth), 'team_id': str(groupCell['_id'])})
+                        incidenceInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Due_date_next_date_by_group'), WHERE={'for_month': str(lastMonth), 'team_id': str(groupCell['_id'])})
                         #Lay gia tri no vao ngay due date + 1#
                     else:
-                        incidenceInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Due_date_next_date'), WHERE={'for_month': str(month), 'team_id': str(groupCell['_id'])})
+                        incidenceInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Due_date_next_date_by_group'), WHERE={'for_month': str(month), 'team_id': str(groupCell['_id'])})
                         temp['due_date'] = dueDayOfMonth['due_date']
 
                     # pprint(temp['due_date'])

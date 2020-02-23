@@ -14,6 +14,10 @@
 				<input class="k-textbox" data-bind="value: item.fullname" style="width: 100%">
 			</div>
 			<div class="form-group">
+				<label>@Staff <ISINDEX></ISINDEX>@: </label>
+				<input class="k-textbox" data-bind="value: item.staffid" style="width: 100%">
+			</div>
+			<div class="form-group">
 				<label>@Role@</a>
 				</label>
 				<select data-role="dropdownlist" name="role"

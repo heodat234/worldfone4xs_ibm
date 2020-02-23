@@ -116,7 +116,7 @@
 </style>
 <div class="container-fluid" style="min-height: 95vh">
   <div class="row" style="padding-top: 20px">
-    <div class="smartphone" id="phone-contain">
+    <div class="smartphone" id="phone-contain" data-bind="invisible: gameVisible">
       <div class="content" data-bind="visible: numpadVisible">
         <div class="form-group">
           <input class="form-control" data-bind="value: phone, events: {change: changePhoneInput}" id="phone-input">
@@ -147,7 +147,8 @@
             <button class="btn btn-alt btn-default" data-bind="click: allCall, css: {active: allCallActive}">@All@</button>
             <button class="btn btn-alt btn-default" data-bind="click: missCall, css: {active: missCallActive}">@Misscall@</button>
         </div>
-        <i class="fa fa-calculator pull-right numpad-btn" style="font-size: 18px; margin-top: 9px; margin-right: 10px" data-bind="click: showNumpad, invisible: numpadVisible"></i>
+        <i class="fa fa-calculator pull-right numpad-btn" title="Numpad" style="font-size: 18px; margin-top: 9px; margin-right: 10px" data-bind="click: showNumpad, invisible: numpadVisible"></i>
+        <i class="fa fa-gamepad pull-right numpad-btn" title="Game" style="font-size: 18px; margin-top: 9px; margin-right: 10px" data-bind="click: showGame"></i>
         <div>
           <table class="historytable">
             <tbody data-template="phonecall-history-template" data-auto-bind="false"
@@ -160,6 +161,8 @@
           </table>
         </div>
       </div>
+    </div>
+    <div class="smartphone" id="game-contain" data-bind="visible: gameVisible">
     </div>
   </div>
 </div>
@@ -191,7 +194,7 @@
     {
       phoneObservable.phone = $(this).val();
       phoneObservable.call();
-    } else playSound("btn-click");
+    }  
   });
 
   var clipboard = document.body.dataset.clipboard;
@@ -199,7 +202,6 @@
     phone: !isNaN(clipboard) ? clipboard : "",
     changePhoneInput: function() {
       $("#phone-input").focus();
-      playSound("btn-click");
     },
     number: function(e) {
       var number = e.currentTarget.title;
@@ -218,6 +220,10 @@
     },
     showNumpad: function() {
       this.set("numpadVisible", true);
+    },
+    showGame: function(e) {
+      this.set("gameVisible", true);
+      $("#game-contain").html(`<iframe src="<?= base_url('public/other/flappybird/index.html') ?>" style="width: 100%; height: 100%; overflow: hidden; border: 0"></iframe>`);
     },
     dataSource: new kendo.data.DataSource({
       serverFiltering: true,
@@ -279,7 +285,6 @@
     },
     call: function() {
         makeCall(this.phone);
-        playSound("dial");
     }
   }
   kendo.bind("#right-form", kendo.observable(phoneObservable));

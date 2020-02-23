@@ -36,8 +36,7 @@ Class Test extends WFF_Controller {
 
 	function import()
 	{
-		shell_exec("/usr/bin/php ".FCPATH."cronjob/LOAN/createPaymentHistory.php");
-		echo "DONE";
+		$this->session->set_userdata("phperror", "TEST");
 	}
 
 	function cdr()

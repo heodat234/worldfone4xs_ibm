@@ -142,9 +142,26 @@ class Setting extends WFF_Controller
         $this->load->view("setting/target_view");
     }
 
+    public function target_of_report()
+    {
+        $this->output->data["js"][] = STEL_PATH . "js/setting/target.js";
+        $this->load->view("setting/target_report_view");
+    }
+
     public function ts_rate()
     {
         $this->output->data["js"][] = STEL_PATH . "js/setting/ts_rate.js";
         $this->load->view("setting/ts_rate_view");
+    }
+
+    public function province() {
+        $this->output->data["js"][] = STEL_PATH . "js/setting/province.js";
+        $this->load->view("setting/province_view");
+    }
+
+    public function importManual() {
+        $this->output->data["css"][] = STEL_PATH . "css/table.css";
+        $this->output->data["js"][] = STEL_PATH . "js/admin/admin.js";
+        $this->load->view("setting/import_manual_view");
     }
 }

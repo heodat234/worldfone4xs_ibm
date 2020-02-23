@@ -91,6 +91,10 @@ var Config = {
             title: "@Extension@",
             width: 100
         },{
+            field: "staffid",
+            title: "@Staff Id@",
+            width: 100
+        },{
             field: "agentname",
             title: "@Agent name@",
             width: 160

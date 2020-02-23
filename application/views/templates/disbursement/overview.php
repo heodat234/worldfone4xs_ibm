@@ -1,8 +1,9 @@
 <div class="row" style="margin: 10px 0">
 	<div class="col-sm-2" id="page-widget"></div>
-	<div class="col-sm-9 filter-mvvm" style="display: none"></div>
-    <div class="col-sm-1" style=" margin: 10px 0; float: right;">
+	<div class="col-sm-8 filter-mvvm" style="display: none"></div>
+    <div class="col-sm-2" style=" margin: 10px 0; float: right;">
         <a role="button" class="btn btn-sm" onclick="Table.grid.saveAsExcel()"><i class="fa fa-file-excel-o"></i> <b>@Export@</b></a>
+        <a id="delete-all-button" data-type="action/delete_all" role="button" class="btn btn-sm" onclick="deleteDataItemChecked()"><i class="fa fa-times text-danger"></i> <b>@Delete@</b></a>
     </div>
 </div>
 <div class="row">
@@ -15,6 +16,8 @@
 <div id="action-menu">
     <ul>
         <a href="javascript:void(0)" data-type="update" onclick="openForm({title: '@Edit@', width: 500}); editForm(this)"><li><i class="fa fa-pencil-square-o text-warning"></i><span>@Edit@</span></li></a>
+        <li class="devide"></li>
+        <a href="javascript:void(0)" data-type="delete" onclick="deleteDataItem(this)"><li><i class="fa fa-times-circle text-danger"></i><span>@Delete@</span></li></a>
     </ul>
 </div>
 
@@ -55,13 +58,14 @@ var Config = Object.assign(Config, {
     columns: [{
         selectable: true,
         width: 32,
-        hidden: (PERMISSION.actions.includes("edit_row")) ? false : true
+        // hidden: (PERMISSION.actions.includes("edit_row")) ? false : true
     }, {
         // Use uid to fix bug data-uid of row undefined
-        title: `<a data-type='action/delete_all' class='btn btn-sm btn-circle btn-action btn-primary' onclick='return deleteDataItemChecked();'><i class='fa fa-times-circle'></i></a>`,
-        template: `<a data-type='action/delete_all' role="button" class="btn btn-sm btn-circle btn-action btn-primary" data-uid="#: uid #"><i class="fa fa-ellipsis-v"></i></a>`,
+        // title: `<a data-type='action/delete_all' class='btn btn-sm btn-circle btn-action btn-primary' onclick='return deleteDataItemChecked();'><i class='fa fa-times-circle'></i></a>`,
+        title: '',
+        template: `<a role="button" class="btn btn-sm btn-circle btn-action btn-primary" data-uid="#: uid #"><i class="fa fa-ellipsis-v"></i></a>`,
         width: 48,
-        hidden: (PERMISSION.actions.includes("edit_row")) ? false : true
+        // hidden: (PERMISSION.actions.includes("edit_row")) ? false : true
     }, {
         field: "dealer_code",
         title: "@Dealer code@",
@@ -222,6 +226,18 @@ var Config = Object.assign(Config, {
         headerAttributes: { style: "white-space: normal"},
         filterable: true,
     },{
+        field: "disbursed",
+        title: "@Disbursed@",
+        width: '200px',
+        headerAttributes: { style: "white-space: normal"},
+        filterable: true,
+    },{
+        field: "note",
+        title: "@note@",
+        width: '200px',
+        headerAttributes: { style: "white-space: normal"},
+        filterable: true,
+    },{
         field: "created_at",
         title: "@Created at@",
         width: '150px',
@@ -260,11 +276,31 @@ var Config = Object.assign(Config, {
 		    })
 		    .then((willDelete) => {
 				if (willDelete) {
+                    var listContract = [];
 					checkIds.forEach(uid => {
 						var dataItem = Table.dataSource.getByUid(uid);
-					    Table.dataSource.remove(dataItem);
-					    Table.dataSource.sync();
+                        listContract.push(dataItem.acc_no)
+					    // Table.dataSource.remove(dataItem);
+					    // Table.dataSource.sync();
 					})
+                    $.ajax({
+                        url: ENV.vApi + 'disbursement/delete_manay_by_acc',
+                        type: "POST",
+                        data: JSON.stringify(listContract),
+                        contentType: "application/json; charset=utf-8",
+                        dataType: 'JSON',
+                        success: (response) => {
+                            if(response.status == 1) {
+                                notification.show("Delete success!", "success");
+                                Table.dataSource.read();
+                            }
+                            else{
+                                notification.show("Delete fail", 'error')
+                            }
+                        },
+                        error: errorDataSource
+                    });
+                    console.log(listContract)
 				}
 		    });
 		} else {
@@ -292,7 +328,15 @@ var Config = Object.assign(Config, {
 		detailData($(this).closest("tr"));
 	});
 
+    kendo.culture("vi-VN");
     Table.init();
+
+    $(document).ready(function(){
+        //javascript
+        if(document.getElementById('delete-all-button')) {
+            checkPermisssion();
+        }
+    });
 </script>
 
 <style>

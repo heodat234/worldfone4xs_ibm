@@ -34,7 +34,7 @@ var Config = {
     	})
     	return res;
     },
-    filter: {field: "createdAt", operator: "gte", value: todayMidnight},
+    // filter: {field: "createdAt", operator: "gte", value: todayMidnight},
     filterable: KENDO.filterable,
     columns: [{
             field: "name",

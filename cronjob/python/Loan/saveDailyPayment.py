@@ -32,7 +32,7 @@ store_collection     = common.getSubUser(subUserType, 'SBV_Stored')
 account_collection   = common.getSubUser(subUserType, 'List_of_account_in_collection_yesterday')
 payment_of_card_collection  = common.getSubUser(subUserType, 'Report_input_payment_of_card')
 diallist_collection  = common.getSubUser(subUserType, 'Diallist_detail')
-user_collection      = common.getSubUser(subUserType, 'User_product')
+user_collection      = common.getSubUser(subUserType, 'User')
 
 
 
@@ -46,7 +46,7 @@ try:
    insertDataPayment = []
 
    today = date.today()
-   today = datetime.strptime('13/02/2020', "%d/%m/%Y").date()
+   # today = datetime.strptime('13/02/2020', "%d/%m/%Y").date()
 
    day = today.day
    month = today.month

@@ -35,7 +35,7 @@ mongo_common = Mongo_common()
 log = open(base_url + "cronjob/python/Telesales/log/exportCallinglist.txt","a")
 now = datetime.now()
 subUserType = 'TS'
-collection = common.getSubUser(subUserType, 'Telesalelist')
+collection = common.getSubUser(subUserType, 'Telesalelist_21022020')
 
 try:
     total = 0
@@ -43,7 +43,7 @@ try:
     today = date.today()
 
     fileOutput  = base_url + 'upload/telesales/export/Calling_list_'+ today.strftime("%d%m%Y") +'.xlsx'
-    model = list(_mongodb.get(MONGO_COLLECTION='Model', WHERE={"collection" : collection}))
+    model = list(_mongodb.get(MONGO_COLLECTION='Model', WHERE={'collection': common.getSubUser(subUserType, 'Telesalelist'), 'sub_type': {'$ne': None}}, SORT=[('index', 1)]))
     model_field = list(common.array_column(model, 'field'))
     model_field.insert(0, 'starttime_call')
     model_title = list(common.array_column(model, 'title'))
@@ -79,32 +79,62 @@ try:
                     continue
 
             if header_value == 'exporting_date':
-                cell_value = time.strftime("%d/%m/%Y", time.localtime(value['exporting_date'])) if 'exporting_date' in value.keys() and value['exporting_date'] != '' else ''
-                worksheet.write(key + 1, header_key, cell_value)
+                if 'exporting_date' in value.keys():
+                    if isinstance(value['exporting_date'], int):
+                        cell_value = time.strftime("%d/%m/%Y", time.localtime(value['exporting_date'])) if 'exporting_date' in value.keys() and value['exporting_date'] != '' else ''
+                        worksheet.write(key + 1, header_key, cell_value)
+                    else:
+                        worksheet.write(key + 1, header_key, value['exporting_date'])
+                else:
+                    worksheet.write(key + 1, header_key, '')
                 # worksheet.set_column(key + 1, header_key, len(str(cell_value)))
                 continue
 
             if header_value == 'date_of_birth':
-                cell_value = time.strftime("%d/%m/%Y", time.localtime(value['date_of_birth'])) if 'date_of_birth' in value.keys() and value['date_of_birth'] != '' else ''
-                worksheet.write(key + 1, header_key, cell_value)
+                if 'date_of_birth' in value.keys():
+                    if isinstance(value['date_of_birth'], int):
+                        cell_value = time.strftime("%d/%m/%Y", time.localtime(value['date_of_birth'])) if 'date_of_birth' in value.keys() and value['date_of_birth'] != '' else ''
+                        worksheet.write(key + 1, header_key, cell_value)
+                    else:
+                        worksheet.write(key + 1, header_key, value['date_of_birth'])
+                else:
+                    worksheet.write(key + 1, header_key, '')
                 # worksheet.set_column(key + 1, header_key, len(str(cell_value)))
                 continue
 
             if header_value == 'first_due_date':
-                cell_value = time.strftime("%d/%m/%Y", time.localtime(value['first_due_date'])) if 'first_due_date' in value.keys() and value['first_due_date'] != '' else ''
-                worksheet.write(key + 1, header_key, cell_value)
+                if 'first_due_date' in value.keys():
+                    if isinstance(value['first_due_date'], int):
+                        cell_value = time.strftime("%d/%m/%Y", time.localtime(value['first_due_date'])) if 'first_due_date' in value.keys() and value['first_due_date'] != '' else ''
+                        worksheet.write(key + 1, header_key, cell_value)
+                    else:
+                        worksheet.write(key + 1, header_key, value['first_due_date'])
+                else:
+                    worksheet.write(key + 1, header_key, '')
                 # worksheet.set_column(key + 1, header_key, len(str(cell_value)))
                 continue
 
             if header_value == 'date_send_data':
-                cell_value = time.strftime("%d/%m/%Y", time.localtime(value['date_send_data'])) if 'date_send_data' in value.keys() and value['date_send_data'] != '' else ''
-                worksheet.write(key + 1, header_key, cell_value)
+                if 'date_send_data' in value.keys():
+                    if isinstance(value['date_send_data'], int):
+                        cell_value = time.strftime("%d/%m/%Y", time.localtime(value['date_send_data'])) if 'date_send_data' in value.keys() and value['date_send_data'] != '' else ''
+                        worksheet.write(key + 1, header_key, cell_value)
+                    else:
+                        worksheet.write(key + 1, header_key, value['date_send_data'])
+                else:
+                    worksheet.write(key + 1, header_key, '')
                 # worksheet.set_column(key + 1, header_key, len(str(cell_value)))
                 continue
 
             if header_value == 'date_receive_data':
-                cell_value = time.strftime("%d/%m/%Y", time.localtime(value['date_receive_data'])) if 'date_receive_data' in value.keys() and value['date_receive_data'] != '' else ''
-                worksheet.write(key + 1, header_key, cell_value)
+                if 'date_send_data' in value.keys():
+                    if isinstance(value['date_send_data'], int):
+                        cell_value = time.strftime("%d/%m/%Y", time.localtime(value['date_receive_data'])) if 'date_receive_data' in value.keys() and value['date_receive_data'] != '' else ''
+                        worksheet.write(key + 1, header_key, cell_value)
+                    else:
+                        worksheet.write(key + 1, header_key, value['date_receive_data'])
+                else:
+                    worksheet.write(key + 1, header_key, '')
                 # worksheet.set_column(key + 1, header_key, len(str(cell_value)))
                 continue
 

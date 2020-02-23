@@ -19,6 +19,7 @@ Class Monthly_bad_debt_province_report extends WFF_Controller {
     {
         try {
             $request = json_decode($this->input->get("q"), TRUE);
+            // print_r(strtotime($request['filter']['filters'][0]['value']));
             $response = $this->crud->read($this->collection, $request);
             echo json_encode($response);
 

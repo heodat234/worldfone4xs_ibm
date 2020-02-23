@@ -22,20 +22,14 @@ mongodb     = Mongodb(MONGODB="worldfone4xs", WFF_ENV=wff_env)
 _mongodb    = Mongodb(MONGODB="_worldfone4xs", WFF_ENV=wff_env)
 now         = datetime.now()
 subUserType = 'LO'
-collection         = common.getSubUser(subUserType, 'Daily_assignment_report_112')
+collection         = common.getSubUser(subUserType, 'Daily_assignment_report')
 lnjc05_collection  = common.getSubUser(subUserType, 'LNJC05')
 ln3206_collection  = common.getSubUser(subUserType, 'LN3206F')
-zaccf_collection   = common.getSubUser(subUserType, 'ZACCF')
 product_collection   = common.getSubUser(subUserType, 'Product')
 sbv_collection       = common.getSubUser(subUserType, 'SBV')
-group_collection     = common.getSubUser(subUserType, 'Group_card')
-account_collection   = common.getSubUser(subUserType, 'List_of_account_in_collection')
-payment_of_card_collection  = common.getSubUser(subUserType, 'Report_input_payment_of_card')
 diallist_detail_collection  = common.getSubUser(subUserType, 'Diallist_detail')
 cdr_collection       = common.getSubUser(subUserType, 'worldfonepbxmanager')
-jsonData_collection  = common.getSubUser(subUserType, 'Jsondata')
 user_collection      = common.getSubUser(subUserType, 'User_product')
-relationship_collection        = common.getSubUser(subUserType, 'Relationship')
 action_code_collection        = common.getSubUser(subUserType, 'Action_code')
 log         = open(base_url + "cronjob/python/Loan/log/DailyAssignment_log.txt","a")
 
@@ -48,7 +42,7 @@ try:
    log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': Start Import' + '\n')
 
    today = date.today()
-   today = datetime.strptime('17/01/2020', "%d/%m/%Y").date()
+   # today = datetime.strptime('17/01/2020', "%d/%m/%Y").date()
 
    day = today.day
    month = today.month
@@ -70,9 +64,7 @@ try:
       sys.exit()
 
 
-   lawsuit_fields = _mongodb.getOne(MONGO_COLLECTION=jsonData_collection,SELECT=['data'],WHERE={'tags': ['LAWSUIT', 'fields']})
-   raa_fields = _mongodb.getOne(MONGO_COLLECTION=jsonData_collection,SELECT=['data'],WHERE={'tags': ['RAA', 'fields']})
-   users = _mongodb.get(MONGO_COLLECTION=user_collection,SELECT=['extension','agentname'],WHERE={'active': 'true'})
+   # users = _mongodb.get(MONGO_COLLECTION=user_collection,SELECT=['extension','agentname'],WHERE={'active': 'true'})
    i = 1
    # LNJC05
 
@@ -127,7 +119,7 @@ try:
             else:
                diallistInfo = mongodb.getOne(MONGO_COLLECTION=diallist_detail_collection, WHERE={'$or' : [{ 'mobile_num' : str(cdr['customernumber'])}, { 'phone' : str(cdr['customernumber'])},  { 'other_phones' :str(cdr['customernumber'])} ],  "createdAt" : {'$gte' : todayTimeStamp,'$lte' : endTodayTimeStamp}, 'assign' : str(cdr['userextension']) }) 
 
-         if 'dialid' not in cdr.keys() and 'customer' not in cdr.keys():
+         if 'dialid' not in cdr.keys():
             diallistInfo = mongodb.getOne(MONGO_COLLECTION=diallist_detail_collection, WHERE={'$or' : [{ 'mobile_num' : str(cdr['customernumber'])}, { 'phone' : str(cdr['customernumber'])},  { 'other_phones' :str(cdr['customernumber'])} ],  "createdAt" : {'$gte' : todayTimeStamp,'$lte' : endTodayTimeStamp}, 'assign' : str(cdr['userextension']) }) 
             
          if 'customer' in cdr.keys():
@@ -184,7 +176,7 @@ try:
                for x in row_1.keys():
                   temp[x] = row_1[x]
          
-         if 'account_number' in temp.keys() and diallistInfo == None and 'customer' not in cdr.keys():
+         if 'account_number' in temp.keys() and diallistInfo == None:
             diallistInfo = mongodb.getOne(MONGO_COLLECTION=diallist_detail_collection, WHERE={'account_number': temp['account_number'],  "createdAt" : {'$gte' : todayTimeStamp,'$lte' : endTodayTimeStamp}}) 
          
          if diallistInfo != None:

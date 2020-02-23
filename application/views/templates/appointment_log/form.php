@@ -301,10 +301,11 @@
             }
         },
         onChangeCMND: function() {
-            var customerDropDown = $("#customer-info").data("kendoDropDownList");
-            // var dataItem = customerDropDown.dataItem();
-            // console.log(customerDropDown.value());
-            this.set('item.name', customerDropDown.value());
+            var item = e.sender.dataItem();
+            console.log(dataItem);
+            if(typeof dataItem != 'undefined' && typeof dataItem.name != 'undefined') {
+                this.set('item.name', (dataItem.name)); 
+            }
         },
     });
     $(document).ready(function() {

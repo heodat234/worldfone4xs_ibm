@@ -40,10 +40,12 @@ Class Report_due_date extends WFF_Controller {
 			$nextDay = $count * 86400 + $data["due_date"];
 			$checkOffSys = $this->crud->where(array('off_date' => $nextDay))->get(set_sub_collection('Report_off_sys'));
 			$dateInWeek = date('w', $nextDay);
-			if(empty($checkOffSys) && !in_array($dateInWeek, array(0, 6))) {
-				$data['due_date_add_1'] = $nextDay;
-				$dueDate1True = true;
-			}
+			// if(empty($checkOffSys) && !in_array($dateInWeek, array(0, 6))) {
+			// 	$data['due_date_add_1'] = $nextDay;
+			// 	$dueDate1True = true;
+			// }
+			$data['due_date_add_1'] = $nextDay;
+			$dueDate1True = true;
 			$count++;
 		}
 		if(!empty($data['debt_group']['text'])) {

@@ -80,180 +80,163 @@ Class Lawsuit_report extends WFF_Controller {
         $worksheet->getParent()->getDefaultStyle()->applyFromArray($style);
         $worksheet->getDefaultColumnDimension()->setWidth(30);
 
-        $worksheet->mergeCells('A1:A2');
         $worksheet->setCellValue('A1', 'STT (No.)');
 
-        $worksheet->mergeCells('B1:B2');
-        $worksheet->setCellValue('B1', 'THÁNG');
+        $worksheet->setCellValue('B1', 'NGÀY LÀM ĐƠN');
 
-        $worksheet->mergeCells('C1:C2');
         $worksheet->setCellValue('C1', 'SỐ HỢP ĐỒNG (AC No.)');
 
-        $worksheet->mergeCells('D1:D2');
         $worksheet->setCellValue('D1', "TÊN KH (Cust's Name)");
-        $worksheet->getStyle("A1:D2")->getFill()
+        $worksheet->getStyle("A1:D1")->getFill()
             ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
             ->getStartColor()->setRGB('00B050');
-        $worksheet->getStyle("A1:D2")->applyFromArray($style);
+        $worksheet->getStyle("A1:D1")->applyFromArray($style);
 
-        $worksheet->mergeCells('E1:F1');
-        $worksheet->setCellValue('E1', 'ĐỊA ĐIỂM (Place) TP. : thành phố H. : huyện TX. : thị xã Q. : quận');
-        $worksheet->setCellValue('E2', "QUẬN/ HUYỆN (District)");
-        $worksheet->setCellValue('F2', "TỈNH/ THÀNH (Province/ City)");
-        $worksheet->getStyle("E1:F2")->getFill()
+        $worksheet->setCellValue('E1', 'QUẬN/ HUYỆN (District)');
+        $worksheet->setCellValue('F1', "TỈNH/ THÀNH (Province/ City)");
+        $worksheet->getStyle("E1:F1")->getFill()
             ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
             ->getStartColor()->setRGB('C6E0B4');
-        $worksheet->getStyle("E1:F2")->applyFromArray($style);
+        $worksheet->getStyle("E1:F1")->applyFromArray($style);
 
-        $worksheet->mergeCells('G1:G2');
         $worksheet->setCellValue('G1', "NGƯỜI ĐƯỢC ỦY QUYỀN");
         $worksheet->getStyle("G1")->getFill()
             ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
             ->getStartColor()->setRGB('00B050');
         $worksheet->getStyle("G1")->applyFromArray($style);
 
-        $worksheet->mergeCells('H1:K1');
-        $worksheet->setCellValue('H1', 'HỢP ĐỒNG (Contract)');
-        $worksheet->setCellValue('H2', "NỢ GỐC (Principal)");
-        $worksheet->setCellValue('I2', "LÃI (Interest)");
-        $worksheet->setCellValue('J2', "TỔNG CỘNG");
-        $worksheet->setCellValue('K2', "Tiền hàng tháng (Monthly)");
-        $worksheet->getStyle("H1:K2")->getFill()
+        // $worksheet->mergeCells('H1:K1');
+        // $worksheet->setCellValue('H1', 'HỢP ĐỒNG (Contract)');
+        $worksheet->setCellValue('H1', "NỢ GỐC (Principal)");
+        $worksheet->setCellValue('I1', "LÃI (Interest)");
+        $worksheet->setCellValue('J1', "TỔNG CỘNG");
+        $worksheet->setCellValue('K1', "Tiền hàng tháng (Monthly)");
+        $worksheet->getStyle("H1:K1")->getFill()
             ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
             ->getStartColor()->setRGB('FFC000');
-        $worksheet->getStyle("H1:K2")->applyFromArray($style);
+        $worksheet->getStyle("H1:K1")->applyFromArray($style);
 
-        $worksheet->mergeCells('L1:O1');
-        $worksheet->setCellValue('L1', 'SỐ TIỀN ĐÃ THANH TOÁN (Paid amount)');
-        $worksheet->setCellValue('L2', "NỢ GỐC (Principal)");
-        $worksheet->setCellValue('M2', "LÃI (Interest)");
-        $worksheet->setCellValue('N2', "PHẠT (Late charge)");
-        $worksheet->setCellValue('O2', "TỔNG CỘNG (Total payment)");
+        // $worksheet->mergeCells('L1:O1');
+        // $worksheet->setCellValue('L1', 'SỐ TIỀN ĐÃ THANH TOÁN (Paid amount)');
+        $worksheet->setCellValue('L1', " NỢ GỐC
+(Principal)
+(Paid amount) ");
+        $worksheet->setCellValue('M1', " LÃI
+(Interest)
+(Paid amount) ");
+        $worksheet->setCellValue('N1', " PHẠT
+(Late charge)
+(Paid amount) ");
+        $worksheet->setCellValue('O1', " TỔNG CỘNG
+(Total Paid amount) ");
         $worksheet->getStyle("L1:O1")->getFill()
             ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
-            ->getStartColor()->setRGB('92D050');
-        $worksheet->getStyle("L1:O1")->applyFromArray($style);
-        $worksheet->getStyle("L2:O2")->getFill()
-            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
             ->getStartColor()->setRGB('C9C9C9');
-        $worksheet->getStyle("L2:O2")->applyFromArray($style);
+        $worksheet->getStyle("L1:O1")->applyFromArray($style);
 
-        $worksheet->mergeCells('P1:T1');
-        $worksheet->setCellValue('P1', 'DƯ NỢ KHỞI KIỆN (O/S balance when lawsuit)');
-        $worksheet->setCellValue('P2', "NỢ GỐC (Principal)");
-        $worksheet->setCellValue('Q2', "LÃI (Interest)");
-        $worksheet->setCellValue('R2', "PHẠT (Late charge)");
-        $worksheet->setCellValue('S2', "PHÍ TẤT TOÁN (Prepayment fee)");
-        $worksheet->setCellValue('T2', "TỔNG CỘNG");
-        $worksheet->getStyle("P1:T2")->getFill()
+        $worksheet->setCellValue('P1', "NỢ GỐC (Principal) (O/S balance when lawsuit)");
+        $worksheet->setCellValue('Q1', "LÃI
+(Interest)
+(O/S balance when lawsuit)");
+        $worksheet->setCellValue('R1', " PHẠT
+(Late charge)
+(O/S balance when lawsuit) ");
+        $worksheet->setCellValue('S1', " PHÍ TẤT TOÁN (Prepayment fee)
+(O/S balance when lawsuit) ");
+        $worksheet->setCellValue('T1', " TỔNG CỘNG
+(O/S balance when lawsuit) ");
+        $worksheet->getStyle("P1:T1")->getFill()
             ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
             ->getStartColor()->setRGB('FFE699');
-        $worksheet->getStyle("P1:T2")->applyFromArray($style);
+        $worksheet->getStyle("P1:T1")->applyFromArray($style);
 
-        $worksheet->mergeCells('U1:V1');
-        $worksheet->setCellValue('U1', 'CỬA HÀNG (Dealer)');
-        $worksheet->setCellValue('U2', "TÊN (Name)");
-        $worksheet->setCellValue('V2', "ĐỊA CHỈ (Address)");
-        $worksheet->getStyle("U1:V2")->getFill()
+        $worksheet->setCellValue('U1'," TÊNCỬA HÀNG
+(Dealer Name) ");
+        $worksheet->setCellValue('V1', " ĐỊA CHỈ KHÁCH HÀNG
+(Customer Address) ");
+        $worksheet->getStyle("U1:V1")->getFill()
             ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
-            ->getStartColor()->setRGB('FFE699');
-        $worksheet->getStyle("U1:V2")->applyFromArray($style);
+            ->getStartColor()->setRGB('FFFF00');
+        $worksheet->getStyle("U1:V1")->applyFromArray($style);
 
-        $worksheet->mergeCells('W1:W2');
         $worksheet->setCellValue('W1', 'TẠM ỨNG ÁN PHÍ (Dự tính)');
 
-        $worksheet->mergeCells('X1:X2');
         $worksheet->setCellValue('X1', 'PHƯƠNG THỨC NỘP');
 
-        $worksheet->mergeCells('Y1:Y2');
         $worksheet->setCellValue('Y1', 'Ngày gởi FC');
 
-        $worksheet->mergeCells('Z1:Z2');
-        $worksheet->setCellValue('Z1', "NGÀY NỘP ĐƠN (Submiting date)");
+        // $worksheet->setCellValue('Z1', "NGÀY NỘP ĐƠN (Submiting date)");
 
-        $worksheet->mergeCells('AA1:AA2');
-        $worksheet->setCellValue('AA1', 'NGÀY NỘP TƯAP (Date of Advance pay)');
+        $worksheet->setCellValue('Z1', 'NGÀY NỘP TƯAP (Date of Advance pay)');
 
-        $worksheet->mergeCells('AB1:AB2');
-        $worksheet->setCellValue('AB1', 'NHẬN THÔNG BÁO THỤ LÝ');
+        $worksheet->setCellValue('AA1', 'NHẬN THÔNG BÁO THỤ LÝ');
 
-        $worksheet->mergeCells('AC1:AC2');
-        $worksheet->setCellValue('AC1', 'NGÀY HÒA GIẢI LẦN 1 (1st conciliation)');
+        $worksheet->setCellValue('AB1', 'NGÀY HÒA GIẢI LẦN 1 (1st conciliation)');
 
-        $worksheet->mergeCells('AD1:AD2');
-        $worksheet->setCellValue('AD1', "NGÀY HÒA GIẢI LẦN 2 (2nd conciliation)");
+        $worksheet->setCellValue('AC1', "NGÀY HÒA GIẢI LẦN 2 (2nd conciliation)");
 
-        $worksheet->mergeCells('AE1:AE2');
-        $worksheet->setCellValue('AE1', 'NGÀY HÒA GIẢI LẦN 3 (3nd conciliation)');
+        $worksheet->setCellValue('AD1', 'NGÀY HÒA GIẢI LẦN 3 (3nd conciliation)');
 
-        $worksheet->mergeCells('AF1:AF2');
-        $worksheet->setCellValue('AF1', "NGÀY XÉT XỬ SƠ THẨM (First instance trial date)");
+        $worksheet->setCellValue('AE1', "NGÀY XÉT XỬ SƠ THẨM
+(First instance trial date)");
 
-        $worksheet->mergeCells('AG1:AG2');
-        $worksheet->setCellValue('AG1', 'KHÁNG CÁO');
+        $worksheet->setCellValue('AF1', 'KHÁNG CÁO');
 
-        $worksheet->mergeCells('AH1:AH2');
-        $worksheet->setCellValue('AH1', 'NGÀY XÉT XỬ PHÚC THẨM (Trial of Appeal date, if any)');
+        $worksheet->setCellValue('AG1', "NGÀY XÉT XỬ PHÚC THẨM
+(Trial of Appeal date, if any)");
 
-        $worksheet->mergeCells('AI1:AI2');
-        $worksheet->setCellValue('AI1', 'Theo dõi');
+        $worksheet->setCellValue('AH1', 'Theo dõi');
 
-        $worksheet->getStyle("W1:AT2")->getFill()
+        $worksheet->getStyle("W1:AH1")->getFill()
             ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
             ->getStartColor()->setRGB('00B050');
-        $worksheet->getStyle("W1:AT2")->applyFromArray($style);
+        $worksheet->getStyle("W1:AH1")->applyFromArray($style);
 
-        $worksheet->mergeCells('AJ1:AJ2');
-        $worksheet->setCellValue('AJ1', "Phương hướng giải quyết");
+        $worksheet->setCellValue('AI1', "Phương hướng giải quyết");
+        $worksheet->getStyle("AI1")->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setRGB('A5A5A5');
+        $worksheet->getStyle("AI1")->applyFromArray($style);
+
+        $worksheet->setCellValue('AJ1', "TÌNH TRẠNG KHỞI KIỆN
+(Lawsuit status)");
         $worksheet->getStyle("AJ1")->getFill()
             ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
-            ->getStartColor()->setRGB('A5A5A5');
+            ->getStartColor()->setRGB('00B050');
         $worksheet->getStyle("AJ1")->applyFromArray($style);
 
-        $worksheet->mergeCells('AK1:AK2');
-        $worksheet->setCellValue('AK1', "TÌNH TRẠNG KHỞI KIỆN (Lawsuit status)");
-        $worksheet->getStyle("AK1")->getFill()
-            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
-            ->getStartColor()->setRGB('00B050');
-        $worksheet->getStyle("AK1")->applyFromArray($style);
-
-        $worksheet->mergeCells('AL1:AP1');
-        $worksheet->setCellValue('AL1', 'TẠM ỨNG ÁN PHÍ');
-        $worksheet->setCellValue('AL2', "Ngày tạm ứng");
-        $worksheet->setCellValue('AM2', "Số tiền tạm ứng");
-        $worksheet->setCellValue('AN2', "Chưa được hoàn trả án phí sau khi rút đơn");
-        $worksheet->setCellValue('AO2', "Đã được hoàn trả tiền án phí");
-        $worksheet->setCellValue('AP2', "Ngày được hoàn trả án phí");
-        $worksheet->getStyle("AL1:AP1")->getFill()
+        $worksheet->setCellValue('AK1', "Ngày tạm ứng");
+        $worksheet->setCellValue('AL1', "Số tiền tạm ứng");
+        $worksheet->setCellValue('AM1', "Chưa được hoàn 
+trả án phí sau khi rút đơn");
+        $worksheet->setCellValue('AN1', "Đã được hoàn trả tiền án phí");
+        $worksheet->setCellValue('AO1', "Ngày được hoàn trả án phí");
+        $worksheet->getStyle("AK1:AO1")->getFill()
             ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
             ->getStartColor()->setRGB('C9C9C9');
-        $worksheet->getStyle("AL1:AP1")->applyFromArray($style);
-        $worksheet->getStyle("AL2:AP2")->getFill()
-            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
-            ->getStartColor()->setRGB('A5A5A5');
-        $worksheet->getStyle("AL2:AP2")->applyFromArray($style);
+        $worksheet->getStyle("AK1:AK1")->applyFromArray($style);
+        // $worksheet->getStyle("AL2:AP2")->getFill()
+        //     ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+        //     ->getStartColor()->setRGB('A5A5A5');
+        // $worksheet->getStyle("AL2:AP2")->applyFromArray($style);
 
 
-        $worksheet->mergeCells('AQ1:AQ2');
-        $worksheet->setCellValue('AQ1', 'THẨM PHÁN');
+        $worksheet->setCellValue('AP1', 'THẨM PHÁN');
 
-        $worksheet->mergeCells('AR1:AS1');
-        $worksheet->setCellValue('AR1', 'Gởi hồ sơ về nhà KH');
-        $worksheet->setCellValue('AR2', "Ngày");
-        $worksheet->setCellValue('AS2', "Số Bill");
+        $worksheet->setCellValue('AQ1', "Ngày Gởi hồ sơ về nhà KH");
+        $worksheet->setCellValue('AR1', "Số Bill Gởi hồ sơ về nhà KH");
 
-        $worksheet->mergeCells('AT1:AU1');
-        $worksheet->setCellValue('AT1', 'Ngày nộp đơn');
-        $worksheet->setCellValue('AT2', "Ngày");
-        $worksheet->setCellValue('AU2', "Số Bill");
+        $worksheet->setCellValue('AS1', "NGÀY NỘP ĐƠN
+(Submiting date)");
+        $worksheet->setCellValue('AT1', "Số Bill Ngày nộp đơn");
 
-        $worksheet->getStyle("AQ1:AU2")->getFill()
+        $worksheet->getStyle("AP1:AT1")->getFill()
             ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
             ->getStartColor()->setRGB('FF0000');
-        $worksheet->getStyle("AQ1:AU2")->applyFromArray($style);
+        $worksheet->getStyle("AP1:AT1")->applyFromArray($style);
 
 
-        foreach(range('A','AU') as $columnID) {
+        foreach(range('A','AT') as $columnID) {
             $worksheet->getColumnDimension($columnID)->setAutoSize(true);
         }
         $headerStyle = array(
@@ -279,12 +262,59 @@ Class Lawsuit_report extends WFF_Controller {
         --$col;
         $maxCol = $col;
         if($data) {
-            $row = 3;
+            $row = 2;
             $i = 1;
             foreach ($data as $doc) {
+                $nogoc_hopdong = $lai_hopdong = $nogoc_sotiendathanhtoan = $lai_sotiendathanhtoan = $phat_sotiendathanhtoan = $nogoc_dunokhoikien = $lai_dunokhoikien = $phat_dunokhoikien = $phitattoan_dunokhoikien = $tongcong_dunokhoikien = 0;
                 foreach ($doc as $field => $value) {
                     if(isset($fieldToCol[ $field ], $model[$field])) {
                         $col = $fieldToCol[ $field ];
+                        if ($field == 'nogoc_hopdong') {
+                            $nogoc_hopdong = $value;
+                        }
+                        if ($field == 'lai_hopdong') {
+                            $lai_hopdong = $value;
+                        }
+                        if ($field == 'tongcong_hopdong') {
+                            $value = $nogoc_hopdong + $lai_hopdong;
+                        }
+
+                        if ($field == 'nogoc_sotiendathanhtoan') {
+                            $nogoc_sotiendathanhtoan = $value;
+                        }
+                        if ($field == 'lai_sotiendathanhtoan') {
+                            $lai_sotiendathanhtoan = $value;
+                        }
+                        if ($field == 'phat_sotiendathanhtoan') {
+                            $phat_sotiendathanhtoan = $value;
+                        }
+                        if ($field == 'tongcong_sotiendathanhtoan') {
+                            $value = $nogoc_sotiendathanhtoan + $lai_sotiendathanhtoan + $phat_sotiendathanhtoan;
+                        }
+
+                        if ($field == 'nogoc_dunokhoikien') {
+                            $nogoc_dunokhoikien = $value;
+                        }
+                        if ($field == 'lai_dunokhoikien') {
+                            $lai_dunokhoikien = $value;
+                        }
+                        if ($field == 'phat_dunokhoikien') {
+                            $phat_dunokhoikien = $value;
+                        }
+                        if ($field == 'phitattoan_dunokhoikien') {
+                            $phitattoan_dunokhoikien = $value;
+                        }
+                        if ($field == 'tongcong_dunokhoikien') {
+                            $value = $nogoc_dunokhoikien + $lai_dunokhoikien + $phat_dunokhoikien + $phitattoan_dunokhoikien;
+                            $tongcong_dunokhoikien = $value;
+                        }
+
+                        if ($field == 'tamung_anphi') {
+                            $value = $tongcong_dunokhoikien * 0.025;
+                        }
+                        if ($field == 'sobill_nopdon') {
+                            $value = (int)$value;
+                        }
                         switch ($model[$field]["type"]) {
                             case 'array': case 'arrayPhone': case 'arrayEmail':
                                 $val = implode(",", $value);
@@ -302,7 +332,8 @@ Class Lawsuit_report extends WFF_Controller {
 
 
                             case 'int': case 'double':
-                                $worksheet->setCellValueExplicit($col . $row,number_format($value), \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
+                                $worksheet->setCellValueExplicit($col . $row, $value, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
+                                $worksheet->getStyle($col . $row)->getNumberFormat()->setFormatCode('#,##0');
                                 break;
 
                             case 'timestamp':
@@ -310,6 +341,7 @@ Class Lawsuit_report extends WFF_Controller {
                                     $value = date("d/m/Y",$value);
                                 }
                                 $worksheet->setCellValueExplicit($col . $row, $value, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+                                $worksheet->getStyle($col . $row)->getNumberFormat()->setFormatCode('dd/mm/yyyy');
                                 break;
 
                             default:
@@ -326,9 +358,11 @@ Class Lawsuit_report extends WFF_Controller {
         }
 
         $maxCell = $worksheet->getHighestRowAndColumn();
-        $worksheet->getStyle("A1:AU".$maxCell['row'])->applyFromArray($headerStyle);
-        $worksheet->getStyle("A1:AU".$maxCell['row'])->getBorders()
+        $worksheet->getStyle("A1:AT".$maxCell['row'])->applyFromArray($headerStyle);
+        $worksheet->getStyle("A1:AT".$maxCell['row'])->getBorders()
         ->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+
+
         $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
         $file_path = UPLOAD_PATH . "loan/export/" . 'LawsuitReport.xlsx';
         $writer->save($file_path);

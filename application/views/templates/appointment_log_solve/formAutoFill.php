@@ -252,6 +252,10 @@
         },
         save: function() {
             var item = this.get('item');
+            if(typeof this.item.appointment_date === 'undefined' || this.item.appointment_date === '' || this.item.appointment_date === null) {
+                notification.show("Xin vui lòng chọn ngày lịch hẹn.", 'error');
+                return false;
+            }
             var appointment_date = new Date(this.item.appointment_date);
             appointment_date.setHours(0, 0, 0, 0);
             item.appointment_date = appointment_date.getTime() / 1000;

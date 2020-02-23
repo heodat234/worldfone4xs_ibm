@@ -27,7 +27,7 @@ base_url = common.base_url()
 wff_env = common.wff_env(base_url)
 mongodb = Mongodb(MONGODB="worldfone4xs", WFF_ENV=wff_env)
 _mongodb = Mongodb(MONGODB="_worldfone4xs", WFF_ENV=wff_env)
-log = open(base_url + "cronjob/python/Loan/log/importK20190812.txt","a")
+log = open(base_url + "cronjob/python/Loan/log/importlnjc05.txt","a")
 now = datetime.now()
 subUserType = 'LO'
 collection = common.getSubUser(subUserType, 'K201908120244R18')
@@ -50,7 +50,7 @@ try:
     day = today.day
     month = today.month
     year = today.year
-    fileName = "K20190812.0244.R18.xls"
+    fileName = "K20190812.0244.R18.xlsx"
     sep = ';'
     logDbName = "LO_Input_result_" + str(year) + str(month)
 
@@ -124,7 +124,7 @@ try:
 
     mongodb.remove_document(MONGO_COLLECTION=collection)
 
-    if filenameExtension[3] in ['csv', 'xls']:
+    if filenameExtension[3] in ['csv', 'xlsx']:
         if(filenameExtension[3] == 'csv'):
             inputDataRaw = excel.getDataCSV(file_path=importLogInfo['file_path'], dtype=object, sep=sep, header=None, names=modelColumns, na_values='')
         else:

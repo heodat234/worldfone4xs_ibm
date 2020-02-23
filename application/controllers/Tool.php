@@ -23,6 +23,27 @@ class Tool extends WFF_Controller {
         $this->load->view('tool/library_view');
     }
 
+    public function post() {
+        $this->output->data["js"][] = STEL_PATH . "js/admin/admin.js";
+        $this->load->view('tool/post_view');
+    }
+
+    public function webrtc() {
+        switch(ENVIRONMENT) {
+            case "production":
+                $data["webSocketURL"] = 'http://192.168.101.11:3000/';
+                break;
+            case "testing":
+                $data["webSocketURL"] = 'http://jaccschat.worldfone.vn/';
+                break;
+            default:
+                $data["webSocketURL"] = 'ws://192.168.16.130:3000/socket.io/?EIO=3&transport=websocket';
+                break;
+        }
+        $this->output->data["js"][] = "https://demos.workerman.net:9988/assets/js/adapter.js";
+        $this->load->view('tool/webrtc_view', $data);
+    }
+
     public function chat() {
         $this->output->data["css"][] = KENDOUI_PATH . "styles/kendo.office365.min.css";
         $this->output->data["js"][] = PROUI_PATH . "js/pages/readyChat.js";

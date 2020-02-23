@@ -47,6 +47,9 @@ Class Main_product extends WFF_Controller {
 				$sale_consultant_code 		= isset($report_release_sale['sale_consultant_code']) ? $report_release_sale['sale_consultant_code'] : '';
 				$value['sale_consultant'] 	= $sale_consultant_code . ' - ' . $sale_consultant_name;
 
+				$Investigation_file 		= $this->mongo_db->where("contract_no", $value["account_number"])->getOne('LO_Investigation_file');
+				$value['biensoxe'] 			= (isset($Investigation_file["license_plates_no"])) ? $Investigation_file["license_plates_no"] : '';
+
 				$value['product_name'] 		= (!empty($value['PRODGRP_ID'])) ? $productList[$value['PRODGRP_ID']] : ''; 
 				$value['monthy_amount'] 	= number_format((int) $value['RPY_PRD']);
 				$maturity_date 				= DateTime::createFromFormat('dmY', $value['DT_MAT']);
@@ -88,8 +91,12 @@ Class Main_product extends WFF_Controller {
 	function paymentCount($account_number){
 		$count = 0;
 		$payment_historys 	= $this->mongo_db->where(array("account_number" => $account_number))->get('LO_Payment_history');
+		$this_year = date('Y', time());
+		$this_year = substr($this_year, 0,2);
 		foreach ($payment_historys as $i_key => $i_payment) {
-			if($i_payment['"payment_amount"'] <= $i_payment['overdue_amount']) continue;
+			if(gettype($i_payment['overdue_amount']) == 'string')
+				$i_payment['overdue_amount'] = (int)str_replace(',','',$i_payment['overdue_amount']);
+			if($i_payment["payment_amount"] <= $i_payment['overdue_amount']) {continue;}
 
 			if(gettype($i_payment['payment_date']) == 'string'){
                     // 271219 -> 27/12/2019
@@ -97,17 +104,15 @@ Class Main_product extends WFF_Controller {
 				$newstr = substr_replace($payment_date, $this_year, 4, 0);
 				$newstr = substr_replace($newstr, "/", 2, 0);
 				$newstr = substr_replace($newstr, "/", 5, 0);
-
 				$dt = DateTime::createFromFormat('d/m/Y', $newstr);
 				$payment_date_timestamp = $dt->getTimestamp();
 
-				$overdue_days = (int)($i_payment['due_date'] - $payment_date_timestamp) / 86400;
+				$overdue_days = (int)($payment_date_timestamp - $i_payment['due_date']) / 86400;
 			}else{
-				$overdue_days = (int)($i_payment['due_date'] - $i_payment['payment_date']) / 86400;
+				$overdue_days = (int)($i_payment['payment_date'] - $i_payment['due_date']) / 86400;
 			}
 			if($overdue_days >= 10) $count++;
 		}
-
 		return $count;
 	}
 }

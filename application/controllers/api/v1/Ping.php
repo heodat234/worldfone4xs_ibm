@@ -78,6 +78,13 @@ Class Ping extends CI_Controller {
         	}
     	}
     	$this->echoEvent("menu_notifications", json_encode($menu_notifications));
+
+    	if($time % 4 == 0) {
+    		$message = $this->getMsg();
+    		if($message) {
+    			$this->echoEvent("message", $message);
+    		}
+    	}
     	
   		flush();
 	}
@@ -91,6 +98,16 @@ Class Ping extends CI_Controller {
 	{
 		header('Content-type: application/json');
 		echo json_encode(array("status" => 1));
+	}
+
+	private function getMsg()
+	{
+		$phperror = $this->session->userdata("phperror");
+		if($phperror) {
+			$this->session->unset_userdata("phperror");
+			return 'Hey! You have a <b>PHP</b> error message: <br>'.$phperror;
+		}
+		return FALSE;
 	}
 
 	private function getFollowUp()

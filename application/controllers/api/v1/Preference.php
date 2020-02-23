@@ -5,7 +5,7 @@ Class Preference extends WFF_Controller {
 
 	private $collection = "User";
 	private $sub = "";
-	private $fields = array("theme", "language", "page_preloader", "ringtone", "avatar", "email", "phone","sound_effect","text_tool", "fullname", "group_name");
+	private $fields = array("theme", "language", "page_preloader", "ringtone", "avatar", "email", "phone","sound_effect","text_tool", "fullname", "group_name", "staffid");
 	private $only_session_fields = array("text_tool");
 
 	function __construct()
@@ -66,6 +66,15 @@ Class Preference extends WFF_Controller {
 			$this->load->driver('cache', array('adapter' => 'memcached', 'backup' => 'file'));
 	    	$my_session_id = $this->session->userdata("my_session_id");
 	    	$this->cache->delete($my_session_id . "_nav");
+	    	// Remove cache html of extension
+	    	$path = APPPATH . "cache/{$extension}/*";
+	    	$files = glob($path);
+	    	if($files) {
+				foreach($files as $file){
+				  if(is_file($file))
+				    @unlink($file);
+				}
+			}
 
 			echo json_encode(array("status" => 1));
 		} catch (Exception $e) {
