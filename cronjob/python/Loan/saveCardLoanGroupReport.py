@@ -88,6 +88,7 @@ try:
         {
             "$match":
             {
+                '$or' : [ { 'createdAt' :  {'$gte': todayTimeStamp}}, {'updatedAt' :  {'$gte': todayTimeStamp}}],
                 "W_ORG_1": {'$gt': 0},
             }
         },{
@@ -100,7 +101,7 @@ try:
             }
         }
     ]
-    zaccfInfo = mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'ZACCF'),aggregate_pipeline=aggregate_zaccf)
+    zaccfInfo = mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'ZACCF_report'),aggregate_pipeline=aggregate_zaccf)
     zaccfInfo1 = zaccfInfo
     sum_org = 0
     sum_acc = 0

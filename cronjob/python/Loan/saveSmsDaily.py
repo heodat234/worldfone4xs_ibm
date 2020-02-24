@@ -67,7 +67,7 @@ try:
       {
            "$lookup":
            {
-               "from": common.getSubUser(subUserType, 'ZACCF'),
+               "from": common.getSubUser(subUserType, 'ZACCF_report'),
                "localField": "account_number",
                "foreignField": "account_number",
                "as": "detail"
@@ -99,7 +99,7 @@ try:
       {
            "$lookup":
            {
-               "from": common.getSubUser(subUserType, 'ZACCF'),
+               "from": common.getSubUser(subUserType, 'ZACCF_report'),
                "localField": "account_number",
                "foreignField": "account_number",
                "as": "detail"

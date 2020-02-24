@@ -36,7 +36,7 @@ collection           = common.getSubUser(subUserType, 'Write_of_expectation')
 
 lnjc05_collection    = common.getSubUser(subUserType, 'LNJC05')
 account_collection   = common.getSubUser(subUserType, 'List_of_account_in_collection')
-zaccf_collection     = common.getSubUser(subUserType, 'ZACCF')
+zaccf_collection     = common.getSubUser(subUserType, 'ZACCF_report')
 
 release_sale_collection   = common.getSubUser(subUserType, 'Report_release_sale')
 investigation_collection  = common.getSubUser(subUserType, 'Investigation_file')

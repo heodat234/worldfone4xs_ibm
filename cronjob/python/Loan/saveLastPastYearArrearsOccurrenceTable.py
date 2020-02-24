@@ -24,7 +24,7 @@ _mongodb    = Mongodb(MONGODB="_worldfone4xs", WFF_ENV=wff_env)
 now         = datetime.now()
 subUserType = 'LO'
 collection         = common.getSubUser(subUserType, 'Last_past_year_arrears_occurrence_report')
-zaccf_collection   = common.getSubUser(subUserType, 'ZACCF')
+zaccf_collection   = common.getSubUser(subUserType, 'ZACCF_report')
 
 
 
@@ -56,7 +56,7 @@ try:
    holidayOfMonth = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_off_sys'))
    listHoliday = map(lambda offDateRow: {offDateRow['off_date']}, holidayOfMonth)
 
-   if day != lastDayOfMonth:
+   if day != 1:
       sys.exit()
 
 

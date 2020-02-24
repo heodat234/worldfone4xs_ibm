@@ -25,8 +25,8 @@ Class Last_past_year_report extends WFF_Controller {
             $request    = json_decode($this->input->get("q"), TRUE);
             $request['sort'] = array(array("field" => "type", "dir" => "asc"),array("field" => "index", "dir" => "asc"));
 
-            $getLastDate        = getdate(strtotime(date("Y-m-1", strtotime($today)) . " -1 month"));
-            $match      =  array('createdAt' => array('$gte' => $getLastDate[0]) );
+            $getDate        = getdate();
+            $match      =  array('for_month' => $getDate['mon'] );
             $response   = $this->crud->read($this->collection, $request,array(),$match);
             echo json_encode($response);
 
@@ -40,12 +40,12 @@ Class Last_past_year_report extends WFF_Controller {
     function exportExcel()
     {
         $today      = date('Y-m-d');
-        $getDate    = getdate(strtotime($today));
-        $month_end = date('Y-m-t');
-        $getmonthEndDate    = getdate(strtotime($month_end));
-        if ($getDate['mday'] < $getmonthEndDate['mday']) {
-            $today        = date("Y-m-d",strtotime(date("Y-m-d", strtotime($today)) . " -1 month"));
-        }
+        // $getDate    = getdate(strtotime($today));
+        // $month_end = date('Y-m-t');
+        // $getmonthEndDate    = getdate(strtotime($month_end));
+        // if ($getDate['mday'] < $getmonthEndDate['mday']) {
+        //     $today        = date("Y-m-t",strtotime(date("Y-m-d", strtotime($today)) . " -1 month"));
+        // }
         
 
         $filename = "Last past year,arrears occurrence table.xlsx";
@@ -66,13 +66,13 @@ Class Last_past_year_report extends WFF_Controller {
             $request    = array('type' => $value, 'for_month' => $month, 'year' => $getDate['year'] );
             $dataBike   = $this->crud->where($request)->order_by(array('index' => 'asc'))->get($this->collection);
             
-            $lats_6_month        = strtotime(date("Y-m-d", strtotime($today)) . " -6 month");
+            $lats_6_month        = strtotime(date("Y-m-t", strtotime($today)) . " -6 month");
             $getlast6Month       = getdate($lats_6_month);
             $month_last_6_month  = $getlast6Month['mon'];
             $request             = array('type' => $value, 'for_month' => $month_last_6_month, 'year' => $getlast6Month['year'] );
             $dataBike6Month   = $this->crud->where($request)->order_by(array('index' => 'asc'))->get($this->collection);
 
-            $last_year              = strtotime(date("Y-m-d", strtotime($today)) . " -1 year");
+            $last_year              = strtotime(date("Y-m-t", strtotime($today)) . " -1 year");
             $getlastYear            = getdate($last_year);
             $month_last_1_year      = $getlastYear['mon'];
             $request                = array('type' => $value, 'for_month' => $month_last_1_year, 'year' => $getlastYear['year'] );

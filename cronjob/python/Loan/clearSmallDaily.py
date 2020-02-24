@@ -31,7 +31,7 @@ subUserType = 'LO'
 collection           = common.getSubUser(subUserType, 'Clear_small_daily_report')
 
 lnjc05_collection    = common.getSubUser(subUserType, 'LNJC05')
-zaccf_collection     = common.getSubUser(subUserType, 'ZACCF')
+zaccf_collection     = common.getSubUser(subUserType, 'ZACCF_report')
 
 release_sale_collection   = common.getSubUser(subUserType, 'Report_release_sale')
 investigation_collection  = common.getSubUser(subUserType, 'Investigation_file')
