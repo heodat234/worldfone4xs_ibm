@@ -3,11 +3,11 @@
 <ul class="breadcrumb breadcrumb-top">
     <li>@Report@</li>
     <li>Monthly Japanese report</li>
-    <!-- <li class="pull-right none-breakcrumb" id="top-row">
+    <li class="pull-right none-breakcrumb" id="top-row">
         <div class="btn-group btn-group-sm">
-            <a role="button" class="btn btn-sm" onclick="Table.grid.saveAsExcel()"><i class="fa fa-file-excel-o"></i> <b>@Export@</b></a>
+            <a role="button" class="btn btn-sm" onclick="exportedExcel()"><i class="fa fa-file-excel-o"></i> <b>@Export@</b></a>
         </div>
-    </li> -->
+    </li>
 </ul>
 <!-- END Table Styles Header -->
 <div class="container-fluid mvvm" style="padding-top: 20px; padding-bottom: 10px">
@@ -175,7 +175,7 @@
                     var dateStr = date + "-" + month + "-" + year;
                     var grid_total = this.grid = $("#grid_total").kendoGrid({
                         dataSource: dataSource_total,
-                        toolbar: ["excel"],
+                        // toolbar: ["excel"],
                         excel: {
                             allPages: true,
                             fileName: "MONTHLY JAPANESE REPORT TOTAL "+dateStr+".xlsx", 
@@ -245,7 +245,7 @@
                     
                     var grid_detail = this.grid = $("#grid_detail").kendoGrid({
                         dataSource: dataSource_detail,
-                        toolbar: ["excel"],
+                        // toolbar: ["excel"],
                         excel: {
                             allPages: true,
                             fileName: "MONTHLY JAPANESE REPORT GROUP "+dateStr+".xlsx", 
@@ -268,19 +268,22 @@
                                 if (rowIndex ==0){
                                     row.cells[cellIndex].bold = true
                                 }
+                                if (cellIndex ==0){
+                                    row.cells[cellIndex].bold = true
+                                }
                                 if (rowIndex !=0  && cellIndex>=row.cells.length-2){
                                     row.cells[cellIndex].format = "[Black]#,##0_);[Red]0.0);0"
                                 }
                                 
                                 var rowin = (sheet.rows.length - 1);
                                 if (rowIndex==rowin || rowIndex ==rowin/2){
-                                    row.cells[cellIndex].bold = true
+                                    // row.cells[cellIndex].bold = true
                                     row.cells[cellIndex].borderBottom = "medium"
                                 
                                 }
                                     
                                 
-                                if (rowIndex == 0){
+                                if (rowIndex == 0||rowIndex == 1){
                                     row.cells[cellIndex].background = "#008738";
                                 }
                                 
@@ -473,7 +476,27 @@
         // });
 
     }
+    function exportedExcel(){
+         $.ajax({
+            url: ENV.reportApi + "loan/monthly_japanese_report/exportExcel",
+            data:{month : '1/'+$("#start-date").val(),export:$("#start-date").val()},
+            type: 'POST',
+            dataType: 'json',
+            timeout: 30000
+        })
+        .done(function(response) {
+            if (response.status == 1) {
+            window.location = response.data
+            }
+        })
+        .fail(function() {
+            console.log("error");
+        });
+    }
+
 </script>
+
+
 </div>
 
 

@@ -31,7 +31,7 @@ ftp = Ftp()
 log = open(base_url + "cronjob/python/Loan/log/calDueDateValue.txt","a")
 now = datetime.now()
 subUserType = 'LO'
-collection = common.getSubUser(subUserType, 'Due_date_next_date_by_group')
+collection           = common.getSubUser(subUserType, 'Due_date_next_date_by_group')
 lnjc05_collection    = common.getSubUser(subUserType, 'LNJC05')
 zaccf_collection     = common.getSubUser(subUserType, 'ZACCF_report')
 sbv_collection       = common.getSubUser(subUserType, 'SBV')
@@ -62,13 +62,6 @@ try:
 
     startMonth = int(time.mktime(time.strptime(str('01/' + str(month) + '/' + str(year) + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
     endMonth = int(time.mktime(time.strptime(str(str(lastDayOfMonth) + '/' + str(month) + '/' + str(year) + " 23:59:59"), "%d/%m/%Y %H:%M:%S")))
-
-    holidayOfMonth = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_off_sys'))
-    listHoliday = map(lambda offDateRow: {offDateRow['off_date']}, holidayOfMonth)
-
-    # # if todayTimeStamp in listHoliday or weekday == 6:
-    if todayTimeStamp in listHoliday:
-        sys.exit()
 
     todayString = today.strftime("%d/%m/%Y")
     starttime = int(time.mktime(time.strptime(str(todayString + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
@@ -115,7 +108,7 @@ try:
             dueDayOfMonth = mongodb.getOne(MONGO_COLLECTION=report_due_date_collection, WHERE={'due_date_add_1': todayTimeStamp, 'debt_group': debtGroupCell[1:3]})
             if dueDayOfMonth != None:
                 for groupProduct in list(listGroupProduct):
-                    groupInfoByDueDate = mongodb.get(MONGO_COLLECTION=group_collection, WHERE={'debt_groups': debtGroupCell, 'name': {"$regex": groupProduct['text'] + '.*'}})
+                    groupInfoByDueDate = mongodb.get(MONGO_COLLECTION=group_collection, WHERE={'name': {"$regex": groupProduct['text'] + '/Group ' + debtGroupCell[0:1]} })
                     for groupCell in list(groupInfoByDueDate):
                         if 'G2' in groupCell['name'] or 'G3' in groupCell['name']:
                             continue
@@ -218,151 +211,151 @@ try:
                         mongodb.insert(MONGO_COLLECTION=collection, insert_data=temp)
 
 
-    dueDayOfMonth = mongodb.getOne(MONGO_COLLECTION=report_due_date_collection, WHERE={'due_date_add_1': todayTimeStamp})
-    if dueDayOfMonth != None:
-        groupInfo = mongodb.get(MONGO_COLLECTION=group_collection, WHERE={'name': {"$regex": 'WO'},'debt_groups' : {'$exists': 'true'}})
-        if groupInfo is not None:
-            for groupCell in groupInfo:
-                temp = {
-                    'due_date'              : 0,
-                    'product'               : 'WO',
-                    'debt_group'            : 'F',
-                    'due_date_code'         : 1,
-                    'team_id'               : str(groupCell['_id']),
-                    'debt_acc_no'           : 0,
-                    'current_balance_total' : 0,
-                    'ob_principal_total'    : 0,
-                    'acc_arr'               : []
-                }
-                count_wo = mongodb.count(MONGO_COLLECTION=common.getSubUser(subUserType, 'WO_monthly'))
-                if count_wo != None or count_wo != 0:
-                    aggregate_monthly = [
-                        {
-                            '$project':
-                            {
-                               'ACCTNO' : 1,
-                               'created_at' : 1,
-                               'WO9711': 1,
-                               'pay_payment': {'$sum' : [ '$WO9711', '$WO9712' ,'$WO9713'] }
-                            }
-                        },{
-                            "$group":
-                            {
-                                "_id": 'null',
-                                "total_amt": {'$sum': '$pay_payment'},
-                                "ob_principal_total": {'$sum': '$WO9711'},
-                                "total_acc": {'$sum': 1},
-                                "acc_arr": {'$push' : '$ACCTNO'},
-                                "created_at": {'$last' : '$created_at'}
-                            }
-                        }
-                    ]
-                    woMonthly = mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'WO_monthly'),aggregate_pipeline=aggregate_monthly)
-                    if woMonthly != None:
-                        for wo_row in woMonthly:
-                            temp['due_date']                = wo_row['created_at']
-                            temp['debt_acc_no']             = wo_row['total_acc']
-                            temp['current_balance_total']   = wo_row['total_amt']
-                            temp['ob_principal_total']      = wo_row['ob_principal_total']
-                            temp['acc_arr']                 = wo_row['acc_arr']
+    # dueDayOfMonth = mongodb.getOne(MONGO_COLLECTION=report_due_date_collection, WHERE={'due_date_add_1': todayTimeStamp})
+    # if dueDayOfMonth != None:
+    #     groupInfo = mongodb.get(MONGO_COLLECTION=group_collection, WHERE={'name': {"$regex": 'WO'},'debt_groups' : {'$exists': 'true'}})
+    #     if groupInfo is not None:
+    #         for groupCell in groupInfo:
+    #             temp = {
+    #                 'due_date'              : 0,
+    #                 'product'               : 'WO',
+    #                 'debt_group'            : 'F',
+    #                 'due_date_code'         : 1,
+    #                 'team_id'               : str(groupCell['_id']),
+    #                 'debt_acc_no'           : 0,
+    #                 'current_balance_total' : 0,
+    #                 'ob_principal_total'    : 0,
+    #                 'acc_arr'               : []
+    #             }
+    #             count_wo = mongodb.count(MONGO_COLLECTION=common.getSubUser(subUserType, 'WO_monthly'))
+    #             if count_wo != None or count_wo != 0:
+    #                 aggregate_monthly = [
+    #                     {
+    #                         '$project':
+    #                         {
+    #                            'ACCTNO' : 1,
+    #                            'created_at' : 1,
+    #                            'WO9711': 1,
+    #                            'pay_payment': {'$sum' : [ '$WO9711', '$WO9712' ,'$WO9713'] }
+    #                         }
+    #                     },{
+    #                         "$group":
+    #                         {
+    #                             "_id": 'null',
+    #                             "total_amt": {'$sum': '$pay_payment'},
+    #                             "ob_principal_total": {'$sum': '$WO9711'},
+    #                             "total_acc": {'$sum': 1},
+    #                             "acc_arr": {'$push' : '$ACCTNO'},
+    #                             "created_at": {'$last' : '$created_at'}
+    #                         }
+    #                     }
+    #                 ]
+    #                 woMonthly = mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'WO_monthly'),aggregate_pipeline=aggregate_monthly)
+    #                 if woMonthly != None:
+    #                     for wo_row in woMonthly:
+    #                         temp['due_date']                = wo_row['created_at']
+    #                         temp['debt_acc_no']             = wo_row['total_acc']
+    #                         temp['current_balance_total']   = wo_row['total_amt']
+    #                         temp['ob_principal_total']      = wo_row['ob_principal_total']
+    #                         temp['acc_arr']                 = wo_row['acc_arr']
 
-                    for key, value in mainProduct.items():
-                        temp['debt_acc_' + key] = 0
-                        temp['current_balance_' + key] = 0
-
-
-                    aggregate_payment_prod = [
-                        {
-                            '$project':
-                            {
-                                'PROD_ID' : 1,
-                                'pay_payment': {'$sum' : [ '$WO9711', '$WO9712' ,'$WO9713'] },
-                            }
-                        },{
-                            "$group":
-                            {
-                                "_id": '$PROD_ID',
-                                "total_amt": {'$sum': '$pay_payment'},
-                                "total_acc": {'$sum': 1},
-                            }
-                        }
-                    ]
-                    woMonthlyProd = mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'WO_monthly'),aggregate_pipeline=aggregate_payment_prod)
-                    if woMonthlyProd != None:
-                        for woRowProd in woMonthlyProd:
-                            temp['debt_acc_' + woRowProd['_id']]        = woRowProd['total_acc']
-                            temp['current_balance_' + woRowProd['_id']] = float(woRowProd['total_amt'])
-
-                else:
-                    # wo all product
-                    aggregate_all_prod = [
-                        {
-                            '$project':
-                            {
-                               'ACCTNO' : 1,
-                               'created_at' : 1,
-                               'WOAMT': 1,
-                               'pay_payment': {'$sum' : [ '$OFF_OSTD', '$OFF_RECEIVE_INT' ,'$OFF_LATE_CHARGE'] }
-                            }
-                        },{
-                            "$group":
-                            {
-                                "_id": 'null',
-                                "total_amt": {'$sum': '$pay_payment'},
-                                "ob_principal_total": {'$sum': '$WOAMT'},
-                                "total_acc": {'$sum': 1},
-                                "acc_arr": {'$push' : '$ACCTNO'},
-                                "created_at": {'$last' : '$created_at'}
-                            }
-                        }
-                    ]
-                    woAllProd = mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'Wo_all_prod'),aggregate_pipeline=aggregate_all_prod)
-                    if woAllProd is not None:
-                        for wo_row in woAllProd:
-                            temp['due_date']                = wo_row['created_at']
-                            temp['debt_acc_no']             = wo_row['total_acc']
-                            temp['current_balance_total']   = wo_row['total_amt']
-                            temp['ob_principal_total']      = wo_row['ob_principal_total']
-                            temp['acc_arr']                 = wo_row['acc_arr']
-
-                    for key, value in mainProduct.items():
-                        temp['debt_acc_' + key] = 0
-                        temp['current_balance_' + key] = 0
+    #                 for key, value in mainProduct.items():
+    #                     temp['debt_acc_' + key] = 0
+    #                     temp['current_balance_' + key] = 0
 
 
-                    aggregate_each_prod = [
-                        {
-                            '$project':
-                            {
-                                'PRODUCT' : 1,
-                                'pay_payment': {'$sum' : [ '$OFF_OSTD', '$OFF_RECEIVE_INT' ,'$OFF_LATE_CHARGE'] }
-                            }
-                        },{
-                            "$group":
-                            {
-                                "_id": '$PRODUCT',
-                                "total_amt": {'$sum': '$pay_payment'},
-                                "total_acc": {'$sum': 1},
-                            }
-                        }
-                    ]
-                    woEachProd = mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'Wo_all_prod'),aggregate_pipeline=aggregate_each_prod)
-                    if woEachProd != None:
-                        for woRowProd in woEachProd:
-                            temp['debt_acc_' + woRowProd['_id']]        = woRowProd['total_acc']
-                            temp['current_balance_' + woRowProd['_id']] = float(woRowProd['total_amt'])
+    #                 aggregate_payment_prod = [
+    #                     {
+    #                         '$project':
+    #                         {
+    #                             'PROD_ID' : 1,
+    #                             'pay_payment': {'$sum' : [ '$WO9711', '$WO9712' ,'$WO9713'] },
+    #                         }
+    #                     },{
+    #                         "$group":
+    #                         {
+    #                             "_id": '$PROD_ID',
+    #                             "total_amt": {'$sum': '$pay_payment'},
+    #                             "total_acc": {'$sum': 1},
+    #                         }
+    #                     }
+    #                 ]
+    #                 woMonthlyProd = mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'WO_monthly'),aggregate_pipeline=aggregate_payment_prod)
+    #                 if woMonthlyProd != None:
+    #                     for woRowProd in woMonthlyProd:
+    #                         temp['debt_acc_' + woRowProd['_id']]        = woRowProd['total_acc']
+    #                         temp['current_balance_' + woRowProd['_id']] = float(woRowProd['total_amt'])
+
+    #             else:
+    #                 # wo all product
+    #                 aggregate_all_prod = [
+    #                     {
+    #                         '$project':
+    #                         {
+    #                            'ACCTNO' : 1,
+    #                            'created_at' : 1,
+    #                            'WOAMT': 1,
+    #                            'pay_payment': {'$sum' : [ '$OFF_OSTD', '$OFF_RECEIVE_INT' ,'$OFF_LATE_CHARGE'] }
+    #                         }
+    #                     },{
+    #                         "$group":
+    #                         {
+    #                             "_id": 'null',
+    #                             "total_amt": {'$sum': '$pay_payment'},
+    #                             "ob_principal_total": {'$sum': '$WOAMT'},
+    #                             "total_acc": {'$sum': 1},
+    #                             "acc_arr": {'$push' : '$ACCTNO'},
+    #                             "created_at": {'$last' : '$created_at'}
+    #                         }
+    #                     }
+    #                 ]
+    #                 woAllProd = mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'Wo_all_prod'),aggregate_pipeline=aggregate_all_prod)
+    #                 if woAllProd is not None:
+    #                     for wo_row in woAllProd:
+    #                         temp['due_date']                = wo_row['created_at']
+    #                         temp['debt_acc_no']             = wo_row['total_acc']
+    #                         temp['current_balance_total']   = wo_row['total_amt']
+    #                         temp['ob_principal_total']      = wo_row['ob_principal_total']
+    #                         temp['acc_arr']                 = wo_row['acc_arr']
+
+    #                 for key, value in mainProduct.items():
+    #                     temp['debt_acc_' + key] = 0
+    #                     temp['current_balance_' + key] = 0
+
+
+    #                 aggregate_each_prod = [
+    #                     {
+    #                         '$project':
+    #                         {
+    #                             'PRODUCT' : 1,
+    #                             'pay_payment': {'$sum' : [ '$OFF_OSTD', '$OFF_RECEIVE_INT' ,'$OFF_LATE_CHARGE'] }
+    #                         }
+    #                     },{
+    #                         "$group":
+    #                         {
+    #                             "_id": '$PRODUCT',
+    #                             "total_amt": {'$sum': '$pay_payment'},
+    #                             "total_acc": {'$sum': 1},
+    #                         }
+    #                     }
+    #                 ]
+    #                 woEachProd = mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'Wo_all_prod'),aggregate_pipeline=aggregate_each_prod)
+    #                 if woEachProd != None:
+    #                     for woRowProd in woEachProd:
+    #                         temp['debt_acc_' + woRowProd['_id']]        = woRowProd['total_acc']
+    #                         temp['current_balance_' + woRowProd['_id']] = float(woRowProd['total_amt'])
 
 
 
 
-                temp['created_at'] = time.time()
-                temp['created_by'] = 'system'
-                if month == 1:
-                    lastmonth = 12
-                else:
-                    lastmonth = month - 1
-                temp['for_month'] = str(lastmonth)
-                mongodb.insert(MONGO_COLLECTION=collection, insert_data=temp)
+    #             temp['created_at'] = time.time()
+    #             temp['created_by'] = 'system'
+    #             if month == 1:
+    #                 lastmonth = 12
+    #             else:
+    #                 lastmonth = month - 1
+    #             temp['for_month'] = str(lastmonth)
+    #             mongodb.insert(MONGO_COLLECTION=collection, insert_data=temp)
 
     pprint("DONE")
 except Exception as e:

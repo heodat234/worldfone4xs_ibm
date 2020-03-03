@@ -66,7 +66,7 @@ function gridDate(data, format = "dd/MM/yy H:mm") {
     return data ? kendo.toString(data, format) : "";
 }
 
-function gridTimestamp(data, format = "dd/MM/yy H:mm") {
+function gridTimestamp(data, format = "dd/MM/yyyy") {
     if(!data) return "";
     let date = new Date();
     if(typeof data == "string") {
@@ -82,6 +82,7 @@ function gridName(name, href = "javascript:void(0)") {
 }
 
 function gridInterger(data, format = "n0") {
+    if(data == 0) return 0;
     return data ? kendo.toString(Number(data), format) : "";
 }
 
@@ -106,7 +107,7 @@ function gridLongText(data, leng = 30) {
     var content = (data || '').toString();
     var html = '';
     if(content.length > leng)
-        html = content.slice(0, (leng - 3)) + '...' + `<a href='javascript:void(0)' data-role='tooltip' title='${content}' onclick='return $(this).parent().html($(this).attr("title"));'>See more</a>`
+        html = content.slice(0, (leng - 3)) + '...' + `<a href='javascript:void(0)' data-title='${content}' onclick='return $(this).parent().html($(this).data("title"));'>See more</a>`
     else html = content;
     return html;
 }

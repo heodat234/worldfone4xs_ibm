@@ -31,24 +31,7 @@ Class Daily_assignment_report extends WFF_Controller {
     {
         try {
             $request = json_decode($this->input->get("q"), TRUE);
-            // if (isset($request['filter'])) {
-            //   $filters = $request['filter'];
-            //   unset($request['filter']);
-            //   foreach ($filters['filters'] as $value) {
-            //     if ($value['operator'] == 'gte') {
-            //       $start = $value['value'];
-            //     }
-            //     if ($value['operator'] == 'lte') {
-            //       $end = $value['value'];
-            //     }
-            //   }
-            //   $match = array('createdAt' => array('$gte' =>strtotime($start), '$lte' => strtotime($end)));
-            // }else{
-            //     $date = date('d-m-Y');
-            //     $match = array('createdAt' => array('$gte' => strtotime($date)));
-            // }
-            
-            $response = $this->crud->read($this->collection, $request,array(),$match);
+            $response = $this->crud->read($this->collection, $request);
             echo json_encode($response);
 
         } catch (Exception $e) {

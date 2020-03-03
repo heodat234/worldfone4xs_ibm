@@ -865,7 +865,7 @@ async function addForm() {
             group_active: false,
             show_team_leader_name: false,
             show_B_plus_duedate_type: false,
-            debtTypeOptions: ["SIBS", "CARD"],
+            debtTypeOptions: ["SIBS", "Card"],
             debtGroupOptions: ["Group A", "Group B", "Group C", "Group D", "Group E"],
             duedateTypeOptions: ["G1", "G2", "G3"],
             B_plus_duedateTypeOptions: [],

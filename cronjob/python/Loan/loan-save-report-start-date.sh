@@ -73,3 +73,18 @@ else
    echo "Worldfone ScanJob service is running"
    exit 0
 fi
+if [ $(ps -ef | grep -v grep | grep listOfAllCustomer.py | wc -l) -lt 1 ]; then
+   /usr/local/bin/python3.6 $BASEDIR/listOfAllCustomer.py > /dev/null 2>&1 &
+   echo "RUN $BASEDIR/listOfAllCustomer.py"
+else
+   echo "Worldfone ScanJob service is running"
+   exit 0
+fi
+
+if [ $(ps -ef | grep -v grep | grep saveDailyReportOfOSBalanceOfGroupABCDE.py | wc -l) -lt 1 ]; then
+   /usr/local/bin/python3.6 ${BASEDIR}/saveDailyReportOfOSBalanceOfGroupABCDE.py > /dev/null 2>&1 &
+   echo "RUN ${BASEDIR}/saveDailyReportOfOSBalanceOfGroupABCDE.py"
+else
+   echo "Worldfone ScanJob service is running"
+   exit 0
+fi

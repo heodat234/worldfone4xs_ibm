@@ -27,6 +27,17 @@ _mongodb    = Mongodb(MONGODB="_worldfone4xs", WFF_ENV=wff_env)
 
 subUserType = 'LO'
 collection = common.getSubUser(subUserType, 'Daily_prod_each_user_group')
+lnjc05_collection       = common.getSubUser(subUserType, 'LNJC05')
+ln3206f_collection      = common.getSubUser(subUserType, 'LN3206F')
+account_collection      = common.getSubUser(subUserType, 'List_of_account_in_collection')
+gl_collection           = common.getSubUser(subUserType, 'Report_input_payment_of_card')
+jsonData_collection     = common.getSubUser(subUserType, 'Jsondata')
+group_collection        = common.getSubUser(subUserType, 'Group')
+target_collection       = common.getSubUser(subUserType, 'Target_of_report')
+report_due_date_collection              = common.getSubUser(subUserType, 'Report_due_date')
+due_date_next_date_group_collection     = common.getSubUser(subUserType, 'Due_date_next_date_by_group')
+
+
 log = open(base_url + "cronjob/python/Loan/log/dailyProdEachUserGroup_log.txt","a")
 now = datetime.now()
 log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': Start Import' + '\n')
@@ -46,6 +57,7 @@ try:
 
     todayString = today.strftime("%d/%m/%Y")
     todayTimeStamp = int(time.mktime(time.strptime(str(todayString + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
+    endTodayTimeStamp = int(time.mktime(time.strptime(str(todayString + " 23:59:59"), "%d/%m/%Y %H:%M:%S")))
 
     startMonth = int(time.mktime(time.strptime(str('01/' + str(month) + '/' + str(year) + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
     endMonth = int(time.mktime(time.strptime(str(str(lastDayOfMonth) + '/' + str(month) + '/' + str(year) + " 23:59:59"), "%d/%m/%Y %H:%M:%S")))
@@ -56,17 +68,10 @@ try:
     if todayTimeStamp in listHoliday:
         sys.exit()
 
-    todayString = today.strftime("%d/%m/%Y")
-    starttime = int(time.mktime(time.strptime(str(todayString + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
-    endtime = int(time.mktime(time.strptime(str(todayString + " 23:59:59"), "%d/%m/%Y %H:%M:%S")))
 
-    mainProduct = {}
-    mainProductRaw = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Product'))
-    for prod in mainProductRaw:
-        mainProduct[prod['code']] = prod['name']
 
-    debtGroup = _mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Jsondata'), WHERE={'tags': ['debt', 'group']})
-    dueDate = _mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Jsondata'), WHERE={'tags': ['debt', 'duedate']})
+    debtGroup = _mongodb.getOne(MONGO_COLLECTION=jsonData_collection, WHERE={'tags': ['debt', 'group']})
+    dueDate = _mongodb.getOne(MONGO_COLLECTION=jsonData_collection, WHERE={'tags': ['debt', 'duedate']})
 
     for group in debtGroup['data']:
         for duedate in dueDate['data']:
@@ -74,14 +79,14 @@ try:
 
     listDebtGroup = sorted(listDebtGroup)
 
-    listGroupProductRaw = _mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Jsondata'), WHERE={'tags': ['group', 'debt', 'product']})
+    listGroupProductRaw = _mongodb.getOne(MONGO_COLLECTION=jsonData_collection, WHERE={'tags': ['group', 'debt', 'product']})
     listGroupProduct = listGroupProductRaw['data']
 
     for debtGroupCell in list(listDebtGroup):
         if debtGroupCell[0:1] is not 'F':
-            dueDayOfMonth = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_due_date'), WHERE={'for_month': str(month), 'debt_group': debtGroupCell[1:3]})
+            dueDayOfMonth = mongodb.getOne(MONGO_COLLECTION=report_due_date_collection, WHERE={'for_month': str(month), 'debt_group': debtGroupCell[1:3]})
             for groupProduct in list(listGroupProduct):
-                groupInfoByDueDate = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Group'), WHERE={'debt_groups': debtGroupCell, 'name': {"$regex": groupProduct['text'] + '.*'}})
+                groupInfoByDueDate = mongodb.get(MONGO_COLLECTION=group_collection, WHERE={'name': {"$regex": groupProduct['text'] + '/Group ' + debtGroupCell[0:1]} })
                 for groupCell in list(groupInfoByDueDate):
                     if 'G2' in groupCell['name'] or 'G3' in groupCell['name']:
                         continue
@@ -106,13 +111,12 @@ try:
                             lastMonth = 12
                         else:
                             lastMonth = month - 1
-                        dueDayLastMonth = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_due_date'), WHERE={'for_month': str(lastMonth), 'debt_group': debtGroupCell[1:3]})
+                        dueDayLastMonth = mongodb.getOne(MONGO_COLLECTION=report_due_date_collection, WHERE={'for_month': str(lastMonth), 'debt_group': debtGroupCell[1:3]})
                         temp['due_date'] = dueDayLastMonth['due_date'] if dueDayLastMonth is not None else ''
                         #Lay gia tri no vao ngay due date + 1#
-                        incidenceInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Due_date_next_date'), WHERE={'for_month': str(lastMonth), 'team_id': str(groupCell['_id'])})
-                        #Lay gia tri no vao ngay due date + 1#
+                        incidenceInfo = mongodb.getOne(MONGO_COLLECTION=due_date_next_date_group_collection, WHERE={'for_month': str(lastMonth), 'team_id': str(groupCell['_id'])})
                     else:
-                        incidenceInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Due_date_next_date'), WHERE={'for_month': str(month), 'team_id': str(groupCell['_id'])})
+                        incidenceInfo = mongodb.getOne(MONGO_COLLECTION=due_date_next_date_group_collection, WHERE={'for_month': str(month), 'team_id': str(groupCell['_id'])})
                         temp['due_date'] = dueDayOfMonth['due_date']
 
                     temp['debt_group'] = debtGroupCell[0:1]
@@ -130,89 +134,155 @@ try:
                         temp['inci_amt'] = 0
                         acc_arr = []
 
-
+                    due_date_add_2 = temp['due_date'] + 86400*2
                     if groupProduct['value'] == 'SIBS':
-                        yesterdayReportData = mongodb.getOne(MONGO_COLLECTION=collection, WHERE={'team_id': str(groupCell['_id']), 'created_at': {'$gte': (starttime - 86400), '$lte': (endtime - 86400)}})
-
-                        dueDateOneData = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Due_date_next_date_SIBS'), WHERE={'debt_group': debtGroupCell[0:1], 'due_date_code': debtGroupCell[1:3], 'for_month': str(month)})
-
-                        lead = ['JIVF00' + groupCell['lead']] if 'lead' in groupCell.keys() else []
-                        member = ('JIVF00' + s for s in groupCell['members']) if 'members' in groupCell.keys() else []
-                        officerIdRaw = list(lead) + list(member)
-                        officerId = list(dict.fromkeys(officerIdRaw))
-
-                        lnjc05Info = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'LNJC05'), WHERE={'group_id': debtGroupCell, 'officer_id': {'$in': officerId}})
-                        for lnjc05 in lnjc05Info:
-                            col_today += 1
-                            col_amt_today += lnjc05['current_balance']
-
                         aggregate_ln3206 = [
                             {
                                 "$match":
                                 {
-                                    "created_at": {'$gte': temp['due_date']},
-                                    "account_number": {'$in' : acc_arr}
+                                      "created_at": {'$gte': due_date_add_2, '$lte': endTodayTimeStamp},
+                                      "account_number": {'$in': acc_arr},
+                                      "code" : '10'
                                 }
                             },{
-                                "$group":
-                                {
-                                    "_id": 'null',
-                                    "total_amt": {'$sum': '$amt'},
-                                }
+                              "$group":
+                              {
+                                  "_id": 'null',
+                                  "sum_amount": {'$sum': '$amt'},
+                                  "count_col": {'$addToSet': '$account_number'},
+                              }
                             }
                         ]
-                        ln3206fInfo = mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'LN3206F'),aggregate_pipeline=aggregate_ln3206)
-                        if ln3206fInfo is not None:
-                            for ln3206 in ln3206fInfo:
-                                temp['payment_amt'] = ln3206['total_amt']
+                        ln3206fData = mongodb.aggregate_pipeline(MONGO_COLLECTION=ln3206f_collection,aggregate_pipeline=aggregate_ln3206)
+                        if ln3206fData != None:
+                            for row in ln3206fData:
+                                temp['col']            = len(row['count_col'] )
+                                if debtGroupCell[0:1] == 'A' or debtGroupCell[0:1] == 'B' or debtGroupCell[0:1] == 'C':
+                                    temp['payment_amt']         = row['sum_amount']
+                                else:
+                                    temp['col_amt']             = row['sum_amount']
 
+
+
+                        if debtGroupCell[0:1] == 'A' or debtGroupCell[0:1] == 'B' or debtGroupCell[0:1] == 'C':
+                            aggregate_lnjc05 = [
+                                {
+                                    "$match":
+                                    {
+                                          "account_number": {'$in': acc_arr},
+                                    }
+                                },{
+                                  "$group":
+                                  {
+                                      "_id": 'null',
+                                      "sum_amount": {'$sum': '$current_balance'},
+                                  }
+                                }
+                            ]
+                            lnjc05Data  = mongodb.aggregate_pipeline(MONGO_COLLECTION=lnjc05_collection,aggregate_pipeline=aggregate_lnjc05)
+                            col_today   = 0
+                            if lnjc05Data != None:
+                                for row in lnjc05Data:
+                                    col_today           = row['sum_amount']
+
+                            temp['col_amt'] = temp['inci_amt'] - col_today
+
+
+                        
                     if groupProduct['value'] == 'Card':
-                        yesterdayReportData = mongodb.getOne(MONGO_COLLECTION=collection, WHERE={'team_id': str(groupCell['_id']), 'created_at': {'$gte': (starttime - 86400), '$lte': (endtime - 86400)}})
-
-                        listOfAccount = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'List_of_account_in_collection'), WHERE={ 'account_number': {'$in': acc_arr}})
-                        for account in listOfAccount:
-                            col_today += 1
-                            col_amt_today += account['cur_bal']
-
-                        aggregate_gl = [
-                            {
-                                "$match":
+                        code = ['2000','2100','2700']
+                        for row_acc in acc_arr:
+                            aggregate_gl = [
                                 {
-                                    "created_at": {'$gte': temp['due_date']},
-                                    "account_number": {'$in' : acc_arr}
-                                }
-                            },{
-                                "$group":
+                                    "$match":
+                                    {
+                                        "created_at": {'$gte': due_date_add_2, '$lte': endTodayTimeStamp},
+                                        "account_number": row_acc,
+                                        "code" : {'$in' : code},
+                                    }
+                                },
                                 {
-                                    "_id": 'null',
-                                    "total_amt": {'$sum': '$amount'},
+                                    "$project":
+                                    {
+                                        "account_number" : 1,
+                                        "amount" : 1,
+                                        "code" : 1,
+                                    }
                                 }
-                            }
-                        ]
-                        glInfo = mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_input_payment_of_card'),aggregate_pipeline=aggregate_gl)
-                        if glInfo is not None:
-                            for gl in glInfo:
-                                temp['payment_amt'] = gl['total_amt']
+                            ]
+                            glData = mongodb.aggregate_pipeline(MONGO_COLLECTION=gl_collection,aggregate_pipeline=aggregate_gl)
+                            code_2000 = 0
+                            code_2700 = 0
+                            sum_code = 0
+                            if glData != None:
+                                for row in glData:
+                                    if row['code'] == '2000' or row['code'] == '2100':
+                                        code_2000 += row['amount']
+                                    else:
+                                        code_2700 += row['amount']
+                                sum_code = code_2000 - code_2700
+                                if sum_code > 0:
+                                    temp['col']             += 1
+                                    if debtGroupCell[0:1] == 'A' or debtGroupCell[0:1] == 'B' or debtGroupCell[0:1] == 'C':
+                                        temp['payment_amt']         += sum_code
+                                    else:
+                                        temp['col_amt']             += sum_code
 
-                    temp['col']         = temp['inci'] - col_today
-                    temp['col_amt']     = temp['inci_amt'] - col_amt_today
-                    temp['rem']         = temp['inci'] - temp['col']
-                    temp['rem_actual']     = temp['inci_amt'] - temp['payment_amt']
-                    temp['rem_os']     = temp['inci_amt'] - temp['col_amt']
-                    temp['flow_rate']   = temp['rem'] / temp['inci'] if temp['inci'] != 0 else 0
-                    temp['flow_rate_actual']   = temp['rem_actual'] / temp['inci_amt'] if temp['inci_amt'] != 0 else 0
-                    temp['flow_rate_os']   = temp['rem_os'] / temp['inci_amt'] if temp['inci_amt'] != 0 else 0
-                    temp['col_ratio']       = temp['col'] / temp['inci'] if temp['inci'] != 0 else 0
-                    temp['col_ratio_actual']   = temp['payment_amt'] / temp['inci_amt'] if temp['inci_amt'] != 0 else 0
-                    temp['col_ratio_os']   = temp['col_amt'] / temp['inci_amt'] if temp['inci_amt'] != 0 else 0
 
-                    targetInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Target'), WHERE={ 'group.id': str(groupCell['_id'])})
+                        if debtGroupCell[0:1] == 'A' or debtGroupCell[0:1] == 'B' or debtGroupCell[0:1] == 'C':
+                            aggregate_account = [
+                                {
+                                    "$match":
+                                    {
+                                          "account_number": {'$in': acc_arr},
+                                    }
+                                },{
+                                  "$group":
+                                  {
+                                      "_id": 'null',
+                                      "sum_amount": {'$sum': '$cur_bal'},
+                                  }
+                                }
+                            ]
+                            listAccData  = mongodb.aggregate_pipeline(MONGO_COLLECTION=account_collection,aggregate_pipeline=aggregate_account)
+                            col_today   = 0
+                            if listAccData != None:
+                                for row in listAccData:
+                                    col_today           = row['sum_amount']
+
+                            temp['col_amt'] = temp['inci_amt'] - col_today
+
+
+
+
+
+                    temp['rem']                 = temp['inci'] - temp['col']
+                    temp['rem_actual']          = temp['inci_amt'] - temp['payment_amt']
+                    temp['rem_os']              = temp['inci_amt'] - temp['col_amt']
+                    temp['flow_rate']           = temp['rem'] / temp['inci'] if temp['inci'] != 0 else 0
+                    temp['flow_rate_actual']    = temp['rem_actual'] / temp['inci_amt'] if temp['inci_amt'] != 0 else 0
+                    temp['flow_rate_os']        = temp['rem_os'] / temp['inci_amt'] if temp['inci_amt'] != 0 else 0
+                    temp['col_ratio']           = temp['col'] / temp['inci'] if temp['inci'] != 0 else 0
+                    temp['col_ratio_actual']    = temp['payment_amt'] / temp['inci_amt'] if temp['inci_amt'] != 0 else 0
+                    temp['col_ratio_os']        = temp['col_amt'] / temp['inci_amt'] if temp['inci_amt'] != 0 else 0
+
+                    
+                    if groupProduct['text'] == 'Card':
+                        debt_type = 'CARD'
+                    else:
+                        debt_type = 'SIBS'
+                    if debtGroupCell[0:1] == 'A':
+                        targetInfo = mongodb.getOne(MONGO_COLLECTION=target_collection, WHERE={ 'duedate_type': str(debtGroupCell), 'debt_type': debt_type })
+                        # print(targetInfo)
+                    else:
+                        targetInfo = mongodb.getOne(MONGO_COLLECTION=target_collection, WHERE={ 'B_plus_duedate_type': debtGroupCell, 'debt_type': debt_type })
+
                     target = int(targetInfo['target'])
                     temp['tar_amt'] = (target * temp['inci_amt'])/100
                     temp['tar_gap'] = temp['tar_amt'] - temp['rem_os']
-                    temp['tar_per'] = temp['tar_gap']/temp['tar_amt'] if temp['tar_amt'] != 0 else 0
+                    temp['tar_per'] = target/100
 
-                    temp['createdAt'] = time.time()
+                    temp['createdAt'] = todayTimeStamp
                     temp['createdBy'] = 'system'
                     temp['for_month'] = str(month)
                     mongodb.insert(MONGO_COLLECTION=collection, insert_data=temp)

@@ -4,8 +4,8 @@ use Pheanstalk\Pheanstalk;
 $queue = new Pheanstalk('127.0.0.1');
 
 //$inputFileName = "../../upload/ftp/telesales/ZACCF.csv";
-$folder = (string)(date("Ymd")); //"20191120";
-// $folder = '20200212'; //"20191120";
+// $folder = (string)(date("Ymd")); //"20191120";
+$folder = '20200225'; //"20191120";
 $inputFileName = "/data/upload_file/{$folder}/ZACCF.txt";
 echo $inputFileName;
 
@@ -115,6 +115,13 @@ while(!feof($file))
             foreach ($header as $index => $field) {
                 if ($field == 'W_ORG') {
                     $doc['W_ORG_1'] = isset($editedValue[$index]) ? (double)$editedValue[$index] : null;
+                }
+                if ($field == 'FRELD8' && isset($editedValue[$index]) ) {
+                    if (strlen($editedValue[$index]) == 7 ) {
+                        $editedValue[$index] = '0'.$editedValue[$index]; 
+                    }
+                    $date = substr($editedValue[$index], 0,2).'-'.substr($editedValue[$index], 2,2).'-'.substr($editedValue[$index], 4,8);
+                    $doc['FRELD8_BJ'] = strtotime($date);
                 }
                 $doc[$field] = isset($editedValue[$index]) ? mb_convert_encoding($editedValue[$index], 'ISO-8859-1', 'UTF-8') : null;
             }

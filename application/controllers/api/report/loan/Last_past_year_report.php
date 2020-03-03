@@ -22,10 +22,12 @@ Class Last_past_year_report extends WFF_Controller {
     {
         try {
             $today      = date('Y-m-d');
+            $today        = date("Y-m-t",strtotime(date("Y-m-d", strtotime($today)) . " -1 month"));
             $request    = json_decode($this->input->get("q"), TRUE);
             $request['sort'] = array(array("field" => "type", "dir" => "asc"),array("field" => "index", "dir" => "asc"));
 
-            $getDate        = getdate();
+            
+            $getDate    = getdate(strtotime($today));
             $match      =  array('for_month' => $getDate['mon'] );
             $response   = $this->crud->read($this->collection, $request,array(),$match);
             echo json_encode($response);
@@ -44,7 +46,7 @@ Class Last_past_year_report extends WFF_Controller {
         // $month_end = date('Y-m-t');
         // $getmonthEndDate    = getdate(strtotime($month_end));
         // if ($getDate['mday'] < $getmonthEndDate['mday']) {
-        //     $today        = date("Y-m-t",strtotime(date("Y-m-d", strtotime($today)) . " -1 month"));
+        $today        = date("Y-m-t",strtotime(date("Y-m-d", strtotime($today)) . " -1 month"));
         // }
         
 

@@ -38,7 +38,18 @@ try:
    insertDataPayment = []
 
    today = date.today()
-   # today = datetime.strptime('31/01/2020', "%d/%m/%Y").date()
+   # today = datetime.strptime('1/02/2020', "%d/%m/%Y").date()
+
+   day = today.day
+   todayString = today.strftime("%d/%m/%Y")
+   todayTimeStamp = int(time.mktime(time.strptime(str(todayString + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
+
+   if day != 1:
+      sys.exit()
+
+
+   today = today - timedelta(days=1)
+
 
    day = today.day
    month = today.month
@@ -47,7 +58,7 @@ try:
    lastDayOfMonth = calendar.monthrange(year, month)[1]
 
    todayString = today.strftime("%d/%m/%Y")
-   todayTimeStamp = int(time.mktime(time.strptime(str(todayString + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
+   # todayTimeStamp = int(time.mktime(time.strptime(str(todayString + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
    endTodayTimeStamp = int(time.mktime(time.strptime(str(todayString + " 23:59:59"), "%d/%m/%Y %H:%M:%S")))
 
    startMonth = int(time.mktime(time.strptime(str('01/' + str(month) + '/' + str(year) + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
@@ -56,8 +67,7 @@ try:
    holidayOfMonth = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_off_sys'))
    listHoliday = map(lambda offDateRow: {offDateRow['off_date']}, holidayOfMonth)
 
-   if day != 1:
-      sys.exit()
+   
 
 
    last_one_months = today - relativedelta(months=1)
@@ -126,7 +136,8 @@ try:
               "$match":
               {
                   'PRODGRP_ID' : {'$in' : code},
-                  '$or' : [ { "created_at" : {'$gte' : todayTimeStamp,'$lte' : endTodayTimeStamp} }, {"updatedAt" : {'$gte' : todayTimeStamp,'$lte' : endTodayTimeStamp} }],
+                  'W_ORG_1': {'$gt': 0},
+                  # '$or' : [ { "createdAt" : {'$gte' : todayTimeStamp,'$lte' : endTodayTimeStamp} }, {"updatedAt" : {'$gte' : todayTimeStamp,'$lte' : endTodayTimeStamp} }],
                   "FRELD8_BJ" : {'$gte' : startMonth,'$lte' : endMonth} 
               }
           },
@@ -146,7 +157,6 @@ try:
          for row in accData:
             total_account  = row['total_account']
             total_w_org    = row['total_w_org']
-
 
       temp = {
          'daily'                 : 'true',
@@ -170,6 +180,7 @@ try:
          'createdAt'             : todayTimeStamp,
          'createdBy'             : 'system',
       }
+      # print(temp)
       insertData.append(temp)
 
 
@@ -181,8 +192,9 @@ try:
               "$match":
               {
                   'PRODGRP_ID' : {'$in' : code},
+                  'W_ORG_1'   : {'$gt': 0},
                   "FRELD8_BJ" : {'$gte' : startSixMonth,'$lte' : endOneMonth},
-                  '$or' : [ { "created_at" : {'$gte' : todayTimeStamp,'$lt' : endTodayTimeStamp} }, {"updatedAt" : {'$gte' : todayTimeStamp,'$lt' : endTodayTimeStamp} }]
+                  # '$or' : [ { "createdAt" : {'$gte' : todayTimeStamp,'$lt' : endTodayTimeStamp} }, {"updatedAt" : {'$gte' : todayTimeStamp,'$lt' : endTodayTimeStamp} }]
               }
           },
           {
@@ -210,9 +222,10 @@ try:
               "$match":
               {
                   'ODIND_FG' : 'B',
+                  'W_ORG_1'   : {'$gt': 0},
                   'PRODGRP_ID' : {'$in' : code},
                   "FRELD8_BJ" : {'$gte' : startSixMonth,'$lte' : endOneMonth},
-                  '$or' : [ { "created_at" : {'$gte' : todayTimeStamp,'$lt' : endTodayTimeStamp} }, {"updatedAt" : {'$gte' : todayTimeStamp,'$lt' : endTodayTimeStamp} }]
+                  # '$or' : [ { "createdAt" : {'$gte' : todayTimeStamp,'$lt' : endTodayTimeStamp} }, {"updatedAt" : {'$gte' : todayTimeStamp,'$lt' : endTodayTimeStamp} }]
               }
           },
           {
@@ -240,9 +253,10 @@ try:
               "$match":
               {
                   'ODIND_FG' : 'C',
+                  'W_ORG_1'   : {'$gt': 0},
                   'PRODGRP_ID' : {'$in' : code},
                   "FRELD8_BJ" : {'$gte' : startSixMonth,'$lte' : endOneMonth},
-                  '$or' : [ { "created_at" : {'$gte' : todayTimeStamp,'$lt' : endTodayTimeStamp} }, {"updatedAt" : {'$gte' : todayTimeStamp,'$lt' : endTodayTimeStamp} }]
+                  # '$or' : [ { "createdAt" : {'$gte' : todayTimeStamp,'$lt' : endTodayTimeStamp} }, {"updatedAt" : {'$gte' : todayTimeStamp,'$lt' : endTodayTimeStamp} }]
               }
           },
           {
@@ -269,10 +283,11 @@ try:
           {
               "$match":
               {
+                  'W_ORG_1'   : {'$gt': 0},
                   'ODIND_FG' : {'$in' : ['C','D','E']},
                   'PRODGRP_ID' : {'$in' : code},
                   "FRELD8_BJ" : {'$gte' : startSixMonth,'$lte' : endOneMonth},
-                  '$or' : [ { "created_at" : {'$gte' : todayTimeStamp,'$lt' : endTodayTimeStamp} }, {"updatedAt" : {'$gte' : todayTimeStamp,'$lt' : endTodayTimeStamp} }]
+                  # '$or' : [ { "createdAt" : {'$gte' : todayTimeStamp,'$lt' : endTodayTimeStamp} }, {"updatedAt" : {'$gte' : todayTimeStamp,'$lt' : endTodayTimeStamp} }]
               }
           },
           {
@@ -329,9 +344,10 @@ try:
           {
               "$match":
               {
+                  'W_ORG_1'   : {'$gt': 0},
                   'PRODGRP_ID' : {'$in' : code},
                   "FRELD8_BJ" : {'$gte' : startMonthLastYear,'$lte' : end7Month},
-                  '$or' : [ { "created_at" : {'$gte' : todayTimeStamp,'$lt' : endTodayTimeStamp} }, {"updatedAt" : {'$gte' : todayTimeStamp,'$lt' : endTodayTimeStamp} }]
+                  # '$or' : [ { "createdAt" : {'$gte' : todayTimeStamp,'$lt' : endTodayTimeStamp} }, {"updatedAt" : {'$gte' : todayTimeStamp,'$lt' : endTodayTimeStamp} }]
               }
           },
           {
@@ -359,9 +375,10 @@ try:
               "$match":
               {
                   'ODIND_FG' : 'B',
+                  'W_ORG_1'   : {'$gt': 0},
                   'PRODGRP_ID' : {'$in' : code},
                   "FRELD8_BJ" : {'$gte' : startMonthLastYear,'$lte' : end7Month},
-                  '$or' : [ { "created_at" : {'$gte' : todayTimeStamp,'$lt' : endTodayTimeStamp} }, {"updatedAt" : {'$gte' : todayTimeStamp,'$lt' : endTodayTimeStamp} }]
+                  # '$or' : [ { "createdAt" : {'$gte' : todayTimeStamp,'$lt' : endTodayTimeStamp} }, {"updatedAt" : {'$gte' : todayTimeStamp,'$lt' : endTodayTimeStamp} }]
               }
           },
           {
@@ -389,9 +406,10 @@ try:
               "$match":
               {
                   'ODIND_FG' : 'C',
+                  'W_ORG_1'   : {'$gt': 0},
                   'PRODGRP_ID' : {'$in' : code},
                   "FRELD8_BJ" : {'$gte' : startMonthLastYear,'$lte' : end7Month},
-                  '$or' : [ { "created_at" : {'$gte' : todayTimeStamp,'$lt' : endTodayTimeStamp} }, {"updatedAt" : {'$gte' : todayTimeStamp,'$lt' : endTodayTimeStamp} }]
+                  # '$or' : [ { "createdAt" : {'$gte' : todayTimeStamp,'$lt' : endTodayTimeStamp} }, {"updatedAt" : {'$gte' : todayTimeStamp,'$lt' : endTodayTimeStamp} }]
               }
           },
           {
@@ -419,9 +437,10 @@ try:
               "$match":
               {
                   'ODIND_FG' : {'$in' : ['C','D','E']},
+                  'W_ORG_1'   : {'$gt': 0},
                   'PRODGRP_ID' : {'$in' : code},
                   "FRELD8_BJ" : {'$gte' : startMonthLastYear,'$lte' : end7Month},
-                  '$or' : [ { "created_at" : {'$gte' : todayTimeStamp,'$lt' : endTodayTimeStamp} }, {"updatedAt" : {'$gte' : todayTimeStamp,'$lt' : endTodayTimeStamp} }]
+                  # '$or' : [ { "createdAt" : {'$gte' : todayTimeStamp,'$lt' : endTodayTimeStamp} }, {"updatedAt" : {'$gte' : todayTimeStamp,'$lt' : endTodayTimeStamp} }]
               }
           },
           {
@@ -503,8 +522,9 @@ try:
          {
               "$match":
               {
+                  'W_ORG_1'   : {'$gt': 0},
                   'PRODGRP_ID' : {'$in' : code},
-                  '$or' : [ { "created_at" : {'$gte' : todayTimeStamp,'$lt' : endTodayTimeStamp} }, {"updatedAt" : {'$gte' : todayTimeStamp,'$lt' : endTodayTimeStamp} }]
+                  # '$or' : [ { "createdAt" : {'$gte' : todayTimeStamp,'$lt' : endTodayTimeStamp} }, {"updatedAt" : {'$gte' : todayTimeStamp,'$lt' : endTodayTimeStamp} }]
               }
          },
          {
@@ -531,8 +551,9 @@ try:
               "$match":
               {
                   'ODIND_FG' : 'B',
+                  'W_ORG_1'   : {'$gt': 0},
                   'PRODGRP_ID' : {'$in' : code},
-                  '$or' : [ { "created_at" : {'$gte' : todayTimeStamp,'$lt' : endTodayTimeStamp} }, {"updatedAt" : {'$gte' : todayTimeStamp,'$lt' : endTodayTimeStamp} }]
+                  # '$or' : [ { "createdAt" : {'$gte' : todayTimeStamp,'$lt' : endTodayTimeStamp} }, {"updatedAt" : {'$gte' : todayTimeStamp,'$lt' : endTodayTimeStamp} }]
               }
          },
          {
@@ -559,8 +580,9 @@ try:
               "$match":
               {
                   'ODIND_FG' : 'C',
+                  'W_ORG_1'   : {'$gt': 0},
                   'PRODGRP_ID' : {'$in' : code},
-                  '$or' : [ { "created_at" : {'$gte' : todayTimeStamp,'$lt' : endTodayTimeStamp} }, {"updatedAt" : {'$gte' : todayTimeStamp,'$lt' : endTodayTimeStamp} }]
+                  # '$or' : [ { "createdAt" : {'$gte' : todayTimeStamp,'$lt' : endTodayTimeStamp} }, {"updatedAt" : {'$gte' : todayTimeStamp,'$lt' : endTodayTimeStamp} }]
               }
          },
          {
@@ -587,8 +609,9 @@ try:
               "$match":
               {
                   'ODIND_FG' : {'$in' : ['C','D','E']},
+                  'W_ORG_1'   : {'$gt': 0},
                   'PRODGRP_ID' : {'$in' : code},
-                  '$or' : [ { "created_at" : {'$gte' : todayTimeStamp,'$lt' : endTodayTimeStamp} }, {"updatedAt" : {'$gte' : todayTimeStamp,'$lt' : endTodayTimeStamp} }]
+                  # '$or' : [ { "createdAt" : {'$gte' : todayTimeStamp,'$lt' : endTodayTimeStamp} }, {"updatedAt" : {'$gte' : todayTimeStamp,'$lt' : endTodayTimeStamp} }]
               }
          },
          {

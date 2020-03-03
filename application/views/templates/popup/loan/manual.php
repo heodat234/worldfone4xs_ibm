@@ -919,35 +919,72 @@ window.popupObservable.assign({
                     }),
                     error: errorDataSource
                 })
+            
+                
             }
 
             this.relationshipDataSource.sync();
             // Change status to ready
             changeStatus(1);
 
-            var data_action_code                = this.action;
-            data_action_code['calluuid']        = (window.popupObservable._dataCall.calluuid) ? window.popupObservable._dataCall.calluuid : '';
-            data_action_code['LIC_NO']          = (this.item.LIC_NO) ? this.item.LIC_NO : '';
-            data_action_code['account_number']  = (this.call.debt_account) ? this.call.debt_account : '';
-            data_action_code['action_code']     = (this.call.action_code) ? this.call.action_code : '';
-            data_action_code['account_type']    = (this.call.account_type) ? this.call.account_type : '';
-            data_action_code['note']            = (this.note) ? this.note : '';
+            if (window.popupObservable._dataCall.calluuid) {
+                var data_action_code                = this.action;
+                data_action_code['calluuid']        = (window.popupObservable._dataCall.calluuid) ? window.popupObservable._dataCall.calluuid : '';
+                data_action_code['LIC_NO']          = (this.item.LIC_NO) ? this.item.LIC_NO : '';
+                data_action_code['account_number']  = (this.call.debt_account) ? this.call.debt_account : '';
+                data_action_code['action_code']     = (this.call.action_code) ? this.call.action_code : '';
+                data_action_code['account_type']    = (this.call.account_type) ? this.call.account_type : '';
+                data_action_code['note']            = (this.note) ? this.note : '';
 
-            $.ajax({
-                url: ENV.restApi + "action_code",
-                type: "POST",
-                contentType: "application/json; charset=utf-8",
-                data: kendo.stringify(data_action_code),
-                success: (response) => {
-                    if(response.status) {
-                        syncDataSource();
-                        let actionCodeData = this.get("actionCodeData") || [];
-                        actionCodeData.push(data_action_code);
-                        this.set("actionCodeData", actionCodeData);
-                    }
-                },
-                error: errorDataSource
-            })
+                $.ajax({
+                    url: ENV.restApi + "action_code",
+                    type: "POST",
+                    contentType: "application/json; charset=utf-8",
+                    data: kendo.stringify(data_action_code),
+                    success: (response) => {
+                        if(response.status) {
+                            syncDataSource();
+                            let actionCodeData = this.get("actionCodeData") || [];
+                            actionCodeData.push(data_action_code);
+                            this.set("actionCodeData", actionCodeData);
+                        }
+                    },
+                    error: errorDataSource
+                })
+            }else{
+                var interval_obj = setInterval(function(){
+                    console.log(window.popupObservable._dataCall.calluuid);
+                    var data_action_code                = this.action;
+                    data_action_code['calluuid']        = (window.popupObservable._dataCall.calluuid) ? window.popupObservable._dataCall.calluuid : '';
+                    data_action_code['LIC_NO']          = (this.item.LIC_NO) ? this.item.LIC_NO : '';
+                    data_action_code['account_number']  = (this.call.debt_account) ? this.call.debt_account : '';
+                    data_action_code['action_code']     = (this.call.action_code) ? this.call.action_code : '';
+                    data_action_code['account_type']    = (this.call.account_type) ? this.call.account_type : '';
+                    data_action_code['note']            = (this.note) ? this.note : '';
+
+                    $.ajax({
+                        url: ENV.restApi + "action_code",
+                        type: "POST",
+                        contentType: "application/json; charset=utf-8",
+                        data: kendo.stringify(data_action_code),
+                        success: (response) => {
+                            if(response.status) {
+                                syncDataSource();
+                                let actionCodeData = this.get("actionCodeData") || [];
+                                actionCodeData.push(data_action_code);
+                                this.set("actionCodeData", actionCodeData);
+                            }
+                        },
+                        error: errorDataSource
+                    })
+
+                    
+                    
+                }, 5000);
+                if (window.popupObservable._dataCall.calluuid != 'undefined') {
+                    clearInterval(interval_obj);
+                }
+            }
 
             if(data_action_code['action_code'] == 'LAWSUIT') {
                 $.ajax({
@@ -1092,10 +1129,18 @@ window.popupObservable.assign({
     onDataBoundDebtAcc: function(e) {
         var debtAcc = $("#debt-account-select").data("kendoDropDownList");
         var debtAccDB = debtAcc.dataSource.data();
+        var _account_number = this.get('item.account_number');
+        var _index =0;
         if(debtAccDB.length > 0) {
-            debtAcc.select(0);
-            var dataItem = debtAcc.dataItem(0);
-            this.set('call.debt_account', dataItem['value']);
+            debtAcc.select(function(dataItem){
+                if(dataItem.value == _account_number)
+                    return true;
+                _index++;
+            })
+            if(debtAcc.dataItem(_index) != undefined){
+                var dataItem = debtAcc.dataItem(_index);
+                this.set('call.debt_account', dataItem['value']);
+            }
         }
     },
 

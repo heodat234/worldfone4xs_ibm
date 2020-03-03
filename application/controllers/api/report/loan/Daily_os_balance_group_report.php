@@ -27,9 +27,26 @@ Class Daily_os_balance_group_report extends WFF_Controller {
     function read() {
         try {
             $request = json_decode($this->input->get("q"), TRUE);
-            $date = date('d-m-Y');
+            $request['sort'] = array(array("field" => "debt_group", "dir" => "asc"), array("field" => "year", "dir" => "asc"), array("field" => "for_month", "dir" => "asc"), array("field" => "day", "dir" => "asc"));
             
-            $match = array('createdAt' => array('$gte' => strtotime($date)));
+            $today      = date('Y-m-d');
+            $last6Month = strtotime(date("Y-m-d", strtotime($today)) . " -6 month");
+            $match = array('createdAt' => array('$gte' => $last6Month), 'type' => 'SIBS');
+            $data = $this->crud->read($this->collection, $request, array(), $match);
+            echo json_encode($data);
+        } catch (Exception $e) {
+            echo json_encode(array("status" => 0, "message" => $e->getMessage()));
+        }
+    }
+
+    function readCard() {
+        try {
+            $request = json_decode($this->input->get("q"), TRUE);
+            $request['sort'] = array(array("field" => "debt_group", "dir" => "asc"), array("field" => "due_date", "dir" => "asc"), array("field" => "year", "dir" => "asc"), array("field" => "for_month", "dir" => "asc"), array("field" => "day", "dir" => "asc"));
+            
+            $today      = date('Y-m-d');
+            $last6Month = strtotime(date("Y-m-d", strtotime($today)) . " -6 month");
+            $match = array('createdAt' => array('$gte' => $last6Month), 'type' => 'CARD');
             $data = $this->crud->read($this->collection, $request, array(), $match);
             echo json_encode($data);
         } catch (Exception $e) {
@@ -44,10 +61,11 @@ Class Daily_os_balance_group_report extends WFF_Controller {
         
 
         $request = array('createdAt' => array('$gte' => $last6Month), 'type' => 'SIBS');
-        $data = $this->crud->where($request)->order_by(array('debt_group' => 'asc', 'due_date' => 'asc','createdAt' => 'asc'))->get($this->collection);
-        // print_r($data);exit;
+        $data = $this->crud->where($request)->order_by(array('debt_group' => 'asc', 'year' => 'asc','for_month' => 'asc','day' => 'asc'))->get($this->collection);
 
 
+        $request = array('createdAt' => array('$gte' => $last6Month), 'type' => 'CARD');
+        $dataCard = $this->crud->where($request)->order_by(array('debt_group' => 'asc', 'year' => 'asc','for_month' => 'asc','day' => 'asc'))->get($this->collection);
 
         $spreadsheet = new Spreadsheet();
     	$spreadsheet->getProperties()
@@ -67,7 +85,9 @@ Class Daily_os_balance_group_report extends WFF_Controller {
             )
         );
 
-        $worksheet = $spreadsheet->getActiveSheet();
+        
+        $worksheet = $spreadsheet->getSheet(0);
+        $worksheet->setTitle('Bike & BL');
 
 
         $worksheet->getParent()->getDefaultStyle()->applyFromArray($style);
@@ -75,16 +95,22 @@ Class Daily_os_balance_group_report extends WFF_Controller {
 
         $start_col = 3;
         $start_row = 3;
-        $debt_group = $data[0]['debt_group'];
-        $for_month = $data[0]['for_month'];
-        $month_column = $this->stringFromColumnIndex($start_col);
+        $debt_group     = $data[0]['debt_group'];
+        $fix_debt_group = $data[0]['debt_group'];
+        $for_month      = $data[0]['for_month'];
+        $getDate        = getdate($data[0]['created_at']);
+        $month_column   = $this->stringFromColumnIndex($start_col);
+
+        $rowGroup = $borderThick = array();
+        $randomColor = 1;
 
         foreach ($data as $key => $value) {
             $column         = $this->stringFromColumnIndex($start_col);
             $next_column    = $this->stringFromColumnIndex($start_col+1);
-            $getDate        = getdate($value['created_at']);
+            $getValueDate   = getdate($value['created_at']);
+            $group          = substr($value['debt_group'], 0, 1);
 
-            if (isset($value['check_due_date'])) {
+            if (isset($value['check_due_date'])) { //kiem tra co phai la ngay due date
                 $col_duedate = $column;
             }
 
@@ -94,29 +120,49 @@ Class Daily_os_balance_group_report extends WFF_Controller {
                 $start_col = 3;
             }
 
-            if ($value['for_month'] != $for_month) {
-                $endMonthColumn = $this->stringFromColumnIndex($start_col -1);
+            if ($value['for_month'] != $for_month && $value['debt_group'] == $fix_debt_group) {
+                // doi thang, doi mau
+                if ($randomColor%2) {
+                    $color = '8EA9DB';
+                }else{
+                    $color = 'FFFF00';
+                }
+                $endMonthColumn = $this->stringFromColumnIndex($start_col-1);
                 $worksheet->mergeCells($month_column."1:".$endMonthColumn."1");
                 $worksheet->setCellValue($month_column."1", $getDate['month']);
                 $worksheet->getStyle($month_column."1")->getFill()
                 ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
-                ->getStartColor()->setRGB('8EA9DB');
+                ->getStartColor()->setRGB($color);
 
-
+                $getDate        = getdate($value['created_at']);
                 $month_column = $this->stringFromColumnIndex($start_col);
+                $for_month      = $value['for_month'];
+                $randomColor++;
 
+                array_push($borderThick, array('col'=>$endMonthColumn, 'row'=> 1));
             }
+
+            
+
             if ($key == (count($data) - 1)) {
+                //thang cuoi cung
+                if ($randomColor%2) {
+                    $color = '8EA9DB';
+                }else{
+                    $color = 'FFFF00';
+                }
                 $endMonthColumn = $this->stringFromColumnIndex($start_col);
                 $worksheet->mergeCells($month_column."1:".$endMonthColumn."1");
                 $worksheet->setCellValue($month_column."1", $getDate['month']);
                 $worksheet->getStyle($month_column."1")->getFill()
                 ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
-                ->getStartColor()->setRGB('8EA9DB');
+                ->getStartColor()->setRGB($color);
             }
-
+            // ten group va target
             $worksheet->setCellValue('A'.$start_row, $debt_group);
-            $worksheet->setCellValue('B'.$start_row, $value['target']);
+            $worksheet->setCellValue('B'.$start_row, ($value['target']/100));
+            $worksheet->getStyle('B'.$start_row)->getNumberFormat()->setFormatCode('0.00%');
+            array_push($rowGroup, $start_row);
 
             $worksheet->mergeCells("A".($start_row+1).":A".($start_row+2));
             $worksheet->setCellValue('A'.($start_row+1), 'START');
@@ -146,7 +192,7 @@ Class Daily_os_balance_group_report extends WFF_Controller {
             $worksheet->setCellValue('B'.($start_row+7), 'OS BL');
             $worksheet->setCellValue('B'.($start_row+8), 'No.');
             $worksheet->getStyle("A".($start_row+7).":B".($start_row+8))->getFill()
-                ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('C6E0B4');
+                ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('FCE4D6');
 
             $worksheet->mergeCells("A".($start_row+9).":A".($start_row+10));
             $worksheet->setCellValue('A'.($start_row+9), 'ACCUMULATED');
@@ -182,43 +228,117 @@ Class Daily_os_balance_group_report extends WFF_Controller {
 
             $worksheet->setCellValueByColumnAndRow($start_col, 2, $value['day']);
 
-            $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 1, $value['start_os_bl']);
-            $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 2, $value['start_no']);
-            $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 3, $value['taget_of_col_os_bl']);
-            $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 4, $value['taget_of_col_no']);
+            if (isset($value['check_due_date'])) {
+                $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 1, $value['start_os_bl']);
+                $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 2, $value['start_no']);
+                $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 3, $value['target_of_col_os_bl']);
+                $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 4, $value['target_of_col_no']);
+
+
+                $worksheet->setCellValueByColumnAndRow($start_col+2, $start_row + 3, $value['start_no']-$value['target_of_col_no']);
+
+                $worksheet->getStyle($column.($start_row+1).":".$column.($start_row+2))->getFill()
+                ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                ->getStartColor()->setRGB('8EA9DB');
+                $worksheet->getStyle($column.($start_row+3).":".$column.($start_row+4))->getFill()
+                ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                ->getStartColor()->setRGB('C6E0B4');
+            }
+
             $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 5, $value['daily_os_bl']);
             $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 6, $value['daily_no']);
+
             $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 7, "=".$column.($start_row+5)."-".$next_column.($start_row+5) );
             $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 8, "=".$column.($start_row+6)."-".$next_column.($start_row+6) );
-            $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 9, "=".$col_duedate.($start_row+1)."-".$next_column.($start_row+5) );
-            $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 10, "=".$col_duedate.($start_row+2)."-".$next_column.($start_row+6) );
-            $worksheet->getStyle($column.($start_row + 1).":".$column.($start_row + 10))
-              ->getNumberFormat()
-              ->setFormatCode('#,##0');
 
-            $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 11, "=".$column.($start_row+9)."/".$col_duedate.($start_row+3) );
-            $worksheet->getStyle($column.($start_row + 11))
-              ->getNumberFormat()
-              ->setFormatCode('0%');
-            $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 12, "=".$column.($col_duedate+4)."-".$column.($start_row+10) );
-            $worksheet->getStyle($column.($start_row + 12))
-              ->getNumberFormat()
-              ->setFormatCode('#,##0');
+            if (isset($col_duedate)) { //ngay due date cong 1
+                $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 9, "=".$col_duedate.($start_row+1)."-".$next_column.($start_row+5) );
+                $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 10, "=".$col_duedate.($start_row+2)."-".$next_column.($start_row+6) );
 
-            $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 13, "=".$column.($start_row+9)."/".$col_duedate.($start_row+1) );
-            $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 14, "=".$column.($start_row+10)."/".$col_duedate.($start_row+2));
-            $worksheet->getStyle($column.($start_row + 13).":".$column.($start_row + 14))
-              ->getNumberFormat()
-              ->setFormatCode('0%');
+                $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 11, "=".$column.($start_row+9)."/".$col_duedate.($start_row+3) );
+                if ($group == 'A') {
+                    $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 12, "=".$col_duedate.($start_row+4)."-".$column.($start_row+10) );
+                }else{
+                    $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 12, "=".$column.($start_row+10)."/".$col_duedate.($start_row+4) );
+                }
+                
+                $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 13, "=".$column.($start_row+9)."/".$col_duedate.($start_row+1) );
+                $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 14, "=".$column.($start_row+10)."/".$col_duedate.($start_row+2));
+            }
+            if (isset($value['final_os_bl'])) { //ngay due date, ngay final
+                $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 7, $value['daily_os_bl'] - $value['final_os_bl'] );
+                $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 8, $value['daily_no'] - $value['final_no'] );
+
+                $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 9, $value['start_os_bl'] - $value['final_os_bl'] );
+                $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 10, $value['start_no'] - $value['final_no'] );
+
+                $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 11, "=".$column.($start_row+9)."/".$value['target_of_col_os_bl'] );
+                
+                if ($group == 'A') {
+                    $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 12, "=".$value['target_of_col_no']."-".$column.($start_row+10) );
+                }else{
+                    $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 12, "=".$column.($start_row+10)."/".$value['target_of_col_no'] );
+                }
+                
+                $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 13, "=".$column.($start_row+9)."/".$value['start_os_bl'] );
+                $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 14, "=".$column.($start_row+10)."/".$value['start_no']);
+
+                array_push($borderThick, array('col'=>$column, 'row'=>$start_row));
+
+            }else{
+                $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 9, "=".$value['start_os_bl']."-".$next_column.($start_row+5) );
+                $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 10, "=".$value['start_no']."-".$next_column.($start_row+6) );
+
+                $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 11, "=".$column.($start_row+9)."/".$value['target_of_col_os_bl'] );
+                
+                if ($group == 'A') {
+                    $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 12, "=".$value['target_of_col_no']."-".$column.($start_row+10) );
+                }else{
+                    $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 12, "=".$column.($start_row+10)."/".$value['target_of_col_no'] );
+                }
+                
+                $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 13, "=".$column.($start_row+9)."/".$value['start_os_bl'] );
+                $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 14, "=".$column.($start_row+10)."/".$value['start_no'] );
+            }
+            
+
+            $worksheet->getStyle($column.($start_row+7).":".$column.($start_row+8))->getFill()
+                ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('FCE4D6');
+
+            $worksheet->getStyle($column.($start_row + 1).":".$column.($start_row + 10))->getNumberFormat()->setFormatCode('#,##0');
+            $worksheet->getStyle($column.($start_row + 11))->getNumberFormat()->setFormatCode('0.00%');
+            if ($group == 'A') {
+                $worksheet->getStyle($column.($start_row + 12))->getNumberFormat()->setFormatCode('#,##0');
+            }else{
+                $worksheet->getStyle($column.($start_row + 12))->getNumberFormat()->setFormatCode('0.00%');
+            }
+            $worksheet->getStyle($column.($start_row + 13).":".$column.($start_row + 14))->getNumberFormat()->setFormatCode('0.00%');
 
 
             $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 15, isset($value['final_os_bl']) ? $value['final_os_bl'] : '' );
             $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 16, isset($value['final_no']) ? $value['final_no'] : '' );
             $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 17, isset($value['final_principal']) ? $value['final_principal'] : '' );
-            $worksheet->getStyle($column.($start_row + 15).":".$column.($start_row + 17))
-              ->getNumberFormat()
-              ->setFormatCode('#,##0');
+            $worksheet->getStyle($column.($start_row + 15).":".$column.($start_row + 17))->getNumberFormat()->setFormatCode('#,##0');
+            $headerStyle1 = array(
+                'font'          => array(
+                    'color'     => array('rgb' => 'FF0000'),
+                )
+            );
+            $worksheet->getStyle($column.($start_row + 15).":".$column.($start_row + 17))->applyFromArray($headerStyle1);
 
+            $headerStyle1 = array(
+                'font'          => array(
+                    'color'     => array('rgb' => '0000FF'),
+                )
+            );
+            $worksheet->getStyle($column.($start_row + 12))->applyFromArray($headerStyle1);
+
+            if ($getValueDate['wday'] == 0 || $getValueDate['wday'] == 6) {
+                $column_weekday         = $this->stringFromColumnIndex($start_col);
+                $worksheet->getStyle($column_weekday.($start_row+1).":".$column_weekday.($start_row+17))->getFill()
+                ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                ->getStartColor()->setRGB('D9D9D9');
+            }
 
 
 
@@ -227,27 +347,378 @@ Class Daily_os_balance_group_report extends WFF_Controller {
 
 
 
-
-
-
-
-
-
-
         $maxCell = $worksheet->getHighestRowAndColumn();
-        $headerStyle = array(
+        $headerStyle1 = array(
             'font'          => array(
-                'bold'      => true,
+                'bold'      => false,
             ),
             'alignment'     => array(
                 'wrapText'  => true
             )
         );
-
-        $worksheet->getStyle("A1:".$maxCell['column'].$maxCell['row'])->applyFromArray($headerStyle);
+        $maxCol = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($maxCell['column']);
+        $maxCol = $this->stringFromColumnIndex($maxCol -1);
+        $worksheet->getStyle("A1:".$maxCol.$maxCell['row'])->applyFromArray($headerStyle1);
         
-        $worksheet->getStyle("A1:".$maxCell['column'].$maxCell['row'])->getBorders()
+        $worksheet->getStyle("A1:".$maxCol.$maxCell['row'])->getBorders()
         ->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+
+
+        $headerStyle = array(
+                'font'          => array(
+                    'bold'      => true,
+                    'size'      => 16
+                ),
+                'alignment'     => array(
+                    'wrapText'  => false
+                )
+            );
+        foreach ($rowGroup as $value) {
+            $worksheet->getStyle("A".$value.":B".$value)->applyFromArray($headerStyle);
+            $worksheet->getStyle("A".$value.":".$maxCol.$value)->getFill()
+                ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('FFFF00');
+        }
+
+
+        foreach ($borderThick as $value) {
+            if ($value['row'] == 1) {
+                //to dam border cuoi thang
+                $worksheet->getStyle($value['col']."1:".$value['col'].$maxCell['row'])->getBorders()
+                ->getRight()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THICK);
+            }else{
+                //to dam border cuoi ki due
+                $worksheet->getStyle($value['col'].($value['row']+1).":".$value['col'].($value['row']+17))->getBorders()
+                ->getRight()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THICK);
+            }
+        }
+        $worksheet->getStyle("B1:B".$maxCell['row'])->getBorders()
+                ->getRight()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THICK);
+        
+
+
+
+
+
+
+
+
+        // CARD
+        $worksheet = $spreadsheet->createSheet(1);
+        $worksheet->setTitle('Card');
+
+        $worksheet->getParent()->getDefaultStyle()->applyFromArray($style);
+        $worksheet->getDefaultColumnDimension()->setWidth(20);
+
+        $start_col = 3;
+        $start_row = 3;
+        $debt_group     = $data[0]['debt_group'];
+        $fix_debt_group = $data[0]['debt_group'];
+        $for_month      = $data[0]['for_month'];
+        $day            = $data[0]['day'];
+        $getDate        = getdate($data[0]['created_at']);
+        $month_column   = $this->stringFromColumnIndex($start_col);
+
+        $rowGroup = $borderThick = array();
+        $randomColor = 1;
+
+        foreach ($dataCard as $key => $value) {
+            $column         = $this->stringFromColumnIndex($start_col);
+            $next_column    = $this->stringFromColumnIndex($start_col+1);
+            $getValueDate   = getdate($value['created_at']);
+
+
+            if (isset($value['check_due_date'])) { //kiem tra co phai la ngay due date
+                $col_duedate = $column;
+                // $colTargetNo = $next_column;
+            }
+
+            if ($value['debt_group'] != $debt_group) {
+                $start_row += 18;
+                $debt_group = $value['debt_group'];
+                if ($value['day'] == $day) {
+                    $start_col = $start_col-1;
+                }else{
+                    $start_col = 3;
+                }
+                
+            }
+            $day = $value['day'];
+
+            if ($value['for_month'] != $for_month && $value['debt_group'] == $fix_debt_group) {
+                // doi thang, doi mau
+                if ($randomColor%2) {
+                    $color = '8EA9DB';
+                }else{
+                    $color = 'FFFF00';
+                }
+                $endMonthColumn = $this->stringFromColumnIndex($start_col-1);
+                $worksheet->mergeCells($month_column."1:".$endMonthColumn."1");
+                $worksheet->setCellValue($month_column."1", $getDate['month']);
+                $worksheet->getStyle($month_column."1")->getFill()
+                ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                ->getStartColor()->setRGB($color);
+
+                $getDate        = getdate($value['created_at']);
+                $month_column = $this->stringFromColumnIndex($start_col);
+                $for_month      = $value['for_month'];
+                $randomColor++;
+
+                array_push($borderThick, array('col'=>$endMonthColumn, 'row'=> 1));
+            }
+
+            
+
+            if ($key == (count($data) - 1)) {
+                //thang cuoi cung
+                if ($randomColor%2) {
+                    $color = '8EA9DB';
+                }else{
+                    $color = 'FFFF00';
+                }
+                $endMonthColumn = $this->stringFromColumnIndex($start_col);
+                $worksheet->mergeCells($month_column."1:".$endMonthColumn."1");
+                $worksheet->setCellValue($month_column."1", $getDate['month']);
+                $worksheet->getStyle($month_column."1")->getFill()
+                ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                ->getStartColor()->setRGB($color);
+            }
+            // ten group va target
+            $worksheet->setCellValue('A'.$start_row, $debt_group);
+            $worksheet->setCellValue('B'.$start_row, ($value['target']/100));
+            $worksheet->getStyle('B'.$start_row)->getNumberFormat()->setFormatCode('0.00%');
+            array_push($rowGroup, $start_row);
+
+            $worksheet->mergeCells("A".($start_row+1).":A".($start_row+2));
+            $worksheet->setCellValue('A'.($start_row+1), 'START');
+            $worksheet->setCellValue('B'.($start_row+1), 'OS BL');
+            $worksheet->setCellValue('B'.($start_row+2), 'No.');
+            $worksheet->getStyle("A".($start_row+1).":B".($start_row+2))->getFill()
+                ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                ->getStartColor()->setRGB('8EA9DB');
+
+            // $worksheet->mergeCells("A".($start_row+3).":A".($start_row+4));
+            // $worksheet->setCellValue('A'.($start_row+3), 'TARGET OF COLLECTION');
+            // $worksheet->setCellValue('B'.($start_row+3), 'OS BL');
+            // $worksheet->setCellValue('B'.($start_row+4), 'No.');
+            // $worksheet->getStyle("A".($start_row+3).":B".($start_row+4))->getFill()
+            //     ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            //     ->getStartColor()->setRGB('C6E0B4');
+
+            $worksheet->mergeCells("A".($start_row+3).":A".($start_row+4));
+            $worksheet->setCellValue('A'.($start_row+3), 'DAILY');
+            $worksheet->setCellValue('B'.($start_row+3), 'OS BL');
+            $worksheet->setCellValue('B'.($start_row+4), 'No.');
+            $worksheet->getStyle("A".($start_row+3).":B".($start_row+4))->getFill()
+                ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID);
+
+            $worksheet->mergeCells("A".($start_row+5).":A".($start_row+6));
+            $worksheet->setCellValue('A'.($start_row+5), 'RESULT END OF DAY');
+            $worksheet->setCellValue('B'.($start_row+5), 'OS BL');
+            $worksheet->setCellValue('B'.($start_row+6), 'No.');
+            $worksheet->getStyle("A".($start_row+5).":B".($start_row+6))->getFill()
+                ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('FCE4D6');
+
+            $worksheet->mergeCells("A".($start_row+7).":A".($start_row+8));
+            $worksheet->setCellValue('A'.($start_row+7), 'ACCUMULATED');
+            $worksheet->setCellValue('B'.($start_row+7), 'OS BL');
+            $worksheet->setCellValue('B'.($start_row+8), 'No.');
+            $worksheet->getStyle("A".($start_row+7).":B".($start_row+8))->getFill()
+                ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('FCE4D6');
+
+            $worksheet->mergeCells("A".($start_row+9).":A".($start_row+10));
+            $worksheet->setCellValue('A'.($start_row+9), 'Collection ratio');
+            $worksheet->setCellValue('B'.($start_row+9), 'OS BL');
+            $worksheet->setCellValue('B'.($start_row+10), 'No.');
+            $worksheet->getStyle("A".($start_row+9).":B".($start_row+10))->getFill()
+                ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('FCE4D6');
+
+            $worksheet->mergeCells("A".($start_row+11).":A".($start_row+12));
+            $worksheet->setCellValue('A'.($start_row+11), 'To the Target');
+            $worksheet->setCellValue('B'.($start_row+11), 'OS BL');
+            $worksheet->setCellValue('B'.($start_row+12), 'No.');
+            $worksheet->getStyle("A".($start_row+11).":B".($start_row+12))->getFill()
+                ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID);
+
+            $worksheet->mergeCells("A".($start_row+13).":A".($start_row+15));
+            $worksheet->setCellValue('A'.($start_row+13), 'FINAL No');
+            $worksheet->setCellValue('B'.($start_row+13), 'OS BL');
+            $worksheet->setCellValue('B'.($start_row+14), 'No.');
+            $worksheet->setCellValue('B'.($start_row+15), 'Principal');
+            $worksheet->getStyle("A".($start_row+13).":B".($start_row+15))->getFill()
+                ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID);
+
+
+            
+
+            $worksheet->setCellValueByColumnAndRow($start_col, 2, $value['day']);
+
+            if (isset($value['check_due_date'])) {
+                $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 1, $value['start_os_bl']);
+                $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 2, $value['start_no']);
+                $worksheet->setCellValueByColumnAndRow($start_col+2, $start_row + 1, 'Target');
+                $worksheet->setCellValueByColumnAndRow($start_col+3, $start_row + 1, ($value['target']/100));
+
+
+                $colTargetTitle = $this->stringFromColumnIndex($start_col+2);
+                $colTarget      = $this->stringFromColumnIndex($start_col+3);
+                $worksheet->setCellValueByColumnAndRow($start_col+1, $start_row + 1, "=".$column.($start_row + 2)."-(".$column.($start_row + 2)."*".$colTarget.($start_row + 1).")");
+
+                $worksheet->getStyle($column.($start_row+1).":".$column.($start_row+2))->getFill()
+                ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                ->getStartColor()->setRGB('8EA9DB');
+                
+                $worksheet->getStyle($start_col+3, $start_row + 1)->getNumberFormat()->setFormatCode('0.00%');
+                $headerStyle1 = array(
+                    'font'          => array(
+                        'color'     => array('rgb' => 'FF0000'),
+                    )
+                );
+                $worksheet->getStyle($colTargetTitle.($start_row + 1).":".$colTarget.($start_row + 1))->applyFromArray($headerStyle1);
+                $worksheet->getStyle($column.($start_row + 1).":".$next_column.($start_row + 1))->getNumberFormat()->setFormatCode('#,##0');
+            }
+
+            $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 3, $value['daily_os_bl']);
+            $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 4, $value['daily_no']);
+
+            $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 5, "=".$column.($start_row+3)."-".$next_column.($start_row+3) );
+            $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 6, "=".$column.($start_row+4)."-".$next_column.($start_row+4) );
+
+            if (isset($col_duedate)) { //ngay due date cong 1
+                $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 7, "=".$col_duedate.($start_row+1)."-".$next_column.($start_row+3) );
+                $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 8, "=".$col_duedate.($start_row+2)."-".$next_column.($start_row+4) );
+
+                $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 9, "=".$column.($start_row+7)."/".$col_duedate.($start_row+1) );
+                $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 10, "=".$col_duedate.($start_row+8)."/".$column.($start_row+2) );
+                
+                $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 12, "=".$next_column.($start_row+4)."-".$next_column.($start_row+1));
+            }
+            if (isset($value['final_os_bl'])) { //ngay due date, ngay final
+                $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 5, $value['daily_os_bl'] - $value['final_os_bl'] );
+                $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 6, $value['daily_no'] - $value['final_no'] );
+
+                $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 7, $value['start_os_bl'] - $value['final_os_bl'] );
+                $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 8, $value['start_no'] - $value['final_no'] );
+
+                $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 9, "=".$column.($start_row+7)."/".$value['start_os_bl'] );
+                $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 10, "=".$column.($start_row+8)."/".$value['start_no'] );
+                
+                $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 12, "=".$value['final_no']."-".$value['start_no']."+(".$value['start_no']."*".($value['target']/100).")");
+
+
+                $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 13, $value['final_os_bl'] );
+                $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 14, $value['final_no'] );
+                $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 15, $value['final_principal'] );
+
+                $worksheet->getStyle($column.($start_row + 13).":".$column.($start_row + 15))->getNumberFormat()->setFormatCode('#,##0');
+                $headerStyle1 = array(
+                    'font'          => array(
+                        'bold'      => true,
+                        'color'     => array('rgb' => 'FF0000'),
+                    )
+                );
+                $worksheet->getStyle($column.($start_row + 13).":".$column.($start_row + 15))->applyFromArray($headerStyle1);
+                $worksheet->getStyle($column.($start_row + 13).":".$column.($start_row + 15))->getNumberFormat()->setFormatCode('#,##0');
+
+                array_push($borderThick, array('col'=>$column, 'row'=>$start_row));
+
+
+            }else{
+                $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 7, "=".$value['start_os_bl']."-".$next_column.($start_row+3) );
+                $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 8, "=".$value['start_no']."-".$next_column.($start_row+4) );
+
+                $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 9, "=".$column.($start_row+7)."/".$value['start_os_bl'] );
+                $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 10, "=".$column.($start_row+8)."-".$value['start_no'] );
+                
+                $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 12, "=".$next_column.($start_row+6)."-".$value['start_no']."+(".$value['start_no']."*".($value['target']/100).")");
+            }
+            
+
+            $worksheet->getStyle($column.($start_row+5).":".$column.($start_row+6))->getFill()
+                ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('CCFFCC');
+
+            $worksheet->getStyle($column.($start_row + 2).":".$column.($start_row + 8))->getNumberFormat()->setFormatCode('#,##0');
+            $worksheet->getStyle($column.($start_row + 9).":".$column.($start_row + 10))->getNumberFormat()->setFormatCode('0.00%');
+            $worksheet->getStyle($column.($start_row + 12))->getNumberFormat()->setFormatCode('#,##0');
+            $headerStyle1 = array(
+                'font'          => array(
+                    'color'     => array('rgb' => 'FF0000'),
+                )
+            );
+            $worksheet->getStyle($column.($start_row + 12))->applyFromArray($headerStyle1);
+
+            $headerStyle1 = array(
+                'font'          => array(
+                    'color'     => array('rgb' => '0000FF'),
+                )
+            );
+            $worksheet->getStyle($column.($start_row + 10))->applyFromArray($headerStyle1);
+
+            
+            if ($getValueDate['wday'] == 0 || $getValueDate['wday'] == 6) {
+                $column_weekday         = $this->stringFromColumnIndex($start_col);
+                $worksheet->getStyle($column_weekday.($start_row+1).":".$column_weekday.($start_row+17))->getFill()
+                ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                ->getStartColor()->setRGB('D9D9D9');
+            }
+
+
+
+            $start_col ++;
+        }
+
+
+
+        $maxCell = $worksheet->getHighestRowAndColumn();
+        $headerStyle1 = array(
+            'font'          => array(
+                'bold'      => false,
+            ),
+            'alignment'     => array(
+                'wrapText'  => true
+            )
+        );
+        $maxCol = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($maxCell['column']);
+        $maxCol = $this->stringFromColumnIndex($maxCol -1);
+        $worksheet->getStyle("A1:".$maxCol.$maxCell['row'])->applyFromArray($headerStyle1);
+        
+        $worksheet->getStyle("A1:".$maxCol.$maxCell['row'])->getBorders()
+        ->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+
+
+        $headerStyle = array(
+                'font'          => array(
+                    'bold'      => true,
+                    'size'      => 16
+                ),
+                'alignment'     => array(
+                    'wrapText'  => false
+                )
+            );
+        foreach ($rowGroup as $value) {
+            $worksheet->getStyle("A".$value.":B".$value)->applyFromArray($headerStyle);
+            $worksheet->getStyle("A".$value.":".$maxCol.$value)->getFill()
+                ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('FFFF00');
+        }
+
+
+        foreach ($borderThick as $value) {
+            if ($value['row'] == 1) {
+                //to dam border cuoi thang
+                $worksheet->getStyle($value['col']."1:".$value['col'].$maxCell['row'])->getBorders()
+                ->getRight()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THICK);
+            }else{
+                //to dam border cuoi ki due
+                $worksheet->getStyle($value['col'].($value['row']+1).":".$value['col'].($value['row']+17))->getBorders()
+                ->getRight()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THICK);
+            }
+        }
+        $worksheet->getStyle("B1:B".$maxCell['row'])->getBorders()
+                ->getRight()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THICK);
+        
+
+
+
+
 
 
         $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
@@ -260,5 +731,4 @@ Class Daily_os_balance_group_report extends WFF_Controller {
         return $this->excel->stringFromColumnIndex($columnIndex);
     }
 
-    
 }

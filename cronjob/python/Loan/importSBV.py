@@ -31,7 +31,7 @@ try:
     log = open(base_url + "cronjob/python/Loan/log/importSBV.txt","a")
     now = datetime.now()
     subUserType = 'LO'
-    collection = common.getSubUser(subUserType, 'SBV_14012020')
+    collection = common.getSubUser(subUserType, 'SBV')
 
     modelColumns = []
     modelConverters = {}
@@ -46,7 +46,7 @@ try:
     total = 0
     complete = 0
     # today = date.today()
-    today = datetime.strptime('14/01/2020', "%d/%m/%Y").date()
+    today = datetime.strptime('25/02/2020', "%d/%m/%Y").date()
     yesterday = today - timedelta(days=1)
     day = today.day
     month = today.month

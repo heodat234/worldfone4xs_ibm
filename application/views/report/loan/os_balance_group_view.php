@@ -13,29 +13,37 @@
     <div class="container-fluid mvvm" style="padding-top: 20px; padding-bottom: 10px">
         <div class="row form-horizontal">
             <div class="form-group col-sm-4">
-               <label class="control-label col-xs-4">@Date@</label>
+               <label class="control-label col-xs-4">Month</label>
                <div class="col-xs-8">
                   <input id="start-date" data-role="datepicker" data-format="dd/MM/yyyy" name="fromDateTime" data-bind="value: fromDateTime" disabled="">
                </div>
             </div>
-            <!-- <div class="form-group col-sm-4">
-               <label class="control-label col-xs-4">@To date@</label>
-               <div class="col-xs-8">
-                  <input id="end-date" data-role="datepicker" data-format="dd/MM/yyyy H:mm:ss" name="toDateTime" data-bind="value: toDateTime, events: {change: endDate}">
-               </div>
-            </div>
-            <div class="form-group col-sm-4 text-center">
-                <button class="k-button" data-bind="click: search">@Search@</button>
-            </div> -->
         </div>
         <div class="row chart-page"  style="background-color: white">
-
-            <div class="col-sm-12">
-                <div id="grid"></div>
-            </div>
-        </div>
-        <div class="row" data-bind="visible: visibleNoData">
-            <h3 class="text-center">@NO DATA@</h3>
+            <div data-role="tabstrip">
+                <ul>
+                    <li class="k-state-active">
+                        SIBS
+                    </li>
+                    <li>
+                        CARD
+                    </li>
+                </ul>
+                <div>
+                  <div class="container-fluid">
+                    <div class="col-sm-12">
+                        <div id="grid"></div>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                    <div class="container-fluid">
+                      <div class="col-sm-12">
+                        <div id="grid_1"></div>
+                      </div>
+                    </div>
+                </div>
+              </div>
         </div>
     </div>
     <div id="action-menu">
@@ -67,51 +75,55 @@
               })
               return response;
           },
-          columns: [{
-              field: 'No',
-              title: "No",
+          columns: [
+            {
+              field: 'type',
+              title: "Type",
               width: 80,
               
-          }, {
-              field: 'Account_No',
-              title: "Account No",
-              width: 150,
-          }, {
-              field: 'Amount',
-              title: "Amount",
-              width: 150,
-          }, {
-              title: 'Accounting entry',
-              columns: [ {
-                  field: 'Income',
-                  title: 'Income',
-                  width: 80,
-                  template: dataItem => girdBoolean(dataItem.block),
-              },{
-                  field: 'Expense',
-                  title: 'Expense',
-                  width: 80,
-                  template: dataItem => girdBoolean(dataItem.Expense),
-              },
-              
-              ]
-          }, {
-              title: 'Remark',
+            },{
+                field: 'debt_group',
+                title: "Group",
+                width: 150,
+            },  {
+                title: "Ngày",
+                width: 100,
+                template: dataItem => gridTimestamp(dataItem.createdAt,"dd/MM/yyyy"),
+            },{
+              title: 'START',
               columns: [{
-                  field: 'Product',
-                  title: 'Product',
-                  width: 80
+                  field: 'start_os_bl',
+                  title: 'OS BL',
+                  width: 120
               }, {
-                  field: 'Group',
-                  title: "Group",
-                  width: 80
+                  field: 'start_no',
+                  title: 'No.',
+                  width: 120
               }]
-          }, {
-              field: 'Empty_column',
-              title: "",
-              width: 100,
-            //   template: dataItem => gridTimestamp(dataItem.createdAt,"dd/MM/yyyy"),
-          }],
+            },{
+              title: 'TARGET OF COLLECTION',
+              columns: [{
+                  field: 'taget_of_col_os_bl',
+                  title: 'OS BL',
+                  width: 120
+              }, {
+                  field: 'taget_of_col_no',
+                  title: 'No.',
+                  width: 120
+              }]
+            },{
+              title: 'DAILY',
+              columns: [{
+                  field: 'daily_os_bl',
+                  title: 'OS BL',
+                  width: 120
+              }, {
+                  field: 'daily_no',
+                  title: 'No.',
+                  width: 120
+              }]
+            }
+          ],
           filterable: KENDO.filterable
       };
       var Table = function() {
@@ -175,8 +187,59 @@
               }
           }
       }();
+      var Table_1 = function() {
+         return {
+              dataSource: {},
+              grid: {},
+              init: function() {
+                  var dataSource = this.dataSource = new kendo.data.DataSource({
+                     serverPaging: true,
+                     serverFiltering: true,
+                     pageSize: 10,
+
+                     transport: {
+                        read: {
+                            url: Config.crudApi + 'loan/' + Config.collection + '/readCard'
+                        },
+                        parameterMap: parameterMap
+                     },
+                     schema: {
+                        data: "data",
+                        total: "total",
+                        
+                     }
+                  });
+                  var grid = this.grid = $("#grid_1").kendoGrid({
+                     dataSource: dataSource,
+                     excel: {allPages: true},
+                     excelExport: function(e) {
+                        var sheet = e.workbook.sheets[0];
+                        for (var rowIndex = 1; rowIndex < sheet.rows.length; rowIndex++) {
+                          var row = sheet.rows[rowIndex];
+                          for (var cellIndex = 0; cellIndex < row.cells.length; cellIndex ++) {
+                              if(row.cells[cellIndex].value instanceof Date) {
+                                  row.cells[cellIndex].format = "dd-MM-yy hh:mm:ss"
+                              }
+                          }
+                        }
+                     },
+                     resizable: true,
+                     pageable: true,
+                     sortable: true,
+                     scrollable: true,
+                     columns: Config.columns,
+                      noRecords: {
+                          template: `<h2 class='text-danger'>${KENDO.noRecords}</h2>`
+                      }
+                  }).data("kendoGrid");
+
+                 
+              }
+          }
+      }();
       window.onload = function() {
          Table.init();
+         Table_1.init();
          var dateRange = 30;
          var nowDate = new Date();
          var date =  new Date(),
@@ -197,42 +260,7 @@
             fromDate: kendo.toString(fromDate, "dd/MM/yyyy H:mm"),
             toDate: kendo.toString(toDate, "dd/MM/yyyy H:mm"),
 
-            startDate: function(e) {
-               var start = e.sender,
-                  startDate = start.value(),
-                  end = $("#end-date").data("kendoDatePicker"),
-                     endDate = end.value();
-
-                   if (startDate) {
-                       startDate = new Date(startDate);
-                       startDate.setDate(startDate.getDate());
-                       end.min(startDate);
-                   } else if (endDate) {
-                       start.max(new Date(endDate));
-                   } else {
-                       endDate = new Date();
-                       start.max(endDate);
-                       end.min(endDate);
-                   }
-            },
-            endDate: function(e) {
-               var end = e.sender,
-                  endDate = end.value(),
-                  start = $("#start-date").data("kendoDatePicker"),
-                  startDate = start.value();
-
-                if (endDate) {
-                    endDate = new Date(endDate);
-                    endDate.setDate(endDate.getDate());
-                    start.max(endDate);
-                } else if (startDate) {
-                    end.min(new Date(startDate));
-                } else {
-                    endDate = new Date();
-                    start.max(endDate);
-                    end.min(endDate);
-                }
-            },
+            
             search: function() {
                this.set("fromDate", kendo.toString(this.get("fromDateTime"), "dd/MM/yyyy H:mm"));
                this.set("toDate", kendo.toString(this.get("toDateTime"), "dd/MM/yyyy H:mm"));

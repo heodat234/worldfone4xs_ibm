@@ -24,7 +24,7 @@ _mongodb    = Mongodb(MONGODB="_worldfone4xs", WFF_ENV=wff_env)
 
 now         = datetime.now()
 subUserType = 'LO'
-collection         = common.getSubUser(subUserType, 'Master_data_report_2')
+collection         = common.getSubUser(subUserType, 'Master_data_report')
 log         = open(base_url + "cronjob/python/Loan/log/exportMasterData_log.txt","a")
 
 
@@ -74,14 +74,25 @@ try:
       }
    ]
    data = mongodb.aggregate_pipeline(MONGO_COLLECTION=collection,aggregate_pipeline=aggregate_acc)
-   
-   df = pd.DataFrame(data, columns= ['group_id','account_number','cus_name','BIR_DT8','CUS_ID','FRELD8','product_name','LIC_NO','APPROV_LMT','TERM_ID','RPY_PRD','F_PDT','DT_MAT','current_balance','CURRENT_DPD','MOBILE_NO','WRK_REF','current_add','current_district','current_province','pernament_add','pernament_district','pernament_province','W_ORG','INT_RATE','OVER_DY','DATE_HANDOVER','license_plates_no','COMPANY'])
+   dataReport = []
+   for row in data:
+      temp = row
+      try:
+         if 'createdAt' in row.keys():
+            date_time = datetime.fromtimestamp(int(row['createdAt']))
+            temp['createdAt']      = date_time.strftime('%d-%m-%Y')
+      except Exception as e:
+         temp['createdAt']      = row['createdAt']
+
+      dataReport.append(temp)
+
+   df = pd.DataFrame(dataReport, columns= ['createdAt','group_id','account_number','cus_name','BIR_DT8','CUS_ID','FRELD8','product_name','LIC_NO','APPROV_LMT','TERM_ID','RPY_PRD','F_PDT','DT_MAT','current_balance','CURRENT_DPD','MOBILE_NO','WRK_REF','current_add','current_district','current_province','pernament_add','pernament_district','pernament_province','W_ORG','INT_RATE','OVER_DY','DATE_HANDOVER','license_plates_no','COMPANY'])
 
    # Create a Pandas Excel writer using XlsxWriter as the engine.
    writer = pd.ExcelWriter(fileOutput, engine='xlsxwriter')
 
    # Convert the dataframe to an XlsxWriter Excel object.
-   df.to_excel(writer,sheet_name='Sheet1',header=['GROUP','CONTRACTNR','CLIENT_NAME','BIRTH_DATE','CIF','SIGNED_DATE','PRODUCTNAME','ID NO','CREDIT AMOUNT','INSTALLMENT NUMBER','INSTALMENT AMOUNT','DATE_FIRST_DUE','DATE_LAST_DUE','CURRENT_DEBT','CURRENT_DPD','PHONE NUMBER','REFERENCE PHONE','Current_ADDRESS (if any)','District','PROVINCE','PERNAMENT_ADDRESS','District','PROVINCE','PRINCIPAL','INTEREST/ year','DPD','DATE HANDOVER','lICENSE PLATES NO','COMPANY']) 
+   df.to_excel(writer,sheet_name='Sheet1',header=['Date Export','GROUP','CONTRACTNR','CLIENT_NAME','BIRTH_DATE','CIF','SIGNED_DATE','PRODUCTNAME','ID NO','CREDIT AMOUNT','INSTALLMENT NUMBER','INSTALMENT AMOUNT','DATE_FIRST_DUE','DATE_LAST_DUE','CURRENT_DEBT','CURRENT_DPD','PHONE NUMBER','REFERENCE PHONE','Current_ADDRESS (if any)','District','PROVINCE','PERNAMENT_ADDRESS','District','PROVINCE','PRINCIPAL','INTEREST/ year','DPD','DATE HANDOVER','lICENSE PLATES NO','COMPANY']) 
    # df.to_excel(writer, sheet_name='Sheet1')
 
    # Get the xlsxwriter workbook and worksheet objects.

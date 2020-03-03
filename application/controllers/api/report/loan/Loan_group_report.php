@@ -28,9 +28,9 @@ Class Loan_group_report extends WFF_Controller {
     {
         try {
             $request    = json_decode($this->input->get("q"), TRUE);
-            $getDate    = getdate(strtotime("-1 days"));
-            $match      = array('month' => $getDate['month'] );
-            $response   = $this->crud->read($this->collection, $request,array(),$match);
+            // $getDate    = getdate(strtotime("-1 days"));
+            // $match      = array('month' => $getDate['month'] );
+            $response   = $this->crud->read($this->collection, $request);
             echo json_encode($response);
 
         } catch (Exception $e) {
@@ -47,8 +47,11 @@ Class Loan_group_report extends WFF_Controller {
 
     function exportExcel()
     {
+        $date = '01/'.$this->input->post('start');
+        $getDate = getdate(strtotime(str_replace('/', '-', $date)));
+        // print_r($getDate);exit;
         $startDay = date('Y-m-1',strtotime("-1 days"));
-        $getDate = getdate(strtotime(date('Y-m-d',strtotime("-1 days"))));
+        // $getDate = getdate(strtotime(date('Y-m-d',strtotime("-1 days"))));
         $month = $getDate['month'];
         $response = $this->crud->read($this->collection, array('take' => 1000,'skip' => 0),'', array('month' => $getDate['month'] ));
         if (isset($response['data'])) {

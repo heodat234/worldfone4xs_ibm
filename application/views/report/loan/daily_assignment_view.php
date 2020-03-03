@@ -48,11 +48,20 @@
           return {
                 dataSource: {},
                 grid: {},
+                formDate: 0,
+                toDate: 0,
                 init: function() {
                     var dataSource = this.dataSource = new kendo.data.DataSource({
                       serverPaging: true,
                       serverFiltering: true,
                       pageSize: 10,
+                      filter: {
+                            logic: "and",
+                            filters: [
+                                {field: 'createdAt', operator: "gte", value: this.fromDate},
+                                {field: 'createdAt', operator: "lte", value: this.toDate}
+                            ]
+                      },
                       transport: {
                           read: ENV.reportApi + "loan/daily_assignment_report",
                           parameterMap: parameterMap
@@ -111,18 +120,6 @@
                           filterable: true,
                           allPages: true,
                       },
-                      // excel: {allPages: true, fileName: "Daily assignment report.xlsx"},
-                      // excelExport: function(e) {
-                      //    var sheet = e.workbook.sheets[0];
-                      //    for (var rowIndex = 1; rowIndex < sheet.rows.length; rowIndex++) {
-                      //      var row = sheet.rows[rowIndex];
-                      //      for (var cellIndex = 0; cellIndex < row.cells.length; cellIndex ++) {
-                      //          if(row.cells[cellIndex].value instanceof Date) {
-                      //              row.cells[cellIndex].format = "dd-MM-yy hh:mm:ss"
-                      //          }
-                      //      }
-                      //    }
-                      // },
                       resizable: true,
                       pageable: {
                           refresh: true,
@@ -660,17 +657,22 @@
             }
         }();
         window.onload = function() {
-          Table.init();
           var dateRange = 30;
           var nowDate = new Date();
           var date =  new Date();
-          // date.setDate(nowDate.getDate() - 1);
+          date.setDate(nowDate.getDate() - 1);
           var timeZoneOffset = date.getTimezoneOffset() * kendo.date.MS_PER_MINUTE;
           date.setHours(- timeZoneOffset / kendo.date.MS_PER_HOUR, 0, 0 ,0);
 
           // var fromDate = new Date(date.getTime() + timeZoneOffset - (dateRange - 1) * 86400000);
           var fromDate = new Date(date.getTime() + timeZoneOffset);
-          var toDate = new Date(date.getTime() + timeZoneOffset + kendo.date.MS_PER_DAY -1)
+          var toDate = new Date(date.getTime() + timeZoneOffset + kendo.date.MS_PER_DAY -1);
+
+          Table.fromDate = fromDate.getTime() / 1000;
+          Table.toDate = fromDate.getTime() / 1000 + 86400 - 1;
+          Table.init();
+
+
           var observable = kendo.observable({
               trueVar: true,
               loading: false,
@@ -725,9 +727,9 @@
               },
               asyncSearch: async function() {
                 var field = "createdAt";
-                console.log(this.fromDateTime.getTime() / 1000)
+                // console.log(this.fromDateTime.getTime() / 1000)
                 var fromDateTime = this.fromDateTime.getTime() / 1000;
-                var toDateTime = fromDateTime + 86000;
+                var toDateTime = fromDateTime + 86400 - 1;
                 var filter = {
                     logic: "and",
                     filters: [

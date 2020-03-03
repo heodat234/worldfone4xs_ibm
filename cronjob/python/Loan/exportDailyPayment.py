@@ -31,7 +31,7 @@ try:
    errorData   = []
 
    today = date.today()
-   today = datetime.strptime('13/02/2020', "%d/%m/%Y").date()
+   # today = datetime.strptime('13/02/2020', "%d/%m/%Y").date()
 
    day = today.day
    month = today.month
@@ -94,13 +94,13 @@ try:
 
       dataReport.append(temp)
 
-   df = pd.DataFrame(dataReport, columns= ['account_number','name','due_date','payment_date','amt','paid_principal','paid_interest','RPY_FEE','group','num_of_overdue_day','pic','product_name','note'])
+   df = pd.DataFrame(dataReport, columns= ['account_number','name','due_date','payment_date','amt','paid_principal','paid_interest','RPY_FEE','group','num_of_overdue_day','pic','product_name','note','DPD','DATE_HANDOVER'])
 
    # Create a Pandas Excel writer using XlsxWriter as the engine.
    writer = pd.ExcelWriter(fileOutput, engine='xlsxwriter')
 
    # Convert the dataframe to an XlsxWriter Excel object.
-   df.to_excel(writer,sheet_name='Sheet1',header=['AC NUMBER','NAME','OVERDUE DATE','PAYMENT DATE','AMOUNT','PAID PRINCIPAL','PAID INTEREST','PAID LATE CHARGE & FEE','GROUP','NUMBER OF OVERDUE DAYS','PIC','PRODUCT','NOTE'])
+   df.to_excel(writer,sheet_name='Sheet1',header=['AC NUMBER','NAME','OVERDUE DATE','PAYMENT DATE','AMOUNT','PAID PRINCIPAL','PAID INTEREST','PAID LATE CHARGE & FEE','GROUP','NUMBER OF OVERDUE DAYS','PIC','PRODUCT','NOTE','DPD','DATE_HANDOVER'])
 
    # Get the xlsxwriter workbook and worksheet objects.
    workbook  = writer.book

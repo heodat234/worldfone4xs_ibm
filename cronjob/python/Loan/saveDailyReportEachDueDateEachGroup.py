@@ -48,7 +48,7 @@ try:
     listDebtGroup = []
 
     today = date.today()
-    # today = datetime.strptime('14/02/2020', "%d/%m/%Y").date()
+    # today = datetime.strptime('27/02/2020', "%d/%m/%Y").date()
 
     day = today.day
     month = today.month
@@ -124,7 +124,6 @@ try:
                     temp['due_date'] = dueDayLastMonth['due_date'] if dueDayLastMonth is not None else ''
                     #Lay gia tri no vao ngay due date + 1#
                     incidenceInfo = mongodb.get(MONGO_COLLECTION=due_date_next_date_collection, WHERE={'for_month': str(lastMonth),  'debt_group': debtGroupCell[0:1],'due_date_code': debtGroupCell[1:3],'product':groupProduct['text']},SELECT=['debt_acc_no','current_balance_total','ob_principal_total','acc_arr'],SORT=[("_id", -1)], SKIP=0, TAKE=1)
-                    #Lay gia tri no vao ngay due date + 1#
                 else:
                     temp['due_date'] = dueDayOfMonth['due_date']
                     incidenceInfo = mongodb.get(MONGO_COLLECTION=due_date_next_date_collection, WHERE={'for_month': str(month), 'debt_group': debtGroupCell[0:1],'due_date_code': debtGroupCell[1:3],'product':groupProduct['text']},SELECT=['debt_acc_no','current_balance_total','ob_principal_total','acc_arr'],SORT=[("_id", -1)], SKIP=0, TAKE=1)

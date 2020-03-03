@@ -33,11 +33,10 @@ now = datetime.now()
 subUserType = 'LO'
 collection = common.getSubUser(subUserType, 'Due_date_next_date')
 lnjc05_collection    = common.getSubUser(subUserType, 'LNJC05')
-zaccf_collection     = common.getSubUser(subUserType, 'ZACCF')
+# zaccf_collection     = common.getSubUser(subUserType, 'ZACCF')
 sbv_collection       = common.getSubUser(subUserType, 'SBV')
 store_collection     = common.getSubUser(subUserType, 'SBV_Stored')
 account_collection   = common.getSubUser(subUserType, 'List_of_account_in_collection')
-group_collection     = common.getSubUser(subUserType, 'Group_product')
 report_due_date_collection     = common.getSubUser(subUserType, 'Report_due_date')
 jsonData_collection  = common.getSubUser(subUserType, 'Jsondata')
 product_collection   = common.getSubUser(subUserType, 'Product')
@@ -48,7 +47,7 @@ try:
     listDebtGroup = []
 
     today = date.today()
-    # today = datetime.strptime('13/02/2020', "%d/%m/%Y").date()
+    # today = datetime.strptime('25/02/2020', "%d/%m/%Y").date()
 
     day = today.day
     month = today.month
@@ -63,35 +62,7 @@ try:
     startMonth = int(time.mktime(time.strptime(str('01/' + str(month) + '/' + str(year) + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
     endMonth = int(time.mktime(time.strptime(str(str(lastDayOfMonth) + '/' + str(month) + '/' + str(year) + " 23:59:59"), "%d/%m/%Y %H:%M:%S")))
 
-    holidayOfMonth = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_off_sys'))
-    listHoliday = map(lambda offDateRow: {offDateRow['off_date']}, holidayOfMonth)
 
-    # # if todayTimeStamp in listHoliday or weekday == 6:
-    if todayTimeStamp in listHoliday:
-        sys.exit()
-
-    todayString = today.strftime("%d/%m/%Y")
-    starttime = int(time.mktime(time.strptime(str(todayString + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
-    endtime = int(time.mktime(time.strptime(str(todayString + " 23:59:59"), "%d/%m/%Y %H:%M:%S")))
-
-    collectionName = 'LO_input_report_' + str(year) + str(month)
-
-    if day == 1:
-        mongodb.create_db(collectionName)
-
-    mongodbReport = Mongodb(MONGODB=collectionName, WFF_ENV=wff_env)
-
-    lnjc05InfoFull = mongodb.get(MONGO_COLLECTION=lnjc05_collection)
-    lnjc05ColName = 'LNJC05_' + str(year) + str(month) + str(day)
-    mongodbReport.create_col(COL_NAME=lnjc05ColName)
-    mongodbReport.remove_document(MONGO_COLLECTION=lnjc05ColName)
-    mongodbReport.batch_insert(MONGO_COLLECTION=lnjc05ColName, insert_data=lnjc05InfoFull)
-
-    listOfAccFull = mongodb.get(MONGO_COLLECTION=account_collection)
-    listOfAccColName = 'List_of_account_in_collection_' + str(year) + str(month) + str(day)
-    mongodbReport.create_col(COL_NAME=listOfAccColName)
-    mongodbReport.remove_document(MONGO_COLLECTION=listOfAccColName)
-    mongodbReport.batch_insert(MONGO_COLLECTION=listOfAccColName, insert_data=listOfAccFull)
 
     mainProduct = {}
     mainProductRaw = mongodb.get(MONGO_COLLECTION=product_collection)
@@ -138,9 +109,9 @@ try:
                             'acc_arr'               : []
                         }
 
-                        for key, value in mainProduct.items():
-                            temp['debt_acc_' + key] = 0
-                            temp['current_balance_' + key] = 0
+                        # for key, value in mainProduct.items():
+                        #     temp['debt_acc_' + key] = 0
+                        #     temp['current_balance_' + key] = 0
 
                         if groupProduct['value'] == 'SIBS':
                             lnjc05Info = list(mongodb.get(MONGO_COLLECTION=lnjc05_collection, WHERE={'group_id': debtGroupCell }))

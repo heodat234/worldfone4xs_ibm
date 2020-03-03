@@ -55,10 +55,10 @@ Class Daily_all_user_report extends CI_Controller {
     function read() {
         try {
             $request = json_decode($this->input->get("q"), TRUE);
-            $date = date('d-m-Y',strtotime("-0 days"));
+            $request['sort'] = array(array("field" => "name", "dir" => "asc"));
             
-            $match = array('createdAt' => array('$gte' => strtotime($date)));
-            $data = $this->crud->read($this->collection, $request,array(),$match);
+            // $match = array('createdAt' => array('$gte' => strtotime($date)));
+            $data = $this->crud->read($this->collection, $request);
             echo json_encode($data);
         } catch (Exception $e) {
             echo json_encode(array("status" => 0, "message" => $e->getMessage()));
@@ -68,11 +68,14 @@ Class Daily_all_user_report extends CI_Controller {
 
    function exportExcel()
    {
-      $now = getdate();
-      $date = date('d-m-Y',strtotime("-0 days"));
+      $date = $this->input->post('date');
+      $getdate = getdate(strtotime(str_replace('/', '-', $date)));
 
-      $request = array('createdAt' => array('$gte' => strtotime($date)));
+      $request = array('createdAt' => array('$gte' => $getdate[0] + 86400, '$lte' => $getdate[0] + 2*86400 - 1));
       $data = $this->mongo_db->where($request)->get($this->collection);
+      // print_r($data);exit;
+      // $data = $this->crud->where($request)->order_by(array('name' => 'asc'))->get($this->collection);
+
       $filename = "DAILY ALL USER REPORT.xlsx";
       $spreadsheet = new Spreadsheet();
       $spreadsheet->getProperties()

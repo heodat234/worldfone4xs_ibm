@@ -114,7 +114,7 @@ try:
               unique_leaders = (list(list_set)) 
 
               for lead in unique_leaders:
-                  teams = mongodb.get(MONGO_COLLECTION=group_collection, WHERE={'lead': lead ,'name' : {'$regex' : groupProduct['value']} })
+                  teams = mongodb.get(MONGO_COLLECTION=group_collection, WHERE={'lead': lead ,'name' : {'$regex' : groupProduct['value']} }, SORT=[("name", 1)] )
                   if teams != None:
                       groupTeam = []
                       name = ''
@@ -324,7 +324,7 @@ try:
                                   "$group":
                                   {
                                       "_id": 'null',
-                                      "talk_time": {'$sum': '$billduration'},
+                                      "talk_time": {'$sum': '$totalduration'},
                                   }
                               }
                           ]
@@ -336,28 +336,29 @@ try:
                                   temp_member['talk_time']            = row['talk_time']
 
                           # contacted
-                          count_contacted = 0
+                          aggregate_contacted = [
+                              {
+                                  "$match":
+                                  {
+                                      "createdAt": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
+                                      "assign": str(member),
+                                      "callResult" : {'$exists': True},
+                                  }
+                              },{
+                                  "$group":
+                                  {
+                                      "_id": 'null',
+                                      "count_contacted": {'$sum': 1},
+                                      "acc_contact_arr": {'$addToSet': '$customernumber'},
+                                  }
+                              }
+                          ]
+                          contactData = mongodb.aggregate_pipeline(MONGO_COLLECTION=diallist_detail_collection,aggregate_pipeline=aggregate_contacted)
                           customernumber_arr = []
-                          for acc_assign in account_assign_arr:
-                              diallistInfo = mongodb.getOne(MONGO_COLLECTION=diallist_detail_collection, WHERE={'account_number': str(acc_assign), "createdAt": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp} },
-                                              SELECT=['mobile_num','phone','other_phones'])
-
-                              phone = []
-                              cdrInfo = 0
-                              if diallistInfo != None:
-                                if 'mobile_num' in diallistInfo.keys():
-                                  phone.append(diallistInfo['mobile_num'])
-                                if 'phone' in diallistInfo.keys():
-                                  phone.append(diallistInfo['phone'])
-                                if 'other_phones' in diallistInfo.keys():
-                                  phone += diallistInfo['other_phones']
-
-                                cdrInfo = mongodb.count(MONGO_COLLECTION=cdr_collection, WHERE={'customernumber': {'$in': phone}, "direction" : "outbound", "userextension": str(member), "starttime": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp}} )
-                                if cdrInfo > 0:
-                                  count_contacted += 1
-                                  customernumber_arr.append(acc_assign)
-
-                          temp_member['count_contacted']           = count_contacted
+                          if contactData != None:
+                              for row in contactData:
+                                  customernumber_arr                  = row['acc_contact_arr']
+                                  temp_member['count_contacted']      = row['count_contacted']
 
                           # call made
                           calMade = mongodb.count(MONGO_COLLECTION=cdr_collection, WHERE={'disposition': 'ANSWERED', "direction" : "outbound", "userextension": str(member), "starttime": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp}} )
@@ -850,7 +851,7 @@ try:
         if debtGroupCell[0:1] != 'A' and debtGroupCell[0:1] != 'F':
             i = 1
             for groupProduct in list(listGroupProduct):
-                teams = mongodb.getOne(MONGO_COLLECTION=group_collection, WHERE={'name' : {'$regex' : groupProduct['value']} , 'debt_groups': debtGroupCell[0:3]})
+                teams = mongodb.getOne(MONGO_COLLECTION=group_collection, WHERE={'name' : {'$regex' : groupProduct['value']} , 'debt_groups': debtGroupCell[0:3]}, SORT=[("name", 1)])
                 if teams != None:
                       groupTeam = []
                       name = ''
