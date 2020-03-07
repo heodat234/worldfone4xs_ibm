@@ -31,6 +31,7 @@ account_collection            = common.getSubUser(subUserType, 'List_of_account_
 report_release_sale_collection   = common.getSubUser(subUserType, 'Report_release_sale')
 diallist_detail_collection    = common.getSubUser(subUserType, 'Diallist_detail')
 user_collection               = common.getSubUser(subUserType, 'User')
+product_collection            = common.getSubUser(subUserType, 'Product')
 
 
 
@@ -53,6 +54,7 @@ try:
 
    todayString = today.strftime("%d/%m/%Y")
    todayTimeStamp = int(time.mktime(time.strptime(str(todayString + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
+   endTodayTimeStamp = int(time.mktime(time.strptime(str(todayString + " 23:59:59"), "%d/%m/%Y %H:%M:%S")))
 
    startMonth = int(time.mktime(time.strptime(str('01/' + str(month) + '/' + str(year) + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
    endMonth = int(time.mktime(time.strptime(str(str(lastDayOfMonth) + '/' + str(month) + '/' + str(year) + " 23:59:59"), "%d/%m/%Y %H:%M:%S")))
@@ -69,8 +71,8 @@ try:
    
 
    aggregate_pipeline = [
-      { "$project": { 'account_number': 1, 'current_balance': 1, 'loan_overdue_amount': 1, 'mobile_num': 1, 'due_date': 1, 'dateDifference' :{"$divide" : [{ "$subtract" : [todayTimeStamp,'$due_date']}, 86400]}  } },
-      { "$match" : {'dateDifference': {"$eq": 35} } },
+      { "$project": { 'account_number': 1, 'current_balance': 1, 'overdue_amount_this_month': 1, 'mobile_num': 1, 'due_date': 1, 'dateDifference' :{"$divide" : [{ "$subtract" : [todayTimeStamp,'$due_date']}, 86400]}  } },
+      { "$match" : {'$or' : [ {'dateDifference': {"$eq": 35} }, {'dateDifference': {"$eq": 185} }]} }
       # {
       #     "$group":
       #     {
@@ -87,6 +89,7 @@ try:
       for row in dataLnjc05:
          zaccf = mongodb.getOne(MONGO_COLLECTION=zaccf_collection, WHERE={'account_number': str(row['account_number']) })
          if zaccf != None:
+
             temp = {
                'index'           : i,
                'account_number'  : row['account_number'],
@@ -95,7 +98,7 @@ try:
                'contract_date'   : zaccf['CIF_CR8'],
                'approved_amt'    : zaccf['APPROV_LMT'],
                'cur_bal'         : row['current_balance'],
-               'overdue_amt'     : row['loan_overdue_amount'],
+               'overdue_amt'     : row['overdue_amount_this_month'],
                'phone'           : row['mobile_num'],
                'due_date'        : row['due_date'],
                'overdue_date'    : zaccf['OVER_DY'],
@@ -105,6 +108,9 @@ try:
                'pic'             : '',
                'product_name'    : zaccf['PROD_NM'],
                'dealer_name'     : zaccf['WRK_BRN'],
+               'license_no'      : zaccf['LIC_NO'],
+               'cif_birth_date'  : zaccf['cif_birth_date'],
+               'license_date'    : zaccf['LIC_DT8'],
                'brand'           : '',
                'model'           : '',
                'engine_no'       : '',
@@ -116,13 +122,21 @@ try:
                'createdAt'       : todayTimeStamp
             }
 
-            
+            product = mongodb.getOne(MONGO_COLLECTION=product_collection, WHERE={'code': str(zaccf['PRODGRP_ID'])},SELECT=['name'])
+            if product != None:
+               temp['product_code'] = product['name']
+
+            lnjc05Info1 = mongodb.getOne(MONGO_COLLECTION=lnjc05_collection, WHERE={'dealer_no': str(zaccf['WRK_BRN'])},
+                     SELECT=['dealer_name'])
+            if lnjc05Info1 != None:
+               temp['dealer_name'] = lnjc05Info1['dealer_name']
+
             contract_date  = zaccf['CIF_CR8']
             temp['day']    = contract_date[0:2]
             temp['month']  = contract_date[2:4]
             temp['year']   = contract_date[4:8]
 
-            diallistInfo = mongodb.getOne(MONGO_COLLECTION=diallist_detail_collection, WHERE={'account_number': str(row['account_number'])},SELECT=['assign'])
+            diallistInfo = mongodb.getOne(MONGO_COLLECTION=diallist_detail_collection, WHERE={'account_number': str(row['account_number']), 'createdAt': {'$gte' : todayTimeStamp,'$lte' : endTodayTimeStamp} },SELECT=['assign'])
             if diallistInfo != None:
                if 'assign' in diallistInfo.keys():
                   temp['pic']        = diallistInfo['assign']
@@ -133,10 +147,11 @@ try:
             releaseInfo = mongodb.getOne(MONGO_COLLECTION=report_release_sale_collection, WHERE={'account_number': str(row['account_number'])},SELECT=['cus_name','temp_address','address'])
             if releaseInfo != None:
                temp['name']        = releaseInfo['cus_name']
-               if releaseInfo['temp_address'] != '':
-                  temp['address'] = releaseInfo['temp_address']
-               else:
-                  temp['address'] = releaseInfo['address']
+               if temp['address'] == '':
+                  if releaseInfo['temp_address'] != '':
+                     temp['address'] = releaseInfo['temp_address']
+                  else:
+                     temp['address'] = releaseInfo['address']
 
             investigationInfo = mongodb.getOne(MONGO_COLLECTION=investigation_collection, WHERE={'contract_no': str(row['account_number'])},SELECT=['brand','model','engine_no','chassis_no','license_plates_no'])
             if investigationInfo != None:
@@ -158,13 +173,13 @@ try:
    # sbv
    aggregate_pipeline = [
       { "$project": { 'account_number': 1, 'overdue_amt': 1, 'phone': 1, 'overdue_date': 1, 'cur_bal': 1, 'dateDifference' :{"$divide" : [{ "$subtract" : [todayTimeStamp,'$overdue_date']}, 86400]}  } },
-      { "$match" : {'dateDifference': {"$eq": 35} } },
+      { "$match" : {'$or' : [ {'dateDifference': {"$eq": 35} }, {'dateDifference': {"$eq": 185} }]} }
 
    ]
    dataAccount = mongodb.aggregate_pipeline(MONGO_COLLECTION=account_collection,aggregate_pipeline=aggregate_pipeline)
    if dataAccount != None:
       for row in dataAccount:
-         sbv = mongodb.getOne(MONGO_COLLECTION=sbv_collection, WHERE={'account_number': str(row['account_number']) })
+         sbv = mongodb.getOne(MONGO_COLLECTION=sbv_collection, WHERE={'contract_no': str(row['account_number']) })
          if sbv != None:
             temp = {
                'index'           : i,
@@ -184,6 +199,9 @@ try:
                'pic'             : '',
                'product_name'    : '',
                'dealer_name'     : '',
+               'license_no'      : sbv['license_no'],
+               'cif_birth_date'  : sbv['cif_birth_date'],
+               'license_date'    : sbv['license_date'],
                'brand'           : '',
                'model'           : '',
                'engine_no'       : '',
@@ -194,18 +212,19 @@ try:
                'createdBy'       : 'system',
                'createdAt'       : todayTimeStamp
             }
-            if sbv['card_type'] == '301':
-               temp['product_name']  = 'Credit Card'
+            if int(sbv['card_type']) < 100:
+               row['product_code'] = '301 - Credit Card'
+               row['product_name'] = 'Credit Card'
             else:
-               temp['product_name']  = 'Cash Card'
-
+               row['product_code'] = '302 - Cash Card'
+               row['product_name'] = 'Cash Card'
             
             contract_date  = sbv['open_card_date']
             temp['day']    = contract_date[0:2]
             temp['month']  = contract_date[2:4]
             temp['year']   = contract_date[4:8]
 
-            diallistInfo = mongodb.getOne(MONGO_COLLECTION=diallist_detail_collection, WHERE={'account_number': str(row['account_number'])},SELECT=['assign'])
+            diallistInfo = mongodb.getOne(MONGO_COLLECTION=diallist_detail_collection, WHERE={'account_number': str(row['account_number']), 'createdAt': {'$gte' : todayTimeStamp,'$lte' : endTodayTimeStamp} },SELECT=['assign'])
             if diallistInfo != None:
                if 'assign' in diallistInfo.keys():
                   temp['pic']        = diallistInfo['assign']
@@ -216,14 +235,19 @@ try:
             releaseInfo = mongodb.getOne(MONGO_COLLECTION=report_release_sale_collection, WHERE={'account_number': str(row['account_number'])},SELECT=['cus_name','temp_address','address'])
             if releaseInfo != None:
                temp['name']        = releaseInfo['cus_name']
-               if releaseInfo['temp_address'] != '':
-                  temp['address'] = releaseInfo['temp_address']
-               else:
-                  temp['address'] = releaseInfo['address']
+               if temp['address'] == '':
+                  if releaseInfo['temp_address'] != '':
+                     temp['address'] = releaseInfo['temp_address']
+                  else:
+                     temp['address'] = releaseInfo['address']
 
             zaccfInfo = mongodb.getOne(MONGO_COLLECTION=zaccf_collection, WHERE={'LIC_NO': str(sbv['license_no'])},SELECT=['WRK_BRN'])
             if zaccfInfo != None:
                temp['dealer_name']        = zaccfInfo['WRK_BRN']
+               lnjc05Info1 = mongodb.getOne(MONGO_COLLECTION=lnjc05_collection, WHERE={'dealer_no': str(zaccfInfo['WRK_BRN'])},
+                     SELECT=['dealer_name'])
+               if lnjc05Info1 != None:
+                  temp['dealer_name'] = lnjc05Info1['dealer_name']
 
             insertData.append(temp)
             i += 1

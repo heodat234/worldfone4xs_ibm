@@ -132,7 +132,7 @@ try:
 
                     if incidenceInfo is not None:
                         temp['inci'] = incidenceInfo['debt_acc_no'] if 'debt_acc_no' in incidenceInfo.keys() else 0
-                        temp['inci_amt'] = incidenceInfo['current_balance_total'] if 'current_balance_total' in incidenceInfo.keys() else 0
+                        temp['inci_amt'] = round(incidenceInfo['current_balance_total']/1000) if 'current_balance_total' in incidenceInfo.keys() else 0
                         acc_arr = incidenceInfo['acc_arr'] if 'acc_arr' in incidenceInfo.keys() else []
                     else:
                         temp['inci'] = 0
@@ -145,7 +145,7 @@ try:
 
                         if incidenceInfo is not None:
                             temp['inci_' + key]     = incidenceInfo['debt_acc_' + key] if ('debt_acc_' + key) in incidenceInfo.keys() else 0
-                            temp['inci_amt_' + key] = incidenceInfo['current_balance_' + key] if ('current_balance_' + key) in incidenceInfo.keys() else 0
+                            temp['inci_amt_' + key] = round(incidenceInfo['current_balance_' + key]/1000) if ('current_balance_' + key) in incidenceInfo.keys() else 0
                         else:
                             temp['inci_' + key]     = 0
                             temp['inci_amt_' + key] = 0
@@ -179,7 +179,7 @@ try:
                         if ln3206fData != None:
                             for row in ln3206fData:
                                 temp['col']            = len(row['count_col'] )
-                                temp['col_amt']        = row['sum_amount']
+                                temp['col_amt']        = round(row['sum_amount']/1000)
 
 
                         for key, value in mainProduct.items():
@@ -226,7 +226,7 @@ try:
                             if ln3206fData != None:
                                 for row in ln3206fData:
                                     temp['col_' + key]          = len(row['count_col'])
-                                    temp['col_amt_' + key]      = row['sum_amount']
+                                    temp['col_amt_' + key]      = round(row['sum_amount']/1000)
 
                         
                         temp['rem']             = temp['inci'] - temp['col']
@@ -275,13 +275,14 @@ try:
                                     temp['col_amt_301']     += sum_code
 
 
-
-                        temp['rem'] = temp['inci'] - temp['col']
-                        temp['rem_amt'] = temp['inci_amt'] - temp['col_amt']
-                        temp['col_ratio'] = temp['col'] / temp['inci'] if temp['inci'] != 0 else 0
-                        temp['col_ratio_amt'] = temp['col_amt'] / temp['inci_amt'] if temp['inci_amt'] != 0 else 0
-                        temp['flow_rate'] = temp['rem'] / temp['inci'] if temp['inci'] != 0 else 0
-                        temp['flow_rate_amt'] = temp['rem_amt'] / temp['inci_amt'] if temp['inci_amt'] != 0 else 0
+                        temp['col_amt']     = round(temp['col_amt']/1000)
+                        temp['col_amt_301']     = round(temp['col_amt_301']/1000)
+                        temp['rem']         = temp['inci'] - temp['col']
+                        temp['rem_amt']     = temp['inci_amt'] - temp['col_amt']
+                        temp['col_ratio']   = temp['col'] / temp['inci'] if temp['inci'] != 0 else 0
+                        temp['col_ratio_amt']   = temp['col_amt'] / temp['inci_amt'] if temp['inci_amt'] != 0 else 0
+                        temp['flow_rate']       = temp['rem'] / temp['inci'] if temp['inci'] != 0 else 0
+                        temp['flow_rate_amt']   = temp['rem_amt'] / temp['inci_amt'] if temp['inci_amt'] != 0 else 0
                         
 
 
@@ -296,7 +297,7 @@ try:
                         targetInfo = mongodb.getOne(MONGO_COLLECTION=target_collection, WHERE={ 'B_plus_duedate_type': debtGroupCell, 'debt_type': debt_type })
 
                     if targetInfo != None:
-                        target = int(targetInfo['target'])
+                        target = targetInfo['target']
                         temp['tar_amt'] = (target * temp['inci_amt'])/100
                         temp['tar_gap'] = temp['tar_amt'] - temp['col_amt']
                         temp['tar_per'] = target/100

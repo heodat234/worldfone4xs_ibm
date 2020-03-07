@@ -151,10 +151,8 @@ try:
          date_time = datetime.fromtimestamp(row['due_date'])
          d2       = date_time.strftime(FMT)
          tdelta   = datetime.strptime(d1, FMT) - datetime.strptime(d2, FMT)
-         holidayOfMonth = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_off_sys'), WHERE={'off_date': {'$gte': row['due_date'],'$lte': todayTimeStamp} })
-         countHoliday = len(list(holidayOfMonth))
-
-         row['CURRENT_DPD'] = int(tdelta.days) - int(countHoliday)
+         
+         row['CURRENT_DPD'] = int(tdelta.days)
 
 
          first_day = today.replace(day=1)

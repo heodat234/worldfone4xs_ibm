@@ -15,17 +15,8 @@
               <div class="form-group col-sm-4">
                 <label class="control-label col-xs-4">@Date@</label>
                 <div class="col-xs-8">
-                    <input id="start-date" data-role="datepicker" data-format="dd/MM/yyyy" name="fromDateTime" data-bind="value: fromDateTime">
+                    <input id="start-date" data-role="datepicker" data-format="MM/yyyy" data-start="year" data-depth="year" name="fromDateTime" data-bind="value: fromDateTime, events: {change: onChangeDate}">
                 </div>
-              </div>
-              <!-- <div class="form-group col-sm-4">
-                <label class="control-label col-xs-4">@To date@</label>
-                <div class="col-xs-8">
-                    <input id="end-date" data-role="datepicker" data-format="dd/MM/yyyy H:mm:ss" name="toDateTime" data-bind="value: toDateTime, events: {change: endDate}">
-                </div>
-              </div> -->
-              <div class="form-group col-sm-4 text-center">
-                  <button class="k-button" data-bind="click: search">@Search@</button>
               </div>
           </div>
           <div class="row chart-page"  style="background-color: white">
@@ -319,16 +310,15 @@
           var dateRange = 30;
           var nowDate = new Date();
           var date =  new Date();
-          // date.setDate(nowDate.getDate() - 1);
           var timeZoneOffset = date.getTimezoneOffset() * kendo.date.MS_PER_MINUTE;
           date.setHours(- timeZoneOffset / kendo.date.MS_PER_HOUR, 0, 0 ,0);
 
-          // var fromDate = new Date(date.getTime() + timeZoneOffset - (dateRange - 1) * 86400000);
           var fromDate = new Date(date.getTime() + timeZoneOffset);
-          var toDate = new Date(date.getTime() + timeZoneOffset + kendo.date.MS_PER_DAY -1);
 
+          fromDate.setDate(1);
           Table.fromDate = fromDate.getTime() / 1000;
-          Table.toDate = Table.fromDate + 86000;
+          var lastDateOfMonth = kendo.date.lastDayOfMonth(fromDate);
+          Table.toDate = lastDateOfMonth.getTime() / 1000;
           Table.init();
 
           var observable = kendo.observable({
@@ -337,66 +327,25 @@
               visibleReport: false,
               visibleNoData: false,
               fromDateTime: fromDate,
-              toDateTime: toDate,
               filterField: "",
               fromDate: kendo.toString(fromDate, "dd/MM/yyyy H:mm"),
-              toDate: kendo.toString(toDate, "dd/MM/yyyy H:mm"),
 
-              startDate: function(e) {
-                var start = e.sender,
-                    startDate = start.value(),
-                    end = $("#end-date").data("kendoDatePicker"),
-                      endDate = end.value();
-
-                    if (startDate) {
-                        startDate = new Date(startDate);
-                        startDate.setDate(startDate.getDate());
-                        end.min(startDate);
-                    } else if (endDate) {
-                        start.max(new Date(endDate));
-                    } else {
-                        endDate = new Date();
-                        start.max(endDate);
-                        end.min(endDate);
-                    }
-              },
-              endDate: function(e) {
-                var end = e.sender,
-                    endDate = end.value(),
-                    start = $("#start-date").data("kendoDatePicker"),
-                    startDate = start.value();
-
-                  if (endDate) {
-                      endDate = new Date(endDate);
-                      endDate.setDate(endDate.getDate());
-                      start.max(endDate);
-                  } else if (startDate) {
-                      end.min(new Date(startDate));
-                  } else {
-                      endDate = new Date();
-                      start.max(endDate);
-                      end.min(endDate);
-                  }
-              },
-              search: function() {
-                this.set("fromDate", kendo.toString(this.get("fromDateTime"), "dd/MM/yyyy H:mm"));
-                this.set("toDate", kendo.toString(this.get("toDateTime"), "dd/MM/yyyy H:mm"));
-                this.asyncSearch();
-              },
-              asyncSearch: async function() {
-                var field = "createdAt";
-                var fromDateTime = this.fromDateTime.getTime() / 1000;
-                var toDateTime = fromDateTime + 86000;
-                var filter = {
-                    logic: "and",
-                    filters: [
-                        {field: field, operator: "gte", value: fromDateTime},
-                        {field: field, operator: "lte", value: toDateTime}
-                    ]
-                };
-
-                Table.dataSource.filter(filter);
-
+              onChangeDate: function() {
+                  var date =  this.fromDateTime;
+                  date.setDate(1);
+                  var fromDate = date.getTime() / 1000;
+                  var lastDateOfMonth = kendo.date.lastDayOfMonth(this.fromDateTime);
+                  var toDate = lastDateOfMonth.getTime() / 1000;
+                  var filter = [{
+                          field: 'createdAt',
+                          operator: 'gte',
+                          value: fromDate
+                      }, {
+                          field: 'createdAt',
+                          operator: 'lte',
+                          value: toDate
+                      }];
+                  Table.dataSource.filter(filter);
               },
           })
           kendo.bind($(".mvvm"), observable);
@@ -411,7 +360,7 @@
                 url: ENV.reportApi + "loan/daily_assignment_report/downloadExcel",
                 type: 'POST',
                 dataType: 'json',
-                data: {date: $('#start-date').val()},
+                data: { start : $("#start-date").val()},
                 timeout: 30000
               })
               .done(function(response) {

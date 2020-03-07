@@ -119,16 +119,16 @@ try:
                         incidenceInfo = mongodb.getOne(MONGO_COLLECTION=due_date_next_date_group_collection, WHERE={'for_month': str(month), 'team_id': str(groupCell['_id'])})
                         temp['due_date'] = dueDayOfMonth['due_date']
 
-                    temp['debt_group'] = debtGroupCell[0:1]
-                    temp['due_date_code'] = debtGroupCell[1:3]
-                    temp['product'] = groupProduct['text']
-                    temp['team'] = groupCell['name']
-                    temp['team_id'] = str(groupCell['_id'])
+                    temp['debt_group']      = debtGroupCell[0:1]
+                    temp['due_date_code']   = debtGroupCell[1:3]
+                    temp['product']         = groupProduct['text']
+                    temp['team']            = groupCell['name']
+                    temp['team_id']         = str(groupCell['_id'])
 
                     if incidenceInfo is not None:
-                        temp['inci'] = incidenceInfo['debt_acc_no'] if 'debt_acc_no' in incidenceInfo.keys() else 0
-                        temp['inci_amt'] = incidenceInfo['current_balance_total'] if 'current_balance_total' in incidenceInfo.keys() else 0
-                        acc_arr = incidenceInfo['acc_arr'] if 'acc_arr' in incidenceInfo.keys() else []
+                        temp['inci']        = incidenceInfo['debt_acc_no'] if 'debt_acc_no' in incidenceInfo.keys() else 0
+                        temp['inci_amt']    = round(incidenceInfo['current_balance_total']/1000) if 'current_balance_total' in incidenceInfo.keys() else 0
+                        acc_arr             = incidenceInfo['acc_arr'] if 'acc_arr' in incidenceInfo.keys() else []
                     else:
                         temp['inci'] = 0
                         temp['inci_amt'] = 0
@@ -183,7 +183,7 @@ try:
                             col_today   = 0
                             if lnjc05Data != None:
                                 for row in lnjc05Data:
-                                    col_today           = row['sum_amount']
+                                    col_today           = round(row['sum_amount']/1000)
 
                             temp['col_amt'] = temp['inci_amt'] - col_today
 
@@ -254,7 +254,8 @@ try:
 
 
 
-
+                    temp['col_amt']             = round(temp['col_amt']/1000)
+                    temp['payment_amt']         = round(temp['payment_amt']/1000)
 
                     temp['rem']                 = temp['inci'] - temp['col']
                     temp['rem_actual']          = temp['inci_amt'] - temp['payment_amt']

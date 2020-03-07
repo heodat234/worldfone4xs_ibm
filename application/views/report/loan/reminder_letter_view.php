@@ -97,14 +97,17 @@
               field: 'approved_amt',
               title: "Approved amount",
               width: 150,
+              template: dataItem=>gridInterger(dataItem.approved_amt),
           },{
               field: 'cur_bal',
               title: "Current balance",
               width: 150,
+              template: dataItem=>gridInterger(dataItem.cur_bal),
           },{
               field: 'overdue_amt',
               title: "Overdue amount",
               width: 150,
+              template: dataItem=>gridInterger(dataItem.overdue_amt),
           },{
               field: 'phone',
               title: "Phone number",
@@ -118,10 +121,12 @@
               field: 'due_date',
               title: "Due date",
               width: 150,
+              template: dataItem => gridTimestamp(dataItem.due_date,"dd/MM/yyyy"),
           },{
               field: 'overdue_date',
               title: "Overdue date",
               width: 150,
+              template: dataItem=>gridInterger(dataItem.overdue_date),
           },{
               field: 'group',
               title: "Group",
@@ -175,6 +180,20 @@
               title: "Năm sản xuất",
               width: 100,
               // template: dataItem => gridTimestamp(dataItem.createdAt,"dd/MM/yyyy"),
+          },{
+              field: 'license_no',
+              title: "license no",
+              width: 150,
+          },{
+              field: 'cif_birth_date',
+              title: "cif birth date",
+              width: 150,
+              template: dataItem => gridTimestamp(dataItem.cif_birth_date,"dd/MM/yyyy"),
+          },{
+              field: 'license_date',
+              title: "license date",
+              width: 150,
+              template: dataItem => gridTimestamp(dataItem.license_date,"dd/MM/yyyy"),
           }],
           filterable: KENDO.filterable
       };
@@ -207,12 +226,46 @@
                      excel: {fileName: "Reminder Letter Export.xlsx",allPages: true},
                      excelExport: function(e) {
                         var sheet = e.workbook.sheets[0];
-                        for (var rowIndex = 1; rowIndex < sheet.rows.length; rowIndex++) {
+                        var row = sheet.rows[0];
+                        for (var rowIndex = 0; rowIndex < sheet.rows.length; rowIndex++) {
                           var row = sheet.rows[rowIndex];
                           for (var cellIndex = 0; cellIndex < row.cells.length; cellIndex ++) {
-                              if (cellIndex == 12) {
+                            if (rowIndex ==0){
+                                row.cells[cellIndex].background = "#fff200";
+                                row.cells[cellIndex].color = "black";
+                              }
+
+
+
+                              if (cellIndex == 12 && rowIndex !=0) {
                                 row.cells[cellIndex].value = gridTimestamp(row.cells[12].value,"dd/MM/yyyy");
                               }
+                              if (cellIndex == 13 && rowIndex !=0) {
+                                row.cells[cellIndex].value = gridTimestamp(row.cells[13].value,"dd/MM/yyyy");
+                              }
+                              if (cellIndex == 29 && rowIndex !=0) {
+                                row.cells[cellIndex].value = gridTimestamp(row.cells[29].value,"dd/MM/yyyy");
+                              }
+                              if (cellIndex == 30 && rowIndex !=0) {
+                                row.cells[cellIndex].value = gridTimestamp(row.cells[30].value,"dd/MM/yyyy");
+                              }
+                              if (cellIndex == 31 && rowIndex !=0) {
+                                row.cells[cellIndex].value = gridTimestamp(row.cells[31].value,"dd/MM/yyyy");
+                              }
+                              if(cellIndex==8 && rowIndex !=0){
+                                var value = parseFloat(row.cells[cellIndex].value);
+                                row.cells[cellIndex].value = value;
+                                row.cells[cellIndex].format = "[Black]#,##0_);[Red]0.0);0"
+                              }
+                              if(cellIndex ==14 && rowIndex !=0){
+                                var value = parseInt(row.cells[cellIndex].value);
+                                row.cells[cellIndex].value = value;
+                              }
+                              if (cellIndex==9||cellIndex==10||cellIndex==17 && rowIndex !=0){
+                                row.cells[cellIndex].format = "[Black]#,##0_);[Red]0.0);0"
+                              }
+
+                             
                               if(row.cells[cellIndex].value instanceof Date) {
                                   row.cells[cellIndex].format = "dd-MM-yy hh:mm:ss"
                               }

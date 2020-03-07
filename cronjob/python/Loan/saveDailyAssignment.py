@@ -29,10 +29,8 @@ product_collection   = common.getSubUser(subUserType, 'Product')
 sbv_collection       = common.getSubUser(subUserType, 'SBV')
 diallist_detail_collection  = common.getSubUser(subUserType, 'Diallist_detail')
 cdr_collection       = common.getSubUser(subUserType, 'worldfonepbxmanager')
-jsonData_collection  = common.getSubUser(subUserType, 'Jsondata')
 user_collection      = common.getSubUser(subUserType, 'User')
 action_code_collection        = common.getSubUser(subUserType, 'Action_code')
-note_collection      = common.getSubUser(subUserType, 'Note')
 log         = open(base_url + "cronjob/python/Loan/log/DailyAssignment_log.txt","a")
 
 try:
@@ -66,9 +64,6 @@ try:
       sys.exit()
 
 
-   lawsuit_fields = _mongodb.getOne(MONGO_COLLECTION=jsonData_collection,SELECT=['data'],WHERE={'tags': ['LAWSUIT', 'fields']})
-   raa_fields = _mongodb.getOne(MONGO_COLLECTION=jsonData_collection,SELECT=['data'],WHERE={'tags': ['RAA', 'fields']})
-   users = _mongodb.get(MONGO_COLLECTION=user_collection,SELECT=['extension','agentname'],WHERE={'active': 'true'})
    i = 1
    # LNJC05
 
@@ -129,35 +124,6 @@ try:
          if 'dialid' not in cdr.keys():
             diallistInfo = mongodb.getOne(MONGO_COLLECTION=diallist_detail_collection, WHERE={'$or' : [{ 'mobile_num' : str(cdr['customernumber'])}, { 'phone' : str(cdr['customernumber'])},  { 'other_phones' :str(cdr['customernumber'])} ],  "createdAt" : {'$gte' : todayTimeStamp,'$lte' : endTodayTimeStamp}, 'assign' : str(cdr['userextension']) }) 
             
-         # if 'customer' in cdr.keys():
-         #    if 'action_code' in cdr['customer'].keys():
-         #       temp['action_code']     = cdr['customer']['action_code'] 
-
-         #    temp['account_number']  = cdr['customer']['account_number']
-         #    temp['name']            = cdr['customer']['cus_name']
-         #    temp['overdue_date']             = cdr['customer']['overdue_date'] if 'overdue_date' in cdr['customer'].keys() else cdr['customer']['due_date']
-         #    temp['loan_overdue_amount']      = cdr['customer']['overdue_amt'] if 'overdue_amt' in cdr['customer'].keys() else cdr['customer']['loan_overdue_amount']
-         #    temp['current_balance']          = cdr['customer']['cur_bal'] if 'cur_bal' in cdr['customer'].keys() else cdr['customer']['current_balance']
-         #    temp['group_id']                 = cdr['customer']['group_id'].replace('-','') if 'group_id' in cdr['customer'].keys() else ''
-
-         #    if 'overdue_indicator' in cdr['customer']:
-         #       sbv = mongodb.getOne(MONGO_COLLECTION=sbv_collection, WHERE={'contract_no': str(temp['account_number']), "created_at" : {'$gte' : todayTimeStamp,'$lte' : endTodayTimeStamp} },SELECT=['card_type','ob_principal_sale','ob_principal_cash'])
-         #       if sbv != None:
-         #          temp['outstanding_principal']       = float(sbv['ob_principal_sale']) + float(sbv['ob_principal_cash'])
-         #          if int(sbv['card_type']) < 100:
-         #             product_id = '301'
-         #          else:
-         #             product_id = '302'
-         #    else:
-         #       product_id                       = cdr['customer']['PRODGRP_ID']
-         #       temp['outstanding_principal']    = cdr['customer']['outstanding_principal'] if 'outstanding_principal' in cdr['customer'].keys() else ''
-
-
-         #    product = mongodb.getOne(MONGO_COLLECTION=product_collection, WHERE={'code': str(product_id)},SELECT=['name'])
-         #    if product != None:
-         #       temp['product_id'] = product['name']
-
-
          temp['connected'] = 1
          
          aggregate_pipeline_action = [
@@ -184,19 +150,6 @@ try:
                   temp[x] = row_1[x]
          
 
-         aggregate_note = [
-            {
-                 "$match":
-                 {
-                     "calluuid" : cdr['calluuid']
-                 }
-            }
-                  
-         ]
-         noteData = mongodb.aggregate_pipeline(MONGO_COLLECTION=note_collection,aggregate_pipeline=aggregate_note)
-         if noteData != None:
-            for row in noteData:
-               temp['note'] = row['content']
          # if 'account_number' in temp.keys() and diallistInfo == None:
          #    diallistInfo = mongodb.getOne(MONGO_COLLECTION=diallist_detail_collection, WHERE={'account_number': temp['account_number'],  "createdAt" : {'$gte' : todayTimeStamp,'$lte' : endTodayTimeStamp}}) 
          
@@ -204,10 +157,11 @@ try:
             temp['account_number']  = diallistInfo['account_number']
             temp['name']            = diallistInfo['cus_name']
             temp['overdue_date']             = diallistInfo['overdue_date'] if 'overdue_date' in diallistInfo.keys() else diallistInfo['due_date']
-            temp['action_code']              = diallistInfo['action_code'] if 'action_code' in diallistInfo.keys() else ''
             temp['loan_overdue_amount']      = diallistInfo['overdue_amt'] if 'overdue_amt' in diallistInfo.keys() else diallistInfo['loan_overdue_amount']
             temp['current_balance']          = diallistInfo['cur_bal'] if 'cur_bal' in diallistInfo.keys() else diallistInfo['current_balance']
             temp['group_id']                 = diallistInfo['group_id'].replace('-','') if 'group_id' in diallistInfo.keys() else ''
+            if 'action_code' in diallistInfo.keys():
+               temp['action_code']              = diallistInfo['action_code'] 
 
             product_id = ''
             if 'overdue_indicator' in diallistInfo:

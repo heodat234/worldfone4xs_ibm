@@ -27,7 +27,7 @@ mongodb     = Mongodb(MONGODB="worldfone4xs", WFF_ENV=wff_env)
 _mongodb    = Mongodb(MONGODB="_worldfone4xs", WFF_ENV=wff_env)
 
 subUserType = 'LO'
-collection                      = common.getSubUser(subUserType, 'Daily_all_user_report')
+collection                      = common.getSubUser(subUserType, 'Daily_all_user_report_temp')
 group_collection                = common.getSubUser(subUserType, 'Group')
 product_collection              = common.getSubUser(subUserType, 'Product')
 report_due_date_collection      = common.getSubUser(subUserType, 'Report_due_date')
@@ -101,6 +101,7 @@ try:
     
     checkGroupA = 'false'
     for debtGroupCell in list(listDebtGroup):
+
         if debtGroupCell[0:1] == 'A' and checkGroupA == 'false':
           i = 1
           for groupProduct in list(listGroupProduct):
@@ -114,7 +115,8 @@ try:
               unique_leaders = (list(list_set)) 
 
               for lead in unique_leaders:
-                  teams = mongodb.get(MONGO_COLLECTION=group_collection, WHERE={'lead': lead ,'name' : {'$regex' : groupProduct['value']} }, SORT=[("name", 1)] )
+                  teams = mongodb.get(MONGO_COLLECTION=group_collection, 
+                    WHERE={'lead': lead ,'name' : {'$regex' : groupProduct['text'] + '/Group ' + debtGroupCell[0:1]} } )
                   if teams != None:
                       groupTeam = []
                       name = ''
@@ -349,7 +351,7 @@ try:
                                   {
                                       "_id": 'null',
                                       "count_contacted": {'$sum': 1},
-                                      "acc_contact_arr": {'$addToSet': '$customernumber'},
+                                      "acc_contact_arr": {'$addToSet': '$account_number'},
                                   }
                               }
                           ]
@@ -371,7 +373,7 @@ try:
 
 
                           # connected
-                          action_code = ['PTP', 'CHECK', 'LM', 'PTP Today']
+                          action_code = ['PTP', 'CHECK', 'LM', 'PTP Today','Spaid']
                           aggregate_cdr_ans = [
                               {
                                   "$match":
@@ -851,18 +853,19 @@ try:
         if debtGroupCell[0:1] != 'A' and debtGroupCell[0:1] != 'F':
             i = 1
             for groupProduct in list(listGroupProduct):
-                teams = mongodb.getOne(MONGO_COLLECTION=group_collection, WHERE={'name' : {'$regex' : groupProduct['value']} , 'debt_groups': debtGroupCell[0:3]}, SORT=[("name", 1)])
+                teams = mongodb.getOne(MONGO_COLLECTION=diallist_collection, WHERE={'group_name' : {'$regex' : groupProduct['text'] + '/Group ' + debtGroupCell[0:1] + '/'+ debtGroupCell}, "createdAt": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp} } )
+                groupInfo = mongodb.getOne(MONGO_COLLECTION=group_collection, WHERE={'name' : {'$regex' : groupProduct['text'] + '/Group ' + debtGroupCell[0:1] + '/'+ debtGroupCell} } )
                 if teams != None:
                       groupTeam = []
                       name = ''
 
                       print(teams['name'])
                       temp = {
-                          'name'           : teams['name'],
+                          'name'           : teams['group_name'],
                           'group'          : debtGroupCell[0:1],
                           'team'           : i,
                           'date'           : todayTimeStamp,
-                          'extension'      : lead,
+                          'extension'      : groupInfo['lead'],
                           'team_lead'      : 'true',
                           'count_data'     : 0,
                           'unwork'            : 0,
@@ -886,8 +889,9 @@ try:
 
                       # members
                       member_arr = []
-                      # count_member = len(unique_members)
-                      for member in teams['members']:
+                      members = teams['members']
+                      # members = members.sort()
+                      for member in members:
                           temp_member = {
                               'name'           : '',
                               'group'          : debtGroupCell[0:1],
@@ -924,13 +928,14 @@ try:
                                   {
                                       "createdAt": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
                                       "assign": str(member),
+                                      "diallist_id": teams['_id']
                                   }
                               },{
                                   "$group":
                                   {
                                       "_id": 'null',
                                       "acc_arr": {'$addToSet': '$account_number'},
-                                      "count_data": {'$sum': 1}
+                                      "count_data": {'$sum': 1},
                                   }
                               }
                           ]
@@ -941,12 +946,13 @@ try:
                                   temp_member['count_data']   = row['count_data']
                                   account_assign_arr          = row['acc_arr']
                           
-
+                         
                           # unwork
                           aggregate_diallist = [
                               {
                                   "$match":
                                   {
+                                      'group_name' : {'$regex' : groupProduct['text'] + '/Group ' + debtGroupCell[0:1] + '/'+ debtGroupCell},
                                       "createdAt": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
                                       "assigns": str(member),
                                       "mode" : "manual"
@@ -994,45 +1000,25 @@ try:
                                   {
                                       "starttime": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
                                       "userextension": str(member),
-                                      '$or' : [ { "dialtype" : {'$in' : ['manual', '']} }, {"dialtype" : {'$exists' : 'false'} }],
-                                      "direction" : "outbound"
+                                      '$or' : [ { "dialtype" : {'$in' : ['manual', '']} }, {"dialtype" : {'$exists' : False} }],
+                                      "direction" : "outbound",
+                                      "diallist_id" : teams['_id']
                                   }
                               },{
                                   "$group":
                                   {
                                       "_id": 'null',
                                       "count_conn": {'$sum': 1},
-                                      "phone_manual_arr": {'$addToSet': '$customernumber'},
+                                      "account_cdr_arr": {'$addToSet': '$account_number'},
                                   }
                               }
                           ]
                           cdrManualData = mongodb.aggregate_pipeline(MONGO_COLLECTION=cdr_collection,aggregate_pipeline=aggregate_cdr_manual)
-                          phone_manual_arr = []
+                          count_acc_manual_cdr = 0
                           if cdrManualData != None:
                               for row in cdrManualData:
-                                  phone_manual_arr            = row['phone_manual_arr']
+                                  count_acc_manual_cdr             = len(row['phone_manual_arr'])
 
-                          aggregate_cdr_manual_1 = [
-                              {
-                                  "$match":
-                                  {
-                                      "createdAt": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
-                                      "assign" : str(member),
-                                      '$or' : [ { "mobile_num" : {'$in' : phone_manual_arr} }, {"phone" : {'$in' : phone_manual_arr} }, {"other_phones" : {'$in' : phone_manual_arr}}]
-                                  }
-                              },{
-                                  "$group":
-                                  {
-                                      "_id": 'null',
-                                      "count_acc_manual_cdr": {'$sum': 1}
-                                  }
-                              }
-                          ]
-                          accountData1 = mongodb.aggregate_pipeline(MONGO_COLLECTION=diallist_detail_collection,aggregate_pipeline=aggregate_cdr_manual_1)
-                          count_acc_manual_cdr = 0
-                          if accountData1 != None:
-                              for row in accountData1:
-                                  count_acc_manual_cdr          = row['count_acc_manual_cdr']
 
                           temp_member['unwork']             = count_acc_manual - count_acc_manual_cdr
                           temp_member['work']               = temp_member['count_data'] - temp_member['unwork']
@@ -1046,12 +1032,13 @@ try:
                                       "starttime" : {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
                                       "direction" : "outbound",
                                       "userextension": str(member),
+                                      "diallist_id" : teams['_id']
                                   }
                               },{
                                   "$group":
                                   {
                                       "_id": 'null',
-                                      "talk_time": {'$sum': '$billduration'},
+                                      "talk_time": {'$sum': '$totalduration'},
                                   }
                               }
                           ]
@@ -1063,41 +1050,43 @@ try:
                                   temp_member['talk_time']            = row['talk_time']
 
                           # contacted
-                          count_contacted = 0
+                          aggregate_contacted = [
+                              {
+                                  "$match":
+                                  {
+                                      "starttime": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
+                                      "userextension": str(member),
+                                      "direction" : "outbound",
+                                      "diallist_id" : teams['_id']
+                                  }
+                              },{
+                                  "$group":
+                                  {
+                                      "_id": 'null',
+                                      "count_contacted": {'$sum': 1},
+                                      "acc_contact_arr": {'$addToSet': '$account_number'},
+                                  }
+                              }
+                          ]
+                          contactData = mongodb.aggregate_pipeline(MONGO_COLLECTION=cdr_collection,aggregate_pipeline=aggregate_contacted)
                           customernumber_arr = []
-                          for acc_assign in account_assign_arr:
-                              diallistInfo = mongodb.getOne(MONGO_COLLECTION=diallist_detail_collection, WHERE={'account_number': str(acc_assign), "createdAt": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp} },
-                                              SELECT=['mobile_num','phone','other_phones'])
-
-                              phone = []
-                              cdrInfo = 0
-                              if diallistInfo != None:
-                                if 'mobile_num' in diallistInfo.keys():
-                                  phone.append(diallistInfo['mobile_num'])
-                                if 'phone' in diallistInfo.keys():
-                                  phone.append(diallistInfo['phone'])
-                                if 'other_phones' in diallistInfo.keys():
-                                  phone += diallistInfo['other_phones']
-
-                                cdrInfo = mongodb.count(MONGO_COLLECTION=cdr_collection, WHERE={'customernumber': {'$in': phone}, "direction" : "outbound", "userextension": str(member), "starttime": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp}} )
-                                if cdrInfo > 0:
-                                  count_contacted += 1
-                                  customernumber_arr.append(acc_assign)
-
-                          temp_member['count_contacted']           = count_contacted
+                          if contactData != None:
+                              for row in contactData:
+                                  customernumber_arr                  = row['acc_contact_arr']
+                                  temp_member['count_contacted']      = row['count_contacted']
 
                           # call made
-                          calMade = mongodb.count(MONGO_COLLECTION=cdr_collection, WHERE={'disposition': 'ANSWERED', "direction" : "outbound", "userextension": str(member), "starttime": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp}} )
+                          calMade = mongodb.count(MONGO_COLLECTION=cdr_collection, WHERE={'disposition': 'ANSWERED', "direction" : "outbound", "userextension": str(member),"diallist_id" : teams['_id'],  "starttime": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp}} )
                           if calMade > 0:
                             temp_member['number_of_call'] = calMade
 
-                          totalCall = mongodb.count(MONGO_COLLECTION=cdr_collection, WHERE={ "direction" : "outbound", "userextension": str(member), "starttime": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp}} )
+                          totalCall = mongodb.count(MONGO_COLLECTION=cdr_collection, WHERE={ "direction" : "outbound", "userextension": str(member), "diallist_id" : teams['_id'], "starttime": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp}} )
                           if totalCall > 0:
                             temp_member['total_call'] = totalCall
 
 
                           # connected
-                          action_code = ['PTP', 'CHECK', 'LM', 'PTP Today']
+                          action_code = ['PTP', 'CHECK', 'LM', 'PTP Today','Spaid']
                           aggregate_cdr_ans = [
                               {
                                   "$match":
@@ -1105,7 +1094,7 @@ try:
                                       "starttime": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
                                       "userextension": str(member),
                                       "disposition" : 'ANSWERED',
-                                      # '$or' : [ { 'action_code' :  {'$in' : action_code}}, {'customer.action_code' :  {'$in' : action_code}}]
+                                      "diallist_id" : teams['_id']
                                   }
                               },{
                                   "$group":
@@ -1129,6 +1118,7 @@ try:
                                       "createdAt": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
                                       "assign" : str(member),
                                       "action_code" : {'$in' : action_code},
+                                      "diallist_id": teams['_id'],
                                       '$or' : [ { "mobile_num" : {'$in' : phone_ans_arr} }, {"phone" : {'$in' : phone_ans_arr} }, {"other_phones" : {'$in' : phone_ans_arr}}]
                                   }
                               },{
@@ -1154,6 +1144,7 @@ try:
                                   {
                                       "createdAt": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
                                       "account_number": {'$in': account_assign_arr},
+                                      "diallist_id": teams['_id'],
                                       '$or' : [ { 'action_code' :  'PTP'}, {'action_code' :  'PTP Today'}, {'action_code' :  'CHECK'}]
                                   }
                               },{
@@ -1179,6 +1170,7 @@ try:
                                   "$match":
                                   {
                                       "account_number": {'$in': account_assign_arr},
+                                      "diallist_id": teams['_id'],
                                       '$or' : [ { 'action_code' :  'PTP'}, {'action_code' :  'PTP Today'}, {'action_code' :  'CHECK'}]
                                   }
                               },{

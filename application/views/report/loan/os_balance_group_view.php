@@ -103,11 +103,11 @@
             },{
               title: 'TARGET OF COLLECTION',
               columns: [{
-                  field: 'taget_of_col_os_bl',
+                  field: 'target_of_col_os_bl',
                   title: 'OS BL',
                   width: 120
               }, {
-                  field: 'taget_of_col_no',
+                  field: 'target_of_col_no',
                   title: 'No.',
                   width: 120
               }]

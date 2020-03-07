@@ -78,7 +78,7 @@ Class Daily_prod_each_group_report extends WFF_Controller {
         $worksheet = $spreadsheet->getActiveSheet();
 
         $worksheet->getParent()->getDefaultStyle()->applyFromArray($style);
-        $worksheet->getDefaultColumnDimension()->setWidth(12);
+        $worksheet->getDefaultColumnDimension()->setWidth(20);
 
         $worksheet->mergeCells('A1:C1');
         $worksheet->setCellValue('A1', 'month-year');
@@ -240,6 +240,14 @@ Class Daily_prod_each_group_report extends WFF_Controller {
         $maxCell = $worksheet->getHighestRowAndColumn();
         $worksheet->getStyle("A1:BY".$maxCell['row'])->getBorders()
         ->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+
+        $worksheet->getStyle('E' ."4:G".$maxCell['row'])->getNumberFormat()->setFormatCode('#,##0');
+        $worksheet->getStyle('H' ."4:I".$maxCell['row'])->getNumberFormat()->setFormatCode('0.00%');
+        $worksheet->getStyle('J' ."4:O".$maxCell['row'])->getNumberFormat()->setFormatCode('#,##0');
+        $worksheet->getStyle('P' ."4:S".$maxCell['row'])->getNumberFormat()->setFormatCode('0.00%');
+
+
+
         $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
     	$file_path = UPLOAD_PATH . "loan/export/" . 'DailyEachDueDateEachGroup.xlsx';
 		$writer->save($file_path);

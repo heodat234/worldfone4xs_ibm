@@ -135,7 +135,7 @@ try:
    # writer = pd.ExcelWriter(fileOutput, engine='xlsxwriter')
 
    # Convert the dataframe to an XlsxWriter Excel object.
-   df.to_excel(writer,sheet_name='CARD',index=False,header=['No','ACCOUNT NUMBER','GROUP','PHONE','NAME','OS','AMOUNT','SENDING DATE'])  
+   df.to_excel(writer,sheet_name='CARD',index=False,header=['No','ACCOUNT NUMBER','GROUP','PHONE','NAME','AMOUNT','OS','SENDING DATE'])  
    
    # Get the xlsxwriter workbook and worksheet objects.
    workbook  = writer.book

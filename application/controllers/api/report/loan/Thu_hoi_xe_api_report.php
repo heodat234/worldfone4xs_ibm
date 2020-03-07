@@ -25,7 +25,7 @@ Class Thu_hoi_xe_api_report extends WFF_Controller {
     {
         try {
             $request = json_decode($this->input->get("q"), TRUE);
-            $request['sort'] = array(array("field" => "No", "dir" => "asc"));
+            // $request['sort'] = array(array("field" => "No", "dir" => "asc"));
             $response = $this->crud->read($this->collection, $request);
             echo json_encode($response);
 
@@ -58,7 +58,7 @@ Class Thu_hoi_xe_api_report extends WFF_Controller {
             $model[$value['field']] = $value;
         }
 
-        // print_r($model);exit;
+        // print_r($data);exit;
         $spreadsheet = new Spreadsheet();
         $spreadsheet->getProperties()
         ->setCreator("South Telecom")
@@ -81,7 +81,8 @@ Class Thu_hoi_xe_api_report extends WFF_Controller {
                 'size' => 16
             ]
         ];
-        $worksheet = $spreadsheet->getActiveSheet();
+        // $worksheet = $spreadsheet->getActiveSheet();
+        $worksheet = $spreadsheet->getSheet(0);
 
         $worksheet->getParent()->getDefaultStyle()->applyFromArray($style);
         $worksheet->getDefaultColumnDimension()->setWidth(30);
@@ -186,7 +187,9 @@ Class Thu_hoi_xe_api_report extends WFF_Controller {
                                 break;
                                
                             case 'int': case 'double':
-                                $worksheet->setCellValueExplicit($col . $row,number_format($value), \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
+                                // print_r($value);
+                                $worksheet->setCellValue($col . $row,$value);
+                                $worksheet->getStyle($col. $row)->getNumberFormat()->setFormatCode('#,##0');
                                 break;
 
                             case 'timestamp':
@@ -212,7 +215,7 @@ Class Thu_hoi_xe_api_report extends WFF_Controller {
         }
         
         $maxCell = $worksheet->getHighestRowAndColumn();
-        $worksheet->getStyle("A1:AA".$maxCell['row'])->applyFromArray($headerStyle);
+        // $worksheet->getStyle("A1:AA".$maxCell['row'])->applyFromArray($headerStyle);
         $worksheet->getStyle("A1:AA".$maxCell['row'])->getBorders()
         ->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
         $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);

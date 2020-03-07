@@ -73,8 +73,15 @@ try:
             duedate_type = targetGroup['duedate_type']
         else:
             duedate_type = targetGroup['B_plus_duedate_type']
-
-        dueDayOfMonth = mongodb.getOne(MONGO_COLLECTION=report_due_date_collection, WHERE={'for_month': str(month), 'debt_group': duedate_type[1:3]})
+        if duedate_type[1:3] == '03':
+            if month == 1:
+                lastmonth = 12
+            else:
+                lastmonth = month - 1
+        else:
+            lastmonth = month
+            
+        dueDayOfMonth = mongodb.getOne(MONGO_COLLECTION=report_due_date_collection, WHERE={'for_month': str(lastmonth), 'debt_group': duedate_type[1:3]})
         temp = {
             'day'           : day,
             'for_month'     : month,
@@ -90,13 +97,13 @@ try:
             'daily_no'                  : 0,
         }
         temp_final = {}
-
+        # print(dueDayOfMonth)
         if todayTimeStamp == dueDayOfMonth['due_date_add_1']:
             temp['due_date'] = dueDayOfMonth['due_date']
             temp['check_due_date'] = 'True'
 
+            # print('ngay due date')
             if targetGroup['debt_type'] == 'SIBS':
-                # print(duedate_type)
                 aggregate_lnjc05 = [
                     {
                       "$match":
@@ -108,6 +115,7 @@ try:
                       {
                           "_id": 'null',
                           "sum_balance": {'$sum': '$current_balance'},
+                          "sum_principal": {'$sum': '$outstanding_principal'},
                           "count_data": {'$sum': 1}
                       }
                     }
@@ -115,8 +123,11 @@ try:
                 lnjc05Data = mongodb.aggregate_pipeline(MONGO_COLLECTION=lnjc05_collection,aggregate_pipeline=aggregate_lnjc05)
                 if lnjc05Data != None:
                     for row in lnjc05Data:
-                        temp['start_os_bl']         = row['sum_balance']
+                        temp['start_os_bl']         = round(row['sum_balance']/1000000)
+                        temp['principal']           = round(row['sum_principal']/1000000)
                         temp['start_no']            = row['count_data']
+
+                
 
                 # Final No
                 aggregate_lnjc05_yesterday = [
@@ -152,7 +163,6 @@ try:
                       {
                           "_id": 'null',
                           "sum_balance": {'$sum': '$current_balance'},
-                          "sum_principal": {'$sum': '$outstanding_principal'},
                           "count_data": {'$sum': 1}
                       }
                     }
@@ -160,8 +170,8 @@ try:
                 lnjc05Data = mongodb.aggregate_pipeline(MONGO_COLLECTION=lnjc05_collection,aggregate_pipeline=aggregate_lnjc05)
                 if lnjc05Data != None:
                     for row in lnjc05Data:
-                        temp_final['final_os_bl']             = row['sum_balance']
-                        temp_final['final_principal']         = row['sum_principal']
+                        temp_final['final_os_bl']             = round(row['sum_balance']/1000000)
+                        # temp_final['final_principal']         = round(row['sum_principal']/1000000)
                         temp_final['final_no']                = row['count_data']
 
             else:
@@ -192,9 +202,53 @@ try:
                 listAccountData = mongodb.aggregate_pipeline(MONGO_COLLECTION=listOfAccount_collection,aggregate_pipeline=aggregate_listAccount)
                 if listAccountData != None:
                     for row in listAccountData:
-                        temp['start_os_bl']         = row['sum_balance']
+                        temp['start_os_bl']         = round(row['sum_balance']/1000000)
                         temp['start_no']            = row['count_data']
 
+
+                aggregate_stored = [
+                    {
+                        "$match":
+                        {
+                            # "createdAt" : {'$gte' : yesterdayTimeStamp,'$lte' : endYesterdayTimeStamp},
+                            # "account_number" : {'$in' : acc_yesterday},
+                            "overdue_indicator": duedate_type[0:1],
+                            "kydue": duedate_type[1:3],
+                        }
+                    },{
+                      "$group":
+                      {
+                          "_id": 'null',
+                          "acc_stored": {'$push': '$contract_no'},
+                      }
+                    }
+                ]
+                sbvStoredData = mongodb.aggregate_pipeline(MONGO_COLLECTION=stored_collection,aggregate_pipeline=aggregate_stored)
+                acc_stored = []
+                if sbvStoredData != None:
+                    for row in sbvStoredData:
+                        acc_stored         = row['acc_stored']
+
+
+                aggregate_sbv = [
+                    {
+                      "$match":
+                      {
+                          "contract_no" : {'$in' : acc_stored},
+                      }
+                    },{
+                      "$group":
+                      {
+                          "_id": 'null',
+                          "sum_principal_sale": {'$sum': '$ob_principal_sale'},
+                          "sum_principal_cash": {'$sum': '$ob_principal_cash'},
+                      }
+                    }
+                ]
+                sbvData = mongodb.aggregate_pipeline(MONGO_COLLECTION=sbv_collection,aggregate_pipeline=aggregate_sbv)
+                if sbvData != None:
+                    for row in sbvData:
+                        temp['principal']         = round((row['sum_principal_sale'] + row['sum_principal_cash'])/1000000)
 
 
 
@@ -253,32 +307,11 @@ try:
                       }
                     }
                 ]
-                lnjc05Data = mongodb.aggregate_pipeline(MONGO_COLLECTION=listOfAccount_collection,aggregate_pipeline=aggregate_listAcc)
-                if lnjc05Data != None:
-                    for row in lnjc05Data:
-                        temp_final['final_os_bl']             = row['sum_balance']
+                accountData = mongodb.aggregate_pipeline(MONGO_COLLECTION=listOfAccount_collection,aggregate_pipeline=aggregate_listAcc)
+                if accountData != None:
+                    for row in accountData:
+                        temp_final['final_os_bl']             = round(row['sum_balance']/1000000)
                         temp_final['final_no']                = row['count_data']
-
-
-                aggregate_sbv = [
-                    {
-                      "$match":
-                      {
-                          "contract_no" : {'$in' : diallist_yesterday},
-                      }
-                    },{
-                      "$group":
-                      {
-                          "_id": 'null',
-                          "sum_principal_sale": {'$sum': '$ob_principal_sale'},
-                          "sum_principal_cash": {'$sum': '$ob_principal_cash'},
-                      }
-                    }
-                ]
-                sbvData = mongodb.aggregate_pipeline(MONGO_COLLECTION=sbv_collection,aggregate_pipeline=aggregate_sbv)
-                if sbvData != None:
-                    for row in sbvData:
-                        temp_final['final_principal']         = row['sum_principal_sale'] + row['sum_principal_cash']
 
 
 
@@ -310,6 +343,7 @@ try:
                       {
                           "_id": 'null',
                           "sum_balance": {'$sum': '$current_balance'},
+                          "sum_principal": {'$sum': '$outstanding_principal'},
                           "count_data": {'$sum': 1}
                       }
                     }
@@ -317,7 +351,8 @@ try:
                 lnjc05Data = mongodb.aggregate_pipeline(MONGO_COLLECTION=lnjc05_collection,aggregate_pipeline=aggregate_lnjc05)
                 if lnjc05Data != None:
                     for row in lnjc05Data:
-                        temp['daily_os_bl']         = row['sum_balance']
+                        temp['daily_os_bl']         = round(row['sum_balance']/1000000)
+                        temp['principal']           = round(row['sum_principal']/1000000)
                         temp['daily_no']            = row['count_data']
 
 
@@ -349,8 +384,57 @@ try:
                 listAccountData = mongodb.aggregate_pipeline(MONGO_COLLECTION=listOfAccount_collection,aggregate_pipeline=aggregate_listAccount)
                 if listAccountData != None:
                     for row in listAccountData:
-                        temp['daily_os_bl']         = row['sum_balance']
+                        temp['daily_os_bl']         = round(row['sum_balance']/1000000)
                         temp['daily_no']            = row['count_data']
+
+
+
+                aggregate_stored = [
+                    {
+                        "$match":
+                        {
+                            # "createdAt" : {'$gte' : yesterdayTimeStamp,'$lte' : endYesterdayTimeStamp},
+                            # "account_number" : {'$in' : acc_yesterday},
+                            "overdue_indicator": duedate_type[0:1],
+                            "kydue": duedate_type[1:3],
+                        }
+                    },{
+                      "$group":
+                      {
+                          "_id": 'null',
+                          "acc_stored": {'$push': '$contract_no'},
+                      }
+                    }
+                ]
+                sbvStoredData = mongodb.aggregate_pipeline(MONGO_COLLECTION=stored_collection,aggregate_pipeline=aggregate_stored)
+                acc_stored = []
+                if sbvStoredData != None:
+                    for row in sbvStoredData:
+                        acc_stored         = row['acc_stored']
+
+
+                aggregate_sbv = [
+                    {
+                      "$match":
+                      {
+                          "contract_no" : {'$in' : acc_stored},
+                      }
+                    },{
+                      "$group":
+                      {
+                          "_id": 'null',
+                          "sum_principal_sale": {'$sum': '$ob_principal_sale'},
+                          "sum_principal_cash": {'$sum': '$ob_principal_cash'},
+                      }
+                    }
+                ]
+                sbvData = mongodb.aggregate_pipeline(MONGO_COLLECTION=sbv_collection,aggregate_pipeline=aggregate_sbv)
+                if sbvData != None:
+                    for row in sbvData:
+                        temp['principal']         = round((row['sum_principal_sale'] + row['sum_principal_cash'])/1000000)
+
+
+
 
 
 

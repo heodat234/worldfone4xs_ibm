@@ -57,8 +57,8 @@ Class Daily_os_balance_group_report extends WFF_Controller {
 
     function exportExcel() {
         $today      = date('Y-m-d');
-        $last6Month = strtotime(date("Y-m-d", strtotime($today)) . " -6 month");
-        
+        $last6Month = strtotime(date("Y-m-d", strtotime($today)) . " -3 month");
+        // print_r($today);exit;
 
         $request = array('createdAt' => array('$gte' => $last6Month), 'type' => 'SIBS');
         $data = $this->crud->where($request)->order_by(array('debt_group' => 'asc', 'year' => 'asc','for_month' => 'asc','day' => 'asc'))->get($this->collection);
@@ -160,8 +160,8 @@ Class Daily_os_balance_group_report extends WFF_Controller {
             }
             // ten group va target
             $worksheet->setCellValue('A'.$start_row, $debt_group);
-            $worksheet->setCellValue('B'.$start_row, ($value['target']/100));
-            $worksheet->getStyle('B'.$start_row)->getNumberFormat()->setFormatCode('0.00%');
+            $worksheet->setCellValue('B'.$start_row, 'Principal');
+            // $worksheet->getStyle('B'.$start_row)->getNumberFormat()->setFormatCode('0.00%');
             array_push($rowGroup, $start_row);
 
             $worksheet->mergeCells("A".($start_row+1).":A".($start_row+2));
@@ -227,6 +227,9 @@ Class Daily_os_balance_group_report extends WFF_Controller {
             
 
             $worksheet->setCellValueByColumnAndRow($start_col, 2, $value['day']);
+            $worksheet->setCellValueByColumnAndRow($start_col,$start_row, (isset($value['principal'])) ? $value['principal'] : '' );
+            $colPrincipal = $this->stringFromColumnIndex($start_col);
+            $worksheet->getStyle($colPrincipal.$start_row)->getNumberFormat()->setFormatCode('#,##0');
 
             if (isset($value['check_due_date'])) {
                 $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 1, $value['start_os_bl']);
@@ -234,8 +237,14 @@ Class Daily_os_balance_group_report extends WFF_Controller {
                 $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 3, $value['target_of_col_os_bl']);
                 $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 4, $value['target_of_col_no']);
 
+                $worksheet->setCellValueByColumnAndRow($start_col+2, $start_row + 1, 'Target');
+                $worksheet->setCellValueByColumnAndRow($start_col+3, $start_row + 1, ($value['target']/100));
+
+                $colTargetTitle = $this->stringFromColumnIndex($start_col+2);
+                $colTarget      = $this->stringFromColumnIndex($start_col+3);
 
                 $worksheet->setCellValueByColumnAndRow($start_col+2, $start_row + 3, $value['start_no']-$value['target_of_col_no']);
+                $worksheet->setCellValueByColumnAndRow($start_col+2, $start_row + 4, $value['start_os_bl']-$value['target_of_col_os_bl']);
 
                 $worksheet->getStyle($column.($start_row+1).":".$column.($start_row+2))->getFill()
                 ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
@@ -243,6 +252,16 @@ Class Daily_os_balance_group_report extends WFF_Controller {
                 $worksheet->getStyle($column.($start_row+3).":".$column.($start_row+4))->getFill()
                 ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
                 ->getStartColor()->setRGB('C6E0B4');
+
+                $worksheet->getStyle($colTarget. ($start_row + 1))->getNumberFormat()->setFormatCode('0.00%');
+                $headerStyle1 = array(
+                    'font'          => array(
+                        'color'     => array('rgb' => 'FF0000'),
+                    )
+                );
+                $worksheet->getStyle($colTargetTitle.($start_row + 1).":".$colTarget.($start_row + 1))->applyFromArray($headerStyle1);
+                $worksheet->getStyle($column.($start_row + 1).":".$next_column.($start_row + 1))->getNumberFormat()->setFormatCode('#,##0');
+                $worksheet->getStyle($colTargetTitle.($start_row + 3).":".$colTargetTitle.($start_row + 4))->getNumberFormat()->setFormatCode('#,##0');
             }
 
             $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 5, $value['daily_os_bl']);
@@ -484,8 +503,8 @@ Class Daily_os_balance_group_report extends WFF_Controller {
             }
             // ten group va target
             $worksheet->setCellValue('A'.$start_row, $debt_group);
-            $worksheet->setCellValue('B'.$start_row, ($value['target']/100));
-            $worksheet->getStyle('B'.$start_row)->getNumberFormat()->setFormatCode('0.00%');
+            $worksheet->setCellValue('B'.$start_row, 'Principal');
+            // $worksheet->getStyle('B'.$start_row)->getNumberFormat()->setFormatCode('0.00%');
             array_push($rowGroup, $start_row);
 
             $worksheet->mergeCells("A".($start_row+1).":A".($start_row+2));
@@ -551,6 +570,9 @@ Class Daily_os_balance_group_report extends WFF_Controller {
             
 
             $worksheet->setCellValueByColumnAndRow($start_col, 2, $value['day']);
+            $worksheet->setCellValueByColumnAndRow($start_col,$start_row, (isset($value['principal'])) ? $value['principal'] : '' );
+            $colPrincipal = $this->stringFromColumnIndex($start_col);
+            $worksheet->getStyle($colPrincipal.$start_row)->getNumberFormat()->setFormatCode('#,##0');
 
             if (isset($value['check_due_date'])) {
                 $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 1, $value['start_os_bl']);
@@ -567,7 +589,7 @@ Class Daily_os_balance_group_report extends WFF_Controller {
                 ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
                 ->getStartColor()->setRGB('8EA9DB');
                 
-                $worksheet->getStyle($start_col+3, $start_row + 1)->getNumberFormat()->setFormatCode('0.00%');
+                $worksheet->getStyle($colTarget. ($start_row + 1))->getNumberFormat()->setFormatCode('0.00%');
                 $headerStyle1 = array(
                     'font'          => array(
                         'color'     => array('rgb' => 'FF0000'),

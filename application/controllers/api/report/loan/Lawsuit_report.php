@@ -315,6 +315,12 @@ trả án phí sau khi rút đơn");
                         if ($field == 'sobill_nopdon') {
                             $value = (int)$value;
                         }
+                        if ($field == 'ngay_guihosovenha_kh' || $field == 'ngay_xetxu_sotham' || $field == 'ngay_hoagiai3'|| $field == 'ngay_hoagiai2' || $field == 'ngay_hoagiai1' || $field == 'ngay_nhanthongbao_thuly' || $field == 'ngay_nop_tuap' || $field == 'ngay_guifc' || $field == 'ngay_xetxu_phuctham' || $field == 'ngay_tamung_anphi' || $field == 'ngay_duochoantra_anphi' || $field == 'ngay_nopdon') {
+                            if ($value != '') {
+                                $value = date('d/m/Y',strtotime($value));
+                                // print_r($value);
+                            }
+                        }
                         switch ($model[$field]["type"]) {
                             case 'array': case 'arrayPhone': case 'arrayEmail':
                                 $val = implode(",", $value);

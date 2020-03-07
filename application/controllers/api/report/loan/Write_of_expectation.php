@@ -57,8 +57,14 @@ Class Write_of_expectation extends WFF_Controller {
     {
         try {
             //sibs
-         
-            $response = $this->crud->read($this->collection);
+            $date = '01/'.$this->input->post('start');
+            $getDate = getdate(strtotime(str_replace('/', '-', $date)));
+
+            $endMonth = strtotime(date("Y-m-t", strtotime($date)) );
+            $where = array('createdAt' => array('$gte' => $getDate[0], '$lte' => $endMonth));
+            $response = $this->crud->read($this->collection, array('take' => 10000,'skip' => 0),'', $where);
+        
+            // $response = $this->crud->read($this->collection);
             $total = $response['total'];
 
             $limit = 1000;

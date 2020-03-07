@@ -140,9 +140,10 @@ try:
                         acc_arr_1   = inc['acc_arr'] if 'acc_arr' in inc.keys() else []
                         acc_arr     += acc_arr_1
 
+                temp['inci_amt']            = round(temp['inci_amt']/1000)
+                temp['inci_ob_principal']   = round(temp['inci_ob_principal']/1000)
 
                 if groupProduct['value'] == 'SIBS':
-                    # yesterdayData = mongodb.get(MONGO_COLLECTION=collection, WHERE={'debt_group': debtGroupCell[0:1], 'due_date_code': debtGroupCell[1:3], 'for_month': str(month)},SELECT=['col_prici'],SORT=[("_id", -1)], SKIP=0, TAKE=1)
                     lnjc05Info = mongodb.get(MONGO_COLLECTION=lnjc05_collection, WHERE={'group_id': debtGroupCell  })
                     for lnjc05 in lnjc05Info:
                         col_today += 1
@@ -173,56 +174,8 @@ try:
                             temp['amt'] = ln3206['total_amt']
 
 
-                    # aggregate_ln3206_today = [
-                    #     {
-                    #         "$match":
-                    #         {
-                    #             "created_at": {'$gte': todayTimeStamp,'$lte': endTodayTimeStamp},
-                    #             "account_number": {'$in' : acc_arr},
-                    #             "code" : '10'
-                    #         }
-                    #     },{
-                    #         "$group":
-                    #         {
-                    #             "_id": 'null',
-                    #             "acc_today_arr" : {'$addToSet' : 'account_number'},
-                    #         }
-                    #     }
-                    # ]
-                    # ln3206fTodayInfo = mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'LN3206F'),aggregate_pipeline=aggregate_ln3206_today)
-                    # acc_today_arr = []
-                    # if ln3206fTodayInfo is not None:
-                    #     for ln3206 in ln3206fTodayInfo:
-                    #         acc_today_arr = ln3206['acc_today_arr']
-
-
-                    # aggregate_LNJC05_yesterday = [
-                    #     {
-                    #         "$match":
-                    #         {
-                    #             "account_number": {'$in' : acc_today_arr},
-                    #         }
-                    #     },{
-                    #         "$group":
-                    #         {
-                    #             "_id": 'null',
-                    #             "sum_prin" : {'$sum' : 'outstanding_principal'},
-                    #         }
-                    #     }
-                    # ]
-                    # LNJC05_yesterdayInfo = mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'LNJC05_yesterday'),aggregate_pipeline=aggregate_LNJC05_yesterday)
-                    # if LNJC05_yesterdayInfo is not None:
-                    #     for lnjc05 in LNJC05_yesterdayInfo:
-                    #         principal_today = lnjc05['sum_prin']
-
-                    # if yesterdayData != None:
-                    #   for yesterday in yesterdayData:
-                    #     temp['col_prici']   = yesterday['col_prici'] + principal_today
-                    # else:
-                    #   temp['col_prici']   = principal_today
-
-                    temp['col_prici']   = temp['inci_ob_principal'] - ob_principal_today
-                    temp['col_amt']     = temp['inci_amt'] - amt_today
+                    temp['col_prici']   = round((temp['inci_ob_principal'] - ob_principal_today)/1000)
+                    temp['col_amt']     = round((temp['inci_amt'] - amt_today)/1000)
 
                     temp['rem']         = temp['inci'] - temp['col']
                     temp['rem_amt']     = temp['inci_amt'] - temp['col_amt']
@@ -342,58 +295,8 @@ try:
                           temp['amt'] += sum_amount
 
 
-                    # aggregate_gl_today = [
-                    #     {
-                    #         "$match":
-                    #         {
-                    #             "created_at": {'$gte': todayTimeStamp,'$lte': endTodayTimeStamp},
-                    #             "account_number": {'$in' : acc_arr},
-                    #             'code' : {'$in' : code}
-                    #         }
-                    #     },{
-                    #         "$group":
-                    #         {
-                    #             "_id": 'null',
-                    #             "acc_today_arr" : {'$addToSet' : 'account_number'},
-                    #         }
-                    #     }
-                    # ]
-                    # glTodayInfo = mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_input_payment_of_card'),aggregate_pipeline=aggregate_gl_today)
-                    # acc_gl_today_arr = []
-                    # if glTodayInfo is not None:
-                    #     for gl in glTodayInfo:
-                    #         acc_gl_today_arr = gl['acc_today_arr']
-
-
-                    # aggregate_sbv_yesterday = [
-                    #     {
-                    #         "$match":
-                    #         {
-                    #             "account_number": {'$in' : acc_today_arr},
-                    #         }
-                    #     },{
-                    #         "$group":
-                    #         {
-                    #             "_id": 'null',
-                    #             "sale_total": {'$sum': 'ob_principal_sale'},
-                    #             "cash_total": {'$sum': 'ob_principal_cash'},
-                    #         }
-                    #     }
-                    # ]
-                    # sbv_yesterdayInfo = mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'SBV_yesterday'),aggregate_pipeline=aggregate_sbv_yesterday)
-                    # principal_card_today = 0
-                    # if sbv_yesterdayInfo is not None:
-                    #     for sbv in sbv_yesterdayInfo:
-                    #         principal_card_today = sbv['sale_total'] + sbv['cash_total']
-
-                    # if yesterdayData != None:
-                    #   for yesterday in yesterdayData:
-                    #     temp['col_prici']   = yesterday['col_prici'] + principal_card_today
-                    # else:
-                    #   temp['col_prici']   = principal_card_today
-
-                    temp['col_prici']   = temp['inci_ob_principal'] - ob_principal_today
-                    temp['col_amt']     = temp['inci_amt'] - amt_today
+                    temp['col_prici']   = round((temp['inci_ob_principal'] - ob_principal_today)/1000)
+                    temp['col_amt']     = round((temp['inci_amt'] - amt_today)/1000)
 
                     temp['rem']         = temp['inci'] - temp['col']
                     temp['rem_amt']     = temp['inci_amt'] - temp['col_amt']
