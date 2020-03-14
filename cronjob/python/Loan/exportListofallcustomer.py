@@ -43,17 +43,19 @@ try:
    todayString = today.strftime("%d/%m/%Y")
    todayTimeStamp = int(time.mktime(time.strptime(str(todayString + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
    endTodayTimeStamp = int(time.mktime(time.strptime(str(todayString + " 23:59:59"), "%d/%m/%Y %H:%M:%S")))
+   dateExport = "0"+ str( int(time.strftime('%m'))-1 ) + today.strftime("%Y")
 
    startMonth = int(time.mktime(time.strptime(str('01/' + str(month) + '/' + str(year) + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
    endMonth = int(time.mktime(time.strptime(str(str(lastDayOfMonth) + '/' + str(month) + '/' + str(year) + " 23:59:59"), "%d/%m/%Y %H:%M:%S")))
-
+   
    holidayOfMonth = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_off_sys'))
    listHoliday = map(lambda offDateRow: {offDateRow['off_date']}, holidayOfMonth)
 
-   if todayTimeStamp in listHoliday:
-      sys.exit()
+   # if day != 1:
+   #    print('stop!')  
+   #    sys.exit()
 
-   fileOutput  = base_url + 'upload/loan/export/ListofallcustomerReport_'+ today.strftime("%d%m%Y") +'.xlsx' 
+   fileOutput  = base_url + 'upload/loan/export/ListofallcustomerReport_'+ dateExport +'.xlsx' 
 
    aggregate_acc = [
       {
@@ -63,7 +65,8 @@ try:
         
           }
       },
-      # { "$limit": 100 },
+      # { '$sort' : { '_id' : -1} },
+      # { "$limit": 1000 },
       {
          "$project":
           {
@@ -79,27 +82,32 @@ try:
    writer = pd.ExcelWriter(fileOutput, engine='xlsxwriter')
 
    # Convert the dataframe to an XlsxWriter Excel object.
-   df.to_excel(writer,sheet_name='AllLoanGroup',header=['DT_TX','ACC_ID','CUS_ID','CUS_NM','Loan Group based on ZACCF and TB','CAR_ID based on ZACCF file','TERM_ID based on ZACCF file','W_ORG on ZACCF file and TB','Total No. of ACC','Total No. of customer','PRODGRP_ID','LIC_NO','Interest rate (%/year)','Dealer code','Province code']) 
+   df.to_excel(writer,sheet_name='AllLoanGroup',header=['DT_TX','ACC_ID','CUS_ID','CUS_NM','Loan Group based on ZACCF and TB','CAR_ID based on ZACCF file','TERM_ID based on ZACCF file','W_ORG on ZACCF file and TB','Total No. of ACC','Total No. of customer','PRODGRP_ID','LIC_NO','Interest rate (%/year)','Dealer code','Province code'],index = False) 
    # Get the xlsxwriter workbook and worksheet objects.
    workbook  = writer.book
    worksheet = writer.sheets['AllLoanGroup']
 
    # Add some cell formats.
    format1 = workbook.add_format({'num_format': '#,##0', 'bottom':1, 'top':1, 'left':1, 'right':1})
-   format2 = workbook.add_format({'num_format': '0%'})
+   format2 = workbook.add_format({'num_format': '0.00%','bottom':1, 'top':1, 'left':1, 'right':1})
    border_fmt = workbook.add_format({'bottom':1, 'top':1, 'left':1, 'right':1})
+   header_fmt = workbook.add_format({'bottom':1, 'top':1, 'left':1, 'right':1, 'bold': True, 'fg_color': '#008738','font_color': '#ffffff','text_wrap': True,})
    date_fmt = workbook.add_format({'num_format': 'dd/mm/yy'})
     
 
    # Set the column width and format.
-   worksheet.set_column('A:P', 20, border_fmt)
-   # worksheet.set_column('N:N', 20, format2)
+   worksheet.set_column('A:O', 20, border_fmt)
+   worksheet.set_column('M:M', 20, format2)
+   # worksheet.set_row(0, 30, header_fmt)
    # worksheet.set_column('B:B', 30, date_fmt)
 
     
-#    worksheet.set_column('F:F', 20, format1)
+   
+   worksheet.set_column('H:H', 30, format1)
    # Set the format but not the column width.
-
+   # Write the column headers with the defined format.
+  
+  
    # Close the Pandas Excel writer and output the Excel file.
    writer.save()
 

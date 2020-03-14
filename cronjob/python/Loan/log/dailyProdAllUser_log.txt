@@ -254,3 +254,29 @@
 15/02/2020, 15:59:57: End Log
 15/02/2020, 16:17:57: Start Import
 15/02/2020, 16:28:57: End Log
+03/03/2020, 14:21:15: Start Import
+03/03/2020, 14:21:15: End Log
+09/03/2020, 14:42:51: Start Import
+09/03/2020, 14:42:51: '<' not supported between instances of 'dict' and 'dict'
+09/03/2020, 14:43:22: Start Import
+09/03/2020, 14:43:22: list indices must be integers or slices, not str
+09/03/2020, 14:45:41: Start Import
+09/03/2020, 14:45:41: 1
+09/03/2020, 14:46:57: Start Import
+09/03/2020, 14:46:57: 1
+09/03/2020, 14:48:35: Start Import
+09/03/2020, 14:48:35: End Log
+09/03/2020, 14:48:56: Start Import
+09/03/2020, 14:48:56: list index out of range
+09/03/2020, 14:50:41: Start Import
+09/03/2020, 14:50:41: End Log
+09/03/2020, 14:51:24: Start Import
+09/03/2020, 14:51:24: bad operand type for unary -: 'str'
+09/03/2020, 14:52:22: Start Import
+09/03/2020, 14:52:22: list index out of range
+09/03/2020, 14:55:27: Start Import
+09/03/2020, 14:55:27: End Log
+09/03/2020, 14:58:19: Start Import
+09/03/2020, 14:58:19: document must be an instance of dict, bson.son.SON, bson.raw_bson.RawBSONDocument, or a type that inherits from collections.MutableMapping
+09/03/2020, 15:03:49: Start Import
+09/03/2020, 15:03:52: End Log

@@ -15,7 +15,7 @@
             <div class="form-group col-sm-3">
                <label class="control-label col-xs-3">@Date@</label>
                <div class="col-xs-8">
-                  <input id="start-date" data-role="datepicker" data-format="dd/MM/yyyy" name="fromDateTime" data-bind="value: fromDateTime, events: {change: startDate}"  >
+                  <input id="start-date" data-role="datepicker" data-format="dd/MM/yyyy" name="fromDateTime" data-bind="value: fromDateTime"  >
                </div>
             </div>
             <!-- <div class="form-group col-sm-4">
@@ -71,11 +71,20 @@
          return {
               dataSource: {},
               grid: {},
+              formDate: 0,
+              toDate: 0,
               init: function() {
                   var dataSource = this.dataSource = new kendo.data.DataSource({
                      serverPaging: true,
                      serverFiltering: true,
-                     pageSize: 10,
+                     pageSize: 15,
+                     filter: {
+                          logic: "and",
+                          filters: [
+                              {field: 'createdAt', operator: "gte", value: this.fromDate},
+                              {field: 'createdAt', operator: "lte", value: this.toDate}
+                          ]
+                     },
                      transport: {
                         read: ENV.reportApi + "loan/master_data_report",
                         parameterMap: parameterMap
@@ -307,7 +316,7 @@
           }
       }();
       window.onload = function() {
-         Table.init();
+         // Table.init();
          var dateRange = 30;
          var nowDate = new Date();
          var date =  new Date(),
@@ -316,7 +325,12 @@
 
          // var fromDate = new Date(date.getTime() + timeZoneOffset - (dateRange - 1) * 86400000);
          var fromDate = new Date(date.getTime() + timeZoneOffset);
-         var toDate = new Date(date.getTime() + timeZoneOffset + kendo.date.MS_PER_DAY -1)
+         var toDate = new Date(date.getTime() + timeZoneOffset + kendo.date.MS_PER_DAY -1);
+
+
+         Table.fromDate = fromDate.getTime() / 1000;
+         Table.toDate = fromDate.getTime() / 1000 + 86400 - 1;
+         Table.init();
          var observable = kendo.observable({
              trueVar: true,
              loading: false,
@@ -339,7 +353,7 @@
              asyncSearch: async function() {
                var field = "created_at";
                var fromDateTime = new Date(this.fromDateTime.getTime()).toISOString();
-               var fromDate = (this.fromDateTime.getTime()).toString();
+               var fromDate = this.fromDateTime.getTime()/1000;
                // console.log(fromDate.substr(0,10));
                 // var toDateTime = new Date(this.toDateTime.getTime() - timeZoneOffset).toISOString();
                 var cif = this.cif;
@@ -365,11 +379,12 @@
                 }else{
                     filter_3 = {field: field_3, operator: "neq", value: nationalID};
                 }
-                filter_4 = {field: field_4, operator: "gte", value: parseInt(fromDate.substr(0,10))};
+                filter_4 = {field: field_4, operator: "gte", value: fromDate};
+                filter_5 = {field: field_4, operator: "lte", value: fromDate+86400-1};
                 var filter = {
                     logic: "and",
                     filters: [
-                        filter_1,filter_2,filter_3,filter_4
+                        filter_1,filter_2,filter_3,filter_4,filter_5
                     ]
                 };
 

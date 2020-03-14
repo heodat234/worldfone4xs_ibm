@@ -29,7 +29,7 @@ _mongodb = Mongodb(MONGODB="_worldfone4xs", WFF_ENV=wff_env)
 log = open(base_url + "cronjob/python/Loan/log/importlnjc05.txt","a")
 now = datetime.now()
 subUserType = 'LO'
-collection = common.getSubUser(subUserType, 'LNJC05')
+collection = common.getSubUser(subUserType, 'LNJC05_01032020')
 
 try:
     modelColumns = []
@@ -45,7 +45,7 @@ try:
     total = 0
     complete = 0
     # today = date.today()
-    today = datetime.strptime('25/02/2020', "%d/%m/%Y").date()
+    today = datetime.strptime('01/03/2020', "%d/%m/%Y").date()
     day = today.day
     month = today.month
     year = today.year

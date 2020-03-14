@@ -19,3 +19,11 @@
 04/01/2020, 15:27:36: End Log
 06/01/2020, 17:15:22: Start Import
 06/01/2020, 17:15:28: End Log
+28/02/2020, 10:21:24: Start Import
+28/02/2020, 10:21:24: name 'due_date_add_2' is not defined
+28/02/2020, 10:21:46: Start Import
+28/02/2020, 10:21:46: name 'endTodayTimeStamp' is not defined
+28/02/2020, 10:22:43: Start Import
+28/02/2020, 10:22:43: End Log
+28/02/2020, 10:28:00: Start Import
+28/02/2020, 10:28:01: End Log

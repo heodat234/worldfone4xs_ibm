@@ -177,3 +177,60 @@
 16/02/2020, 11:50:25: End Log
 16/02/2020, 14:03:51: Start Import
 16/02/2020, 14:07:23: End Log
+29/02/2020, 10:16:24: Start Import
+29/02/2020, 10:16:34: End Log
+29/02/2020, 10:17:10: Start Import
+29/02/2020, 10:17:21: End Log
+29/02/2020, 10:18:43: Start Import
+29/02/2020, 10:18:55: End Log
+29/02/2020, 10:21:10: Start Import
+29/02/2020, 10:21:21: End Log
+29/02/2020, 10:24:09: Start Import
+29/02/2020, 10:24:19: End Log
+29/02/2020, 10:26:38: Start Import
+29/02/2020, 10:30:10: End Log
+29/02/2020, 10:30:42: Start Import
+29/02/2020, 11:06:13: Start Import
+29/02/2020, 11:06:13: 'posting_date'
+29/02/2020, 11:06:46: Start Import
+29/02/2020, 11:06:46: 'amount'
+29/02/2020, 11:07:14: Start Import
+29/02/2020, 11:07:27: End Log
+29/02/2020, 11:08:07: Start Import
+29/02/2020, 11:08:11: End Log
+29/02/2020, 11:09:20: Start Import
+29/02/2020, 11:09:23: End Log
+29/02/2020, 11:09:53: Start Import
+29/02/2020, 11:09:56: End Log
+29/02/2020, 11:11:32: Start Import
+29/02/2020, 11:11:37: End Log
+29/02/2020, 11:12:55: Start Import
+29/02/2020, 11:12:55: 'code'
+29/02/2020, 11:13:14: Start Import
+29/02/2020, 11:13:14: batch op errors occurred
+29/02/2020, 11:15:50: Start Import
+29/02/2020, 11:15:54: End Log
+29/02/2020, 11:16:04: Start Import
+29/02/2020, 11:16:08: End Log
+29/02/2020, 11:16:22: Start Import
+29/02/2020, 11:16:22: documents must be a non-empty list
+29/02/2020, 11:16:41: Start Import
+29/02/2020, 11:16:44: End Log
+29/02/2020, 11:18:18: Start Import
+29/02/2020, 11:18:21: End Log
+29/02/2020, 11:44:02: Start Import
+29/02/2020, 11:44:02: batch op errors occurred
+29/02/2020, 11:45:38: Start Import
+29/02/2020, 11:45:38: batch op errors occurred
+29/02/2020, 11:47:24: Start Import
+29/02/2020, 11:47:24: batch op errors occurred
+29/02/2020, 11:48:01: Start Import
+29/02/2020, 11:48:05: End Log
+29/02/2020, 11:48:44: Start Import
+29/02/2020, 11:48:44: batch op errors occurred
+29/02/2020, 11:49:24: Start Import
+29/02/2020, 11:49:28: End Log
+29/02/2020, 11:53:32: Start Import
+29/02/2020, 11:53:36: End Log
+29/02/2020, 11:54:10: Start Import
+29/02/2020, 11:54:14: End Log

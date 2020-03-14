@@ -4,6 +4,7 @@
 import sys
 import os
 import time
+import traceback
 from datetime import datetime
 from datetime import date
 from xlsxwriter.utility import xl_rowcol_to_cell
@@ -16,13 +17,15 @@ from helper.excel import Excel
 from helper.jaccs import Config
 from helper.common import Common
 
-mongodb = Mongodb("worldfone4xs")
-_mongodb = Mongodb("_worldfone4xs")
+common = Common()
+base_url = common.base_url()
+wff_env = common.wff_env(base_url)
+mongodb = Mongodb("worldfone4xs", wff_env)
+_mongodb = Mongodb("_worldfone4xs", wff_env)
 excel = Excel()
 config = Config()
 ftp = Ftp()
-common = Common()
-base_url = config.base_url()
+# base_url = config.base_url()
 log = open(base_url + "cronjob/python/Telesales/importSCschedule.txt","a")
 now = datetime.now()
 subUserType = 'TS'
@@ -36,7 +39,7 @@ try:
     countRow = 0
 
     importLogInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': ObjectId(importLogId)})
-
+   
     lichLamViecSC = excel.getDataExcel(importLogInfo['file_path'], active_sheet='Sheet1', header=0, skiprows=[1], na_values="0", dtype=str)
     
     ngayTrucs = list(lichLamViecSC.columns.values)
@@ -85,3 +88,4 @@ try:
 except Exception as e:
     pprint(e)
     log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')
+    pprint(traceback.format_exc())

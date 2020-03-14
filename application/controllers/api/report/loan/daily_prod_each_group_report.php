@@ -27,10 +27,8 @@ Class Daily_prod_each_group_report extends WFF_Controller {
     function read() {
         try {
             $request = json_decode($this->input->get("q"), TRUE);
-            $date = date('d-m-Y',strtotime("-1 days"));
             
-            $match = array('createdAt' => array('$gte' => strtotime($date)));
-            $data = $this->crud->read($this->collection, $request, array(), $match);
+            $data = $this->crud->read($this->collection, $request);
             echo json_encode($data);
         } catch (Exception $e) {
             echo json_encode(array("status" => 0, "message" => $e->getMessage()));
@@ -48,23 +46,27 @@ Class Daily_prod_each_group_report extends WFF_Controller {
     }
 
     function exportExcel() {
-        $now = getdate();
-        $month = (string)$now['mon'];
-        $date = date('d-m-Y',strtotime("-1 days"));
+        // $now = getdate();
+        // $month = (string)$now['mon'];
+        // $date = date('d-m-Y',strtotime("-1 days"));
 
-        $request = array('createdAt' => array('$gte' => strtotime($date)));
-        $data = $this->crud->where($request)->order_by(array('debt_group' => 'asc', 'due_date_code' => 'asc'))->get($this->collection);
+        // $request = array('createdAt' => array('$gte' => strtotime($date)));
+        $date = $this->input->post('date');
+        $getdate = getdate(strtotime(str_replace('/', '-', $date)));
+
+        $request = array('createdAt' => array('$gte' => $getdate[0], '$lte' => $getdate[0] + 86400 - 1));
+        $data = $this->crud->where($request)->order_by(array('debt_group' => 'asc', 'due_date_code' => 'asc', 'product' => 'desc'))->get($this->collection);
         $product = $this->crud->order_by(array('code' => 'asc'))->get(set_sub_collection('Product'));
         $groupProduct = $this->mongo_private->where(array('tags' => array('group', 'debt', 'product')))->getOne(set_sub_collection("Jsondata"));
         // print_r($data);exit;
         $spreadsheet = new Spreadsheet();
-    	$spreadsheet->getProperties()
-	    ->setCreator("South Telecom")
-	    ->setLastModifiedBy("Thanh Hung")
-	    ->setTitle("Daily Each Due Date Each Group Report")
-	    ->setSubject("Report")
-	    ->setDescription("Office 2007 XLSX, generated using PHP classes.")
-	    ->setKeywords("office 2007 openxml php")
+        $spreadsheet->getProperties()
+        ->setCreator("South Telecom")
+        ->setLastModifiedBy("Thanh Hung")
+        ->setTitle("Daily Each Due Date Each Group Report")
+        ->setSubject("Report")
+        ->setDescription("Office 2007 XLSX, generated using PHP classes.")
+        ->setKeywords("office 2007 openxml php")
         ->setCategory("Report");
 
         $style = array(
@@ -95,7 +97,7 @@ Class Daily_prod_each_group_report extends WFF_Controller {
         $worksheet->getStyle("D1")->applyFromArray($style);
 
         $worksheet->mergeCells('E1:S1');
-        $worksheet->setCellValue('E1', $now['mon'].'/'.$now['year']);
+        $worksheet->setCellValue('E1', $getdate['mon'].'/'.$getdate['year']);
         $worksheet->getStyle("E1")->getFill()
             ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
             ->getStartColor()->setRGB('FFFF00');
@@ -249,9 +251,9 @@ Class Daily_prod_each_group_report extends WFF_Controller {
 
 
         $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
-    	$file_path = UPLOAD_PATH . "loan/export/" . 'DailyEachDueDateEachGroup.xlsx';
-		$writer->save($file_path);
-		echo json_encode(array("status" => 1, "data" => $file_path));
+        $file_path = UPLOAD_PATH . "loan/export/" . 'DailyEachDueDateEachGroup.xlsx';
+        $writer->save($file_path);
+        echo json_encode(array("status" => 1, "data" => $file_path));
     }
 
     function stringFromColumnIndex($columnIndex) {
@@ -259,26 +261,26 @@ Class Daily_prod_each_group_report extends WFF_Controller {
     }
 
     function debtGroupDueDate() {
-		ini_set("display_errors", 1);
-		ini_set("display_startup_errors", 1);
-		error_reporting(E_ALL);
-		$data = array();
-		$this->load->library("mongo_private");
-		$debtGroupRaw = $this->mongo_private->where(array('tags' => array('debt', 'group')))->getOne($this->sub . "Jsondata");
-		$dueDateRaw = $this->mongo_private->where(array('tags' => array('debt', 'duedate')))->getOne($this->sub . "Jsondata");
-		if(!empty($debtGroupRaw['data']) && !empty($dueDateRaw['data'])) {
-			$tempDebtGroupRaw = $debtGroupRaw['data'];
-			$tempDueDateRaw = $dueDateRaw['data'];
-			$debtGroup = array_column($tempDebtGroupRaw, 'text');
-			$dueDate = array_column($tempDueDateRaw, 'text');
-			asort($debtGroup);
-			asort($dueDate);
-			foreach($debtGroup as $group) {
-				foreach($dueDate as $duedate) {
-					array_push($data, $group . $duedate);
-				}
-			}
-		}
-		return $data;
-	}
+        ini_set("display_errors", 1);
+        ini_set("display_startup_errors", 1);
+        error_reporting(E_ALL);
+        $data = array();
+        $this->load->library("mongo_private");
+        $debtGroupRaw = $this->mongo_private->where(array('tags' => array('debt', 'group')))->getOne($this->sub . "Jsondata");
+        $dueDateRaw = $this->mongo_private->where(array('tags' => array('debt', 'duedate')))->getOne($this->sub . "Jsondata");
+        if(!empty($debtGroupRaw['data']) && !empty($dueDateRaw['data'])) {
+            $tempDebtGroupRaw = $debtGroupRaw['data'];
+            $tempDueDateRaw = $dueDateRaw['data'];
+            $debtGroup = array_column($tempDebtGroupRaw, 'text');
+            $dueDate = array_column($tempDueDateRaw, 'text');
+            asort($debtGroup);
+            asort($dueDate);
+            foreach($debtGroup as $group) {
+                foreach($dueDate as $duedate) {
+                    array_push($data, $group . $duedate);
+                }
+            }
+        }
+        return $data;
+    }
 }

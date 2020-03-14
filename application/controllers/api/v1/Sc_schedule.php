@@ -14,7 +14,6 @@ Class Sc_schedule extends WFF_Controller {
         $this->load->library("Excel");
         $this->load->library("csv");
         $this->load->library('mongo_db');
-        $this->load->library('pheanstalk');
         $this->load->model('ftp_model');
 		$this->collection = set_sub_collection($this->collection);
 	}
@@ -157,13 +156,16 @@ Class Sc_schedule extends WFF_Controller {
             $this->kendo_aggregate->set_kendo_query($request)->selecting();
             $this->kendo_aggregate->filtering();
             if(empty($request['filter'])) {
-                $month = date('m', strtotime('this month'));
-                $starttime = strtotime('21-' . ($month - 1) . '-2019 00:00:00');
-                $endtime = strtotime('20-' . $month . '-2019 23:59:59');
+                $endtime              = strtotime(date('Y-m-20'));
+                $lastDayOneMonth        = date("Y-m-21",strtotime(date("Y-m-d", $endtime) . " -1 month"));
+                
+                // $month = date('m', strtotime('last month'));
+                // $starttime = strtotime('21-' . $getDate['mon'] . '-2019 00:00:00');
+                // $endtime = strtotime('20-' . $getDate['mon'] . '-2019 23:59:59');
                 $match = array(
                     '$match'    => array(
                         'from_date' => array(
-                            '$gte'  => $starttime,
+                            '$gte'  => strtotime($lastDayOneMonth),
                             '$lte'  => $endtime
                         )
                     )

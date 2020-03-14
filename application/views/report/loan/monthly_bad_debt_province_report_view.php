@@ -13,44 +13,12 @@
 <div class="container-fluid mvvm" style="padding-top: 20px; padding-bottom: 10px">
     <div class="row form-horizontal">
         <div class="form-group col-sm-3">
-            <label class="control-label col-xs-3">@Date@</label>
+            <label class="control-label col-xs-3">@Month@</label>
             <div class="col-xs-8">
                 <input id="start-date" data-role="datepicker" data-format="MM/yyyy" data-start="year" data-depth="year" name="fromDateTime" data-bind="value: fromDateTime, events: {change: onChangeDate}">
             </div>
         </div>
-        <!-- <div class="form-group col-sm-4">
-            <label class="control-label col-xs-4">@To date@</label>
-            <div class="col-xs-8">
-                <input id="end-date" data-role="datepicker" data-format="dd/MM/yyyy H:mm:ss" name="toDateTime" data-bind="value: toDateTime, events: {change: endDate}">
-            </div>
-        </div>
-        <div class="form-group col-sm-4 text-center">
-            <button class="k-button" data-bind="click: search">@Search@</button>
-        </div> -->
     </div>
-    <!-- <div class="row form-horizontal">
-        <div class="col-sm-3">
-            <label class="control-label col-xs-2" style="line-height: 2;">CIF</label>
-            <div class="col-xs-10">
-                <input class="k-textbox" style="width: 100%" id="cif_id" name="cif" data-bind="value: cif">
-            </div>
-        </div>
-        <div class="col-sm-5" style="padding-left: 21px">
-            <label class="control-label col-xs-4" style="line-height: 2;">LOAN CONTRACT</label>
-            <div class="col-xs-7">
-                <input class="k-textbox" style="width: 95%" id="loan_id" name="loanContract" data-bind="value: loanContract}">
-            </div>
-        </div>
-        <div class="col-sm-4">
-            <label class="control-label col-xs-4" style="line-height: 2;">National ID</label>
-            <div class="col-xs-8">
-                <input class="k-textbox" style="width: 100%" id="national" name="nationalID" data-bind="value: nationalID">
-            </div>
-        </div>
-        <div class="col-sm-12 text-center">
-            <button style="margin-top: 10px; margin-bottom: 10px" data-role="button" data-bind="click: search">@Search@</button>
-        </div>
-    </div> -->
     <h3 class="col-sm-12 text-center" style="margin-bottom: 20px;color: #27ae60">MONTHLY BAD DEBT AT PROVINCES</h3>
     <div class="row chart-page"  style="background-color: white">
         <div class="col-sm-12">
@@ -121,16 +89,10 @@
                                 total_amt_card: {
                                     type: 'number'
                                 },
-                                release_acc_no_sibs: {
+                                total_acc_group_two: {
                                     type: 'number'
                                 },
-                                release_amt_sibs: {
-                                    type: 'number'
-                                },
-                                release_acc_no_card: {
-                                    type: 'number'
-                                },
-                                release_amt_card: {
+                                total_amt_group_two: {
                                     type: 'number'
                                 },
                                 group_two_acc_sibs: {
@@ -145,16 +107,28 @@
                                 group_two_w_org_card: {
                                     type: 'number'
                                 },
-                                group_two_plus_acc_sibs: {
+                                total_acc_group_two_plus: {
                                     type: 'number'
                                 },
-                                group_two_plus_w_org_sibs: {
+                                total_amt_group_two_plus: {
                                     type: 'number'
                                 },
-                                group_two_plus_acc_card: {
+                                total_acc_group_three_plus: {
                                     type: 'number'
                                 },
-                                group_two_plus_w_org_card: {
+                                total_amt_group_three_plus: {
+                                    type: 'number'
+                                },
+                                group_three_plus_acc_sibs: {
+                                    type: 'number'
+                                },
+                                group_three_plus_w_org_sibs: {
+                                    type: 'number'
+                                },
+                                group_three_plus_acc_card: {
+                                    type: 'number'
+                                },
+                                group_three_plus_w_org_card: {
                                     type: 'number'
                                 },
                                 bad_debt_ratio_sibs: {
@@ -202,16 +176,12 @@
                         },
                         }
                     });
-                    var d = new Date();
-                    var date = d.getDate();
-                    var month = d.getMonth() + 1; // Since getMonth() returns month from 0-11 not 1-12
-                    var year = d.getFullYear();
-                    var dateStr = date + "-" + month + "-" + year;
+                   
                     var grid = this.grid = $("#grid").kendoGrid({
                         dataSource: dataSource,
                         excel: {
                             allPages: true,
-                            fileName: "Monthly bad debt at provinces "+dateStr+".xlsx", 
+                            fileName: "Monthly bad debt at provinces.xlsx", 
                             filterable: true
                             },
                         excelExport: function(e) {   
@@ -236,9 +206,57 @@
                             }
                                   
                               
-                              if (rowIndex ==0 || rowIndex ==1){
-                                row.cells[cellIndex].background = "#008738";
+                              if ((rowIndex ==0) && cellIndex ==0){
+                                row.cells[cellIndex].background = "#FFFFFF";
+                                row.cells[cellIndex].color = "black";
+                              }else
+                              if (rowIndex ==0 && cellIndex ==1){
+                                row.cells[cellIndex].background = "#c6e0b4";
+                                row.cells[cellIndex].color = "black";
+                              }else
+                              // if (rowIndex ==0 && cellIndex ==2){
+                              //   row.cells[cellIndex].background = "#fce4d6";
+                              //   row.cells[cellIndex].color = "black";
+                              // }else
+                              if (rowIndex ==0 && cellIndex ==2){
+                                row.cells[cellIndex].background = "#BDD7EE";
+                                row.cells[cellIndex].color = "black";
+                              }else
+                              if (rowIndex ==0 && cellIndex ==3){
+                                row.cells[cellIndex].background = "#CC99FF";
+                                row.cells[cellIndex].color = "black";
+                              }else
+                              if (rowIndex ==0 && cellIndex ==4){
+                                row.cells[cellIndex].background = "#FFE699";
+                                row.cells[cellIndex].color = "black";
                               }
+                             //==============================================
+
+
+
+                             // if (rowIndex ==1 && cellIndex ==0 || rowIndex ==1 && cellIndex ==1){
+                             //    row.cells[cellIndex].background = "#c6e0b4";
+                             //    row.cells[cellIndex].color = "black";
+                             //  }else
+                             if (rowIndex ==1 && cellIndex >=0 && cellIndex <=5){
+                                row.cells[cellIndex].background = "#c6e0b4";
+                                row.cells[cellIndex].color = "black";
+                              }else
+                             if (rowIndex ==1 && cellIndex >5 && cellIndex <=11){
+                                row.cells[cellIndex].background = "#BDD7EE";
+                                row.cells[cellIndex].color = "black";
+                              }else
+                             if (rowIndex ==1 && cellIndex >11 && cellIndex <=13){
+                                row.cells[cellIndex].background = "#CC99FF";
+                                row.cells[cellIndex].color = "black";
+                              }else
+                             if (rowIndex ==1 && cellIndex >13 && cellIndex <=22){
+                                row.cells[cellIndex].background = "#FFE699";
+                                row.cells[cellIndex].color = "black";
+                              }
+
+                             
+                             
                               
                               
                           }
@@ -254,7 +272,7 @@
                                 title: "PROVINCE",
                                 width: 140
                             },{
-                                title: "",
+                                title: "TOTAL",
                                 columns: [{
                                     title: 'No of accounts',
                                     field: 'total_acc',
@@ -263,10 +281,7 @@
                                     title: 'w_org (VND)',
                                     field: 'total_amt',
                                     width: 200,
-                                }]
-                            },{
-                                title: "TOTAL",
-                                columns: [{
+                                },{
                                     title: 'No of accounts SIBS',
                                     field: 'total_acc_no_sibs',
                                     width: 140
@@ -284,27 +299,16 @@
                                     width: 200
                                 }]
                             },{
-                                title: "Release",
-                                columns: [{
-                                    title: 'No.accts released SIBS',
-                                    field: 'release_acc_no_sibs',
-                                    width: 140
-                                }, {
-                                    title: 'Release (Amount) SIBS',
-                                    field: 'release_amt_sibs',
-                                    width: 200
-                                }, {
-                                    title: 'No.accts released CARD',
-                                    field: 'release_acc_no_card',
-                                    width: 140
-                                }, {
-                                    title: 'Release (Amount) CARD',
-                                    field: 'release_amt_card',
-                                    width: 200
-                                }]
-                            },{
                                 title: "GROUP 2",
                                 columns: [{
+                                    title: 'Total no of accounts',
+                                    field: 'total_acc_group_two',
+                                    width: 140
+                                }, {
+                                    title: 'Total of amounts',
+                                    field: 'total_amt_group_two',
+                                    width: 200
+                                },{
                                     title: 'No of accounts SIBS',
                                     field: 'group_two_acc_sibs',
                                     width: 140
@@ -322,22 +326,41 @@
                                     width: 200
                                 }]
                             },{
+                                title: "GROUP 2 OVER",
+                                columns: [{
+                                    title: 'Total no of accounts',
+                                    field: 'total_acc_group_two_plus',
+                                    width: 140
+                                }, {
+                                    title: 'Total of amounts',
+                                    field: 'total_amt_group_two_plus',
+                                    width: 200
+                                }]
+                            },{
                                 title: "GROUP 3 OVER",
                                 columns: [{
+                                    title: 'Total no of accounts',
+                                    field: 'total_acc_group_three_plus',
+                                    width: 140
+                                }, {
+                                    title: 'Total of amounts',
+                                    field: 'total_amt_group_three_plus',
+                                    width: 200
+                                },{
                                     title: 'No of accounts SIBS',
-                                    field: 'group_two_plus_acc_sibs',
+                                    field: 'group_three_plus_acc_sibs',
                                     width: 140
                                 }, {
                                     title: 'w_org (VND) SIBS',
-                                    field: 'group_two_plus_w_org_sibs',
+                                    field: 'group_three_plus_w_org_sibs',
                                     width: 200
                                 }, {
                                     title: 'No of accounts CARD',
-                                    field: 'group_two_plus_acc_card',
+                                    field: 'group_three_plus_acc_card',
                                     width: 140
                                 }, {
                                     title: 'w_org (VND) CARD',
-                                    field: 'group_two_plus_w_org_card',
+                                    field: 'group_three_plus_w_org_card',
                                     width: 200
                                 }, {
                                     title: 'Bad debt ratio SIBS',
@@ -372,63 +395,7 @@
                         return checkedIds;
                     }
 
-                    /*
-                    * Right Click Menu
-                    */
-                    var menu = $("#action-menu");
-                    if(!menu.length) return;
-
-                    $("html").on("click", function() {menu.hide()});
-
-                    $(document).on("click", "#grid tr[role=row] a.btn-action", function(e){
-                        let btna = $(e.target);
-                        let row = $(e.target).closest("tr");
-                        e.pageX -= 20;
-                        showMenu(e, row, btna);
-                    });
-
-                    function showMenu(e, that,btna) {
-                        //hide menu if already shown
-                        menu.hide();
-
-                        //Get id value of document
-                        var uid = $(that).data('uid');
-                        var fltnumber = btna.data('flt');
-                        var date = btna.data('date');
-                        if(uid)
-                        {
-                            menu.find("a").data('uid',uid);
-                            menu.find("a").data('fltnumber',fltnumber);
-                            menu.find("a").data('date',date);
-                            menu.find("a").data('dpt',btna.data('dpt'));
-                            menu.find("a").data('arv',btna.data('arv'));
-                            //get x and y values of the click event
-                            var pageX = e.pageX;
-                            var pageY = e.pageY;
-
-                            //position menu div near mouse cliked area
-                            menu.css({top: pageY , left: pageX});
-
-                            var mwidth = menu.width();
-                            var mheight = menu.height();
-                            var screenWidth = $(window).width();
-                            var screenHeight = $(window).height();
-
-                            //if window is scrolled
-                            var scrTop = $(window).scrollTop();
-
-                            //if the menu is close to right edge of the window
-                            if(pageX+mwidth > screenWidth){
-                            menu.css({left:pageX-mwidth});
-                            }
-                            //if the menu is close to bottom edge of the window
-                            if(pageY+mheight > screenHeight+scrTop){
-                            menu.css({top:pageY-mheight});
-                            }
-                            //finally show the menu
-                            menu.show();
-                        }
-                    }
+                    
                 }
                 else {
                     setTimeout(this.init, 100);
@@ -440,6 +407,7 @@
         Table.init();
         var dateRange = 30;
         var nowDate = new Date();
+        
         var observable = kendo.observable({
             trueVar: true,
             loading: false,
@@ -451,6 +419,7 @@
             nationalID: "",
             onChangeDate: function() {
                 var date =  this.fromDateTime;
+               
                 date.setDate(1);
                 var fromDate = date.getTime() / 1000;
                 var lastDateOfMonth = kendo.date.lastDayOfMonth(this.fromDateTime);

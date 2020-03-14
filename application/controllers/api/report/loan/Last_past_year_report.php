@@ -9,6 +9,7 @@ use PhpOffice\PhpSpreadsheet\Reader;
 Class Last_past_year_report extends WFF_Controller {
 
     private $collection = "Last_past_year_arrears_occurrence_report";
+    private $group_collection = "Product_group";
 
     function __construct()
     {
@@ -16,7 +17,8 @@ Class Last_past_year_report extends WFF_Controller {
         header('Content-type: application/json');
         $this->load->library("crud");
         $this->load->library("excel");
-        $this->collection = set_sub_collection($this->collection);
+        $this->collection       = set_sub_collection($this->collection);
+        $this->group_collection = set_sub_collection($this->group_collection);
     }
     function index()
     {
@@ -59,10 +61,12 @@ Class Last_past_year_report extends WFF_Controller {
         $excelWorkbook = $reader->load(UPLOAD_PATH . "loan/template/" . $file_template);
 
         
-
-        $product_code = array('Bike', 'PL','Electro', 'Auto', 'Total');
+        $request    = array('group_code' => array('$nin' => array('300')) );
+        $product_code   = $this->crud->where($request)->get($this->group_collection);
+        array_push($product_code, array('group_name' => 'Total'));
+        // $product_code = array('Bike', 'PL','Electro', 'Auto', 'Total');
         foreach ($product_code as $key => $value) {
-
+            $value      = $value['group_name'];
             $getDate    = getdate(strtotime($today));
             $month      = $getDate['mon'];
             $request    = array('type' => $value, 'for_month' => $month, 'year' => $getDate['year'] );
@@ -82,6 +86,7 @@ Class Last_past_year_report extends WFF_Controller {
 
             
             $worksheet = $excelWorkbook->setActiveSheetIndex($key);
+            $worksheet->setTitle(substr($value,0,30));
             
             $worksheet->setCellValueExplicit('A1', 'Base on '. $getDate['mday'] .' '. $getDate['month']. ' '. $getDate['year']. ' data' , \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
             $worksheet->setCellValueExplicit('A5', 'Total '. $getDate['year']. '/'. $getDate['mon']. ' data' , \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
@@ -90,15 +95,15 @@ Class Last_past_year_report extends WFF_Controller {
             foreach ($dataBike as $doc) {            
                 $worksheet->setCellValueExplicit('C' . $rowBike, $doc['sales_period'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
                 
-                $worksheet->setCellValueExplicit('D' . $rowBike, $doc['total_w_org'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
+                $worksheet->setCellValueExplicit('D' . $rowBike, round($doc['total_w_org']/1000), \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
                 $worksheet->setCellValueExplicit('E' . $rowBike, $doc['total_account'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
-                $worksheet->setCellValueExplicit('F' . $rowBike, $doc['w_org_group_b'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
+                $worksheet->setCellValueExplicit('F' . $rowBike, round($doc['w_org_group_b']/1000), \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
                 $worksheet->setCellValueExplicit('G' . $rowBike, $doc['account_group_b'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
                 $worksheet->setCellValueExplicit('H' . $rowBike, $doc['group_b_ratio'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
-                $worksheet->setCellValueExplicit('I' . $rowBike, $doc['w_org_group_c'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
+                $worksheet->setCellValueExplicit('I' . $rowBike, round($doc['w_org_group_c']/1000), \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
                 $worksheet->setCellValueExplicit('J' . $rowBike, $doc['account_group_c'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
                 $worksheet->setCellValueExplicit('K' . $rowBike, $doc['group_c_ratio'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
-                $worksheet->setCellValueExplicit('L' . $rowBike, $doc['w_org_group_c_over'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
+                $worksheet->setCellValueExplicit('L' . $rowBike, round($doc['w_org_group_c_over']/1000), \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
                 $worksheet->setCellValueExplicit('M' . $rowBike, $doc['account_group_c_over'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
                 $worksheet->setCellValueExplicit('N' . $rowBike, $doc['group_c_over_ratio'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);            
                 $rowBike ++;
@@ -113,15 +118,15 @@ Class Last_past_year_report extends WFF_Controller {
             foreach ($dataBike6Month as $doc) {            
                 $worksheet->setCellValueExplicit('C' . $rowBikeLast6Month, $doc['sales_period'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
                 
-                $worksheet->setCellValueExplicit('D' . $rowBikeLast6Month, $doc['total_w_org'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
+                $worksheet->setCellValueExplicit('D' . $rowBikeLast6Month, round($doc['total_w_org']/1000), \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
                 $worksheet->setCellValueExplicit('E' . $rowBikeLast6Month, $doc['total_account'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
-                $worksheet->setCellValueExplicit('F' . $rowBikeLast6Month, $doc['w_org_group_b'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
+                $worksheet->setCellValueExplicit('F' . $rowBikeLast6Month, round($doc['w_org_group_b']/1000), \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
                 $worksheet->setCellValueExplicit('G' . $rowBikeLast6Month, $doc['account_group_b'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
                 $worksheet->setCellValueExplicit('H' . $rowBikeLast6Month, $doc['group_b_ratio'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
-                $worksheet->setCellValueExplicit('I' . $rowBikeLast6Month, $doc['w_org_group_c'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
+                $worksheet->setCellValueExplicit('I' . $rowBikeLast6Month, round($doc['w_org_group_c']/1000), \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
                 $worksheet->setCellValueExplicit('J' . $rowBikeLast6Month, $doc['account_group_c'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
                 $worksheet->setCellValueExplicit('K' . $rowBikeLast6Month, $doc['group_c_ratio'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
-                $worksheet->setCellValueExplicit('L' . $rowBikeLast6Month, $doc['w_org_group_c_over'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
+                $worksheet->setCellValueExplicit('L' . $rowBikeLast6Month, round($doc['w_org_group_c_over']/1000), \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
                 $worksheet->setCellValueExplicit('M' . $rowBikeLast6Month, $doc['account_group_c_over'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
                 $worksheet->setCellValueExplicit('N' . $rowBikeLast6Month, $doc['group_c_over_ratio'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);            
                 $rowBikeLast6Month ++;
@@ -137,15 +142,15 @@ Class Last_past_year_report extends WFF_Controller {
             foreach ($dataBike1Year as $doc) {            
                 $worksheet->setCellValueExplicit('C' . $rowBikeLastYear, $doc['sales_period'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
                 
-                $worksheet->setCellValueExplicit('D' . $rowBikeLastYear, $doc['total_w_org'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
+                $worksheet->setCellValueExplicit('D' . $rowBikeLastYear, round($doc['total_w_org']/1000), \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
                 $worksheet->setCellValueExplicit('E' . $rowBikeLastYear, $doc['total_account'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
-                $worksheet->setCellValueExplicit('F' . $rowBikeLastYear, $doc['w_org_group_b'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
+                $worksheet->setCellValueExplicit('F' . $rowBikeLastYear, round($doc['w_org_group_b']/1000), \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
                 $worksheet->setCellValueExplicit('G' . $rowBikeLastYear, $doc['account_group_b'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
                 $worksheet->setCellValueExplicit('H' . $rowBikeLastYear, $doc['group_b_ratio'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
-                $worksheet->setCellValueExplicit('I' . $rowBikeLastYear, $doc['w_org_group_c'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
+                $worksheet->setCellValueExplicit('I' . $rowBikeLastYear, round($doc['w_org_group_c']/1000), \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
                 $worksheet->setCellValueExplicit('J' . $rowBikeLastYear, $doc['account_group_c'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
                 $worksheet->setCellValueExplicit('K' . $rowBikeLastYear, $doc['group_c_ratio'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
-                $worksheet->setCellValueExplicit('L' . $rowBikeLastYear, $doc['w_org_group_c_over'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
+                $worksheet->setCellValueExplicit('L' . $rowBikeLastYear, round($doc['w_org_group_c_over']/1000), \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
                 $worksheet->setCellValueExplicit('M' . $rowBikeLastYear, $doc['account_group_c_over'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
                 $worksheet->setCellValueExplicit('N' . $rowBikeLastYear, $doc['group_c_over_ratio'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);            
                 $rowBikeLastYear ++;

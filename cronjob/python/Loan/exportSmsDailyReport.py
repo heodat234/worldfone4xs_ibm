@@ -67,6 +67,13 @@ try:
           {
               "_id": 0,
           }
+      },
+      {
+         "$sort":
+          {
+              "group": 1,
+              "amount": 1
+          }
       }
    ]
    data = mongodb.aggregate_pipeline(MONGO_COLLECTION=collection,aggregate_pipeline=aggregate_acc)
@@ -84,6 +91,13 @@ try:
           {
               "_id": 0,
           }
+      },
+      {
+         "$sort":
+          {
+              "group": 1,
+              "amount": 1
+          }
       }
    ]
    dataCard = mongodb.aggregate_pipeline(MONGO_COLLECTION=collection,aggregate_pipeline=aggregate_card)
@@ -99,13 +113,13 @@ try:
    #    dataReport.append(temp)
 
 
-   df = pd.DataFrame(data, columns= ['stt','account_number','group','phone','name','amount','sending_date'])
+   df = pd.DataFrame(data, columns= ['stt','group','account_number','phone','name','amount'])
 
    # Create a Pandas Excel writer using XlsxWriter as the engine.
    writer = pd.ExcelWriter(fileOutput, engine='xlsxwriter')
 
    # Convert the dataframe to an XlsxWriter Excel object.
-   df.to_excel(writer,sheet_name='SIBS',index=False,header=['No','ACCOUNT NUMBER','GROUP','PHONE','NAME','AMOUNT','SENDING DATE'])  
+   df.to_excel(writer,sheet_name='SIBS',index=False,header=['No','GROUP','ACCOUNT NUMBER','PHONE','NAME','AMOUNT'])  
    
    # Get the xlsxwriter workbook and worksheet objects.
    workbook  = writer.book
@@ -118,7 +132,7 @@ try:
 
 
    # Set the column width and format.
-   worksheet.set_column('A:G', 20, border_fmt)
+   worksheet.set_column('A:F', 20, border_fmt)
 
    worksheet.set_column('F:F', 20, format1)
    # Set the format but not the column width.
@@ -129,13 +143,13 @@ try:
 
 
    # CARD
-   df = pd.DataFrame(dataCard, columns= ['stt','account_number','group','phone','name','os', 'amount','sending_date'])
+   df = pd.DataFrame(dataCard, columns= ['stt','group','account_number','phone','name','amount', 'os'])
 
    # Create a Pandas Excel writer using XlsxWriter as the engine.
    # writer = pd.ExcelWriter(fileOutput, engine='xlsxwriter')
 
    # Convert the dataframe to an XlsxWriter Excel object.
-   df.to_excel(writer,sheet_name='CARD',index=False,header=['No','ACCOUNT NUMBER','GROUP','PHONE','NAME','AMOUNT','OS','SENDING DATE'])  
+   df.to_excel(writer,sheet_name='CARD',index=False,header=['No','GROUP','ACCOUNT NUMBER','PHONE','NAME','OS','AMOUNT'])  
    
    # Get the xlsxwriter workbook and worksheet objects.
    workbook  = writer.book
@@ -148,7 +162,7 @@ try:
 
 
    # Set the column width and format.
-   worksheet.set_column('A:H', 20, border_fmt)
+   worksheet.set_column('A:G', 20, border_fmt)
 
    worksheet.set_column('F:F', 20, format1)
    worksheet.set_column('G:G', 20, format1)
@@ -164,5 +178,4 @@ try:
    print('DONE')
 except Exception as e:
    pprint(e)
-   traceback.print_exc()
    log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')

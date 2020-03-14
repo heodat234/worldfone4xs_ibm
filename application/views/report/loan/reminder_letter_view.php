@@ -15,7 +15,7 @@
             <div class="form-group col-sm-4">
                <label class="control-label col-xs-4">@Date@</label>
                <div class="col-xs-8">
-                  <input id="start-date" data-role="datepicker" data-format="dd/MM/yyyy" name="fromDateTime" data-bind="value: fromDateTime" disabled="">
+                  <input id="start-date" data-role="datepicker" data-format="dd/MM/yyyy" name="fromDateTime" data-bind="value: fromDateTime, events: {change: onChangeDate}">
                </div>
             </div>
             <!-- <div class="form-group col-sm-4">
@@ -201,12 +201,21 @@
          return {
               dataSource: {},
               grid: {},
+              formDate: 0,
+              toDate: 0,
               init: function() {
                   var dataSource = this.dataSource = new kendo.data.DataSource({
                      serverPaging: true,
                      serverFiltering: true,
                      serverSorting: true,
                      pageSize: 10,
+                     filter: {
+                            logic: "and",
+                            filters: [
+                                {field: 'createdAt', operator: "gte", value: this.fromDate},
+                                {field: 'createdAt', operator: "lte", value: this.toDate}
+                            ]
+                     },
                      sort: { field: "index", dir: "asc" },
                      transport: {
                         read: {
@@ -298,16 +307,19 @@
           }
       }();
       window.onload = function() {
-         Table.init();
          var dateRange = 30;
          var nowDate = new Date();
          var date =  new Date(),
                timeZoneOffset = date.getTimezoneOffset() * kendo.date.MS_PER_MINUTE;
                date.setHours(- timeZoneOffset / kendo.date.MS_PER_HOUR, 0, 0 ,0);
 
-         // var fromDate = new Date(date.getTime() + timeZoneOffset - (dateRange - 1) * 86400000);
          var fromDate = new Date(date.getTime() + timeZoneOffset);
-         var toDate = new Date(date.getTime() + timeZoneOffset + kendo.date.MS_PER_DAY -1)
+         var toDate = new Date(date.getTime() + timeZoneOffset + kendo.date.MS_PER_DAY -1);
+
+         Table.fromDate = fromDate.getTime() / 1000;
+         Table.toDate = fromDate.getTime() / 1000 + 86400 - 1;
+         Table.init();
+
          var observable = kendo.observable({
              trueVar: true,
              loading: false,
@@ -319,62 +331,20 @@
             fromDate: kendo.toString(fromDate, "dd/MM/yyyy H:mm"),
             toDate: kendo.toString(toDate, "dd/MM/yyyy H:mm"),
 
-            startDate: function(e) {
-               var start = e.sender,
-                  startDate = start.value(),
-                  end = $("#end-date").data("kendoDatePicker"),
-                     endDate = end.value();
-
-                   if (startDate) {
-                       startDate = new Date(startDate);
-                       startDate.setDate(startDate.getDate());
-                       end.min(startDate);
-                   } else if (endDate) {
-                       start.max(new Date(endDate));
-                   } else {
-                       endDate = new Date();
-                       start.max(endDate);
-                       end.min(endDate);
-                   }
-            },
-            endDate: function(e) {
-               var end = e.sender,
-                  endDate = end.value(),
-                  start = $("#start-date").data("kendoDatePicker"),
-                  startDate = start.value();
-
-                if (endDate) {
-                    endDate = new Date(endDate);
-                    endDate.setDate(endDate.getDate());
-                    start.max(endDate);
-                } else if (startDate) {
-                    end.min(new Date(startDate));
-                } else {
-                    endDate = new Date();
-                    start.max(endDate);
-                    end.min(endDate);
-                }
-            },
-            search: function() {
-               this.set("fromDate", kendo.toString(this.get("fromDateTime"), "dd/MM/yyyy H:mm"));
-               this.set("toDate", kendo.toString(this.get("toDateTime"), "dd/MM/yyyy H:mm"));
-               this.asyncSearch();
-            },
-             asyncSearch: async function() {
-               var field = "created_at";
-               var fromDateTime = new Date(this.fromDateTime.getTime() - timeZoneOffset).toISOString();
-                var toDateTime = new Date(this.toDateTime.getTime() - timeZoneOffset).toISOString();
-
-                var filter = {
-                    logic: "and",
-                    filters: [
-                        {field: field, operator: "gte", value: fromDateTime},
-                        {field: field, operator: "lte", value: toDateTime}
-                    ]
-                };
-
-               Table.dataSource.filter(filter);
-
+            onChangeDate: function() {
+                var date =  this.fromDateTime;
+                var fromDate = date.getTime() / 1000;
+                var toDate = fromDate + 86400 - 1;
+                var filter = [{
+                        field: 'createdAt',
+                        operator: 'gte',
+                        value: fromDate
+                    }, {
+                        field: 'createdAt',
+                        operator: 'lte',
+                        value: toDate
+                    }];
+                Table.dataSource.filter(filter);
             },
          })
          kendo.bind($(".mvvm"), observable);

@@ -29,6 +29,7 @@ product_collection   = common.getSubUser(subUserType, 'Product')
 sbv_collection       = common.getSubUser(subUserType, 'SBV')
 diallist_detail_collection  = common.getSubUser(subUserType, 'Diallist_detail')
 cdr_collection       = common.getSubUser(subUserType, 'worldfonepbxmanager')
+jsonData_collection  = common.getSubUser(subUserType, 'Jsondata')
 user_collection      = common.getSubUser(subUserType, 'User')
 action_code_collection        = common.getSubUser(subUserType, 'Action_code')
 log         = open(base_url + "cronjob/python/Loan/log/DailyAssignment_log.txt","a")
@@ -42,7 +43,7 @@ try:
    log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': Start Import' + '\n')
 
    today = date.today()
-   today = datetime.strptime('14/02/2020', "%d/%m/%Y").date()
+   # today = datetime.strptime('10/03/2020', "%d/%m/%Y").date()
 
    day = today.day
    month = today.month
@@ -64,6 +65,9 @@ try:
       sys.exit()
 
 
+   lawsuit_fields = _mongodb.getOne(MONGO_COLLECTION=jsonData_collection,SELECT=['data'],WHERE={'tags': ['LAWSUIT', 'fields']})
+   raa_fields = _mongodb.getOne(MONGO_COLLECTION=jsonData_collection,SELECT=['data'],WHERE={'tags': ['RAA', 'fields']})
+   users = _mongodb.get(MONGO_COLLECTION=user_collection,SELECT=['extension','agentname'],WHERE={'active': 'true'})
    i = 1
    # LNJC05
 
@@ -72,7 +76,8 @@ try:
            "$match":
            {
                "starttime" : {'$gte' : todayTimeStamp,'$lte' : endTodayTimeStamp},
-               "direction" : 'outbound'
+               "direction" : 'outbound',
+               # "userextension": '4022'
                
            }
       }
@@ -85,6 +90,7 @@ try:
          temp['export_date']     = todayString
          temp['index']           = i
          temp['contacted']       = cdr['customernumber']
+         temp['disposition']     = cdr['disposition'] if 'disposition' in cdr.keys() else ''
 
          if 'dialtype' in cdr.keys() and cdr['dialtype'] == 'auto':
             temp['duration'] = cdr['callduration'] if 'callduration' in cdr.keys() else 0
@@ -119,11 +125,11 @@ try:
             if len(str(cdr['dialid'])) == 24:
                diallistInfo = mongodb.getOne(MONGO_COLLECTION=diallist_detail_collection, WHERE={'_id': ObjectId(str(cdr['dialid'])),  "createdAt" : {'$gte' : todayTimeStamp,'$lte' : endTodayTimeStamp}}) 
             else:
-               diallistInfo = mongodb.getOne(MONGO_COLLECTION=diallist_detail_collection, WHERE={'$or' : [{ 'mobile_num' : str(cdr['customernumber'])}, { 'phone' : str(cdr['customernumber'])},  { 'other_phones' :str(cdr['customernumber'])} ],  "createdAt" : {'$gte' : todayTimeStamp,'$lte' : endTodayTimeStamp}, 'assign' : str(cdr['userextension']) }) 
+               diallistInfo = mongodb.getOne(MONGO_COLLECTION=diallist_detail_collection, WHERE={'$or' : [{ 'mobile_num' : str(cdr['customernumber'])}, { 'phone' : str(cdr['customernumber'])},  { 'other_phones' :str(cdr['customernumber'])} ],  "createdAt" : {'$gte' : todayTimeStamp,'$lte' : endTodayTimeStamp} }) 
 
          if 'dialid' not in cdr.keys():
-            diallistInfo = mongodb.getOne(MONGO_COLLECTION=diallist_detail_collection, WHERE={'$or' : [{ 'mobile_num' : str(cdr['customernumber'])}, { 'phone' : str(cdr['customernumber'])},  { 'other_phones' :str(cdr['customernumber'])} ],  "createdAt" : {'$gte' : todayTimeStamp,'$lte' : endTodayTimeStamp}, 'assign' : str(cdr['userextension']) }) 
-            
+            diallistInfo = mongodb.getOne(MONGO_COLLECTION=diallist_detail_collection, WHERE={'$or' : [{ 'mobile_num' : str(cdr['customernumber'])}, { 'phone' : str(cdr['customernumber'])},  { 'other_phones' :str(cdr['customernumber'])} ],  "createdAt" : {'$gte' : todayTimeStamp,'$lte' : endTodayTimeStamp} }) 
+
          temp['connected'] = 1
          
          aggregate_pipeline_action = [
@@ -149,10 +155,6 @@ try:
                for x in row_1.keys():
                   temp[x] = row_1[x]
          
-
-         # if 'account_number' in temp.keys() and diallistInfo == None:
-         #    diallistInfo = mongodb.getOne(MONGO_COLLECTION=diallist_detail_collection, WHERE={'account_number': temp['account_number'],  "createdAt" : {'$gte' : todayTimeStamp,'$lte' : endTodayTimeStamp}}) 
-         
          if diallistInfo != None:
             temp['account_number']  = diallistInfo['account_number']
             temp['name']            = diallistInfo['cus_name']
@@ -160,9 +162,7 @@ try:
             temp['loan_overdue_amount']      = diallistInfo['overdue_amt'] if 'overdue_amt' in diallistInfo.keys() else diallistInfo['loan_overdue_amount']
             temp['current_balance']          = diallistInfo['cur_bal'] if 'cur_bal' in diallistInfo.keys() else diallistInfo['current_balance']
             temp['group_id']                 = diallistInfo['group_id'].replace('-','') if 'group_id' in diallistInfo.keys() else ''
-            if 'action_code' in diallistInfo.keys():
-               temp['action_code']              = diallistInfo['action_code'] 
-
+            
             product_id = ''
             if 'overdue_indicator' in diallistInfo:
                # groupData = mongodb.getOne(MONGO_COLLECTION=diallist_detail_collection, WHERE={'account_number': temp['account_number'],  "createdAt" : {'$gte' : todayTimeStamp,'$lte' : endTodayTimeStamp}}) 
@@ -174,7 +174,7 @@ try:
                      temp['group_id']                 = store['overdue_indicator'] + store['kydue']
                
 
-               sbv = mongodb.getOne(MONGO_COLLECTION=sbv_collection, WHERE={'contract_no': str(temp['account_number']), "created_at" : {'$gte' : todayTimeStamp,'$lte' : endTodayTimeStamp} },SELECT=['card_type','ob_principal_sale','ob_principal_cash'])
+               sbv = mongodb.getOne(MONGO_COLLECTION=sbv_collection, WHERE={'contract_no': str(temp['account_number'])},SELECT=['card_type','ob_principal_sale','ob_principal_cash'])
                if sbv != None:
                   temp['outstanding_principal']       = float(sbv['ob_principal_sale']) + float(sbv['ob_principal_cash'])
                   if int(sbv['card_type']) < 100:

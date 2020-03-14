@@ -25,10 +25,7 @@ Class Daily_prod_user_group_report extends WFF_Controller {
     function read() {
         try {
             $request = json_decode($this->input->get("q"), TRUE);
-            $date = date('d-m-Y',strtotime("-1 days"));
-            
-            $match = array('createdAt' => array('$gte' => strtotime($date)));
-            $data = $this->crud->read($this->collection, $request,array(),$match);
+            $data = $this->crud->read($this->collection, $request);
             echo json_encode($data);
         } catch (Exception $e) {
             echo json_encode(array("status" => 0, "message" => $e->getMessage()));
@@ -45,11 +42,10 @@ Class Daily_prod_user_group_report extends WFF_Controller {
     }
 
     function exportExcel() {
-        $now = getdate();
-        $month = (string)$now['mon'];
-        $date = date('d-m-Y',strtotime("-1 days"));
+        $date = $this->input->post('date');
+        $getdate = getdate(strtotime(str_replace('/', '-', $date)));
 
-        $request = array('createdAt' => array('$gte' => strtotime($date)));
+        $request = array('createdAt' => array('$gte' => $getdate[0], '$lte' => $getdate[0] + 86400 - 1));
         $data = $this->crud->where($request)->order_by(array('debt_group' => 'asc', 'due_date_code' => 'asc', 'product' => 'desc', 'team' => 'asc'))->get($this->collection);
         $groupProduct = $this->mongo_private->where(array('tags' => array('group', 'debt', 'product')))->getOne(set_sub_collection("Jsondata"));
 
@@ -119,7 +115,7 @@ Class Daily_prod_user_group_report extends WFF_Controller {
         $worksheet->getStyle("F1")->applyFromArray($style);
 
         $worksheet->mergeCells('I1:U1');
-        $worksheet->setCellValue('I1', $now['mon'].'/'.$now['year']);
+        $worksheet->setCellValue('I1', $getdate['mon'].'/'.$getdate['year']);
         $worksheet->getStyle("I1")->getFill()
             ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
             ->getStartColor()->setRGB('FFFF00');
@@ -225,12 +221,12 @@ Class Daily_prod_user_group_report extends WFF_Controller {
             'rem'               => 0,
             'rem_actual'        => 0,
             'rem_os'            => 0,
-            'flow_rate'         => 0,
-            'flow_rate_actual'  => 0,
-            'flow_rate_os'      => 0,
-            'col_ratio'         => 0,
-            'col_ratio_actual'  => 0,
-            'col_ratio_os'      => 0,
+            'flow_rate'         => '',
+            'flow_rate_actual'  => '',
+            'flow_rate_os'      => '',
+            'col_ratio'         => '',
+            'col_ratio_actual'  => '',
+            'col_ratio_os'      => '',
         );
 
         $dueDateCodeTotal = $totalData;
@@ -266,22 +262,18 @@ Class Daily_prod_user_group_report extends WFF_Controller {
                 $worksheet->mergeCells('D' . $start_row . ':E' . ($start_row));
                 $worksheet->setCellValue('D' . $start_row, 'TOTAL');
 
-                $worksheet->setCellValue('F' . $start_row, (!empty($totalData['tar_per']) ? $totalData['tar_per'] : 0));
+                $worksheet->setCellValue('F' . $start_row, '');
                 $worksheet->setCellValue('G' . $start_row, (!empty($totalData['tar_amt']) ? $totalData['tar_amt'] : 0));
                 $worksheet->setCellValue('H' . $start_row, (!empty($totalData['tar_gap']) ? $totalData['tar_gap'] : 0));
                 $worksheet->setCellValue('I' . $start_row, (!empty($totalData['inci']) ? $totalData['inci'] : 0));
                 $worksheet->setCellValue('J' . $start_row, (!empty($totalData['col']) ? $totalData['col'] : 0));
                 $worksheet->setCellValue('K' . $start_row, (!empty($totalData['rem']) ? $totalData['rem'] : 0));
-                $worksheet->setCellValue('L' . $start_row, (!empty($totalData['flow_rate']) ? $totalData['flow_rate'] : 0));
-                $worksheet->setCellValue('M' . $start_row, (!empty($totalData['col_ratio']) ? $totalData['col_ratio'] : 0));
                 $worksheet->setCellValue('N' . $start_row, (!empty($totalData['inci_amt']) ? $totalData['inci_amt'] : 0));
                 $worksheet->setCellValue('O' . $start_row, (!empty($totalData['col_amt']) ? $totalData['col_amt'] : 0));
                 $worksheet->setCellValue('P' . $start_row, (!empty($totalData['payment_amt']) ? $totalData['payment_amt'] : 0));
                 $worksheet->setCellValue('Q' . $start_row, (!empty($totalData['rem_actual']) ? $totalData['rem_actual'] : 0));
-                $worksheet->setCellValue('R' . $start_row, (!empty($totalData['col_ratio_actual']) ? $totalData['col_ratio_actual'] : 0));
                 $worksheet->setCellValue('S' . $start_row, (!empty($totalData['rem_os']) ? $totalData['rem_os'] : 0));
-                $worksheet->setCellValue('T' . $start_row, (!empty($totalData['flow_rate_os']) ? $totalData['flow_rate_os'] : 0));
-                $worksheet->setCellValue('U' . $start_row, (!empty($totalData['col_ratio_os']) ? $totalData['col_ratio_os'] : 0));
+                
 
                 $worksheet->getStyle('D' . $start_row . ':U' . $start_row)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('DDEBF7');
                 $worksheet->getStyle('D' . $start_row . ':U'. $start_row)->applyFromArray([
@@ -309,22 +301,17 @@ Class Daily_prod_user_group_report extends WFF_Controller {
                 $worksheet->mergeCells('B' . $start_row . ':E' . ($start_row));
                 $worksheet->setCellValue('B' . $start_row, 'TOTAL');
 
-                $worksheet->setCellValue('F' . $start_row, (!empty($dueDateCodeTotal['tar_per']) ? $dueDateCodeTotal['tar_per'] : 0));
+                $worksheet->setCellValue('F' . $start_row, '');
                 $worksheet->setCellValue('G' . $start_row, (!empty($dueDateCodeTotal['tar_amt']) ? $dueDateCodeTotal['tar_amt'] : 0));
                 $worksheet->setCellValue('H' . $start_row, (!empty($dueDateCodeTotal['tar_gap']) ? $dueDateCodeTotal['tar_gap'] : 0));
                 $worksheet->setCellValue('I' . $start_row, (!empty($dueDateCodeTotal['inci']) ? $dueDateCodeTotal['inci'] : 0));
                 $worksheet->setCellValue('J' . $start_row, (!empty($dueDateCodeTotal['col']) ? $dueDateCodeTotal['col'] : 0));
                 $worksheet->setCellValue('K' . $start_row, (!empty($dueDateCodeTotal['rem']) ? $dueDateCodeTotal['rem'] : 0));
-                $worksheet->setCellValue('L' . $start_row, (!empty($dueDateCodeTotal['flow_rate']) ? $dueDateCodeTotal['flow_rate'] : 0));
-                $worksheet->setCellValue('M' . $start_row, (!empty($dueDateCodeTotal['col_ratio']) ? $dueDateCodeTotal['col_ratio'] : 0));
                 $worksheet->setCellValue('N' . $start_row, (!empty($dueDateCodeTotal['inci_amt']) ? $dueDateCodeTotal['inci_amt'] : 0));
                 $worksheet->setCellValue('O' . $start_row, (!empty($dueDateCodeTotal['col_amt']) ? $dueDateCodeTotal['col_amt'] : 0));
                 $worksheet->setCellValue('P' . $start_row, (!empty($dueDateCodeTotal['payment_amt']) ? $dueDateCodeTotal['payment_amt'] : 0));
                 $worksheet->setCellValue('Q' . $start_row, (!empty($dueDateCodeTotal['rem_actual']) ? $dueDateCodeTotal['rem_actual'] : 0));
-                $worksheet->setCellValue('R' . $start_row, (!empty($dueDateCodeTotal['col_ratio_actual']) ? $dueDateCodeTotal['col_ratio_actual'] : 0));
                 $worksheet->setCellValue('S' . $start_row, (!empty($dueDateCodeTotal['rem_os']) ? $dueDateCodeTotal['rem_os'] : 0));
-                $worksheet->setCellValue('T' . $start_row, (!empty($dueDateCodeTotal['flow_rate_os']) ? $dueDateCodeTotal['flow_rate_os'] : 0));
-                $worksheet->setCellValue('U' . $start_row, (!empty($dueDateCodeTotal['col_ratio_os']) ? $dueDateCodeTotal['col_ratio_os'] : 0));
 
                 $worksheet->getStyle('B' . $start_row . ':U' . $start_row)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('F4B084');
                 $worksheet->getStyle('B' . $start_row . ':U' . $start_row)->applyFromArray([
@@ -352,22 +339,17 @@ Class Daily_prod_user_group_report extends WFF_Controller {
                         $worksheet->setCellValue('B' . ($start_row + $gProdKey), $gProdValue['text']);
                         $debtProdTotalGroup = $debtProdTotal[$gProdValue['text']];
 
-                        $worksheet->setCellValue('F' . $rowGroup, (!empty($debtProdTotalGroup['tar_per']) ? $debtProdTotalGroup['tar_per'] : 0));
+                        $worksheet->setCellValue('F' . $rowGroup, '');
                         $worksheet->setCellValue('G' . $rowGroup, (!empty($debtProdTotalGroup['tar_amt']) ? $debtProdTotalGroup['tar_amt'] : 0));
                         $worksheet->setCellValue('H' . $rowGroup, (!empty($debtProdTotalGroup['tar_gap']) ? $debtProdTotalGroup['tar_gap'] : 0));
                         $worksheet->setCellValue('I' . $rowGroup, (!empty($debtProdTotalGroup['inci']) ? $debtProdTotalGroup['inci'] : 0));
                         $worksheet->setCellValue('J' . $rowGroup, (!empty($debtProdTotalGroup['col']) ? $debtProdTotalGroup['col'] : 0));
                         $worksheet->setCellValue('K' . $rowGroup, (!empty($debtProdTotalGroup['rem']) ? $debtProdTotalGroup['rem'] : 0));
-                        $worksheet->setCellValue('L' . $rowGroup, (!empty($debtProdTotalGroup['flow_rate']) ? $debtProdTotalGroup['flow_rate'] : 0));
-                        $worksheet->setCellValue('M' . $rowGroup, (!empty($debtProdTotalGroup['col_ratio']) ? $debtProdTotalGroup['col_ratio'] : 0));
                         $worksheet->setCellValue('N' . $rowGroup, (!empty($debtProdTotalGroup['inci_amt']) ? $debtProdTotalGroup['inci_amt'] : 0));
                         $worksheet->setCellValue('O' . $rowGroup, (!empty($debtProdTotalGroup['col_amt']) ? $debtProdTotalGroup['col_amt'] : 0));
                         $worksheet->setCellValue('P' . $rowGroup, (!empty($debtProdTotalGroup['payment_amt']) ? $debtProdTotalGroup['payment_amt'] : 0));
                         $worksheet->setCellValue('Q' . $rowGroup, (!empty($debtProdTotalGroup['rem_actual']) ? $debtProdTotalGroup['rem_actual'] : 0));
-                        $worksheet->setCellValue('R' . $rowGroup, (!empty($debtProdTotalGroup['col_ratio_actual']) ? $debtProdTotalGroup['col_ratio_actual'] : 0));
                         $worksheet->setCellValue('S' . $rowGroup, (!empty($debtProdTotalGroup['rem_os']) ? $debtProdTotalGroup['rem_os'] : 0));
-                        $worksheet->setCellValue('T' . $rowGroup, (!empty($debtProdTotalGroup['flow_rate_os']) ? $debtProdTotalGroup['flow_rate_os'] : 0));
-                        $worksheet->setCellValue('U' . $rowGroup, (!empty($debtProdTotalGroup['col_ratio_os']) ? $debtProdTotalGroup['col_ratio_os'] : 0));
 
                         $worksheet->getStyle('B' . $rowGroup . ':U' . $rowGroup)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('DDEBF7');
                         $worksheet->getStyle('B' . $rowGroup . ':U'. $rowGroup)->applyFromArray([
@@ -390,7 +372,7 @@ Class Daily_prod_user_group_report extends WFF_Controller {
                 $worksheet->setCellValue('A' . $start_row_debt_group, $debt_group);
                 $worksheet->getStyle('A' . $start_row_debt_group)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('FFE699');
 
-                $worksheet->setCellValue('F' . ($start_row + count($groupProduct['data'])), (!empty($debtGroupTotal['tar_per']) ? $debtGroupTotal['tar_per'] : 0));
+                $worksheet->setCellValue('F' . ($start_row + count($groupProduct['data'])), '');
                 $worksheet->setCellValue('G' . ($start_row + count($groupProduct['data'])), (!empty($debtGroupTotal['tar_amt']) ? $debtGroupTotal['tar_amt'] : 0));
                 $worksheet->setCellValue('H' . ($start_row + count($groupProduct['data'])), (!empty($debtGroupTotal['tar_gap']) ? $debtGroupTotal['tar_gap'] : 0));
                 $worksheet->setCellValue('I' . ($start_row + count($groupProduct['data'])), (!empty($debtGroupTotal['inci']) ? $debtGroupTotal['inci'] : 0));
@@ -398,16 +380,11 @@ Class Daily_prod_user_group_report extends WFF_Controller {
 
                 $worksheet->setCellValue('J' . ($start_row + count($groupProduct['data'])), (!empty($debtGroupTotal['col']) ? $debtGroupTotal['col'] : 0));
                 $worksheet->setCellValue('K' . ($start_row + count($groupProduct['data'])), (!empty($debtGroupTotal['rem']) ? $debtGroupTotal['rem'] : 0));
-                $worksheet->setCellValue('L' . ($start_row + count($groupProduct['data'])), (!empty($debtGroupTotal['flow_rate']) ? $debtGroupTotal['flow_rate'] : 0));
-                $worksheet->setCellValue('M' . ($start_row + count($groupProduct['data'])), (!empty($debtGroupTotal['col_ratio']) ? $debtGroupTotal['col_ratio'] : 0));
                 $worksheet->setCellValue('N' . ($start_row + count($groupProduct['data'])), (!empty($debtGroupTotal['inci_amt']) ? $debtGroupTotal['inci_amt'] : 0));
                 $worksheet->setCellValue('O' . ($start_row + count($groupProduct['data'])), (!empty($debtGroupTotal['col_amt']) ? $debtGroupTotal['col_amt'] : 0));
                 $worksheet->setCellValue('P' . ($start_row + count($groupProduct['data'])), (!empty($debtGroupTotal['payment_amt']) ? $debtGroupTotal['payment_amt'] : 0));
                 $worksheet->setCellValue('Q' . ($start_row + count($groupProduct['data'])), (!empty($debtGroupTotal['rem_actual']) ? $debtGroupTotal['rem_actual'] : 0));
-                $worksheet->setCellValue('R' . ($start_row + count($groupProduct['data'])), (!empty($debtGroupTotal['col_ratio_actual']) ? $debtGroupTotal['col_ratio_actual'] : 0));
                 $worksheet->setCellValue('S' . ($start_row + count($groupProduct['data'])), (!empty($debtGroupTotal['rem_os']) ? $debtGroupTotal['rem_os'] : 0));
-                $worksheet->setCellValue('T' . ($start_row + count($groupProduct['data'])), (!empty($debtGroupTotal['flow_rate_os']) ? $debtGroupTotal['flow_rate_os'] : 0));
-                $worksheet->setCellValue('U' . ($start_row + count($groupProduct['data'])), (!empty($debtGroupTotal['col_ratio_os']) ? $debtGroupTotal['col_ratio_os'] : 0));
 
 
                 $worksheet->getStyle('B' . ($start_row + count($groupProduct['data'])) . ':U'  .($start_row + count($groupProduct['data'])))->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('FCE4D6');
@@ -484,21 +461,18 @@ Class Daily_prod_user_group_report extends WFF_Controller {
                             $worksheet->setCellValue('B' . ($start_row + $gProdKey + 3), $gProdValue['text']);
                             $debtProdTotalGroup = $debtProdTotal[$gProdValue['text']];
 
-                            $worksheet->setCellValue('F' . $rowGroup, (!empty($debtProdTotalGroup['tar_per']) ? $debtProdTotalGroup['tar_per'] : 0));
+                            $worksheet->setCellValue('F' . $rowGroup, '');
                             $worksheet->setCellValue('G' . $rowGroup, (!empty($debtProdTotalGroup['tar_amt']) ? $debtProdTotalGroup['tar_amt'] : 0));
                             $worksheet->setCellValue('H' . $rowGroup, (!empty($debtProdTotalGroup['tar_gap']) ? $debtProdTotalGroup['tar_gap'] : 0));
                             $worksheet->setCellValue('I' . $rowGroup, (!empty($debtProdTotalGroup['inci']) ? $debtProdTotalGroup['inci'] : 0));
 
                             $worksheet->setCellValue('J' . $rowGroup, (!empty($debtProdTotalGroup['col']) ? $debtProdTotalGroup['col'] : 0));
                             $worksheet->setCellValue('K' . $rowGroup, (!empty($debtProdTotalGroup['rem']) ? $debtProdTotalGroup['rem'] : 0));
-                            $worksheet->setCellValue('L' . $rowGroup, (!empty($debtProdTotalGroup['flow_rate']) ? $debtProdTotalGroup['flow_rate'] : 0));
-                            $worksheet->setCellValue('M' . $rowGroup, (!empty($debtProdTotalGroup['col_ratio']) ? $debtProdTotalGroup['col_ratio'] : 0));
                             $worksheet->setCellValue('N' . $rowGroup, (!empty($debtProdTotalGroup['inci_amt']) ? $debtProdTotalGroup['inci_amt'] : 0));
                             $worksheet->setCellValue('O' . $rowGroup, (!empty($debtProdTotalGroup['col_amt']) ? $debtProdTotalGroup['col_amt'] : 0));
                             $worksheet->setCellValue('P' . $rowGroup, (!empty($debtProdTotalGroup['payment_amt']) ? $debtProdTotalGroup['payment_amt'] : 0));
                             $worksheet->setCellValue('Q' . $rowGroup, (!empty($debtProdTotalGroup['rem_actual']) ? $debtProdTotalGroup['rem_actual'] : 0));
-                            $worksheet->setCellValue('R' . $rowGroup, (!empty($debtProdTotalGroup['col_ratio_actual']) ? $debtProdTotalGroup['col_ratio_actual'] : 0));
-                            $worksheet->setCellValue('S' . $rowGroup, (!empty($debtProdTotalGroup['flow_rate_actual']) ? $debtProdTotalGroup['flow_rate_actual'] : 0));
+                            $worksheet->setCellValue('S' . $rowGroup, (!empty($debtProdTotalGroup['rem_os']) ? $debtProdTotalGroup['rem_os'] : 0));
 
                             $worksheet->getStyle('B' . $rowGroup . ':U' . $rowGroup)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('DDEBF7');
                             $worksheet->getStyle('B' . $rowGroup . ':U'. $rowGroup)->applyFromArray([
@@ -536,21 +510,18 @@ Class Daily_prod_user_group_report extends WFF_Controller {
                     $worksheet->mergeCells('D' . ($start_row + 1) . ':E' . ($start_row + 1));
                     $worksheet->setCellValue('D' . ($start_row + 1), 'TOTAL');
 
-                    $worksheet->setCellValue('F' . ($start_row + 1), (!empty($total['tar_per']) ? $total['tar_per'] : 0));
+                    $worksheet->setCellValue('F' . ($start_row + 1), '');
                     $worksheet->setCellValue('G' . ($start_row + 1), (!empty($total['tar_amt']) ? $total['tar_amt'] : 0));
                     $worksheet->setCellValue('H' . ($start_row + 1), (!empty($total['tar_gap']) ? $total['tar_gap'] : 0));
                     $worksheet->setCellValue('I' . ($start_row + 1), (!empty($total['inci']) ? $total['inci'] : 0));
 
                     $worksheet->setCellValue('J' . ($start_row + 1), (!empty($total['col']) ? $total['col'] : 0));
                     $worksheet->setCellValue('K' . ($start_row + 1), (!empty($total['rem']) ? $total['rem'] : 0));
-                    $worksheet->setCellValue('L' . ($start_row + 1), (!empty($total['flow_rate']) ? $total['flow_rate'] : 0));
-                    $worksheet->setCellValue('M' . ($start_row + 1), (!empty($total['col_ratio']) ? $total['col_ratio'] : 0));
                     $worksheet->setCellValue('N' . ($start_row + 1), (!empty($total['inci_amt']) ? $total['inci_amt'] : 0));
                     $worksheet->setCellValue('O' . ($start_row + 1), (!empty($total['col_amt']) ? $total['col_amt'] : 0));
                     $worksheet->setCellValue('P' . ($start_row + 1), (!empty($total['payment_amt']) ? $total['payment_amt'] : 0));
                     $worksheet->setCellValue('Q' . ($start_row + 1), (!empty($total['rem_actual']) ? $total['rem_actual'] : 0));
-                    $worksheet->setCellValue('R' . ($start_row + 1), (!empty($total['col_ratio_actual']) ? $total['col_ratio_actual'] : 0));
-                    $worksheet->setCellValue('S' . ($start_row + 1), (!empty($total['flow_rate_actual']) ? $total['flow_rate_actual'] : 0));
+                    $worksheet->setCellValue('S' . ($start_row + 1), (!empty($total['rem_os']) ? $total['rem_os'] : 0));
 
                     $worksheet->getStyle('D' . ($start_row + 1) . ':U' . ($start_row + 1))->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('DDEBF7');
                     $worksheet->getStyle('D' . ($start_row + 1) . ':U' . ($start_row + 1))->applyFromArray([
@@ -563,7 +534,7 @@ Class Daily_prod_user_group_report extends WFF_Controller {
                         $totalValue = 0;
                     }
 
-                    $worksheet->setCellValue('F' . ($start_row + 2), (!empty($dueDateCodeTotal['tar_per']) ? $dueDateCodeTotal['tar_per'] : 0));
+                    $worksheet->setCellValue('F' . ($start_row + 2), '');
                     $worksheet->setCellValue('G' . ($start_row + 2), (!empty($dueDateCodeTotal['tar_amt']) ? $dueDateCodeTotal['tar_amt'] : 0));
                     $worksheet->setCellValue('H' . ($start_row + 2), (!empty($dueDateCodeTotal['tar_gap']) ? $dueDateCodeTotal['tar_gap'] : 0));
                     $worksheet->setCellValue('I' . ($start_row + 2), (!empty($dueDateCodeTotal['inci']) ? $dueDateCodeTotal['inci'] : 0));
@@ -571,14 +542,11 @@ Class Daily_prod_user_group_report extends WFF_Controller {
 
                     $worksheet->setCellValue('J' . ($start_row + 2), (!empty($dueDateCodeTotal['col']) ? $dueDateCodeTotal['col'] : 0));
                     $worksheet->setCellValue('K' . ($start_row + 2), (!empty($dueDateCodeTotal['rem']) ? $dueDateCodeTotal['rem'] : 0));
-                    $worksheet->setCellValue('L' . ($start_row + 2), (!empty($dueDateCodeTotal['flow_rate']) ? $dueDateCodeTotal['flow_rate'] : 0));
-                    $worksheet->setCellValue('M' . ($start_row + 2), (!empty($dueDateCodeTotal['col_ratio']) ? $dueDateCodeTotal['col_ratio'] : 0));
                     $worksheet->setCellValue('N' . ($start_row + 2), (!empty($dueDateCodeTotal['inci_amt']) ? $dueDateCodeTotal['inci_amt'] : 0));
                     $worksheet->setCellValue('O' . ($start_row + 2), (!empty($dueDateCodeTotal['col_amt']) ? $dueDateCodeTotal['col_amt'] : 0));
                     $worksheet->setCellValue('P' . ($start_row + 2), (!empty($dueDateCodeTotal['payment_amt']) ? $dueDateCodeTotal['payment_amt'] : 0));
                     $worksheet->setCellValue('Q' . ($start_row + 2), (!empty($dueDateCodeTotal['rem_actual']) ? $dueDateCodeTotal['rem_actual'] : 0));
-                    $worksheet->setCellValue('R' . ($start_row + 2), (!empty($dueDateCodeTotal['col_ratio_actual']) ? $dueDateCodeTotal['col_ratio_actual'] : 0));
-                    $worksheet->setCellValue('S' . ($start_row + 2), (!empty($dueDateCodeTotal['flow_rate_actual']) ? $dueDateCodeTotal['flow_rate_actual'] : 0));
+                    $worksheet->setCellValue('S' . ($start_row + 2), (!empty($dueDateCodeTotal['rem_os']) ? $dueDateCodeTotal['rem_os'] : 0));
 
                     $worksheet->getStyle('B' . ($start_row + 2) . ':U' .($start_row + 2))->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('F4B084');
                     $worksheet->getStyle('B' . ($start_row + 2) . ':U' . ($start_row + 2))->applyFromArray([
@@ -590,7 +558,7 @@ Class Daily_prod_user_group_report extends WFF_Controller {
                         $totalValue = 0;
                     }
 
-                    $worksheet->setCellValue('F' . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['tar_per']) ? $debtGroupTotal['tar_per'] : 0));
+                    $worksheet->setCellValue('F' . ($start_row + count($groupProduct['data']) + 3), '');
                     $worksheet->setCellValue('G' . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['tar_amt']) ? $debtGroupTotal['tar_amt'] : 0));
                     $worksheet->setCellValue('H' . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['tar_gap']) ? $debtGroupTotal['tar_gap'] : 0));
                     $worksheet->setCellValue('I' . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['inci']) ? $debtGroupTotal['inci'] : 0));
@@ -598,14 +566,11 @@ Class Daily_prod_user_group_report extends WFF_Controller {
 
                     $worksheet->setCellValue('J' . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['col']) ? $debtGroupTotal['col'] : 0));
                     $worksheet->setCellValue('K' . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['rem']) ? $debtGroupTotal['rem'] : 0));
-                    $worksheet->setCellValue('L' . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['flow_rate']) ? $debtGroupTotal['flow_rate'] : 0));
-                    $worksheet->setCellValue('M' . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['col_ratio']) ? $debtGroupTotal['col_ratio'] : 0));
                     $worksheet->setCellValue('N' . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['inci_amt']) ? $debtGroupTotal['inci_amt'] : 0));
                     $worksheet->setCellValue('O' . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['col_amt']) ? $debtGroupTotal['col_amt'] : 0));
                     $worksheet->setCellValue('P' . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['payment_amt']) ? $debtGroupTotal['payment_amt'] : 0));
                     $worksheet->setCellValue('Q' . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['rem_actual']) ? $debtGroupTotal['rem_actual'] : 0));
-                    $worksheet->setCellValue('R' . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['col_ratio_actual']) ? $debtGroupTotal['col_ratio_actual'] : 0));
-                    $worksheet->setCellValue('S' . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['flow_rate_actual']) ? $debtGroupTotal['flow_rate_actual'] : 0));
+                    $worksheet->setCellValue('S' . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['rem_os']) ? $debtGroupTotal['rem_os'] : 0));
 
                      $worksheet->getStyle('B' . ($start_row + count($groupProduct['data']) + 3) . ':U'  .($start_row + count($groupProduct['data']) + 3))->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('FCE4D6');
                     $worksheet->getStyle('B' . ($start_row + count($groupProduct['data']) + 3) . ':U' . ($start_row + count($groupProduct['data']) + 3))->applyFromArray([
@@ -617,45 +582,7 @@ Class Daily_prod_user_group_report extends WFF_Controller {
                         $totalValue = 0;
                     }
                 }
-                else
-                {
-                    $worksheet->mergeCells('B' . ($start_row + 1) . ':E' . ($start_row + 1 ));
-                    $worksheet->setCellValue('B' . ($start_row + 1 ), 'F-Total');
-                    $worksheet->mergeCells('A' . $start_row_debt_group . ':A' . ($start_row + 1 ));
-                    $worksheet->setCellValue('A' . $start_row_debt_group, $debt_group);
-                    $worksheet->getStyle('A' . $start_row_debt_group)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('FFE699');
-                    $worksheet->mergeCells('B' . $start_row_prod . ':D' . $start_row );
-                    $worksheet->setCellValue('B' . $start_row_prod, $prod_row);
-
-                    $worksheet->setCellValue('F' . ($start_row + 1 ), (!empty($dueDateCodeTotal['tar_per']) ? $dueDateCodeTotal['tar_per'] : 0));
-                    $worksheet->setCellValue('G' . ($start_row + 1 ), (!empty($dueDateCodeTotal['tar_amt']) ? $dueDateCodeTotal['tar_amt'] : 0));
-                    $worksheet->setCellValue('H' . ($start_row + 1 ), (!empty($dueDateCodeTotal['tar_gap']) ? $dueDateCodeTotal['tar_gap'] : 0));
-                    $worksheet->setCellValue('I' . ($start_row + 1 ), (!empty($dueDateCodeTotal['inci']) ? $dueDateCodeTotal['inci'] : 0));
-
-
-                    $worksheet->setCellValue('J' . ($start_row + 1), (!empty($dueDateCodeTotal['col']) ? $dueDateCodeTotal['col'] : 0));
-                    $worksheet->setCellValue('K' . ($start_row + 1), (!empty($dueDateCodeTotal['rem']) ? $dueDateCodeTotal['rem'] : 0));
-                    $worksheet->setCellValue('L' . ($start_row + 1), (!empty($dueDateCodeTotal['flow_rate']) ? $dueDateCodeTotal['flow_rate'] : 0));
-                    $worksheet->setCellValue('M' . ($start_row + 1), (!empty($dueDateCodeTotal['col_ratio']) ? $dueDateCodeTotal['col_ratio'] : 0));
-                    $worksheet->setCellValue('N' . ($start_row + 1), (!empty($dueDateCodeTotal['inci_amt']) ? $dueDateCodeTotal['inci_amt'] : 0));
-                    $worksheet->setCellValue('O' . ($start_row + 1), (!empty($dueDateCodeTotal['col_amt']) ? $dueDateCodeTotal['col_amt'] : 0));
-                    $worksheet->setCellValue('P' . ($start_row + 1), (!empty($dueDateCodeTotal['payment_amt']) ? $dueDateCodeTotal['payment_amt'] : 0));
-                    $worksheet->setCellValue('Q' . ($start_row + 1), (!empty($dueDateCodeTotal['rem_actual']) ? $dueDateCodeTotal['rem_actual'] : 0));
-                    $worksheet->setCellValue('R' . ($start_row + 1), (!empty($dueDateCodeTotal['col_ratio_actual']) ? $dueDateCodeTotal['col_ratio_actual'] : 0));
-                    $worksheet->setCellValue('S' .($start_row + 1), (!empty($dueDateCodeTotal['rem_os']) ? $dueDateCodeTotal['rem_os'] : 0));
-                    $worksheet->setCellValue('T' .($start_row + 1), (!empty($dueDateCodeTotal['flow_rate_os']) ? $dueDateCodeTotal['flow_rate_os'] : 0));
-                    $worksheet->setCellValue('U' .($start_row + 1), (!empty($dueDateCodeTotal['col_ratio_os']) ? $dueDateCodeTotal['col_ratio_os'] : 0));
-
-                    $worksheet->getStyle('B' . ($start_row + 1) . ':U'  .($start_row + 1))->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('FCE4D6');
-                    $worksheet->getStyle('B' . ($start_row + 1) . ':U' . ($start_row + 1))->applyFromArray([
-                        'font'      => [
-                            'bold'  => true
-                        ]
-                    ]);
-                    foreach($dueDateCodeTotal as $totalKey => &$totalValue) {
-                        $totalValue = 0;
-                    }
-                }
+                
             }
             $start_row += 1;
 
@@ -716,7 +643,7 @@ Class Daily_prod_user_group_report extends WFF_Controller {
         $worksheet->getStyle("F1")->applyFromArray($style);
 
         $worksheet->mergeCells('I1:R1');
-        $worksheet->setCellValue('I1', $now['mon'].'/'.$now['year']);
+        $worksheet->setCellValue('I1', $getdate['mon'].'/'.$getdate['year']);
         $worksheet->getStyle("I1")->getFill()
             ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
             ->getStartColor()->setRGB('FFFF00');
@@ -859,19 +786,15 @@ Class Daily_prod_user_group_report extends WFF_Controller {
                 $worksheet->mergeCells('D' . $start_row . ':E' . ($start_row));
                 $worksheet->setCellValue('D' . $start_row, 'TOTAL');
 
-                $worksheet->setCellValue('F' . $start_row, (!empty($totalData['tar_per']) ? $totalData['tar_per'] : 0));
+                $worksheet->setCellValue('F' . $start_row, '');
                 $worksheet->setCellValue('G' . $start_row, (!empty($totalData['tar_amt']) ? $totalData['tar_amt'] : 0));
                 $worksheet->setCellValue('H' . $start_row, (!empty($totalData['tar_gap']) ? $totalData['tar_gap'] : 0));
                 $worksheet->setCellValue('I' . $start_row, (!empty($totalData['inci']) ? $totalData['inci'] : 0));
                 $worksheet->setCellValue('J' . $start_row, (!empty($totalData['col']) ? $totalData['col'] : 0));
                 $worksheet->setCellValue('K' . $start_row, (!empty($totalData['rem']) ? $totalData['rem'] : 0));
-                $worksheet->setCellValue('L' . $start_row, (!empty($totalData['flow_rate']) ? $totalData['flow_rate'] : 0));
-                $worksheet->setCellValue('M' . $start_row, (!empty($totalData['col_ratio']) ? $totalData['col_ratio'] : 0));
                 $worksheet->setCellValue('N' . $start_row, (!empty($totalData['inci_amt']) ? $totalData['inci_amt'] : 0));
                 $worksheet->setCellValue('O' . $start_row, (!empty($totalData['col_amt']) ? $totalData['col_amt'] : 0));
                 $worksheet->setCellValue('P' . $start_row, (!empty($totalData['rem_os']) ? $totalData['rem_os'] : 0));
-                $worksheet->setCellValue('Q' . $start_row, (!empty($totalData['flow_rate_os']) ? $totalData['flow_rate_os'] : 0));
-                $worksheet->setCellValue('R' . $start_row, (!empty($totalData['col_ratio_os']) ? $totalData['col_ratio_os'] : 0));
 
                 $worksheet->getStyle('D' . $start_row . ':R'  . $start_row)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('DDEBF7');
                 $worksheet->getStyle('D' . $start_row . ':R' . $start_row)->applyFromArray([
@@ -899,19 +822,15 @@ Class Daily_prod_user_group_report extends WFF_Controller {
                 $worksheet->mergeCells('B' . $start_row . ':E' . ($start_row));
                 $worksheet->setCellValue('B' . $start_row, 'TOTAL');
 
-                $worksheet->setCellValue('F' . $start_row, (!empty($dueDateCodeTotal['tar_per']) ? $dueDateCodeTotal['tar_per'] : 0));
+                $worksheet->setCellValue('F' . $start_row, '');
                 $worksheet->setCellValue('G' . $start_row, (!empty($dueDateCodeTotal['tar_amt']) ? $dueDateCodeTotal['tar_amt'] : 0));
                 $worksheet->setCellValue('H' . $start_row, (!empty($dueDateCodeTotal['tar_gap']) ? $dueDateCodeTotal['tar_gap'] : 0));
                 $worksheet->setCellValue('I' . $start_row, (!empty($dueDateCodeTotal['inci']) ? $dueDateCodeTotal['inci'] : 0));
                 $worksheet->setCellValue('J' . $start_row, (!empty($dueDateCodeTotal['col']) ? $dueDateCodeTotal['col'] : 0));
                 $worksheet->setCellValue('K' . $start_row, (!empty($dueDateCodeTotal['rem']) ? $dueDateCodeTotal['rem'] : 0));
-                $worksheet->setCellValue('L' . $start_row, (!empty($dueDateCodeTotal['flow_rate']) ? $dueDateCodeTotal['flow_rate'] : 0));
-                $worksheet->setCellValue('M' . $start_row, (!empty($dueDateCodeTotal['col_ratio']) ? $dueDateCodeTotal['col_ratio'] : 0));
                 $worksheet->setCellValue('N' . $start_row, (!empty($dueDateCodeTotal['inci_amt']) ? $dueDateCodeTotal['inci_amt'] : 0));
                 $worksheet->setCellValue('O' . $start_row, (!empty($dueDateCodeTotal['col_amt']) ? $dueDateCodeTotal['col_amt'] : 0));
                 $worksheet->setCellValue('P' . $start_row, (!empty($dueDateCodeTotal['rem_os']) ? $dueDateCodeTotal['rem_os'] : 0));
-                $worksheet->setCellValue('Q' . $start_row, (!empty($dueDateCodeTotal['flow_rate_os']) ? $dueDateCodeTotal['flow_rate_os'] : 0));
-                $worksheet->setCellValue('R' . $start_row, (!empty($dueDateCodeTotal['col_ratio_os']) ? $dueDateCodeTotal['col_ratio_os'] : 0));
 
                 $worksheet->getStyle('B' . $start_row . ':R'  . $start_row)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('F4B084');
                 $worksheet->getStyle('B' . $start_row . ':R' . $start_row)->applyFromArray([
@@ -939,19 +858,15 @@ Class Daily_prod_user_group_report extends WFF_Controller {
                         $worksheet->setCellValue('B' . ($start_row + $gProdKey), $gProdValue['text']);
                         $debtProdTotalGroup = $debtProdTotal[$gProdValue['text']];
 
-                        $worksheet->setCellValue('F' . $rowGroup, (!empty($debtProdTotalGroup['tar_per']) ? $debtProdTotalGroup['tar_per'] : 0));
+                        $worksheet->setCellValue('F' . $rowGroup, '');
                         $worksheet->setCellValue('G' . $rowGroup, (!empty($debtProdTotalGroup['tar_amt']) ? $debtProdTotalGroup['tar_amt'] : 0));
                         $worksheet->setCellValue('H' . $rowGroup, (!empty($debtProdTotalGroup['tar_gap']) ? $debtProdTotalGroup['tar_gap'] : 0));
                         $worksheet->setCellValue('I' . $rowGroup, (!empty($debtProdTotalGroup['inci']) ? $debtProdTotalGroup['inci'] : 0));
                         $worksheet->setCellValue('J' . $rowGroup, (!empty($debtProdTotalGroup['col']) ? $debtProdTotalGroup['col'] : 0));
                         $worksheet->setCellValue('K' . $rowGroup, (!empty($debtProdTotalGroup['rem']) ? $debtProdTotalGroup['rem'] : 0));
-                        $worksheet->setCellValue('L' . $rowGroup, (!empty($debtProdTotalGroup['flow_rate']) ? $debtProdTotalGroup['flow_rate'] : 0));
-                        $worksheet->setCellValue('M' . $rowGroup, (!empty($debtProdTotalGroup['col_ratio']) ? $debtProdTotalGroup['col_ratio'] : 0));
                         $worksheet->setCellValue('N' . $rowGroup, (!empty($debtProdTotalGroup['inci_amt']) ? $debtProdTotalGroup['inci_amt'] : 0));
                         $worksheet->setCellValue('O' . $rowGroup, (!empty($debtProdTotalGroup['col_amt']) ? $debtProdTotalGroup['col_amt'] : 0));
                         $worksheet->setCellValue('P' . $rowGroup, (!empty($debtProdTotalGroup['rem_os']) ? $debtProdTotalGroup['rem_os'] : 0));
-                        $worksheet->setCellValue('Q' . $rowGroup, (!empty($debtProdTotalGroup['flow_rate_os']) ? $debtProdTotalGroup['flow_rate_os'] : 0));
-                        $worksheet->setCellValue('R' . $rowGroup, (!empty($debtProdTotalGroup['col_ratio_os']) ? $debtProdTotalGroup['col_ratio_os'] : 0));
 
                         $worksheet->getStyle('B' . $rowGroup . ':R'  . $rowGroup)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('DDEBF7');
                         $worksheet->getStyle('B' . $rowGroup . ':R'  . $rowGroup)->applyFromArray([
@@ -974,7 +889,7 @@ Class Daily_prod_user_group_report extends WFF_Controller {
                 $worksheet->setCellValue('A' . $start_row_debt_group, $debt_group);
                 $worksheet->getStyle('A' . $start_row_debt_group)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('FFE699');
 
-                $worksheet->setCellValue('F' . ($start_row + count($groupProduct['data'])), (!empty($debtGroupTotal['tar_per']) ? $debtGroupTotal['tar_per'] : 0));
+                $worksheet->setCellValue('F' . ($start_row + count($groupProduct['data'])), '');
                 $worksheet->setCellValue('G' . ($start_row + count($groupProduct['data'])), (!empty($debtGroupTotal['tar_amt']) ? $debtGroupTotal['tar_amt'] : 0));
                 $worksheet->setCellValue('H' . ($start_row + count($groupProduct['data'])), (!empty($debtGroupTotal['tar_gap']) ? $debtGroupTotal['tar_gap'] : 0));
                 $worksheet->setCellValue('I' . ($start_row + count($groupProduct['data'])), (!empty($debtGroupTotal['inci']) ? $debtGroupTotal['inci'] : 0));
@@ -982,13 +897,9 @@ Class Daily_prod_user_group_report extends WFF_Controller {
 
                 $worksheet->setCellValue('J' . ($start_row + count($groupProduct['data'])), (!empty($debtGroupTotal['col']) ? $debtGroupTotal['col'] : 0));
                 $worksheet->setCellValue('K' . ($start_row + count($groupProduct['data'])), (!empty($debtGroupTotal['rem']) ? $debtGroupTotal['rem'] : 0));
-                $worksheet->setCellValue('L' . ($start_row + count($groupProduct['data'])), (!empty($debtGroupTotal['flow_rate']) ? $debtGroupTotal['flow_rate'] : 0));
-                $worksheet->setCellValue('M' . ($start_row + count($groupProduct['data'])), (!empty($debtGroupTotal['col_ratio']) ? $debtGroupTotal['col_ratio'] : 0));
                 $worksheet->setCellValue('N' . ($start_row + count($groupProduct['data'])), (!empty($debtGroupTotal['inci_amt']) ? $debtGroupTotal['inci_amt'] : 0));
                 $worksheet->setCellValue('O' . ($start_row + count($groupProduct['data'])), (!empty($debtGroupTotal['col_amt']) ? $debtGroupTotal['col_amt'] : 0));
                 $worksheet->setCellValue('P' . ($start_row + count($groupProduct['data'])), (!empty($debtGroupTotal['rem_os']) ? $debtGroupTotal['rem_os'] : 0));
-                $worksheet->setCellValue('Q' . ($start_row + count($groupProduct['data'])), (!empty($debtGroupTotal['flow_rate_os']) ? $debtGroupTotal['flow_rate_os'] : 0));
-                $worksheet->setCellValue('R' . ($start_row + count($groupProduct['data'])), (!empty($debtGroupTotal['col_ratio_os']) ? $debtGroupTotal['col_ratio_os'] : 0));
 
                 $worksheet->getStyle('B' . ($start_row + count($groupProduct['data'])) . ':R' .($start_row + count($groupProduct['data'])))->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('FCE4D6');
                 $worksheet->getStyle('B' . ($start_row + count($groupProduct['data'])) . ':R' . ($start_row + count($groupProduct['data'])))->applyFromArray([
@@ -1061,20 +972,16 @@ Class Daily_prod_user_group_report extends WFF_Controller {
                             $worksheet->setCellValue('B' . ($start_row + $gProdKey + 3), $gProdValue['text']);
                             $debtProdTotalGroup = $debtProdTotal[$gProdValue['text']];
 
-                            $worksheet->setCellValue('F' . $rowGroup, (!empty($debtProdTotalGroup['tar_per']) ? $debtProdTotalGroup['tar_per'] : 0));
+                            $worksheet->setCellValue('F' . $rowGroup, '');
                             $worksheet->setCellValue('G' . $rowGroup, (!empty($debtProdTotalGroup['tar_amt']) ? $debtProdTotalGroup['tar_amt'] : 0));
                             $worksheet->setCellValue('H' . $rowGroup, (!empty($debtProdTotalGroup['tar_gap']) ? $debtProdTotalGroup['tar_gap'] : 0));
                             $worksheet->setCellValue('I' . $rowGroup, (!empty($debtProdTotalGroup['inci']) ? $debtProdTotalGroup['inci'] : 0));
 
                             $worksheet->setCellValue('J' . $rowGroup, (!empty($debtProdTotalGroup['col']) ? $debtProdTotalGroup['col'] : 0));
                             $worksheet->setCellValue('K' . $rowGroup, (!empty($debtProdTotalGroup['rem']) ? $debtProdTotalGroup['rem'] : 0));
-                            $worksheet->setCellValue('L' . $rowGroup, (!empty($debtProdTotalGroup['flow_rate']) ? $debtProdTotalGroup['flow_rate'] : 0));
-                            $worksheet->setCellValue('M' . $rowGroup, (!empty($debtProdTotalGroup['col_ratio']) ? $debtProdTotalGroup['col_ratio'] : 0));
                             $worksheet->setCellValue('N' . $rowGroup, (!empty($debtProdTotalGroup['inci_amt']) ? $debtProdTotalGroup['inci_amt'] : 0));
                             $worksheet->setCellValue('O' . $rowGroup, (!empty($debtProdTotalGroup['col_amt']) ? $debtProdTotalGroup['col_amt'] : 0));
                             $worksheet->setCellValue('P' . $rowGroup, (!empty($debtProdTotalGroup['rem_os']) ? $debtProdTotalGroup['rem_os'] : 0));
-                            $worksheet->setCellValue('Q' . $rowGroup, (!empty($debtProdTotalGroup['flow_rate_os']) ? $debtProdTotalGroup['flow_rate_os'] : 0));
-                            $worksheet->setCellValue('R' . $rowGroup, (!empty($debtProdTotalGroup['col_ratio_os']) ? $debtProdTotalGroup['col_ratio_os'] : 0));
 
                              $worksheet->getStyle('B' . $rowGroup . ':R' . $rowGroup)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('DDEBF7');
                             $worksheet->getStyle('B' . $rowGroup . ':R' . $rowGroup)->applyFromArray([
@@ -1111,20 +1018,16 @@ Class Daily_prod_user_group_report extends WFF_Controller {
                     $worksheet->mergeCells('D' . ($start_row + 1) . ':E' . ($start_row + 1));
                     $worksheet->setCellValue('D' . ($start_row + 1), 'TOTAL');
 
-                    $worksheet->setCellValue('F' . ($start_row + 1), (!empty($total['tar_per']) ? $total['tar_per'] : 0));
+                    $worksheet->setCellValue('F' . ($start_row + 1), '');
                     $worksheet->setCellValue('G' . ($start_row + 1), (!empty($total['tar_amt']) ? $total['tar_amt'] : 0));
                     $worksheet->setCellValue('H' . ($start_row + 1), (!empty($total['tar_gap']) ? $total['tar_gap'] : 0));
                     $worksheet->setCellValue('I' . ($start_row + 1), (!empty($total['inci']) ? $total['inci'] : 0));
 
                     $worksheet->setCellValue('J' . ($start_row + 1), (!empty($total['col']) ? $total['col'] : 0));
                     $worksheet->setCellValue('K' . ($start_row + 1), (!empty($total['rem']) ? $total['rem'] : 0));
-                    $worksheet->setCellValue('L' . ($start_row + 1), (!empty($total['flow_rate']) ? $total['flow_rate'] : 0));
-                    $worksheet->setCellValue('M' . ($start_row + 1), (!empty($total['col_ratio']) ? $total['col_ratio'] : 0));
                     $worksheet->setCellValue('N' . ($start_row + 1), (!empty($total['inci_amt']) ? $total['inci_amt'] : 0));
                     $worksheet->setCellValue('O' . ($start_row + 1), (!empty($total['col_amt']) ? $total['col_amt'] : 0));
                     $worksheet->setCellValue('P' . ($start_row + 1), (!empty($total['rem_os']) ? $total['rem_os'] : 0));
-                    $worksheet->setCellValue('Q' . ($start_row + 1), (!empty($total['flow_rate_os']) ? $total['flow_rate_os'] : 0));
-                    $worksheet->setCellValue('R' . ($start_row + 1), (!empty($total['col_ratio_os']) ? $total['col_ratio_os'] : 0));
 
                     $worksheet->getStyle('D' . ($start_row + 1) . ':U' . ($start_row + 1))->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('DDEBF7');
                     $worksheet->getStyle('D' . ($start_row + 1) . ':U' . ($start_row + 1))->applyFromArray([
@@ -1137,7 +1040,7 @@ Class Daily_prod_user_group_report extends WFF_Controller {
                         $totalValue = 0;
                     }
 
-                    $worksheet->setCellValue('F' . ($start_row + 2), (!empty($dueDateCodeTotal['tar_per']) ? $dueDateCodeTotal['tar_per'] : 0));
+                    $worksheet->setCellValue('F' . ($start_row + 2), '');
                     $worksheet->setCellValue('G' . ($start_row + 2), (!empty($dueDateCodeTotal['tar_amt']) ? $dueDateCodeTotal['tar_amt'] : 0));
                     $worksheet->setCellValue('H' . ($start_row + 2), (!empty($dueDateCodeTotal['tar_gap']) ? $dueDateCodeTotal['tar_gap'] : 0));
                     $worksheet->setCellValue('I' . ($start_row + 2), (!empty($dueDateCodeTotal['inci']) ? $dueDateCodeTotal['inci'] : 0));
@@ -1145,13 +1048,9 @@ Class Daily_prod_user_group_report extends WFF_Controller {
 
                     $worksheet->setCellValue('J' . ($start_row + 2), (!empty($dueDateCodeTotal['col']) ? $dueDateCodeTotal['col'] : 0));
                     $worksheet->setCellValue('K' . ($start_row + 2), (!empty($dueDateCodeTotal['rem']) ? $dueDateCodeTotal['rem'] : 0));
-                    $worksheet->setCellValue('L' . ($start_row + 2), (!empty($dueDateCodeTotal['flow_rate']) ? $dueDateCodeTotal['flow_rate'] : 0));
-                    $worksheet->setCellValue('M' . ($start_row + 2), (!empty($dueDateCodeTotal['col_ratio']) ? $dueDateCodeTotal['col_ratio'] : 0));
                     $worksheet->setCellValue('N' . ($start_row + 2), (!empty($dueDateCodeTotal['inci_amt']) ? $dueDateCodeTotal['inci_amt'] : 0));
                     $worksheet->setCellValue('O' . ($start_row + 2), (!empty($dueDateCodeTotal['col_amt']) ? $dueDateCodeTotal['col_amt'] : 0));
                     $worksheet->setCellValue('P' . ($start_row + 2), (!empty($dueDateCodeTotal['rem_os']) ? $dueDateCodeTotal['rem_os'] : 0));
-                    $worksheet->setCellValue('Q' . ($start_row + 2), (!empty($dueDateCodeTotal['flow_rate_os']) ? $dueDateCodeTotal['flow_rate_os'] : 0));
-                    $worksheet->setCellValue('R' . ($start_row + 2), (!empty($dueDateCodeTotal['col_ratio_os']) ? $dueDateCodeTotal['col_ratio_os'] : 0));
 
                     $worksheet->getStyle('B' . ($start_row + 2) . ':R' . ($start_row + 2))->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('F4B084');
                     $worksheet->getStyle('B' . ($start_row + 2) . ':R' . ($start_row + 2))->applyFromArray([
@@ -1163,7 +1062,7 @@ Class Daily_prod_user_group_report extends WFF_Controller {
                         $totalValue = 0;
                     }
 
-                    $worksheet->setCellValue('F' . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['tar_per']) ? $debtGroupTotal['tar_per'] : 0));
+                    $worksheet->setCellValue('F' . ($start_row + count($groupProduct['data']) + 3),'');
                     $worksheet->setCellValue('G' . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['tar_amt']) ? $debtGroupTotal['tar_amt'] : 0));
                     $worksheet->setCellValue('H' . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['tar_gap']) ? $debtGroupTotal['tar_gap'] : 0));
                     $worksheet->setCellValue('I' . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['inci']) ? $debtGroupTotal['inci'] : 0));
@@ -1171,13 +1070,9 @@ Class Daily_prod_user_group_report extends WFF_Controller {
 
                     $worksheet->setCellValue('J' . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['col']) ? $debtGroupTotal['col'] : 0));
                     $worksheet->setCellValue('K' . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['rem']) ? $debtGroupTotal['rem'] : 0));
-                    $worksheet->setCellValue('L' . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['flow_rate']) ? $debtGroupTotal['flow_rate'] : 0));
-                    $worksheet->setCellValue('M' . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['col_ratio']) ? $debtGroupTotal['col_ratio'] : 0));
                     $worksheet->setCellValue('N' . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['inci_amt']) ? $debtGroupTotal['inci_amt'] : 0));
                     $worksheet->setCellValue('O' . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['col_amt']) ? $debtGroupTotal['col_amt'] : 0));
                     $worksheet->setCellValue('P' . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['rem_os']) ? $debtGroupTotal['rem_os'] : 0));
-                    $worksheet->setCellValue('Q' . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['flow_rate_os']) ? $debtGroupTotal['flow_rate_os'] : 0));
-                    $worksheet->setCellValue('R' . ($start_row + count($groupProduct['data']) + 3), (!empty($debtGroupTotal['col_ratio_os']) ? $debtGroupTotal['col_ratio_os'] : 0));
 
                     $worksheet->getStyle('B' . ($start_row + count($groupProduct['data']) + 3) . ':R' .($start_row + count($groupProduct['data']) + 3))->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('FCE4D6');
                     $worksheet->getStyle('B' . ($start_row + count($groupProduct['data']) + 3) . ':R' . ($start_row + count($groupProduct['data']) + 3))->applyFromArray([
@@ -1200,7 +1095,7 @@ Class Daily_prod_user_group_report extends WFF_Controller {
                     $worksheet->mergeCells('B' . $start_row_prod . ':D' . $start_row );
                     $worksheet->setCellValue('B' . $start_row_prod, $prod_row);
 
-                    $worksheet->setCellValue('F' . ($start_row + 1 ), (!empty($dueDateCodeTotal['tar_per']) ? $dueDateCodeTotal['tar_per'] : 0));
+                    $worksheet->setCellValue('F' . ($start_row + 1 ), '');
                     $worksheet->setCellValue('G' . ($start_row + 1 ), (!empty($dueDateCodeTotal['tar_amt']) ? $dueDateCodeTotal['tar_amt'] : 0));
                     $worksheet->setCellValue('H' . ($start_row + 1 ), (!empty($dueDateCodeTotal['tar_gap']) ? $dueDateCodeTotal['tar_gap'] : 0));
                     $worksheet->setCellValue('I' . ($start_row + 1 ), (!empty($dueDateCodeTotal['inci']) ? $dueDateCodeTotal['inci'] : 0));
@@ -1208,13 +1103,9 @@ Class Daily_prod_user_group_report extends WFF_Controller {
 
                     $worksheet->setCellValue('J' . ($start_row + 1), (!empty($dueDateCodeTotal['col']) ? $dueDateCodeTotal['col'] : 0));
                     $worksheet->setCellValue('K' . ($start_row + 1), (!empty($dueDateCodeTotal['rem']) ? $dueDateCodeTotal['rem'] : 0));
-                    $worksheet->setCellValue('L' . ($start_row + 1), (!empty($dueDateCodeTotal['flow_rate']) ? $dueDateCodeTotal['flow_rate'] : 0));
-                    $worksheet->setCellValue('M' . ($start_row + 1), (!empty($dueDateCodeTotal['col_ratio']) ? $dueDateCodeTotal['col_ratio'] : 0));
                     $worksheet->setCellValue('N' . ($start_row + 1), (!empty($dueDateCodeTotal['inci_amt']) ? $dueDateCodeTotal['inci_amt'] : 0));
                     $worksheet->setCellValue('O' . ($start_row + 1), (!empty($dueDateCodeTotal['col_amt']) ? $dueDateCodeTotal['col_amt'] : 0));
                     $worksheet->setCellValue('P' . ($start_row + 1), (!empty($dueDateCodeTotal['rem_os']) ? $dueDateCodeTotal['rem_os'] : 0));
-                    $worksheet->setCellValue('Q' . ($start_row + 1), (!empty($dueDateCodeTotal['flow_rate_os']) ? $dueDateCodeTotal['flow_rate_os'] : 0));
-                    $worksheet->setCellValue('R' . ($start_row + 1), (!empty($dueDateCodeTotal['col_ratio_os']) ? $dueDateCodeTotal['col_ratio_os'] : 0));
 
                     $worksheet->getStyle('B' . ($start_row + 1) . ':R' .($start_row + 1))->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('FCE4D6');
                     $worksheet->getStyle('B' . ($start_row + 1) . ':R' . ($start_row + 1))->applyFromArray([

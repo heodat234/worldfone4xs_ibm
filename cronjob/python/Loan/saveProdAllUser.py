@@ -27,7 +27,7 @@ mongodb     = Mongodb(MONGODB="worldfone4xs", WFF_ENV=wff_env)
 _mongodb    = Mongodb(MONGODB="_worldfone4xs", WFF_ENV=wff_env)
 
 subUserType = 'LO'
-collection                      = common.getSubUser(subUserType, 'Daily_all_user_report_temp')
+collection                      = common.getSubUser(subUserType, 'Daily_all_user_report')
 group_collection                = common.getSubUser(subUserType, 'Group')
 product_collection              = common.getSubUser(subUserType, 'Product')
 report_due_date_collection      = common.getSubUser(subUserType, 'Report_due_date')
@@ -160,11 +160,22 @@ try:
                       }
 
                       # members
-                      member_arr = []
                       count_member = len(unique_members)
+                      member_arr = []
+                      member_arr_sort = []
                       for member in list(unique_members):
+                          temp_member = [member]
+                          users = _mongodb.getOne(MONGO_COLLECTION=user_collection,WHERE={'extension': str(member)}, SELECT=['extension','agentname'])
+                          if users != None:
+                              temp_member.append(users['agentname'])
+
+                          member_arr_sort.append(temp_member)
+
+                      sorted_l = sorted(member_arr_sort, key=lambda x: x[1])
+                      for members in list(sorted_l):
+                          member = members[0]
                           temp_member = {
-                              'name'           : '',
+                              'name'           : members[1],
                               'group'          : debtGroupCell[0:1],
                               'team'           : i,
                               'date'           : todayTimeStamp,
@@ -188,27 +199,45 @@ try:
                               'count_ptp_all_days'        : 0,
                               'paid_amount_all_days'      : 0,
                           }
-                          users = _mongodb.getOne(MONGO_COLLECTION=user_collection,WHERE={'extension': str(member)}, SELECT=['extension','agentname'])
-                          if users != None:
-                              temp_member['name'] = users['agentname']
-
+                          
                           # account assign
-                          aggregate_diallist = [
-                              {
-                                  "$match":
-                                  {
-                                      "createdAt": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
-                                      "assign": str(member),
-                                  }
-                              },{
-                                  "$group":
-                                  {
-                                      "_id": 'null',
-                                      "acc_arr": {'$addToSet': '$account_number'},
-                                      "count_data": {'$sum': 1}
-                                  }
-                              }
-                          ]
+                          if groupProduct['value'] == 'SIBS':
+                            aggregate_diallist = [
+                                {
+                                    "$match":
+                                    {
+                                        "createdAt": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
+                                        "assign": str(member),
+                                        # "Donotcall": "N", 
+                                        # "DonotcallBy": {'$exists': 'true'}, 
+                                        "$or": [{"Donotcall": "N"}, {"Donotcall": "Y", "DonotcallBy": {'$exists':'true'}}]
+                                    }
+                                },{
+                                    "$group":
+                                    {
+                                        "_id": 'null',
+                                        "acc_arr": {'$addToSet': '$account_number'},
+                                        "count_data": {'$sum': 1}
+                                    }
+                                }
+                            ]
+                          else:
+                            aggregate_diallist = [
+                                {
+                                    "$match":
+                                    {
+                                        "createdAt": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
+                                        "assign": str(member),
+                                    }
+                                },{
+                                    "$group":
+                                    {
+                                        "_id": 'null',
+                                        "acc_arr": {'$addToSet': '$account_number'},
+                                        "count_data": {'$sum': 1}
+                                    }
+                                }
+                            ]
                           diallistData = mongodb.aggregate_pipeline(MONGO_COLLECTION=diallist_detail_collection,aggregate_pipeline=aggregate_diallist)
                           account_assign_arr = []
                           if diallistData != None:
@@ -218,100 +247,31 @@ try:
                           
 
                           # unwork
-                          aggregate_diallist = [
+                          aggregate_contacted = [
                               {
                                   "$match":
                                   {
                                       "createdAt": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
-                                      "assigns": str(member),
-                                      "mode" : "manual"
+                                      "assign": str(member),
+                                      "callResult" : {'$exists': 'true'},
+                                      "callResult.userextension": str(member)
                                   }
                               },{
                                   "$group":
                                   {
                                       "_id": 'null',
-                                      "diallist_id_arr": {'$push': '$_id'},
+                                      "count_work": {'$sum': 1},
                                   }
                               }
                           ]
-                          diallistData = mongodb.aggregate_pipeline(MONGO_COLLECTION=diallist_collection,aggregate_pipeline=aggregate_diallist)
-                          diallist_id_arr = []
-                          if diallistData != None:
-                              for row in diallistData:
-                                  diallist_id_arr          = row['diallist_id_arr']
+                          contactData = mongodb.aggregate_pipeline(MONGO_COLLECTION=diallist_detail_collection,aggregate_pipeline=aggregate_contacted)
+                          count_work = 0
+                          if contactData != None:
+                              for row in contactData:
+                                  count_work                  = row['count_work']
 
-                          aggregate_diallist = [
-                              {
-                                  "$match":
-                                  {
-                                      "createdAt": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
-                                      "diallist_id": {'$in' : diallist_id_arr},
-                                      "assign": str(member)
-                                  }
-                              },{
-                                  "$group":
-                                  {
-                                      "_id": 'null',
-                                      "count_acc_manual": {'$sum': 1}
-                                  }
-                              }
-                          ]
-                          diallistData_1 = mongodb.aggregate_pipeline(MONGO_COLLECTION=diallist_detail_collection,aggregate_pipeline=aggregate_diallist)
-                          count_acc_manual = 0
-                          if diallistData_1 != None:
-                              for row in diallistData_1:
-                                  count_acc_manual          = row['count_acc_manual']
-
-
-                          aggregate_cdr_manual = [
-                              {
-                                  "$match":
-                                  {
-                                      "starttime": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
-                                      "userextension": str(member),
-                                      '$or' : [ { "dialtype" : {'$in' : ['manual', '']} }, {"dialtype" : {'$exists' : 'false'} }],
-                                      "direction" : "outbound"
-                                  }
-                              },{
-                                  "$group":
-                                  {
-                                      "_id": 'null',
-                                      "count_conn": {'$sum': 1},
-                                      "phone_manual_arr": {'$addToSet': '$customernumber'},
-                                  }
-                              }
-                          ]
-                          cdrManualData = mongodb.aggregate_pipeline(MONGO_COLLECTION=cdr_collection,aggregate_pipeline=aggregate_cdr_manual)
-                          phone_manual_arr = []
-                          if cdrManualData != None:
-                              for row in cdrManualData:
-                                  phone_manual_arr            = row['phone_manual_arr']
-
-                          aggregate_cdr_manual_1 = [
-                              {
-                                  "$match":
-                                  {
-                                      "createdAt": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
-                                      "assign" : str(member),
-                                      '$or' : [ { "mobile_num" : {'$in' : phone_manual_arr} }, {"phone" : {'$in' : phone_manual_arr} }, {"other_phones" : {'$in' : phone_manual_arr}}]
-                                  }
-                              },{
-                                  "$group":
-                                  {
-                                      "_id": 'null',
-                                      "count_acc_manual_cdr": {'$sum': 1}
-                                  }
-                              }
-                          ]
-                          accountData1 = mongodb.aggregate_pipeline(MONGO_COLLECTION=diallist_detail_collection,aggregate_pipeline=aggregate_cdr_manual_1)
-                          count_acc_manual_cdr = 0
-                          if accountData1 != None:
-                              for row in accountData1:
-                                  count_acc_manual_cdr          = row['count_acc_manual_cdr']
-
-                          temp_member['unwork']             = count_acc_manual - count_acc_manual_cdr
-                          temp_member['work']               = temp_member['count_data'] - temp_member['unwork']
-
+                          temp_member['work']               = count_work
+                          temp_member['unwork']             = temp_member['count_data'] - count_work
 
                           # talk time
                           aggregate_cdr = [
@@ -342,25 +302,40 @@ try:
                               {
                                   "$match":
                                   {
-                                      "createdAt": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
-                                      "assign": str(member),
-                                      "callResult" : {'$exists': True},
-                                  }
-                              },{
-                                  "$group":
-                                  {
-                                      "_id": 'null',
-                                      "count_contacted": {'$sum': 1},
-                                      "acc_contact_arr": {'$addToSet': '$account_number'},
+                                      "starttime": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
+                                      "userextension": str(member),
+                                      "direction" : "outbound"
                                   }
                               }
+                              # ,{
+                              #     "$group":
+                              #     {
+                              #         "_id": 'null',
+                              #         "phone_contact_arr": {'$addToSet': '$customernumber'},
+                              #         "dialid_arr": {'$addToSet': '$dialid'},
+                              #     }
+                              # }
                           ]
-                          contactData = mongodb.aggregate_pipeline(MONGO_COLLECTION=diallist_detail_collection,aggregate_pipeline=aggregate_contacted)
-                          customernumber_arr = []
+                          contactData = mongodb.aggregate_pipeline(MONGO_COLLECTION=cdr_collection,aggregate_pipeline=aggregate_contacted)
+                          acc_contact_arr_temp = []
                           if contactData != None:
-                              for row in contactData:
-                                  customernumber_arr                  = row['acc_contact_arr']
-                                  temp_member['count_contacted']      = row['count_contacted']
+                              for cdr in contactData:
+                                diallistInfo = None
+                                if 'dialid' in cdr.keys():
+                                  if len(str(cdr['dialid'])) == 24:
+                                    diallistInfo = mongodb.getOne(MONGO_COLLECTION=diallist_detail_collection, WHERE={'_id': ObjectId(str(cdr['dialid'])),  "createdAt" : {'$gte' : yesterdayTimeStamp,'$lte' : endYesterdayTimeStamp}}) 
+                                  else:
+                                    diallistInfo = mongodb.getOne(MONGO_COLLECTION=diallist_detail_collection, WHERE={'$or' : [{ 'mobile_num' : str(cdr['customernumber'])}, { 'phone' : str(cdr['customernumber'])},  { 'other_phones' :str(cdr['customernumber'])} ],  "createdAt" : {'$gte' : yesterdayTimeStamp,'$lte' : endYesterdayTimeStamp} }) 
+
+                                if 'dialid' not in cdr.keys():
+                                  diallistInfo = mongodb.getOne(MONGO_COLLECTION=diallist_detail_collection, WHERE={'$or' : [{ 'mobile_num' : str(cdr['customernumber'])}, { 'phone' : str(cdr['customernumber'])},  { 'other_phones' :str(cdr['customernumber'])} ],  "createdAt" : {'$gte' : yesterdayTimeStamp,'$lte' : endYesterdayTimeStamp} }) 
+
+                                if diallistInfo != None:
+                                  acc_contact_arr_temp.append(diallistInfo['account_number'])
+
+                          set_acc_contact = set(acc_contact_arr_temp) 
+                          acc_contact_arr = list(set_acc_contact)
+                          temp_member['count_contacted']      = len(acc_contact_arr)
 
                           # call made
                           calMade = mongodb.count(MONGO_COLLECTION=cdr_collection, WHERE={'disposition': 'ANSWERED', "direction" : "outbound", "userextension": str(member), "starttime": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp}} )
@@ -380,108 +355,75 @@ try:
                                   {
                                       "starttime": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
                                       "userextension": str(member),
-                                      "disposition" : 'ANSWERED',
+                                      "disposition" : "ANSWERED",
                                       "direction" : "outbound"
-                                      # '$or' : [ { 'action_code' :  {'$in' : action_code}}, {'customer.action_code' :  {'$in' : action_code}}]
-                                  }
-                              },{
-                                  "$group":
-                                  {
-                                      "_id": 'null',
-                                      "count_conn": {'$sum': 1},
-                                      "phone_ans_arr": {'$addToSet': '$customernumber'},
                                   }
                               }
                           ]
                           cdrAnsData = mongodb.aggregate_pipeline(MONGO_COLLECTION=cdr_collection,aggregate_pipeline=aggregate_cdr_ans)
-                          phone_ans_arr = []
-                          if cdrAnsData != None:
-                              for row in cdrAnsData:
-                                  phone_ans_arr            = row['phone_ans_arr']
-
-                          aggregate_cdr_ans_1 = [
-                              {
-                                  "$match":
-                                  {
-                                      "createdAt": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
-                                      "assign" : str(member),
-                                      "action_code" : {'$in' : action_code},
-                                      '$or' : [ { "mobile_num" : {'$in' : phone_ans_arr} }, {"phone" : {'$in' : phone_ans_arr} }, {"other_phones" : {'$in' : phone_ans_arr}}]
-                                  }
-                              },{
-                                  "$group":
-                                  {
-                                      "_id": 'null',
-                                      "account_ans_arr": {'$addToSet': '$account_number'},
-                                  }
-                              }
-                          ]
-                          accountData = mongodb.aggregate_pipeline(MONGO_COLLECTION=diallist_detail_collection,aggregate_pipeline=aggregate_cdr_ans_1)
                           acc_ans_arr = []
-                          if accountData != None:
-                              for row in accountData:
-                                  acc_ans_arr               = row['account_ans_arr']
-                                  temp_member['count_conn'] = len(row['account_ans_arr'])
-
+                          if cdrAnsData != None:
+                            for cdr in cdrAnsData:
+                              aggregate_pipeline_action = [
+                                {
+                                     "$match":
+                                     {
+                                         "calluuid" : cdr['calluuid'],
+                                         "action_code" : {'$in': action_code}
+                                     }
+                                },{
+                                     "$project":
+                                     {
+                                         "_id": 0,
+                                         # "LIC_NO": 0,
+                                         "account_number": 1,
+                                     }
+                                }
+                                      
+                              ]
+                              accountData = mongodb.aggregate_pipeline(MONGO_COLLECTION=action_code_collection,aggregate_pipeline=aggregate_pipeline_action)
+                              if accountData != None:
+                                for row in accountData:
+                                  temp_member['count_conn'] += 1
+                                  acc_ans_arr.append(row['account_number'])
 
 
                           # PTP
-                          aggregate_ptp = [
-                              {
-                                  "$match":
-                                  {
-                                      "createdAt": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
-                                      "account_number": {'$in': account_assign_arr},
-                                      '$or' : [ { 'action_code' :  'PTP'}, {'action_code' :  'PTP Today'}, {'action_code' :  'CHECK'}]
-                                  }
-                              },{
-                                  "$group":
-                                  {
-                                      "_id": 'null',
-                                      "acc_arr": {'$addToSet': '$account_number'},
-                                      "count_data": {'$sum': 1}
-                                  }
-                              }
-                          ]
-                          ptpData = mongodb.aggregate_pipeline(MONGO_COLLECTION=diallist_detail_collection,aggregate_pipeline=aggregate_ptp)
                           account_ptp_arr = []
-                          if ptpData != None:
-                            for row in ptpData:
-                                account_ptp_arr                     = row['acc_arr']
-                                temp_member['count_ptp']            = row['count_data']
+                          for acc in acc_contact_arr:
+                            where = {
+                                        "createdAt": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
+                                        "account_number": acc,
+                                        'action_code' :  {'$in': ['PTP','PTP Today', 'CHECK']}
+                            }
+                            actionCodeData = mongodb.get(MONGO_COLLECTION=action_code_collection, WHERE=where,SELECT=['account_number','createdBy'],SORT=[("_id", -1)], SKIP=0, TAKE=1)
+                            if actionCodeData != None:
+                              for row in actionCodeData:
+                                if row['createdBy'] == str(member):
+                                  account_ptp_arr.append(row['account_number'])
+                                  temp_member['count_ptp']            += 1
 
 
                           # PTP all days
-                          aggregate_ptp = [
-                              {
-                                  "$match":
-                                  {
-                                      "account_number": {'$in': account_assign_arr},
-                                      '$or' : [ { 'action_code' :  'PTP'}, {'action_code' :  'PTP Today'}, {'action_code' :  'CHECK'}]
-                                  }
-                              },{
-                                  "$group":
-                                  {
-                                      "_id": 'null',
-                                      "acc_arr": {'$addToSet': '$account_number'},
-                                      # "count_data": {'$sum': 1}
-                                  }
-                              }
-                          ]
-                          ptpData = mongodb.aggregate_pipeline(MONGO_COLLECTION=diallist_detail_collection,aggregate_pipeline=aggregate_ptp)
                           account_ptp_all_days_arr = []
-                          if ptpData != None:
-                            for row in ptpData:
-                                account_ptp_all_days_arr            = row['acc_arr']
-                                # temp_member['count_ptp']            = row['count_data']
-                          
+                          for acc in acc_contact_arr:
+                            where = {
+                                        "account_number": acc,
+                                        'action_code' :  {'$in': ['PTP','PTP Today', 'CHECK']}
+                            }
+                            actionCodeData = mongodb.get(MONGO_COLLECTION=action_code_collection, WHERE=where,SELECT=['account_number','createdBy'],SORT=[("_id", -1)], SKIP=0, TAKE=1)
+                            if actionCodeData != None:
+                              for row in actionCodeData:
+                                if row['createdBy'] == str(member):
+                                  account_ptp_all_days_arr.append(row['account_number'])
+
 
                           if groupProduct['value'] == 'SIBS':
                               aggregate_cdr_amt = [
                                   {
                                       "$match":
                                       {
-                                          "account_number": {'$in': customernumber_arr},
+                                          "account_number": {'$in': acc_contact_arr},
                                       }
                                   },{
                                       "$group":
@@ -620,7 +562,7 @@ try:
                                   {
                                       "$match":
                                       {
-                                          "account_number": {'$in': customernumber_arr},
+                                          "account_number": {'$in': acc_contact_arr},
                                       }
                                   },{
                                       "$group":
@@ -889,11 +831,22 @@ try:
 
                       # members
                       member_arr = []
-                      members = teams['members']
-                      # members = members.sort()
-                      for member in members:
+                      list_members = teams['members']
+                      member_arr_sort = []
+                      for member in list_members:
+                          temp_member = [member]
+                          users = _mongodb.getOne(MONGO_COLLECTION=user_collection,WHERE={'extension': str(member)}, SELECT=['extension','agentname'])
+                          if users != None:
+                              temp_member.append(users['agentname'])
+
+                          member_arr_sort.append(temp_member)
+
+                      sorted_l = sorted(member_arr_sort, key=lambda x: x[1])
+
+                      for members in sorted_l:
+                          member = members[0]
                           temp_member = {
-                              'name'           : '',
+                              'name'           : members[1],
                               'group'          : debtGroupCell[0:1],
                               'team'           : i,
                               'date'           : todayTimeStamp,
@@ -917,10 +870,7 @@ try:
                               'count_ptp_all_days'        : 0,
                               'paid_amount_all_days'      : 0,
                           }
-                          users = _mongodb.getOne(MONGO_COLLECTION=user_collection,WHERE={'extension': str(member)}, SELECT=['extension','agentname'])
-                          if users != None:
-                              temp_member['name'] = users['agentname']
-
+                          
                           # account assign
                           aggregate_diallist = [
                               {
@@ -948,81 +898,32 @@ try:
                           
                          
                           # unwork
-                          aggregate_diallist = [
-                              {
-                                  "$match":
-                                  {
-                                      'group_name' : {'$regex' : groupProduct['text'] + '/Group ' + debtGroupCell[0:1] + '/'+ debtGroupCell},
-                                      "createdAt": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
-                                      "assigns": str(member),
-                                      "mode" : "manual"
-                                  }
-                              },{
-                                  "$group":
-                                  {
-                                      "_id": 'null',
-                                      "diallist_id_arr": {'$push': '$_id'},
-                                  }
-                              }
-                          ]
-                          diallistData = mongodb.aggregate_pipeline(MONGO_COLLECTION=diallist_collection,aggregate_pipeline=aggregate_diallist)
-                          diallist_id_arr = []
-                          if diallistData != None:
-                              for row in diallistData:
-                                  diallist_id_arr          = row['diallist_id_arr']
-
-                          aggregate_diallist = [
+                          aggregate_contacted = [
                               {
                                   "$match":
                                   {
                                       "createdAt": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
-                                      "diallist_id": {'$in' : diallist_id_arr},
-                                      "assign": str(member)
+                                      "assign": str(member),
+                                      # "diallist_id" : teams['_id'],
+                                      "callResult" : {'$exists': 'true'},
+                                      "callResult.userextension": str(member)
                                   }
                               },{
                                   "$group":
                                   {
                                       "_id": 'null',
-                                      "count_acc_manual": {'$sum': 1}
+                                      "count_work": {'$sum': 1},
                                   }
                               }
                           ]
-                          diallistData_1 = mongodb.aggregate_pipeline(MONGO_COLLECTION=diallist_detail_collection,aggregate_pipeline=aggregate_diallist)
-                          count_acc_manual = 0
-                          if diallistData_1 != None:
-                              for row in diallistData_1:
-                                  count_acc_manual          = row['count_acc_manual']
+                          contactData = mongodb.aggregate_pipeline(MONGO_COLLECTION=diallist_detail_collection,aggregate_pipeline=aggregate_contacted)
+                          count_work = 0
+                          if contactData != None:
+                              for row in contactData:
+                                  count_work                  = row['count_work']
 
-
-                          aggregate_cdr_manual = [
-                              {
-                                  "$match":
-                                  {
-                                      "starttime": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
-                                      "userextension": str(member),
-                                      '$or' : [ { "dialtype" : {'$in' : ['manual', '']} }, {"dialtype" : {'$exists' : False} }],
-                                      "direction" : "outbound",
-                                      "diallist_id" : teams['_id']
-                                  }
-                              },{
-                                  "$group":
-                                  {
-                                      "_id": 'null',
-                                      "count_conn": {'$sum': 1},
-                                      "account_cdr_arr": {'$addToSet': '$account_number'},
-                                  }
-                              }
-                          ]
-                          cdrManualData = mongodb.aggregate_pipeline(MONGO_COLLECTION=cdr_collection,aggregate_pipeline=aggregate_cdr_manual)
-                          count_acc_manual_cdr = 0
-                          if cdrManualData != None:
-                              for row in cdrManualData:
-                                  count_acc_manual_cdr             = len(row['phone_manual_arr'])
-
-
-                          temp_member['unwork']             = count_acc_manual - count_acc_manual_cdr
-                          temp_member['work']               = temp_member['count_data'] - temp_member['unwork']
-
+                          temp_member['work']               = count_work
+                          temp_member['unwork']             = temp_member['count_data'] - count_work
 
                           # talk time
                           aggregate_cdr = [
@@ -1032,7 +933,7 @@ try:
                                       "starttime" : {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
                                       "direction" : "outbound",
                                       "userextension": str(member),
-                                      "diallist_id" : teams['_id']
+                                      # "diallist_id" : teams['_id'],
                                   }
                               },{
                                   "$group":
@@ -1057,30 +958,47 @@ try:
                                       "starttime": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
                                       "userextension": str(member),
                                       "direction" : "outbound",
-                                      "diallist_id" : teams['_id']
-                                  }
-                              },{
-                                  "$group":
-                                  {
-                                      "_id": 'null',
-                                      "count_contacted": {'$sum': 1},
-                                      "acc_contact_arr": {'$addToSet': '$account_number'},
+                                      # "diallist_id" : teams['_id'],
                                   }
                               }
+                              # ,{
+                              #     "$group":
+                              #     {
+                              #         "_id": 'null',
+                              #         "phone_contact_arr": {'$addToSet': '$customernumber'},
+                              #         "dialid_arr": {'$addToSet': '$dialid'},
+                              #     }
+                              # }
                           ]
                           contactData = mongodb.aggregate_pipeline(MONGO_COLLECTION=cdr_collection,aggregate_pipeline=aggregate_contacted)
-                          customernumber_arr = []
+                          acc_contact_arr_temp = []
                           if contactData != None:
-                              for row in contactData:
-                                  customernumber_arr                  = row['acc_contact_arr']
-                                  temp_member['count_contacted']      = row['count_contacted']
+                              for cdr in contactData:
+                                diallistInfo = None
+                                if 'dialid' in cdr.keys():
+                                  if len(str(cdr['dialid'])) == 24:
+                                    diallistInfo = mongodb.getOne(MONGO_COLLECTION=diallist_detail_collection, WHERE={'_id': ObjectId(str(cdr['dialid'])),  "createdAt" : {'$gte' : yesterdayTimeStamp,'$lte' : endYesterdayTimeStamp}}) 
+                                  else:
+                                    diallistInfo = mongodb.getOne(MONGO_COLLECTION=diallist_detail_collection, WHERE={'$or' : [{ 'mobile_num' : str(cdr['customernumber'])}, { 'phone' : str(cdr['customernumber'])},  { 'other_phones' :str(cdr['customernumber'])} ],  "createdAt" : {'$gte' : yesterdayTimeStamp,'$lte' : endYesterdayTimeStamp} }) 
+
+                                if 'dialid' not in cdr.keys():
+                                  diallistInfo = mongodb.getOne(MONGO_COLLECTION=diallist_detail_collection, WHERE={'$or' : [{ 'mobile_num' : str(cdr['customernumber'])}, { 'phone' : str(cdr['customernumber'])},  { 'other_phones' :str(cdr['customernumber'])} ],  "createdAt" : {'$gte' : yesterdayTimeStamp,'$lte' : endYesterdayTimeStamp} }) 
+
+                                if diallistInfo != None:
+                                  acc_contact_arr_temp.append(diallistInfo['account_number'])
+
+                          set_acc_contact = set(acc_contact_arr_temp) 
+                          acc_contact_arr = list(set_acc_contact)
+                          temp_member['count_contacted']      = len(acc_contact_arr)
+                                  
+
 
                           # call made
-                          calMade = mongodb.count(MONGO_COLLECTION=cdr_collection, WHERE={'disposition': 'ANSWERED', "direction" : "outbound", "userextension": str(member),"diallist_id" : teams['_id'],  "starttime": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp}} )
+                          calMade = mongodb.count(MONGO_COLLECTION=cdr_collection, WHERE={'disposition': 'ANSWERED', "direction" : "outbound", "userextension": str(member),  "starttime": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp}} )
                           if calMade > 0:
                             temp_member['number_of_call'] = calMade
 
-                          totalCall = mongodb.count(MONGO_COLLECTION=cdr_collection, WHERE={ "direction" : "outbound", "userextension": str(member), "diallist_id" : teams['_id'], "starttime": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp}} )
+                          totalCall = mongodb.count(MONGO_COLLECTION=cdr_collection, WHERE={ "direction" : "outbound", "userextension": str(member), "starttime": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp}} )
                           if totalCall > 0:
                             temp_member['total_call'] = totalCall
 
@@ -1093,99 +1011,69 @@ try:
                                   {
                                       "starttime": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
                                       "userextension": str(member),
-                                      "disposition" : 'ANSWERED',
-                                      "diallist_id" : teams['_id']
-                                  }
-                              },{
-                                  "$group":
-                                  {
-                                      "_id": 'null',
-                                      "count_conn": {'$sum': 1},
-                                      "phone_ans_arr": {'$addToSet': '$customernumber'},
+                                      "disposition" : "ANSWERED",
+                                      "direction" : "outbound",
+                                      # "diallist_id" : teams['_id'],
                                   }
                               }
                           ]
                           cdrAnsData = mongodb.aggregate_pipeline(MONGO_COLLECTION=cdr_collection,aggregate_pipeline=aggregate_cdr_ans)
-                          phone_ans_arr = []
-                          if cdrAnsData != None:
-                              for row in cdrAnsData:
-                                  phone_ans_arr            = row['phone_ans_arr']
-
-                          aggregate_cdr_ans_1 = [
-                              {
-                                  "$match":
-                                  {
-                                      "createdAt": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
-                                      "assign" : str(member),
-                                      "action_code" : {'$in' : action_code},
-                                      "diallist_id": teams['_id'],
-                                      '$or' : [ { "mobile_num" : {'$in' : phone_ans_arr} }, {"phone" : {'$in' : phone_ans_arr} }, {"other_phones" : {'$in' : phone_ans_arr}}]
-                                  }
-                              },{
-                                  "$group":
-                                  {
-                                      "_id": 'null',
-                                      "account_ans_arr": {'$addToSet': '$account_number'},
-                                  }
-                              }
-                          ]
-                          accountData = mongodb.aggregate_pipeline(MONGO_COLLECTION=diallist_detail_collection,aggregate_pipeline=aggregate_cdr_ans_1)
                           acc_ans_arr = []
-                          if accountData != None:
-                              for row in accountData:
-                                  acc_ans_arr               = row['account_ans_arr']
-                                  temp_member['count_conn'] = len(row['account_ans_arr'])
+                          if cdrAnsData != None:
+                            for cdr in cdrAnsData:
+                              aggregate_pipeline_action = [
+                                {
+                                     "$match":
+                                     {
+                                         "calluuid" : cdr['calluuid'],
+                                         "action_code" : {'$in': action_code}
+                                     }
+                                },{
+                                     "$project":
+                                     {
+                                         "_id": 0,
+                                         # "LIC_NO": 0,
+                                         "account_number": 1,
+                                     }
+                                }
+                                      
+                              ]
+                              accountData = mongodb.aggregate_pipeline(MONGO_COLLECTION=action_code_collection,aggregate_pipeline=aggregate_pipeline_action)
+                              if accountData != None:
+                                for row in accountData:
+                                  temp_member['count_conn'] += 1
+                                  acc_ans_arr.append(row['account_number'])
 
+                          
 
                           # PTP
-                          aggregate_ptp = [
-                              {
-                                  "$match":
-                                  {
-                                      "createdAt": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
-                                      "account_number": {'$in': account_assign_arr},
-                                      "diallist_id": teams['_id'],
-                                      '$or' : [ { 'action_code' :  'PTP'}, {'action_code' :  'PTP Today'}, {'action_code' :  'CHECK'}]
-                                  }
-                              },{
-                                  "$group":
-                                  {
-                                      "_id": 'null',
-                                      "acc_arr": {'$addToSet': '$account_number'},
-                                      "count_data": {'$sum': 1}
-                                  }
-                              }
-                          ]
-                          ptpData = mongodb.aggregate_pipeline(MONGO_COLLECTION=diallist_detail_collection,aggregate_pipeline=aggregate_ptp)
                           account_ptp_arr = []
-                          if ptpData != None:
-                            for row in ptpData:
-                                account_ptp_arr                     = row['acc_arr']
-                                temp_member['count_ptp']            = row['count_data']
+                          for acc in acc_contact_arr:
+                            where = {
+                                        "createdAt": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp},
+                                        "account_number": acc,
+                                        'action_code' :  {'$in': ['PTP','PTP Today', 'CHECK']}
+                            }
+                            actionCodeData = mongodb.get(MONGO_COLLECTION=action_code_collection, WHERE=where,SELECT=['account_number','createdBy'],SORT=[("_id", -1)], SKIP=0, TAKE=1)
+                            if actionCodeData != None:
+                              for row in actionCodeData:
+                                if row['createdBy'] == str(member):
+                                  account_ptp_arr.append(row['account_number'])
+                                  temp_member['count_ptp']            += 1
 
 
                           # PTP all days
-                          aggregate_ptp = [
-                              {
-                                  "$match":
-                                  {
-                                      "account_number": {'$in': account_assign_arr},
-                                      "diallist_id": teams['_id'],
-                                      '$or' : [ { 'action_code' :  'PTP'}, {'action_code' :  'PTP Today'}, {'action_code' :  'CHECK'}]
-                                  }
-                              },{
-                                  "$group":
-                                  {
-                                      "_id": 'null',
-                                      "acc_arr": {'$addToSet': '$account_number'},
-                                  }
-                              }
-                          ]
-                          ptpData = mongodb.aggregate_pipeline(MONGO_COLLECTION=diallist_detail_collection,aggregate_pipeline=aggregate_ptp)
                           account_ptp_all_days_arr = []
-                          if ptpData != None:
-                            for row in ptpData:
-                                account_ptp_all_days_arr            = row['acc_arr']
+                          for acc in acc_contact_arr:
+                            where = {
+                                        "account_number": acc,
+                                        'action_code' :  {'$in': ['PTP','PTP Today', 'CHECK']}
+                            }
+                            actionCodeData = mongodb.get(MONGO_COLLECTION=action_code_collection, WHERE=where,SELECT=['account_number','createdBy'],SORT=[("_id", -1)], SKIP=0, TAKE=1)
+                            if actionCodeData != None:
+                              for row in actionCodeData:
+                                if row['createdBy'] == str(member):
+                                  account_ptp_all_days_arr.append(row['account_number'])
                           
 
                           if groupProduct['value'] == 'SIBS':
@@ -1193,7 +1081,7 @@ try:
                                   {
                                       "$match":
                                       {
-                                          "account_number": {'$in': customernumber_arr},
+                                          "account_number": {'$in': acc_contact_arr},
                                       }
                                   },{
                                       "$group":
@@ -1338,7 +1226,7 @@ try:
                                   {
                                       "$match":
                                       {
-                                          "account_number": {'$in': customernumber_arr},
+                                          "account_number": {'$in': acc_contact_arr},
                                       }
                                   },{
                                       "$group":

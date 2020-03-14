@@ -545,3 +545,9 @@
 04/02/2020, 14:28:37: 'group_id'
 04/02/2020, 14:34:44: Start Import
 04/02/2020, 14:41:20: End Log
+28/02/2020, 16:38:36: Start Import
+28/02/2020, 16:38:36: name 'product_id' is not defined
+28/02/2020, 16:41:01: Start Import
+28/02/2020, 16:58:00: End Log
+05/03/2020, 13:59:18: Start Import
+05/03/2020, 14:12:41: End Log

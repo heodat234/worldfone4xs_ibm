@@ -39,6 +39,7 @@ group_collection        = common.getSubUser(subUserType, 'Group')
 target_collection       = common.getSubUser(subUserType, 'Target_of_report')
 report_due_date_collection              = common.getSubUser(subUserType, 'Report_due_date')
 due_date_next_date_group_collection     = common.getSubUser(subUserType, 'Due_date_next_date_by_group')
+diallist_detail_collection     = common.getSubUser(subUserType, 'Diallist_detail')
 
 log = open(base_url + "cronjob/python/Loan/log/saveDailyProdProdEachUserGroup.txt","a")
 now = datetime.now()
@@ -155,9 +156,29 @@ try:
                         # temp['flow_rate_' + key]    = 0
                         # temp['flow_rate_amt_' + key] = 0
 
+                    aggregate_diallist = [
+                        {
+                            "$match":
+                            {
+                                  "createdAt": {'$gte': todayTimeStamp, '$lte': endTodayTimeStamp},
+                                  "account_number": {'$in': acc_arr},
+                            }
+                        },{
+                          "$group":
+                          {
+                              "_id": 'null',
+                              "count_col": {'$sum': 1},
+                          }
+                        }
+                    ]
+                    diallistData = mongodb.aggregate_pipeline(MONGO_COLLECTION=diallist_detail_collection,aggregate_pipeline=aggregate_diallist)
+                    if diallistData != None:
+                        for row in diallistData:
+                            col_today            = row['count_col']
 
                     due_date_add_2 = temp['due_date'] + 86400*2
                     if groupProduct['value'] == 'SIBS':
+
                         aggregate_ln3206 = [
                             {
                                 "$match":
@@ -178,11 +199,36 @@ try:
                         ln3206fData = mongodb.aggregate_pipeline(MONGO_COLLECTION=ln3206f_collection,aggregate_pipeline=aggregate_ln3206)
                         if ln3206fData != None:
                             for row in ln3206fData:
-                                temp['col']            = len(row['count_col'] )
+                                # temp['col']            = len(row['count_col'] )
                                 temp['col_amt']        = round(row['sum_amount']/1000)
 
 
                         for key, value in mainProduct.items():
+                            col_product_today = 0
+                            aggregate_diallist = [
+                                {
+                                    "$match":
+                                    {
+                                          "createdAt": {'$gte': todayTimeStamp, '$lte': endTodayTimeStamp},
+                                          "account_number": {'$in': acc_arr},
+                                          "PRODGRP_ID" : key
+                                    }
+                                },{
+                                  "$group":
+                                  {
+                                      "_id": 'null',
+                                      "count_col": {'$sum': 1},
+                                  }
+                                }
+                            ]
+                            diallistInfo = mongodb.aggregate_pipeline(MONGO_COLLECTION=diallist_detail_collection,aggregate_pipeline=aggregate_diallist)
+                            if diallistData != None:
+                                for row in diallistData:
+                                    col_product_today            = row['count_col']
+
+                            temp['col_' + key]  = temp['inci_' + key]  - col_product_today
+
+
                             aggregate_zaccf = [
                                 {
                                     "$match":
@@ -225,10 +271,12 @@ try:
                             ln3206fData = mongodb.aggregate_pipeline(MONGO_COLLECTION=ln3206f_collection,aggregate_pipeline=aggregate_ln3206)
                             if ln3206fData != None:
                                 for row in ln3206fData:
-                                    temp['col_' + key]          = len(row['count_col'])
+                                    # temp['col_' + key]          = len(row['count_col'])
                                     temp['col_amt_' + key]      = round(row['sum_amount']/1000)
 
                         
+
+                        temp['col']             = temp['inci'] - col_today
                         temp['rem']             = temp['inci'] - temp['col']
                         temp['col_ratio']       = temp['col'] / temp['inci'] if temp['inci'] != 0 else 0
                         temp['col_ratio_amt']   = temp['col_amt'] / temp['inci_amt'] if temp['inci_amt'] != 0 else 0
@@ -236,7 +284,10 @@ try:
                         temp['flow_rate']       = temp['rem'] / temp['inci'] if temp['inci'] != 0 else 0
                         temp['flow_rate_amt']   = temp['rem_amt'] / temp['inci_amt'] if temp['inci_amt'] != 0 else 0
 
+                    
+
                     if groupProduct['value'] == 'Card':
+
                         code = ['2000','2100','2700']
                         for row_acc in acc_arr:
                             aggregate_gl = [
@@ -269,17 +320,19 @@ try:
                                         code_2700 += row['amount']
                                 sum_code = code_2000 - code_2700
                                 if sum_code > 0:
-                                    temp['col']             += 1
+                                    # temp['col']             += 1
                                     temp['col_amt']         += sum_code
-                                    temp['col_301']         += 1
+                                    # temp['col_301']         += 1
                                     temp['col_amt_301']     += sum_code
 
 
-                        temp['col_amt']     = round(temp['col_amt']/1000)
+                        temp['col']             = temp['inci'] - col_today
+                        temp['col_301']         = temp['col']
+                        temp['col_amt']         = round(temp['col_amt']/1000)
                         temp['col_amt_301']     = round(temp['col_amt_301']/1000)
-                        temp['rem']         = temp['inci'] - temp['col']
-                        temp['rem_amt']     = temp['inci_amt'] - temp['col_amt']
-                        temp['col_ratio']   = temp['col'] / temp['inci'] if temp['inci'] != 0 else 0
+                        temp['rem']             = temp['inci'] - temp['col']
+                        temp['rem_amt']         = temp['inci_amt'] - temp['col_amt']
+                        temp['col_ratio']       = temp['col'] / temp['inci'] if temp['inci'] != 0 else 0
                         temp['col_ratio_amt']   = temp['col_amt'] / temp['inci_amt'] if temp['inci_amt'] != 0 else 0
                         temp['flow_rate']       = temp['rem'] / temp['inci'] if temp['inci'] != 0 else 0
                         temp['flow_rate_amt']   = temp['rem_amt'] / temp['inci_amt'] if temp['inci_amt'] != 0 else 0
@@ -292,7 +345,6 @@ try:
                         debt_type = 'SIBS'
                     if debtGroupCell[0:1] == 'A':
                         targetInfo = mongodb.getOne(MONGO_COLLECTION=target_collection, WHERE={ 'duedate_type': str(debtGroupCell), 'debt_type': debt_type })
-                        # print(targetInfo)
                     else:
                         targetInfo = mongodb.getOne(MONGO_COLLECTION=target_collection, WHERE={ 'B_plus_duedate_type': debtGroupCell, 'debt_type': debt_type })
 

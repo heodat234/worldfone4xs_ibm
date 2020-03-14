@@ -127,7 +127,8 @@ try:
                for cell in row:
                   try:
                      if modelConverters[cell] == 'timestamp':
-                        temp[cell] = common.convertDataType(data=row[cell], datatype=modelConverters[cell], formatType="%Y-%m-%d %H:%M:%S")
+                        row[cell] = str(row[cell]).zfill(10)
+                        temp[cell] = common.convertDataType(data=row[cell], datatype='timestamp', formatType="%d/%m/%Y")
                      else:
                         temp[cell] = common.convertDataType(data=row[cell], datatype=modelConverters[cell], formatType=modelFormat[cell])
 
@@ -137,7 +138,7 @@ try:
                      temp['type'] = modelConverters[cell]
                      temp['error_mesg'] = 'Sai kiểu dữ liệu nhập'
                      temp['result'] = 'error'
-                     # pprint(temp)
+                     pprint('error')
                      result = False
                temp['created_by'] = 'system'
                temp['created_at'] = time.time()
@@ -176,7 +177,7 @@ try:
                      insertData.append(temp)
                      result = True
                      complete += 1
-
+                     
    if(len(errorData) > 0):
       mongodbresult.remove_document(MONGO_COLLECTION=common.getSubUser(subUserType, ('Lawsuit_' + str(year) + str(month) + str(day))))
       mongodbresult.batch_insert(common.getSubUser(subUserType, ('Lawsuit_' + str(year) + str(month) + str(day))), errorData)

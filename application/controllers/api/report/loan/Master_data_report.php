@@ -19,10 +19,10 @@ Class Master_data_report extends WFF_Controller {
     {
         try {
             $request = json_decode($this->input->get("q"), TRUE);
-            $date = date('d-m-Y');
+            // $date = date('d-m-Y');
             
-            $match = array('createdAt' => array('$gte' => strtotime($date)));
-            $response = $this->crud->read($this->collection, $request,array(),$match);
+            // $match = array('createdAt' => array('$gte' => strtotime($date)));
+            $response = $this->crud->read($this->collection, $request);
             echo json_encode($response);
 
         } catch (Exception $e) {

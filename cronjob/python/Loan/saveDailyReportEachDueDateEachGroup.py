@@ -162,7 +162,7 @@ try:
                             "$group":
                             {
                                 "_id": 'null',
-                                "acc_arr" : {'$addToSet' : 'account_number'},
+                                "acc_arr" : {'$addToSet' : '$account_number'},
                                 "total_amt": {'$sum': '$amt'},
                             }
                         }
@@ -170,12 +170,13 @@ try:
                     ln3206fInfo = mongodb.aggregate_pipeline(MONGO_COLLECTION=ln3206_collection,aggregate_pipeline=aggregate_ln3206)
                     if ln3206fInfo is not None:
                         for ln3206 in ln3206fInfo:
-                            temp['col'] = len(ln3206['acc_arr'])
-                            temp['amt'] = ln3206['total_amt']
+                            # temp['col'] = len(ln3206['acc_arr'])
+                            temp['amt'] = round(ln3206['total_amt']/1000)
 
 
-                    temp['col_prici']   = round((temp['inci_ob_principal'] - ob_principal_today)/1000)
-                    temp['col_amt']     = round((temp['inci_amt'] - amt_today)/1000)
+                    temp['col']         = temp['inci'] - col_today
+                    temp['col_prici']   = temp['inci_ob_principal'] - round(ob_principal_today/1000)
+                    temp['col_amt']     = temp['inci_amt'] - round(amt_today/1000)
 
                     temp['rem']         = temp['inci'] - temp['col']
                     temp['rem_amt']     = temp['inci_amt'] - temp['col_amt']
@@ -219,7 +220,7 @@ try:
                         {
                             "$match":
                             {
-                                "created_at": {'$gte': temp['due_date'], '$lte': todayTimeStamp},
+                                # "created_at": {'$gte': temp['due_date'], '$lte': todayTimeStamp},
                                 "contract_no": {'$in' : acc_card_arr }
                             }
                         },{
@@ -291,12 +292,14 @@ try:
                                code_2700 += row['amount']
                          sum_amount = code_2000 - code_2700
                          if sum_amount > 0:
-                          temp['col'] += 1
+                          # temp['col'] += 1
                           temp['amt'] += sum_amount
 
 
-                    temp['col_prici']   = round((temp['inci_ob_principal'] - ob_principal_today)/1000)
-                    temp['col_amt']     = round((temp['inci_amt'] - amt_today)/1000)
+                    temp['amt']         = round(temp['amt']/1000)
+                    temp['col']         = temp['inci'] - col_today
+                    temp['col_prici']   = temp['inci_ob_principal'] - round(ob_principal_today/1000)
+                    temp['col_amt']     = temp['inci_amt'] - round(amt_today/1000)
 
                     temp['rem']         = temp['inci'] - temp['col']
                     temp['rem_amt']     = temp['inci_amt'] - temp['col_amt']

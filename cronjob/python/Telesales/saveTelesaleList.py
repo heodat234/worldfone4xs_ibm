@@ -35,7 +35,7 @@ mongo_common = Mongo_common()
 log = open(base_url + "cronjob/python/Telesales/log/exportCallinglist.txt","a")
 now = datetime.now()
 subUserType = 'TS'
-collection = common.getSubUser(subUserType, 'Telesalelist_21022020')
+collection = common.getSubUser(subUserType, 'Telesalelist')
 
 try:
     total = 0

@@ -649,7 +649,7 @@ Class Daily_os_balance_group_report extends WFF_Controller {
                 $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 8, "=".$value['start_no']."-".$next_column.($start_row+4) );
 
                 $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 9, "=".$column.($start_row+7)."/".$value['start_os_bl'] );
-                $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 10, "=".$column.($start_row+8)."-".$value['start_no'] );
+                $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 10, "=".$column.($start_row+8)."/".$value['start_no'] );
                 
                 $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 12, "=".$next_column.($start_row+6)."-".$value['start_no']."+(".$value['start_no']."*".($value['target']/100).")");
             }

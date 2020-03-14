@@ -59,8 +59,8 @@ try:
     gr5 = 0
     g2 = 1
     total = 0
-    today = date.today()
-    # today = datetime.strptime('12/10/2019', "%d/%m/%Y").date()
+    # today = date.today()
+    today = datetime.strptime('01/03/2020', "%d/%m/%Y").date()
 
     day = today.day
     month = today.month
@@ -78,7 +78,8 @@ try:
     holidayOfMonth = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_off_sys'))
     listHoliday = map(lambda offDateRow: {offDateRow['off_date']}, holidayOfMonth)
 
-    if todayTimeStamp in listHoliday:
+    if day != 1:
+      print('stop!')  
       sys.exit()
 
     users = _mongodb.get(MONGO_COLLECTION=user_collection, SELECT=['extension','agentname'],SORT=([('_id', -1)]),SKIP=0, TAKE=200)
@@ -183,7 +184,7 @@ try:
                 temp["t_a"] = total_report[0]["t_a"]
                 temp["a"+product_value['code']] = total_report[0]["a"+product_value['code']]
                 temp['index'] = i 
-                temp['createdAt'] = time.time()
+                temp['createdAt'] = todayTimeStamp -3600 *36
         insertData.append(temp)
     
 
@@ -464,7 +465,7 @@ try:
                     temp1['t_g'] = str('{:05.2f}'.format(total_report1[0]["ttg_g2"]*100)) +"%"
                     temp1['t_a'] = str('{:05.2f}'.format(total_report1[0]["tta_g2"]*100)) +"%"
                     temp1['index'] = 20
-                    temp1['createdAt'] = time.time()
+                    temp1['createdAt'] = todayTimeStamp -3600 *36
                 elif gr == "G2~":
                     temp1['group'] = "G2~"
                     temp1["g"+product_value1['code']] = str('{:05.2f}'.format(total_report1[0]["g21_g"+product_value1['code']]*100))+"%"
@@ -472,7 +473,7 @@ try:
                     temp1['t_g'] = str('{:05.2f}'.format(total_report1[0]["ttg_g21"]*100)) +"%"
                     temp1['t_a'] = str('{:05.2f}'.format(total_report1[0]["tta_g21"]*100)) +"%"
                     temp1['index'] = 21
-                    temp1['createdAt'] = time.time()
+                    temp1['createdAt'] = todayTimeStamp -3600 *36
                 elif gr =="G3~":
                     temp1['group'] = "G3~"
                     temp1["g"+product_value1['code']] = str('{:05.2f}'.format(total_report1[0]["g3_g"+product_value1['code']]*100))+"%" 
@@ -480,7 +481,7 @@ try:
                     temp1['t_g'] = str('{:05.2f}'.format(total_report1[0]["ttg_g3"]*100)) +"%"
                     temp1['t_a'] = str('{:05.2f}'.format(total_report1[0]["tta_g3"]*100)) +"%"
                     temp1['index'] = 22
-                    temp1['createdAt'] = time.time()
+                    temp1['createdAt'] = todayTimeStamp -3600 *36
         # pprint(temp1)        
         insertData.append(temp1)
     
@@ -489,7 +490,7 @@ try:
     if len(insertData) > 0:
     
       mongodb.batch_insert(MONGO_COLLECTION=collection1, insert_data=insertData)
-      mongodb.remove_document(MONGO_COLLECTION=temp_collection)
+    #   mongodb.remove_document(MONGO_COLLECTION=temp_collection)
     now_end         = datetime.now()
     log.write(now_end.strftime("%d/%m/%Y, %H:%M:%S") + ': End Log' + '\n')
       

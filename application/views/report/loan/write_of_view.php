@@ -90,10 +90,14 @@
                       },
                       excelExport: function(e) {
                         var sheet = e.workbook.sheets[0];
-                        for (var rowIndex = 1; rowIndex < sheet.rows.length; rowIndex++) {
+                        for (var rowIndex = 0; rowIndex < sheet.rows.length; rowIndex++) {
                           var row = sheet.rows[rowIndex];
                           for (var cellIndex = 0; cellIndex < row.cells.length; cellIndex ++) {
                             //whatever you want to do with cells
+                            if (rowIndex ==0){
+                                row.cells[cellIndex].background = "#fff200";
+                                row.cells[cellIndex].color = "black";
+                            }
                           }
                           row.cells[5].format = "#,##0";
                           row.cells[6].format = "0%";

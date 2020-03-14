@@ -130,6 +130,14 @@ try:
                 
 
                 # Final No
+                if duedate_type[0:1] == 'A':
+                  nextDueDate = 'B'
+                if duedate_type[0:1] == 'B':
+                  nextDueDate = 'C'
+                if duedate_type[0:1] == 'C':
+                  nextDueDate = 'D'
+                if duedate_type[0:1] == 'D':
+                  nextDueDate = 'E'
                 aggregate_lnjc05_yesterday = [
                     {
                       "$match":
@@ -155,7 +163,7 @@ try:
                     {
                       "$match":
                       {
-                          "group_id": duedate_type,
+                          "group_id": nextDueDate + duedate_type[1:3],
                           "account_number" : {'$in' : acc_yesterday}
                       }
                     },{

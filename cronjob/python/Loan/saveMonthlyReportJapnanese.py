@@ -33,14 +33,21 @@ log = open(base_url + "cronjob/python/Loan/log/importSBV.txt","a")
 now = datetime.now()
 subUserType = 'LO'
 collection = common.getSubUser(subUserType, 'Monthly_report_japanese')
+colection_total = 'Collection_factors_total'
+colection_detail = 'Collection_factors_detail'
+zaccf_collection = 'ZACCF_report'
+sbv_collection ='SBV'
+# zaccf_collection = 'ZACCF_01032020'
+# sbv_collection ='SBV_01032020'
 try:
     total = 0
     complete = 0
     today = date.today()
-    # today = datetime.strptime('01/02/2020', "%d/%m/%Y").date()
+    # today = datetime.strptime('01/03/2020', "%d/%m/%Y").date()
     yesterday = today - timedelta(days=1)
     day = today.day
     month = today.month
+    # month = 2
     year = today.year
     weekday = today.weekday()
 
@@ -59,7 +66,9 @@ try:
     endMonthEndtime = int(time.mktime(time.strptime(str(str(lastDayOfMonth) + '/' + str(month) + '/' + str(year) + " 23:59:59"), "%d/%m/%Y %H:%M:%S")))
     endMonthStarttime = endMonthEndtime - 86399
     # lastMonthEndtime = int(time.mktime(time.strptime(str(str(lastDayOfMonth) + '/' + str(month) + '/' + str(year) + " 23:59:59"), "%d/%m/%Y %H:%M:%S")))
-    
+    exporttime = todayTimeStamp - 3600 * 72
+    # report_at = 
+
     first = today.replace(day=1)
     lastMonthLastDate = first - timedelta(days=1)
     lastMonthMonth = lastMonthLastDate.month
@@ -93,37 +102,30 @@ try:
     # if todayTimeStamp in listHoliday:
     #     sys.exit()
 
-    # Check hom nay co phai la ngay cuoi thang
-    if todayTimeStamp > endMonthStarttime or todayTimeStamp < endMonthEndtime:
+    # Check hom nay co phai la ngay dau thang
+    if day != 1:
+        print('die')
         sys.exit()
 
     todayString = today.strftime("%d/%m/%Y")
     starttime = int(time.mktime(time.strptime(str(todayString + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
     endtime = int(time.mktime(time.strptime(str(todayString + " 23:59:59"), "%d/%m/%Y %H:%M:%S")))
     
-    list_product = mongodb.get(common.getSubUser(subUserType, 'Product'), SORT=[("code", 1)])
+    list_product_group = list(mongodb.get(common.getSubUser(subUserType, 'Product_group'), SORT=[("group_code", 1)]))
 
     credit_card_range = list(map(lambda x: str(format(x, '03d')), range(1, 100, 1)))
 
-    for product_code, product_value in enumerate(list_product):
+    for product_code, product_value in enumerate(list_product_group):
         temp_group = {}
         # ZACCF
-        if product_value['code'] not in ['301', '302']:
+        if product_value['group_code'] not in ['300']:
+            list_product_code = list(common.array_column(product_value['product_code'], 'code'))
             aggregate_zaccf = [
                 {
                     "$match"                            : {
-                        'PRODGRP_ID'                    : product_value['code'],
-                        "$or"                           : [{
-                            "createdAt"                 : {
-                                "$gte"                  : starttime,
-                                "$lte"                  : endtime
-                            },
-                        }, {
-                            "updatedAt"                 : {
-                                "$gte"                  : starttime,
-                                "$lte"                  : endtime
-                            }
-                        }] 
+                        'PRODGRP_ID'                    : {
+                            '$in'                       : list_product_code
+                        },
                     }
                 }, 
                 {
@@ -256,50 +258,52 @@ try:
                     }
                 }
             ]
-            zaccfInfo = list(mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'ZACCF_01022020'),aggregate_pipeline=aggregate_zaccf))
+            zaccfInfo = list(mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, zaccf_collection),aggregate_pipeline=aggregate_zaccf))
+            
             if zaccfInfo not in [None, []] and zaccfInfo[0] is not None:
                 temp_total_amt_zaccf = 0
                 
                 for total_detail in total_list_value:
                     temp_total = {}
                     temp_total['detail'] = total_detail
-                    temp_total['product_code'] = product_value['code']
-                    temp_total['product_name'] = product_value['name']
-                    temp_total['created_at'] = todayTimeStamp
+                    temp_total['product_code'] = product_value['group_code']
+                    temp_total['product_name'] = product_value['group_name']
+                    temp_total['created_at'] = exporttime
+                    temp_total['report_at'] = todayTimeStamp
                     # temp_total['created_at'] = time.time()
                     temp_total['created_by'] = 'system'
                     temp_total['index'] = '1'
                     if total_detail == 'acc':
                         temp_total['this_month'] = zaccfInfo[0]['this_month_acc'] if 'this_month_acc' in zaccfInfo[0].keys() else 0
                         total_total_acc += temp_total['this_month']
-                        lastMonthInfoTotal = mongodb.getOne(common.getSubUser(subUserType, 'Collection_factors_total'), WHERE={'created_at': {'$gte': lastMonthStarttime, '$lte': lastMonthEndtime}, 'detail': 'acc', 'product_code': product_value['code']})
-                        # pprint(lastMonthStarttime)
+                        lastMonthInfoTotal = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, colection_total), WHERE={'report_at': {'$gte': lastMonthStarttime, '$lte': lastMonthEndtime}, 'detail': 'acc', 'product_code': product_value['group_code']})
                         temp_total['last_month'] = lastMonthInfoTotal['this_month'] if lastMonthInfoTotal is not None and 'this_month' in lastMonthInfoTotal.keys() else 0
                     else:
                         
                         temp_total['this_month'] = sum(map(lambda x: float(x), zaccfInfo[0]['this_month_amt'] if 'this_month_amt' in zaccfInfo[0].keys() else 0))
                         total_total_amt += temp_total['this_month']
                         temp_total_amt_zaccf = temp_total['this_month']
-                        lastMonthInfoTotal = mongodb.getOne(common.getSubUser(subUserType, 'Collection_factors_total'), WHERE={'created_at': {'$gte': lastMonthStarttime, '$lte': lastMonthEndtime}, 'detail': 'amt', 'product_code': product_value['code']})
+                        lastMonthInfoTotal = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, colection_total), WHERE={'report_at': {'$gte': lastMonthStarttime, '$lte': lastMonthEndtime}, 'detail': 'amt', 'product_code': product_value['group_code']})
                         temp_total['last_month'] = lastMonthInfoTotal['this_month'] if lastMonthInfoTotal is not None and 'this_month' in lastMonthInfoTotal.keys() else 0
+                   
                     insertDataTotal.append(temp_total)
                 
                 temp_2 = {
                     'index'         : '1b',
                     'type_detail'   : 'group_b',
                     'group_name'    : '',
-                    'product_code'  : product_value['code'],
-                    'product_name'  : product_value['name'],
+                    'product_code'  : product_value['group_code'],
+                    'product_name'  : product_value['group_name'],
                     'this_month_acc': zaccfInfo[0]['this_month_g_b_acc'] if 'this_month_g_b_acc' in zaccfInfo[0].keys() else 0,
-                    'this_month_amt': sum(map(lambda x: float(x), zaccfInfo[0]['this_month_g_b_amt'])) if 'this_month_g_b_amt' in zaccfInfo[0].keys() else 0,
+                    'this_month_amt': sum(map(lambda x: float(x), zaccfInfo[0]['this_month_g_b_amt']))  if 'this_month_g_b_amt' in zaccfInfo[0].keys() else 0,
                     # 'created_at'    : time.time(),
-                    'created_at'    : todayTimeStamp,
+                    'created_at'    : exporttime,
+                    'report_at'     : todayTimeStamp,
                     'created_by'    : 'system'
                 }
                 total_g_b_acc += temp_2['this_month_acc'] if 'this_month_acc' in temp_2.keys() else 0
                 total_g_b_amt += temp_2['this_month_amt'] if 'this_month_amt' in temp_2.keys() else 0
-                lastMonthInfoTotal = mongodb.getOne(common.getSubUser(subUserType, 'Collection_factors_detail'), WHERE={'created_at': {'$gte': lastMonthStarttime, '$lte': lastMonthEndtime}, 'product_code': product_value['code'], 'type_detail': 'group_b'})
-                # pprint(lastMonthInfoTotal['this_month_acc'])
+                lastMonthInfoTotal = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, colection_detail), WHERE={'report_at': {'$gte': lastMonthStarttime, '$lte': lastMonthEndtime}, 'product_code': product_value['group_code'], 'type_detail': 'group_b'})
                 temp_2['last_month_acc'] = lastMonthInfoTotal['this_month_acc'] if lastMonthInfoTotal is not None and 'this_month_acc' in lastMonthInfoTotal.keys() else 0
                 temp_2['last_month_amt'] = lastMonthInfoTotal['this_month_amt'] if lastMonthInfoTotal is not None and 'this_month_amt' in lastMonthInfoTotal.keys() else 0
                 insertDataDetail.append(temp_2)
@@ -308,17 +312,18 @@ try:
                     'index'         : '2b',
                     'type_detail'   : 'group_c',
                     'group_name'    : '',
-                    'product_code'  : product_value['code'],
-                    'product_name'  : product_value['name'],
+                    'product_code'  : product_value['group_code'],
+                    'product_name'  : product_value['group_name'],
                     'this_month_acc': zaccfInfo[0]['this_month_g_c_acc'] if 'this_month_g_c_acc' in zaccfInfo[0].keys() else 0,
                     'this_month_amt': sum(map(lambda x: float(x), zaccfInfo[0]['this_month_g_c_amt'])) if 'this_month_g_c_amt' in zaccfInfo[0].keys() else 0,
                     # 'created_at'    : time.time(),
-                    'created_at'    : todayTimeStamp,
+                    'created_at'    : exporttime,
+                    'report_at'     : todayTimeStamp,
                     'created_by'    : 'system'
                 }
                 total_g_c_acc += temp_3['this_month_acc'] if 'this_month_acc' in temp_3.keys() else 0
                 total_g_c_amt += temp_3['this_month_amt'] if 'this_month_amt' in temp_3.keys() else 0
-                lastMonthInfoTotal = mongodb.getOne(common.getSubUser(subUserType, 'Collection_factors_detail'), WHERE={'created_at': {'$gte': lastMonthStarttime, '$lte': lastMonthEndtime}, 'product_code': product_value['code'], 'type_detail': 'group_c'})
+                lastMonthInfoTotal = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, colection_detail), WHERE={'report_at': {'$gte': lastMonthStarttime, '$lte': lastMonthEndtime}, 'product_code': product_value['group_code'], 'type_detail': 'group_c'})
                 temp_3['last_month_acc'] = lastMonthInfoTotal['this_month_acc'] if lastMonthInfoTotal is not None and 'this_month_acc' in lastMonthInfoTotal.keys() else 0
                 temp_3['last_month_amt'] = lastMonthInfoTotal['this_month_amt'] if lastMonthInfoTotal is not None and 'this_month_amt' in lastMonthInfoTotal.keys() else 0
                 insertDataDetail.append(temp_3)
@@ -327,17 +332,18 @@ try:
                     'index'         : '3b',
                     'type_detail'   : 'group_d',
                     'group_name'    : '',
-                    'product_code'  : product_value['code'],
-                    'product_name'  : product_value['name'],
+                    'product_code'  : product_value['group_code'],
+                    'product_name'  : product_value['group_name'],
                     'this_month_acc': zaccfInfo[0]['this_month_g_d_acc'] if 'this_month_g_d_acc' in zaccfInfo[0].keys() else 0,
                     'this_month_amt': sum(map(lambda x: float(x), zaccfInfo[0]['this_month_g_d_amt'])) if 'this_month_g_d_amt' in zaccfInfo[0].keys() else 0,
                     # 'created_at'    : time.time(),
-                    'created_at'    : todayTimeStamp,
+                    'created_at'    : exporttime,
+                    'report_at'     : todayTimeStamp,
                     'created_by'    : 'system'
                 }
                 total_g_d_acc += temp_4['this_month_acc']
                 total_g_d_amt += temp_4['this_month_amt']
-                lastMonthInfoTotal = mongodb.getOne(common.getSubUser(subUserType, 'Collection_factors_detail'), WHERE={'created_at': {'$gte': lastMonthStarttime, '$lte': lastMonthEndtime}, 'product_code': product_value['code'], 'type_detail': 'group_d'})
+                lastMonthInfoTotal = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, colection_detail), WHERE={'report_at': {'$gte': lastMonthStarttime, '$lte': lastMonthEndtime}, 'product_code': product_value['group_code'], 'type_detail': 'group_d'})
                 temp_4['last_month_acc'] = lastMonthInfoTotal['this_month_acc'] if lastMonthInfoTotal is not None and 'this_month_acc' in lastMonthInfoTotal.keys() else 0
                 temp_4['last_month_amt'] = lastMonthInfoTotal['this_month_amt'] if lastMonthInfoTotal is not None and 'this_month_amt' in lastMonthInfoTotal.keys() else 0
                 insertDataDetail.append(temp_4)
@@ -346,12 +352,13 @@ try:
                     'index'         : '4b',
                     'type_detail'   : 'group_e',
                     'group_name'    : '',
-                    'product_code'  : product_value['code'],
-                    'product_name'  : product_value['name'],
+                    'product_code'  : product_value['group_code'],
+                    'product_name'  : product_value['group_name'],
                     'this_month_acc': zaccfInfo[0]['this_month_g_e_acc'] if 'this_month_g_e_acc' in zaccfInfo[0].keys() else 0,
                     'this_month_amt': sum(map(lambda x: float(x), zaccfInfo[0]['this_month_g_e_amt'])) if 'this_month_g_e_amt' in zaccfInfo[0].keys() else 0,
                     # 'created_at'    : time.time(),
-                    'created_at'    : todayTimeStamp,
+                    'created_at'    : exporttime,
+                    'report_at'     : todayTimeStamp,
                     'created_by'    : 'system'
                 }
                 # insertDataDetail.append(temp_5)
@@ -361,12 +368,13 @@ try:
                         'index'         : '5b',
                         'type_detail'   : 'group_b_plus',
                         'group_name'    : '(Ｇ２以上）',
-                        'product_code'  : product_value['code'],
-                        'product_name'  : product_value['name'],
+                        'product_code'  : product_value['group_code'],
+                        'product_name'  : product_value['group_name'],
                         'this_month_acc': temp_2['this_month_acc'] + temp_3['this_month_acc'] + temp_4['this_month_acc'],
                         'this_month_amt': temp_2['this_month_amt'] + temp_3['this_month_amt'] + temp_4['this_month_amt'],
                         # 'created_at'    : time.time(),
-                        'created_at'    : todayTimeStamp,
+                        'created_at'    : exporttime,
+                        'report_at'     : todayTimeStamp,
                         'created_by'    : 'system'
                     }
                 else:
@@ -374,18 +382,19 @@ try:
                         'index'         : '5b',
                         'type_detail'   : 'group_b_plus',
                         'group_name'    : '',
-                        'product_code'  : product_value['code'],
-                        'product_name'  : product_value['name'],
+                        'product_code'  : product_value['group_code'],
+                        'product_name'  : product_value['group_name'],
                         'this_month_acc': temp_2['this_month_acc'] + temp_3['this_month_acc'] + temp_4['this_month_acc'],
                         'this_month_amt': temp_2['this_month_amt'] + temp_3['this_month_amt'] + temp_4['this_month_amt'],
                         # 'created_at'    : time.time(),
-                        'created_at'    : todayTimeStamp,
+                        'created_at'    : exporttime,
+                        'report_at'     : todayTimeStamp,
                         'created_by'    : 'system'
                     }
 
                 total_g_b_plus_acc += temp_2_plus['this_month_acc']
                 total_g_b_plus_amt += temp_2_plus['this_month_amt']
-                lastMonthInfoTotal = mongodb.getOne(common.getSubUser(subUserType, 'Collection_factors_detail'), WHERE={'created_at': {'$gte': lastMonthStarttime, '$lte': lastMonthEndtime}, 'product_code': product_value['code'], 'type_detail': 'group_b_plus'})
+                lastMonthInfoTotal = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, colection_detail), WHERE={'report_at': {'$gte': lastMonthStarttime, '$lte': lastMonthEndtime}, 'product_code': product_value['group_code'], 'type_detail': 'group_b_plus'})
                 temp_2_plus['last_month_acc'] = lastMonthInfoTotal['this_month_acc'] if lastMonthInfoTotal is not None and 'this_month_acc' in lastMonthInfoTotal.keys() else 0
                 temp_2_plus['last_month_amt'] = lastMonthInfoTotal['this_month_amt'] if lastMonthInfoTotal is not None and 'this_month_amt' in lastMonthInfoTotal.keys() else 0
                 insertDataDetail.append(temp_2_plus)
@@ -395,11 +404,12 @@ try:
                         'index'         : '6b',
                         'type_detail'   : 'group_b_plus_ratio',
                         'group_name'    : '(Ｇ２以上）',
-                        'product_code'  : product_value['code'],
-                        'product_name'  : product_value['name'],
+                        'product_code'  : product_value['group_code'],
+                        'product_name'  : product_value['group_name'],
                         'this_month_amt': temp_2_plus['this_month_amt'] / temp_total_amt_zaccf if temp_total_amt_zaccf != 0 else 0,
                         # 'created_at'    : time.time(),
-                        'created_at'    : todayTimeStamp,
+                        'created_at'    : exporttime,
+                        'report_at'     : todayTimeStamp,
                         'created_by'    : 'system'
                     }
                 else:
@@ -407,15 +417,16 @@ try:
                         'index'         : '6b',
                         'type_detail'   : 'group_b_plus_ratio',
                         'group_name'    : '',
-                        'product_code'  : product_value['code'],
-                        'product_name'  : product_value['name'],
+                        'product_code'  : product_value['group_code'],
+                        'product_name'  : product_value['group_name'],
                         'this_month_amt': temp_2_plus['this_month_amt'] / temp_total_amt_zaccf if temp_total_amt_zaccf != 0 else 0,
                         # 'created_at'    : time.time(),
-                        'created_at'    : todayTimeStamp,
+                        'created_at'    : exporttime,
+                        'report_at'     : todayTimeStamp,
                         'created_by'    : 'system'
                     }
 
-                lastMonthInfoTotal = mongodb.getOne(common.getSubUser(subUserType, 'Collection_factors_detail'), WHERE={'created_at': {'$gte': lastMonthStarttime, '$lte': lastMonthEndtime}, 'product_code': product_value['code'], 'type_detail': 'group_b_plus_ratio'})
+                lastMonthInfoTotal = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, colection_detail), WHERE={'report_at': {'$gte': lastMonthStarttime, '$lte': lastMonthEndtime}, 'product_code': product_value['group_code'], 'type_detail': 'group_b_plus_ratio'})
                 temp_2_ratio['last_month_acc'] = lastMonthInfoTotal['this_month_acc'] if lastMonthInfoTotal != None and 'this_month_acc' in lastMonthInfoTotal.keys() else 0
                 temp_2_ratio['last_month_amt'] = lastMonthInfoTotal['this_month_amt'] if lastMonthInfoTotal is not None and 'this_month_amt' in lastMonthInfoTotal.keys() else 0
                 insertDataDetail.append(temp_2_ratio)
@@ -424,17 +435,18 @@ try:
                     'index'         : '7b',
                     'type_detail'   : 'group_c_plus',
                     'group_name'    : '',
-                    'product_code'  : product_value['code'],
-                    'product_name'  : product_value['name'],
+                    'product_code'  : product_value['group_code'],
+                    'product_name'  : product_value['group_name'],
                     'this_month_acc': temp_3['this_month_acc'] + temp_4['this_month_acc'],
                     'this_month_amt': temp_3['this_month_amt'] + temp_4['this_month_amt'],
                     # 'created_at'    : time.time(),
-                    'created_at'    : todayTimeStamp,
+                    'created_at'    : exporttime,
+                    'report_at'     : todayTimeStamp,
                     'created_by'    : 'system'
                 }
                 total_g_c_plus_acc += temp_3_plus['this_month_acc']
                 total_g_c_plus_amt += temp_3_plus['this_month_amt']
-                lastMonthInfoTotal = mongodb.getOne(common.getSubUser(subUserType, 'Collection_factors_detail'), WHERE={'created_at': {'$gte': lastMonthStarttime, '$lte': lastMonthEndtime}, 'product_code': product_value['code'], 'type_detail': 'group_c_plus'})
+                lastMonthInfoTotal = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, colection_detail), WHERE={'report_at': {'$gte': lastMonthStarttime, '$lte': lastMonthEndtime}, 'product_code': product_value['group_code'], 'type_detail': 'group_c_plus'})
                 temp_3_plus['last_month_acc'] = lastMonthInfoTotal['this_month_acc'] if lastMonthInfoTotal is not None and 'this_month_acc' in lastMonthInfoTotal.keys() else 0
                 temp_3_plus['last_month_amt'] = lastMonthInfoTotal['this_month_amt'] if lastMonthInfoTotal is not None and 'this_month_amt' in lastMonthInfoTotal.keys() else 0
                 insertDataDetail.append(temp_3_plus)
@@ -443,12 +455,13 @@ try:
                     temp_3_ratio = {
                         'index'         : '9b',
                         'type_detail'   : 'group_c_plus_ratio',
-                        'group_name'    : '(Ｇ２以上）',
-                        'product_code'  : product_value['code'],
-                        'product_name'  : product_value['name'],
+                        'group_name'    : '',
+                        'product_code'  : product_value['group_code'],
+                        'product_name'  : product_value['group_name'],
                         'this_month_amt': temp_3_plus['this_month_amt'] / temp_total_amt_zaccf if temp_total_amt_zaccf != 0 else 0,
                         # 'created_at'    : time.time(),
-                        'created_at'    : todayTimeStamp,
+                        'created_at'    : exporttime,
+                        'report_at'     : todayTimeStamp,
                         'created_by'    : 'system'
                     }
                 else:
@@ -456,14 +469,15 @@ try:
                         'index'         : '9b',
                         'type_detail'   : 'group_c_plus_ratio',
                         'group_name'    : '',
-                        'product_code'  : product_value['code'],
-                        'product_name'  : product_value['name'],
+                        'product_code'  : product_value['group_code'],
+                        'product_name'  : product_value['group_name'],
                         'this_month_amt': temp_3_plus['this_month_amt'] / temp_total_amt_zaccf if temp_total_amt_zaccf != 0 else 0,
                         # 'created_at'    : time.time(),
-                        'created_at'    : todayTimeStamp,
+                        'created_at'    : exporttime,
+                        'report_at'     : todayTimeStamp,
                         'created_by'    : 'system'
                     }
-                lastMonthInfoTotal = mongodb.getOne(common.getSubUser(subUserType, 'Collection_factors_detail'), WHERE={'created_at': {'$gte': lastMonthStarttime, '$lte': lastMonthEndtime}, 'product_code': product_value['code'], 'type_detail': 'group_c_plus_ratio'})
+                lastMonthInfoTotal = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, colection_detail), WHERE={'report_at': {'$gte': lastMonthStarttime, '$lte': lastMonthEndtime}, 'product_code': product_value['group_code'], 'type_detail': 'group_c_plus_ratio'})
                 temp_3_ratio['last_month_acc'] = lastMonthInfoTotal['this_month_acc'] if lastMonthInfoTotal is not None and 'this_month_acc' in lastMonthInfoTotal.keys() else 0
                 temp_3_ratio['last_month_amt'] = lastMonthInfoTotal['this_month_amt'] if lastMonthInfoTotal is not None and 'this_month_amt' in lastMonthInfoTotal.keys() else 0
                 insertDataDetail.append(temp_3_ratio)
@@ -472,11 +486,12 @@ try:
                     'index'         : '1b',
                     'type_detail'   : 'group_b',
                     'group_name'    : '',
-                    'product_code'  : product_value['code'],
-                    'product_name'  : product_value['name'],
+                    'product_code'  : product_value['group_code'],
+                    'product_name'  : product_value['group_name'],
                     'this_month_acc': 0,
                     'this_month_amt': 0,
-                    'created_at'    : todayTimeStamp,
+                    'created_at'    : exporttime,
+                    'report_at'     : todayTimeStamp,
                     # 'created_at'    : time.time(),
                     'created_by'    : 'system'
                 }
@@ -485,12 +500,13 @@ try:
                     'index'         : '2b',
                     'type_detail'   : 'group_c',
                     'group_name'    : '',
-                    'product_code'  : product_value['code'],
-                    'product_name'  : product_value['name'],
+                    'product_code'  : product_value['group_code'],
+                    'product_name'  : product_value['group_name'],
                     'this_month_acc': 0,
                     'this_month_amt': 0,
                     # 'created_at'    : time.time(),
-                    'created_at'    : todayTimeStamp,
+                    'created_at'    : exporttime,
+                    'report_at'     : todayTimeStamp,
                     'created_by'    : 'system'
                 }
                 insertDataDetail.append(temp_3)
@@ -498,12 +514,13 @@ try:
                     'index'         : '3b',
                     'type_detail'   : 'group_d',
                     'group_name'    : '',
-                    'product_code'  : product_value['code'],
-                    'product_name'  : product_value['name'],
+                    'product_code'  : product_value['group_code'],
+                    'product_name'  : product_value['group_name'],
                     'this_month_acc': 0,
                     'this_month_amt': 0,
                     # 'created_at'    : time.time(),
-                    'created_at'    : todayTimeStamp,
+                    'created_at'    : exporttime,
+                    'report_at'     : todayTimeStamp,
                     'created_by'    : 'system'
                 }
                 insertDataDetail.append(temp_4)
@@ -512,12 +529,13 @@ try:
                         'index'         : '5b',
                         'type_detail'   : 'group_b_plus',
                         'group_name'    : '(Ｇ２以上）',
-                        'product_code'  : product_value['code'],
-                        'product_name'  : product_value['name'],
+                        'product_code'  : product_value['group_code'],
+                        'product_name'  : product_value['group_name'],
                         'this_month_acc': 0,
                         'this_month_amt': 0,
                         # 'created_at'    : time.time(),
-                        'created_at'    : todayTimeStamp,
+                        'created_at'    : exporttime,
+                        'report_at'     : todayTimeStamp,
                         'created_by'    : 'system'
                     }
                 else:
@@ -525,12 +543,13 @@ try:
                         'index'         : '5b',
                         'type_detail'   : 'group_b_plus',
                         'group_name'    : '',
-                        'product_code'  : product_value['code'],
-                        'product_name'  : product_value['name'],
+                        'product_code'  : product_value['group_code'],
+                        'product_name'  : product_value['group_name'],
                         'this_month_acc': 0,
                         'this_month_amt': 0,
                         # 'created_at'    : time.time(),
-                        'created_at'    : todayTimeStamp,
+                        'created_at'    : exporttime,
+                        'report_at'     : todayTimeStamp,
                         'created_by'    : 'system'
                     }
                 insertDataDetail.append(temp_2_plus)
@@ -539,11 +558,12 @@ try:
                         'index'         : '6b',
                         'type_detail'   : 'group_b_plus_ratio',
                         'group_name'    : '(Ｇ２以上）',
-                        'product_code'  : product_value['code'],
-                        'product_name'  : product_value['name'],
+                        'product_code'  : product_value['group_code'],
+                        'product_name'  : product_value['group_name'],
                         'this_month_amt': 0,
                         # 'created_at'    : time.time(),
-                        'created_at'    : todayTimeStamp,
+                        'created_at'    : exporttime,
+                        'report_at'     : todayTimeStamp,
                         'created_by'    : 'system'
                     }
                 else:
@@ -551,11 +571,12 @@ try:
                         'index'         : '6b',
                         'type_detail'   : 'group_b_plus_ratio',
                         'group_name'    : '',
-                        'product_code'  : product_value['code'],
-                        'product_name'  : product_value['name'],
+                        'product_code'  : product_value['group_code'],
+                        'product_name'  : product_value['group_name'],
                         'this_month_amt': 0,
                         # 'created_at'    : time.time(),
-                        'created_at'    : todayTimeStamp,
+                        'created_at'    : exporttime,
+                        'report_at'     : todayTimeStamp,
                         'created_by'    : 'system'
                     }
                 insertDataDetail.append(temp_2_ratio)
@@ -563,12 +584,13 @@ try:
                     'index'         : '7b',
                     'type_detail'   : 'group_c_plus',
                     'group_name'    : '',
-                    'product_code'  : product_value['code'],
-                    'product_name'  : product_value['name'],
+                    'product_code'  : product_value['group_code'],
+                    'product_name'  : product_value['group_name'],
                     'this_month_acc': 0,
                     'this_month_amt': 0,
                     # 'created_at'    : time.time(),
-                    'created_at'    : todayTimeStamp,
+                    'created_at'    : exporttime,
+                    'report_at'     : todayTimeStamp,
                     'created_by'    : 'system'
                 }
                 insertDataDetail.append(temp_3_plus)
@@ -577,11 +599,12 @@ try:
                         'index'         : '9b',
                         'type_detail'   : 'group_c_plus_ratio',
                         'group_name'    : '(Ｇ２以上）',
-                        'product_code'  : product_value['code'],
-                        'product_name'  : product_value['name'],
+                        'product_code'  : product_value['group_code'],
+                        'product_name'  : product_value['group_name'],
                         'this_month_amt': 0,
                         # 'created_at'    : time.time(),
-                        'created_at'    : todayTimeStamp,
+                        'created_at'    : exporttime,
+                        'report_at'     : todayTimeStamp,
                         'created_by'    : 'system'
                     }
                 else:
@@ -589,378 +612,392 @@ try:
                         'index'         : '9b',
                         'type_detail'   : 'group_c_plus_ratio',
                         'group_name'    : '',
-                        'product_code'  : product_value['code'],
-                        'product_name'  : product_value['name'],
+                        'product_code'  : product_value['group_code'],
+                        'product_name'  : product_value['group_name'],
                         'this_month_amt': 0,
                         # 'created_at'    : time.time(),
-                        'created_at'    : todayTimeStamp,
+                        'created_at'    : exporttime,
+                        'report_at'     : todayTimeStamp,
                         'created_by'    : 'system'
                     }
                 insertDataDetail.append(temp_3_ratio)
         else:
             # SBV
-            aggregate_sbv = []
-            if product_value['code'] == '301':
-                aggregate_sbv.append({
-                    '$match'                        : {
-                        'card_type'                 : {
-                            '$in'                   : credit_card_range
+            group_code_card = ['301', '302']
+            for card_type in group_code_card:
+                card_type_name = 'Credit card' if card_type == '301' else 'Cash card'
+                aggregate_sbv = []
+                if card_type == '301':
+                    aggregate_sbv.append({
+                        '$match'                        : {
+                            'card_type'                 : {
+                                '$in'                   : credit_card_range
+                            }
                         }
-                    }
-                })
-            else:
-                aggregate_sbv.append({
-                    '$match'                        : {
-                        'card_type'                 : {
-                            '$nin'                  : credit_card_range
+                    })
+                else:
+                    aggregate_sbv.append({
+                        '$match'                        : {
+                            'card_type'                 : {
+                                '$nin'                  : credit_card_range
+                            }
                         }
+                    })
+                aggregate_sbv.append(
+                    {
+                        '$group'                        : {
+                            '_id'                       : None,
+                            "this_month_acc"            : {
+                                "$sum"                  : {
+                                    "$cond"             : [
+                                        {
+                                            '$and'      : [
+                                                {"$gt"  : [{'$add': ['$ob_principal_sale', '$ob_principal_cash']}, 0]},
+                                            ]
+                                        },
+                                        1,
+                                        0
+                                    ]
+                                }
+                            },
+                            'this_month_amt'            : {
+                                '$sum'                  : {'$add': ['$ob_principal_sale', '$ob_principal_cash']}
+                            },
+                            "this_month_g_b_acc"            : {
+                                "$sum"                      : {
+                                    "$cond"                 : [
+                                        {
+                                            '$and'          : [
+                                                {"$gt"      : [{'$add': ['$ob_principal_sale', '$ob_principal_cash']}, 0]},
+                                                {"$eq"      : ["$delinquency_group", "02"]}
+                                            ]
+                                        },
+                                        1,
+                                        0
+                                    ]
+                                }
+                            },
+                            "this_month_g_b_amt"            : {
+                                "$push"                     : {
+                                    "$cond"                 : [
+                                        {
+                                            '$and'          : [
+                                                {"$gt"      : [{'$add': ['$ob_principal_sale', '$ob_principal_cash']}, 0]},
+                                                {"$eq"      : ["$delinquency_group", "02"]}
+                                            ]
+                                        },
+                                        {'$add'             : ['$ob_principal_sale', '$ob_principal_cash']},
+                                        0
+                                    ]
+                                }
+                            },
+                            "this_month_g_c_acc"            : {
+                                "$sum"                      : {
+                                    "$cond"                 : [
+                                        {
+                                            '$and'          : [
+                                                {"$gt"      : [{'$add': ['$ob_principal_sale', '$ob_principal_cash']}, 0]},
+                                                {"$eq"      : ["$delinquency_group", "03"]}
+                                            ]
+                                        },
+                                        1,
+                                        0
+                                    ]
+                                }
+                            },
+                            "this_month_g_c_amt"            : {
+                                "$push"                     : {
+                                    "$cond"                 : [
+                                        {
+                                            '$and'          : [
+                                                {"$gt"      : [{'$add': ['$ob_principal_sale', '$ob_principal_cash']}, 0]},
+                                                {"$eq"      : ["$delinquency_group", "03"]}
+                                            ]
+                                        },
+                                        {'$add'             : ['$ob_principal_sale', '$ob_principal_cash']},
+                                        0
+                                    ]
+                                }
+                            },
+                            "this_month_g_d_acc"            : {
+                                "$sum"                      : {
+                                    "$cond"                 : [
+                                        {
+                                            '$and'          : [
+                                                {"$gt"      : [{'$add': ['$ob_principal_sale', '$ob_principal_cash']}, 0]},
+                                                {"$eq"      : ["$delinquency_group", "04"]}
+                                            ]
+                                        },
+                                        1,
+                                        0
+                                    ]
+                                }
+                            },
+                            "this_month_g_d_amt"            : {
+                                "$push"                     : {
+                                    "$cond"                 : [
+                                        {
+                                            '$and'          : [
+                                                {"$gt"      : [{'$add': ['$ob_principal_sale', '$ob_principal_cash']}, 0]},
+                                                {"$eq"      : ["$delinquency_group", "04"]}
+                                            ]
+                                        },
+                                        {'$add'             : ['$ob_principal_sale', '$ob_principal_cash']},
+                                        0
+                                    ]
+                                }
+                            },
+                            "this_month_g_e_acc"            : {
+                                "$sum"                      : {
+                                    "$cond"                 : [
+                                        {
+                                            '$and'          : [
+                                                {"$gt"      : [{'$add': ['$ob_principal_sale', '$ob_principal_cash']}, 0]},
+                                                {"$eq"      : ["$delinquency_group", "05"]}
+                                            ]
+                                        },
+                                        1,
+                                        0
+                                    ]
+                                }
+                            },
+                            "this_month_g_e_amt"            : {
+                                "$push"                     : {
+                                    "$cond"                 : [
+                                        {
+                                            '$and'          : [
+                                                {"$gt"      : [{'$add': ['$ob_principal_sale', '$ob_principal_cash']}, 0]},
+                                                {"$eq"      : ["$delinquency_group", "05"]}
+                                            ]
+                                        },
+                                        {'$add'             : ['$ob_principal_sale', '$ob_principal_cash']},
+                                        0
+                                    ]
+                                }
+                            },
+                        },
                     }
-                })
-            aggregate_sbv.append(
-                {
-                    '$group'                        : {
-                        '_id'                       : None,
-                        "this_month_acc"            : {
-                            "$sum"                  : {
-                                "$cond"             : [
-                                    {
-                                        '$and'      : [
-                                            {"$gt"  : [{'$add': ['$ob_principal_sale', '$ob_principal_cash']}, 0]},
-                                        ]
-                                    },
-                                    1,
-                                    0
-                                ]
-                            }
-                        },
-                        'this_month_amt'            : {
-                            '$sum'                  : {'$add': ['$ob_principal_sale', '$ob_principal_cash']}
-                        },
-                        "this_month_g_b_acc"            : {
-                            "$sum"                      : {
-                                "$cond"                 : [
-                                    {
-                                        '$and'          : [
-                                            {"$gt"      : [{'$add': ['$ob_principal_sale', '$ob_principal_cash']}, 0]},
-                                            {"$eq"      : ["$overdue_indicator", "B"]}
-                                        ]
-                                    },
-                                    1,
-                                    0
-                                ]
-                            }
-                        },
-                        "this_month_g_b_amt"            : {
-                            "$push"                     : {
-                                "$cond"                 : [
-                                    {
-                                        '$and'          : [
-                                            {"$gt"      : [{'$add': ['$ob_principal_sale', '$ob_principal_cash']}, 0]},
-                                            {"$eq"      : ["$overdue_indicator", "B"]}
-                                        ]
-                                    },
-                                    {'$add'             : ['$ob_principal_sale', '$ob_principal_cash']},
-                                    0
-                                ]
-                            }
-                        },
-                        "this_month_g_c_acc"            : {
-                            "$sum"                      : {
-                                "$cond"                 : [
-                                    {
-                                        '$and'          : [
-                                            {"$gt"      : [{'$add': ['$ob_principal_sale', '$ob_principal_cash']}, 0]},
-                                            {"$eq"      : ["$overdue_indicator", "C"]}
-                                        ]
-                                    },
-                                    1,
-                                    0
-                                ]
-                            }
-                        },
-                        "this_month_g_c_amt"            : {
-                            "$push"                     : {
-                                "$cond"                 : [
-                                    {
-                                        '$and'          : [
-                                            {"$gt"      : [{'$add': ['$ob_principal_sale', '$ob_principal_cash']}, 0]},
-                                            {"$eq"      : ["$overdue_indicator", "C"]}
-                                        ]
-                                    },
-                                    {'$add'             : ['$ob_principal_sale', '$ob_principal_cash']},
-                                    0
-                                ]
-                            }
-                        },
-                        "this_month_g_d_acc"            : {
-                            "$sum"                      : {
-                                "$cond"                 : [
-                                    {
-                                        '$and'          : [
-                                            {"$gt"      : [{'$add': ['$ob_principal_sale', '$ob_principal_cash']}, 0]},
-                                            {"$eq"      : ["$overdue_indicator", "D"]}
-                                        ]
-                                    },
-                                    1,
-                                    0
-                                ]
-                            }
-                        },
-                        "this_month_g_d_amt"            : {
-                            "$push"                     : {
-                                "$cond"                 : [
-                                    {
-                                        '$and'          : [
-                                            {"$gt"      : [{'$add': ['$ob_principal_sale', '$ob_principal_cash']}, 0]},
-                                            {"$eq"      : ["$overdue_indicator", "D"]}
-                                        ]
-                                    },
-                                    {'$add'             : ['$ob_principal_sale', '$ob_principal_cash']},
-                                    0
-                                ]
-                            }
-                        },
-                        "this_month_g_e_acc"            : {
-                            "$sum"                      : {
-                                "$cond"                 : [
-                                    {
-                                        '$and'          : [
-                                            {"$gt"      : [{'$add': ['$ob_principal_sale', '$ob_principal_cash']}, 0]},
-                                            {"$eq"      : ["$overdue_indicator", "E"]}
-                                        ]
-                                    },
-                                    1,
-                                    0
-                                ]
-                            }
-                        },
-                        "this_month_g_e_amt"            : {
-                            "$push"                     : {
-                                "$cond"                 : [
-                                    {
-                                        '$and'          : [
-                                            {"$gt"      : [{'$add': ['$ob_principal_sale', '$ob_principal_cash']}, 0]},
-                                            {"$eq"      : ["$overdue_indicator", "E"]}
-                                        ]
-                                    },
-                                    {'$add'             : ['$ob_principal_sale', '$ob_principal_cash']},
-                                    0
-                                ]
-                            }
-                        },
-                    },
-                }
-            )
-            sbvInfo = list(mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, 'SBV_01022020'),aggregate_pipeline=aggregate_sbv))
-            # pprint(product_value['code'])
-            # pprint(list(sbvInfo))
-            if sbvInfo not in [None, []] and sbvInfo[0] is not None:
-                temp_total_amt_sbv = 0
-                for total_detail in total_list_value:
-                    temp_total1 = {}
-                    temp_total1['detail'] = total_detail
-                    temp_total1['product_code'] = product_value['code']
-                    temp_total1['product_name'] = product_value['name']
-                    # temp_total1['created_at'] = time.time()
-                    temp_total1['created_at'] = todayTimeStamp
-                    temp_total1['created_by'] = 'system'
-                    temp_total1['index'] = '1'
-                    if total_detail == 'acc':
-                        temp_total1['this_month'] = sbvInfo[0]['this_month_acc']
-                        lastMonthInfoTotal = mongodb.getOne(common.getSubUser(subUserType, 'Collection_factors_total'), WHERE={'created_at': {'$gte': lastMonthStarttime, '$lte': lastMonthEndtime}, 'detail': 'acc', 'product_code': product_value['code']})
-                        temp_total1['last_month'] = lastMonthInfoTotal['this_month'] if lastMonthInfoTotal is not None and 'this_month' in lastMonthInfoTotal.keys() else 0
-                        total_total_acc += temp_total1['this_month']
+                )
+                sbvInfo = list(mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, sbv_collection),aggregate_pipeline=aggregate_sbv))
+                if sbvInfo not in [None, []] and sbvInfo[0] is not None:
+                    temp_total_amt_sbv = 0
+                    for total_detail in total_list_value:
+                        temp_total1 = {}
+                        temp_total1['detail'] = total_detail
+                        temp_total1['product_code'] = card_type
+                        temp_total1['product_name'] = card_type_name
+                        # temp_total1['created_at'] = time.time()
+                        temp_total1['created_at'] = exporttime
+                        temp_total1['report_at'] = todayTimeStamp
+                        temp_total1['created_by'] = 'system'
+                        temp_total1['index'] = '1'
+                        if total_detail == 'acc':
+                            temp_total1['this_month'] = sbvInfo[0]['this_month_acc']
+                            lastMonthInfoTotal = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, colection_total), WHERE={'report_at': {'$gte': lastMonthStarttime, '$lte': lastMonthEndtime}, 'detail': 'acc', 'product_code': card_type})
+                            temp_total1['last_month'] = lastMonthInfoTotal['this_month'] if lastMonthInfoTotal is not None and 'this_month' in lastMonthInfoTotal.keys() else 0
+                            total_total_acc += temp_total1['this_month']
+                        else:
+                            temp_total1['this_month'] = sbvInfo[0]['this_month_amt']
+                            lastMonthInfoTotal = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, colection_total), WHERE={'report_at': {'$gte': lastMonthStarttime, '$lte': lastMonthEndtime}, 'detail': 'amt', 'product_code': card_type})
+                            temp_total1['last_month'] = lastMonthInfoTotal['this_month'] if lastMonthInfoTotal is not None and 'this_month' in lastMonthInfoTotal.keys() else 0
+                            total_total_amt += temp_total1['this_month']
+                            temp_total_amt_sbv = temp_total1['this_month']
+                        insertDataTotal.append(temp_total1)
+
+                    temp_2 = {
+                        'index'         : '1b',
+                        'type_detail'   : 'group_b',
+                        'group_name'    : '',
+                        'product_code'  : card_type,
+                        'product_name'  : card_type_name,
+                        'this_month_acc': sbvInfo[0]['this_month_g_b_acc'] if sbvInfo[0]['this_month_g_b_acc'] is not None else 0,
+                        'this_month_amt': sum(map(lambda x: float(x), sbvInfo[0]['this_month_g_b_amt'])) if sbvInfo[0]['this_month_g_b_amt'] is not None else 0,
+                        # 'created_at'    : time.time(),
+                        'created_at'    : exporttime,
+                        'report_at'     : todayTimeStamp,
+                        'created_by'    : 'system'
+                    }
+                    total_g_b_acc += temp_2['this_month_acc']
+                    total_g_b_amt += temp_2['this_month_amt']
+                    lastMonthInfoTotal = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, colection_detail), WHERE={'report_at': {'$gte': lastMonthStarttime, '$lte': lastMonthEndtime}, 'product_code': card_type, 'type_detail': 'group_b'})
+                    temp_2['last_month_acc'] = lastMonthInfoTotal['this_month_acc'] if lastMonthInfoTotal is not None and 'this_month_acc' in lastMonthInfoTotal.keys() else 0
+                    temp_2['last_month_amt'] = lastMonthInfoTotal['this_month_amt'] if lastMonthInfoTotal is not None and 'this_month_amt' in lastMonthInfoTotal.keys() else 0
+                    insertDataDetail.append(temp_2)
+
+                    temp_3 = {
+                        'index'         : '2b',
+                        'type_detail'   : 'group_c',
+                        'group_name'    : '',
+                        'product_code'  : card_type,
+                        'product_name'  : card_type_name,
+                        'this_month_acc': sbvInfo[0]['this_month_g_c_acc'] if 'this_month_g_c_acc' in sbvInfo[0].keys() else 0,
+                        'this_month_amt': sum(map(lambda x: float(x), sbvInfo[0]['this_month_g_c_amt'])) if 'this_month_g_c_amt' in sbvInfo[0].keys() else 0,
+                        # 'created_at'    : time.time(),
+                        'created_at'    : exporttime,
+                        'report_at'     : todayTimeStamp,
+                        'created_by'    : 'system'
+                    }
+                    total_g_c_acc += temp_3['this_month_acc']
+                    total_g_c_amt += temp_3['this_month_amt']
+                    lastMonthInfoTotal = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, colection_detail), WHERE={'report_at': {'$gte': lastMonthStarttime, '$lte': lastMonthEndtime}, 'product_code': card_type, 'type_detail': 'group_c'})
+                    temp_3['last_month_acc'] = lastMonthInfoTotal['this_month_acc'] if lastMonthInfoTotal is not None and 'this_month_acc' in lastMonthInfoTotal.keys() else 0
+                    temp_3['last_month_amt'] = lastMonthInfoTotal['this_month_amt'] if lastMonthInfoTotal is not None and 'this_month_amt' in lastMonthInfoTotal.keys() else 0
+                    insertDataDetail.append(temp_3)
+
+                    temp_4 = {
+                        'index'         : '3b',
+                        'type_detail'   : 'group_d',
+                        'group_name'    : '',
+                        'product_code'  : card_type,
+                        'product_name'  : card_type_name,
+                        'this_month_acc': sbvInfo[0]['this_month_g_d_acc'] if 'this_month_g_d_acc' in sbvInfo[0].keys() else 0,
+                        'this_month_amt': sum(map(lambda x: float(x), sbvInfo[0]['this_month_g_d_amt'])) if 'this_month_g_d_amt' in sbvInfo[0].keys() else 0,
+                        # 'created_at'    : time.time(),
+                        'created_at'    : exporttime,
+                        'report_at'     : todayTimeStamp,
+                        'created_by'    : 'system'
+                    }
+                    total_g_d_acc += temp_4['this_month_acc']
+                    total_g_d_amt += temp_4['this_month_amt']
+                    lastMonthInfoTotal = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, colection_detail), WHERE={'report_at': {'$gte': lastMonthStarttime, '$lte': lastMonthEndtime}, 'product_code': card_type, 'type_detail': 'group_d'})
+                    temp_4['last_month_acc'] = lastMonthInfoTotal['this_month_acc'] if lastMonthInfoTotal is not None and 'this_month_acc' in lastMonthInfoTotal.keys() else 0
+                    temp_4['last_month_amt'] = lastMonthInfoTotal['this_month_amt'] if lastMonthInfoTotal is not None and 'this_month_amt' in lastMonthInfoTotal.keys() else 0
+                    insertDataDetail.append(temp_4)
+
+                    # temp_5 = {
+                    #     'index'         : '4b',
+                    #     'type_detail'   : 'group_e',
+                    #     'group_name'    : '',
+                    #     'product_code'  : card_type,
+                    #     'product_name'  : card_type_name,
+                    #     'this_month_acc': sbvInfo[0]['this_month_g_e_acc'] if 'this_month_g_e_acc' in sbvInfo[0].keys() else 0,
+                    #     'this_month_amt': sum(map(lambda x: float(x), sbvInfo[0]['this_month_g_e_amt'])) if 'this_month_g_e_amt' in sbvInfo[0].keys() else 0,
+                    #     # 'created_at'    : time.time(),
+                    #     'created_at'    : exporttime,
+                    #     'report_at'     : todayTimeStamp,
+                    #     'created_by'    : 'system'
+                    # }
+                    # insertDataDetail.append(temp_5)
+
+                    if product_code == 0:
+                        temp_2_plus = {
+                            'index'         : '5b',
+                            'type_detail'   : 'group_b_plus',
+                            'group_name'    : '(Ｇ２以上）',
+                            'product_code'  : card_type,
+                            'product_name'  : card_type_name,
+                            'this_month_acc': temp_2['this_month_acc'] + temp_3['this_month_acc'] + temp_4['this_month_acc'],
+                            'this_month_amt': temp_2['this_month_amt'] + temp_3['this_month_amt'] + temp_4['this_month_amt'],
+                            # 'created_at'    : time.time(),
+                            'created_at'    : exporttime,
+                            'report_at'     : todayTimeStamp,
+                            'created_by'    : 'system'
+                        }
                     else:
-                        temp_total1['this_month'] = sbvInfo[0]['this_month_amt']
-                        lastMonthInfoTotal = mongodb.getOne(common.getSubUser(subUserType, 'Collection_factors_total'), WHERE={'created_at': {'$gte': lastMonthStarttime, '$lte': lastMonthEndtime}, 'detail': 'amt', 'product_code': product_value['code']})
-                        temp_total1['last_month'] = lastMonthInfoTotal['this_month'] if lastMonthInfoTotal is not None and 'this_month' in lastMonthInfoTotal.keys() else 0
-                        total_total_amt += temp_total1['this_month']
-                        temp_total_amt_sbv = temp_total1['this_month']
-                    insertDataTotal.append(temp_total1)
+                        temp_2_plus = {
+                            'index'         : '5b',
+                            'type_detail'   : 'group_b_plus',
+                            'group_name'    : '',
+                            'product_code'  : card_type,
+                            'product_name'  : card_type_name,
+                            'this_month_acc': temp_2['this_month_acc'] + temp_3['this_month_acc'] + temp_4['this_month_acc'],
+                            'this_month_amt': temp_2['this_month_amt'] + temp_3['this_month_amt'] + temp_4['this_month_amt'],
+                            # 'created_at'    : time.time(),
+                            'created_at'    : exporttime,
+                            'report_at'     : todayTimeStamp,
+                            'created_by'    : 'system'
+                        }
 
-                temp_2 = {
-                    'index'         : '1b',
-                    'type_detail'   : 'group_b',
-                    'group_name'    : '',
-                    'product_code'  : product_value['code'],
-                    'product_name'  : product_value['name'],
-                    'this_month_acc': sbvInfo[0]['this_month_g_b_acc'] if sbvInfo[0]['this_month_g_b_acc'] is not None else 0,
-                    'this_month_amt': sum(map(lambda x: float(x), sbvInfo[0]['this_month_g_b_amt'])) if sbvInfo[0]['this_month_g_b_amt'] is not None else 0,
-                    # 'created_at'    : time.time(),
-                    'created_at'    : todayTimeStamp,
-                    'created_by'    : 'system'
-                }
-                total_g_b_acc += temp_2['this_month_acc']
-                total_g_b_amt += temp_2['this_month_amt']
-                lastMonthInfoTotal = mongodb.getOne(common.getSubUser(subUserType, 'Collection_factors_detail'), WHERE={'created_at': {'$gte': lastMonthStarttime, '$lte': lastMonthEndtime}, 'product_code': product_value['code'], 'type_detail': 'group_b'})
-                temp_2['last_month_acc'] = lastMonthInfoTotal['this_month_acc'] if lastMonthInfoTotal is not None and 'this_month_acc' in lastMonthInfoTotal.keys() else 0
-                temp_2['last_month_amt'] = lastMonthInfoTotal['this_month_amt'] if lastMonthInfoTotal is not None and 'this_month_amt' in lastMonthInfoTotal.keys() else 0
-                insertDataDetail.append(temp_2)
+                    total_g_b_plus_acc += temp_2_plus['this_month_acc']
+                    total_g_b_plus_amt += temp_2_plus['this_month_amt']
+                    lastMonthInfoTotal = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, colection_detail), WHERE={'report_at': {'$gte': lastMonthStarttime, '$lte': lastMonthEndtime}, 'product_code': card_type, 'type_detail': 'group_b_plus'})
+                    temp_2_plus['last_month_acc'] = lastMonthInfoTotal['this_month_acc'] if lastMonthInfoTotal is not None and 'this_month_acc' in lastMonthInfoTotal.keys() else 0
+                    temp_2_plus['last_month_amt'] = lastMonthInfoTotal['this_month_amt'] if lastMonthInfoTotal is not None and 'this_month_amt' in lastMonthInfoTotal.keys() else 0
+                    insertDataDetail.append(temp_2_plus)
 
-                temp_3 = {
-                    'index'         : '2b',
-                    'type_detail'   : 'group_c',
-                    'group_name'    : '',
-                    'product_code'  : product_value['code'],
-                    'product_name'  : product_value['name'],
-                    'this_month_acc': sbvInfo[0]['this_month_g_c_acc'] if 'this_month_g_c_acc' in sbvInfo[0].keys() else 0,
-                    'this_month_amt': sum(map(lambda x: float(x), sbvInfo[0]['this_month_g_c_amt'])) if 'this_month_g_c_amt' in sbvInfo[0].keys() else 0,
-                    # 'created_at'    : time.time(),
-                    'created_at'    : todayTimeStamp,
-                    'created_by'    : 'system'
-                }
-                total_g_c_acc += temp_3['this_month_acc']
-                total_g_c_amt += temp_3['this_month_amt']
-                lastMonthInfoTotal = mongodb.getOne(common.getSubUser(subUserType, 'Collection_factors_detail'), WHERE={'created_at': {'$gte': lastMonthStarttime, '$lte': lastMonthEndtime}, 'product_code': product_value['code'], 'type_detail': 'group_c'})
-                temp_3['last_month_acc'] = lastMonthInfoTotal['this_month_acc'] if lastMonthInfoTotal is not None and 'this_month_acc' in lastMonthInfoTotal.keys() else 0
-                temp_3['last_month_amt'] = lastMonthInfoTotal['this_month_amt'] if lastMonthInfoTotal is not None and 'this_month_amt' in lastMonthInfoTotal.keys() else 0
-                insertDataDetail.append(temp_3)
+                    if product_code == 0:
+                        temp_2_ratio = {
+                            'index'         : '6b',
+                            'type_detail'   : 'group_b_plus_ratio',
+                            'group_name'    : '(Ｇ２以上）',
+                            'product_code'  : card_type,
+                            'product_name'  : card_type_name,
+                            'this_month_amt': temp_2_plus['this_month_amt'] / temp_total_amt_sbv if temp_total_amt_sbv != 0 else 0,
+                            # 'created_at'    : time.time(),
+                            'created_at'    : exporttime,
+                            'report_at'     : todayTimeStamp,
+                            'created_by'    : 'system'
+                        }
+                    else:
+                        temp_2_ratio = {
+                            'index'         : '6b',
+                            'type_detail'   : 'group_b_plus_ratio',
+                            'group_name'    : '',
+                            'product_code'  : card_type,
+                            'product_name'  : card_type_name,
+                            'this_month_amt': temp_2_plus['this_month_amt'] / temp_total_amt_sbv if temp_total_amt_sbv != 0 else 0,
+                            # 'created_at'    : time.time(),
+                            'created_at'    : exporttime,
+                            'report_at'     : todayTimeStamp,
+                            'created_by'    : 'system'
+                        }
+                    lastMonthInfoTotal = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, colection_detail), WHERE={'report_at': {'$gte': lastMonthStarttime, '$lte': lastMonthEndtime}, 'product_code': card_type, 'type_detail': 'group_b_plus_ratio'})
+                    temp_2_ratio['last_month_acc'] = lastMonthInfoTotal['this_month_acc'] if lastMonthInfoTotal is not None and 'this_month_acc' in lastMonthInfoTotal.keys() else 0
+                    temp_2_ratio['last_month_amt'] = lastMonthInfoTotal['this_month_amt'] if lastMonthInfoTotal is not None and 'this_month_amt' in lastMonthInfoTotal.keys() else 0
+                    insertDataDetail.append(temp_2_ratio)
 
-                temp_4 = {
-                    'index'         : '3b',
-                    'type_detail'   : 'group_d',
-                    'group_name'    : '',
-                    'product_code'  : product_value['code'],
-                    'product_name'  : product_value['name'],
-                    'this_month_acc': sbvInfo[0]['this_month_g_d_acc'] if 'this_month_g_d_acc' in sbvInfo[0].keys() else 0,
-                    'this_month_amt': sum(map(lambda x: float(x), sbvInfo[0]['this_month_g_d_amt'])) if 'this_month_g_d_amt' in sbvInfo[0].keys() else 0,
-                    # 'created_at'    : time.time(),
-                    'created_at'    : todayTimeStamp,
-                    'created_by'    : 'system'
-                }
-                total_g_d_acc += temp_4['this_month_acc']
-                total_g_d_amt += temp_4['this_month_amt']
-                lastMonthInfoTotal = mongodb.getOne(common.getSubUser(subUserType, 'Collection_factors_detail'), WHERE={'created_at': {'$gte': lastMonthStarttime, '$lte': lastMonthEndtime}, 'product_code': product_value['code'], 'type_detail': 'group_d'})
-                temp_4['last_month_acc'] = lastMonthInfoTotal['this_month_acc'] if lastMonthInfoTotal is not None and 'this_month_acc' in lastMonthInfoTotal.keys() else 0
-                temp_4['last_month_amt'] = lastMonthInfoTotal['this_month_amt'] if lastMonthInfoTotal is not None and 'this_month_amt' in lastMonthInfoTotal.keys() else 0
-                insertDataDetail.append(temp_4)
-
-                temp_5 = {
-                    'index'         : '4b',
-                    'type_detail'   : 'group_e',
-                    'group_name'    : '',
-                    'product_code'  : product_value['code'],
-                    'product_name'  : product_value['name'],
-                    'this_month_acc': sbvInfo[0]['this_month_g_e_acc'] if 'this_month_g_e_acc' in sbvInfo[0].keys() else 0,
-                    'this_month_amt': sum(map(lambda x: float(x), sbvInfo[0]['this_month_g_e_amt'])) if 'this_month_g_e_amt' in sbvInfo[0].keys() else 0,
-                    # 'created_at'    : time.time(),
-                    'created_at'    : todayTimeStamp,
-                    'created_by'    : 'system'
-                }
-                insertDataDetail.append(temp_5)
-
-                if product_code == 0:
-                    temp_2_plus = {
-                        'index'         : '5b',
-                        'type_detail'   : 'group_b_plus',
-                        'group_name'    : '(Ｇ２以上）',
-                        'product_code'  : product_value['code'],
-                        'product_name'  : product_value['name'],
-                        'this_month_acc': temp_2['this_month_acc'] + temp_3['this_month_acc'] + temp_4['this_month_acc'],
-                        'this_month_amt': temp_2['this_month_amt'] + temp_3['this_month_amt'] + temp_4['this_month_amt'],
-                        # 'created_at'    : time.time(),
-                        'created_at'    : todayTimeStamp,
-                        'created_by'    : 'system'
-                    }
-                else:
-                    temp_2_plus = {
-                        'index'         : '5b',
-                        'type_detail'   : 'group_b_plus',
+                    temp_3_plus = {
+                        'index'         : '7b',
+                        'type_detail'   : 'group_c_plus',
                         'group_name'    : '',
-                        'product_code'  : product_value['code'],
-                        'product_name'  : product_value['name'],
-                        'this_month_acc': temp_2['this_month_acc'] + temp_3['this_month_acc'] + temp_4['this_month_acc'],
-                        'this_month_amt': temp_2['this_month_amt'] + temp_3['this_month_amt'] + temp_4['this_month_amt'],
+                        'product_code'  : card_type,
+                        'product_name'  : card_type_name,
+                        'this_month_acc': temp_3['this_month_acc'] + temp_4['this_month_acc'],
+                        'this_month_amt': temp_3['this_month_amt'] + temp_4['this_month_amt'],
                         # 'created_at'    : time.time(),
-                        'created_at'    : todayTimeStamp,
+                        'created_at'    : exporttime,
+                        'report_at'     : todayTimeStamp,
                         'created_by'    : 'system'
                     }
+                    total_g_c_plus_acc += temp_3_plus['this_month_acc']
+                    total_g_c_plus_amt += temp_3_plus['this_month_amt']
+                    lastMonthInfoTotal = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, colection_detail), WHERE={'report_at': {'$gte': lastMonthStarttime, '$lte': lastMonthEndtime}, 'product_code': card_type, 'type_detail': 'group_c_plus'})
+                    temp_3_plus['last_month_acc'] = lastMonthInfoTotal['this_month_acc'] if lastMonthInfoTotal is not None and 'this_month_acc' in lastMonthInfoTotal.keys() else 0
+                    temp_3_plus['last_month_amt'] = lastMonthInfoTotal['this_month_amt'] if lastMonthInfoTotal is not None and 'this_month_amt' in lastMonthInfoTotal.keys() else 0
+                    insertDataDetail.append(temp_3_plus)
 
-                total_g_b_plus_acc += temp_2_plus['this_month_acc']
-                total_g_b_plus_amt += temp_2_plus['this_month_amt']
-                lastMonthInfoTotal = mongodb.getOne(common.getSubUser(subUserType, 'Collection_factors_detail'), WHERE={'created_at': {'$gte': lastMonthStarttime, '$lte': lastMonthEndtime}, 'product_code': product_value['code'], 'type_detail': 'group_b_plus'})
-                temp_2_plus['last_month_acc'] = lastMonthInfoTotal['this_month_acc'] if lastMonthInfoTotal is not None and 'this_month_acc' in lastMonthInfoTotal.keys() else 0
-                temp_2_plus['last_month_amt'] = lastMonthInfoTotal['this_month_amt'] if lastMonthInfoTotal is not None and 'this_month_amt' in lastMonthInfoTotal.keys() else 0
-                insertDataDetail.append(temp_2_plus)
-
-                if product_code == 0:
-                    temp_2_ratio = {
-                        'index'         : '6b',
-                        'type_detail'   : 'group_b_plus_ratio',
-                        'group_name'    : '(Ｇ２以上）',
-                        'product_code'  : product_value['code'],
-                        'product_name'  : product_value['name'],
-                        'this_month_amt': temp_2_plus['this_month_amt'] / temp_total_amt_sbv if temp_total_amt_sbv != 0 else 0,
-                        # 'created_at'    : time.time(),
-                        'created_at'    : todayTimeStamp,
-                        'created_by'    : 'system'
-                    }
-                else:
-                    temp_2_ratio = {
-                        'index'         : '6b',
-                        'type_detail'   : 'group_b_plus_ratio',
-                        'group_name'    : '',
-                        'product_code'  : product_value['code'],
-                        'product_name'  : product_value['name'],
-                        'this_month_amt': temp_2_plus['this_month_amt'] / temp_total_amt_sbv if temp_total_amt_sbv != 0 else 0,
-                        # 'created_at'    : time.time(),
-                        'created_at'    : todayTimeStamp,
-                        'created_by'    : 'system'
-                    }
-                lastMonthInfoTotal = mongodb.getOne(common.getSubUser(subUserType, 'Collection_factors_detail'), WHERE={'created_at': {'$gte': lastMonthStarttime, '$lte': lastMonthEndtime}, 'product_code': product_value['code'], 'type_detail': 'group_b_plus_ratio'})
-                temp_2_ratio['last_month_acc'] = lastMonthInfoTotal['this_month_acc'] if lastMonthInfoTotal is not None and 'this_month_acc' in lastMonthInfoTotal.keys() else 0
-                temp_2_ratio['last_month_amt'] = lastMonthInfoTotal['this_month_amt'] if lastMonthInfoTotal is not None and 'this_month_amt' in lastMonthInfoTotal.keys() else 0
-                insertDataDetail.append(temp_2_ratio)
-
-                temp_3_plus = {
-                    'index'         : '7b',
-                    'type_detail'   : 'group_c_plus',
-                    'group_name'    : '',
-                    'product_code'  : product_value['code'],
-                    'product_name'  : product_value['name'],
-                    'this_month_acc': temp_3['this_month_acc'] + temp_4['this_month_acc'],
-                    'this_month_amt': temp_3['this_month_amt'] + temp_4['this_month_amt'],
-                    # 'created_at'    : time.time(),
-                    'created_at'    : todayTimeStamp,
-                    'created_by'    : 'system'
-                }
-                total_g_c_plus_acc += temp_3_plus['this_month_acc']
-                total_g_c_plus_amt += temp_3_plus['this_month_amt']
-                lastMonthInfoTotal = mongodb.getOne(common.getSubUser(subUserType, 'Collection_factors_detail'), WHERE={'created_at': {'$gte': lastMonthStarttime, '$lte': lastMonthEndtime}, 'product_code': product_value['code'], 'type_detail': 'group_c_plus'})
-                temp_3_plus['last_month_acc'] = lastMonthInfoTotal['this_month_acc'] if lastMonthInfoTotal is not None and 'this_month_acc' in lastMonthInfoTotal.keys() else 0
-                temp_3_plus['last_month_amt'] = lastMonthInfoTotal['this_month_amt'] if lastMonthInfoTotal is not None and 'this_month_amt' in lastMonthInfoTotal.keys() else 0
-                insertDataDetail.append(temp_3_plus)
-
-                if product_code == 0:
-                    temp_3_ratio = {
-                        'index'         : '9b',
-                        'type_detail'   : 'group_c_plus_ratio',
-                        'group_name'    : '(Ｇ２以上）',
-                        'product_code'  : product_value['code'],
-                        'product_name'  : product_value['name'],
-                        'this_month_amt': temp_3_plus['this_month_amt'] / temp_total_amt_sbv if temp_total_amt_sbv != 0 else 0,
-                        # 'created_at'    : time.time(),
-                        'created_at'    : todayTimeStamp,
-                        'created_by'    : 'system',
-                    }
-                else:
-                    temp_3_ratio = {
-                        'index'         : '9b',
-                        'type_detail'   : 'group_c_plus_ratio',
-                        'group_name'    : '',
-                        'product_code'  : product_value['code'],
-                        'product_name'  : product_value['name'],
-                        'this_month_amt': temp_3_plus['this_month_amt'] / temp_total_amt_sbv if temp_total_amt_sbv != 0 else 0,
-                        # 'created_at'    : time.time(),
-                        'created_at'    : todayTimeStamp,
-                        'created_by'    : 'system',
-                    }
-                lastMonthInfoTotal = mongodb.getOne(common.getSubUser(subUserType, 'Collection_factors_detail'), WHERE={'created_at': {'$gte': lastMonthStarttime, '$lte': lastMonthEndtime}, 'product_code': product_value['code'], 'type_detail': 'group_c_plus_ratio'})
-                temp_3_ratio['last_month_acc'] = lastMonthInfoTotal['this_month_acc'] if lastMonthInfoTotal is not None and 'this_month_acc' in lastMonthInfoTotal.keys() else 0
-                temp_3_ratio['last_month_amt'] = lastMonthInfoTotal['this_month_amt'] if lastMonthInfoTotal is not None and 'this_month_amt' in lastMonthInfoTotal.keys() else 0
-                insertDataDetail.append(temp_3_ratio)
+                    if product_code == 0:
+                        temp_3_ratio = {
+                            'index'         : '9b',
+                            'type_detail'   : 'group_c_plus_ratio',
+                            'group_name'    : '(Ｇ２以上）',
+                            'product_code'  : card_type,
+                            'product_name'  : card_type_name,
+                            'this_month_amt': temp_3_plus['this_month_amt'] / temp_total_amt_sbv if temp_total_amt_sbv != 0 else 0,
+                            # 'created_at'    : time.time(),
+                            'created_at'    : exporttime,
+                            'report_at'     : todayTimeStamp,
+                            'created_by'    : 'system',
+                        }
+                    else:
+                        temp_3_ratio = {
+                            'index'         : '9b',
+                            'type_detail'   : 'group_c_plus_ratio',
+                            'group_name'    : '',
+                            'product_code'  : card_type,
+                            'product_name'  : card_type_name,
+                            'this_month_amt': temp_3_plus['this_month_amt'] / temp_total_amt_sbv if temp_total_amt_sbv != 0 else 0,
+                            # 'created_at'    : time.time(),
+                            'created_at'    : exporttime,
+                            'report_at'     : todayTimeStamp,
+                            'created_by'    : 'system',
+                        }
+                    lastMonthInfoTotal = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, colection_detail), WHERE={'report_at': {'$gte': lastMonthStarttime, '$lte': lastMonthEndtime}, 'product_code': card_type, 'type_detail': 'group_c_plus_ratio'})
+                    temp_3_ratio['last_month_acc'] = lastMonthInfoTotal['this_month_acc'] if lastMonthInfoTotal is not None and 'this_month_acc' in lastMonthInfoTotal.keys() else 0
+                    temp_3_ratio['last_month_amt'] = lastMonthInfoTotal['this_month_amt'] if lastMonthInfoTotal is not None and 'this_month_amt' in lastMonthInfoTotal.keys() else 0
+                    insertDataDetail.append(temp_3_ratio)
     
-    lastMonthInfoTotal_total_acc = mongodb.getOne(common.getSubUser(subUserType, 'Collection_factors_detail'), WHERE={'created_at': {'$gte': lastMonthStarttime, '$lte': lastMonthEndtime}, 'type_detail': 'total_total_acc'})
+    lastMonthInfoTotal_total_acc = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, colection_total), WHERE={'report_at': {'$gte': lastMonthStarttime, '$lte': lastMonthEndtime}, 'type_detail': 'total_total_acc'})
     insertDataTotal.append({
         'index'         : '1',
         'type_detail'   : 'total_total_acc',
@@ -971,11 +1008,12 @@ try:
         'this_month'    : total_total_acc,
         'last_month'    : lastMonthInfoTotal_total_acc['this_month'] if lastMonthInfoTotal_total_acc != None and 'this_month' in lastMonthInfoTotal_total_acc.keys() else 0,
         # 'created_at'    : time.time(),
-        'created_at'    : todayTimeStamp,
+        'created_at'    : exporttime,
+        'report_at'     : todayTimeStamp,
         'created_by'    : 'system'
     })
 
-    lastMonthInfoTotal_total_amt = mongodb.getOne(common.getSubUser(subUserType, 'Collection_factors_detail'), WHERE={'created_at': {'$gte': lastMonthStarttime, '$lte': lastMonthEndtime}, 'type_detail': 'total_total_amt'})
+    lastMonthInfoTotal_total_amt = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, colection_total), WHERE={'report_at': {'$gte': lastMonthStarttime, '$lte': lastMonthEndtime}, 'type_detail': 'total_total_amt'})
     insertDataTotal.append({
         'index'         : '2',
         'type_detail'   : 'total_total_amt',
@@ -986,11 +1024,12 @@ try:
         'this_month'    : total_total_amt,
         'last_month'    : lastMonthInfoTotal_total_amt['this_month'] if lastMonthInfoTotal_total_amt != None and 'this_month' in lastMonthInfoTotal_total_amt.keys() else 0,
         # 'created_at'    : time.time(),
-        'created_at'    : todayTimeStamp,
+        'created_at'    : exporttime,
+        'report_at'     : todayTimeStamp,
         'created_by'    : 'system'
     })
 
-    lastMonthInfoTotal_total_group_2 = mongodb.getOne(common.getSubUser(subUserType, 'Collection_factors_detail'), WHERE={'created_at': {'$gte': lastMonthStarttime, '$lte': lastMonthEndtime}, 'type_detail': 'total_group_b'})
+    lastMonthInfoTotal_total_group_2 = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, colection_detail), WHERE={'report_at': {'$gte': lastMonthStarttime, '$lte': lastMonthEndtime}, 'type_detail': 'total_group_b'})
     insertDataDetail.append({
         'index'         : '1a',
         'type_detail'   : 'total_group_b',
@@ -1002,11 +1041,12 @@ try:
         'last_month_acc': lastMonthInfoTotal_total_group_2['this_month_acc'] if lastMonthInfoTotal_total_group_2 != None and 'this_month_acc' in lastMonthInfoTotal_total_group_2.keys() else 0,
         'last_month_amt': lastMonthInfoTotal_total_group_2['this_month_amt'] if lastMonthInfoTotal_total_group_2 != None and 'this_month_amt' in lastMonthInfoTotal_total_group_2.keys() else 0,
         # 'created_at'    : time.time(),
-        'created_at'    : todayTimeStamp,
+        'created_at'    : exporttime,
+        'report_at'     : todayTimeStamp,
         'created_by'    : 'system'
     })
 
-    lastMonthInfoTotal_total_group_3 = mongodb.getOne(common.getSubUser(subUserType, 'Collection_factors_detail'), WHERE={'created_at': {'$gte': lastMonthStarttime, '$lte': lastMonthEndtime}, 'type_detail': 'total_group_c'})
+    lastMonthInfoTotal_total_group_3 = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, colection_detail), WHERE={'report_at': {'$gte': lastMonthStarttime, '$lte': lastMonthEndtime}, 'type_detail': 'total_group_c'})
     insertDataDetail.append({
         'index'         : '2a',
         'type_detail'   : 'total_group_c',
@@ -1018,11 +1058,12 @@ try:
         'last_month_acc': lastMonthInfoTotal_total_group_3['this_month_acc'] if lastMonthInfoTotal_total_group_3 != None and 'this_month_acc' in lastMonthInfoTotal_total_group_3.keys() else 0,
         'last_month_amt': lastMonthInfoTotal_total_group_3['this_month_amt'] if lastMonthInfoTotal_total_group_3 != None and 'this_month_amt' in lastMonthInfoTotal_total_group_3.keys() else 0,
         # 'created_at'    : time.time(),
-        'created_at'    : todayTimeStamp,
+        'created_at'    : exporttime,
+        'report_at'     : todayTimeStamp,
         'created_by'    : 'system'
     })
 
-    lastMonthInfoTotal_total_group_4 = mongodb.getOne(common.getSubUser(subUserType, 'Collection_factors_detail'), WHERE={'created_at': {'$gte': lastMonthStarttime, '$lte': lastMonthEndtime}, 'type_detail': 'total_group_d'})
+    lastMonthInfoTotal_total_group_4 = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, colection_detail), WHERE={'report_at': {'$gte': lastMonthStarttime, '$lte': lastMonthEndtime}, 'type_detail': 'total_group_d'})
     insertDataDetail.append({
         'index'         : '3a',
         'type_detail'   : 'total_group_d',
@@ -1034,11 +1075,12 @@ try:
         'last_month_acc': lastMonthInfoTotal_total_group_4['this_month_acc'] if lastMonthInfoTotal_total_group_4 != None and 'this_month_acc' in lastMonthInfoTotal_total_group_4.keys() else 0,
         'last_month_amt': lastMonthInfoTotal_total_group_4['this_month_amt'] if lastMonthInfoTotal_total_group_4 != None and 'this_month_amt' in lastMonthInfoTotal_total_group_4.keys() else 0,
         # 'created_at'    : time.time(),
-        'created_at'    : todayTimeStamp,
+        'created_at'    : exporttime,
+        'report_at'     : todayTimeStamp,
         'created_by'    : 'system'
     })
 
-    lastMonthInfoTotal_total_group_2_plus = mongodb.getOne(common.getSubUser(subUserType, 'Collection_factors_detail'), WHERE={'created_at': {'$gte': lastMonthStarttime, '$lte': lastMonthEndtime}, 'type_detail': 'total_group_b_plus'})
+    lastMonthInfoTotal_total_group_2_plus = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, colection_detail), WHERE={'report_at': {'$gte': lastMonthStarttime, '$lte': lastMonthEndtime}, 'type_detail': 'total_group_b_plus'})
     insertDataDetail.append({
         'index'         : '5a',
         'type_detail'   : 'total_group_b_plus',
@@ -1050,11 +1092,12 @@ try:
         'last_month_acc': lastMonthInfoTotal_total_group_2_plus['this_month_acc'] if lastMonthInfoTotal_total_group_2_plus != None and 'this_month_acc' in lastMonthInfoTotal_total_group_2_plus.keys() else 0,
         'last_month_amt': lastMonthInfoTotal_total_group_2_plus['this_month_amt'] if lastMonthInfoTotal_total_group_2_plus != None and 'this_month_amt' in lastMonthInfoTotal_total_group_2_plus.keys() else 0,
         # 'created_at'    : time.time(),
-        'created_at'    : todayTimeStamp,
+        'created_at'    : exporttime,
+        'report_at'     : todayTimeStamp,
         'created_by'    : 'system'
     })
 
-    lastMonthInfoTotal_b_plus = mongodb.getOne(common.getSubUser(subUserType, 'Collection_factors_detail'), WHERE={'created_at': {'$gte': lastMonthStarttime, '$lte': lastMonthEndtime}, 'type_detail': 'total_inc_dec_b_plus'})
+    lastMonthInfoTotal_b_plus = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, colection_detail), WHERE={'report_at': {'$gte': lastMonthStarttime, '$lte': lastMonthEndtime}, 'type_detail': 'total_inc_dec_b_plus'})
     insertDataDetail.append({
         'index'         : '5bc',
         'type_detail'   : 'total_inc_dec_b_plus',
@@ -1066,11 +1109,12 @@ try:
         'last_month_acc': lastMonthInfoTotal_b_plus['this_month_acc'] if lastMonthInfoTotal_b_plus != None and 'this_month_acc' in lastMonthInfoTotal_b_plus.keys() else 0,
         'last_month_amt': lastMonthInfoTotal_b_plus['this_month_amt'] if lastMonthInfoTotal_b_plus != None and 'this_month_amt' in lastMonthInfoTotal_b_plus.keys() else 0,
         # 'created_at'    : time.time(),
-        'created_at'    : todayTimeStamp,
+        'created_at'    : exporttime,
+        'report_at'     : todayTimeStamp,
         'created_by'    : 'system'
     })
 
-    lastMonthInfoTotal_total_group_2_plus_ratio = mongodb.getOne(common.getSubUser(subUserType, 'Collection_factors_detail'), WHERE={'created_at': {'$gte': lastMonthStarttime, '$lte': lastMonthEndtime}, 'type_detail': 'total_group_b_plus_ratio'})
+    lastMonthInfoTotal_total_group_2_plus_ratio = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, colection_detail), WHERE={'report_at': {'$gte': lastMonthStarttime, '$lte': lastMonthEndtime}, 'type_detail': 'total_group_b_plus_ratio'})
     insertDataDetail.append({
         'index'         : '6a',
         'type_detail'   : 'total_group_b_plus_ratio',
@@ -1082,11 +1126,12 @@ try:
         'last_month_acc': lastMonthInfoTotal_total_group_2_plus_ratio['this_month_acc'] if lastMonthInfoTotal_total_group_2_plus_ratio != None and 'this_month_acc' in lastMonthInfoTotal_total_group_2_plus_ratio.keys() else 0,
         'last_month_amt': lastMonthInfoTotal_total_group_2_plus_ratio['this_month_amt'] if lastMonthInfoTotal_total_group_2_plus_ratio != None and 'this_month_amt' in lastMonthInfoTotal_total_group_2_plus_ratio.keys() else 0,
         # 'created_at'    : time.time(),
-        'created_at'    : todayTimeStamp,
+        'created_at'    : exporttime,
+        'report_at'     : todayTimeStamp,
         'created_by'    : 'system'
     })
 
-    lastMonthInfoTotal_total_group_3_plus = mongodb.getOne(common.getSubUser(subUserType, 'Collection_factors_detail'), WHERE={'created_at': {'$gte': lastMonthStarttime, '$lte': lastMonthEndtime}, 'type_detail': 'total_group_c_plus'})
+    lastMonthInfoTotal_total_group_3_plus = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, colection_detail), WHERE={'report_at': {'$gte': lastMonthStarttime, '$lte': lastMonthEndtime}, 'type_detail': 'total_group_c_plus'})
     insertDataDetail.append({
         'index'         : '7a',
         'type_detail'   : 'total_group_c_plus',
@@ -1098,11 +1143,12 @@ try:
         'last_month_acc': lastMonthInfoTotal_total_group_3_plus['this_month_acc'] if lastMonthInfoTotal_total_group_3_plus != None and 'this_month_acc' in lastMonthInfoTotal_total_group_3_plus.keys() else 0,
         'last_month_amt': lastMonthInfoTotal_total_group_3_plus['this_month_amt'] if lastMonthInfoTotal_total_group_3_plus != None and 'this_month_amt' in lastMonthInfoTotal_total_group_3_plus.keys() else 0,
         # 'created_at'    : time.time(),
-        'created_at'    : todayTimeStamp,
+        'created_at'    : exporttime,
+        'report_at'     : todayTimeStamp,
         'created_by'    : 'system'
     })
 
-    lastMonthInfoTotal_c_plus = mongodb.getOne(common.getSubUser(subUserType, 'Collection_factors_detail'), WHERE={'created_at': {'$gte': lastMonthStarttime, '$lte': lastMonthEndtime}, 'type_detail': 'total_inc_dec_c_plus'})
+    lastMonthInfoTotal_c_plus = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, colection_detail), WHERE={'report_at': {'$gte': lastMonthStarttime, '$lte': lastMonthEndtime}, 'type_detail': 'total_inc_dec_c_plus'})
     insertDataDetail.append({
         'index'         : '8a',
         'type_detail'   : 'total_inc_dec_c_plus',
@@ -1114,11 +1160,12 @@ try:
         'last_month_acc': lastMonthInfoTotal_c_plus['this_month_acc'] if lastMonthInfoTotal_c_plus != None and 'this_month_acc' in lastMonthInfoTotal_c_plus.keys() else 0,
         'last_month_amt': lastMonthInfoTotal_c_plus['this_month_amt'] if lastMonthInfoTotal_c_plus != None and 'this_month_amt' in lastMonthInfoTotal_c_plus.keys() else 0,
         # 'created_at'    : time.time(),
-        'created_at'    : todayTimeStamp,
+        'created_at'    : exporttime,
+        'report_at'     : todayTimeStamp,
         'created_by'    : 'system'
     })
 
-    lastMonthInfoTotal_c_plus_ratio = mongodb.getOne(common.getSubUser(subUserType, 'Collection_factors_detail'), WHERE={'created_at': {'$gte': lastMonthStarttime, '$lte': lastMonthEndtime}, 'type_detail': 'total_group_c_plus_ratio'})
+    lastMonthInfoTotal_c_plus_ratio = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, colection_detail), WHERE={'report_at': {'$gte': lastMonthStarttime, '$lte': lastMonthEndtime}, 'type_detail': 'total_group_c_plus_ratio'})
     insertDataDetail.append({
         'index'         : '9a',
         'type_detail'   : 'total_group_c_plus_ratio',
@@ -1130,12 +1177,13 @@ try:
         'last_month_acc': lastMonthInfoTotal_c_plus_ratio['this_month_acc'] if lastMonthInfoTotal_c_plus_ratio != None and 'this_month_acc' in lastMonthInfoTotal_c_plus_ratio.keys() else 0,
         'last_month_amt': lastMonthInfoTotal_c_plus_ratio['this_month_amt'] if lastMonthInfoTotal_c_plus_ratio != None and 'this_month_amt' in lastMonthInfoTotal_c_plus_ratio.keys() else 0,
         # 'created_at'    : time.time(),
-        'created_at'    : todayTimeStamp,
+        'created_at'    : exporttime,
+        'report_at'     : todayTimeStamp,
         'created_by'    : 'system'
     })
-    # pprint(insertDataDetail)
-    mongodb.batch_insert(MONGO_COLLECTION=common.getSubUser(subUserType, 'Collection_factors_total'), insert_data=insertDataTotal)
-    mongodb.batch_insert(MONGO_COLLECTION=common.getSubUser(subUserType, 'Collection_factors_detail'), insert_data=insertDataDetail)
+
+    mongodb.batch_insert(MONGO_COLLECTION=common.getSubUser(subUserType, colection_total), insert_data=insertDataTotal)
+    mongodb.batch_insert(MONGO_COLLECTION=common.getSubUser(subUserType, colection_detail), insert_data=insertDataDetail)
     print('DONE')
 except Exception as e:
     log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')

@@ -94,7 +94,7 @@ try:
                'index'           : i,
                'account_number'  : row['account_number'],
                'name'            : zaccf['name'],
-               'address'         : zaccf['ADDR_1'],
+               'address'         : zaccf['ADDR_1']+ ', '+zaccf['ADDR_2']+', '+zaccf['ADDR_3'],
                'contract_date'   : zaccf['CIF_CR8'],
                'approved_amt'    : zaccf['APPROV_LMT'],
                'cur_bal'         : row['current_balance'],
@@ -147,11 +147,10 @@ try:
             releaseInfo = mongodb.getOne(MONGO_COLLECTION=report_release_sale_collection, WHERE={'account_number': str(row['account_number'])},SELECT=['cus_name','temp_address','address'])
             if releaseInfo != None:
                temp['name']        = releaseInfo['cus_name']
-               if temp['address'] == '':
-                  if releaseInfo['temp_address'] != '':
-                     temp['address'] = releaseInfo['temp_address']
-                  else:
-                     temp['address'] = releaseInfo['address']
+               if releaseInfo['temp_address'] != '':
+                  temp['address'] = releaseInfo['temp_address']
+               else:
+                  temp['address'] = releaseInfo['address']
 
             investigationInfo = mongodb.getOne(MONGO_COLLECTION=investigation_collection, WHERE={'contract_no': str(row['account_number'])},SELECT=['brand','model','engine_no','chassis_no','license_plates_no'])
             if investigationInfo != None:
@@ -235,11 +234,10 @@ try:
             releaseInfo = mongodb.getOne(MONGO_COLLECTION=report_release_sale_collection, WHERE={'account_number': str(row['account_number'])},SELECT=['cus_name','temp_address','address'])
             if releaseInfo != None:
                temp['name']        = releaseInfo['cus_name']
-               if temp['address'] == '':
-                  if releaseInfo['temp_address'] != '':
-                     temp['address'] = releaseInfo['temp_address']
-                  else:
-                     temp['address'] = releaseInfo['address']
+               if releaseInfo['temp_address'] != '':
+                  temp['address'] = releaseInfo['temp_address']
+               else:
+                  temp['address'] = releaseInfo['address']
 
             zaccfInfo = mongodb.getOne(MONGO_COLLECTION=zaccf_collection, WHERE={'LIC_NO': str(sbv['license_no'])},SELECT=['WRK_BRN'])
             if zaccfInfo != None:

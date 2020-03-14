@@ -50,7 +50,7 @@ class Mongodb:
     def update(self, MONGO_COLLECTION='', WHERE=None, VALUE=None):
         SET = {'$set': VALUE}
         collection = self.db[MONGO_COLLECTION]
-        return collection.update_one(WHERE, SET,upsert=True)
+        return collection.update_one(WHERE, SET, upsert=True)
 
     def batch_update(self, MONGO_COLLECTION='', WHERE=None, VALUE=None):
         SET = {'$set': VALUE}
@@ -60,7 +60,17 @@ class Mongodb:
     def update_push(self, MONGO_COLLECTION='', WHERE=None, VALUE=None):
         PUSH = {'$push': VALUE}
         collection = self.db[MONGO_COLLECTION]
-        return collection.update_one(WHERE, PUSH)
+        return collection.update_one(WHERE, PUSH, upsert=True)
+
+    def update_add_to_set(self, MONGO_COLLECTION='', WHERE=None, VALUE=None):
+        ADD_TO_SET = {'$addToSet': VALUE}
+        collection = self.db[MONGO_COLLECTION]
+        return collection.update_one(WHERE, ADD_TO_SET)
+
+    def inc(self, MONGO_COLLECTION='', WHERE=None, VALUE=None):
+        INC = {'$inc': VALUE}
+        collection = self.db[MONGO_COLLECTION]
+        return collection.update_one(WHERE, INC, upsert=True)
 
     def delete(self, MONGO_COLLECTION='', WHERE=None):
         collection = self.db[MONGO_COLLECTION]

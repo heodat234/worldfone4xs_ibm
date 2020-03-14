@@ -146,6 +146,8 @@ var Table = function() {
         dataSource: {},
         columns: Config.columns,
         grid: {},
+        formDate: 0,
+        toDate: 0,
         init: async function() {
             var dataSource = this.dataSource = new kendo.data.DataSource({
                 serverFiltering: true,
@@ -154,6 +156,13 @@ var Table = function() {
                 serverGrouping: false,
                 pageSize: 5,
                 batch: false,
+                filter: {
+                      logic: "and",
+                      filters: [
+                          {field: 'createdAt', operator: "gte", value: this.fromDate},
+                          {field: 'createdAt', operator: "lte", value: this.toDate}
+                      ]
+                },
                 sort: [{
                     field: "debt_group", dir: "asc"
                 }, {
@@ -303,13 +312,29 @@ $(document).on("ready", function() {
     date.setHours(- timeZoneOffset / kendo.date.MS_PER_HOUR, 0, 0 ,0);
 
     var fromDate = new Date(date.getTime() + timeZoneOffset);
-    var toDate = new Date(date.getTime() + timeZoneOffset + kendo.date.MS_PER_DAY -1)
+
+    Table.fromDate = fromDate.getTime() / 1000;
+    Table.toDate = Table.fromDate + 86400 - 1;
+    Table.init();
+
     var observable = kendo.observable({
         fromDateTime: fromDate,
-        toDateTime: toDate,
         filterField: "",
         fromDate: kendo.toString(fromDate, "dd/MM/yyyy H:mm"),
-        toDate: kendo.toString(toDate, "dd/MM/yyyy H:mm"),
+        onChangeDate: function() {
+            var fromDateTime = this.fromDateTime.getTime() / 1000;
+            var toDateTime = fromDateTime + 86400 - 1;
+            filter = [{
+                    field: 'createdAt',
+                    operator: 'gte',
+                    value: fromDateTime
+                }, {
+                    field: 'createdAt',
+                    operator: 'lte',
+                    value: toDateTime
+                }];
+            Table.dataSource.filter(filter);
+        },
         
     })
     kendo.bind($(".mvvm"), observable);
@@ -320,6 +345,7 @@ function saveAsExcel() {
         url: ENV.reportApi + "loan/"+Config.collection+"/exportExcel",
         type: 'POST',
         dataType: 'json',
+        data: {date: $('#start-date').val()},
     })
     .done(function(response) {
         if (response.status == 1) {
@@ -353,7 +379,7 @@ function saveAsExcel() {
             <div class="form-group col-sm-4">
             <label class="control-label col-xs-4">@Date@</label>
             <div class="col-xs-8">
-                <input id="start-date" data-role="datepicker" data-format="dd/MM/yyyy" name="fromDateTime" data-bind="value: fromDateTime" disabled="">
+                <input id="start-date" data-role="datepicker" data-format="dd/MM/yyyy" name="fromDateTime" data-bind="value: fromDateTime , events: {change: onChangeDate}">
             </div>
             </div>
             

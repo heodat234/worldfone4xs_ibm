@@ -2,3 +2,17 @@
 15/12/2019, 15:52:13: End Log
 15/12/2019, 15:55:04: Start Import
 15/12/2019, 15:55:54: End Log
+02/03/2020, 15:15:39: Start Import
+02/03/2020, 15:15:39: name 'endDayTimeStamp' is not defined
+02/03/2020, 15:16:06: Start Import
+02/03/2020, 15:16:06: 'current_balance'
+02/03/2020, 15:19:13: Start Import
+02/03/2020, 15:21:25: End Log
+09/03/2020, 13:26:26: Start Import
+09/03/2020, 13:26:27: End Log
+09/03/2020, 13:26:53: Start Import
+09/03/2020, 13:26:53: End Log
+09/03/2020, 13:27:15: Start Import
+09/03/2020, 13:27:15: End Log
+09/03/2020, 13:30:48: Start Import
+09/03/2020, 13:30:49: End Log

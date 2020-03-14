@@ -301,8 +301,8 @@
             var fromDate = new Date(date.getTime() + timeZoneOffset);
             var toDate = new Date(date.getTime() + timeZoneOffset + kendo.date.MS_PER_DAY -1);
 
-            Table.fromDate = fromDate.getTime() / 1000;
-            Table.toDate = fromDate.getTime() / 1000 + 86400 - 1;
+            Table.fromDate = fromDate.getTime() / 1000 + 86400;
+            Table.toDate = Table.fromDate + 86400 - 1;
             Table.init();
 
             var observable = kendo.observable({

@@ -32,10 +32,10 @@ log = open(base_url + "cronjob/python/Loan/log/calDueDateValue.txt","a")
 now = datetime.now()
 subUserType = 'LO'
 collection           = common.getSubUser(subUserType, 'Due_date_next_date_by_group')
-lnjc05_collection    = common.getSubUser(subUserType, 'LNJC05')
+# lnjc05_collection    = common.getSubUser(subUserType, 'LNJC05')
 zaccf_collection     = common.getSubUser(subUserType, 'ZACCF_report')
 sbv_collection       = common.getSubUser(subUserType, 'SBV')
-account_collection   = common.getSubUser(subUserType, 'List_of_account_in_collection')
+# account_collection   = common.getSubUser(subUserType, 'List_of_account_in_collection')
 diallist_collection  = common.getSubUser(subUserType, 'Diallist_detail')
 group_collection     = common.getSubUser(subUserType, 'Group')
 report_due_date_collection     = common.getSubUser(subUserType, 'Report_due_date')
@@ -48,7 +48,7 @@ try:
     listDebtGroup = []
 
     today = date.today()
-    # today = datetime.strptime('13/02/2020', "%d/%m/%Y").date()
+    # today = datetime.strptime('03/03/2020', "%d/%m/%Y").date()
 
     day = today.day
     month = today.month
@@ -72,19 +72,6 @@ try:
     if day == 1:
         mongodb.create_db(collectionName)
 
-    mongodbReport = Mongodb(MONGODB=collectionName, WFF_ENV=wff_env)
-
-    lnjc05InfoFull = mongodb.get(MONGO_COLLECTION=lnjc05_collection)
-    lnjc05ColName = 'LNJC05_' + str(year) + str(month) + str(day)
-    mongodbReport.create_col(COL_NAME=lnjc05ColName)
-    mongodbReport.remove_document(MONGO_COLLECTION=lnjc05ColName)
-    mongodbReport.batch_insert(MONGO_COLLECTION=lnjc05ColName, insert_data=lnjc05InfoFull)
-
-    listOfAccFull = mongodb.get(MONGO_COLLECTION=account_collection)
-    listOfAccColName = 'List_of_account_in_collection_' + str(year) + str(month) + str(day)
-    mongodbReport.create_col(COL_NAME=listOfAccColName)
-    mongodbReport.remove_document(MONGO_COLLECTION=listOfAccColName)
-    mongodbReport.batch_insert(MONGO_COLLECTION=listOfAccColName, insert_data=listOfAccFull)
 
     mainProduct = {}
     mainProductRaw = mongodb.get(MONGO_COLLECTION=product_collection)
@@ -140,20 +127,20 @@ try:
                             temp['current_balance_' + key] = 0
 
                         if groupProduct['value'] == 'SIBS':
-                            lead = ['JIVF00' + groupCell['lead']] if 'lead' in groupCell.keys() else []
-                            member = ('JIVF00' + s for s in groupCell['members']) if 'members' in groupCell.keys() else []
+                            lead = [groupCell['lead']] if 'lead' in groupCell.keys() else []
+                            member = (s for s in groupCell['members']) if 'members' in groupCell.keys() else []
                             officerIdRaw = list(lead) + list(member)
                             officerId = list(dict.fromkeys(officerIdRaw))
-                            lnjc05Info = list(mongodb.get(MONGO_COLLECTION=lnjc05_collection, WHERE={'group_id': debtGroupCell, 'officer_id': {'$in': officerId}}))
-                            for lnjc05 in lnjc05Info:
-                                zaccfInfo = mongodb.getOne(MONGO_COLLECTION=zaccf_collection, WHERE={'account_number': lnjc05['account_number']})
+                            diallistDetail = list(mongodb.get(MONGO_COLLECTION=diallist_collection, WHERE={'group_id': debtGroupCell, 'assign': {'$in': officerId}, "createdAt": {'$gte': todayTimeStamp, '$lte' : endTodayTimeStamp} }))
+                            for diallist in diallistDetail:
+                                zaccfInfo = mongodb.getOne(MONGO_COLLECTION=zaccf_collection, WHERE={'account_number': diallist['account_number']})
                                 temp['debt_acc_no']            += 1
-                                temp['current_balance_total']  += float(lnjc05['current_balance'])
-                                temp['ob_principal_total']     += float(lnjc05['outstanding_principal'])
-                                temp['acc_arr'].append(lnjc05['account_number'])
+                                temp['current_balance_total']  += float(diallist['current_balance'])
+                                temp['ob_principal_total']     += float(diallist['outstanding_principal'])
+                                temp['acc_arr'].append(diallist['account_number'])
                                 if zaccfInfo is not None:
                                     temp['debt_acc_' + zaccfInfo['PRODGRP_ID']]        += 1
-                                    temp['current_balance_' + zaccfInfo['PRODGRP_ID']] += float(lnjc05['current_balance'])
+                                    temp['current_balance_' + zaccfInfo['PRODGRP_ID']] += float(diallist['current_balance'])
 
                         if groupProduct['value'] == 'Card':
                             member = ( s for s in groupCell['members']) if 'members' in groupCell.keys() else []

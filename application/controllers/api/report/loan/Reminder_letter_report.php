@@ -27,10 +27,7 @@ Class Reminder_letter_report extends WFF_Controller {
     function read() {
         try {
             $request = json_decode($this->input->get("q"), TRUE);
-            $date = date('d-m-Y',strtotime("-1 days"));
-            
-            $match = array('createdAt' => array('$gte' => strtotime($date)));
-            $data = $this->crud->read($this->collection, $request,array(),$match);
+            $data = $this->crud->read($this->collection, $request);
             echo json_encode($data);
         } catch (Exception $e) {
             echo json_encode(array("status" => 0, "message" => $e->getMessage()));

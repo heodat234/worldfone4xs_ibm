@@ -66,7 +66,7 @@ try:
    FMT         = '%d-%m-%Y'
 
    today = date.today()
-   # today = datetime.strptime('12/10/2019', "%d/%m/%Y").date()
+   # today = datetime.strptime('09/03/2020', "%d/%m/%Y").date()
 
    day = today.day
    month = today.month
@@ -80,9 +80,9 @@ try:
    startMonth = int(time.mktime(time.strptime(str('01/' + str(month) + '/' + str(year) + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
    endMonth = int(time.mktime(time.strptime(str(str(lastDayOfMonth) + '/' + str(month) + '/' + str(year) + " 23:59:59"), "%d/%m/%Y %H:%M:%S")))
 
-   account_sibs_for_month = []
-   account_card_for_month = []
-
+   account_sibs_for_month  = []
+   account_card_for_month  = []
+   lic_no_for_month   = []
 
    for x in range(0,3):
       dateAddMonths     = today + relativedelta(months=x)
@@ -128,7 +128,6 @@ try:
             account_arr = row['account_arr']
             # lic_no_arr = row['lic_no_arr']
 
-      account_sibs_for_month += account_arr
 
       aggregate_zaccf = [
          {
@@ -175,7 +174,7 @@ try:
             account_arr_card = row['account_arr']
             # print(account_arr)
 
-      account_card_for_month += account_arr_card
+      
 
 
       aggregate_sbv = [
@@ -202,16 +201,12 @@ try:
 
 
 
-
-
-
-
       # SIBS
       aggregate_zaccf = [
          {
              "$match":
              {
-                 "LIC_NO": {'$in' : lic_no_arr},
+                 "LIC_NO": {'$in' : lic_no_arr, '$nin' : lic_no_for_month},
              }
          }
       ]
@@ -219,9 +214,10 @@ try:
       if data_zaccf != None:
          for row in data_zaccf:
             if 'account_number' in row.keys():
-               # print(row['account_number'])
+               if row['account_number'] in account_sibs_for_month:
+                  continue
                lnjc05Info = mongodb.getOne(MONGO_COLLECTION=lnjc05_collection, WHERE={'account_number': str(row['account_number'])},
-                  SELECT=['group_id','cus_name','due_date','outstanding_principal','current_balance'])
+                  SELECT=['account_number','group_id','cus_name','due_date','outstanding_principal','current_balance'])
 
                customerInfo = mongodb.getOne(MONGO_COLLECTION=customer_collection, WHERE={'account_number': str(row['account_number'])},
                         SELECT=['profession','secured_asset'])
@@ -293,7 +289,7 @@ try:
                # d2       = F_PDT.strftime(FMT)
 
 
-               if lnjc05Info != None:
+               if lnjc05Info != None and lnjc05Info['account_number'] not in account_sibs_for_month:
                   temp['Group']        = lnjc05Info['group_id']
                   temp['Name']         = lnjc05Info['cus_name']
                   temp['Due_date']     = lnjc05Info['due_date']
@@ -414,7 +410,7 @@ try:
          {
              "$match":
              {
-                 "license_no": {'$in' : lic_no_arr, '$nin' : lic_no_arr_card},
+                 "license_no": {'$in' : lic_no_arr, '$nin' : lic_no_for_month},
              }
          }
       ]
@@ -422,8 +418,10 @@ try:
       if data_sbv != None:
          for row in data_sbv:
             if 'contract_no' in row.keys():
+               if row['contract_no'] in account_card_for_month:
+                  continue
                accountInfo = mongodb.getOne(MONGO_COLLECTION=account_collection, WHERE={'account_number': str(row['contract_no'])},
-                  SELECT=['cus_name','overdue_date','cur_bal'])
+                  SELECT=['account_number','cus_name','overdue_date','cur_bal'])
 
                customerInfo = mongodb.getOne(MONGO_COLLECTION=customer_collection, WHERE={'account_number': str(row['contract_no'])},
                         SELECT=['profession','secured_asset'])
@@ -486,7 +484,8 @@ try:
                if customerInfo != None and 'profession' in customerInfo.keys():
                   temp['Profession'] = customerInfo['profession']
 
-               if accountInfo != None:
+               if accountInfo != None and accountInfo['account_number'] not in account_card_for_month:
+                  # pprint(accountInfo['account_number'])
                   temp['Name']         = accountInfo['cus_name']
                   temp['Due_date']     = accountInfo['overdue_date']
                   temp['Current_balance'] = accountInfo['cur_bal']
@@ -503,9 +502,7 @@ try:
                      statement_date = datetime.strptime(statement_date, "%d/%m/%Y").date() 
                      Due_date = statement_date + timedelta(days=20)
                      temp['Due_date']     = int(time.mktime(time.strptime(str(Due_date.strftime("%d/%m/%Y") + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
-               # if trialInfo != None:
-               #    temp['Outstanding_balance']     = float(trialInfo['prin_retail_balance']) + float(trialInfo['prin_cash_balance'])
-
+              
 
                temp['MRC'] = invest['cndk_no'] if invest !=None else ''
                temp['Reason_of_uncollected'] = code['reason_nonpayment'] if code != None and 'reason_nonpayment' in code else ''
@@ -546,12 +543,6 @@ try:
                   temp['Send_reminder_letter']  = '2'
                   temp['Note']   = ''
 
-                  # today          = datetime.now()
-                  # d1             = today.strftime(FMT)
-                  # date_time      = datetime.fromtimestamp(accountInfo['overdue_date'])
-                  # d2             = date_time.strftime(FMT)
-                  # tdelta         = datetime.strptime(d1, FMT) - datetime.strptime(d2, FMT)
-                  # temp['Note']   = tdelta.days
                else:
                   if 'Group' in temp.keys() and temp['Group'].find('A') == -1:
                      temp['Send_reminder_letter']  = '2'
@@ -603,7 +594,7 @@ try:
          {
              "$match":
              {
-                 "license_no": {'$in' : lic_no_arr_card},
+                 "license_no": {'$in' : lic_no_arr_card, '$nin' : lic_no_for_month},
              }
          }
       ]
@@ -611,8 +602,10 @@ try:
       if data_sbv != None:
          for row in data_sbv:
             if 'contract_no' in row.keys():
+               if row['contract_no'] in account_card_for_month:
+                  continue
                accountInfo = mongodb.getOne(MONGO_COLLECTION=account_collection, WHERE={'account_number': str(row['contract_no'])},
-                  SELECT=['cus_name','overdue_date','cur_bal'])
+                  SELECT=['account_number','cus_name','overdue_date','cur_bal'])
 
                customerInfo = mongodb.getOne(MONGO_COLLECTION=customer_collection, WHERE={'account_number': str(row['contract_no'])},
                         SELECT=['profession','secured_asset'])
@@ -675,14 +668,14 @@ try:
                if customerInfo != None and 'profession' in customerInfo.keys():
                   temp['Profession'] = customerInfo['profession']
 
-               if accountInfo != None:
-                  temp['Name']         = accountInfo['cus_name']
-                  temp['Due_date']     = accountInfo['overdue_date']
-                  temp['Current_balance'] = accountInfo['cur_bal']
-                  sbv_stored = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'SBV_Stored'), WHERE={'contract_no': str(row['contract_no'])},SELECT=['overdue_indicator','kydue'],SORT=[("_id", -1)], SKIP=0, TAKE=1)
-                  if sbv_stored != None:
-                     for store in sbv_stored:
-                        temp['Group']                 = store['overdue_indicator'] + store['kydue']
+               if accountInfo != None and accountInfo['account_number'] not in account_card_for_month:
+                     temp['Name']         = accountInfo['cus_name']
+                     temp['Due_date']     = accountInfo['overdue_date']
+                     temp['Current_balance'] = accountInfo['cur_bal']
+                     sbv_stored = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'SBV_Stored'), WHERE={'contract_no': str(row['contract_no'])},SELECT=['overdue_indicator','kydue'],SORT=[("_id", -1)], SKIP=0, TAKE=1)
+                     if sbv_stored != None:
+                        for store in sbv_stored:
+                           temp['Group']                 = store['overdue_indicator'] + store['kydue']
                else:
                   if int(row['statement_date']) != 0:
                      if len(str(row['statement_date'])) == 7:
@@ -785,7 +778,7 @@ try:
          {
              "$match":
              {
-                 "LIC_NO": {'$in' : lic_no_arr_card,  '$nin' : lic_no_arr},
+                 "LIC_NO": {'$in' : lic_no_arr_card,  '$nin' : lic_no_for_month},
              }
          }
       ]
@@ -793,8 +786,10 @@ try:
       if data_zaccf != None:
          for row in data_zaccf:
             if 'account_number' in row.keys():
+               if row['account_number'] in account_sibs_for_month:
+                  continue
                lnjc05Info = mongodb.getOne(MONGO_COLLECTION=lnjc05_collection, WHERE={'account_number': str(row['account_number'])},
-                  SELECT=['group_id','cus_name','due_date','current_balance'])
+                  SELECT=['account_number','group_id','cus_name','due_date','current_balance'])
 
                customerInfo = mongodb.getOne(MONGO_COLLECTION=customer_collection, WHERE={'account_number': str(row['account_number'])},
                         SELECT=['profession','secured_asset'])
@@ -865,7 +860,7 @@ try:
                # d2       = F_PDT.strftime(FMT)
 
 
-               if lnjc05Info != None:
+               if lnjc05Info != None and lnjc05Info['account_number'] not in account_sibs_for_month:
                   temp['Group']        = lnjc05Info['group_id']
                   temp['Name']         = lnjc05Info['cus_name']
                   temp['Due_date']     = lnjc05Info['due_date']
@@ -975,31 +970,33 @@ try:
 
 
       if len(insertData) > 0:
-         # mongodb.remove_document(MONGO_COLLECTION=collection)
          mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertData)
 
 
       if len(insertData) > 0:
          for row in insertData:
-            countsiteFielder = mongodb.count(MONGO_COLLECTION=site_collection, WHERE={'contract_no': str(row['Account_number']), 'field_staff': {'$nin': ['', 'null']} })
+            countsiteFielder = mongodb.count(MONGO_COLLECTION=site_collection, WHERE={'contract_no': str(row['Account_number']), 'createdAt': todayTimeStamp, 'field_staff': {'$nin': ['', 'null']} })
             if countsiteFielder > 0 :
                temp = {}
                temp['If_there_is_fielder_in_location'] = "Yes"
-               mongodb.batch_update( MONGO_COLLECTION=collection, WHERE={'LIC_NO': str(row['LIC_NO'])}, VALUE=temp)
+               mongodb.batch_update( MONGO_COLLECTION=collection, WHERE={'LIC_NO': str(row['LIC_NO']), 'createdAt': todayTimeStamp}, VALUE=temp)
 
             if row['Send_reminder_letter'] == '2':
                temp = {}
                temp['Send_reminder_letter'] = "2"
-               mongodb.batch_update( MONGO_COLLECTION=collection, WHERE={'LIC_NO': str(row['LIC_NO']), '$or': [  { 'Group': { '$regex': "B" } },  { 'Group': { '$regex': "C" } },  { 'Group': { '$regex': "D" } },  { 'Group': { '$regex': "E" } } ] }, VALUE=temp)
+               mongodb.batch_update( MONGO_COLLECTION=collection, WHERE={'LIC_NO': str(row['LIC_NO']), 'createdAt': todayTimeStamp, '$or': [  { 'Group': { '$regex': "B" } },  { 'Group': { '$regex': "C" } },  { 'Group': { '$regex': "D" } },  { 'Group': { '$regex': "E" } } ] }, VALUE=temp)
 
             if row['Note'] == '':
                temp = {}
                temp['Note'] = 'Follow ' + row['Product_code']
-               mongodb.batch_update( MONGO_COLLECTION=collection, WHERE={'LIC_NO': str(row['LIC_NO']), 'Note': '1' }, VALUE=temp)
+               mongodb.batch_update( MONGO_COLLECTION=collection, WHERE={'LIC_NO': str(row['LIC_NO']), 'createdAt': todayTimeStamp, 'Note': '1' }, VALUE=temp)
                # temp['Note'] = ''
                # mongodb.update( MONGO_COLLECTION=collection, WHERE={'Account_number': str(row['Account_number']) }, VALUE=temp)
       insertData = []
-
+      account_card_for_month += account_arr_card
+      account_sibs_for_month += account_arr
+      lic_no_for_month += lic_no_arr
+      lic_no_for_month += lic_no_arr_card
 
    now_end         = datetime.now()
    log.write(now_end.strftime("%d/%m/%Y, %H:%M:%S") + ': End Log' + '\n')

@@ -145,7 +145,9 @@ try:
          else:
             row['current_add']    = row['address']
 
-         # today    = datetime.now()
+         if row['current_add'] == '0' or row['current_add'] == '':
+            row['current_add']    = row['address']
+
          FMT      = '%d-%m-%y'
          d1       = today.strftime(FMT)
          date_time = datetime.fromtimestamp(row['due_date'])
@@ -184,7 +186,6 @@ try:
                   user = _mongodb.getOne(MONGO_COLLECTION=user_collection, WHERE={'extension': str(diallist['assign'])},SELECT=['agentname'])
                   if user != None:
                      row['COMPANY']          += '-' + user['agentname']
-                     # print(row['COMPANY'])
                else: 
                   name = row['officer_id']
                   extension = name[6:10]
@@ -192,7 +193,6 @@ try:
                   user = _mongodb.getOne(MONGO_COLLECTION=user_collection, WHERE={'extension': str(extension)},SELECT=['agentname'])
                   if user != None:
                      row['COMPANY']          += '-' + user['agentname']
-                     # print(row['COMPANY'])
 
          if row['COMPANY'] == '':
             name = row['officer_id']
@@ -201,12 +201,10 @@ try:
             user = _mongodb.getOne(MONGO_COLLECTION=user_collection, WHERE={'extension': str(extension)},SELECT=['agentname'])
             if user != None:
                row['COMPANY']          += '-' + user['agentname']
-               # print(row['COMPANY'])
          
          row['current_balance'] = float(row['current_balance'])
          row.pop('_id')
          row.pop('officer_name')
-         # row.pop('officer_id')
          row.pop('due_date')
          row['createdAt'] = int(todayTimeStamp)
          row['createdBy'] = 'system'

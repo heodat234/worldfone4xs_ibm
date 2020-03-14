@@ -818,3 +818,196 @@
 21/02/2020, 13:44:39: Start Import
 21/02/2020, 13:46:20: End Log
 21/02/2020, 15:52:36: Start Import
+24/02/2020, 11:13:47: Start Import
+24/02/2020, 11:13:57: Start Import
+24/02/2020, 11:14:07: Start Import
+24/02/2020, 11:16:02: Start Import
+24/02/2020, 11:16:38: Start Import
+24/02/2020, 11:21:10: Start Import
+24/02/2020, 11:21:43: Start Import
+24/02/2020, 11:21:55: Start Import
+24/02/2020, 11:22:51: Start Import
+24/02/2020, 11:25:56: Start Import
+24/02/2020, 11:25:56: unsupported operand type(s) for -: 'str' and 'int'
+24/02/2020, 11:26:42: Start Import
+24/02/2020, 11:26:42: unsupported operand type(s) for -: 'str' and 'int'
+24/02/2020, 11:27:32: Start Import
+24/02/2020, 11:27:46: Start Import
+24/02/2020, 11:28:08: Start Import
+24/02/2020, 11:28:25: Start Import
+24/02/2020, 11:28:34: Start Import
+24/02/2020, 11:28:34: unsupported operand type(s) for -: 'str' and 'int'
+24/02/2020, 11:28:46: Start Import
+24/02/2020, 11:28:46: unsupported operand type(s) for -: 'str' and 'int'
+24/02/2020, 11:28:55: Start Import
+24/02/2020, 11:29:27: Start Import
+24/02/2020, 11:29:27: unsupported operand type(s) for +: 'int' and 'str'
+24/02/2020, 11:29:58: Start Import
+24/02/2020, 11:29:58: name 'test' is not defined
+24/02/2020, 11:30:35: Start Import
+24/02/2020, 11:30:35: unsupported operand type(s) for -: 'str' and 'int'
+24/02/2020, 11:31:56: Start Import
+24/02/2020, 11:32:10: Start Import
+24/02/2020, 11:32:16: Start Import
+24/02/2020, 11:32:49: Start Import
+24/02/2020, 11:32:55: Start Import
+24/02/2020, 15:59:02: Start Import
+25/02/2020, 10:19:50: Start Import
+25/02/2020, 10:20:03: Start Import
+25/02/2020, 10:21:59: End Log
+25/02/2020, 10:24:10: Start Import
+25/02/2020, 10:29:59: End Log
+25/02/2020, 10:40:27: Start Import
+25/02/2020, 10:47:49: End Log
+25/02/2020, 10:54:39: Start Import
+25/02/2020, 10:54:49: Start Import
+25/02/2020, 10:56:55: Start Import
+25/02/2020, 11:03:42: End Log
+25/02/2020, 11:08:20: Start Import
+25/02/2020, 11:15:22: End Log
+25/02/2020, 11:27:58: Start Import
+25/02/2020, 11:27:58: name 'true' is not defined
+25/02/2020, 11:29:51: Start Import
+25/02/2020, 11:29:51: expected a boolean for the preserveNullAndEmptyArrays option to $unwind stage, got int
+25/02/2020, 11:31:21: Start Import
+25/02/2020, 11:31:57: Start Import
+25/02/2020, 11:32:06: End Log
+25/02/2020, 11:35:18: Start Import
+25/02/2020, 11:36:17: Start Import
+25/02/2020, 11:38:58: Start Import
+25/02/2020, 11:59:33: Start Import
+25/02/2020, 12:00:07: Start Import
+25/02/2020, 12:00:25: End Log
+25/02/2020, 12:14:22: Start Import
+25/02/2020, 12:14:33: End Log
+25/02/2020, 12:16:35: Start Import
+25/02/2020, 12:16:53: End Log
+25/02/2020, 13:03:36: Start Import
+25/02/2020, 13:03:36: 'state'
+25/02/2020, 13:05:26: Start Import
+25/02/2020, 13:05:26: 'state'
+25/02/2020, 13:07:51: Start Import
+25/02/2020, 13:09:06: Start Import
+25/02/2020, 13:10:08: Start Import
+25/02/2020, 13:14:53: Start Import
+25/02/2020, 13:14:53: invalid literal for int() with base 10: 'state'
+25/02/2020, 13:17:36: Start Import
+25/02/2020, 13:17:36: 'license_no'
+25/02/2020, 13:18:58: Start Import
+25/02/2020, 13:19:35: Start Import
+25/02/2020, 13:20:29: Start Import
+25/02/2020, 13:20:47: Start Import
+25/02/2020, 13:21:20: Start Import
+25/02/2020, 13:21:20: invalid literal for int() with base 10: '$state'
+25/02/2020, 13:24:02: Start Import
+25/02/2020, 13:24:23: Start Import
+25/02/2020, 13:25:11: Start Import
+25/02/2020, 13:25:22: Start Import
+25/02/2020, 13:26:14: Start Import
+25/02/2020, 13:26:16: End Log
+25/02/2020, 13:26:37: Start Import
+25/02/2020, 13:26:37: 'license_no'
+25/02/2020, 13:27:32: Start Import
+25/02/2020, 13:27:38: End Log
+25/02/2020, 13:27:57: Start Import
+25/02/2020, 13:27:59: End Log
+25/02/2020, 13:32:07: Start Import
+25/02/2020, 13:32:09: End Log
+25/02/2020, 13:33:51: Start Import
+25/02/2020, 13:33:53: End Log
+25/02/2020, 13:37:37: Start Import
+25/02/2020, 13:37:37: The field 'contract_no' must be an accumulator object
+25/02/2020, 13:38:06: Start Import
+25/02/2020, 13:38:06: The field 'contract_no' must be an accumulator object
+25/02/2020, 13:54:30: Start Import
+25/02/2020, 13:54:37: End Log
+25/02/2020, 13:56:26: Start Import
+25/02/2020, 13:56:32: End Log
+25/02/2020, 13:57:19: Start Import
+25/02/2020, 13:57:26: End Log
+25/02/2020, 13:57:39: Start Import
+25/02/2020, 13:57:45: End Log
+25/02/2020, 13:59:38: Start Import
+25/02/2020, 14:00:08: Start Import
+25/02/2020, 14:00:58: Start Import
+25/02/2020, 14:02:12: Start Import
+25/02/2020, 14:02:30: Start Import
+25/02/2020, 14:03:38: Start Import
+25/02/2020, 14:03:49: End Log
+25/02/2020, 14:03:58: Start Import
+25/02/2020, 14:04:08: End Log
+25/02/2020, 14:24:26: Start Import
+25/02/2020, 14:24:26: 'state'
+25/02/2020, 14:25:45: Start Import
+25/02/2020, 14:29:10: Start Import
+25/02/2020, 14:29:18: End Log
+25/02/2020, 16:30:16: Start Import
+25/02/2020, 16:30:16: 'PRODGRP_NAME'
+25/02/2020, 16:33:08: Start Import
+25/02/2020, 16:33:08: 'PRODGRP_NAME'
+25/02/2020, 16:35:35: Start Import
+25/02/2020, 16:35:35: 'PRODGRP_NAME'
+25/02/2020, 16:37:17: Start Import
+25/02/2020, 16:41:21: Start Import
+25/02/2020, 16:41:21: 'dict' object has no attribute 'key'
+25/02/2020, 16:41:43: Start Import
+25/02/2020, 16:42:08: Start Import
+25/02/2020, 16:47:51: Start Import
+25/02/2020, 16:48:00: Start Import
+25/02/2020, 16:53:09: End Log
+25/02/2020, 18:01:24: Start Import
+25/02/2020, 18:01:24: End Log
+26/02/2020, 22:09:33: Start Import
+26/02/2020, 22:09:33: End Log
+26/02/2020, 22:10:54: Start Import
+26/02/2020, 22:10:54: End Log
+26/02/2020, 22:12:00: Start Import
+26/02/2020, 22:12:00: End Log
+26/02/2020, 22:14:59: Start Import
+26/02/2020, 22:15:00: End Log
+26/02/2020, 22:24:29: Start Import
+26/02/2020, 22:24:29: End Log
+26/02/2020, 22:25:45: Start Import
+26/02/2020, 22:25:45: End Log
+26/02/2020, 22:26:14: Start Import
+26/02/2020, 22:29:03: End Log
+26/02/2020, 22:30:48: Start Import
+26/02/2020, 22:30:48: End Log
+27/02/2020, 11:59:51: Start Import
+27/02/2020, 12:01:58: End Log
+27/02/2020, 12:04:24: Start Import
+27/02/2020, 12:04:24: End Log
+27/02/2020, 12:09:05: Start Import
+27/02/2020, 12:10:26: End Log
+27/02/2020, 12:13:40: Start Import
+27/02/2020, 12:16:48: End Log
+27/02/2020, 12:21:02: Start Import
+27/02/2020, 12:21:03: End Log
+02/03/2020, 12:27:38: Start Import
+02/03/2020, 12:28:20: End Log
+02/03/2020, 13:53:24: Start Import
+02/03/2020, 13:53:24: can't $divide by zero
+02/03/2020, 14:01:28: Start Import
+02/03/2020, 14:01:28: can't $divide by zero
+02/03/2020, 14:01:58: Start Import
+02/03/2020, 14:01:58: can't $divide by zero
+02/03/2020, 14:02:48: Start Import
+02/03/2020, 14:03:31: End Log
+02/03/2020, 14:03:46: Start Import
+02/03/2020, 14:04:28: End Log
+02/03/2020, 14:05:26: Start Import
+02/03/2020, 14:06:10: End Log
+02/03/2020, 14:06:26: Start Import
+02/03/2020, 14:06:26: End Log
+02/03/2020, 14:43:35: Start Import
+02/03/2020, 14:43:36: End Log
+02/03/2020, 14:49:45: Start Import
+02/03/2020, 14:49:45: End Log
+02/03/2020, 16:31:27: Start Import
+02/03/2020, 16:31:27: End Log
+02/03/2020, 16:32:31: Start Import
+02/03/2020, 16:32:31: End Log
+02/03/2020, 16:34:31: Start Import
+02/03/2020, 16:34:32: End Log
+02/03/2020, 16:40:25: Start Import
+02/03/2020, 16:40:26: End Log
