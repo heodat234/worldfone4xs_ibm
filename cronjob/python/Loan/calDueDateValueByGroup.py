@@ -33,8 +33,8 @@ now = datetime.now()
 subUserType = 'LO'
 collection           = common.getSubUser(subUserType, 'Due_date_next_date_by_group')
 # lnjc05_collection    = common.getSubUser(subUserType, 'LNJC05')
-zaccf_collection     = common.getSubUser(subUserType, 'ZACCF_report')
-sbv_collection       = common.getSubUser(subUserType, 'SBV')
+zaccf_collection     = common.getSubUser(subUserType, 'ZACCF_13032020')
+sbv_collection       = common.getSubUser(subUserType, 'SBV_13032020')
 # account_collection   = common.getSubUser(subUserType, 'List_of_account_in_collection')
 diallist_collection  = common.getSubUser(subUserType, 'Diallist_detail')
 group_collection     = common.getSubUser(subUserType, 'Group')
@@ -48,7 +48,7 @@ try:
     listDebtGroup = []
 
     today = date.today()
-    # today = datetime.strptime('03/03/2020', "%d/%m/%Y").date()
+    today = datetime.strptime('13/03/2020', "%d/%m/%Y").date()
 
     day = today.day
     month = today.month
@@ -107,6 +107,14 @@ try:
                         else:
                             lastmonth = month
 
+
+                        members = []
+                        name = groupCell['name']
+                        name = name.replace('G1','')
+                        groupInfoByName = mongodb.get(MONGO_COLLECTION=group_collection, WHERE={'name': {"$regex": name} })
+                        for groupInfo in list(groupInfoByName):
+                            members += groupInfo['members']
+
                         temp = {
                             'due_date'              : todayTimeStamp - 86400,
                             'due_date_one'          : todayTimeStamp,
@@ -114,7 +122,7 @@ try:
                             'debt_group'            : debtGroupCell[0:1],
                             'due_date_code'         : debtGroupCell[1:3],
                             'team_id'               : str(groupCell['_id']),
-                            'team_name'             : groupCell['name'],
+                            'team_name'             : name,
                             'for_month'             : str(lastmonth),
                             'debt_acc_no'           : 0,
                             'current_balance_total' : 0,
@@ -128,7 +136,7 @@ try:
 
                         if groupProduct['value'] == 'SIBS':
                             lead = [groupCell['lead']] if 'lead' in groupCell.keys() else []
-                            member = (s for s in groupCell['members']) if 'members' in groupCell.keys() else []
+                            member = (s for s in members)
                             officerIdRaw = list(lead) + list(member)
                             officerId = list(dict.fromkeys(officerIdRaw))
                             diallistDetail = list(mongodb.get(MONGO_COLLECTION=diallist_collection, WHERE={'group_id': debtGroupCell, 'assign': {'$in': officerId}, "createdAt": {'$gte': todayTimeStamp, '$lte' : endTodayTimeStamp} }))
@@ -143,14 +151,15 @@ try:
                                     temp['current_balance_' + zaccfInfo['PRODGRP_ID']] += float(diallist['current_balance'])
 
                         if groupProduct['value'] == 'Card':
-                            member = ( s for s in groupCell['members']) if 'members' in groupCell.keys() else []
+                            member = ( s for s in members)
                             assign = list(dict.fromkeys(list(member)))
                             aggregate_diallist = [
                                 {
                                     "$match":
                                     {
                                         "createdAt": {'$gte': todayTimeStamp, '$lte' : endTodayTimeStamp},
-                                        "assign": {'$in' : assign}
+                                        "assign": {'$in' : assign},
+                                        "group_id": debtGroupCell[0:1]+'-'+debtGroupCell[1:3]
                                     }
                                 },{
                                     "$group":
@@ -196,6 +205,10 @@ try:
                         # pprint(temp)
                         # break
                         mongodb.insert(MONGO_COLLECTION=collection, insert_data=temp)
+
+
+
+
 
 
     # dueDayOfMonth = mongodb.getOne(MONGO_COLLECTION=report_due_date_collection, WHERE={'due_date_add_1': todayTimeStamp})

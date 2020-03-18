@@ -5,7 +5,7 @@ $queue = new Pheanstalk('127.0.0.1');
 
 //$inputFileName = "../../upload/ftp/telesales/ZACCF.csv";
 // $folder = (string)(date("Ymd")); //"20191120";
-$folder = '20200225'; //"20191120";
+$folder = '20200313'; //"20191120";
 $inputFileName = "/data/upload_file/{$folder}/ZACCF.txt";
 echo $inputFileName;
 

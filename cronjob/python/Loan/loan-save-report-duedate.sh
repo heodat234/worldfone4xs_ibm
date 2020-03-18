@@ -17,9 +17,9 @@ else
    exit 0
 fi
 
-if [ $(ps -ef | grep -v grep | grep updateGroupCard.py | wc -l) -lt 1 ]; then
-   /usr/local/bin/python3.6 ${BASEDIR}/updateGroupCard.py > /dev/null 2>&1 &
-   echo "RUN ${BASEDIR}/updateGroupCard.py"
+if [ $(ps -ef | grep -v grep | grep updatePayment.py | wc -l) -lt 1 ]; then
+   /usr/local/bin/python3.6 ${BASEDIR}/updatePayment.py > /dev/null 2>&1 &
+   echo "RUN ${BASEDIR}/updatePayment.py"
 else
    echo "Worldfone ScanJob service is running"
    exit 0

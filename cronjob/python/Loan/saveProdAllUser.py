@@ -307,14 +307,6 @@ try:
                                       "direction" : "outbound"
                                   }
                               }
-                              # ,{
-                              #     "$group":
-                              #     {
-                              #         "_id": 'null',
-                              #         "phone_contact_arr": {'$addToSet': '$customernumber'},
-                              #         "dialid_arr": {'$addToSet': '$dialid'},
-                              #     }
-                              # }
                           ]
                           contactData = mongodb.aggregate_pipeline(MONGO_COLLECTION=cdr_collection,aggregate_pipeline=aggregate_contacted)
                           acc_contact_arr_temp = []

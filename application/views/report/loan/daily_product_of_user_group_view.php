@@ -307,7 +307,7 @@ $(document).on("ready", function() {
     var dateRange = 30;
     var nowDate = new Date();
     var date =  new Date();
-    date.setDate(nowDate.getDate() - 1);
+    // date.setDate(nowDate.getDate() - 1);
     var timeZoneOffset = date.getTimezoneOffset() * kendo.date.MS_PER_MINUTE;
     date.setHours(- timeZoneOffset / kendo.date.MS_PER_HOUR, 0, 0 ,0);
 

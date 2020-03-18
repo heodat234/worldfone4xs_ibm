@@ -93,6 +93,7 @@ class Common:
             if len(str(value)) < 6:
                 value = '0' + str(value)
 
+        # if value != 
         result = int(self.time.mktime(self.time.strptime(str(value), formatString)))
         return result
 
@@ -152,7 +153,7 @@ class Common:
 
         if wff_env in ['UAT', 'DEV']:
             # serverfolder = 'YYYYMMDD'
-            today = self.datetime.strptime('01/03/2020', "%d/%m/%Y").date()
+            today = self.datetime.strptime('13/03/2020', "%d/%m/%Y").date()
             serverfolder = today.strftime("%Y%m%d")
         else:
             today = self.date.today()

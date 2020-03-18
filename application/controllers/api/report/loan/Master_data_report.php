@@ -41,7 +41,8 @@ Class Master_data_report extends WFF_Controller {
     }
     function downloadExcel()
     {
-        $date = getdate();
+        $date = $this->input->post('date');
+        $date = getdate(strtotime(str_replace('/', '-', $date)));
         // print_r($date);exit;
         $day = $date['mday'];
         $month = $date['mon'];

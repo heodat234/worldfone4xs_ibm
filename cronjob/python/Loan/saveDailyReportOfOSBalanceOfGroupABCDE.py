@@ -23,16 +23,16 @@ mongodb     = Mongodb(MONGODB="worldfone4xs", WFF_ENV=wff_env)
 _mongodb    = Mongodb(MONGODB="_worldfone4xs", WFF_ENV=wff_env)
 now         = datetime.now()
 subUserType = 'LO'
-collection                  = common.getSubUser(subUserType, 'Os_balance_group_report')
-lnjc05_collection           = common.getSubUser(subUserType, 'LNJC05')
-listOfAccount_collection    = common.getSubUser(subUserType, 'List_of_account_in_collection')
+collection                  = common.getSubUser(subUserType, 'Os_balance_group_report_final')
+lnjc05_collection           = common.getSubUser(subUserType, 'LNJC05_13032020')
+listOfAccount_collection    = common.getSubUser(subUserType, 'List_of_account_in_collection_13032020')
 target_collection           = common.getSubUser(subUserType, 'Target_of_report')
 report_due_date_collection          = common.getSubUser(subUserType, 'Report_due_date')
-lnjc05_yesterday_collection         = common.getSubUser(subUserType, 'LNJC05_yesterday')
-listAcc_yesterday_collection        = common.getSubUser(subUserType, 'List_of_account_in_collection_yesterday')
+lnjc05_yesterday_collection         = common.getSubUser(subUserType, 'LNJC05_yesterday_12032020')
+listAcc_yesterday_collection        = common.getSubUser(subUserType, 'List_of_account_in_collection_yesterday_12032020')
 stored_collection           = common.getSubUser(subUserType, 'SBV_Stored')
 diallist_collection         = common.getSubUser(subUserType, 'Diallist_detail')
-sbv_collection              = common.getSubUser(subUserType, 'SBV')
+sbv_collection              = common.getSubUser(subUserType, 'SBV_13032020')
 
 log         = open(base_url + "cronjob/python/Loan/log/Os_balance_group_log.txt","a")
 
@@ -44,7 +44,7 @@ try:
     lnjc05ByGroup = {}
 
     today = date.today()
-    # today = datetime.strptime('27/02/2020', "%d/%m/%Y").date()
+    today = datetime.strptime('13/03/2020', "%d/%m/%Y").date()
 
     day = today.day
     month = today.month
@@ -130,14 +130,19 @@ try:
                 
 
                 # Final No
+                group = []
                 if duedate_type[0:1] == 'A':
-                  nextDueDate = 'B'
+                  group.append('B'+duedate_type[1:3])
                 if duedate_type[0:1] == 'B':
-                  nextDueDate = 'C'
+                  group.append('C'+duedate_type[1:3])
                 if duedate_type[0:1] == 'C':
-                  nextDueDate = 'D'
+                  group.append('D'+duedate_type[1:3])
                 if duedate_type[0:1] == 'D':
-                  nextDueDate = 'E'
+                  group.append('D'+duedate_type[1:3])
+                  group.append('E'+duedate_type[1:3])
+                if duedate_type[0:1] == 'E':
+                  group.append('E'+duedate_type[1:3])
+
                 aggregate_lnjc05_yesterday = [
                     {
                       "$match":
@@ -163,7 +168,7 @@ try:
                     {
                       "$match":
                       {
-                          "group_id": nextDueDate + duedate_type[1:3],
+                          "group_id": {'$in': group},
                           "account_number" : {'$in' : acc_yesterday}
                       }
                     },{
@@ -261,28 +266,25 @@ try:
 
 
                 # Final No
-                aggregate_listAcc_yesterday = [
-                    {
-                      "$group":
-                      {
-                          "_id": 'null',
-                          "acc_yesterday": {'$push': '$account_number'},
-                      }
-                    }
-                ]
-                listAccYesterdayData = mongodb.aggregate_pipeline(MONGO_COLLECTION=listAcc_yesterday_collection,aggregate_pipeline=aggregate_listAcc_yesterday)
-                acc_yesterday = []
-                if listAccYesterdayData != None:
-                    for row in listAccYesterdayData:
-                        acc_yesterday         = row['acc_yesterday']
+                group = []
+                if duedate_type[0:1] == 'A':
+                  group.append('B')
+                if duedate_type[0:1] == 'B':
+                  group.append('C')
+                if duedate_type[0:1] == 'C':
+                  group.append('D')
+                if duedate_type[0:1] == 'D':
+                  group.append('D')
+                  group.append('E')
+                if duedate_type[0:1] == 'E':
+                  group.append('E')
 
-                aggregate_diallist_yesterday = [
+                aggregate_listAcc_yesterday = [
                     {
                         "$match":
                         {
-                            "createdAt" : {'$gte' : yesterdayTimeStamp,'$lte' : endYesterdayTimeStamp},
-                            "account_number" : {'$in' : acc_yesterday},
-                            "group_id": duedate_type[0:1]+'-'+duedate_type[1:3],
+                            "overdue_indicator" : duedate_type[0:1],
+                            "kydue" : duedate_type[1:3]
                         }
                     },{
                       "$group":
@@ -292,19 +294,40 @@ try:
                       }
                     }
                 ]
-                diallistYesterdayData = mongodb.aggregate_pipeline(MONGO_COLLECTION=diallist_collection,aggregate_pipeline=aggregate_diallist_yesterday)
-                diallist_yesterday = []
-                if diallistYesterdayData != None:
-                    for row in diallistYesterdayData:
-                        diallist_yesterday         = row['acc_yesterday']
+                listAccYesterdayData = mongodb.aggregate_pipeline(MONGO_COLLECTION=stored_yesterday_collection,aggregate_pipeline=aggregate_listAcc_yesterday)
+                acc_yesterday = []
+                if listAccYesterdayData != None:
+                    for row in listAccYesterdayData:
+                        acc_yesterday         = row['acc_yesterday']
 
+                aggregate_stored = [
+                    {
+                        "$match":
+                        {
+                            "overdue_indicator" : {'$in': group},
+                            "kydue" : duedate_type[1:3]
+                        }
+                    },{
+                      "$group":
+                      {
+                          "_id": 'null',
+                          "acc_yesterday": {'$push': '$account_number'},
+                      }
+                    }
+                ]
+                storeData = mongodb.aggregate_pipeline(MONGO_COLLECTION=stored_collection,aggregate_pipeline=aggregate_stored)
+                acc_stored_yesterday = []
+                if storeData != None:
+                    for row in storeData:
+                        acc_stored_yesterday         = row['acc_yesterday']
 
+                temp_final['final_no']                = len(acc_stored_yesterday)
 
                 aggregate_listAcc = [
                     {
                       "$match":
                       {
-                          "account_number" : {'$in' : diallist_yesterday},
+                          "account_number" : {'$in' : acc_stored_yesterday},
                       }
                     },{
                       "$group":
@@ -319,7 +342,7 @@ try:
                 if accountData != None:
                     for row in accountData:
                         temp_final['final_os_bl']             = round(row['sum_balance']/1000000)
-                        temp_final['final_no']                = row['count_data']
+                        # temp_final['final_no']                = row['count_data']
 
 
 

@@ -143,6 +143,7 @@ try:
                 temp['inci_amt']            = round(temp['inci_amt']/1000)
                 temp['inci_ob_principal']   = round(temp['inci_ob_principal']/1000)
 
+                due_date_add_2 = temp['due_date'] + 86400*2
                 if groupProduct['value'] == 'SIBS':
                     lnjc05Info = mongodb.get(MONGO_COLLECTION=lnjc05_collection, WHERE={'group_id': debtGroupCell  })
                     for lnjc05 in lnjc05Info:
@@ -154,9 +155,10 @@ try:
                         {
                             "$match":
                             {
-                                "created_at": {'$gte': temp['due_date'] + 86400,'$lte': endTodayTimeStamp},
+                                "created_at": {'$gte': due_date_add_2,'$lte': endTodayTimeStamp},
                                 "account_number": {'$in' : acc_arr},
-                                "code" : '10'
+                                "code" : '10',
+                                "coNoHayKhong": 'Y'
                             }
                         },{
                             "$group":
@@ -245,8 +247,9 @@ try:
                        {
                            "$match":
                            {   'account_number' : {'$in' : acc_card_arr},
-                               'created_at': {'$gte' : temp['due_date'] + 86400,'$lte' : todayTimeStamp},
-                               'code' : {'$in' : code}
+                               'created_at': {'$gte' : due_date_add_2,'$lte' : todayTimeStamp},
+                               'code' : {'$in' : code},
+                               "coNoHayKhong": 'Y'
                            }
                        },
                        {
@@ -267,9 +270,10 @@ try:
                           {
                               "$match":
                               {
-                                  "created_at": {'$gte': temp['due_date'] + 86400,'$lte': todayTimeStamp},
+                                  "created_at": {'$gte': due_date_add_2,'$lte': todayTimeStamp},
                                   "account_number": acc,
-                                  'code' : {'$in' : code}
+                                  'code' : {'$in' : code},
+                                  "coNoHayKhong": 'Y'
                               }
                           },{
                               "$project":

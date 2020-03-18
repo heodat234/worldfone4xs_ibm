@@ -159,8 +159,8 @@ try:
                     worksheet.write('O' + str(row), due_date)
 
                 if product == 'Card':
-                    worksheet.write('H' + str(row), '=G' + str(row), add_format_cell({'font_color': 'red', 'bg_color': 'DAEEF3'}))
-                    worksheet.write('K' + str(row), '=J' + str(row), add_format_cell({'font_color': 'red', 'bg_color': 'FFFFCC'}))
+                    worksheet.write('H' + str(row), '=G' + str(row), add_format_cell({'font_color': 'red', 'bg_color': 'DAEEF3', 'num_format': '0.00%'}))
+                    worksheet.write('K' + str(row), '=J' + str(row), add_format_cell({'font_color': 'red', 'bg_color': 'FFFFCC', 'num_format': '0.00%'}))
 
                 if product == 'Total':
                     worksheet.write('E' + str(row), '=E' + str(row - 2) + '+E' + str(row - 1), add_format_cell({'align': 'right'}))

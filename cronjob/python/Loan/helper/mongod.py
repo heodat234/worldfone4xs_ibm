@@ -15,6 +15,7 @@ class Mongodb:
         self.connection = connection
         self.MONGODB = MONGODB
         self.db = connection[self.MONGODB]
+        self.traceback = traceback
 
     def create_db(self, DB_NAME=''):
         dblist = self.connection.list_database_names()
@@ -27,7 +28,7 @@ class Mongodb:
             if COL_NAME not in collist:
                 self.db[COL_NAME]
         except Exception as e:
-            print(traceback.format_exc())
+            print(self.traceback.format_exc())
 
     def get(self, MONGO_COLLECTION='', WHERE=None, SELECT=None, SORT=[("$natural", 1)], SKIP=0, TAKE=0):
         collection = self.db[MONGO_COLLECTION]

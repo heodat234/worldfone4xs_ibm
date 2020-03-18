@@ -351,11 +351,8 @@
                this.asyncSearch();
             },
              asyncSearch: async function() {
-               var field = "created_at";
                var fromDateTime = new Date(this.fromDateTime.getTime()).toISOString();
                var fromDate = this.fromDateTime.getTime()/1000;
-               // console.log(fromDate.substr(0,10));
-                // var toDateTime = new Date(this.toDateTime.getTime() - timeZoneOffset).toISOString();
                 var cif = this.cif;
                 var loanContract = this.loanContract;
                 var nationalID = this.nationalID;
@@ -403,7 +400,8 @@
               url: ENV.reportApi + "loan/master_data_report/downloadExcel",
               type: 'POST',
               dataType: 'json',
-              timeout: 30000
+              timeout: 30000,
+              data: {date: $('#start-date').val()},
             })
             .done(function(response) {
               if (response.status == 1) {

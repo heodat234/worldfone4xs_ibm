@@ -9,30 +9,6 @@ else
    exit 0
 fi
 
-if [ $(ps -ef | grep -v grep | grep saveDailyProdEachUserGroup.py | wc -l) -lt 1 ]; then
-   /usr/local/bin/python3.6 $BASEDIR/saveDailyProdEachUserGroup.py > /dev/null 2>&1 &
-   echo "RUN $BASEDIR/saveDailyProdEachUserGroup.py"
-else
-   echo "Worldfone ScanJob service is running"
-   exit 0
-fi
-
-if [ $(ps -ef | grep -v grep | grep saveDailyProdProdEachUserGroupRewrite.py | wc -l) -lt 1 ]; then
-   /usr/local/bin/python3.6 $BASEDIR/saveDailyProdProdEachUserGroupRewrite.py > /dev/null 2>&1 &
-   echo "RUN $BASEDIR/saveDailyProdProdEachUserGroupRewrite.py"
-else
-   echo "Worldfone ScanJob service is running"
-   exit 0
-fi
-
-if [ $(ps -ef | grep -v grep | grep saveDailyReportEachDueDateEachGroup.py | wc -l) -lt 1 ]; then
-   /usr/local/bin/python3.6 $BASEDIR/saveDailyReportEachDueDateEachGroup.py > /dev/null 2>&1 &
-   echo "RUN $BASEDIR/saveDailyReportEachDueDateEachGroup.py"
-else
-   echo "Worldfone ScanJob service is running"
-   exit 0
-fi
-
 if [ $(ps -ef | grep -v grep | grep saveDPWorkingDay.py | wc -l) -lt 1 ]; then
    /usr/local/bin/python3.6 $BASEDIR/saveDPWorkingDay.py > /dev/null 2>&1 &
    echo "RUN $BASEDIR/saveDPWorkingDay.py"
@@ -65,13 +41,18 @@ else
    exit 0
 fi
 
-# if [ $(ps -ef | grep -v grep | grep thuhoixe_report.py | wc -l) -lt 1 ]; then
-#    /usr/local/bin/python3.6 $BASEDIR/thuhoixe_report.py > /dev/null 2>&1 &
-#    echo "RUN $BASEDIR/thuhoixe_report.py"
-# else
-#    echo "Worldfone ScanJob service is running"
-#    exit 0
-# fi
+if [ $(ps -ef | grep -v grep | grep saveOutsoucingCollectionTrend.py | wc -l) -lt 1 ]; then
+   /usr/local/bin/python3.6 $BASEDIR/saveOutsoucingCollectionTrend.py > /dev/null 2>&1 &
+   echo "RUN $BASEDIR/saveOutsoucingCollectionTrend.py"
+else
+   echo "Worldfone ScanJob service is running"
+   exit 0
+fi
 
-
-
+if [ $(ps -ef | grep -v grep | grep saveMonthlyBadDebtProvince.py | wc -l) -lt 1 ]; then
+   /usr/local/bin/python3.6 ${BASEDIR}/saveMonthlyBadDebtProvince.py > /dev/null 2>&1 &
+   echo "RUN ${BASEDIR}/saveMonthlyBadDebtProvince.py"
+else
+   echo "Worldfone ScanJob service is running"
+   exit 0
+fi
