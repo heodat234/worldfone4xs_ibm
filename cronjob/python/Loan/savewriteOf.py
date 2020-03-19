@@ -474,8 +474,11 @@ try:
 
                temp['Account_number']  = row['contract_no']
                temp['Name']            = row['name']
-               # temp['Release_date']    = row['FRELD8']
-               # temp['Release_amount']  = row['approved_limit']
+               if int(row['open_card_date']) > 0 :
+                  if len(row['open_card_date']) == 7:
+                     row['open_card_date'] = '0' + row['open_card_date']
+                  temp['Release_date']    = row['open_card_date'][0:2]+'/'+row['open_card_date'][2:4]+'/'+row['open_card_date'][4:8]
+               temp['Release_amount']  = row['approved_limit']
                temp['Interest_rate']   = row['interest_rate']
                temp['LIC_NO']          = row['license_no']
 
@@ -658,8 +661,11 @@ try:
 
                temp['Account_number']  = row['contract_no']
                temp['Name']            = row['name']
-               # temp['Release_date']    = row['FRELD8']
-               # temp['Release_amount']  = row['approved_limit']
+               if int(row['open_card_date']) > 0 :
+                  if len(row['open_card_date']) == 7:
+                     row['open_card_date'] = '0' + row['open_card_date']
+                  temp['Release_date']    = row['open_card_date'][0:2]+'/'+row['open_card_date'][2:4]+'/'+row['open_card_date'][4:8]
+               temp['Release_amount']  = row['approved_limit']
                temp['Interest_rate']   = row['interest_rate']
                temp['LIC_NO']          = row['license_no']
 

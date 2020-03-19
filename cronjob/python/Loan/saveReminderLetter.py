@@ -23,14 +23,14 @@ _mongodb    = Mongodb(MONGODB="_worldfone4xs", WFF_ENV=wff_env)
 now         = datetime.now()
 subUserType = 'LO'
 collection                    = common.getSubUser(subUserType, 'Reminder_letter_report')
-lnjc05_collection             = common.getSubUser(subUserType, 'LNJC05')
-zaccf_collection              = common.getSubUser(subUserType, 'ZACCF_report')
-sbv_collection                = common.getSubUser(subUserType, 'SBV')
+lnjc05_collection             = common.getSubUser(subUserType, 'LNJC05_15032020')
+zaccf_collection              = common.getSubUser(subUserType, 'ZACCF_15032020')
+sbv_collection                = common.getSubUser(subUserType, 'SBV_15032020')
 investigation_collection      = common.getSubUser(subUserType, 'Investigation_file')
-account_collection            = common.getSubUser(subUserType, 'List_of_account_in_collection')
+account_collection            = common.getSubUser(subUserType, 'List_of_account_in_collection_15032020')
 report_release_sale_collection   = common.getSubUser(subUserType, 'Report_release_sale')
 diallist_detail_collection    = common.getSubUser(subUserType, 'Diallist_detail')
-user_collection               = common.getSubUser(subUserType, 'User')
+user_collection               = common.getSubUser(subUserType, 'User_product')
 product_collection            = common.getSubUser(subUserType, 'Product')
 
 
@@ -44,7 +44,7 @@ try:
    now         = datetime.now()
 
    today = date.today()
-   # today = datetime.strptime('13/12/2019', "%d/%m/%Y").date()
+   today = datetime.strptime('15/03/2020', "%d/%m/%Y").date()
 
    day = today.day
    month = today.month
@@ -109,8 +109,8 @@ try:
                'product_name'    : zaccf['PROD_NM'],
                'dealer_name'     : zaccf['WRK_BRN'],
                'license_no'      : zaccf['LIC_NO'],
-               'cif_birth_date'  : zaccf['cif_birth_date'],
-               'license_date'    : zaccf['LIC_DT8'],
+               'cif_birth_date'  : '',
+               'license_date'    : '',
                'brand'           : '',
                'model'           : '',
                'engine_no'       : '',
@@ -121,6 +121,19 @@ try:
                'createdBy'       : 'system',
                'createdAt'       : todayTimeStamp
             }
+            if int(zaccf['cif_birth_date']) > 0 :
+               if len(str(zaccf['cif_birth_date'])) == 7:
+                  zaccf['cif_birth_date']       = '0'+str(zaccf['cif_birth_date'])
+               cif_birth_date                = str(zaccf['cif_birth_date'])
+               d1                      = cif_birth_date[0:2]+'/'+cif_birth_date[2:4]+'/'+cif_birth_date[4:9]
+               temp['cif_birth_date']    = int(time.mktime(time.strptime(str(d1 + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
+
+            if int(zaccf['LIC_DT8']) > 0 :
+               if len(str(zaccf['LIC_DT8'])) == 7:
+                  zaccf['LIC_DT8']       = '0'+str(zaccf['LIC_DT8'])
+               LIC_DT8                = str(zaccf['LIC_DT8'])
+               d1                      = LIC_DT8[0:2]+'/'+LIC_DT8[2:4]+'/'+LIC_DT8[4:8]
+               temp['license_date']    = int(time.mktime(time.strptime(str(d1 + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
 
             product = mongodb.getOne(MONGO_COLLECTION=product_collection, WHERE={'code': str(zaccf['PRODGRP_ID'])},SELECT=['name'])
             if product != None:
@@ -147,10 +160,15 @@ try:
             releaseInfo = mongodb.getOne(MONGO_COLLECTION=report_release_sale_collection, WHERE={'account_number': str(row['account_number'])},SELECT=['cus_name','temp_address','address'])
             if releaseInfo != None:
                temp['name']        = releaseInfo['cus_name']
-               if releaseInfo['temp_address'] != '':
+               if releaseInfo['temp_address'] != '' and releaseInfo['temp_address'] != '0':
                   temp['address'] = releaseInfo['temp_address']
                else:
                   temp['address'] = releaseInfo['address']
+
+            if temp['address'] == '0' or temp['address'] == '':
+               temp['address']    = zaccf['ADDR_1']+ ', '+zaccf['ADDR_2']+', '+zaccf['ADDR_3']
+
+
 
             investigationInfo = mongodb.getOne(MONGO_COLLECTION=investigation_collection, WHERE={'contract_no': str(row['account_number'])},SELECT=['brand','model','engine_no','chassis_no','license_plates_no'])
             if investigationInfo != None:
@@ -200,7 +218,7 @@ try:
                'dealer_name'     : '',
                'license_no'      : sbv['license_no'],
                'cif_birth_date'  : sbv['cif_birth_date'],
-               'license_date'    : sbv['license_date'],
+               'license_date'    : '',
                'brand'           : '',
                'model'           : '',
                'engine_no'       : '',
@@ -222,6 +240,13 @@ try:
             temp['day']    = contract_date[0:2]
             temp['month']  = contract_date[2:4]
             temp['year']   = contract_date[4:8]
+
+            if int(sbv['license_date']) > 0 :
+               if len(str(sbv['license_date'])) == 7:
+                  sbv['license_date']       = '0'+str(sbv['license_date'])
+               license_date                = str(sbv['license_date'])
+               d1                      = license_date[0:2]+'/'+license_date[2:4]+'/'+license_date[4:8]
+               temp['license_date']    = int(time.mktime(time.strptime(str(d1 + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
 
             diallistInfo = mongodb.getOne(MONGO_COLLECTION=diallist_detail_collection, WHERE={'account_number': str(row['account_number']), 'createdAt': {'$gte' : todayTimeStamp,'$lte' : endTodayTimeStamp} },SELECT=['assign'])
             if diallistInfo != None:

@@ -157,9 +157,9 @@ try:
          row['CURRENT_DPD'] = int(tdelta.days)
 
 
-         first_day = today.replace(day=1)
+         # first_day = today.replace(day=1)
          FMT      = '%d-%m-%y'
-         d3       = first_day.strftime(FMT)
+         d3       = today.strftime(FMT)
          date_time = datetime.fromtimestamp(row['due_date'])
          d4       = date_time.strftime(FMT)
          tdelta1   = datetime.strptime(d3, FMT) - datetime.strptime(d4, FMT)
@@ -337,9 +337,9 @@ try:
          row['CURRENT_DPD'] = tdelta.days
 
 
-         first_day = today.replace(day=1)
+         # first_day = today.replace(day=1)
          FMT      = '%d/%m/%Y'
-         d3       = first_day.strftime(FMT)
+         d3       = today.strftime(FMT)
          date_time = datetime.fromtimestamp(row['overdue_date'])
          d4       = date_time.strftime(FMT)
          tdelta1   = datetime.strptime(d3, FMT) - datetime.strptime(d4, FMT)

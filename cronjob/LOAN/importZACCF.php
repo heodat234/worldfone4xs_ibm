@@ -5,7 +5,7 @@ $queue = new Pheanstalk('127.0.0.1');
 
 //$inputFileName = "../../upload/ftp/telesales/ZACCF.csv";
 // $folder = date("Ymd"); //"20191120";
-$folder = '20200114'; //"20191120";
+$folder = '20200315'; //"20191120";
 $inputFileName = "/data/upload_file/{$folder}/ZACCF.txt";
 // echo $inputFileName;
 // exit();
@@ -40,7 +40,7 @@ $endColumn = 9;
 
 $file = fopen($inputFileName,"r");
 
-$collection = "LO_ZACCF_14012020";
+$collection = "LO_ZACCF_15032020";
 
 $key_field = "account_number";
 $key_field_2 = "CUS_ID";

@@ -329,10 +329,46 @@ try:
                           acc_contact_arr = list(set_acc_contact)
                           temp_member['count_contacted']      = len(acc_contact_arr)
 
+
+                          # so hop dong da goi ngay hom truoc
+                          aggregate_contacted = [
+                              {
+                                  "$match":
+                                  {
+                                      "starttime": {'$gte': yesterdayTimeStamp - 86400, '$lte': endYesterdayTimeStamp - 86400},
+                                      "userextension": str(member),
+                                      "direction" : "outbound"
+                                  }
+                              }
+                          ]
+                          lastcontactData = mongodb.aggregate_pipeline(MONGO_COLLECTION=cdr_collection,aggregate_pipeline=aggregate_contacted)
+                          acc_contact_arr_temp = []
+                          if lastcontactData != None:
+                              for cdr in lastcontactData:
+                                diallistInfo = None
+                                if 'dialid' in cdr.keys():
+                                  if len(str(cdr['dialid'])) == 24:
+                                    diallistInfo = mongodb.getOne(MONGO_COLLECTION=diallist_detail_collection, WHERE={'_id': ObjectId(str(cdr['dialid'])),  "createdAt" : {'$gte' : yesterdayTimeStamp - 86400,'$lte' : endYesterdayTimeStamp - 86400}}) 
+                                  else:
+                                    diallistInfo = mongodb.getOne(MONGO_COLLECTION=diallist_detail_collection, WHERE={'$or' : [{ 'mobile_num' : str(cdr['customernumber'])}, { 'phone' : str(cdr['customernumber'])},  { 'other_phones' :str(cdr['customernumber'])} ],  "createdAt" : {'$gte' : yesterdayTimeStamp - 86400,'$lte' : endYesterdayTimeStamp - 86400} }) 
+
+                                if 'dialid' not in cdr.keys():
+                                  diallistInfo = mongodb.getOne(MONGO_COLLECTION=diallist_detail_collection, WHERE={'$or' : [{ 'mobile_num' : str(cdr['customernumber'])}, { 'phone' : str(cdr['customernumber'])},  { 'other_phones' :str(cdr['customernumber'])} ],  "createdAt" : {'$gte' : yesterdayTimeStamp - 86400,'$lte' : endYesterdayTimeStamp - 86400} }) 
+
+                                if diallistInfo != None:
+                                  acc_contact_arr_temp.append(diallistInfo['account_number'])
+
+                          set_acc_last_contact = set(acc_contact_arr_temp) 
+                          acc_last_contact_arr = list(set_acc_last_contact)
+
+                          match_acc = list(set(acc_last_contact_arr).intersection(set(acc_contact_arr)))
+                          temp_member['number_of_call'] = len(match_acc)
+
+
                           # call made
-                          calMade = mongodb.count(MONGO_COLLECTION=cdr_collection, WHERE={'disposition': 'ANSWERED', "direction" : "outbound", "userextension": str(member), "starttime": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp}} )
-                          if calMade > 0:
-                            temp_member['number_of_call'] = calMade
+                          # calMade = mongodb.count(MONGO_COLLECTION=cdr_collection, WHERE={'disposition': 'ANSWERED', "direction" : "outbound", "userextension": str(member), "starttime": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp}} )
+                          # if calMade > 0:
+                          #   temp_member['number_of_call'] = calMade
 
                           totalCall = mongodb.count(MONGO_COLLECTION=cdr_collection, WHERE={ "direction" : "outbound", "userextension": str(member), "starttime": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp}} )
                           if totalCall > 0:
@@ -953,14 +989,6 @@ try:
                                       # "diallist_id" : teams['_id'],
                                   }
                               }
-                              # ,{
-                              #     "$group":
-                              #     {
-                              #         "_id": 'null',
-                              #         "phone_contact_arr": {'$addToSet': '$customernumber'},
-                              #         "dialid_arr": {'$addToSet': '$dialid'},
-                              #     }
-                              # }
                           ]
                           contactData = mongodb.aggregate_pipeline(MONGO_COLLECTION=cdr_collection,aggregate_pipeline=aggregate_contacted)
                           acc_contact_arr_temp = []
@@ -984,11 +1012,45 @@ try:
                           temp_member['count_contacted']      = len(acc_contact_arr)
                                   
 
+                          # so hop dong da goi ngay hom truoc
+                          aggregate_contacted = [
+                              {
+                                  "$match":
+                                  {
+                                      "starttime": {'$gte': yesterdayTimeStamp - 86400, '$lte': endYesterdayTimeStamp - 86400},
+                                      "userextension": str(member),
+                                      "direction" : "outbound"
+                                  }
+                              }
+                          ]
+                          lastcontactData = mongodb.aggregate_pipeline(MONGO_COLLECTION=cdr_collection,aggregate_pipeline=aggregate_contacted)
+                          acc_contact_arr_temp = []
+                          if lastcontactData != None:
+                              for cdr in lastcontactData:
+                                diallistInfo = None
+                                if 'dialid' in cdr.keys():
+                                  if len(str(cdr['dialid'])) == 24:
+                                    diallistInfo = mongodb.getOne(MONGO_COLLECTION=diallist_detail_collection, WHERE={'_id': ObjectId(str(cdr['dialid'])),  "createdAt" : {'$gte' : yesterdayTimeStamp - 86400,'$lte' : endYesterdayTimeStamp - 86400}}) 
+                                  else:
+                                    diallistInfo = mongodb.getOne(MONGO_COLLECTION=diallist_detail_collection, WHERE={'$or' : [{ 'mobile_num' : str(cdr['customernumber'])}, { 'phone' : str(cdr['customernumber'])},  { 'other_phones' :str(cdr['customernumber'])} ],  "createdAt" : {'$gte' : yesterdayTimeStamp - 86400,'$lte' : endYesterdayTimeStamp - 86400} }) 
+
+                                if 'dialid' not in cdr.keys():
+                                  diallistInfo = mongodb.getOne(MONGO_COLLECTION=diallist_detail_collection, WHERE={'$or' : [{ 'mobile_num' : str(cdr['customernumber'])}, { 'phone' : str(cdr['customernumber'])},  { 'other_phones' :str(cdr['customernumber'])} ],  "createdAt" : {'$gte' : yesterdayTimeStamp - 86400,'$lte' : endYesterdayTimeStamp - 86400} }) 
+
+                                if diallistInfo != None:
+                                  acc_contact_arr_temp.append(diallistInfo['account_number'])
+
+                          set_acc_last_contact = set(acc_contact_arr_temp) 
+                          acc_last_contact_arr = list(set_acc_last_contact)
+
+                          match_acc = list(set(acc_last_contact_arr).intersection(set(acc_contact_arr)))
+                          temp_member['number_of_call'] = len(match_acc)
+
 
                           # call made
-                          calMade = mongodb.count(MONGO_COLLECTION=cdr_collection, WHERE={'disposition': 'ANSWERED', "direction" : "outbound", "userextension": str(member),  "starttime": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp}} )
-                          if calMade > 0:
-                            temp_member['number_of_call'] = calMade
+                          # calMade = mongodb.count(MONGO_COLLECTION=cdr_collection, WHERE={'disposition': 'ANSWERED', "direction" : "outbound", "userextension": str(member),  "starttime": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp}} )
+                          # if calMade > 0:
+                          #   temp_member['number_of_call'] = calMade
 
                           totalCall = mongodb.count(MONGO_COLLECTION=cdr_collection, WHERE={ "direction" : "outbound", "userextension": str(member), "starttime": {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp}} )
                           if totalCall > 0:

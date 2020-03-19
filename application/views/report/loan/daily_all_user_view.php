@@ -155,17 +155,16 @@
                                 }]
                             },
                             {
-                                title: "Call made",
-                                columns: [{
-                                    field: 'number_of_call',
-                                    title: 'Number of call',
-                                    width: 80
-                                }, {
-                                    field: 'total_call',
-                                    title: 'Total call made include drop call',
-                                    width: 80
-                                }]
+                                field: "number_of_call",
+                                title: "Số HĐ đã gọi hôm qua",
+                                width: 80,
                             },
+                            {
+                                field: 'total_call',
+                                title: 'Total call made include drop call',
+                                width: 80,
+                            },
+                            
                             {
                                 title: "Promise to pay",
                                 columns: [{
