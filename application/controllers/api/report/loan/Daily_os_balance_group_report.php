@@ -115,7 +115,7 @@ Class Daily_os_balance_group_report extends WFF_Controller {
             }
 
             if ($value['debt_group'] != $debt_group) {
-                $start_row += 18;
+                $start_row += 17;
                 $debt_group = $value['debt_group'];
                 $start_col = 3;
             }
@@ -215,12 +215,12 @@ Class Daily_os_balance_group_report extends WFF_Controller {
             $worksheet->getStyle("A".($start_row+13).":B".($start_row+14))->getFill()
                 ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID);
 
-            $worksheet->mergeCells("A".($start_row+15).":A".($start_row+17));
+            $worksheet->mergeCells("A".($start_row+15).":A".($start_row+16));
             $worksheet->setCellValue('A'.($start_row+15), 'FINAL No');
             $worksheet->setCellValue('B'.($start_row+15), 'OS BL');
             $worksheet->setCellValue('B'.($start_row+16), 'No.');
-            $worksheet->setCellValue('B'.($start_row+17), 'Principal');
-            $worksheet->getStyle("A".($start_row+15).":B".($start_row+17))->getFill()
+            // $worksheet->setCellValue('B'.($start_row+17), 'Principal');
+            $worksheet->getStyle("A".($start_row+15).":B".($start_row+16))->getFill()
                 ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID);
 
 
@@ -304,6 +304,27 @@ Class Daily_os_balance_group_report extends WFF_Controller {
 
                 array_push($borderThick, array('col'=>$column, 'row'=>$start_row));
 
+                $column_wo_title    = $this->stringFromColumnIndex($start_col - 4);
+                $column_wo          = $this->stringFromColumnIndex($start_col - 3);
+
+                $worksheet->setCellValueByColumnAndRow($start_col-4, $start_row + 15, 'Write Of OS BL' );
+                $worksheet->setCellValueByColumnAndRow($start_col-4, $start_row + 16, 'Write Of No.' );
+                $worksheet->getStyle($column_wo_title.($start_row+15).":".$column_wo.($start_row+16))->getFill()
+                ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                ->getStartColor()->setRGB('cb42f5');
+
+
+                $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 15, "=".$value['final_os_bl'].'+'.$column_wo.($start_row+15) );
+                $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 16, "=".$value['final_no'].'+'.$column_wo.($start_row+16) );
+                // $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 17, isset($value['final_principal']) ? $value['final_principal'] : '' );
+                $worksheet->getStyle($column.($start_row + 15).":".$column.($start_row + 16))->getNumberFormat()->setFormatCode('#,##0');
+                $headerStyle1 = array(
+                    'font'          => array(
+                        'color'     => array('rgb' => 'FF0000'),
+                    )
+                );
+                $worksheet->getStyle($column.($start_row + 15).":".$column.($start_row + 16))->applyFromArray($headerStyle1);
+
             }else{
                 $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 9, "=".$value['start_os_bl']."-".$next_column.($start_row+5) );
                 $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 10, "=".$value['start_no']."-".$next_column.($start_row+6) );
@@ -333,17 +354,6 @@ Class Daily_os_balance_group_report extends WFF_Controller {
             }
             $worksheet->getStyle($column.($start_row + 13).":".$column.($start_row + 14))->getNumberFormat()->setFormatCode('0.00%');
 
-
-            $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 15, isset($value['final_os_bl']) ? $value['final_os_bl'] : '' );
-            $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 16, isset($value['final_no']) ? $value['final_no'] : '' );
-            $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 17, isset($value['final_principal']) ? $value['final_principal'] : '' );
-            $worksheet->getStyle($column.($start_row + 15).":".$column.($start_row + 17))->getNumberFormat()->setFormatCode('#,##0');
-            $headerStyle1 = array(
-                'font'          => array(
-                    'color'     => array('rgb' => 'FF0000'),
-                )
-            );
-            $worksheet->getStyle($column.($start_row + 15).":".$column.($start_row + 17))->applyFromArray($headerStyle1);
 
             $headerStyle1 = array(
                 'font'          => array(
@@ -452,7 +462,7 @@ Class Daily_os_balance_group_report extends WFF_Controller {
             }
 
             if ($value['debt_group'] != $debt_group) {
-                $start_row += 18;
+                $start_row += 15;
                 $debt_group = $value['debt_group'];
                 if ($value['day'] == $day) {
                     $start_col = $start_col-1;
@@ -515,14 +525,6 @@ Class Daily_os_balance_group_report extends WFF_Controller {
                 ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
                 ->getStartColor()->setRGB('8EA9DB');
 
-            // $worksheet->mergeCells("A".($start_row+3).":A".($start_row+4));
-            // $worksheet->setCellValue('A'.($start_row+3), 'TARGET OF COLLECTION');
-            // $worksheet->setCellValue('B'.($start_row+3), 'OS BL');
-            // $worksheet->setCellValue('B'.($start_row+4), 'No.');
-            // $worksheet->getStyle("A".($start_row+3).":B".($start_row+4))->getFill()
-            //     ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
-            //     ->getStartColor()->setRGB('C6E0B4');
-
             $worksheet->mergeCells("A".($start_row+3).":A".($start_row+4));
             $worksheet->setCellValue('A'.($start_row+3), 'DAILY');
             $worksheet->setCellValue('B'.($start_row+3), 'OS BL');
@@ -558,12 +560,12 @@ Class Daily_os_balance_group_report extends WFF_Controller {
             $worksheet->getStyle("A".($start_row+11).":B".($start_row+12))->getFill()
                 ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID);
 
-            $worksheet->mergeCells("A".($start_row+13).":A".($start_row+15));
+            $worksheet->mergeCells("A".($start_row+13).":A".($start_row+14));
             $worksheet->setCellValue('A'.($start_row+13), 'FINAL No');
             $worksheet->setCellValue('B'.($start_row+13), 'OS BL');
             $worksheet->setCellValue('B'.($start_row+14), 'No.');
-            $worksheet->setCellValue('B'.($start_row+15), 'Principal');
-            $worksheet->getStyle("A".($start_row+13).":B".($start_row+15))->getFill()
+            // $worksheet->setCellValue('B'.($start_row+15), 'Principal');
+            $worksheet->getStyle("A".($start_row+13).":B".($start_row+14))->getFill()
                 ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID);
 
 
@@ -627,19 +629,29 @@ Class Daily_os_balance_group_report extends WFF_Controller {
                 $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 12, "=".$value['final_no']."-".$value['start_no']."+(".$value['start_no']."*".($value['target']/100).")");
 
 
-                $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 13, $value['final_os_bl'] );
-                $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 14, $value['final_no'] );
-                $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 15, $value['final_principal'] );
+                $column_wo_title    = $this->stringFromColumnIndex($start_col - 4);
+                $column_wo          = $this->stringFromColumnIndex($start_col - 3);
 
-                $worksheet->getStyle($column.($start_row + 13).":".$column.($start_row + 15))->getNumberFormat()->setFormatCode('#,##0');
+                $worksheet->setCellValueByColumnAndRow($start_col-4, $start_row + 13, 'Write Of OS BL' );
+                $worksheet->setCellValueByColumnAndRow($start_col-4, $start_row + 14, 'Write Of No.' );
+                $worksheet->getStyle($column_wo_title.($start_row+13).":".$column_wo.($start_row+14))->getFill()
+                ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                ->getStartColor()->setRGB('cb42f5');
+
+
+                $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 13, "=".$value['final_os_bl'].'+'.$column_wo.($start_row+13) );
+                $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 14, "=".$value['final_no'].'+'.$column_wo.($start_row+14) );
+                // $worksheet->setCellValueByColumnAndRow($start_col, $start_row + 15, $value['final_principal'] );
+
+                $worksheet->getStyle($column.($start_row + 13).":".$column.($start_row + 14))->getNumberFormat()->setFormatCode('#,##0');
                 $headerStyle1 = array(
                     'font'          => array(
                         'bold'      => true,
                         'color'     => array('rgb' => 'FF0000'),
                     )
                 );
-                $worksheet->getStyle($column.($start_row + 13).":".$column.($start_row + 15))->applyFromArray($headerStyle1);
-                $worksheet->getStyle($column.($start_row + 13).":".$column.($start_row + 15))->getNumberFormat()->setFormatCode('#,##0');
+                $worksheet->getStyle($column.($start_row + 13).":".$column.($start_row + 14))->applyFromArray($headerStyle1);
+                $worksheet->getStyle($column.($start_row + 13).":".$column.($start_row + 14))->getNumberFormat()->setFormatCode('#,##0');
 
                 array_push($borderThick, array('col'=>$column, 'row'=>$start_row));
 

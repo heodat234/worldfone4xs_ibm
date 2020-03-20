@@ -103,6 +103,7 @@
                           row.cells[6].format = "0%";
                           row.cells[8].format = "#,##0";
                           row.cells[29].format = "#,##0";
+                          row.cells[33].format = "dd/MM/yyyy";
                         }
                       },
                       resizable: true,
@@ -274,6 +275,16 @@
                           {
                               field:"Dealer_name",
                               title:"Dealer name",
+                              width: 130
+                          },
+                          {
+                              field:"Province",
+                              title:"Province",
+                              width: 130
+                          },
+                          {
+                              field:"F_PDT",
+                              title:"First Payment Date",
                               width: 130
                           }
                          
