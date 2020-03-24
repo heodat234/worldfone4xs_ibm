@@ -32,7 +32,7 @@ try:
     log = open(base_url + "cronjob/python/Loan/log/importListOfAccountInCollection.txt","a")
     now = datetime.now()
     subUserType = 'LO'
-    collection = common.getSubUser(subUserType, 'List_of_account_in_collection_15032020')
+    collection = common.getSubUser(subUserType, 'List_of_account_in_collection_23032020')
 
     modelColumns = []
     modelConverters = {}
@@ -45,7 +45,7 @@ try:
     insertData = []
     errorData = []
     today = date.today()
-    today = datetime.strptime('15/03/2020', "%d/%m/%Y").date()
+    today = datetime.strptime('23/03/2020', "%d/%m/%Y").date()
     yesterday = today - timedelta(days=1)
     day = today.day
     month = today.month

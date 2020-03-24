@@ -32,7 +32,7 @@ lnjc05_yesterday_collection         = common.getSubUser(subUserType, 'LNJC05_yes
 listAcc_yesterday_collection        = common.getSubUser(subUserType, 'List_of_account_in_collection_yesterday')
 stored_collection           = common.getSubUser(subUserType, 'SBV_Stored')
 stored_old_collection           = common.getSubUser(subUserType, 'SBV_Stored_Old')
-diallist_collection         = common.getSubUser(subUserType, 'Diallist_detail')
+# diallist_collection         = common.getSubUser(subUserType, 'Diallist_detail')
 sbv_collection              = common.getSubUser(subUserType, 'SBV')
 
 log         = open(base_url + "cronjob/python/Loan/log/Os_balance_group_log.txt","a")

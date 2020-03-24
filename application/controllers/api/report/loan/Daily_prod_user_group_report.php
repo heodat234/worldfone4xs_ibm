@@ -174,7 +174,7 @@ Class Daily_prod_user_group_report extends WFF_Controller {
         $worksheet->getStyle("K3:M3")->applyFromArray($style);
 
         $worksheet->setCellValue('N3', 'Total outstanding balance at due date');
-        $worksheet->setCellValue('O3', 'Total Collected amount (actual amount)');
+        $worksheet->setCellValue('O3', 'Total Collected  amount (OS at due date - OS at current)');
         $worksheet->getStyle("N3:O3")->getFill()
             ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
             ->getStartColor()->setRGB('F4B084');

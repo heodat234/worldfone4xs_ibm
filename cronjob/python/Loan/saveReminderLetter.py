@@ -23,14 +23,14 @@ _mongodb    = Mongodb(MONGODB="_worldfone4xs", WFF_ENV=wff_env)
 now         = datetime.now()
 subUserType = 'LO'
 collection                    = common.getSubUser(subUserType, 'Reminder_letter_report')
-lnjc05_collection             = common.getSubUser(subUserType, 'LNJC05_15032020')
-zaccf_collection              = common.getSubUser(subUserType, 'ZACCF_15032020')
-sbv_collection                = common.getSubUser(subUserType, 'SBV_15032020')
+lnjc05_collection             = common.getSubUser(subUserType, 'LNJC05')
+zaccf_collection              = common.getSubUser(subUserType, 'ZACCF_report')
+sbv_collection                = common.getSubUser(subUserType, 'SBV')
 investigation_collection      = common.getSubUser(subUserType, 'Investigation_file')
-account_collection            = common.getSubUser(subUserType, 'List_of_account_in_collection_15032020')
+account_collection            = common.getSubUser(subUserType, 'List_of_account_in_collection')
 report_release_sale_collection   = common.getSubUser(subUserType, 'Report_release_sale')
 diallist_detail_collection    = common.getSubUser(subUserType, 'Diallist_detail')
-user_collection               = common.getSubUser(subUserType, 'User_product')
+user_collection               = common.getSubUser(subUserType, 'User')
 product_collection            = common.getSubUser(subUserType, 'Product')
 
 
@@ -44,7 +44,7 @@ try:
    now         = datetime.now()
 
    today = date.today()
-   today = datetime.strptime('15/03/2020', "%d/%m/%Y").date()
+   # today = datetime.strptime('15/03/2020', "%d/%m/%Y").date()
 
    day = today.day
    month = today.month
@@ -72,7 +72,7 @@ try:
 
    aggregate_pipeline = [
       { "$project": { 'account_number': 1, 'current_balance': 1, 'overdue_amount_this_month': 1, 'mobile_num': 1, 'due_date': 1, 'dateDifference' :{"$divide" : [{ "$subtract" : [todayTimeStamp,'$due_date']}, 86400]}  } },
-      { "$match" : {'$or' : [ {'dateDifference': {"$eq": 35} }, {'dateDifference': {"$eq": 185} }]} }
+      { "$match" : {'$or' : [ {'dateDifference': {"$eq": 35} }, {'dateDifference': {"$eq": 65} }, {'dateDifference': {"$eq": 95} }, {'dateDifference': {"$eq": 185} }]} }
       # {
       #     "$group":
       #     {
@@ -190,7 +190,7 @@ try:
    # sbv
    aggregate_pipeline = [
       { "$project": { 'account_number': 1, 'overdue_amt': 1, 'phone': 1, 'overdue_date': 1, 'cur_bal': 1, 'dateDifference' :{"$divide" : [{ "$subtract" : [todayTimeStamp,'$overdue_date']}, 86400]}  } },
-      { "$match" : {'$or' : [ {'dateDifference': {"$eq": 35} }, {'dateDifference': {"$eq": 185} }]} }
+      { "$match" : {'$or' : [ {'dateDifference': {"$eq": 35} }, {'dateDifference': {"$eq": 65} }, {'dateDifference': {"$eq": 95} }, {'dateDifference': {"$eq": 185} }]} }
 
    ]
    dataAccount = mongodb.aggregate_pipeline(MONGO_COLLECTION=account_collection,aggregate_pipeline=aggregate_pipeline)

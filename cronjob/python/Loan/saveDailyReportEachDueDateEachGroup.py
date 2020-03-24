@@ -115,7 +115,7 @@ try:
                 col_today = 0
                 amt_today = 0
                 ob_principal_today = 0
-                if todayTimeStamp <= dueDayOfMonth['due_date_add_1']:
+                if todayTimeStamp < dueDayOfMonth['due_date_add_1']:
                     if month == 1:
                         lastMonth = 12
                     else:
@@ -157,8 +157,7 @@ try:
                             {
                                 "created_at": {'$gte': due_date_add_2,'$lte': endTodayTimeStamp},
                                 "account_number": {'$in' : acc_arr},
-                                "code" : '10',
-                                "coNoHayKhong": 'Y'
+                                "code" : '10'
                             }
                         },{
                             "$group":
@@ -248,8 +247,7 @@ try:
                            "$match":
                            {   'account_number' : {'$in' : acc_card_arr},
                                'created_at': {'$gte' : due_date_add_2,'$lte' : todayTimeStamp},
-                               'code' : {'$in' : code},
-                               "coNoHayKhong": 'Y'
+                               'code' : {'$in' : code}
                            }
                        },
                        {
@@ -272,8 +270,7 @@ try:
                               {
                                   "created_at": {'$gte': due_date_add_2,'$lte': todayTimeStamp},
                                   "account_number": acc,
-                                  'code' : {'$in' : code},
-                                  "coNoHayKhong": 'Y'
+                                  'code' : {'$in' : code}
                               }
                           },{
                               "$project":

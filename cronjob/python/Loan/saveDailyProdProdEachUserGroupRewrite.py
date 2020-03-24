@@ -30,6 +30,8 @@ subUserType = 'LO'
 collection              = common.getSubUser(subUserType, 'Daily_prod_prod_each_user_group')
 lnjc05_collection       = common.getSubUser(subUserType, 'LNJC05')
 ln3206f_collection      = common.getSubUser(subUserType, 'LN3206F')
+sbv_collection          = common.getSubUser(subUserType, 'SBV')
+sbv_yesterday_collection  = common.getSubUser(subUserType, 'SBV_yesterday')
 zaccf_collection        = common.getSubUser(subUserType, 'ZACCF_yesterday')
 account_collection      = common.getSubUser(subUserType, 'List_of_account_in_collection')
 gl_collection           = common.getSubUser(subUserType, 'Report_input_payment_of_card')
@@ -124,9 +126,9 @@ try:
                         dueDayLastMonth = mongodb.getOne(MONGO_COLLECTION=report_due_date_collection, WHERE={'for_month': str(lastMonth), 'debt_group': debtGroupCell[1:3]})
                         temp['due_date'] = dueDayLastMonth['due_date'] if dueDayLastMonth is not None else ''
                         #Lay gia tri no vao ngay due date + 1#
-                        incidenceInfo = mongodb.getOne(MONGO_COLLECTION=due_date_next_date_group_collection, WHERE={'for_month': str(lastMonth), 'team_id': str(groupCell['_id'])})
+                        incidenceInfo = mongodb.getOne(MONGO_COLLECTION=due_date_next_date_group_collection, WHERE={'for_month': str(lastMonth), "due_date_code" : debtGroupCell[1:3], 'team_id': str(groupCell['_id'])})
                     else:
-                        incidenceInfo = mongodb.getOne(MONGO_COLLECTION=due_date_next_date_group_collection, WHERE={'for_month': str(month), 'team_id': str(groupCell['_id'])})
+                        incidenceInfo = mongodb.getOne(MONGO_COLLECTION=due_date_next_date_group_collection, WHERE={'for_month': str(month), "due_date_code" : debtGroupCell[1:3], 'team_id': str(groupCell['_id'])})
                         temp['due_date'] = dueDayOfMonth['due_date']
 
 
@@ -156,30 +158,6 @@ try:
                             temp['inci_' + key]     = 0
                             temp['inci_amt_' + key] = 0
 
-                        # temp['rem_' + key]          = 0
-                        # temp['rem_amt_' + key]      = 0
-                        # temp['flow_rate_' + key]    = 0
-                        # temp['flow_rate_amt_' + key] = 0
-
-                    # aggregate_diallist = [
-                    #     {
-                    #         "$match":
-                    #         {
-                    #               "createdAt": {'$gte': todayTimeStamp, '$lte': endTodayTimeStamp},
-                    #               "account_number": {'$in': acc_arr},
-                    #         }
-                    #     },{
-                    #       "$group":
-                    #       {
-                    #           "_id": 'null',
-                    #           "count_col": {'$sum': 1},
-                    #       }
-                    #     }
-                    # ]
-                    # diallistData = mongodb.aggregate_pipeline(MONGO_COLLECTION=diallist_detail_collection,aggregate_pipeline=aggregate_diallist)
-                    # if diallistData != None:
-                    #     for row in diallistData:
-                    #         col_today            = row['count_col']
 
                     due_date_add_2 = temp['due_date'] + 86400*2
                     if groupProduct['value'] == 'SIBS':
@@ -319,8 +297,10 @@ try:
                     
 
                     if groupProduct['value'] == 'Card':
-                        member = ( s for s in members)
-                        assign = list(dict.fromkeys(list(member)))
+                        lead = [groupCell['lead']] if 'lead' in groupCell.keys() else []
+                        member = (s for s in members)
+                        officerIdRaw = list(lead) + list(member)
+                        assign = list(dict.fromkeys(officerIdRaw))
                         aggregate_diallist = [
                             {
                                 "$match":
@@ -342,7 +322,40 @@ try:
                             for row in diallistData:
                                 col_today            = row['count_col']
 
-                                
+                        
+                        col_301_today = 0
+                        col_302_today = 0
+                        aggregate_diallist = [
+                            {
+                                "$match":
+                                {
+                                    "createdAt": {'$gte': todayTimeStamp, '$lte' : endTodayTimeStamp},
+                                    "assign": {'$in' : assign},
+                                    "group_id": debtGroupCell[0:1]+'-'+debtGroupCell[1:3]
+                                }
+                            },{
+                                   "$lookup":
+                                   {
+                                       "from": sbv_collection,
+                                       "localField": "account_number",
+                                       "foreignField": "contract_no",
+                                       "as": "detail"
+                                   }
+                            }
+                        ]
+                        diallistDetail = mongodb.aggregate_pipeline(MONGO_COLLECTION=diallist_detail_collection,aggregate_pipeline=aggregate_diallist)
+                        if diallistDetail is not None:
+                            for diallist in diallistDetail:
+                                card_type = 0
+                                for sbv in diallist['detail']:
+                                    card_type = int(sbv['card_type'])
+                                if card_type > 1 and card_type <= 99:                                    
+                                    col_301_today          += 1
+                                else:
+                                    col_302_today          += 1
+
+
+                        # payment     
                         code = ['2000','2100','2700']
                         for row_acc in acc_arr:
                             aggregate_gl = [
@@ -376,16 +389,105 @@ try:
                                         code_2700 += row['amount']
                                 sum_code = code_2000 - code_2700
                                 if sum_code > 0:
-                                    # temp['col']             += 1
                                     temp['col_amt']         += sum_code
-                                    # temp['col_301']         += 1
-                                    temp['col_amt_301']     += sum_code
+                                    # temp['col_amt_301']     += sum_code
+
+
+                        aggregate_sbv = [
+                            {
+                                "$match":
+                                {
+                                      "contract_no": {'$in': acc_arr},
+                                }
+                            }
+                        ]
+                        sbvData = mongodb.aggregate_pipeline(MONGO_COLLECTION=sbv_yesterday_collection,aggregate_pipeline=aggregate_sbv)
+                        acc_by_301 = []
+                        acc_by_302 = []
+                        if sbvData != None:
+                            for row in sbvData:
+                                if int(row['card_type']) > 1 and int(row['card_type']) <= 99:
+                                    acc_by_301.append(row['contract_no'])
+                                else:
+                                    acc_by_302.append(row['contract_no'])
+
+
+                        for row_acc in acc_by_301:
+                            aggregate_gl = [
+                                {
+                                    "$match":
+                                    {
+                                        "created_at": {'$gte': due_date_add_2, '$lte': endTodayTimeStamp},
+                                        "account_number": row_acc,
+                                        "code" : {'$in' : code},
+                                        "coNoHayKhong": 'Y'
+                                    }
+                                },
+                                {
+                                    "$project":
+                                    {
+                                        "account_number" : 1,
+                                        "amount" : 1,
+                                        "code" : 1,
+                                    }
+                                }
+                            ]
+                            glData = mongodb.aggregate_pipeline(MONGO_COLLECTION=gl_collection,aggregate_pipeline=aggregate_gl)
+                            code_2000 = 0
+                            code_2700 = 0
+                            sum_code = 0
+                            if glData != None:
+                                for row in glData:
+                                    if row['code'] == '2000' or row['code'] == '2100':
+                                        code_2000 += row['amount']
+                                    else:
+                                        code_2700 += row['amount']
+                                sum_code = code_2000 - code_2700
+                                if sum_code > 0:
+                                    temp['col_amt_301']         += sum_code
+
+
+                        for row_acc in acc_by_302:
+                            aggregate_gl = [
+                                {
+                                    "$match":
+                                    {
+                                        "created_at": {'$gte': due_date_add_2, '$lte': endTodayTimeStamp},
+                                        "account_number": row_acc,
+                                        "code" : {'$in' : code},
+                                        "coNoHayKhong": 'Y'
+                                    }
+                                },
+                                {
+                                    "$project":
+                                    {
+                                        "account_number" : 1,
+                                        "amount" : 1,
+                                        "code" : 1,
+                                    }
+                                }
+                            ]
+                            glData = mongodb.aggregate_pipeline(MONGO_COLLECTION=gl_collection,aggregate_pipeline=aggregate_gl)
+                            code_2000 = 0
+                            code_2700 = 0
+                            sum_code = 0
+                            if glData != None:
+                                for row in glData:
+                                    if row['code'] == '2000' or row['code'] == '2100':
+                                        code_2000 += row['amount']
+                                    else:
+                                        code_2700 += row['amount']
+                                sum_code = code_2000 - code_2700
+                                if sum_code > 0:
+                                    temp['col_amt_302']         += sum_code
 
 
                         temp['col']             = temp['inci'] - col_today
-                        temp['col_301']         = temp['col']
+                        temp['col_301']         = temp['inci_301'] - col_301_today
+                        temp['col_302']         = temp['inci_302'] - col_302_today
                         temp['col_amt']         = round(temp['col_amt']/1000)
                         temp['col_amt_301']     = round(temp['col_amt_301']/1000)
+                        temp['col_amt_302']     = round(temp['col_amt_302']/1000)
                         temp['rem']             = temp['inci'] - temp['col']
                         temp['rem_amt']         = temp['inci_amt'] - temp['col_amt']
                         temp['col_ratio']       = temp['col'] / temp['inci'] if temp['inci'] != 0 else 0
@@ -448,9 +550,9 @@ try:
                         dueDayLastMonth = mongodb.getOne(MONGO_COLLECTION=report_due_date_collection, WHERE={'for_month': str(lastMonth), 'debt_group': debtGroupCell[1:3]})
                         temp['due_date'] = dueDayLastMonth['due_date'] if dueDayLastMonth is not None else ''
                         #Lay gia tri no vao ngay due date + 1#
-                        incidenceInfo = mongodb.getOne(MONGO_COLLECTION=due_date_next_date_group_collection, WHERE={'for_month': str(lastMonth), 'team_id': str(groupCell['_id'])})
+                        incidenceInfo = mongodb.getOne(MONGO_COLLECTION=due_date_next_date_group_collection, WHERE={'for_month': str(lastMonth),  "due_date_code" : debtGroupCell[1:3], 'team_id': str(groupCell['_id'])})
                     else:
-                        incidenceInfo = mongodb.getOne(MONGO_COLLECTION=due_date_next_date_group_collection, WHERE={'for_month': str(month), 'team_id': str(groupCell['_id'])})
+                        incidenceInfo = mongodb.getOne(MONGO_COLLECTION=due_date_next_date_group_collection, WHERE={'for_month': str(month),  "due_date_code" : debtGroupCell[1:3], 'team_id': str(groupCell['_id'])})
                         temp['due_date'] = dueDayOfMonth['due_date']
 
 
@@ -479,31 +581,6 @@ try:
                         else:
                             temp['inci_' + key]     = 0
                             temp['inci_amt_' + key] = 0
-
-                        # temp['rem_' + key]          = 0
-                        # temp['rem_amt_' + key]      = 0
-                        # temp['flow_rate_' + key]    = 0
-                        # temp['flow_rate_amt_' + key] = 0
-
-                    # aggregate_diallist = [
-                    #     {
-                    #         "$match":
-                    #         {
-                    #               "createdAt": {'$gte': todayTimeStamp, '$lte': endTodayTimeStamp},
-                    #               "account_number": {'$in': acc_arr},
-                    #         }
-                    #     },{
-                    #       "$group":
-                    #       {
-                    #           "_id": 'null',
-                    #           "count_col": {'$sum': 1},
-                    #       }
-                    #     }
-                    # ]
-                    # diallistData = mongodb.aggregate_pipeline(MONGO_COLLECTION=diallist_detail_collection,aggregate_pipeline=aggregate_diallist)
-                    # if diallistData != None:
-                    #     for row in diallistData:
-                    #         col_today            = row['count_col']
 
                     due_date_add_2 = temp['due_date'] + 86400*2
                     if groupProduct['value'] == 'SIBS':
@@ -666,7 +743,40 @@ try:
                             for row in diallistData:
                                 col_today            = row['count_col']
 
-                                
+                        
+                        col_301_today = 0
+                        col_302_today = 0
+                        aggregate_diallist = [
+                            {
+                                "$match":
+                                {
+                                    "createdAt": {'$gte': todayTimeStamp, '$lte' : endTodayTimeStamp},
+                                    "assign": {'$in' : assign},
+                                    "group_id": debtGroupCell[0:1]+'-'+debtGroupCell[1:3]
+                                }
+                            },{
+                                   "$lookup":
+                                   {
+                                       "from": sbv_collection,
+                                       "localField": "account_number",
+                                       "foreignField": "contract_no",
+                                       "as": "detail"
+                                   }
+                            }
+                        ]
+                        diallistDetail = mongodb.aggregate_pipeline(MONGO_COLLECTION=diallist_detail_collection,aggregate_pipeline=aggregate_diallist)
+                        if diallistDetail != None:
+                            for diallist in diallistDetail:
+                                card_type = 0
+                                for sbv in diallist['detail']:
+                                    card_type = int(sbv['card_type'])
+                                if card_type > 1 and card_type <= 99:                                    
+                                    col_301_today          += 1
+                                else:
+                                    col_302_today          += 1
+
+
+                        # payment     
                         code = ['2000','2100','2700']
                         for row_acc in acc_arr:
                             aggregate_gl = [
@@ -700,16 +810,105 @@ try:
                                         code_2700 += row['amount']
                                 sum_code = code_2000 - code_2700
                                 if sum_code > 0:
-                                    # temp['col']             += 1
                                     temp['col_amt']         += sum_code
-                                    # temp['col_301']         += 1
-                                    temp['col_amt_301']     += sum_code
+                                    # temp['col_amt_301']     += sum_code
+
+
+                        aggregate_sbv = [
+                            {
+                                "$match":
+                                {
+                                      "contract_no": {'$in': acc_arr},
+                                }
+                            }
+                        ]
+                        sbvData = mongodb.aggregate_pipeline(MONGO_COLLECTION=sbv_yesterday_collection,aggregate_pipeline=aggregate_sbv)
+                        acc_by_301 = []
+                        acc_by_302 = []
+                        if sbvData != None:
+                            for row in sbvData:
+                                if int(row['card_type']) > 1 and int(row['card_type']) <= 99:
+                                    acc_by_301.append(row['contract_no'])
+                                else:
+                                    acc_by_302.append(row['contract_no'])
+
+
+                        for row_acc in acc_by_301:
+                            aggregate_gl = [
+                                {
+                                    "$match":
+                                    {
+                                        "created_at": {'$gte': due_date_add_2, '$lte': endTodayTimeStamp},
+                                        "account_number": row_acc,
+                                        "code" : {'$in' : code},
+                                        "coNoHayKhong": 'Y'
+                                    }
+                                },
+                                {
+                                    "$project":
+                                    {
+                                        "account_number" : 1,
+                                        "amount" : 1,
+                                        "code" : 1,
+                                    }
+                                }
+                            ]
+                            glData = mongodb.aggregate_pipeline(MONGO_COLLECTION=gl_collection,aggregate_pipeline=aggregate_gl)
+                            code_2000 = 0
+                            code_2700 = 0
+                            sum_code = 0
+                            if glData != None:
+                                for row in glData:
+                                    if row['code'] == '2000' or row['code'] == '2100':
+                                        code_2000 += row['amount']
+                                    else:
+                                        code_2700 += row['amount']
+                                sum_code = code_2000 - code_2700
+                                if sum_code > 0:
+                                    temp['col_amt_301']         += sum_code
+
+
+                        for row_acc in acc_by_302:
+                            aggregate_gl = [
+                                {
+                                    "$match":
+                                    {
+                                        "created_at": {'$gte': due_date_add_2, '$lte': endTodayTimeStamp},
+                                        "account_number": row_acc,
+                                        "code" : {'$in' : code},
+                                        "coNoHayKhong": 'Y'
+                                    }
+                                },
+                                {
+                                    "$project":
+                                    {
+                                        "account_number" : 1,
+                                        "amount" : 1,
+                                        "code" : 1,
+                                    }
+                                }
+                            ]
+                            glData = mongodb.aggregate_pipeline(MONGO_COLLECTION=gl_collection,aggregate_pipeline=aggregate_gl)
+                            code_2000 = 0
+                            code_2700 = 0
+                            sum_code = 0
+                            if glData != None:
+                                for row in glData:
+                                    if row['code'] == '2000' or row['code'] == '2100':
+                                        code_2000 += row['amount']
+                                    else:
+                                        code_2700 += row['amount']
+                                sum_code = code_2000 - code_2700
+                                if sum_code > 0:
+                                    temp['col_amt_302']         += sum_code
 
 
                         temp['col']             = temp['inci'] - col_today
-                        temp['col_301']         = temp['col']
+                        temp['col_301']         = temp['inci_301'] - col_301_today
+                        temp['col_302']         = temp['inci_302'] - col_302_today
                         temp['col_amt']         = round(temp['col_amt']/1000)
                         temp['col_amt_301']     = round(temp['col_amt_301']/1000)
+                        temp['col_amt_302']     = round(temp['col_amt_302']/1000)
                         temp['rem']             = temp['inci'] - temp['col']
                         temp['rem_amt']         = temp['inci_amt'] - temp['col_amt']
                         temp['col_ratio']       = temp['col'] / temp['inci'] if temp['inci'] != 0 else 0

@@ -49,7 +49,7 @@ Class Daily_prod_prod_user_report extends WFF_Controller {
 
         $request = array('createdAt' => array('$gte' => $getdate[0], '$lte' => $getdate[0] + 86400 - 1));
         $data = $this->crud->where($request)->order_by(array('debt_group' => 'asc', 'due_date_code' => 'asc', 'due_date' => 'asc', 'product' => 'desc', 'team' => 'asc'))->get($this->collection);
-        $product = $this->crud->where(array('code' => array('$ne' => '302')))->order_by(array('code' => 'asc'))->get(set_sub_collection('Product'));
+        $product = $this->crud->order_by(array('code' => 'asc'))->get(set_sub_collection('Product'));
         $groupProduct = $this->mongo_private->where(array('tags' => array('group', 'debt', 'product')))->getOne(set_sub_collection("Jsondata"));
         
         $spreadsheet = new Spreadsheet();

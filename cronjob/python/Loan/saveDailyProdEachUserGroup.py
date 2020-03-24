@@ -123,9 +123,9 @@ try:
                         dueDayLastMonth = mongodb.getOne(MONGO_COLLECTION=report_due_date_collection, WHERE={'for_month': str(lastMonth), 'debt_group': debtGroupCell[1:3]})
                         temp['due_date'] = dueDayLastMonth['due_date'] if dueDayLastMonth is not None else ''
                         #Lay gia tri no vao ngay due date + 1#
-                        incidenceInfo = mongodb.getOne(MONGO_COLLECTION=due_date_next_date_group_collection, WHERE={'for_month': str(lastMonth), 'team_id': str(groupCell['_id'])})
+                        incidenceInfo = mongodb.getOne(MONGO_COLLECTION=due_date_next_date_group_collection, WHERE={'for_month': str(lastMonth), "due_date_code" : debtGroupCell[1:3], 'team_id': str(groupCell['_id'])})
                     else:
-                        incidenceInfo = mongodb.getOne(MONGO_COLLECTION=due_date_next_date_group_collection, WHERE={'for_month': str(month), 'team_id': str(groupCell['_id'])})
+                        incidenceInfo = mongodb.getOne(MONGO_COLLECTION=due_date_next_date_group_collection, WHERE={'for_month': str(month), "due_date_code" : debtGroupCell[1:3],'team_id': str(groupCell['_id'])})
                         temp['due_date'] = dueDayOfMonth['due_date']
 
                     pprint(name)
@@ -346,8 +346,12 @@ try:
 
                     target = targetInfo['target']
                     temp['tar_amt'] = (target * temp['inci_amt'])/100
-                    temp['tar_gap'] = temp['tar_amt'] - temp['rem_os']
+                    
                     temp['tar_per'] = target/100
+                    if debtGroupCell[0:1] == 'A' or debtGroupCell[0:1] == 'B' or debtGroupCell[0:1] == 'C':
+                        temp['tar_gap'] = temp['tar_amt'] - temp['payment_amt']
+                    else:
+                        temp['tar_gap'] = temp['tar_amt'] - temp['col_amt']
 
                     temp['createdAt'] = todayTimeStamp
                     temp['createdBy'] = 'system'
@@ -390,9 +394,9 @@ try:
                         dueDayLastMonth = mongodb.getOne(MONGO_COLLECTION=report_due_date_collection, WHERE={'for_month': str(lastMonth), 'debt_group': debtGroupCell[1:3]})
                         temp['due_date'] = dueDayLastMonth['due_date'] if dueDayLastMonth is not None else ''
                         #Lay gia tri no vao ngay due date + 1#
-                        incidenceInfo = mongodb.getOne(MONGO_COLLECTION=due_date_next_date_group_collection, WHERE={'for_month': str(lastMonth), 'team_id': str(groupCell['_id'])})
+                        incidenceInfo = mongodb.getOne(MONGO_COLLECTION=due_date_next_date_group_collection, WHERE={'for_month': str(lastMonth), "due_date_code" : debtGroupCell[1:3], 'team_id': str(groupCell['_id'])})
                     else:
-                        incidenceInfo = mongodb.getOne(MONGO_COLLECTION=due_date_next_date_group_collection, WHERE={'for_month': str(month), 'team_id': str(groupCell['_id'])})
+                        incidenceInfo = mongodb.getOne(MONGO_COLLECTION=due_date_next_date_group_collection, WHERE={'for_month': str(month), "due_date_code" : debtGroupCell[1:3], 'team_id': str(groupCell['_id'])})
                         temp['due_date'] = dueDayOfMonth['due_date']
 
                     pprint(name)
@@ -613,8 +617,12 @@ try:
 
                     target = targetInfo['target']
                     temp['tar_amt'] = (target * temp['inci_amt'])/100
-                    temp['tar_gap'] = temp['tar_amt'] - temp['rem_os']
+                    # temp['tar_gap'] = temp['tar_amt'] - temp['col_amt']
                     temp['tar_per'] = target/100
+                    if debtGroupCell[0:1] == 'A' or debtGroupCell[0:1] == 'B' or debtGroupCell[0:1] == 'C':
+                        temp['tar_gap'] = temp['tar_amt'] - temp['payment_amt']
+                    else:
+                        temp['tar_gap'] = temp['tar_amt'] - temp['col_amt']
 
                     temp['createdAt'] = todayTimeStamp
                     temp['createdBy'] = 'system'

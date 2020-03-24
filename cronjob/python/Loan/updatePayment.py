@@ -74,9 +74,9 @@ try:
 
    print(len(accountYes))
    temp['coNoHayKhong'] = 'Y'
-   mongodb.batch_update(MONGO_COLLECTION=ln3206_collection,  WHERE={'account_number': {'$in': accountYes}}, VALUE=temp)
+   mongodb.batch_update(MONGO_COLLECTION=ln3206_collection,  WHERE={'account_number': {'$in': accountYes},"created_at" : {'$gte' : todayTimeStamp,'$lte' : endTodayTimeStamp}}, VALUE=temp)
    temp['coNoHayKhong'] = 'N'
-   mongodb.batch_update(MONGO_COLLECTION=ln3206_collection,  WHERE={'account_number': {'$in': accountNo}}, VALUE=temp)
+   mongodb.batch_update(MONGO_COLLECTION=ln3206_collection,  WHERE={'account_number': {'$in': accountNo}, "created_at" : {'$gte' : todayTimeStamp,'$lte' : endTodayTimeStamp}}, VALUE=temp)
    
 
    # card
@@ -95,7 +95,7 @@ try:
    accountNo   = []
    if data != None:
       for row in data:
-         lnjc05Data = mongodb.getOne(MONGO_COLLECTION=lnjc05_collection, WHERE={'account_number': str(row['account_number'])} )
+         lnjc05Data = mongodb.getOne(MONGO_COLLECTION=account_collection, WHERE={'account_number': str(row['account_number'])} )
          if lnjc05Data != None:
             accountYes.append(row['account_number'])
          else:
@@ -103,9 +103,9 @@ try:
    
 
    temp['coNoHayKhong'] = 'Y'
-   mongodb.batch_update(MONGO_COLLECTION=ln3206_collection,  WHERE={'account_number': {'$in': accountYes}}, VALUE=temp)
+   mongodb.batch_update(MONGO_COLLECTION=payment_of_card_collection,  WHERE={'account_number': {'$in': accountYes}, "created_at" : {'$gte' : todayTimeStamp,'$lte' : endTodayTimeStamp}}, VALUE=temp)
    temp['coNoHayKhong'] = 'N'
-   mongodb.batch_update(MONGO_COLLECTION=ln3206_collection,  WHERE={'account_number': {'$in': accountNo}}, VALUE=temp)
+   mongodb.batch_update(MONGO_COLLECTION=payment_of_card_collection,  WHERE={'account_number': {'$in': accountNo}, "created_at" : {'$gte' : todayTimeStamp,'$lte' : endTodayTimeStamp}}, VALUE=temp)
    
 
 

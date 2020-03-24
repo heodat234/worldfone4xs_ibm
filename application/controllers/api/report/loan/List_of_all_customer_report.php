@@ -22,7 +22,7 @@ Class List_of_all_customer_report extends WFF_Controller {
         $sdate = date('1-m-Y');
         $edate = date('t-m-Y');
         $this->date = strtotime($date);
-        $this->sdate = strtotime($sdate);
+        $this->sdate = strtotime($sdate) - 3600 *24 *20;
         $this->edate = strtotime($edate);
     }
 
@@ -79,165 +79,117 @@ Class List_of_all_customer_report extends WFF_Controller {
 
 
 
-    function saveAsExcel()
-    {
+   
+    function exportExcel(){
         try {
-            //sibs
-            $request    = array("take" => 1, "skip" => 0);
-            $response = $this->crud->read($this->collection, $request);
-            $total = $response['total'];
+            $request    = $this->input->post();
 
-            $limit = 1000;
-            $count = (int)($total/$limit);
-            $data = array();
-
-            // for ($i=0; $i < $count; $i++) { 
-            //     $request    = array("take" => $limit, "skip" => $i*$limit);
-            //     $response = $this->crud->read($this->collection, $request,[]);
-            //     foreach ($response['data'] as &$value) {
-            //           array_push($data, $value);
-            //     }
-            // }
-            // if (($total%$limit) > 0) {
-            //     $request    = array("take" => $limit, "skip" => $count*$limit);
-            //     $response = $this->crud->read($this->collection, $request,[]);
-            //     foreach ($response['data'] as &$value) {
-            //           array_push($data, $value);
-            //     }
-            // }
-
-
-            $filename = "SMS DAILY SMS REPORT.xlsx";
+            $date =str_replace('/', '-', $request['month']);
+            $smonth = strtotime($date);
+            $lastDateOfMonth = strtotime(date("Y-m-t", strtotime($date)));
+            
+            $match = array(
+                '$and' => array(
+                array('createdAt'=> array( '$gte'=> $smonth, '$lte'=> $lastDateOfMonth))
+                )               
+            );
+            $data = $this->crud->where($match)->order_by(array('index' => 'asc'))->get($this->data_total);
+            $product = $this->crud->order_by(array('code' => 'asc'))->get($this->product);
+           
+            
+            $filename = "List of all customer by Loan Group ".str_replace('/', '-', $request['export']).".xlsx";
             $spreadsheet = new Spreadsheet();
             $spreadsheet->getProperties()
             ->setCreator("South Telecom")
-            ->setLastModifiedBy("Thanh Hung")
-            ->setTitle("SMS DAILY SMS REPORT")
-            ->setSubject("SMS DAILY SMS REPORT")
+            ->setLastModifiedBy("Son Vu")
+            ->setTitle("List of all customer by Loan Group Report")
+            ->setSubject("List of all customer by Loan Group Report")
             ->setDescription("Office 2007 XLSX, generated using PHP classes.")
             ->setKeywords("office 2007 openxml php")
             ->setCategory("Report");
 
+            
+            // TOTAL
+            $worksheet = $spreadsheet->setActiveSheetIndex(0);
+            $worksheet = $spreadsheet->getActiveSheet();
             $worksheet = $spreadsheet->getSheet(0);
-            $worksheet->setTitle('SMS SIBS');
+            $worksheet->setTitle('summary report');
             $fieldToCol = array();
-            // Title row
-            $row = 1;
-            $worksheet->setCellValue("A1", "NO");
-            $worksheet->getColumnDimension('A')->setAutoSize(true);
-            $worksheet->setCellValue("B1", "GROUP");
-            $worksheet->getColumnDimension('B')->setAutoSize(true);
-            $worksheet->setCellValue("C1", "ACC");
-            $worksheet->getColumnDimension('A')->setAutoSize(true);
-            $worksheet->setCellValue("D1", "PHONE");
-            $worksheet->getColumnDimension('A')->setAutoSize(true);
-            $worksheet->setCellValue("E1", "NAME");
-            $worksheet->getColumnDimension('A')->setAutoSize(true);
-            $worksheet->setCellValue("F1", "AMOUNT");
-            $worksheet->getColumnDimension('A')->setAutoSize(true);
-            $worksheet->setCellValue("G1", "SENDING DATE");
-            $worksheet->getColumnDimension('A')->setAutoSize(true);
-
-            $worksheet->getStyle("A1:G1")->getFill()
-            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
-            ->getStartColor()->setRGB('FFFF00');
-            $style = array('font' => array('bold' => true), 'alignment' => array('horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER));
-            $worksheet->getStyle("A1:G1")->applyFromArray($style);
-
-            $row = 2;
-            $match = array('type' => 'sibs');
-            for ($i=0; $i < $count; $i++) { 
-                $request    = array("take" => $limit, "skip" => $i*$limit);
-                $response = $this->crud->read($this->collection, $request,[],$match);
-                foreach ($response['data'] as &$value) {
-                    $worksheet->setCellValue("A".$row, $value['stt']);
-                    $worksheet->setCellValue("B".$row, $value['group']);
-                    $worksheet->setCellValueExplicit('C' . $row, $value['account_number'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-                    $worksheet->setCellValue("D".$row, $value['mobile_num']);
-                    $worksheet->setCellValue("E".$row, $value['cus_name']);
-                    $worksheet->setCellValue("F".$row, number_format($value['amount']));
-                    $worksheet->setCellValue("G".$row, $value['sending_date']);
-                    $row++;
-                }
+                // Title row
+              $coll ="A"; 
+            foreach($product as $col){
+                $worksheet->setCellValue("A1", "Collection Factors");
+                $worksheet->setCellValue("A2", "");
+                $worksheet->getColumnDimension('A')->setAutoSize(true);
             }
-            if (($total%$limit) > 0) {
-                $request    = array("take" => $limit, "skip" => $count*$limit);
-                $response = $this->crud->read($this->collection, $request,[],$match);
-                foreach ($response['data'] as &$value) {
-                    $worksheet->setCellValue("A".$row, $value['stt']);
-                    $worksheet->setCellValue("B".$row, $value['group']);
-                    $worksheet->setCellValueExplicit('C' . $row, $value['account_number'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-                    $worksheet->setCellValue("D".$row, $value['mobile_num']);
-                    $worksheet->setCellValue("E".$row, $value['cus_name']);
-                    $worksheet->setCellValue("F".$row, number_format($value['amount']));
-                    $worksheet->setCellValue("G".$row, $value['sending_date']);
-                    $row++;
-                }
-            }
-            
+                $row = 2;
+               
+                $worksheet->setCellValue("B2", "");
+                $worksheet->getColumnDimension('B')->setAutoSize(true);
+                $worksheet->setCellValue("C2", "Last month");
+                $worksheet->getColumnDimension('C')->setAutoSize(true);
+                $worksheet->setCellValue("D1", "Unit Thousand dong");
+                $worksheet->setCellValue("D2", "This month");
+                $worksheet->getColumnDimension('D')->setAutoSize(true);
+                $styleArray = array(
+                    
+                        
+                    'font'  => array(
+                        'bold'  => true,
+                        'color' => array('rgb' => 'ffffff'),
+                        'size'  => 13
+                       
+                    ));
+                $worksheet->getStyle("A2:D2")->getFill()
+                ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                ->getStartColor()->setRGB('008738');
+                
+                $style = array('font' => array('bold' => true,
+                                               'color' => array('rgb' => 'ffffff'),
+                                               'size'  => 13),
+                 'alignment' => array('horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                
+                
+                ));
 
-            //card
-            $worksheet_card = $spreadsheet->createSheet(1);
-            $worksheet_card->setTitle('SMS CARD');
-            $fieldToCol = array();
-            // Title row
-            $worksheet_card->setCellValue("A1", "NO");
-            $worksheet_card->getColumnDimension('A')->setAutoSize(true);
-            $worksheet_card->setCellValue("B1", "GROUP");
-            $worksheet_card->getColumnDimension('B')->setAutoSize(true);
-            $worksheet_card->setCellValue("C1", "ACCOUNT NUMBER");
-            $worksheet_card->getColumnDimension('C')->setAutoSize(true);
-            $worksheet_card->setCellValue("D1", "PHONE");
-            $worksheet_card->getColumnDimension('D')->setAutoSize(true);
-            $worksheet_card->setCellValue("E1", "NAME");
-            $worksheet_card->getColumnDimension('E')->setAutoSize(true);
-            $worksheet_card->setCellValue("F1", "OS");
-            $worksheet_card->getColumnDimension('F')->setAutoSize(true);
-            $worksheet_card->setCellValue("G1", "AMOUNT");
-            $worksheet_card->getColumnDimension('G')->setAutoSize(true);
-            $worksheet_card->setCellValue("H1", "SENDING DATE");
-            $worksheet_card->getColumnDimension('H')->setAutoSize(true);
+              
+                $worksheet->getStyle("A2:D2")->applyFromArray($style);
 
-            $worksheet_card->getStyle("A1:G1")->getFill()
-            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
-            ->getStartColor()->setRGB('FFFF00');
-            $style = array('font' => array('bold' => true), 'alignment' => array('horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER));
-            $worksheet_card->getStyle("A1:G1")->applyFromArray($style);
+                $worksheet->getStyle('C')->getNumberFormat()->setFormatCode("#,##0");
+                $worksheet->getStyle('D')->getNumberFormat()->setFormatCode("#,##0");
+                $worksheet->getStyle('A')->getFont()->setBold(true);
+          
+                $start_row = 3;
+                
+                foreach($data_total as $key => $value) {
+                    $detail_name = (isset($value['detail_name']))?$value['detail_name']:'';
+                    if($value['detail'] == 'amt') {
+                        $lastMonth = (isset($value['last_month']))?$value['last_month']/1000:'';
+                        $thisMonth = (isset($value['this_month']))?$value['this_month']/1000:'';
+                    }else{
+                        $lastMonth = (isset($value['last_month']))?$value['last_month']:'';
+                        $thisMonth = (isset($value['this_month']))?$value['this_month']:'';
+                    }
+                       
 
-            $row = 2;
-            $match = array('type' => 'card');
-            for ($i=0; $i < $count; $i++) { 
-                $request    = array("take" => $limit, "skip" => $i*$limit);
-                $response = $this->crud->read($this->collection, $request,[],$match);
-                foreach ($response['data'] as &$value) {
-                    $worksheet_card->setCellValue("A".$row, $value['stt']);
-                    $worksheet_card->setCellValue("B".$row, $value['group']);
-                    $worksheet_card->setCellValueExplicit('C' . $row, $value['account_number'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-                    $worksheet_card->setCellValue("D".$row, $value['mobile_num']);
-                    $worksheet_card->setCellValue("E".$row, $value['cus_name']);
-                    $worksheet_card->setCellValue("F".$row, $value['overdue_amt']);
-                    $worksheet_card->setCellValue("G".$row, $value['current_bal']);
-                    $worksheet_card->setCellValue("H".$row, $value['sending_date']);
-                    $row++;
+                    $worksheet->setCellValue('A' . $start_row, $detail_name);
+                    $worksheet->setCellValueExplicit('B' . $start_row, $value['product_name'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+                    $worksheet->setCellValueExplicit('C' . $start_row, $lastMonth, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
+                    $worksheet->setCellValueExplicit('D' . $start_row, $thisMonth, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
+                   
+                    
+                   
+                    
+                $start_row += 1;
                 }
-            }
-            if (($total%$limit) > 0) {
-                $request    = array("take" => $limit, "skip" => $count*$limit);
-                $response = $this->crud->read($this->collection, $request,[],$match);
-                foreach ($response['data'] as &$value) {
-                    $worksheet_card->setCellValue("A".$row,  $value['stt']);
-                    $worksheet_card->setCellValue("B".$row, $value['group']);
-                    $worksheet_card->setCellValueExplicit('C' . $row, $value['account_number'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-                    $worksheet_card->setCellValue("D".$row, $value['mobile_num']);
-                    $worksheet_card->setCellValue("E".$row, $value['cus_name']);
-                    $worksheet_card->setCellValue("F".$row, $value['os']);
-                    $worksheet_card->setCellValue("G".$row, $value['amount']);
-                    $worksheet_card->setCellValue("H".$row, $value['sending_date']);
-                    $row++;
-                }
-            }
-            
-            
+                $total_row=count($data_total)+2;
+                $worksheet->getStyle("A2:D$total_row")->getBorders()
+                ->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+
+
+           
+
+
             $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
             $file_path = UPLOAD_PATH . "loan/export/" . $filename;
             $writer->save($file_path);
@@ -245,20 +197,22 @@ Class List_of_all_customer_report extends WFF_Controller {
         } catch (Exception $e) {
             echo json_encode(array("status" => 0, "message" => $e->getMessage()));
         }
+
     }
 
     function downloadExcel()
     {
-        $date = getdate();
-        $day = $date['mday'];
-        $month = $date['mon'];
-        if ($date['mday'] < 10) {
-            $day = '0'.(string)$date['mday'];
-        }
-        if ($date['mon'] < 10) {
-            $month = '0'.(string)$date['mon'];
-        }
-        $file_path = UPLOAD_PATH . "loan/export/ListofallcustomerReport_". $day.$month.$date['year'] .".xlsx";
+        $dmonth =str_replace('/','',$_POST['month']);
+        // $date = getdate();
+        // $day = $date['mday'];
+        // $month = $date['mon'];
+        // if ($date['mday'] < 10) {
+        //     $day = '0'.(string)$date['mday'];
+        // }
+        // if ($date['mon'] < 10) {
+        //     $month = '0'.(string)$date['mon'];
+        // }
+        $file_path = UPLOAD_PATH . "loan/export/ListofallcustomerReport_". $dmonth .".xlsx";
         echo json_encode(array("status" => 1, "data" => $file_path));
     }
 }

@@ -32,10 +32,8 @@ log = open(base_url + "cronjob/python/Loan/log/calDueDateValue.txt","a")
 now = datetime.now()
 subUserType = 'LO'
 collection           = common.getSubUser(subUserType, 'Due_date_next_date_by_group')
-# lnjc05_collection    = common.getSubUser(subUserType, 'LNJC05')
-zaccf_collection     = common.getSubUser(subUserType, 'ZACCF_13032020')
-sbv_collection       = common.getSubUser(subUserType, 'SBV_13032020')
-# account_collection   = common.getSubUser(subUserType, 'List_of_account_in_collection')
+zaccf_collection     = common.getSubUser(subUserType, 'ZACCF_report')
+sbv_collection       = common.getSubUser(subUserType, 'SBV')
 diallist_collection  = common.getSubUser(subUserType, 'Diallist_detail')
 group_collection     = common.getSubUser(subUserType, 'Group')
 report_due_date_collection     = common.getSubUser(subUserType, 'Report_due_date')
@@ -48,7 +46,7 @@ try:
     listDebtGroup = []
 
     today = date.today()
-    today = datetime.strptime('13/03/2020', "%d/%m/%Y").date()
+    # today = datetime.strptime('13/03/2020', "%d/%m/%Y").date()
 
     day = today.day
     month = today.month
@@ -91,7 +89,7 @@ try:
     listGroupProduct = listGroupProductRaw['data']
 
     for debtGroupCell in list(listDebtGroup):
-        if debtGroupCell[0:1] is not 'F':
+        if debtGroupCell[0:1] == 'A':
             dueDayOfMonth = mongodb.getOne(MONGO_COLLECTION=report_due_date_collection, WHERE={'due_date_add_1': todayTimeStamp, 'debt_group': debtGroupCell[1:3]})
             if dueDayOfMonth != None:
                 for groupProduct in list(listGroupProduct):
@@ -176,8 +174,8 @@ try:
                                 for diallist in diallistDetail:
                                     temp['debt_acc_no']           = diallist['total_acc']
                                     temp['current_balance_total'] = diallist['total_amt']
-                                    temp['debt_acc_301']          = diallist['total_acc']
-                                    temp['current_balance_301']   = diallist['total_amt']
+                                    # temp['debt_acc_301']          = diallist['total_acc']
+                                    # temp['current_balance_301']   = diallist['total_amt']
                                     temp['acc_arr']               = diallist['acc_arr']
 
                             aggregate_sbv = [
@@ -196,9 +194,186 @@ try:
                                 }
                             ]
                             sbvInfo = mongodb.aggregate_pipeline(MONGO_COLLECTION=sbv_collection,aggregate_pipeline=aggregate_sbv)
-                            if sbvInfo is not None:
+                            if sbvInfo != None:
                                 for sbv in sbvInfo:
-                                    temp['ob_principal_total'] = float(sbv['sale_total']) + float(sbv['cash_total'])
+                                    temp['ob_principal_total'] = sbv['sale_total'] + sbv['cash_total']
+
+
+                            aggregate_diallist = [
+                                {
+                                    "$match":
+                                    {
+                                        "createdAt": {'$gte': todayTimeStamp, '$lte' : endTodayTimeStamp},
+                                        "assign": {'$in' : assign},
+                                        "group_id": debtGroupCell[0:1]+'-'+debtGroupCell[1:3]
+                                    }
+                                },{
+                                       "$lookup":
+                                       {
+                                           "from": sbv_collection,
+                                           "localField": "account_number",
+                                           "foreignField": "contract_no",
+                                           "as": "detail"
+                                       }
+                                }
+                            ]
+                            diallistDetail = mongodb.aggregate_pipeline(MONGO_COLLECTION=diallist_collection,aggregate_pipeline=aggregate_diallist)
+                            if diallistDetail is not None:
+                                for diallist in diallistDetail:
+                                    card_type = 0
+                                    for sbv in diallist['detail']:
+                                        card_type = int(sbv['card_type'])
+                                    if card_type > 1 and card_type <= 99:                                    
+                                        temp['debt_acc_301']          += 1
+                                        temp['current_balance_301']   += diallist['cur_bal']
+                                    else:
+                                        temp['debt_acc_302']          += 1
+                                        temp['current_balance_302']   += diallist['cur_bal']
+
+                        temp['created_at'] = time.time()
+                        temp['created_by'] = 'system'
+                        # pprint(temp)
+                        # break
+                        mongodb.insert(MONGO_COLLECTION=collection, insert_data=temp)
+
+
+        if debtGroupCell[0:1] is not 'A' and debtGroupCell[0:1] is not 'F':
+            dueDayOfMonth = mongodb.getOne(MONGO_COLLECTION=report_due_date_collection, WHERE={'due_date_add_1': todayTimeStamp, 'debt_group': debtGroupCell[1:3]})
+            if dueDayOfMonth != None:
+                for groupProduct in list(listGroupProduct):
+                    groupInfoByDueDate = mongodb.get(MONGO_COLLECTION=group_collection, WHERE={'name': {"$regex": groupProduct['text'] + '/Group ' + debtGroupCell[0:1] + '/' + debtGroupCell} })
+                    for groupCell in list(groupInfoByDueDate):
+                        
+                        if debtGroupCell[1:3] == '03':
+                            if month == 1:
+                                lastmonth = 12
+                            else:
+                                lastmonth = month - 1
+                        else:
+                            lastmonth = month
+
+
+                        members = groupCell['members']
+                        name = groupCell['name']
+
+                        temp = {
+                            'due_date'              : todayTimeStamp - 86400,
+                            'due_date_one'          : todayTimeStamp,
+                            'product'               : groupProduct['value'],
+                            'debt_group'            : debtGroupCell[0:1],
+                            'due_date_code'         : debtGroupCell[1:3],
+                            'team_id'               : str(groupCell['_id']),
+                            'team_name'             : name,
+                            'for_month'             : str(lastmonth),
+                            'debt_acc_no'           : 0,
+                            'current_balance_total' : 0,
+                            'ob_principal_total'    : 0,
+                            'acc_arr'               : []
+                        }
+
+                        for key, value in mainProduct.items():
+                            temp['debt_acc_' + key] = 0
+                            temp['current_balance_' + key] = 0
+
+                        if groupProduct['value'] == 'SIBS':
+                            lead = [groupCell['lead']] if 'lead' in groupCell.keys() else []
+                            member = (s for s in members)
+                            officerIdRaw = list(lead) + list(member)
+                            officerId = list(dict.fromkeys(officerIdRaw))
+                            diallistDetail = list(mongodb.get(MONGO_COLLECTION=diallist_collection, WHERE={'group_id': debtGroupCell, 'assign': {'$in': officerId}, "createdAt": {'$gte': todayTimeStamp, '$lte' : endTodayTimeStamp} }))
+                            for diallist in diallistDetail:
+                                zaccfInfo = mongodb.getOne(MONGO_COLLECTION=zaccf_collection, WHERE={'account_number': diallist['account_number']})
+                                temp['debt_acc_no']            += 1
+                                temp['current_balance_total']  += float(diallist['current_balance'])
+                                temp['ob_principal_total']     += float(diallist['outstanding_principal'])
+                                temp['acc_arr'].append(diallist['account_number'])
+                                if zaccfInfo is not None:
+                                    temp['debt_acc_' + zaccfInfo['PRODGRP_ID']]        += 1
+                                    temp['current_balance_' + zaccfInfo['PRODGRP_ID']] += float(diallist['current_balance'])
+
+                        if groupProduct['value'] == 'Card':
+                            lead = [groupCell['lead']] if 'lead' in groupCell.keys() else []
+                            member = ( s for s in members)
+                            officerIdRaw = list(lead) + list(member)
+                            assign = list(dict.fromkeys(list(officerIdRaw)))
+                            aggregate_diallist = [
+                                {
+                                    "$match":
+                                    {
+                                        "createdAt": {'$gte': todayTimeStamp, '$lte' : endTodayTimeStamp},
+                                        "assign": {'$in' : assign},
+                                        "group_id": debtGroupCell[0:1]+'-'+debtGroupCell[1:3]
+                                    }
+                                },{
+                                    "$group":
+                                    {
+                                        "_id": 'null',
+                                        "total_amt": {'$sum': '$cur_bal'},
+                                        "total_acc": {'$sum': 1},
+                                        "acc_arr": {'$push' : '$account_number'}
+                                    }
+                                }
+                            ]
+                            diallistDetail = mongodb.aggregate_pipeline(MONGO_COLLECTION=diallist_collection,aggregate_pipeline=aggregate_diallist)
+                            if diallistDetail is not None:
+                                for diallist in diallistDetail:
+                                    temp['debt_acc_no']           = diallist['total_acc']
+                                    temp['current_balance_total'] = diallist['total_amt']
+                                    # temp['debt_acc_301']          = diallist['total_acc']
+                                    # temp['current_balance_301']   = diallist['total_amt']
+                                    temp['acc_arr']               = diallist['acc_arr']
+
+                            aggregate_sbv = [
+                                {
+                                    "$match":
+                                    {
+                                        "contract_no": {'$in' : temp['acc_arr']}
+                                    }
+                                },{
+                                    "$group":
+                                    {
+                                        "_id": 'null',
+                                        "sale_total": {'$sum': '$ob_principal_sale'},
+                                        "cash_total": {'$sum': '$ob_principal_cash'},
+                                    }
+                                }
+                            ]
+                            sbvInfo = mongodb.aggregate_pipeline(MONGO_COLLECTION=sbv_collection,aggregate_pipeline=aggregate_sbv)
+                            if sbvInfo != None:
+                                for sbv in sbvInfo:
+                                    temp['ob_principal_total'] = sbv['sale_total'] + sbv['cash_total']
+
+
+                            aggregate_diallist = [
+                                {
+                                    "$match":
+                                    {
+                                        "createdAt": {'$gte': todayTimeStamp, '$lte' : endTodayTimeStamp},
+                                        "assign": {'$in' : assign},
+                                        "group_id": debtGroupCell[0:1]+'-'+debtGroupCell[1:3]
+                                    }
+                                },{
+                                       "$lookup":
+                                       {
+                                           "from": sbv_collection,
+                                           "localField": "account_number",
+                                           "foreignField": "contract_no",
+                                           "as": "detail"
+                                       }
+                                }
+                            ]
+                            diallistDetail = mongodb.aggregate_pipeline(MONGO_COLLECTION=diallist_collection,aggregate_pipeline=aggregate_diallist)
+                            if diallistDetail is not None:
+                                for diallist in diallistDetail:
+                                    card_type = 0
+                                    for sbv in diallist['detail']:
+                                        card_type = int(sbv['card_type'])
+                                    if card_type > 1 and card_type <= 99:                                    
+                                        temp['debt_acc_301']          += 1
+                                        temp['current_balance_301']   += diallist['cur_bal']
+                                    else:
+                                        temp['debt_acc_302']          += 1
+                                        temp['current_balance_302']   += diallist['cur_bal']
 
                         temp['created_at'] = time.time()
                         temp['created_by'] = 'system'

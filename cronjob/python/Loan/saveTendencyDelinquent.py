@@ -29,23 +29,23 @@ base_url = common.base_url()
 wff_env = common.wff_env(base_url)
 mongodb = Mongodb(MONGODB="worldfone4xs", WFF_ENV=wff_env)
 _mongodb = Mongodb(MONGODB="_worldfone4xs", WFF_ENV=wff_env)
-log = open(base_url + "cronjob/python/Loan/log/importSBV.txt","a")
+# log = open(base_url + "cronjob/python/Loan/log/importSBV.txt","a")
 now = datetime.now()
 subUserType = 'LO'
 collection = common.getSubUser(subUserType, 'Tendency_delinquent')
-lnjc05_today = 'LNJC05_31012020'
-list_of_acc_today = 'List_of_account_in_collection_31012020'
-lnjc05_yesterday = 'LNJC05_yesterday_30012020'
-list_of_acc_yesterday = 'List_of_account_in_collection_yesterday_30012020'
-zaccf_col = 'ZACCF_31012020'
-sbv_col = 'SBV_31012020'
+lnjc05_today = 'LNJC05'
+list_of_acc_today = 'List_of_account_in_collection'
+lnjc05_yesterday = 'LNJC05_yesterday'
+list_of_acc_yesterday = 'List_of_account_in_collection_yesterday'
+zaccf_col = 'ZACCF_report'
+sbv_col = 'SBV'
 diallist_detail = 'Diallist_detail'
 sbv_store = 'SBV_Stored'
-SBV_Stored_yesterday = 'SBV_Stored_yesterday'
+SBV_Stored_yesterday = 'SBV_Stored_Old'
 
 try:
-    # today = date.today()
-    today = datetime.strptime('31/01/2020', "%d/%m/%Y").date()
+    today = date.today()
+    # today = datetime.strptime('23/03/2020', "%d/%m/%Y").date()
     yesterday = today - timedelta(days=1)
     day = today.day
     month = today.month
@@ -136,44 +136,24 @@ try:
         temp_sibs_last_month = {}
         temp_card_last_month = {}
 
-        if 'is_due_date' in report_day.keys():
+        if (report_day['due_date'] + 864000) == todayTimeStamp:
             # Update thong tin 10 ngay sau due date
             temp_sibs_10_days = {}
             temp_card_10_days = {}
             lnjc05_aggregate = [{
-                '$project'              : {
-                    'group_2_tran_no'   : {
-                        '$subtract'     : [todayTimeStamp, '$due_date']
-                    },
-                    'account_number'    : 1,
-                    'group_id'          : 1
-                }
-            },
-            {
-                '$match'                : {
-                    'group_2_tran_no'   : 864000,
+                '$match'         : {
+                    'group_id'   : 'A' + report_day['debt_group'],
                 }
             }]
             lnjc05_info = list(mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, lnjc05_today), aggregate_pipeline=lnjc05_aggregate))
             temp_sibs_10_days['group_2_tran_no'] = len(lnjc05_info)
-            mongodb.update(MONGO_COLLECTION=collection, WHERE={'for_month': str(month), 'for_year': str(year), 'debt_group': 'A' + report_day['debt_group'], 'prod_name': 'Bike/PL'}, VALUE=temp_sibs_10_days)
+            mongodb.update(MONGO_COLLECTION=collection, WHERE={'for_month': str(report_day['for_month']), 'for_year': str(report_day['for_year']), 'debt_group': 'A' + report_day['debt_group'], 'prod_name': 'Bike/PL'}, VALUE=temp_sibs_10_days)
 
-            list_acc_aggregate = [{
-                '$project'              : {
-                    'group_2_tran_no'   : {
-                        '$subtract'     : [todayTimeStamp, '$overdue_date']
-                    },
-                    'account_number'    : 1
-                }
-            }, 
-            {
-                '$match'                : {
-                    'group_2_tran_no'   : 864000,
-                }
-            }]
-            list_acc_info = list(mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, list_of_acc_today), aggregate_pipeline=list_acc_aggregate))
-            temp_card_10_days['group_2_tran_no'] = len(list_acc_info)
-            mongodb.update(MONGO_COLLECTION=collection, WHERE={'for_month': str(month), 'for_year': str(year), 'debt_group': 'A' + report_day['debt_group'], 'prod_name': 'Card'}, VALUE=temp_card_10_days)
+            list_acc_info_temp = list(mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, list_of_acc_today), SELECT=['account_number']))
+            list_acc_info = list(common.array_column(list_acc_info_temp, 'account_number'))
+            check_with_store = list(mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, sbv_store), WHERE={'contract_no': {'$in': list_acc_info}, 'overdue_indicator': 'A', 'kydue': report_day['debt_group']}))
+            temp_card_10_days['group_2_tran_no'] = len(check_with_store)
+            mongodb.update(MONGO_COLLECTION=collection, WHERE={'for_month': str(report_day['for_month']), 'for_year': str(report_day['for_year']), 'debt_group': 'A' + report_day['debt_group'], 'prod_name': 'Card'}, VALUE=temp_card_10_days)
         else:
             if report_day['due_date'] == todayTimeStamp:
                 zaccf_aggregate = [{
@@ -185,58 +165,44 @@ try:
                 temp_sibs['request_no'] = len(zaccf_info)
 
                 sbv_aggregate = [{
-                    '$match'                : {
-                        'statement_date'    : datetime.fromtimestamp(report_day['due_date'] - 1728000).strftime('%d%m%Y')
+                    '$match'                    : {
+                        'statement_date'        : datetime.fromtimestamp(report_day['due_date'] - 1728000).strftime('%d%m%Y'),
+                        'minimum_payable_amt'   : {'$ne': 0}
                     }
                 }]
                 sbv_info = list(mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, sbv_col), aggregate_pipeline=sbv_aggregate))
                 temp_card['request_no'] = len(sbv_info)
             
-            lnjc05_aggregate = [{
-                '$match'                : {
-                    # 'due_date'          : report_day['due_date'],
-                    'group_id'          : 'A' + report_day['debt_group']
-                }
-            }]
-            lnjc05_info = list(mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, lnjc05_today), aggregate_pipeline=lnjc05_aggregate))
-            temp_sibs['no_delays'] = len(lnjc05_info)
+            if report_day['due_date_add_1'] == todayTimeStamp:
+                lnjc05_aggregate = [{
+                    '$match'                : {
+                        # 'due_date'          : report_day['due_date'],
+                        'group_id'          : 'A' + report_day['debt_group']
+                    }
+                }]
+                lnjc05_info = list(mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, lnjc05_today), aggregate_pipeline=lnjc05_aggregate))
+                temp_sibs['no_delays'] = len(lnjc05_info)
 
-            # list_acc_aggregate = [{
-            #     '$match'                : {
-            #         'overdue_date'      : report_day['due_date'],
-            #     }
-            # }]
-            # list_acc_info = list(mongodb.aggregate_pipeline(MONGO_COLLECTION=common.getSubUser(subUserType, list_of_acc_today), aggregate_pipeline=list_acc_aggregate))
-            list_acc_info_temp = list(mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, list_of_acc_today), SELECT=['account_number']))
-            accs = list(common.array_column(list_acc_info_temp, 'account_number'))
-            list_acc_info = list(mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, list_of_acc_today), WHERE={'contract_no': {'$in': accs}, 'overdue_indicator': 'A', 'kydue': report_day['debt_group']}))
-            temp_card['no_delays'] = len(list_acc_info)
+                list_acc_info_temp = list(mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, list_of_acc_today), SELECT=['account_number']))
+                accs = list(common.array_column(list_acc_info_temp, 'account_number'))
+                list_acc_info = list(mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, sbv_store), WHERE={'contract_no': {'$in': accs}, 'overdue_indicator': 'A', 'kydue': report_day['debt_group']}))
+                len(list_acc_info)
+                temp_card['no_delays'] = len(list_acc_info)
 
             # Update thong tin cho thang truoc
             lastMonthDueDate = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Tendency_delinquent'), WHERE={'for_month': str(lastMonthMonth), 'for_year': str(lastMonthYear), 'debt_group': 'A' + report_day['debt_group'], 'prod_name': 'Bike/PL'})
             
             if lastMonthDueDate != None:
-                list_acc_due_date_sibs = list(mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, lnjc05_yesterday), WHERE={'due_date': lastMonthDueDate['due_date']}, SELECT=['account_number', 'group_id']))
-                # list_acc_due_date_sibs = list(common.array_column(list_dict=list_acc_due_date_sibs_temp, value='account_number'))
-                count_group_b_trans_sibs = 0
-                for acc in list_acc_due_date_sibs:
-                    checkAccExistedSibs = list(mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, lnjc05_today), WHERE={'account_number': acc['account_number'], 'group_id': 'B' + report_day['debt_group']}, SELECT=['account_number']))
-                    if len(checkAccExistedSibs) > 0:
-                        count_group_b_trans_sibs += 1
+                list_acc_due_date_sibs_temp = list(mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, lnjc05_yesterday), WHERE={'group_id': 'A' + report_day['debt_group']}, SELECT=['account_number', 'group_id']))
+                list_acc_due_date_sibs = list(common.array_column(list_dict=list_acc_due_date_sibs_temp, value='account_number'))
+                checkAccExistedSibs = list(mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, lnjc05_today), WHERE={'account_number': {'$in': list_acc_due_date_sibs}, 'group_id': 'B' + report_day['debt_group']}, SELECT=['account_number']))
+                temp_sibs_last_month['group_b_trans_no'] = len(checkAccExistedSibs)
 
-                temp_sibs_last_month['group_b_trans_no'] = count_group_b_trans_sibs
+                list_acc_due_date_card_sbv_stored = list(mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, SBV_Stored_yesterday), WHERE={'overdue_indicator': 'A', 'kydue': report_day['debt_group']}, SELECT=['contract_no']))
+                list_acc_due_date_card_sbv_stored_contract_no = list(common.array_column(list_acc_due_date_card_sbv_stored, 'contract_no'))
+                checkAccExistedCard = list(mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, sbv_store), WHERE={'contract_no': {'$in': list_acc_due_date_card_sbv_stored_contract_no}, 'overdue_indicator': 'B', 'kydue': report_day['debt_group']}))
+                temp_card_last_month['group_b_trans_no'] = len(checkAccExistedCard)
 
-                list_acc_due_date_card_temp = list(mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, list_of_acc_yesterday), SELECT=['account_number']))
-                list_acc_due_date_card = list(common.array_column(list_acc_due_date_card_temp, 'account_number'))
-                list_acc_due_date_card_sbv_stored = list(common.get(MONGO_COLLECTION=SBV_Stored_yesterday, WHERE={'contract_no': {'$in': list_acc_due_date_card}}))
-                count_group_b_trans_card = 0
-                for acc in list_acc_due_date_card_sbv_stored:
-                    checkAccExistedCard = list(mongodb.get(MONGO_COLLECTION=sbv_store, WHERE={'contract_no': acc['account_number'], 'overdue_indicator': 'B', 'kydue': report_day['debt_group']}))
-                    len(checkAccExistedCard)
-                    if len(checkAccExistedCard) > 0:   
-                        count_group_b_trans_card += 1
-
-                temp_card_last_month['group_b_trans_no'] = count_group_b_trans_card
                 if temp_sibs_last_month != {}:
                     mongodb.update(MONGO_COLLECTION=collection, WHERE={'for_month': str(lastMonthMonth), 'for_year': str(lastMonthYear), 'debt_group': 'A' + report_day['debt_group'], 'prod_name': 'Bike/PL'}, VALUE=temp_sibs_last_month)
             
@@ -247,8 +213,7 @@ try:
         temp_card['created_at'] = todayTimeStamp
         mongodb.update(MONGO_COLLECTION=collection, WHERE={'for_month': str(month), 'for_year': str(year), 'debt_group': 'A' + report_day['debt_group'], 'prod_name': 'Bike/PL'}, VALUE=temp_sibs)
         mongodb.update(MONGO_COLLECTION=collection, WHERE={'for_month': str(month), 'for_year': str(year), 'debt_group': 'A' + report_day['debt_group'], 'prod_name': 'Card'}, VALUE=temp_card)
-        # mongodb.insert(MONGO_COLLECTION=collection, insert_data=temp_sibs)
-        # mongodb.insert(MONGO_COLLECTION=collection, insert_data=temp_card)
+
         pprint(todayString)
         pprint("DONE")
     

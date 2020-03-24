@@ -291,6 +291,7 @@ try:
                F_PDT = str(row['F_PDT'])
                F_PDT = F_PDT[0:2]+'-'+F_PDT[2:4]+'-'+F_PDT[4:8]
 
+               temp['F_PDT']          = F_PDT
 
                if lnjc05Info != None and lnjc05Info['account_number'] not in account_sibs_for_month:
                   temp['Group']        = lnjc05Info['group_id']
@@ -873,6 +874,8 @@ try:
                F_PDT = str(row['F_PDT'])
                F_PDT = F_PDT[0:2]+'-'+F_PDT[2:4]+'-'+F_PDT[4:8]
 
+               temp['F_PDT']          = F_PDT
+
 
                if lnjc05Info != None and lnjc05Info['account_number'] not in account_sibs_for_month:
                   temp['Group']        = lnjc05Info['group_id']
@@ -881,7 +884,6 @@ try:
 
                   due_date = datetime.fromtimestamp(lnjc05Info['due_date'])
                   d1       = due_date.strftime(FMT)
-                  # d2       = F_PDT.strftime(FMT)
                   tdelta   = datetime.strptime(d1, FMT) - datetime.strptime(F_PDT, FMT)
                   kq       = tdelta.days /30
                   temp['Actual_payment']  = round(kq,0)
