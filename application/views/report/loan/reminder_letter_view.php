@@ -5,7 +5,7 @@
         <li>Reminder Letter Report</li>
         <li class="pull-right none-breakcrumb" id="top-row">
             <div class="btn-group btn-group-sm">
-                <a role="button" class="btn btn-sm" onclick="Table.grid.saveAsExcel()"><i class="fa fa-file-excel-o"></i> <b>@Export@</b></a>
+                <a role="button" class="btn btn-sm" onclick="saveAsExcel()"><i class="fa fa-file-excel-o"></i> <b>@Export@</b></a>
             </div>
         </li>
     </ul>
@@ -355,9 +355,10 @@
     <script>
         function saveAsExcel() {
             $.ajax({
-              url: Config.crudApi + 'loan/' + Config.collection+ "/exportExcel",
+              url: Config.crudApi + 'loan/' + Config.collection+ "/downloadExcel",
               type: 'POST',
               dataType: 'json',
+              data: {date: $('#start-date').val()},
               timeout: 30000
             })
             .done(function(response) {

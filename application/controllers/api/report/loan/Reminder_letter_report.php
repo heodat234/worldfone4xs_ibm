@@ -39,5 +39,20 @@ Class Reminder_letter_report extends WFF_Controller {
     function stringFromColumnIndex($columnIndex) {
         return $this->excel->stringFromColumnIndex($columnIndex);
     }
-
+    
+    function downloadExcel()
+    {
+        $date = $this->input->post('date');
+        $date = getdate(strtotime(str_replace('/', '-', $date)));
+        $day = $date['mday'];
+        $month = $date['mon'];
+        if ($date['mday'] < 10) {
+            $day = '0'.(string)$date['mday'];
+        }
+        if ($date['mon'] < 10) {
+            $month = '0'.(string)$date['mon'];
+        }
+        $file_path = UPLOAD_PATH . "loan/export/Reminder Letter Report_". $day.$month.$date['year'] .".xlsx";
+        echo json_encode(array("status" => 1, "data" => $file_path));
+    }
 }

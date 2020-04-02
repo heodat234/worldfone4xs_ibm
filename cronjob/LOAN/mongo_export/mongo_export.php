@@ -11,6 +11,6 @@ $limit = 100000;
 $command = "mongoexport --username {$username} --password {$password} --authenticationDatabase admin --db $db --collection $collection --sort='{_id:-1}' --limit=$limit --out=$path_export";
 $result = exec($command);
 echo $result;
-//mongoimport --db worldfone4xs --collection LO_worldfonepbxmanager --mode=upsert --file=/var/www/html/worldfone4xs_ibm/application/database/worldfone4xs/LO_worldfonepbxmanager.json
+//mongoimport --db worldfone4xs --collection LO_Diallist_detail --mode=upsert --file=/var/www/html/worldfone4xs_ibm/cronjob/LOAN/mongo_export/LO_Diallist_detail.json
 
  ?>

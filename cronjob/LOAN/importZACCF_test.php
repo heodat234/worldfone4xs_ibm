@@ -5,7 +5,7 @@ $queue = new Pheanstalk('127.0.0.1');
 
 //$inputFileName = "../../upload/ftp/telesales/ZACCF.csv";
 // $folder = date("Ymd"); //"20191120";
-$folder = '20200224'; //"20191120";
+$folder = '20200328'; //"20191120";
 $inputFileName = "/data/upload_file/{$folder}/ZACCF.txt";
 // echo $inputFileName;
 // exit();
@@ -40,7 +40,7 @@ $endColumn = 9;
 
 $file = fopen($inputFileName,"r");
 
-$collection = "LO_ZACCF_24022020";
+$collection = "LO_ZACCF_01022020";
 
 $key_field = "account_number";
 $key_field_2 = "CUS_ID";
@@ -68,7 +68,7 @@ $count = 0;
 // Log import
 
 $import_data = array(
-    "collection"        => $collection, 
+    "collection"        => $collection,
     "begin_import"      => $starttime,
     "complete_import"   => 0,
     "file_name"         => basename($inputFileName),
@@ -86,7 +86,7 @@ if(empty($import_log["id"])) exit();
 // Create collection and index
 $list = $mongo_db->command(["listCollections"=>1, "authorizedCollections"=> true, "nameOnly"=>true]);
 $exists_collections = array_column($list, "name");
-if(!in_array($collection, $exists_collections)) 
+if(!in_array($collection, $exists_collections))
 {
     $mongo_db->command(["create"=>$collection], FALSE);
     $index_result = $mongo_db->add_index($collection, [$key_field => -1, $key_field_2 => -1]);
@@ -101,11 +101,11 @@ while(!feof($file))
     if(!empty($temp)) {
 
         // Condition data
-    	$editedValue = array_slice($temp, $startColumn, $endColumn + 1 - $startColumn);
+        $editedValue = array_slice($temp, $startColumn, $endColumn + 1 - $startColumn);
         //if(empty($editedValue[$endColumn-1-$startColumn])) continue;
         //if(!strpos($editedValue[$endColumn -1-$startColumn], "/")) continue;
         if(empty($editedValue[5])) continue;
-        
+
         $doc = [];
         if($header) {
             foreach ($header as $index => $field) {
@@ -116,22 +116,20 @@ while(!feof($file))
                     if (strlen($editedValue[$index]) == 7 ) {
                         $editedValue[$index] = '0'.$editedValue[$index]; 
                     }
-                    $date = substr($editedValue[$index], 0,2).'-'.substr($editedValue[$index], 2,2).'-'.substr($editedValue[$index], 4,8);
-                    $doc['FRELD8_BJ'] = strtotime($date);
+                    if (strlen($editedValue[$index]) == 8 ) {
+                        $date = substr($editedValue[$index], 0,2).'-'.substr($editedValue[$index], 2,2).'-'.substr($editedValue[$index], 4,8);
+                        $doc['FRELD8_BJ'] = strtotime($date);
+                    }
                 }
-                $doc[$field] = isset($editedValue[$index]) ? $editedValue[$index] : null;
-                
-                
+                $doc[$field] = isset($editedValue[$index]) ? mb_convert_encoding($editedValue[$index], 'ISO-8859-1', 'UTF-8') : null;
             }
         }
-
-        $doc['created_at'] = strtotime($folder . ' 00:00:00');
 
         $queueData = array(
             "startTimestamp"    => time(),
             "doc"               => $doc,
             "collection"        => $collection,
-            // "key_field"         => $key_field,
+            "key_field"         => $key_field,
             "key_field_2"       => $key_field_2,
             "import_id"         => $import_log["id"]
         );

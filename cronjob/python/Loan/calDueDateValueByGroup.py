@@ -39,6 +39,8 @@ group_collection     = common.getSubUser(subUserType, 'Group')
 report_due_date_collection     = common.getSubUser(subUserType, 'Report_due_date')
 jsonData_collection  = common.getSubUser(subUserType, 'Jsondata')
 product_collection   = common.getSubUser(subUserType, 'Product')
+cus_assigned_partner_collection   = common.getSubUser(subUserType, 'Cus_assigned_partner')
+lnjc05_collection       = common.getSubUser(subUserType, 'LNJC05')
 
 try:
     insertData = []
@@ -46,7 +48,7 @@ try:
     listDebtGroup = []
 
     today = date.today()
-    # today = datetime.strptime('13/03/2020', "%d/%m/%Y").date()
+    # today = datetime.strptime('24/03/2020', "%d/%m/%Y").date()
 
     day = today.day
     month = today.month
@@ -133,20 +135,23 @@ try:
                             temp['current_balance_' + key] = 0
 
                         if groupProduct['value'] == 'SIBS':
-                            lead = [groupCell['lead']] if 'lead' in groupCell.keys() else []
-                            member = (s for s in members)
+                            lead = ['JIVF00' + groupCell['lead']] if 'lead' in groupCell.keys() else []
+                            member = ('JIVF00' + s for s in members)
                             officerIdRaw = list(lead) + list(member)
                             officerId = list(dict.fromkeys(officerIdRaw))
-                            diallistDetail = list(mongodb.get(MONGO_COLLECTION=diallist_collection, WHERE={'group_id': debtGroupCell, 'assign': {'$in': officerId}, "createdAt": {'$gte': todayTimeStamp, '$lte' : endTodayTimeStamp} }))
-                            for diallist in diallistDetail:
-                                zaccfInfo = mongodb.getOne(MONGO_COLLECTION=zaccf_collection, WHERE={'account_number': diallist['account_number']})
-                                temp['debt_acc_no']            += 1
-                                temp['current_balance_total']  += float(diallist['current_balance'])
-                                temp['ob_principal_total']     += float(diallist['outstanding_principal'])
-                                temp['acc_arr'].append(diallist['account_number'])
-                                if zaccfInfo is not None:
-                                    temp['debt_acc_' + zaccfInfo['PRODGRP_ID']]        += 1
-                                    temp['current_balance_' + zaccfInfo['PRODGRP_ID']] += float(diallist['current_balance'])
+                            lnjc05Detail = list(mongodb.get(MONGO_COLLECTION=lnjc05_collection, WHERE={'group_id': debtGroupCell, 'officer_id': {'$in': officerId}, "created_at": {'$gte': todayTimeStamp, '$lte' : endTodayTimeStamp} }))
+                            for lnjc05 in lnjc05Detail:
+                                partnerInfo = mongodb.getOne(MONGO_COLLECTION=cus_assigned_partner_collection, WHERE={'CONTRACTNR': lnjc05['account_number']})
+                                if partnerInfo == None:
+                                    zaccfInfo = mongodb.getOne(MONGO_COLLECTION=zaccf_collection, WHERE={'account_number': lnjc05['account_number']})
+                                    temp['debt_acc_no']            += 1
+                                    temp['current_balance_total']  += float(lnjc05['current_balance'])
+                                    temp['ob_principal_total']     += float(lnjc05['outstanding_principal'])
+                                    temp['acc_arr'].append(lnjc05['account_number'])
+                                    if zaccfInfo is not None:
+                                        temp['debt_acc_' + zaccfInfo['PRODGRP_ID']]        += 1
+                                        temp['current_balance_' + zaccfInfo['PRODGRP_ID']] += float(lnjc05['current_balance'])
+
 
                         if groupProduct['value'] == 'Card':
                             member = ( s for s in members)
@@ -276,20 +281,22 @@ try:
                             temp['current_balance_' + key] = 0
 
                         if groupProduct['value'] == 'SIBS':
-                            lead = [groupCell['lead']] if 'lead' in groupCell.keys() else []
-                            member = (s for s in members)
+                            lead = ['JIVF00' + groupCell['lead']] if 'lead' in groupCell.keys() else []
+                            member = ('JIVF00' + s for s in members)
                             officerIdRaw = list(lead) + list(member)
                             officerId = list(dict.fromkeys(officerIdRaw))
-                            diallistDetail = list(mongodb.get(MONGO_COLLECTION=diallist_collection, WHERE={'group_id': debtGroupCell, 'assign': {'$in': officerId}, "createdAt": {'$gte': todayTimeStamp, '$lte' : endTodayTimeStamp} }))
-                            for diallist in diallistDetail:
-                                zaccfInfo = mongodb.getOne(MONGO_COLLECTION=zaccf_collection, WHERE={'account_number': diallist['account_number']})
-                                temp['debt_acc_no']            += 1
-                                temp['current_balance_total']  += float(diallist['current_balance'])
-                                temp['ob_principal_total']     += float(diallist['outstanding_principal'])
-                                temp['acc_arr'].append(diallist['account_number'])
-                                if zaccfInfo is not None:
-                                    temp['debt_acc_' + zaccfInfo['PRODGRP_ID']]        += 1
-                                    temp['current_balance_' + zaccfInfo['PRODGRP_ID']] += float(diallist['current_balance'])
+                            lnjc05Detail = list(mongodb.get(MONGO_COLLECTION=lnjc05_collection, WHERE={'group_id': debtGroupCell, "created_at": {'$gte': todayTimeStamp, '$lte' : endTodayTimeStamp} }))
+                            for lnjc05 in lnjc05Detail:
+                                partnerInfo = mongodb.getOne(MONGO_COLLECTION=cus_assigned_partner_collection, WHERE={'CONTRACTNR': lnjc05['account_number']})
+                                if partnerInfo == None:
+                                    zaccfInfo = mongodb.getOne(MONGO_COLLECTION=zaccf_collection, WHERE={'account_number': lnjc05['account_number']})
+                                    temp['debt_acc_no']            += 1
+                                    temp['current_balance_total']  += float(lnjc05['current_balance'])
+                                    temp['ob_principal_total']     += float(lnjc05['outstanding_principal'])
+                                    temp['acc_arr'].append(lnjc05['account_number'])
+                                    if zaccfInfo is not None:
+                                        temp['debt_acc_' + zaccfInfo['PRODGRP_ID']]        += 1
+                                        temp['current_balance_' + zaccfInfo['PRODGRP_ID']] += float(lnjc05['current_balance'])
 
                         if groupProduct['value'] == 'Card':
                             lead = [groupCell['lead']] if 'lead' in groupCell.keys() else []

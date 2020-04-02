@@ -19,11 +19,16 @@ while($starttime > time() - 1200) {
 function runQueue() {
     global $queue;
     global $mongo_db;
+    $complete = 0;
+    $import_id = '';
     while ($job = $queue->watch("import")->ignore('default')->reserve(10)) {
         try {
             $queue->bury($job);
 
             $jData = json_decode($job->getData(), true);
+
+            $import_id = (!empty($jData['import_id'])) ? $jData['import_id'] : '';
+
             echo json_encode($jData) . PHP_EOL;
             $time = time();
             if($jData["startTimestamp"] > $time || empty($jData["doc"]) || empty($jData["collection"])) {
@@ -41,8 +46,10 @@ function runQueue() {
                 if(empty($jData["key_field"])) {
                     $doc["createdAt"] = time();
                     $doc["createdBy"] = "System";
-                	$result = $mongo_db->insert($jData["collection"], $doc);
+                    $result = $mongo_db->insert($jData["collection"], $doc);
+                    echo $complete;
                 } else {
+                    echo 'update';
                     $key_field = $jData["key_field"];
                     $where = array($key_field => $doc[$key_field]);
                     if(!empty($jData["key_field_2"])) {
@@ -52,13 +59,13 @@ function runQueue() {
                     if($mongo_db->where($where)->getOne($jData["collection"])) {
                         if(!isset($doc["updatedAt"])) 
                             // $doc["updatedAt"] = time();
-                            $doc['updatedAt'] = strtotime('14-01-2020 10:59:59');
+                            $doc['updatedAt'] = strtotime('23-01-2020 10:59:59');
                         $doc["updatedBy"] = "System";
                         $result = $mongo_db->where($where)->set($doc)->update($jData["collection"]);
                     } else {
                         if(!isset($doc["createdAt"])) 
                             // $doc["createdAt"] = time();
-                            $doc['createdAt'] = strtotime('14-01-2020 10:59:59');
+                            $doc['createdAt'] = strtotime('23-01-2020 10:59:59');
                         $doc["createdBy"] = "System";
                         $result = $mongo_db->insert($jData["collection"], $doc);
                     }
@@ -67,8 +74,7 @@ function runQueue() {
                     echo " ==> Import is success -> delete job ". PHP_EOL;
                     $queue->delete($job);
                     if(!empty($jData["import_id"])) {
-                        $mongo_db->where_id($jData["import_id"])->inc("complete", 1)
-                        ->set(array("updatedAt" => $time))->set("status", 1)->update("LO_Import");
+                        $complete += 1;
                     }
                 } else {
                     throw new Exception("Import not success");
@@ -89,5 +95,7 @@ function runQueue() {
             $mongo_db->insert($jData["collection"] . "_result", $doc);*/
         }
     }
+
+    $mongo_db->where_id($import_id)->set(array('status' => 1, 'complete' => $complete, 'complete_import' => time()))->update("LO_Import");
 }
 echo "END" . PHP_EOL;

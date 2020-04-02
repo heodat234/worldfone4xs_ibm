@@ -20,7 +20,13 @@ if(empty($check_duedate_plus1)) exit;
 if(!isset($check_duedate_plus1['debt_group'])) {ghilog(' --Error: debt_group not isset'); exit;}
 
 $due_date_cong1 = $check_duedate_plus1['debt_group'];
+$due_date_cong1 = '02';
 
+//store old data for report
+$sbv_backup = $mongo_db->where('kydue', $due_date_cong1)->get('LO_SBV_Stored');
+$mongo_db->where('kydue', $due_date_cong1)->delete_all('LO_SBV_Stored_Old');
+$mongo_db->batch_insert('LO_SBV_Stored_Old', $sbv_backup);
+//end
 
 $mongo_db->where('kydue', $due_date_cong1)->delete_all('LO_SBV_Stored');
 $date_log = date('d-m-Y H:i:s', time());

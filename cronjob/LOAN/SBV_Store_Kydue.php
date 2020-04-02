@@ -20,6 +20,7 @@ if(empty($check_duedate_plus1)) exit;
 if(!isset($check_duedate_plus1['debt_group'])) {ghilog(' --Error: debt_group not isset'); exit;}
 
 $due_date_cong1 = $check_duedate_plus1['debt_group'];
+// $due_date_cong1 = '02';
 
 $list_of_account   = $mongo_db->get('LO_List_of_account_in_collection');
 $data = [];
@@ -34,7 +35,7 @@ foreach ($list_of_account as $key => $value) {
 	}
 	if($kydue != $due_date_cong1) continue;
     $sbv = $mongo_db->where("contract_no", $value["account_number"])->order_by(array('_id' => -1))->getOne('LO_SBV');
-    echo $kydue . PHP_EOL;
+    echo $key . PHP_EOL;
     $data[] = array(
     	'contract_no' => $sbv['contract_no'], 
     	"overdue_indicator" => $sbv["overdue_indicator"], 

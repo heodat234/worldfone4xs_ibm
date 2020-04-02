@@ -117,7 +117,7 @@ try:
                         'col_ratio_amt' : 0,
                     }
                     col_today = 0
-                    col_amt_today = 0
+                    cur_bal_today = 0
                     if todayTimeStamp < dueDayOfMonth['due_date_add_1']:
                         if month == 1:
                             lastMonth = 12
@@ -161,16 +161,16 @@ try:
 
                     due_date_add_2 = temp['due_date'] + 86400*2
                     if groupProduct['value'] == 'SIBS':
-                        lead = [groupCell['lead']] if 'lead' in groupCell.keys() else []
-                        member = (s for s in members)
+                        lead = ['JIVF00' + groupCell['lead']] if 'lead' in groupCell.keys() else []
+                        member = ('JIVF00' + s for s in members)
                         officerIdRaw = list(lead) + list(member)
                         officerId = list(dict.fromkeys(officerIdRaw))
-                        aggregate_diallist = [
+                        aggregate_lnjc05 = [
                             {
                                 "$match":
                                 {
-                                      "createdAt": {'$gte': todayTimeStamp, '$lte': endTodayTimeStamp},
-                                      "assign": {'$in': officerId},
+                                      "created_at": {'$gte': todayTimeStamp, '$lte': endTodayTimeStamp},
+                                      "account_number": {'$in': acc_arr},
                                       'group_id': debtGroupCell
                                 }
                             },{
@@ -178,13 +178,15 @@ try:
                               {
                                   "_id": 'null',
                                   "count_col": {'$sum': 1},
+                                  "cur_bal_total": {'$sum': '$current_balance'}
                               }
                             }
                         ]
-                        diallistData = mongodb.aggregate_pipeline(MONGO_COLLECTION=diallist_detail_collection,aggregate_pipeline=aggregate_diallist)
-                        if diallistData != None:
-                            for row in diallistData:
-                                col_today            = row['count_col']
+                        lnjc05Data = mongodb.aggregate_pipeline(MONGO_COLLECTION=lnjc05_collection,aggregate_pipeline=aggregate_lnjc05)
+                        if lnjc05Data != None:
+                            for row in lnjc05Data:
+                                col_today               = row['count_col']
+                                cur_bal_today           = round(row['cur_bal_total']/1000)
 
 
                         aggregate_ln3206 = [
@@ -213,51 +215,45 @@ try:
 
 
                         for key, value in mainProduct.items():
-                            col_product_today = 0
-                            aggregate_diallist = [
+                            col_product_today   = 0
+                            acc_by_code         = []
+                            aggregate_lnjc05 = [
                                 {
                                     "$match":
                                     {
-                                          "createdAt": {'$gte': todayTimeStamp, '$lte': endTodayTimeStamp},
-                                          "assign": {'$in': officerId},
-                                          "PRODGRP_ID" : key
+                                          "created_at": {'$gte': todayTimeStamp, '$lte': endTodayTimeStamp},
+                                          "account_number": {'$in': acc_arr},
+                                          'group_id': debtGroupCell
+                                    }
+                                },{
+                                    "$lookup":
+                                       {
+                                           "from": zaccf_collection,
+                                           "localField": "account_number",
+                                           "foreignField": "account_number",
+                                           "as": "detail"
+                                       }
+                                },{
+                                    "$match":
+                                    {
+                                          "detail.PRODGRP_ID" : key
                                     }
                                 },{
                                   "$group":
                                   {
                                       "_id": 'null',
                                       "count_col": {'$sum': 1},
-                                  }
-                                }
-                            ]
-                            diallistInfo = mongodb.aggregate_pipeline(MONGO_COLLECTION=diallist_detail_collection,aggregate_pipeline=aggregate_diallist)
-                            if diallistData != None:
-                                for row in diallistData:
-                                    col_product_today            = row['count_col']
-
-                            temp['col_' + key]  = temp['inci_' + key]  - col_product_today
-
-
-                            aggregate_zaccf = [
-                                {
-                                    "$match":
-                                    {
-                                          "account_number": {'$in': acc_arr},
-                                          "PRODGRP_ID" : key
-                                    }
-                                },{
-                                  "$group":
-                                  {
-                                      "_id": 'null',
                                       "count_acc": {'$push': '$account_number'},
                                   }
                                 }
                             ]
-                            zaccfData = mongodb.aggregate_pipeline(MONGO_COLLECTION=zaccf_collection,aggregate_pipeline=aggregate_zaccf)
-                            acc_by_code = []
-                            if zaccfData != None:
-                                for row in zaccfData:
+                            lnjc05Data = mongodb.aggregate_pipeline(MONGO_COLLECTION=lnjc05_collection,aggregate_pipeline=aggregate_lnjc05)
+                            if lnjc05Data != None:
+                                for row in lnjc05Data:
+                                    col_product_today      = row['count_col']
                                     acc_by_code            = row['count_acc']
+
+                            temp['col_' + key]  = temp['inci_' + key]  - col_product_today
 
 
                             aggregate_ln3206 = [
@@ -281,7 +277,6 @@ try:
                             ln3206fData = mongodb.aggregate_pipeline(MONGO_COLLECTION=ln3206f_collection,aggregate_pipeline=aggregate_ln3206)
                             if ln3206fData != None:
                                 for row in ln3206fData:
-                                    # temp['col_' + key]          = len(row['count_col'])
                                     temp['col_amt_' + key]      = round(row['sum_amount']/1000)
 
                         
@@ -290,7 +285,7 @@ try:
                         temp['rem']             = temp['inci'] - temp['col']
                         temp['col_ratio']       = temp['col'] / temp['inci'] if temp['inci'] != 0 else 0
                         temp['col_ratio_amt']   = temp['col_amt'] / temp['inci_amt'] if temp['inci_amt'] != 0 else 0
-                        temp['rem_amt']         = temp['inci_amt'] - temp['col_amt']
+                        temp['rem_amt']         = cur_bal_today
                         temp['flow_rate']       = temp['rem'] / temp['inci'] if temp['inci'] != 0 else 0
                         temp['flow_rate_amt']   = temp['rem_amt'] / temp['inci_amt'] if temp['inci_amt'] != 0 else 0
 
@@ -314,13 +309,15 @@ try:
                                 {
                                       "_id": 'null',
                                       "count_col": {'$sum': 1},
+                                      "cur_bal_total": {'$sum': '$cur_bal'}
                                 }
                             }
                         ]
                         diallistData = mongodb.aggregate_pipeline(MONGO_COLLECTION=diallist_detail_collection,aggregate_pipeline=aggregate_diallist)
                         if diallistData != None:
                             for row in diallistData:
-                                col_today            = row['count_col']
+                                col_today               = row['count_col']
+                                cur_bal_today           = round(row['cur_bal_total']/1000)
 
                         
                         col_301_today = 0
@@ -489,7 +486,7 @@ try:
                         temp['col_amt_301']     = round(temp['col_amt_301']/1000)
                         temp['col_amt_302']     = round(temp['col_amt_302']/1000)
                         temp['rem']             = temp['inci'] - temp['col']
-                        temp['rem_amt']         = temp['inci_amt'] - temp['col_amt']
+                        temp['rem_amt']         = cur_bal_today
                         temp['col_ratio']       = temp['col'] / temp['inci'] if temp['inci'] != 0 else 0
                         temp['col_ratio_amt']   = temp['col_amt'] / temp['inci_amt'] if temp['inci_amt'] != 0 else 0
                         temp['flow_rate']       = temp['rem'] / temp['inci'] if temp['inci'] != 0 else 0
@@ -541,7 +538,7 @@ try:
                         'col_ratio_amt' : 0,
                     }
                     col_today = 0
-                    col_amt_today = 0
+                    cur_bal_today = 0
                     if todayTimeStamp < dueDayOfMonth['due_date_add_1']:
                         if month == 1:
                             lastMonth = 12
@@ -588,12 +585,12 @@ try:
                         member = (s for s in members)
                         officerIdRaw = list(lead) + list(member)
                         officerId = list(dict.fromkeys(officerIdRaw))
-                        aggregate_diallist = [
+                        aggregate_lnjc05 = [
                             {
                                 "$match":
                                 {
-                                      "createdAt": {'$gte': todayTimeStamp, '$lte': endTodayTimeStamp},
-                                      "assign": {'$in': officerId},
+                                      "created_at": {'$gte': todayTimeStamp, '$lte': endTodayTimeStamp},
+                                      "account_number": {'$in': acc_arr},
                                       'group_id': debtGroupCell
                                 }
                             },{
@@ -601,13 +598,15 @@ try:
                               {
                                   "_id": 'null',
                                   "count_col": {'$sum': 1},
+                                  "cur_bal_total": {'$sum': '$current_balance'}
                               }
                             }
                         ]
-                        diallistData = mongodb.aggregate_pipeline(MONGO_COLLECTION=diallist_detail_collection,aggregate_pipeline=aggregate_diallist)
-                        if diallistData != None:
-                            for row in diallistData:
-                                col_today            = row['count_col']
+                        lnjc05Data = mongodb.aggregate_pipeline(MONGO_COLLECTION=lnjc05_collection,aggregate_pipeline=aggregate_lnjc05)
+                        if lnjc05Data != None:
+                            for row in lnjc05Data:
+                                col_today               = row['count_col']
+                                cur_bal_today           = round(row['cur_bal_total']/1000)
 
 
                         aggregate_ln3206 = [
@@ -631,56 +630,49 @@ try:
                         ln3206fData = mongodb.aggregate_pipeline(MONGO_COLLECTION=ln3206f_collection,aggregate_pipeline=aggregate_ln3206)
                         if ln3206fData != None:
                             for row in ln3206fData:
-                                # temp['col']            = len(row['count_col'] )
                                 temp['col_amt']        = round(row['sum_amount']/1000)
 
 
                         for key, value in mainProduct.items():
-                            col_product_today = 0
-                            aggregate_diallist = [
+                            col_product_today   = 0
+                            acc_by_code         = []
+                            aggregate_lnjc05 = [
                                 {
                                     "$match":
                                     {
-                                          "createdAt": {'$gte': todayTimeStamp, '$lte': endTodayTimeStamp},
-                                          "assign": {'$in': officerId},
-                                          "PRODGRP_ID" : key
+                                          "created_at": {'$gte': todayTimeStamp, '$lte': endTodayTimeStamp},
+                                          "account_number": {'$in': acc_arr},
+                                          'group_id': debtGroupCell
+                                    }
+                                },{
+                                    "$lookup":
+                                       {
+                                           "from": zaccf_collection,
+                                           "localField": "account_number",
+                                           "foreignField": "account_number",
+                                           "as": "detail"
+                                       }
+                                },{
+                                    "$match":
+                                    {
+                                          "detail.PRODGRP_ID" : key
                                     }
                                 },{
                                   "$group":
                                   {
                                       "_id": 'null',
                                       "count_col": {'$sum': 1},
-                                  }
-                                }
-                            ]
-                            diallistInfo = mongodb.aggregate_pipeline(MONGO_COLLECTION=diallist_detail_collection,aggregate_pipeline=aggregate_diallist)
-                            if diallistData != None:
-                                for row in diallistData:
-                                    col_product_today            = row['count_col']
-
-                            temp['col_' + key]  = temp['inci_' + key]  - col_product_today
-
-
-                            aggregate_zaccf = [
-                                {
-                                    "$match":
-                                    {
-                                          "account_number": {'$in': acc_arr},
-                                          "PRODGRP_ID" : key
-                                    }
-                                },{
-                                  "$group":
-                                  {
-                                      "_id": 'null',
                                       "count_acc": {'$push': '$account_number'},
                                   }
                                 }
                             ]
-                            zaccfData = mongodb.aggregate_pipeline(MONGO_COLLECTION=zaccf_collection,aggregate_pipeline=aggregate_zaccf)
-                            acc_by_code = []
-                            if zaccfData != None:
-                                for row in zaccfData:
+                            lnjc05Data = mongodb.aggregate_pipeline(MONGO_COLLECTION=lnjc05_collection,aggregate_pipeline=aggregate_lnjc05)
+                            if lnjc05Data != None:
+                                for row in lnjc05Data:
+                                    col_product_today      = row['count_col']
                                     acc_by_code            = row['count_acc']
+
+                            temp['col_' + key]  = temp['inci_' + key]  - col_product_today
 
 
                             aggregate_ln3206 = [
@@ -704,7 +696,6 @@ try:
                             ln3206fData = mongodb.aggregate_pipeline(MONGO_COLLECTION=ln3206f_collection,aggregate_pipeline=aggregate_ln3206)
                             if ln3206fData != None:
                                 for row in ln3206fData:
-                                    # temp['col_' + key]          = len(row['count_col'])
                                     temp['col_amt_' + key]      = round(row['sum_amount']/1000)
 
                         
@@ -713,7 +704,7 @@ try:
                         temp['rem']             = temp['inci'] - temp['col']
                         temp['col_ratio']       = temp['col'] / temp['inci'] if temp['inci'] != 0 else 0
                         temp['col_ratio_amt']   = temp['col_amt'] / temp['inci_amt'] if temp['inci_amt'] != 0 else 0
-                        temp['rem_amt']         = temp['inci_amt'] - temp['col_amt']
+                        temp['rem_amt']         = cur_bal_today
                         temp['flow_rate']       = temp['rem'] / temp['inci'] if temp['inci'] != 0 else 0
                         temp['flow_rate_amt']   = temp['rem_amt'] / temp['inci_amt'] if temp['inci_amt'] != 0 else 0
 
@@ -735,13 +726,15 @@ try:
                                 {
                                       "_id": 'null',
                                       "count_col": {'$sum': 1},
+                                      "cur_bal_total": {'$sum': '$cur_bal'}
                                 }
                             }
                         ]
                         diallistData = mongodb.aggregate_pipeline(MONGO_COLLECTION=diallist_detail_collection,aggregate_pipeline=aggregate_diallist)
                         if diallistData != None:
                             for row in diallistData:
-                                col_today            = row['count_col']
+                                col_today               = row['count_col']
+                                cur_bal_today           = round(row['cur_bal_total']/1000)
 
                         
                         col_301_today = 0
@@ -910,7 +903,7 @@ try:
                         temp['col_amt_301']     = round(temp['col_amt_301']/1000)
                         temp['col_amt_302']     = round(temp['col_amt_302']/1000)
                         temp['rem']             = temp['inci'] - temp['col']
-                        temp['rem_amt']         = temp['inci_amt'] - temp['col_amt']
+                        temp['rem_amt']         = cur_bal_today
                         temp['col_ratio']       = temp['col'] / temp['inci'] if temp['inci'] != 0 else 0
                         temp['col_ratio_amt']   = temp['col_amt'] / temp['inci_amt'] if temp['inci_amt'] != 0 else 0
                         temp['flow_rate']       = temp['rem'] / temp['inci'] if temp['inci'] != 0 else 0

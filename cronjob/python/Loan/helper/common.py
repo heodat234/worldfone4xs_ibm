@@ -153,7 +153,7 @@ class Common:
 
         if wff_env in ['UAT', 'DEV']:
             # serverfolder = 'YYYYMMDD'
-            today = self.datetime.strptime('23/03/2020', "%d/%m/%Y").date()
+            today = self.datetime.strptime('31/03/2020', "%d/%m/%Y").date()
             serverfolder = today.strftime("%Y%m%d")
         else:
             today = self.date.today()

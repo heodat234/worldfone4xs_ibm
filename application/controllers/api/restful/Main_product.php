@@ -23,7 +23,7 @@ Class Main_product extends WFF_Controller {
 			$productInfo = $this->crud->get(set_sub_collection('Product'));
 			$productList = array_column($productInfo, 'name', 'code');
 			$finalData = [];
-
+			
 			foreach ($response['data'] as $key => $value) {
 				$LNCJ05 = $this->mongo_db->where("account_number", $value["account_number"])->getOne('LO_LNJC05');
 				if(!empty($LNCJ05)){

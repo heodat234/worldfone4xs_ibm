@@ -48,7 +48,7 @@ try:
     listDebtGroup = []
 
     today = date.today()
-    # today = datetime.strptime('27/02/2020', "%d/%m/%Y").date()
+    # today = datetime.strptime('27/03/2020', "%d/%m/%Y").date()
 
     day = today.day
     month = today.month
@@ -123,22 +123,20 @@ try:
                     dueDayLastMonth = mongodb.getOne(MONGO_COLLECTION=report_due_date_collection, WHERE={'for_month': str(lastMonth), 'debt_group': debtGroupCell[1:3]})
                     temp['due_date'] = dueDayLastMonth['due_date'] if dueDayLastMonth is not None else ''
                     #Lay gia tri no vao ngay due date + 1#
-                    incidenceInfo = mongodb.get(MONGO_COLLECTION=due_date_next_date_collection, WHERE={'for_month': str(lastMonth),  'debt_group': debtGroupCell[0:1],'due_date_code': debtGroupCell[1:3],'product':groupProduct['text']},SELECT=['debt_acc_no','current_balance_total','ob_principal_total','acc_arr'],SORT=[("_id", -1)], SKIP=0, TAKE=1)
+                    incidenceInfo = mongodb.getOne(MONGO_COLLECTION=due_date_next_date_collection, WHERE={'for_month': str(lastMonth),  'debt_group': debtGroupCell[0:1],'due_date_code': debtGroupCell[1:3],'product':groupProduct['text']})
                 else:
                     temp['due_date'] = dueDayOfMonth['due_date']
-                    incidenceInfo = mongodb.get(MONGO_COLLECTION=due_date_next_date_collection, WHERE={'for_month': str(month), 'debt_group': debtGroupCell[0:1],'due_date_code': debtGroupCell[1:3],'product':groupProduct['text']},SELECT=['debt_acc_no','current_balance_total','ob_principal_total','acc_arr'],SORT=[("_id", -1)], SKIP=0, TAKE=1)
+                    incidenceInfo = mongodb.getOne(MONGO_COLLECTION=due_date_next_date_collection, WHERE={'for_month': str(month), 'debt_group': debtGroupCell[0:1],'due_date_code': debtGroupCell[1:3],'product':groupProduct['text']})
 
                 temp['debt_group']    = debtGroupCell[0:1]
                 temp['due_date_code'] = int(debtGroupCell[1:3])
                 temp['product']       = groupProduct['text']
                 acc_arr = []
                 if incidenceInfo is not None:
-                    for inc in incidenceInfo:
-                        temp['inci']        += inc['debt_acc_no']
-                        temp['inci_amt']    += inc['current_balance_total']
-                        temp['inci_ob_principal'] += inc['ob_principal_total']
-                        acc_arr_1   = inc['acc_arr'] if 'acc_arr' in inc.keys() else []
-                        acc_arr     += acc_arr_1
+                    temp['inci']        = incidenceInfo['debt_acc_no']
+                    temp['inci_amt']    = incidenceInfo['current_balance_total']
+                    temp['inci_ob_principal'] = incidenceInfo['ob_principal_total']
+                    acc_arr   = incidenceInfo['acc_arr'] if 'acc_arr' in incidenceInfo.keys() else []
 
                 temp['inci_amt']            = round(temp['inci_amt']/1000)
                 temp['inci_ob_principal']   = round(temp['inci_ob_principal']/1000)
@@ -239,62 +237,42 @@ try:
                             ob_principal_today = float(sbv['sale_total']) + float(sbv['cash_total'])
 
 
-
                     code = ['2000','2100','2700']
-                    acc_arr = []
-                    aggregate_gl = [
-                       {
-                           "$match":
-                           {   'account_number' : {'$in' : acc_card_arr},
-                               'created_at': {'$gte' : due_date_add_2,'$lte' : todayTimeStamp},
-                               'code' : {'$in' : code}
-                           }
-                       },
-                       {
-                           "$group":
-                           {
-                               "_id": 'null',
-                               "acc_arr": {'$addToSet' : '$account_number'},
-                           }
-                       }
-                    ]
-                    accData = mongodb.aggregate_pipeline(MONGO_COLLECTION=payment_of_card_collection,aggregate_pipeline=aggregate_gl)
-                    if accData != None:
-                      for row in accData:
-                         accData = row['acc_arr']
+                    for row_acc in acc_arr:
+                        aggregate_gl = [
+                            {
+                                "$match":
+                                {
+                                    "created_at": {'$gte': due_date_add_2, '$lte': endTodayTimeStamp},
+                                    "account_number": row_acc,
+                                    "code" : {'$in' : code},
+                                    "coNoHayKhong": 'Y'
+                                }
+                            },
+                            {
+                                "$project":
+                                {
+                                    "account_number" : 1,
+                                    "amount" : 1,
+                                    "code" : 1,
+                                }
+                            }
+                        ]
+                        glData = mongodb.aggregate_pipeline(MONGO_COLLECTION=payment_of_card_collection,aggregate_pipeline=aggregate_gl)
+                        code_2000 = 0
+                        code_2700 = 0
+                        sum_code = 0
+                        if glData != None:
+                            for row in glData:
+                                if row['code'] == '2000' or row['code'] == '2100':
+                                    code_2000 += row['amount']
+                                else:
+                                    code_2700 += row['amount']
+                            sum_code = code_2000 - code_2700
+                            if sum_code > 0:
+                                temp['amt']         += sum_code
+                    
 
-                    for acc in accData:
-                      aggregate_gl = [
-                          {
-                              "$match":
-                              {
-                                  "created_at": {'$gte': due_date_add_2,'$lte': todayTimeStamp},
-                                  "account_number": acc,
-                                  'code' : {'$in' : code}
-                              }
-                          },{
-                              "$project":
-                              {
-                                   "account_number" : 1,
-                                   "amount" : 1,
-                                   "code" : 1,
-                              }
-                          }
-                      ]
-                      glInfo = mongodb.aggregate_pipeline(MONGO_COLLECTION=payment_of_card_collection,aggregate_pipeline=aggregate_gl)
-                      code_2000 = 0
-                      code_2700 = 0
-                      sum_amount = 0
-                      if glInfo != None:
-                         for row in glInfo:
-                            if row['code'] == '2000' or row['code'] == '2100':
-                               code_2000 += row['amount']
-                            else:
-                               code_2700 += row['amount']
-                         sum_amount = code_2000 - code_2700
-                         if sum_amount > 0:
-                          # temp['col'] += 1
-                          temp['amt'] += sum_amount
 
 
                     temp['amt']         = round(temp['amt']/1000)

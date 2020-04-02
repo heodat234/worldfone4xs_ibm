@@ -4,8 +4,8 @@ use Pheanstalk\Pheanstalk;
 $queue = new Pheanstalk('127.0.0.1');
 
 //$inputFileName = "../../upload/ftp/telesales/ZACCF.csv";
-// $folder = (string)(date("Ymd")); //"20191120";
-$folder = '20200313'; //"20191120";
+$folder = (string)(date("Ymd")); //"20191120";
+// $folder = '20200313'; //"20191120";
 $inputFileName = "/data/upload_file/{$folder}/ZACCF.txt";
 echo $inputFileName;
 
@@ -131,15 +131,17 @@ while(!feof($file))
             "startTimestamp"    => time(),
             "doc"               => $doc,
             "collection"        => $collection,
-            "key_field"         => $key_field,
-            "key_field_2"       => $key_field_2,
+            // "key_field"         => $key_field,
+            // "key_field_2"       => $key_field_2,
             "import_id"         => $import_log["id"]
         );
 
         $queue->useTube('import')->put(json_encode($queueData));
         ++$count;
         //$mongo_db->insert("LO_Test", $doc);
-        echo "NO.{$count}\t"; print_r(implode("\t\t", $editedValue)); echo PHP_EOL;
+        echo "NO.{$count}\t"; 
+        // print_r(implode("\t\t", $editedValue)); 
+        echo PHP_EOL;
         //usleep( 50000 );
         //array_push($data, $editedValue);
     }
