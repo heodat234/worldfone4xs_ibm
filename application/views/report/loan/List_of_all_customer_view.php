@@ -2,11 +2,12 @@
     <!-- Table Styles Header -->
     <ul class="breadcrumb breadcrumb-top">
         <li>@Report@</li>
-        <li>SMS Daily SMS Report</li>
+        <li>List of all customer by Loan Group</li>
+    
         <li class="pull-right none-breakcrumb" id="top-row">
             <div class="btn-group btn-group-sm">
                 <a role="button" class="btn btn-sm" onclick="saveAsExcel()"><i class="fa fa-file-excel-o"></i> <b>@Export@ All Loan Group</b></a>
-                <!-- <a role="button" class="btn btn-sm" onclick="Table_1.grid.saveAsExcel()"><i class="fa fa-file-excel-o"></i> <b>@Export@ Card</b></a> -->
+                
             </div>
         </li>
     </ul>
@@ -16,7 +17,7 @@
             <div class="form-group col-sm-4">
                <label class="control-label col-xs-4">@Month@</label>
                <div class="col-xs-8">
-               <input id="start-date" data-role="datepicker" data-format="MM/yyyy" name="toDateTime" data-bind="value: toDateTime, events: {change: startDate}" disabled="">
+               <input id="start-date" data-role="datepicker" data-format="MM/yyyy" name="toDateTime" data-start="year" data-depth="year" data-bind="value: toDateTime" >
                </div>
             </div>
         </div>
@@ -203,7 +204,24 @@
                                 row.cells[cellIndex].background = "#f7d631";
                              }
                                   
-                              
+                             if (rowIndex == (sheet.rows.length-3)&&row.cells[cellIndex].value!='G2'){
+                                var value = parseFloat(row.cells[cellIndex].value)/100;
+                               
+                                row.cells[cellIndex].value = value;
+                                row.cells[cellIndex].format = "#0.00%;";
+                             }
+                             if (rowIndex == (sheet.rows.length-2)&&row.cells[cellIndex].value!='G2~'){
+                                var value = parseFloat(row.cells[cellIndex].value)/100;
+                               
+                                row.cells[cellIndex].value = value;
+                                row.cells[cellIndex].format = "#0.00%;";
+                             }
+                             if (rowIndex == (sheet.rows.length-1)&&row.cells[cellIndex].value!='G3~'){
+                                var value = parseFloat(row.cells[cellIndex].value)/100;
+                               
+                                row.cells[cellIndex].value = value;
+                                row.cells[cellIndex].format = "#0.00%;";
+                             }
                               if (rowIndex ==0 || rowIndex ==1){
                                 row.cells[cellIndex].background = "#008738";
                               }
@@ -304,7 +322,10 @@
                         
                         case "PRODGRP_ID":  
                             col.width = 150;
-                            col.template = (dataItem) => dataItem[col.field][0];
+                            col.template = (dataItem) => dataItem[col.field];
+                        case "interest_rate":  
+                            col.width = 150;
+                            col.template = (dataItem) =>  kendo.toString(dataItem[col.field], "p");
                         default:
                             col.width = 120;
                             break;
@@ -491,15 +512,16 @@
                         {
                         field: "g"+col.code,
                         title: "NO of accounts",
-                        format: "{0}",   
+                        format: "{0:n0}",   
                         width: 150
                         },
                         {
                         field: "a"+col.code,
                         title: "Amount",
                         width: 150,
-                        format: "{0}"
+                        format: "{0:n0}"
                         },
+                        
                 ],   
                  });
                 
@@ -512,14 +534,14 @@
                         {
                         field: "t_g",
                         title: "NO of accounts",
-                        format: "{0:n}",   
+                        format: "{0:n0}",   
                         width: 150
                         },
                         {
                         field: "t_a",
                         title: "Amount",
                         width: 150,
-                        format: "{0:n}"
+                        format: "{0:n0}"
                         },
                 ],   
               });
@@ -530,6 +552,7 @@
               Table1.fromDate = fromDateTime
               Table1.toDate = toDateTime
               Table1.init();
+              
           });
          
           var observable = kendo.observable({
@@ -611,9 +634,11 @@
     </script>
    
     <script>
+        
         function saveAsExcel() {
             $.ajax({
               url: ENV.reportApi + "loan/List_of_all_customer_report/downloadExcel",
+              data:{month : $("#start-date").val()},
               type: 'POST',
               dataType: 'json',
               timeout: 30000
@@ -628,6 +653,24 @@
             });
 
         }
+
+        function exportedExcel(){
+         $.ajax({
+            url: ENV.reportApi + "loan/List_of_all_customer_report/exportExcel",
+            data:{month : '1/'+$("#start-date").val(),export:$("#start-date").val()},
+            type: 'POST',
+            dataType: 'json',
+            timeout: 30000
+        })
+        .done(function(response) {
+            if (response.status == 1) {
+            window.location = response.data
+            }
+        })
+        .fail(function() {
+            console.log("error");
+        });
+    }
     </script>
 </div>
 

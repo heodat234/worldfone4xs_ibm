@@ -118,7 +118,7 @@ try:
                     }
                     col_today = 0
                     cur_bal_today = 0
-                    if todayTimeStamp < dueDayOfMonth['due_date_add_1']:
+                    if todayTimeStamp <= dueDayOfMonth['due_date_add_1']:
                         if month == 1:
                             lastMonth = 12
                         else:
@@ -539,7 +539,7 @@ try:
                     }
                     col_today = 0
                     cur_bal_today = 0
-                    if todayTimeStamp < dueDayOfMonth['due_date_add_1']:
+                    if todayTimeStamp <= dueDayOfMonth['due_date_add_1']:
                         if month == 1:
                             lastMonth = 12
                         else:

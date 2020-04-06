@@ -103,7 +103,7 @@ try:
       startDayString       = start_day_of_month.strftime("%d/%m/%Y")
       startDayTimeStamp      = int(time.mktime(time.strptime(str(startDayString + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
 
-      mongodb.remove_document(MONGO_COLLECTION=collection, WHERE={'createdAt': {'$gte': startDayTimeStamp, '$lt': endDayTimeStamp} })
+      mongodb.remove_document(MONGO_COLLECTION=collection, WHERE={'createdAt': {'$gte': startDayTimeStamp, '$lte': endDayTimeStamp} })
 
       account_sibs_each_month = []
       account_card_each_month = []

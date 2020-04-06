@@ -14,6 +14,7 @@ from pprint import pprint
 from bson import ObjectId
 from helper.common import Common
 from helper.jaccs import Config
+import pandas as pd
 
 common      = Common()
 base_url    = common.base_url()
@@ -534,6 +535,74 @@ try:
    if len(insertDataPayment_1) > 0:
       # print(insertDataPayment_1)
       mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertDataPayment_1)
+
+
+
+   # export file
+   fileOutput  = base_url + 'upload/loan/export/DailyPayment_'+ yesterday.strftime("%d%m%Y") +'.xlsx'
+
+   aggregate_acc = [
+      {
+          "$match":
+          {
+              "createdAt": {'$gte' : yesterdayTimeStamp, '$lte' : endYesterdayTimeStamp},
+          }
+      },
+         "$project":{
+
+          {
+              "_id": 0,
+          }
+      }
+   ]
+   data = mongodb.aggregate_pipeline(MONGO_COLLECTION=collection,aggregate_pipeline=aggregate_acc)
+   dataReport = []
+   for row in data:
+      temp = {}
+      temp = row
+      # print(temp['product_name'])
+      try:
+         if 'due_date' in row.keys():
+            date_time = datetime.fromtimestamp(int(row['due_date']))
+            temp['due_date']      = date_time.strftime('%d/%m/%Y')
+      except Exception as e:
+         temp['due_date']      = row['due_date']
+
+      if 'payment_date' in row.keys():
+         if row['payment_date'] != None:
+            date_time = datetime.fromtimestamp(row['payment_date'])
+            temp['payment_date']      = date_time.strftime('%d/%m/%Y')
+         else:
+            temp['payment_date']      = ''
+
+      dataReport.append(temp)
+
+   df = pd.DataFrame(dataReport, columns= ['account_number','name','due_date','payment_date','amt','paid_principal','paid_interest','RPY_FEE','group','num_of_overdue_day','pic','product_name','note','DPD','DATE_HANDOVER'])
+
+   # Create a Pandas Excel writer using XlsxWriter as the engine.
+   writer = pd.ExcelWriter(fileOutput, engine='xlsxwriter')
+
+   # Convert the dataframe to an XlsxWriter Excel object.
+   df.to_excel(writer,sheet_name='Sheet1',header=['AC NUMBER','NAME','OVERDUE DATE','PAYMENT DATE','AMOUNT','PAID PRINCIPAL','PAID INTEREST','PAID LATE CHARGE & FEE','GROUP','NUMBER OF OVERDUE DAYS','PIC','PRODUCT','NOTE','DPD','DATE_HANDOVER'])
+
+   # Get the xlsxwriter workbook and worksheet objects.
+   workbook  = writer.book
+   worksheet = writer.sheets['Sheet1']
+
+   # Add some cell formats.
+   format1 = workbook.add_format({'num_format': '#,##0', 'bottom':1, 'top':1, 'left':1, 'right':1})
+   format2 = workbook.add_format({'num_format': 'dd/mm/yyyy', 'bottom':1, 'top':1, 'left':1, 'right':1})
+   # format2 = workbook.add_format({'num_format': '0%'})
+   border_fmt = workbook.add_format({'bottom':1, 'top':1, 'left':1, 'right':1})
+
+
+   # Set the column width and format.
+   worksheet.set_column('A:N', 20, border_fmt)
+
+   worksheet.set_column('F:I', 20, format1)
+   worksheet.set_column('D:E', 20, format2)
+
+   writer.save()
 
    now_end         = datetime.now()
    log.write(now_end.strftime("%d/%m/%Y, %H:%M:%S") + ': End Log' + '\n')

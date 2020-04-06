@@ -115,7 +115,7 @@ try:
                 col_today = 0
                 amt_today = 0
                 ob_principal_today = 0
-                if todayTimeStamp < dueDayOfMonth['due_date_add_1']:
+                if todayTimeStamp <= dueDayOfMonth['due_date_add_1']:
                     if month == 1:
                         lastMonth = 12
                     else:
