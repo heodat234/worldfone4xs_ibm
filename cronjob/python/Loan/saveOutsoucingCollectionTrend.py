@@ -30,8 +30,8 @@ now = datetime.now()
 subUserType = 'LO'
 collection              = common.getSubUser(subUserType, 'Cus_assigned_partner_prod')
 collection_temp         = common.getSubUser(subUserType, 'Outsoucing_Collection_Trend_report_temp')
-collection_lnjc05       = common.getSubUser(subUserType, 'LNJC05')
-collection_listofAccount = common.getSubUser(subUserType, 'List_of_account_in_collection_01042020')
+collection_lnjc05       = common.getSubUser(subUserType, 'LNJC05_start_of_month')
+collection_listofAccount = common.getSubUser(subUserType, 'List_of_account_in_collection_start_of_month')
 
 collection_ln3206f      =  common.getSubUser(subUserType, 'LN3206F')
 collection_gl_2018      =  common.getSubUser(subUserType, 'Report_input_payment_of_card')
@@ -242,11 +242,11 @@ try :
          if "lnjc05" in row_result:
             due_date    = datetime.fromtimestamp(row_result['lnjc05']['due_date'])
             os_balance  = row_result['lnjc05']['current_balance']
-            check_ln3206f = mongodb.count(MONGO_COLLECTION=collection_ln3206f, WHERE={'account_number':str(row_result['CONTRACTNR']), 'code':'10'})
-            # check_ln3206f = mongodb.count(MONGO_COLLECTION=collection_ln3206f, WHERE={'account_number':str(row_result['CONTRACTNR']), 'code':'10', 'created_at': { '$gte' :  startDayTimeStamp + 86400,'$lte' : endDayTimeStamp + 86400}})
+            # check_ln3206f = mongodb.count(MONGO_COLLECTION=collection_ln3206f, WHERE={'account_number':str(row_result['CONTRACTNR']), 'code':'10'})
+            check_ln3206f = mongodb.count(MONGO_COLLECTION=collection_ln3206f, WHERE={'account_number':str(row_result['CONTRACTNR']), 'code':'10', 'created_at': { '$gte' :  startDayTimeStamp + 86400,'$lte' : endDayTimeStamp + 86400}})
             if check_ln3206f > 0:
-               get_ln3206f = mongodb.get(MONGO_COLLECTION=collection_ln3206f, WHERE={'account_number':str(row_result['CONTRACTNR']), 'code':'10'})
-               # get_ln3206f = mongodb.get(MONGO_COLLECTION=collection_ln3206f, WHERE={'account_number':str(row_result['CONTRACTNR']), 'code':'10', 'created_at': { '$gte' :  startDayTimeStamp + 86400,'$lte' : endDayTimeStamp + 86400}})
+               # get_ln3206f = mongodb.get(MONGO_COLLECTION=collection_ln3206f, WHERE={'account_number':str(row_result['CONTRACTNR']), 'code':'10'})
+               get_ln3206f = mongodb.get(MONGO_COLLECTION=collection_ln3206f, WHERE={'account_number':str(row_result['CONTRACTNR']), 'code':'10', 'created_at': { '$gte' :  startDayTimeStamp + 86400,'$lte' : endDayTimeStamp + 86400}})
                print('SIBS: '+str(idx))
                if get_ln3206f != None:
                   count_account  = 1
@@ -256,11 +256,11 @@ try :
          elif "listofAccount" in row_result:
             due_date    = datetime.fromtimestamp(row_result['listofAccount']['overdue_date'])
             os_balance  =  row_result['listofAccount']['cur_bal']
-            check_gl    = mongodb.count(MONGO_COLLECTION=collection_gl_2018, WHERE={'$and' : [{'account_number':str(row_result['CONTRACTNR'])}, {'$or' : [{'code': '2000'}, {'code': '2100'}, {'code': '2700'}]}]})
-            # check_gl    = mongodb.count(MONGO_COLLECTION=collection_gl_2018, WHERE={'$and' : [{'created_at': { '$gte' :  startDayTimeStamp + 86400,'$lte' : endDayTimeStamp + 86400}},{'account_number':str(row_result['CONTRACTNR'])}, {'$or' : [{'code': '2000'}, {'code': '2100'}, {'code': '2700'}]}]})
+            # check_gl    = mongodb.count(MONGO_COLLECTION=collection_gl_2018, WHERE={'$and' : [{'account_number':str(row_result['CONTRACTNR'])}, {'$or' : [{'code': '2000'}, {'code': '2100'}, {'code': '2700'}]}]})
+            check_gl    = mongodb.count(MONGO_COLLECTION=collection_gl_2018, WHERE={'$and' : [{'created_at': { '$gte' :  startDayTimeStamp + 86400,'$lte' : endDayTimeStamp + 86400}},{'account_number':str(row_result['CONTRACTNR'])}, {'$or' : [{'code': '2000'}, {'code': '2100'}, {'code': '2700'}]}]})
             if check_gl > 0:
-               get_gl_2018 = mongodb.get(MONGO_COLLECTION=collection_gl_2018, WHERE={'$and' : [ {'account_number':str(row_result['CONTRACTNR'])}, {'$or' : [{'code': '2000'}, {'code': '2100'}, {'code': '2700'}]}]})
-               # get_gl_2018 = mongodb.get(MONGO_COLLECTION=collection_gl_2018, WHERE={'$and' : [{'created_at': { '$gte' :  startDayTimeStamp + 86400,'$lte' : endDayTimeStamp + 86400}}, {'account_number':str(row_result['CONTRACTNR'])}, {'$or' : [{'code': '2000'}, {'code': '2100'}, {'code': '2700'}]}]})
+               # get_gl_2018 = mongodb.get(MONGO_COLLECTION=collection_gl_2018, WHERE={'$and' : [ {'account_number':str(row_result['CONTRACTNR'])}, {'$or' : [{'code': '2000'}, {'code': '2100'}, {'code': '2700'}]}]})
+               get_gl_2018 = mongodb.get(MONGO_COLLECTION=collection_gl_2018, WHERE={'$and' : [{'created_at': { '$gte' :  startDayTimeStamp + 86400,'$lte' : endDayTimeStamp + 86400}}, {'account_number':str(row_result['CONTRACTNR'])}, {'$or' : [{'code': '2000'}, {'code': '2100'}, {'code': '2700'}]}]})
                print('Card: '+str(idx))
                code_2000 = False
                code_2100 = False
@@ -544,7 +544,7 @@ try :
                aggregate_payment = [
 						{
 							'$match' : {
-								# 'created_at': { '$gte' :  startDayTimeStamp + 86400,'$lte' : endDayTimeStamp + 86400},
+								'created_at': { '$gte' :  startDayTimeStamp + 86400,'$lte' : endDayTimeStamp + 86400},
 								'account_number': {'$in': row_result['acc_arr']},
 								'code':'10'
 							}
@@ -568,11 +568,11 @@ try :
                      subtotal_amount    += row['sum_amount']
                if account == 0:
                   for acc in row_result['acc_arr']:
-                     check_gl    = mongodb.count(MONGO_COLLECTION=collection_gl_2018, WHERE={'$and' : [{'account_number':str(acc)}, {'$or' : [{'code': '2000'}, {'code': '2100'}, {'code': '2700'}]}]})
-                     # check_gl    = mongodb.count(MONGO_COLLECTION=collection_gl_2018, WHERE={'$and' : [{'created_at': { '$gte' :  startDayTimeStamp + 86400,'$lte' : endDayTimeStamp + 86400}},{'account_number':str(acc)}, {'$or' : [{'code': '2000'}, {'code': '2100'}, {'code': '2700'}]}]})
+                     # check_gl    = mongodb.count(MONGO_COLLECTION=collection_gl_2018, WHERE={'$and' : [{'account_number':str(acc)}, {'$or' : [{'code': '2000'}, {'code': '2100'}, {'code': '2700'}]}]})
+                     check_gl    = mongodb.count(MONGO_COLLECTION=collection_gl_2018, WHERE={'$and' : [{'created_at': { '$gte' :  startDayTimeStamp + 86400,'$lte' : endDayTimeStamp + 86400}},{'account_number':str(acc)}, {'$or' : [{'code': '2000'}, {'code': '2100'}, {'code': '2700'}]}]})
                      if check_gl > 0:
-                        get_gl_2018 = mongodb.get(MONGO_COLLECTION=collection_gl_2018, WHERE={'$and' : [ {'account_number':acc}, {'$or' : [{'code': '2000'}, {'code': '2100'}, {'code': '2700'}]}]})
-                        # get_gl_2018 = mongodb.get(MONGO_COLLECTION=collection_gl_2018, WHERE={'$and' : [{'created_at': { '$gte' :  startDayTimeStamp + 86400,'$lte' : endDayTimeStamp + 86400}}, {'account_number':acc}, {'$or' : [{'code': '2000'}, {'code': '2100'}, {'code': '2700'}]}]})
+                        # get_gl_2018 = mongodb.get(MONGO_COLLECTION=collection_gl_2018, WHERE={'$and' : [ {'account_number':acc}, {'$or' : [{'code': '2000'}, {'code': '2100'}, {'code': '2700'}]}]})
+                        get_gl_2018 = mongodb.get(MONGO_COLLECTION=collection_gl_2018, WHERE={'$and' : [{'created_at': { '$gte' :  startDayTimeStamp + 86400,'$lte' : endDayTimeStamp + 86400}}, {'account_number':acc}, {'$or' : [{'code': '2000'}, {'code': '2100'}, {'code': '2700'}]}]})
                         code_2000 = False
                         code_2100 = False
                         code_2700 = False

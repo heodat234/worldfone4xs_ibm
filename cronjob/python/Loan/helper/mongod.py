@@ -91,7 +91,7 @@ class Mongodb:
 
     def count(self, MONGO_COLLECTION='', WHERE=None):
         collection = self.db[MONGO_COLLECTION]
-        return collection.find(WHERE).count()
+        return collection.count(WHERE)
 
     def aggregate_pipeline(self, MONGO_COLLECTION='', aggregate_pipeline=[]):
         collection = self.db[MONGO_COLLECTION]
@@ -105,3 +105,8 @@ class Mongodb:
         collist = self.db.list_collection_names()
         if old_name in collist:
             collection = self.db[old_name].rename(new_name)
+
+    def create_index(self, MONGO_COLLECTION='', FIELD=[], unique=False):
+        collection = self.db[MONGO_COLLECTION]
+        return collection.create_index(FIELD, unique=unique)
+

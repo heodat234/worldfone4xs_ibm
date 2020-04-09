@@ -70,7 +70,7 @@ $count = 0;
 // Log import
 
 $import_data = array(
-    "collection"        => $collection, 
+    "collection"        => $collection,
     "begin_import"      => $starttime,
     "complete_import"   => 0,
     "file_name"         => basename($inputFileName),
@@ -88,7 +88,7 @@ if(empty($import_log["id"])) exit();
 // Create collection and index
 $list = $mongo_db->command(["listCollections"=>1, "authorizedCollections"=> true, "nameOnly"=>true]);
 $exists_collections = array_column($list, "name");
-if(!in_array($collection, $exists_collections)) 
+if(!in_array($collection, $exists_collections))
 {
     $mongo_db->command(["create"=>$collection], FALSE);
     $index_result = $mongo_db->add_index($collection, [$key_field => -1, $key_field_2 => -1]);
@@ -107,9 +107,9 @@ while(!feof($file))
         // Condition data
         $editedValue = array_slice($temp, $startColumn, $endColumn + 1 - $startColumn);
         //if(empty($editedValue[$endColumn-1-$startColumn])) continue;
-        //if(!strpos($editedValue[$endColumn -1-$startColumn], "/")) continue; 
+        //if(!strpos($editedValue[$endColumn -1-$startColumn], "/")) continue;
         if(empty($editedValue[5])) continue;
-        
+
         $doc = [];
         if($header) {
             foreach ($header as $index => $field) {
@@ -118,7 +118,7 @@ while(!feof($file))
                 }
                 if ($field == 'FRELD8' && isset($editedValue[$index]) ) {
                     if (strlen($editedValue[$index]) == 7 ) {
-                        $editedValue[$index] = '0'.$editedValue[$index]; 
+                        $editedValue[$index] = '0'.$editedValue[$index];
                     }
                     $date = substr($editedValue[$index], 0,2).'-'.substr($editedValue[$index], 2,2).'-'.substr($editedValue[$index], 4,8);
                     $doc['FRELD8_BJ'] = strtotime($date);
@@ -139,8 +139,8 @@ while(!feof($file))
         $queue->useTube('import')->put(json_encode($queueData));
         ++$count;
         //$mongo_db->insert("LO_Test", $doc);
-        echo "NO.{$count}\t"; 
-        // print_r(implode("\t\t", $editedValue)); 
+        echo "NO.{$count}\t";
+        // print_r(implode("\t\t", $editedValue));
         echo PHP_EOL;
         //usleep( 50000 );
         //array_push($data, $editedValue);
