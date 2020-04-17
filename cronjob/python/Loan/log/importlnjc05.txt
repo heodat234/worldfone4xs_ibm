@@ -23,30 +23,3 @@
 12/12/2019, 15:53:24: Expecting value: line 1 column 1 (char 0)
 12/12/2019, 15:55:32: Expecting value: line 1 column 1 (char 0)
 12/12/2019, 15:56:24: 'NoneType' object has no attribute 'to_dict'
-24/12/2019, 09:29:04: type object 'datetime.datetime' has no attribute 'datetime'
-24/12/2019, 09:36:57: cannot encode object: datetime.date(2019, 12, 24), of type: <class 'datetime.date'>
-30/12/2019, 21:10:27: batch op errors occurred
-30/12/2019, 21:14:55: batch op errors occurred
-30/12/2019, 21:37:40: batch op errors occurred
-30/12/2019, 21:40:47: batch op errors occurred
-30/12/2019, 21:46:37: batch op errors occurred
-30/12/2019, 21:54:47: batch op errors occurred
-30/12/2019, 22:02:58: batch op errors occurred
-30/12/2019, 22:11:10: batch op errors occurred
-30/12/2019, 22:19:22: batch op errors occurred
-31/12/2019, 10:56:17: batch op errors occurred
-03/01/2020, 17:35:24: name 'false' is not defined
-05/02/2020, 15:05:39: line contains NULL byte
-05/02/2020, 15:06:28: line contains NULL byte
-05/02/2020, 15:07:22: line contains NULL byte
-05/02/2020, 15:10:53: line contains NULL byte
-05/02/2020, 15:15:06: 'NoneType' object has no attribute 'to_dict'
-05/02/2020, 15:16:56: 'NoneType' object has no attribute 'to_dict'
-05/02/2020, 15:18:41: 'NoneType' object has no attribute 'to_dict'
-05/02/2020, 15:24:11: 'NoneType' object has no attribute 'to_dict'
-05/02/2020, 15:26:19: 'account_number'
-05/02/2020, 15:42:05: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)
-05/02/2020, 15:44:38: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)
-05/02/2020, 15:45:31: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)
-06/02/2020, 17:05:55: 'account_number'
-12/02/2020, 10:18:48: 'Cursor' object has no attribute 'fetchall'

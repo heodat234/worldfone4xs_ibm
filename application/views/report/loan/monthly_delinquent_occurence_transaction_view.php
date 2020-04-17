@@ -3,54 +3,14 @@
 <ul class="breadcrumb breadcrumb-top">
     <li>@Report@</li>
     <li>Delinquent occurance transaction</li>
-    <!-- <li class="pull-right none-breakcrumb" id="top-row">
+    <li class="pull-right none-breakcrumb" id="top-row">
         <div class="btn-group btn-group-sm">
-            <a role="button" class="btn btn-sm" onclick="Table.grid.saveAsExcel()"><i class="fa fa-file-excel-o"></i> <b>@Export@</b></a>
+            <a role="button" class="btn btn-sm" onclick="saveAsExcel()"><i class="fa fa-file-excel-o"></i> <b>@Export@</b></a>
         </div>
-    </li> -->
+    </li>
 </ul>
 <!-- END Table Styles Header -->
-<div class="container-fluid mvvm" style="padding-top: 20px; padding-bottom: 10px">
-    <!-- <div class="row form-horizontal"> -->
-        <!-- <div class="form-group col-sm-3">
-            <label class="control-label col-xs-3">@Date@</label>
-            <div class="col-xs-8">
-                <input id="start-date" data-role="datepicker" data-format="MM/yyyy" data-start="year" data-depth="year" name="fromDateTime" data-bind="value: fromDateTime, events: {change: onChangeDate}">
-            </div>
-        </div> -->
-        <!-- <div class="form-group col-sm-4">
-            <label class="control-label col-xs-4">@To date@</label>
-            <div class="col-xs-8">
-                <input id="end-date" data-role="datepicker" data-format="dd/MM/yyyy H:mm:ss" name="toDateTime" data-bind="value: toDateTime, events: {change: endDate}">
-            </div>
-        </div>
-        <div class="form-group col-sm-4 text-center">
-            <button class="k-button" data-bind="click: search">@Search@</button>
-        </div> -->
-    <!-- </div> -->
-    <!-- <div class="row form-horizontal">
-        <div class="col-sm-3">
-            <label class="control-label col-xs-2" style="line-height: 2;">CIF</label>
-            <div class="col-xs-10">
-                <input class="k-textbox" style="width: 200%" id="cif_id" name="cif" data-bind="value: cif">
-            </div>
-        </div>
-        <div class="col-sm-5" style="padding-left: 21px">
-            <label class="control-label col-xs-4" style="line-height: 2;">LOAN CONTRACT</label>
-            <div class="col-xs-7">
-                <input class="k-textbox" style="width: 95%" id="loan_id" name="loanContract" data-bind="value: loanContract}">
-            </div>
-        </div>
-        <div class="col-sm-4">
-            <label class="control-label col-xs-4" style="line-height: 2;">National ID</label>
-            <div class="col-xs-8">
-                <input class="k-textbox" style="width: 200%" id="national" name="nationalID" data-bind="value: nationalID">
-            </div>
-        </div>
-        <div class="col-sm-12 text-center">
-            <button style="margin-top: 10px; margin-bottom: 10px" data-role="button" data-bind="click: search">@Search@</button>
-        </div>
-    </div> -->
+<div class="container-fluid mvvm" style="padding-top: 20px; padding-bottom: 10px; background-color: #ffffff">
     <h3 class="col-sm-12 text-center" style="margin-bottom: 20px;color: #27ae60">Delinquency occurrence transition table by loan terms  (Amount of money)</h3>
     <h4 class="col-sm-12 text-center" style="margin-bottom: 20px;color: #27ae60">貸付条件別滞納発生推移表（金額)</h4>
     <div class="col-sm-12 grid-data"></div>
@@ -98,7 +58,6 @@
                     type: 'POST',
                     success: function(response) {
                         response.map(async function(doc) {
-                            var test = doc.product_code.split(', ');
                             var columns = [{
                                 field: 'int_rate_name',
                                 title: doc.group_name,
@@ -1428,22 +1387,21 @@
 </script>
 <script>
     function saveAsExcel() {
-        Table.grid.saveAsExcel();
-        // $.ajax({
-        //     url: ENV.reportApi + "loan/master_data_report/downloadExcel",
-        //     type: 'POST',
-        //     dataType: 'json',
-        //     timeout: 30000
-        // })
-        // .done(function(response) {
-        //     if (response.status == 1) {
-        //     window.location = response.data
-        //     }
-        // })
-        // .fail(function() {
-        //     console.log("error");
-        // });
-
+        $.ajax({
+            url: ENV.reportApi + "loan/Monthly_delinquent_occurence_transaction/exportExcel",
+            type: 'POST',
+            dataType: 'json',
+            timeout: 30000
+        })
+        .done(function(response) {
+            if (response.status == 1) {
+                // console.log(ENV)
+                window.location = ENV.baseUrl + response.data
+            }
+        })
+        .fail(function() {
+            console.log("error");
+        });
     }
 </script>
 </div>

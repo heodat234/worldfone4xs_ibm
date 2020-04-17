@@ -8,7 +8,7 @@ import json
 import calendar
 from helper.mongod import Mongodb
 from datetime import datetime
-from datetime import date
+from datetime import date,timedelta
 from pprint import pprint
 from bson import ObjectId
 from helper.common import Common
@@ -32,7 +32,7 @@ try:
    errorData   = []
 
    today = date.today()
-   # today = datetime.strptime('22/12/2019', "%d/%m/%Y").date()
+   # today = datetime.strptime('01/04/2020', "%d/%m/%Y").date()
 
    day = today.day
    month = today.month
@@ -43,7 +43,9 @@ try:
    todayString = today.strftime("%d/%m/%Y")
    todayTimeStamp = int(time.mktime(time.strptime(str(todayString + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
    endTodayTimeStamp = int(time.mktime(time.strptime(str(todayString + " 23:59:59"), "%d/%m/%Y %H:%M:%S")))
-   dateExport = "0"+ str( int(time.strftime('%m'))-1 ) + today.strftime("%Y")
+
+   yesterday = today - timedelta(days=1)
+   dateExport = "0"+ str( int(yesterday.strftime('%m')) ) + yesterday.strftime("%Y")
 
    startMonth = int(time.mktime(time.strptime(str('01/' + str(month) + '/' + str(year) + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
    endMonth = int(time.mktime(time.strptime(str(str(lastDayOfMonth) + '/' + str(month) + '/' + str(year) + " 23:59:59"), "%d/%m/%Y %H:%M:%S")))
@@ -51,9 +53,9 @@ try:
    holidayOfMonth = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_off_sys'))
    listHoliday = map(lambda offDateRow: {offDateRow['off_date']}, holidayOfMonth)
 
-   # if day != 1:
-   #    print('stop!')  
-   #    sys.exit()
+   if day != 1:
+      print('stop!')  
+      sys.exit()
 
    fileOutput  = base_url + 'upload/loan/export/ListofallcustomerReport_'+ dateExport +'.xlsx' 
 

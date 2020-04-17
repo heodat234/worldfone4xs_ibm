@@ -14,6 +14,8 @@ from bson import ObjectId
 from helper.common import Common
 
 from helper.jaccs import Config
+import pandas as pd
+import xlsxwriter
 
 common      = Common()
 base_url    = common.base_url()
@@ -47,6 +49,7 @@ try:
 
    todayString = today.strftime("%d/%m/%Y")
    todayTimeStamp = int(time.mktime(time.strptime(str(todayString + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
+   endTodayTimeStamp = int(time.mktime(time.strptime(str(todayString + " 23:59:59"), "%d/%m/%Y %H:%M:%S")))
 
    startMonth = int(time.mktime(time.strptime(str('01/' + str(month) + '/' + str(year) + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
    endMonth = int(time.mktime(time.strptime(str(str(lastDayOfMonth) + '/' + str(month) + '/' + str(year) + " 23:59:59"), "%d/%m/%Y %H:%M:%S")))
@@ -57,6 +60,7 @@ try:
    if todayTimeStamp in listHoliday:
       sys.exit()
 
+   mongodb.remove_document(MONGO_COLLECTION=collection, WHERE={'createdAt': {'$gte': todayTimeStamp, '$lte': endTodayTimeStamp} })
 
 
    price = mongodb.getOne(MONGO_COLLECTION=config_collection, SELECT=['conditionDonotCall']) 
@@ -188,6 +192,131 @@ try:
 
    if len(insertData) > 0:
       mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertData)
+
+   
+
+
+
+
+   fileOutput  = base_url + 'upload/loan/export/SMS Daily Report_'+ today.strftime("%d%m%Y") +'.xlsx' 
+
+   aggregate_acc = [
+      {
+          "$match":
+          {
+              "createdAt": {'$gte' : todayTimeStamp},
+              "type": 'sibs'
+          }
+      },
+      {
+         "$project":
+          {
+              "_id": 0,
+          }
+      },
+      {
+         "$sort":
+          {
+              "group": 1,
+              "amount": 1
+          }
+      }
+   ]
+   data = mongodb.aggregate_pipeline(MONGO_COLLECTION=collection,aggregate_pipeline=aggregate_acc)
+
+   aggregate_card = [
+      {
+          "$match":
+          {
+              "createdAt": {'$gte' : todayTimeStamp},
+              "type": 'card'
+          }
+      },
+      {
+         "$project":
+          {
+              "_id": 0,
+          }
+      },
+      {
+         "$sort":
+          {
+              "group": 1,
+              "amount": 1
+          }
+      }
+   ]
+   dataCard = mongodb.aggregate_pipeline(MONGO_COLLECTION=collection,aggregate_pipeline=aggregate_card)
+   # dataReport = []
+   # for row in data:
+   #    temp = row
+   #    # if 'os' in row.keys():
+   #    #    temp['os']      = '{:,.2f}'.format(float(row['os']))
+
+   #    # if 'amount' in row.keys():
+   #    #    temp['amount']      = '{:,.2f}'.format(float(row['amount']))
+
+   #    dataReport.append(temp)
+
+
+   df = pd.DataFrame(data, columns= ['stt','group','account_number','phone','name','amount'])
+
+   # Create a Pandas Excel writer using XlsxWriter as the engine.
+   writer = pd.ExcelWriter(fileOutput, engine='xlsxwriter')
+
+   # Convert the dataframe to an XlsxWriter Excel object.
+   df.to_excel(writer,sheet_name='SIBS',index=False,header=['No','GROUP','ACCOUNT NUMBER','PHONE','NAME','AMOUNT'])  
+   
+   # Get the xlsxwriter workbook and worksheet objects.
+   workbook  = writer.book
+   worksheet = writer.sheets['SIBS']
+
+   # Add some cell formats.
+   format1 = workbook.add_format({'num_format': '#,##0', 'bottom':1, 'top':1, 'left':1, 'right':1})
+   # format2 = workbook.add_format({'num_format': '0%'})
+   border_fmt = workbook.add_format({'bottom':1, 'top':1, 'left':1, 'right':1})
+
+
+   # Set the column width and format.
+   worksheet.set_column('A:F', 20, border_fmt)
+
+   worksheet.set_column('F:F', 20, format1)
+   # Set the format but not the column width.
+
+   # Close the Pandas Excel writer and output the Excel file.
+   # writer.save()
+
+
+
+   # CARD
+   df = pd.DataFrame(dataCard, columns= ['stt','group','account_number','phone','name','amount', 'os'])
+
+   # Create a Pandas Excel writer using XlsxWriter as the engine.
+   # writer = pd.ExcelWriter(fileOutput, engine='xlsxwriter')
+
+   # Convert the dataframe to an XlsxWriter Excel object.
+   df.to_excel(writer,sheet_name='CARD',index=False,header=['No','GROUP','ACCOUNT NUMBER','PHONE','NAME','OS','AMOUNT'])  
+   
+   # Get the xlsxwriter workbook and worksheet objects.
+   workbook  = writer.book
+   worksheet = writer.sheets['CARD']
+
+   # Add some cell formats.
+   format1 = workbook.add_format({'num_format': '#,##0', 'bottom':1, 'top':1, 'left':1, 'right':1})
+   # format2 = workbook.add_format({'num_format': '0%'})
+   border_fmt = workbook.add_format({'bottom':1, 'top':1, 'left':1, 'right':1})
+
+
+   # Set the column width and format.
+   worksheet.set_column('A:G', 20, border_fmt)
+
+   worksheet.set_column('F:F', 20, format1)
+   worksheet.set_column('G:G', 20, format1)
+   # Set the format but not the column width.
+
+   # Close the Pandas Excel writer and output the Excel file.
+   writer.save()
+
 
 
    now_end         = datetime.now()

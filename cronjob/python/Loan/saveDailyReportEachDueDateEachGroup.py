@@ -48,7 +48,7 @@ try:
     listDebtGroup = []
 
     today = date.today()
-    # today = datetime.strptime('27/03/2020', "%d/%m/%Y").date()
+    # today = datetime.strptime('27/02/2020', "%d/%m/%Y").date()
 
     day = today.day
     month = today.month
@@ -73,6 +73,9 @@ try:
     starttime = int(time.mktime(time.strptime(str(todayString + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
     endtime = int(time.mktime(time.strptime(str(todayString + " 23:59:59"), "%d/%m/%Y %H:%M:%S")))
 
+
+    mongodb.remove_document(MONGO_COLLECTION=collection, WHERE={'createdAt': {'$gte': todayTimeStamp, '$lte': endTodayTimeStamp} })
+    
     mainProduct = {}
     mainProductRaw = mongodb.get(MONGO_COLLECTION=product_collection)
     for prod in mainProductRaw:
@@ -237,42 +240,43 @@ try:
                             ob_principal_today = float(sbv['sale_total']) + float(sbv['cash_total'])
 
 
+
                     code = ['2000','2100','2700']
-                    for row_acc in acc_arr:
-                        aggregate_gl = [
-                            {
-                                "$match":
-                                {
-                                    "created_at": {'$gte': due_date_add_2, '$lte': endTodayTimeStamp},
-                                    "account_number": row_acc,
-                                    "code" : {'$in' : code},
-                                    "coNoHayKhong": 'Y'
-                                }
-                            },
-                            {
-                                "$project":
-                                {
-                                    "account_number" : 1,
-                                    "amount" : 1,
-                                    "code" : 1,
-                                }
-                            }
-                        ]
-                        glData = mongodb.aggregate_pipeline(MONGO_COLLECTION=payment_of_card_collection,aggregate_pipeline=aggregate_gl)
-                        code_2000 = 0
-                        code_2700 = 0
-                        sum_code = 0
-                        if glData != None:
-                            for row in glData:
-                                if row['code'] == '2000' or row['code'] == '2100':
-                                    code_2000 += row['amount']
-                                else:
-                                    code_2700 += row['amount']
-                            sum_code = code_2000 - code_2700
-                            if sum_code > 0:
-                                temp['amt']         += sum_code
                     
 
+                    for acc in acc_arr:
+                      aggregate_gl = [
+                          {
+                              "$match":
+                              {
+                                  "created_at": {'$gte': due_date_add_2,'$lte': todayTimeStamp},
+                                  "account_number": acc,
+                                  'code' : {'$in' : code},
+                                  "coNoHayKhong": 'Y'
+                              }
+                          },{
+                              "$project":
+                              {
+                                   "account_number" : 1,
+                                   "amount" : 1,
+                                   "code" : 1,
+                              }
+                          }
+                      ]
+                      glInfo = mongodb.aggregate_pipeline(MONGO_COLLECTION=payment_of_card_collection,aggregate_pipeline=aggregate_gl)
+                      code_2000 = 0
+                      code_2700 = 0
+                      sum_amount = 0
+                      if glInfo != None:
+                         for row in glInfo:
+                            if row['code'] == '2000' or row['code'] == '2100':
+                               code_2000 += row['amount']
+                            else:
+                               code_2700 += row['amount']
+                         sum_amount = code_2000 - code_2700
+                         if sum_amount > 0:
+                          # temp['col'] += 1
+                          temp['amt'] += sum_amount
 
 
                     temp['amt']         = round(temp['amt']/1000)

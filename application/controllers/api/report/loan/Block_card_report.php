@@ -36,6 +36,12 @@ Class Block_card_report extends WFF_Controller {
         }
     }
 
+    function saveReport()
+    {
+      shell_exec('/usr/local/bin/python3.6 /data/worldfone4xs/cronjob/python/Loan/saveBlockCardReport.py  > /dev/null &');
+      echo json_encode(array("status" => 1, "data" => []));
+    }
+    
     function exportExcel() {
         $request    = $this->input->post();
         $start      =  strtotime(str_replace('/', '-', $request['start'])) ;

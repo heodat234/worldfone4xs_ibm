@@ -1,58 +1,8 @@
-11/02/2020, 16:06:20: Writing 15 cols but got 14 aliases
-11/02/2020, 16:09:25: Writing 15 cols but got 14 aliases
-11/02/2020, 16:16:53: End Log
-11/02/2020, 16:32:32: not enough values to unpack (expected 2, got 1)
-11/02/2020, 16:46:22: End Log
-11/02/2020, 16:53:42: End Log
-11/02/2020, 17:17:38: End Log
-11/02/2020, 17:38:14: End Log
-11/02/2020, 17:48:01: End Log
-11/02/2020, 19:59:54: End Log
-12/02/2020, 11:31:58: End Log
-12/02/2020, 11:43:24: End Log
-12/02/2020, 13:05:22: End Log
-19/02/2020, 11:53:11: End Log
-19/02/2020, 12:00:13: End Log
-19/02/2020, 12:03:09: End Log
-24/02/2020, 18:07:42: End Log
-24/02/2020, 18:11:14: End Log
-24/02/2020, 18:11:55: End Log
-24/02/2020, 18:14:47: End Log
-24/02/2020, 18:16:10: End Log
-25/02/2020, 10:33:00: End Log
-25/02/2020, 10:34:41: End Log
-25/02/2020, 12:54:06: End Log
-25/02/2020, 12:56:41: End Log
-25/02/2020, 14:07:00: End Log
-25/02/2020, 14:09:30: End Log
-25/02/2020, 14:30:12: End Log
-25/02/2020, 14:32:43: End Log
-25/02/2020, 14:42:41: '<' not supported between instances of 'str' and 'int'
-25/02/2020, 14:43:25: '<' not supported between instances of 'str' and 'int'
-25/02/2020, 14:43:38: '<' not supported between instances of 'str' and 'int'
-25/02/2020, 14:44:59: '<' not supported between instances of 'str' and 'int'
-25/02/2020, 14:45:27: End Log
-25/02/2020, 14:46:06: '<' not supported between instances of 'str' and 'int'
-25/02/2020, 14:46:23: End Log
-25/02/2020, 14:48:56: End Log
-25/02/2020, 14:50:52: End Log
-25/02/2020, 14:58:53: End Log
-25/02/2020, 15:00:15: End Log
-25/02/2020, 15:01:25: End Log
-25/02/2020, 15:01:45: End Log
-25/02/2020, 15:03:42: Unsupported type <class 'xlsxwriter.format.Format'> in write()
-25/02/2020, 15:05:08: 'DataFrame' object has no attribute 'header'
-25/02/2020, 15:05:19: 'DataFrame' object has no attribute 'header'
-25/02/2020, 15:06:07: 'DataFrame' object has no attribute 'header'
-25/02/2020, 15:06:49: 'DataFrame' object has no attribute 'header'
-25/02/2020, 15:09:27: 'DataFrame' object has no attribute 'header'
-25/02/2020, 15:18:06: End Log
-25/02/2020, 15:26:23: End Log
-25/02/2020, 15:27:34: '<' not supported between instances of 'str' and 'int'
-25/02/2020, 15:31:17: End Log
-25/02/2020, 15:31:49: End Log
-25/02/2020, 15:32:31: End Log
-25/02/2020, 15:50:53: End Log
-26/02/2020, 22:35:23: End Log
-27/02/2020, 12:07:26: End Log
-27/02/2020, 12:24:19: End Log
+22/02/2020, 10:39:47: End Log
+24/02/2020, 09:24:19: End Log
+24/02/2020, 09:31:42: End Log
+25/02/2020, 18:03:18: End Log
+02/03/2020, 10:38:10: End Log
+03/04/2020, 11:35:47: End Log
+03/04/2020, 11:42:38: name 'timedelta' is not defined
+03/04/2020, 11:44:13: End Log

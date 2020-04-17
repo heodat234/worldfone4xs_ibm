@@ -67,19 +67,6 @@ try:
         importLogInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': ObjectId(sys.argv[1])})
     except Exception as SysArgvError:
         if not os.path.isfile(ftpLocalUrl):
-            # notification = {
-            #     'title'     : 'Import COLLATERALL INFO error',
-            #     'active'    : True,
-            #     'icon'      : 'fa fa-exclamation-triangle',
-            #     'color'     : 'text-warning',
-            #     'content'   : 'Không có file COLLATERALL INFO hôm nay',
-            #     'link'      : '/manage/data/import_file',
-            #     'to'        : ['911'],
-            #     'notifyDate': datetime.utcnow(),
-            #     'createdBy' : 'System',
-            #     'createdAt' : time.time()
-            # }
-            # mongodb.insert(MONGO_COLLECTION=common.getSubUser(subUserType, 'Notification'), insert_data=notification)
             sys.exit()
     
         importLogInfo = {

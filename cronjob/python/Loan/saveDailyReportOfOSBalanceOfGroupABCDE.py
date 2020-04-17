@@ -32,7 +32,7 @@ lnjc05_yesterday_collection         = common.getSubUser(subUserType, 'LNJC05_yes
 listAcc_yesterday_collection        = common.getSubUser(subUserType, 'List_of_account_in_collection_yesterday')
 stored_collection           = common.getSubUser(subUserType, 'SBV_Stored')
 stored_old_collection           = common.getSubUser(subUserType, 'SBV_Stored_Old')
-# diallist_collection         = common.getSubUser(subUserType, 'Diallist_detail')
+diallist_collection         = common.getSubUser(subUserType, 'Diallist_detail')
 sbv_collection              = common.getSubUser(subUserType, 'SBV')
 
 log         = open(base_url + "cronjob/python/Loan/log/Os_balance_group_log.txt","a")
@@ -55,7 +55,8 @@ try:
 
     todayString = today.strftime("%d/%m/%Y")
     todayTimeStamp = int(time.mktime(time.strptime(str(todayString + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
-
+    endTodayTimeStamp = int(time.mktime(time.strptime(str(todayString + " 23:59:59"), "%d/%m/%Y %H:%M:%S")))
+    
     starttime = int(time.mktime(time.strptime(str(todayString + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
     endtime = int(time.mktime(time.strptime(str(todayString + " 23:59:59"), "%d/%m/%Y %H:%M:%S")))
 
@@ -67,6 +68,8 @@ try:
     yesterdayString = yesterday.strftime("%d/%m/%Y")
     yesterdayTimeStamp = int(time.mktime(time.strptime(str(yesterdayString + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
     endYesterdayTimeStamp = int(time.mktime(time.strptime(str(yesterdayString + " 23:59:59"), "%d/%m/%Y %H:%M:%S")))
+
+    mongodb.remove_document(MONGO_COLLECTION=collection, WHERE={'createdAt': {'$gte': todayTimeStamp, '$lte': endTodayTimeStamp} })
 
     targetInfo = mongodb.get(MONGO_COLLECTION=target_collection)
     for targetGroup in targetInfo:

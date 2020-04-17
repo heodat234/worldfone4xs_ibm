@@ -24,6 +24,7 @@ try:
     config = Config()
     ftp = Ftp()
     common = Common()
+
     base_url = common.base_url()
     wff_env = common.wff_env(base_url)
     mongodb = Mongodb(MONGODB="worldfone4xs", WFF_ENV=wff_env)
@@ -60,7 +61,7 @@ try:
         mongodbresult = Mongodb(logDbName, wff_env)
     
     ftpLocalUrl = common.getDownloadFolder() + fileName
-    
+
     try:
         sys.argv[1]
         importLogId = str(sys.argv[1])
@@ -115,6 +116,7 @@ try:
             inputDataRaw = excel.getDataCSV(file_path=importLogInfo['file_path'], dtype=object, sep=sep, header=0, names=modelColumns, na_values='')
         else:
             inputDataRaw = excel.getDataExcel(file_path=importLogInfo['file_path'], header=0, names=modelColumns, na_values='')
+
         inputData = inputDataRaw.to_dict('records')
         for idx, row in enumerate(inputData):
             total += 1

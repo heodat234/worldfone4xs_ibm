@@ -24,7 +24,7 @@ now         = datetime.now()
 subUserType = 'LO'
 collection         = common.getSubUser(subUserType, 'Daily_assignment_report')
 # lnjc05_collection  = common.getSubUser(subUserType, 'LNJC05_yesterday')
-# ln3206_collection  = common.getSubUser(subUserType, 'LN3206F')
+zaccf_collection     = common.getSubUser(subUserType, 'ZACCF')
 product_collection   = common.getSubUser(subUserType, 'Product')
 sbv_collection       = common.getSubUser(subUserType, 'SBV')
 diallist_detail_collection  = common.getSubUser(subUserType, 'Diallist_detail')
@@ -43,7 +43,7 @@ try:
    log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': Start Import' + '\n')
 
    today = date.today()
-   # today = datetime.strptime('10/03/2020', "%d/%m/%Y").date()
+   # today = datetime.strptime('25/03/2020', "%d/%m/%Y").date()
 
    day = today.day
    month = today.month
@@ -182,7 +182,13 @@ try:
                   else:
                      product_id = '302'
             else:
-               product_id                       = diallistInfo['PRODGRP_ID']
+               if 'PRODGRP_ID' in diallistInfo.keys():
+                  product_id                       = diallistInfo['PRODGRP_ID']
+               else:
+                  zaccfInfo = mongodb.getOne(MONGO_COLLECTION=zaccf_collection, WHERE={'account_number': str(temp['account_number'])},SELECT=['PRODGRP_ID'])
+                  if zaccfInfo != None:
+                     product_id                       = zaccfInfo['PRODGRP_ID']
+
                temp['outstanding_principal']    = diallistInfo['outstanding_principal'] if 'outstanding_principal' in diallistInfo.keys() else ''
 
             product = mongodb.getOne(MONGO_COLLECTION=product_collection, WHERE={'code': str(product_id)},SELECT=['name'])

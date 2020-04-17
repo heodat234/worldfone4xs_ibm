@@ -1,9 +1,0 @@
-21/02/2020, 17:44:19: time data '(5, 29)/2/2020 23:59:59' does not match format '%d/%m/%Y %H:%M:%S'
-21/02/2020, 17:44:37: time data '(5, 29)/2/2020 23:59:59' does not match format '%d/%m/%Y %H:%M:%S'
-21/02/2020, 17:57:54: Authentication failed.
-21/02/2020, 17:58:22: Authentication failed.
-21/02/2020, 17:58:43: time data '(5, 29)/2/2020 23:59:59' does not match format '%d/%m/%Y %H:%M:%S'
-21/02/2020, 17:59:05: Authentication failed.
-21/02/2020, 17:59:15: Authentication failed.
-21/02/2020, 18:00:37: time data '(5, 29)/2/2020 23:59:59' does not match format '%d/%m/%Y %H:%M:%S'
-21/02/2020, 18:01:05: time data '(5, 29)/2/2020 23:59:59' does not match format '%d/%m/%Y %H:%M:%S'

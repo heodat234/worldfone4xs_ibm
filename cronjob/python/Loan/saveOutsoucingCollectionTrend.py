@@ -28,7 +28,7 @@ common = Common()
 log = open(base_url + "cronjob/python/Loan/log/saveOutsoucingCollectionTrend.txt","a")
 now = datetime.now()
 subUserType = 'LO'
-collection              = common.getSubUser(subUserType, 'Cus_assigned_partner_prod')
+collection              = common.getSubUser(subUserType, 'Cus_assigned_partner')
 collection_temp         = common.getSubUser(subUserType, 'Outsoucing_Collection_Trend_report_temp')
 collection_lnjc05       = common.getSubUser(subUserType, 'LNJC05_start_of_month')
 collection_listofAccount = common.getSubUser(subUserType, 'List_of_account_in_collection_start_of_month')
@@ -51,7 +51,7 @@ try :
 
    todayString = today.strftime("%d/%m/%Y")
    todayTimeStamp = int(time.mktime(time.strptime(str(todayString + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
-	# todayString = "26/03/2020"
+   # todayString = "26/03/2020"
    day_of_month      = monthrange(year, month)[1]
    end_day_of_month  = today.replace(day=day_of_month)
    endDayString      = end_day_of_month.strftime("%d/%m/%Y")
@@ -61,142 +61,155 @@ try :
    startDayString       = start_day_of_month.strftime("%d/%m/%Y")
    startDayTimeStamp      = int(time.mktime(time.strptime(str(startDayString + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
 
-   yesterday 	= today - timedelta(days=1)
+   yesterday   = today - timedelta(days=1)
    if day == 1 :
       lastMonth = yesterday.month
+      lastYear = yesterday.year
+
+      lastDayOfMonth = calendar.monthrange(lastYear, lastMonth)[1]
+
+      # todayString = "26/03/2020"
+      day_of_month      = monthrange(lastYear, lastMonth)[1]
+      end_day_of_month  = today.replace(day=day_of_month)
+      endDayString      = end_day_of_month.strftime("%d/%m/%Y")
+      endDayTimeStamp   = int(time.mktime(time.strptime(str(endDayString + " 23:59:59"), "%d/%m/%Y %H:%M:%S")))
+
+      start_day_of_month   = today.replace(day=1)
+      startDayString       = start_day_of_month.strftime("%d/%m/%Y")
+      startDayTimeStamp      = int(time.mktime(time.strptime(str(startDayString + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
    else:
       lastMonth = month
 
 
-	# TẠO ROW CHO TỪNG PARTNER NẾU CHƯA TỒN TẠI
+   # TẠO ROW CHO TỪNG PARTNER NẾU CHƯA TỒN TẠI
    partner_lists = mongodb.getDistinct(MONGO_COLLECTION=collection , SELECT="COMPANY")
    if partner_lists != None:
       for row_partner in partner_lists:
          pprint(row_partner)
          exists_amount = mongodb.count(MONGO_COLLECTION=collection_amount_report,WHERE={'partner':row_partner, 'year' : {'$eq' : str(year)} })
          if exists_amount == 0 : mongodb.insert(MONGO_COLLECTION=collection_amount_report, insert_data={
-				'partner': row_partner,
-				'outsoucing' : {
-					'account' : {
-						'before' : {
-							'l30' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
-							'p30' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
-							'p60' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
-							'p90' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
-							'p180' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
-							'subtotal':{ 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
-						},
-						'writeof':{
-							'p360':{ 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
-						}
-					},
-					'amount':{
-						'before' : {
-							'l30' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
-							'p30' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
-							'p60' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
-							'p90' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
-							'p180' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
-							'subtotal': { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
-						},
-						'writeof' : {
-							'p360' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
-						}
-					}
-				},
-				'collected' : {
-					'account' : {
-						'before' : {
-							'l30' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
-							'p30' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
-							'p60' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
-							'p90' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
-							'p180' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
-							'subtotal' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
-						},
-						'writeof' : {
-							'p360' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
-						}
-					},
-					'amount' : {
-						'before' : {
-							'l30' : {'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
-							'p30' : {'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
-							'p60' : {'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
-							'p90' : {'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
-							'p180' : {'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
-							'subtotal':{'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
-						},
-						'writeof' : {
-							'p360' : {'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
-						}
-					}
-				},
-				'year' : str(year)
-			})
+            'partner': row_partner,
+            'outsoucing' : {
+               'account' : {
+                  'before' : {
+                     'l30' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
+                     'p30' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
+                     'p60' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
+                     'p90' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
+                     'p180' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
+                     'subtotal':{ 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
+                  },
+                  'writeof':{
+                     'p360':{ 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
+                  }
+               },
+               'amount':{
+                  'before' : {
+                     'l30' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
+                     'p30' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
+                     'p60' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
+                     'p90' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
+                     'p180' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
+                     'subtotal': { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
+                  },
+                  'writeof' : {
+                     'p360' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
+                  }
+               }
+            },
+            'collected' : {
+               'account' : {
+                  'before' : {
+                     'l30' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
+                     'p30' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
+                     'p60' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
+                     'p90' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
+                     'p180' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
+                     'subtotal' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
+                  },
+                  'writeof' : {
+                     'p360' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
+                  }
+               },
+               'amount' : {
+                  'before' : {
+                     'l30' : {'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
+                     'p30' : {'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
+                     'p60' : {'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
+                     'p90' : {'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
+                     'p180' : {'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
+                     'subtotal':{'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
+                  },
+                  'writeof' : {
+                     'p360' : {'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
+                  }
+               }
+            },
+            'year' : str(year)
+         })
 
          exists_assign_dpd = mongodb.count(MONGO_COLLECTION=collection_assigned_report,WHERE={'partner':row_partner, 'year' : {'$eq' : str(year)} })
          if exists_assign_dpd == 0 : mongodb.insert(MONGO_COLLECTION=collection_assigned_report, insert_data={
-				'partner': row_partner,
-				'outsoucing' : {
-					'account' : {
-						'before' : {
-							'l30' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
-							'p30' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
-							'p60' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
-							'p90' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
-							'p180' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
-							'subtotal':{ 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
-						},
-						'writeof':{
-							'p360':{ 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
-						}
-					},
-					'amount':{
-						'before' : {
-							'l30' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
-							'p30' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
-							'p60' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
-							'p90' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
-							'p180' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
-							'subtotal': { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
-						},
-						'writeof' : {
-							'p360' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
-						}
-					}
-				},
-				'collected' : {
-					'account' : {
-						'before' : {
-							'l30' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
-							'p30' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
-							'p60' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
-							'p90' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
-							'p180' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
-							'subtotal' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
-						},
-						'writeof' : {
-							'p360' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
-						}
-					},
-					'amount' : {
-						'before' : {
-							'l30' : {'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
-							'p30' : {'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
-							'p60' : {'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
-							'p90' : {'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
-							'p180' : {'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
-							'subtotal':{'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
-						},
-						'writeof' : {
-							'p360' : {'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
-						}
-					}
-				},
-				'year' : str(year)
-			})
-	#SHEET AMOUNT------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+            'partner': row_partner,
+            'outsoucing' : {
+               'account' : {
+                  'before' : {
+                     'l30' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
+                     'p30' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
+                     'p60' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
+                     'p90' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
+                     'p180' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
+                     'subtotal':{ 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
+                  },
+                  'writeof':{
+                     'p360':{ 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
+                  }
+               },
+               'amount':{
+                  'before' : {
+                     'l30' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
+                     'p30' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
+                     'p60' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
+                     'p90' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
+                     'p180' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
+                     'subtotal': { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
+                  },
+                  'writeof' : {
+                     'p360' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
+                  }
+               }
+            },
+            'collected' : {
+               'account' : {
+                  'before' : {
+                     'l30' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
+                     'p30' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
+                     'p60' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
+                     'p90' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
+                     'p180' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
+                     'subtotal' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
+                  },
+                  'writeof' : {
+                     'p360' : { 'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
+                  }
+               },
+               'amount' : {
+                  'before' : {
+                     'l30' : {'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
+                     'p30' : {'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
+                     'p60' : {'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
+                     'p90' : {'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
+                     'p180' : {'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
+                     'subtotal':{'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
+                  },
+                  'writeof' : {
+                     'p360' : {'T1':0,'T2':0,'T3':0,'T4':0,'T5':0,'T6':0,'T7':0,'T8':0,'T9':0,'T10':0,'T11':0,'T12':0},
+                  }
+               }
+            },
+            'year' : str(year)
+         })
+   #SHEET AMOUNT------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
    # lấy dữ liệu theo từng account đã tính DPD và tính payment trong ln3206f và gl2018 đưa vào bảng tạm
    pipeline_outsoucing = [
       {
@@ -262,24 +275,18 @@ try :
                # get_gl_2018 = mongodb.get(MONGO_COLLECTION=collection_gl_2018, WHERE={'$and' : [ {'account_number':str(row_result['CONTRACTNR'])}, {'$or' : [{'code': '2000'}, {'code': '2100'}, {'code': '2700'}]}]})
                get_gl_2018 = mongodb.get(MONGO_COLLECTION=collection_gl_2018, WHERE={'$and' : [{'created_at': { '$gte' :  startDayTimeStamp + 86400,'$lte' : endDayTimeStamp + 86400}}, {'account_number':str(row_result['CONTRACTNR'])}, {'$or' : [{'code': '2000'}, {'code': '2100'}, {'code': '2700'}]}]})
                print('Card: '+str(idx))
-               code_2000 = False
-               code_2100 = False
-               code_2700 = False
                code_amount_2000 = 0
                code_amount_2100 = 0
                code_amount_2700 = 0
                if get_gl_2018 != None:
                   for row_code in get_gl_2018:
                      if row_code['code'] == '2000':
-                        code_2000 = True
                         code_amount_2000 += row_code['amount']
                      if row_code['code'] == '2100':
-                        code_2100 = True
                         code_amount_2100 += row_code['amount']
                      if row_code['code'] == '2700':
-                        code_2700 = True
                         code_amount_2700 += row_code['amount']
-               if code_2000 and code_2100 and code_2700 and (code_amount_2000+code_amount_2100-code_amount_2700)>0:
+               if (code_amount_2000+code_amount_2100-code_amount_2700)>0:
                   count_account = 1
                   payment = code_amount_2000+code_amount_2100-code_amount_2700
          else: continue
@@ -442,28 +449,28 @@ try :
 
 
    #SHEET ASSIGNED DPD------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-	#1.OUTSOURCING
+   #1.OUTSOURCING
    print('OUTSOURCING SHEET ASSIGNED DPD')
    if partner_lists != None:
       for row_partner in partner_lists:
          where = {'partner':row_partner, 'year' : {'$exists' : True, '$eq' : str(year)} }
          aggregate_pipeline = [
-				{
-					'$match' : {
-						'$or': [{'created_at': { '$gte' :  startDayTimeStamp,'$lte' : endDayTimeStamp}}, {'updated_at': { '$gte' :  startDayTimeStamp,'$lte' : endDayTimeStamp}}],
-						'COMPANY': row_partner
-					}
-				},
-				{
-				 	"$group":
-				 	{
-				    	"_id": '$DPD',
-		        		"sum_acc": {'$sum': 1},
-		        		"sum_amount": {'$sum': '$CURRENT_DEBT'},
-				 	}
-				}
+            {
+               '$match' : {
+                  '$or': [{'created_at': { '$gte' :  startDayTimeStamp,'$lte' : endDayTimeStamp}}, {'updated_at': { '$gte' :  startDayTimeStamp,'$lte' : endDayTimeStamp}}],
+                  'COMPANY': row_partner
+               }
+            },
+            {
+               "$group":
+               {
+                  "_id": '$DPD',
+                  "sum_acc": {'$sum': 1},
+                  "sum_amount": {'$sum': '$CURRENT_DEBT'},
+               }
+            }
 
-			]
+         ]
          data = mongodb.aggregate_pipeline(MONGO_COLLECTION=collection,aggregate_pipeline=aggregate_pipeline)
          if data != None:
             total_account_p60 = 0
@@ -472,14 +479,16 @@ try :
                if(row_result['_id'] == '<30'):
                   modified = mongodb.update(MONGO_COLLECTION=collection_assigned_report,WHERE=where,VALUE={'outsoucing.account.before.l30.T'+str(month) :row_result['sum_acc'], 'outsoucing.amount.before.l30.T'+str(month) : row_result['sum_amount']})
                elif(row_result['_id'] == '30+' or row_result['_id'] == '<60'):
-                  total_account_p60 	+= row_result['sum_acc']
-                  total_amount_p60 	+= row_result['sum_amount']
+                  total_account_p60    += row_result['sum_acc']
+                  total_amount_p60  += row_result['sum_amount']
                elif(row_result['_id'] == '60+'):
                   modified = mongodb.update(MONGO_COLLECTION=collection_assigned_report,WHERE=where,VALUE={'outsoucing.account.before.p60.T'+str(month) :row_result['sum_acc'], 'outsoucing.amount.before.p60.T'+str(month) : row_result['sum_amount']})
                elif(row_result['_id'] == '90+'):
                   modified = mongodb.update(MONGO_COLLECTION=collection_assigned_report,WHERE=where,VALUE={'outsoucing.account.before.p90.T'+str(month) :row_result['sum_acc'], 'outsoucing.amount.before.p90.T'+str(month) : row_result['sum_amount']})
                elif(row_result['_id'] == '180+'):
                   modified = mongodb.update(MONGO_COLLECTION=collection_assigned_report,WHERE=where,VALUE={'outsoucing.account.before.p180.T'+str(month):row_result['sum_acc'], 'outsoucing.amount.before.p180.T'+str(month) : row_result['sum_amount']})
+               elif(row_result['_id'] == '360+'):
+                  modified = mongodb.update(MONGO_COLLECTION=collection_assigned_report,WHERE=where,VALUE={'outsoucing.account.writeof.p360.T'+str(month):row_result['sum_acc'], 'outsoucing.amount.writeof.p360.T'+str(month) : row_result['sum_amount']})
                else: continue
 
             modified = mongodb.update(MONGO_COLLECTION=collection_assigned_report,WHERE=where,VALUE={'outsoucing.account.before.p30.T'+str(month) :total_account_p60, 'outsoucing.amount.before.p30.T'+str(month) : total_amount_p60})
@@ -511,7 +520,7 @@ try :
 
 
 
-	#2.COLLECTED
+   #2.COLLECTED
    print('COLLECTED SHEET ASSIGNED DPD')
    if partner_lists != None:
       for row_partner in partner_lists:
@@ -519,94 +528,89 @@ try :
          subtotal_amount    = 0
          where = {'partner':row_partner, 'year' : {'$exists' : True, '$eq' : str(year)} }
          aggregate_pipeline = [
-				{
-					'$match' : {
-						'$or': [{'created_at': { '$gte' :  startDayTimeStamp,'$lte' : endDayTimeStamp}}, {'updated_at': { '$gte' :  startDayTimeStamp,'$lte' : endDayTimeStamp}}],
-						'COMPANY': row_partner
-					}
-				},
-				{
-				 	"$group":
-				 	{
-				    	"_id": '$DPD',
-		        		"acc_arr": {'$push': '$CONTRACTNR'},
-				 	}
-				}
+            {
+               '$match' : {
+                  '$or': [{'created_at': { '$gte' :  startDayTimeStamp,'$lte' : endDayTimeStamp}}, {'updated_at': { '$gte' :  startDayTimeStamp,'$lte' : endDayTimeStamp}}],
+                  'COMPANY': row_partner
+               }
+            },
+            {
+               "$group":
+               {
+                  "_id": '$DPD',
+                  "acc_arr": {'$push': '$CONTRACTNR'},
+               }
+            }
 
-			]
+         ]
          data = mongodb.aggregate_pipeline(MONGO_COLLECTION=collection,aggregate_pipeline=aggregate_pipeline)
          if data != None:
             total_account_p60 = 0
             total_amount_p60 = 0
             for row_result in data:
-               account = 0
-               amount = 0
-               aggregate_payment = [
-						{
-							'$match' : {
-								'created_at': { '$gte' :  startDayTimeStamp + 86400,'$lte' : endDayTimeStamp + 86400},
-								'account_number': {'$in': row_result['acc_arr']},
-								'code':'10'
-							}
-						},
-						{
-						 	"$group":
-						 	{
-						    	"_id": 'null',
-				        		"sum_amount": {'$sum': '$amt'},
-				        		"sum_account": {'$sum': 1},
-						 	}
-						}
+               if row_result['_id'] != '360+':
+                  account = 0
+                  amount = 0
+                  aggregate_payment = [
+                     {
+                        '$match' : {
+                           'created_at': { '$gte' :  startDayTimeStamp + 86400,'$lte' : endDayTimeStamp + 86400},
+                           'account_number': {'$in': row_result['acc_arr']},
+                           'code':'10'
+                        }
+                     },
+                     {
+                        "$group":
+                        {
+                           "_id": 'null',
+                           "sum_amount": {'$sum': '$amt'},
+                           "sum_account": {'$sum': 1},
+                        }
+                     }
 
-					]
-               dataLn3206f = mongodb.aggregate_pipeline(MONGO_COLLECTION=collection_ln3206f,aggregate_pipeline=aggregate_payment)
-               if dataLn3206f != None:
-                  for row in dataLn3206f:
-                     account  = row['sum_account']
-                     amount   = row['sum_amount']
-                     subtotal_account   += row['sum_account']
-                     subtotal_amount    += row['sum_amount']
-               if account == 0:
+                  ]
+                  dataLn3206f = mongodb.aggregate_pipeline(MONGO_COLLECTION=collection_ln3206f,aggregate_pipeline=aggregate_payment)
+                  if dataLn3206f != None:
+                     for row in dataLn3206f:
+                        account  = row['sum_account']
+                        amount   = row['sum_amount']
+                        subtotal_account   += row['sum_account']
+                        subtotal_amount    += row['sum_amount']
+
                   for acc in row_result['acc_arr']:
                      # check_gl    = mongodb.count(MONGO_COLLECTION=collection_gl_2018, WHERE={'$and' : [{'account_number':str(acc)}, {'$or' : [{'code': '2000'}, {'code': '2100'}, {'code': '2700'}]}]})
                      check_gl    = mongodb.count(MONGO_COLLECTION=collection_gl_2018, WHERE={'$and' : [{'created_at': { '$gte' :  startDayTimeStamp + 86400,'$lte' : endDayTimeStamp + 86400}},{'account_number':str(acc)}, {'$or' : [{'code': '2000'}, {'code': '2100'}, {'code': '2700'}]}]})
                      if check_gl > 0:
                         # get_gl_2018 = mongodb.get(MONGO_COLLECTION=collection_gl_2018, WHERE={'$and' : [ {'account_number':acc}, {'$or' : [{'code': '2000'}, {'code': '2100'}, {'code': '2700'}]}]})
                         get_gl_2018 = mongodb.get(MONGO_COLLECTION=collection_gl_2018, WHERE={'$and' : [{'created_at': { '$gte' :  startDayTimeStamp + 86400,'$lte' : endDayTimeStamp + 86400}}, {'account_number':acc}, {'$or' : [{'code': '2000'}, {'code': '2100'}, {'code': '2700'}]}]})
-                        code_2000 = False
-                        code_2100 = False
-                        code_2700 = False
                         code_amount_2000 = 0
                         code_amount_2100 = 0
                         code_amount_2700 = 0
                         for row_code in get_gl_2018:
                            if row_code['code'] == '2000':
-                              code_2000 = True
                               code_amount_2000 = row_code['amount']
                            if row_code['code'] == '2100':
-                              code_2100 = True
                               code_amount_2100 = row_code['amount']
                            if row_code['code'] == '2700':
-                              code_2700 = True
                               code_amount_2700 = row_code['amount']
-                        if code_2000 and code_2100 and code_2700 and (code_amount_2000+code_amount_2100-code_amount_2700)>0:
-                           account += 1
-                           amount 	+= code_amount_2000+code_amount_2100-code_amount_2700
+                        if (code_amount_2000+code_amount_2100-code_amount_2700)>0:
+                           account  += 1
+                           amount   += code_amount_2000+code_amount_2100-code_amount_2700
                            subtotal_account += 1
-                           subtotal_amount += amount
+                           subtotal_amount += code_amount_2000+code_amount_2100-code_amount_2700
 
-               if(row_result['_id'] == '<30'):
-                  modified = mongodb.update(MONGO_COLLECTION=collection_assigned_report,WHERE=where,VALUE={'collected.account.before.l30.T'+str(lastMonth) :account, 'collected.amount.before.l30.T'+str(lastMonth) : amount})
-               elif(row_result['_id'] == '30+' or row_result['_id'] == '<60'):
-                  total_account_p60 += account
-                  total_amount_p60 += amount
-               elif(row_result['_id'] == '60+'):
-                  modified = mongodb.update(MONGO_COLLECTION=collection_assigned_report,WHERE=where,VALUE={'collected.account.before.p60.T'+str(lastMonth) :account, 'collected.amount.before.p60.T'+str(lastMonth) : amount})
-               elif(row_result['_id'] == '90+'):
-                  modified = mongodb.update(MONGO_COLLECTION=collection_assigned_report,WHERE=where,VALUE={'collected.account.before.p90.T'+str(lastMonth) :account, 'collected.amount.before.p90.T'+str(lastMonth) : amount})
-               elif(row_result['_id'] == '180+'):
-                  modified = mongodb.update(MONGO_COLLECTION=collection_assigned_report,WHERE=where,VALUE={'collected.account.before.p180.T'+str(lastMonth):account, 'collected.amount.before.p180.T'+str(lastMonth) : amount})
-               else: continue
+                  if(row_result['_id'] == '<30'):
+                     modified = mongodb.update(MONGO_COLLECTION=collection_assigned_report,WHERE=where,VALUE={'collected.account.before.l30.T'+str(lastMonth) :account, 'collected.amount.before.l30.T'+str(lastMonth) : amount})
+                  elif(row_result['_id'] == '30+' or row_result['_id'] == '<60'):
+                     total_account_p60 += account
+                     total_amount_p60 += amount
+                  elif(row_result['_id'] == '60+'):
+                     modified = mongodb.update(MONGO_COLLECTION=collection_assigned_report,WHERE=where,VALUE={'collected.account.before.p60.T'+str(lastMonth) :account, 'collected.amount.before.p60.T'+str(lastMonth) : amount})
+                  elif(row_result['_id'] == '90+'):
+                     modified = mongodb.update(MONGO_COLLECTION=collection_assigned_report,WHERE=where,VALUE={'collected.account.before.p90.T'+str(lastMonth) :account, 'collected.amount.before.p90.T'+str(lastMonth) : amount})
+                  elif(row_result['_id'] == '180+'):
+                     modified = mongodb.update(MONGO_COLLECTION=collection_assigned_report,WHERE=where,VALUE={'collected.account.before.p180.T'+str(lastMonth):account, 'collected.amount.before.p180.T'+str(lastMonth) : amount})
+                  else: continue
 
             modified = mongodb.update(MONGO_COLLECTION=collection_assigned_report,WHERE=where,VALUE={'collected.account.before.p30.T'+str(lastMonth) :total_account_p60, 'collected.amount.before.p30.T'+str(lastMonth) : total_amount_p60})
 
@@ -617,5 +621,5 @@ try :
    print('DONE')
 
 except Exception as ex :
-	pprint(ex)
-	log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(ex) + '\n')
+   pprint(ex)
+   log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(ex) + '\n')

@@ -45,7 +45,7 @@ try:
     insertData = []
     errorData = []
     today = date.today()
-    today = datetime.strptime('01/04/2020', "%d/%m/%Y").date()
+    # today = datetime.strptime('01/04/2020', "%d/%m/%Y").date()
     yesterday = today - timedelta(days=1)
     day = today.day
     month = today.month
@@ -56,6 +56,8 @@ try:
     total = 0
     complete = 0
 
+    yesterday = today - timedelta(days=1)
+    
     if day == 1:
         mongodb.create_db(DB_NAME=logDbName)
         mongodbresult = Mongodb(logDbName, wff_env)
@@ -63,7 +65,10 @@ try:
         mongodbresult = Mongodb(logDbName, wff_env)
         sys.exit()
 
-    ftpLocalUrl = common.getDownloadFolder() + fileName
+    if day != 2:
+        sys.exit()
+
+    ftpLocalUrl = common.getDownloadFolderByDate(yesterday.strftime("%Y%m%d")) + fileName
     pprint(ftpLocalUrl)
 
     try:
@@ -168,7 +173,7 @@ try:
     else:
         if len(insertData) > 0:
             mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertData)
-            mongodb.create_index(MONGO_COLLECTION=collection, FIELD=[('account_number',1)])
+            # mongodb.create_index(MONGO_COLLECTION=collection, FIELD=[('account_number',1)])
         mongodb.update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': importLogId}, VALUE={'status': 1, 'complete_import': time.time(), 'total': total, 'complete': complete})
 except Exception as e:
     log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')

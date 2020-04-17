@@ -10,7 +10,7 @@ import json
 import csv
 from pprint import pprint
 from datetime import datetime
-from datetime import date
+from datetime import date, timedelta
 from bson import ObjectId
 from helper.ftp import Ftp
 from helper.mongod import Mongodb
@@ -44,8 +44,8 @@ try:
     errorData = []
     total = 0
     complete = 0
-    # today = date.today()
-    today = datetime.strptime('2/04/2020', "%d/%m/%Y").date()
+    today = date.today()
+    # today = datetime.strptime('2/04/2020', "%d/%m/%Y").date()
     day = today.day
     month = today.month
     year = today.year
@@ -54,14 +54,18 @@ try:
     sep = ';'
     logDbName = "LO_Input_result_" + str(year) + str(month)
 
+    yesterday = today - timedelta(days=1)
+
     if day == 1:
         mongodb.create_db(DB_NAME=logDbName)
         mongodbresult = Mongodb(logDbName, WFF_ENV=wff_env)
     else:
         mongodbresult = Mongodb(logDbName, WFF_ENV=wff_env)
+    
+    if day != 2:
         sys.exit()
 
-    ftpLocalUrl = common.getDownloadFolder() + fileName
+    ftpLocalUrl = common.getDownloadFolderByDate(yesterday.strftime("%Y%m%d")) + fileName
 
     try:
         sys.argv[1]
@@ -194,7 +198,7 @@ try:
     else:
         if len(insertData) > 0:
             mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertData)
-            mongodb.create_index(MONGO_COLLECTION=collection, FIELD=[('account_number',1)])
+            # mongodb.create_index(MONGO_COLLECTION=collection, FIELD=[('account_number',1)])
         mongodb.update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': importLogId}, VALUE={'status': 1, 'complete_import': time.time(), 'total': total, 'complete': complete})
 
 except Exception as e:

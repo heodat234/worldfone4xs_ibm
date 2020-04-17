@@ -54,16 +54,21 @@ Class Daily_os_balance_group_report extends WFF_Controller {
         }
     }
 
+    function saveReport()
+    {
+      shell_exec('/usr/local/bin/python3.6 /data/worldfone4xs/cronjob/python/Loan/saveDailyReportOfOSBalanceOfGroupABCDE.py  > /dev/null &');
+      echo json_encode(array("status" => 1, "data" => []));
+    }
+    
     function exportExcel()
     {
         $file_path = UPLOAD_PATH . "loan/export/DailyReportOfOSBlanceOfGroupBCDE.xlsx";
         echo json_encode(array("status" => 1, "data" => $file_path));
     }
 
-
   //   function exportExcel() {
   //       $today      = date('Y-m-d');
-  //       $last6Month = strtotime(date("Y-m-d", strtotime($today)) . " -3 month");
+  //       $last6Month = strtotime(date("Y-m-d", strtotime($today)) . " -1 month");
   //       // print_r($today);exit;
 
   //       $request = array('createdAt' => array('$gte' => $last6Month), 'type' => 'SIBS');

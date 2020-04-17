@@ -32,7 +32,8 @@ Class Master_data_report extends WFF_Controller {
 
     function saveReport()
     {
-      shell_exec('PYTHONIOENCODING=utf-8 python3.6 /var/www/html/worldfone4xs_ibm/cronjob/python/Loan/saveMasterData.py  > /dev/null &');
+      shell_exec('/usr/local/bin/python3.6 /data/worldfone4xs/cronjob/python/Loan/saveMasterData.py  > /dev/null &');
+      echo json_encode(array("status" => 1, "data" => []));
     }
 
     function exportExcel()
@@ -43,7 +44,7 @@ Class Master_data_report extends WFF_Controller {
     {
         $date = $this->input->post('date');
         $date = getdate(strtotime(str_replace('/', '-', $date)));
-        // print_r($date);exit;
+        
         $day = $date['mday'];
         $month = $date['mon'];
         if ($date['mday'] < 10) {

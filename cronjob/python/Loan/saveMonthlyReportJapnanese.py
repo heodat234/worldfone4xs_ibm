@@ -18,8 +18,8 @@ from helper.mongod import Mongodb
 from helper.excel import Excel
 from helper.jaccs import Config
 from helper.common import Common
-from helper.mongodbaggregate import Mongodbaggregate
-from math import ceil
+# from helper.mongodbaggregate import Mongodbaggregate
+# from math import ceil
 
 excel = Excel()
 config = Config()
@@ -1181,6 +1181,9 @@ try:
         'report_at'     : todayTimeStamp,
         'created_by'    : 'system'
     })
+
+    # pprint(len(insertDataTotal))
+    # pprint(len(insertDataDetail))
 
     mongodb.batch_insert(MONGO_COLLECTION=common.getSubUser(subUserType, colection_total), insert_data=insertDataTotal)
     mongodb.batch_insert(MONGO_COLLECTION=common.getSubUser(subUserType, colection_detail), insert_data=insertDataDetail)

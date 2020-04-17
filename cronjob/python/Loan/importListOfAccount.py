@@ -32,7 +32,7 @@ try:
     log = open(base_url + "cronjob/python/Loan/log/importListOfAccountInCollection.txt","a")
     now = datetime.now()
     subUserType = 'LO'
-    collection = common.getSubUser(subUserType, 'List_of_account_in_collection_01042020')
+    collection = common.getSubUser(subUserType, 'List_of_account_in_collection')
 
     modelColumns = []
     modelConverters = {}
@@ -45,7 +45,7 @@ try:
     insertData = []
     errorData = []
     today = date.today()
-    today = datetime.strptime('01/04/2020', "%d/%m/%Y").date()
+    # today = datetime.strptime('13/02/2020', "%d/%m/%Y").date()
     yesterday = today - timedelta(days=1)
     day = today.day
     month = today.month
@@ -63,7 +63,6 @@ try:
         mongodbresult = Mongodb(logDbName, wff_env)
 
     ftpLocalUrl = common.getDownloadFolder() + fileName
-    pprint(ftpLocalUrl)
 
     try:
         sys.argv[1]
@@ -100,7 +99,7 @@ try:
         }
         importLogId = mongodb.insert(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), insert_data=importLogInfo)
 
-    models = _mongodb.get(MONGO_COLLECTION='Model', WHERE={'collection': common.getSubUser(subUserType, 'List_of_account_in_collection'), 'sub_type': {'$ne': None}}, SORT=[('index', 1)], SELECT=['index', 'collection', 'field', 'type', 'sub_type'], TAKE=1000)
+    models = _mongodb.get(MONGO_COLLECTION='Model', WHERE={'collection': collection, 'sub_type': {'$ne': None}}, SORT=[('index', 1)], SELECT=['index', 'collection', 'field', 'type', 'sub_type'], TAKE=1000)
     for model in models:
         modelColumns.append(model['field'])
         modelConverters[model['field']] = model['type']

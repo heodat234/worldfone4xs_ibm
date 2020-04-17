@@ -7,6 +7,9 @@
         <div class="btn-group btn-group-sm">
             <a role="button" class="btn btn-sm" onclick="saveAsExcel()"><i class="fa fa-file-excel-o"></i> <b>@Export@</b></a>
         </div>
+        <div class="btn-group btn-group-sm">
+            <a role="button" class="btn btn-sm" style="color:#1bbae1" onclick="reloadReport()"><i class="fa fa-refresh"></i> <b> Reload Report</b></a>
+        </div>
     </li>
 </ul>
 <!-- END Table Styles Header -->
@@ -265,6 +268,23 @@
         })
         .fail(function() {
             console.log("error");
+        });
+
+    }
+    function reloadReport() {
+        $.ajax({
+          url: ENV.reportApi + "loan/last_past_year_report/saveReport",
+          type: 'POST',
+          dataType: 'json',
+          timeout: 30000,
+        })
+        .done(function(response) {
+          if (response.status == 1) {
+            notification.show('@Xin vui lòng đợi trong ít phút@', 'success');     
+          }       
+        })
+        .fail(function() {
+          console.log("error");
         });
 
     }

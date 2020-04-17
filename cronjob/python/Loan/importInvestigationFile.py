@@ -45,7 +45,7 @@ try:
     total = 0
     complete = 0
     today = date.today()
-    # today = datetime.strptime('23/12/2019', "%d/%m/%Y").date()
+    # today = datetime.strptime('20/11/2019', "%d/%m/%Y").date()
     day = today.day
     month = today.month
     year = today.year
@@ -67,19 +67,6 @@ try:
         importLogInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': ObjectId(sys.argv[1])})
     except Exception as SysArgvError:
         if not os.path.isfile(ftpLocalUrl):
-            notification = {
-                'title'     : 'Import INVESTIGATION FILE error',
-                'active'    : True,
-                'icon'      : 'fa fa-exclamation-triangle',
-                'color'     : 'text-warning',
-                'content'   : 'Không có file INVESTIGATION FILE hôm nay',
-                'link'      : '/manage/data/import_file',
-                'to'        : ['911'],
-                'notifyDate': datetime.utcnow(),
-                'createdBy' : 'System',
-                'createdAt' : time.time()
-            }
-            mongodb.insert(MONGO_COLLECTION=common.getSubUser(subUserType, 'Notification'), insert_data=notification)
             sys.exit()
     
         importLogInfo = {

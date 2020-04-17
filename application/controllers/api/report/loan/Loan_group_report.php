@@ -44,6 +44,11 @@ Class Loan_group_report extends WFF_Controller {
       return floor(($mday + $firstWday - 1)/7) + 1;
     }
 
+    function saveReport()
+    {
+      shell_exec('/usr/local/bin/python3.6 /data/worldfone4xs/cronjob/python/Loan/saveCardLoanGroupReport.py  > /dev/null &');
+      echo json_encode(array("status" => 1, "data" => []));
+    }
 
     function exportExcel()
     {

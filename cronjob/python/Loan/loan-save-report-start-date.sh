@@ -105,13 +105,13 @@ else
    exit 0
 fi
 
-if [ $(ps -ef | grep -v grep | grep saveCardLoanGroupReport.py | wc -l) -lt 1 ]; then
-   /usr/local/bin/python3.6 ${BASEDIR}/saveCardLoanGroupReport.py > /dev/null 2>&1 &
-   echo "RUN ${BASEDIR}/saveCardLoanGroupReport.py"
-else
-   echo "Worldfone ScanJob service is running"
-   exit 0
-fi
+# if [ $(ps -ef | grep -v grep | grep saveCardLoanGroupReport.py | wc -l) -lt 1 ]; then
+#    /usr/local/bin/python3.6 ${BASEDIR}/saveCardLoanGroupReport.py > /dev/null 2>&1 &
+#    echo "RUN ${BASEDIR}/saveCardLoanGroupReport.py"
+# else
+#    echo "Worldfone ScanJob service is running"
+#    exit 0
+# fi
 
 if [ $(ps -ef | grep -v grep | grep saveBlockCardReport.py | wc -l) -lt 1 ]; then
    /usr/local/bin/python3.6 ${BASEDIR}/saveBlockCardReport.py > /dev/null 2>&1 &
@@ -132,6 +132,30 @@ fi
 if [ $(ps -ef | grep -v grep | grep clearSmallDaily.py | wc -l) -lt 1 ]; then
    /usr/local/bin/python3.6 ${BASEDIR}/clearSmallDaily.py > /dev/null 2>&1 &
    echo "RUN ${BASEDIR}/clearSmallDaily.py"
+else
+   echo "Worldfone ScanJob service is running"
+   exit 0
+fi
+
+if [ $(ps -ef | grep -v grep | grep saveMonthlyBadDebtProvince.py | wc -l) -lt 1 ]; then
+   /usr/local/bin/python3.6 ${BASEDIR}/saveMonthlyBadDebtProvince.py > /dev/null 2>&1 &
+   echo "RUN ${BASEDIR}/saveMonthlyBadDebtProvince.py"
+else
+   echo "Worldfone ScanJob service is running"
+   exit 0
+fi
+
+if [ $(ps -ef | grep -v grep | grep saveMonthlyReportJapnanese.py | wc -l) -lt 1 ]; then
+   /usr/local/bin/python3.6 ${BASEDIR}/saveMonthlyReportJapnanese.py > /dev/null 2>&1 &
+   echo "RUN ${BASEDIR}/saveMonthlyReportJapnanese.py"
+else
+   echo "Worldfone ScanJob service is running"
+   exit 0
+fi
+
+if [ $(ps -ef | grep -v grep | grep calDueDateValue.py | wc -l) -lt 1 ]; then
+   /usr/local/bin/python3.6 ${BASEDIR}/calDueDateValue.py > /dev/null 2>&1 &
+   echo "RUN ${BASEDIR}/calDueDateValue.py"
 else
    echo "Worldfone ScanJob service is running"
    exit 0

@@ -1,13 +1,1 @@
-29/02/2020, 15:16:14: 'UpdateResult' object has no attribute 'UpdateResult'
-29/02/2020, 15:31:28: name 'collection_amount_report' is not defined
-29/02/2020, 16:27:47: 'current_balance'
-16/03/2020, 00:36:15: key must be an instance of str
-16/03/2020, 00:41:03: key must be an instance of str
-16/03/2020, 00:43:29: key must be an instance of str
-16/03/2020, 00:44:30: key must be an instance of str
-16/03/2020, 00:44:42: key must be an instance of str
-16/03/2020, 00:46:13: key must be an instance of str
-16/03/2020, 00:46:52: key must be an instance of str
-16/03/2020, 00:47:18: key must be an instance of str
-16/03/2020, 00:47:24: key must be an instance of str
-16/03/2020, 00:48:37: string indices must be integers
+20/03/2020, 09:50:47: 'Mongodb' object has no attribute 'inc'

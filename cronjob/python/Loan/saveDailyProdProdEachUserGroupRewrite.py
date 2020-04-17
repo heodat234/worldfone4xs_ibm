@@ -73,6 +73,9 @@ try:
     if todayTimeStamp in listHoliday:
         sys.exit()
 
+    mongodb.remove_document(MONGO_COLLECTION=collection, WHERE={'createdAt': {'$gte': todayTimeStamp, '$lte': endTodayTimeStamp} })
+
+    
     mainProduct = {}
     mainProductRaw = mongodb.get(MONGO_COLLECTION=product_collection)
     for prod in mainProductRaw:
@@ -104,6 +107,7 @@ try:
                     name = name.replace('G1','')
                     groupInfoByName = mongodb.get(MONGO_COLLECTION=group_collection, WHERE={'name': {"$regex": name} })
                     for groupInfo in list(groupInfoByName):
+                      if 'members' in groupInfo.keys():
                         members += groupInfo['members']
 
                     temp = {
@@ -523,8 +527,9 @@ try:
             for groupProduct in list(listGroupProduct):
                 groupInfoByDueDate = mongodb.get(MONGO_COLLECTION=group_collection, WHERE={ 'name': {"$regex": groupProduct['text'] + '/Group ' + debtGroupCell[0:1] + '/' + debtGroupCell} })
                 for groupCell in list(groupInfoByDueDate):
-                    
-                    members = groupCell['members']
+                    members = []
+                    if 'members' in groupCell.keys():
+                      members = groupCell['members']
                     name = groupCell['name']
                     
                     temp = {

@@ -41,6 +41,12 @@ Class Daily_prod_user_group_report extends WFF_Controller {
         }
     }
 
+    function saveReport()
+    {
+      shell_exec('/usr/local/bin/python3.6 /data/worldfone4xs/cronjob/python/Loan/saveDailyProdEachUserGroup.py  > /dev/null &');
+      echo json_encode(array("status" => 1, "data" => []));
+    }
+
     function exportExcel() {
         $date = $this->input->post('date');
         $getdate = getdate(strtotime(str_replace('/', '-', $date)));

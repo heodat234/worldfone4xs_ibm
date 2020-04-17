@@ -34,7 +34,11 @@ Class Reminder_letter_report extends WFF_Controller {
         }
     }
 
-
+    function saveReport()
+    {
+      shell_exec('/usr/local/bin/python3.6 /data/worldfone4xs/cronjob/python/Loan/saveReminderLetter.py  > /dev/null &');
+      echo json_encode(array("status" => 1, "data" => []));
+    }
 
     function stringFromColumnIndex($columnIndex) {
         return $this->excel->stringFromColumnIndex($columnIndex);

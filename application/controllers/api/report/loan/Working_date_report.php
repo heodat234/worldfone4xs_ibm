@@ -7,7 +7,7 @@ class Working_date_report extends WFF_Controller
     public function __construct()
     {
         parent::__construct();
-        $this->dir = '/var/www/html/worldfone4xs_ibm/cronjob/LOAN/report/export';
+        $this->dir = '/mnt/nas/upload_file/working_date_report';
     }
 
     public function read()
@@ -34,7 +34,7 @@ class Working_date_report extends WFF_Controller
     {
         $file_path = urldecode($_GET['data']);
 
-        $file = $this->dir . '/' . $file_path;
+        $file = $this->dir .'/'. $file_path;
 
         if (!file_exists($file)) {
             die('file not found');

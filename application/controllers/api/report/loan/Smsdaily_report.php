@@ -49,10 +49,13 @@ Class Smsdaily_report extends WFF_Controller {
             echo json_encode(array("status" => 0, "message" => $e->getMessage()));
         }
     }
-    function save()
+    
+    function saveReport()
     {
-        shell_exec('PYTHONIOENCODING=utf-8 python3.6 /var/www/html/worldfone4xs_ibm/cronjob/python/Loan/saveSmsDaily.py  > /dev/null &');
+      shell_exec('/usr/local/bin/python3.6 /data/worldfone4xs/cronjob/python/Loan/saveSmsDaily.py  > /dev/null &');
+      echo json_encode(array("status" => 1, "data" => []));
     }
+
     function saveAsExcel()
     {
         try {
@@ -84,13 +87,13 @@ Class Smsdaily_report extends WFF_Controller {
             $filename = "SMS DAILY SMS REPORT.xlsx";
             $spreadsheet = new Spreadsheet();
             $spreadsheet->getProperties()
-                        ->setCreator("South Telecom")
-                        ->setLastModifiedBy("Thanh Hung")
-                        ->setTitle("SMS DAILY SMS REPORT")
-                        ->setSubject("SMS DAILY SMS REPORT")
-                        ->setDescription("Office 2007 XLSX, generated using PHP classes.")
-                        ->setKeywords("office 2007 openxml php")
-                        ->setCategory("Report");
+            ->setCreator("South Telecom")
+            ->setLastModifiedBy("Thanh Hung")
+            ->setTitle("SMS DAILY SMS REPORT")
+            ->setSubject("SMS DAILY SMS REPORT")
+            ->setDescription("Office 2007 XLSX, generated using PHP classes.")
+            ->setKeywords("office 2007 openxml php")
+            ->setCategory("Report");
 
             $worksheet = $spreadsheet->getSheet(0);
             $worksheet->setTitle('SMS SIBS');

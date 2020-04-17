@@ -38,15 +38,17 @@ try:
    totalCode   = []
 
    today = date.today()
-   today = datetime.strptime('1/02/2020', "%d/%m/%Y").date()
+   # today = datetime.strptime('1/02/2020', "%d/%m/%Y").date()
 
    day = today.day
    todayString = today.strftime("%d/%m/%Y")
    todayTimeStamp = int(time.mktime(time.strptime(str(todayString + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
+   endTodayTimeStamp = int(time.mktime(time.strptime(str(todayString + " 23:59:59"), "%d/%m/%Y %H:%M:%S")))
 
    if day != 1:
       sys.exit()
 
+   mongodb.remove_document(MONGO_COLLECTION=collection, WHERE={'createdAt': {'$gte': todayTimeStamp, '$lte': endTodayTimeStamp} })
 
    # tru 1 ngay de tinh cho thang truoc 
    today = today - timedelta(days=1)

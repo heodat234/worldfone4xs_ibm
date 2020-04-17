@@ -353,6 +353,23 @@ function saveAsExcel() {
         }
     })
 }
+function reloadReport() {
+    $.ajax({
+      url: ENV.reportApi + "loan/"+Config.collection+"/saveReport",
+      type: 'POST',
+      dataType: 'json',
+      timeout: 30000,
+    })
+    .done(function(response) {
+      if (response.status == 1) {
+        notification.show('@Xin vui lòng đợi trong ít phút@', 'success');     
+      }       
+    })
+    .fail(function() {
+      console.log("error");
+    });
+
+}
 </script>
 
 <script type="text/x-kendo-template" id="statusTemplate">
@@ -368,6 +385,7 @@ function saveAsExcel() {
         <li class="pull-right none-breakcrumb">
             
             <a role="button" class="btn btn-sm" onclick="saveAsExcel()"><i class="fa fa-file-excel-o"></i> <b>@Export@</b></a>
+            <a role="button" class="btn btn-sm" style="color:#1bbae1" onclick="reloadReport()"><i class="fa fa-refresh"></i> <b> Reload Report</b></a>
         </li>
     </ul>
     <!-- END Table Styles Header -->

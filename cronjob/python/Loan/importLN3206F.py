@@ -45,11 +45,10 @@ try:
     total = 0
     complete = 0
     today = date.today()
-    # today = datetime.strptime('14/02/2020', "%d/%m/%Y").date()
+    # today = datetime.strptime('13/12/2019', "%d/%m/%Y").date()
     day = today.day
     month = today.month
     year = today.year
-    todayString = today.strftime("%d/%m/%Y")
     fileName = "LN3206F"
     sep = ';'
     logDbName = "LO_Input_result_" + str(year) + str(month)
@@ -59,7 +58,7 @@ try:
         mongodbresult = Mongodb(logDbName, wff_env)
     else:
         mongodbresult = Mongodb(logDbName, wff_env)
-
+    
     ftpLocalUrl = common.getDownloadFolder() + fileName
 
     try:
@@ -86,10 +85,10 @@ try:
             sys.exit()
 
         importLogInfo = {
-            'collection'    : collection,
+            'collection'    : collection, 
             'begin_import'  : time.time(),
             'file_name'     : fileName,
-            'file_path'     : ftpLocalUrl,
+            'file_path'     : ftpLocalUrl, 
             'source'        : 'ftp',
             'status'        : 2,
             'command'       : '/usr/local/bin/python3.6 ' + base_url + "cronjob/python/Loan/importLN3206F.py > /dev/null &",
@@ -98,7 +97,7 @@ try:
         importLogId = mongodb.insert(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), insert_data=importLogInfo)
 
     models = _mongodb.get(MONGO_COLLECTION='Model', WHERE={'collection': collection}, SORT=[('index', 1)], SELECT=['index', 'collection', 'field', 'type', 'sub_type'], TAKE=40)
-
+    
     for model in models:
         modelColumns.append(model['field'])
         modelConverters[model['field']] = model['type']
@@ -124,8 +123,6 @@ try:
     if len(filenameExtension) < 2:
         filenameExtension.append('txt')
 
-    mongodb.remove_document(MONGO_COLLECTION=collection)
-
     if filenameExtension[1] in ['csv', 'xlsx']:
         if(filenameExtension[1] == 'csv'):
             inputDataRaw = excel.getDataCSV(file_path=importLogInfo['file_path'], dtype=object, sep=sep, header=None, names=modelColumns, na_values='')
@@ -147,8 +144,7 @@ try:
                             temp['result'] = 'error'
                             result = False
                     temp['created_by'] = 'system'
-                    # temp['created_at'] = time.time()
-                    temp['created_at'] = int(time.mktime(time.strptime(str(todayString + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
+                    temp['created_at'] = time.time()
                     temp['import_id'] = str(importLogId)
                     if(result == False):
                         errorData.append(temp)
@@ -176,8 +172,7 @@ try:
                                 temp['result'] = 'error'
                                 result = False
                     temp['created_by'] = 'system'
-                    # temp['created_at'] = time.time()
-                    temp['created_at'] = int(time.mktime(time.strptime(str(todayString + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
+                    temp['created_at'] = time.time()
                     temp['import_id'] = str(importLogId)
                     if(result == False):
                         errorData.append(temp)

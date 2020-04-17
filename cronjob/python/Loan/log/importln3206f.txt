@@ -14,4 +14,3 @@
 25/11/2019, 15:10:03: list assignment index out of range
 25/11/2019, 15:10:13: list assignment index out of range
 25/11/2019, 15:42:35: [Errno 2] No such file or directory: '/data/upload_file/20191122/LN3206F'
-30/12/2019, 21:01:11: name 'today' is not defined

@@ -128,3 +128,43 @@ else
    echo "Worldfone ScanJob service is running"
    exit 0
 fi
+
+if [ $(ps -ef | grep -v grep | grep importLNJC05Yesterday.py | wc -l) -lt 1 ]; then
+   /usr/local/bin/python3.6 ${BASEDIR}/importLNJC05Yesterday.py > /dev/null 2>&1 &
+   echo "RUN ${BASEDIR}/importLNJC05Yesterday.py"
+else
+   echo "Worldfone ScanJob service is running"
+   exit 0
+fi
+
+if [ $(ps -ef | grep -v grep | grep importListOfAccountYesterday.py | wc -l) -lt 1 ]; then
+   /usr/local/bin/python3.6 ${BASEDIR}/importListOfAccountYesterday.py > /dev/null 2>&1 &
+   echo "RUN ${BASEDIR}/importListOfAccountYesterday.py"
+else
+   echo "Worldfone ScanJob service is running"
+   exit 0
+fi
+
+if [ $(ps -ef | grep -v grep | grep importSBVYesterday.py | wc -l) -lt 1 ]; then
+   /usr/local/bin/python3.6 ${BASEDIR}/importSBVYesterday.py > /dev/null 2>&1 &
+   echo "RUN ${BASEDIR}/importSBVYesterday.py"
+else
+   echo "Worldfone ScanJob service is running"
+   exit 0
+fi
+
+if [ $(ps -ef | grep -v grep | grep importLNJC05FStartMonth.py | wc -l) -lt 1 ]; then
+   /usr/local/bin/python3.6 ${BASEDIR}/importLNJC05FStartMonth.py > /dev/null 2>&1 &
+   echo "RUN ${BASEDIR}/importLNJC05FStartMonth.py"
+else
+   echo "Worldfone ScanJob service is running"
+   exit 0
+fi
+
+if [ $(ps -ef | grep -v grep | grep importListOfAccountStartMonth.py | wc -l) -lt 1 ]; then
+   /usr/local/bin/python3.6 ${BASEDIR}/importListOfAccountStartMonth.py > /dev/null 2>&1 &
+   echo "RUN ${BASEDIR}/importListOfAccountStartMonth.py"
+else
+   echo "Worldfone ScanJob service is running"
+   exit 0
+fi

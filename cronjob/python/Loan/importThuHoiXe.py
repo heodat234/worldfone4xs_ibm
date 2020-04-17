@@ -1,7 +1,6 @@
 #!/usr/bin/python3.6
 # -*- coding: utf-8 -*-
 
-import re
 import ftplib
 import calendar
 import time
@@ -9,7 +8,6 @@ import sys
 import os
 import json
 import csv
-import traceback
 from pprint import pprint
 from datetime import datetime
 from datetime import date
@@ -110,7 +108,7 @@ try:
     if len(filenameExtension) < 2:
         filenameExtension.append('txt')
 
-    if filenameExtension[1] in ['csv', 'xlsx', 'xls']:
+    if filenameExtension[1] in ['csv', 'xlsx']:
         if(filenameExtension[1] == 'csv'):
             inputDataRaw = excel.getDataCSV(file_path=importLogInfo['file_path'], dtype=object, sep=';', header=0, names=modelColumns, na_values='')
         else:
@@ -179,4 +177,5 @@ try:
         mongodb.update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': importLogId}, VALUE={'status': 1, 'complete_import': time.time(), 'total': total, 'complete': complete})
 
 except Exception as e:
-    log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(traceback.format_exc()) + '\n')
+    log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')
+    pprint(str(e))

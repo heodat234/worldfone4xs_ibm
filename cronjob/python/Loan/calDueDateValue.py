@@ -63,6 +63,8 @@ try:
     endMonth = int(time.mktime(time.strptime(str(str(lastDayOfMonth) + '/' + str(month) + '/' + str(year) + " 23:59:59"), "%d/%m/%Y %H:%M:%S")))
 
 
+    mongodb.remove_document(MONGO_COLLECTION=collection, WHERE={'created_at': {'$gte': todayTimeStamp, '$lte': endTodayTimeStamp} })
+
 
     mainProduct = {}
     mainProductRaw = mongodb.get(MONGO_COLLECTION=product_collection)

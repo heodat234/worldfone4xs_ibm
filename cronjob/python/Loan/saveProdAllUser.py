@@ -54,7 +54,7 @@ try:
     code = ['2000','2100','2700']
 
     today = date.today()
-    # today = datetime.strptime('13/02/2020', "%d/%m/%Y").date()
+    # today = datetime.strptime('12/04/2020', "%d/%m/%Y").date()
 
     day = today.day
     month = today.month
@@ -98,6 +98,7 @@ try:
     listGroupProductRaw = _mongodb.getOne(MONGO_COLLECTION=jsondata_collection, WHERE={'tags': ['group', 'debt', 'product']})
     listGroupProduct = listGroupProductRaw['data']
 
+    mongodb.remove_document(MONGO_COLLECTION=collection, WHERE={'createdAt': {'$gte': todayTimeStamp, '$lte': endTodayTimeStamp} })
     
     checkGroupA = 'false'
     for debtGroupCell in list(listDebtGroup):
@@ -122,7 +123,8 @@ try:
                       name = ''
                       for team in teams:
                           name1 =  team['name']
-                          groupTeam += team['members']
+                          if 'members' in team.keys():
+                            groupTeam += team['members']
 
                       list_members = set(groupTeam) 
                       unique_members = (list(list_members))
@@ -859,7 +861,10 @@ try:
 
                       # members
                       member_arr = []
-                      list_members = teams['members']
+                      if 'members' in teams.keys():
+                        list_members = teams['members']
+                      else:
+                        list_members = []
                       member_arr_sort = []
                       for member in list_members:
                           temp_member = [member]

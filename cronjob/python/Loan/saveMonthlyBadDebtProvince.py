@@ -18,8 +18,8 @@ from helper.mongod import Mongodb
 from helper.excel import Excel
 from helper.jaccs import Config
 from helper.common import Common
-from helper.mongodbaggregate import Mongodbaggregate
-from math import ceil
+# from helper.mongodbaggregate import Mongodbaggregate
+# from math import ceil
 
 excel = Excel()
 config = Config()
@@ -378,6 +378,7 @@ try:
         temp['bad_debt_ratio'] = (temp['group_two_plus_w_org_sibs'] + temp['group_two_plus_w_org_card']) / temp['total_amt'] if temp['total_amt'] != 0 else 0
         temp['created_at'] = todayTimeStamp - 3600 *24
         insertData.append(temp)
+        # pprint(temp)
     mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertData)
     print('DONE')
 except Exception as e:

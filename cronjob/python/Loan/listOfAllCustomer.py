@@ -51,8 +51,8 @@ subUserType = 'LO'
 collection           = common.getSubUser(subUserType, 'List_of_all_customer_report')
 collection1          = common.getSubUser(subUserType, 'List_of_all_customer_total_report_temp')
 
-zaccf_collection     = common.getSubUser(subUserType, 'ZACCF_01022020')
-sbv_collection            = common.getSubUser(subUserType, 'SBV_01022020')
+zaccf_collection     = common.getSubUser(subUserType, 'ZACCF_report')
+sbv_collection            = common.getSubUser(subUserType, 'SBV')
 
 product_collection   = common.getSubUser(subUserType, 'Product')
 province_collection   = common.getSubUser(subUserType, 'Province')
@@ -98,169 +98,169 @@ try:
     # holidayOfMonth = mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'Report_off_sys'))
     # listHoliday = map(lambda offDateRow: {offDateRow['off_date']}, holidayOfMonth)
 
-    # if day != 1:
-    #   print('stop!')  
-    #   sys.exit()
+    if day != 1:
+      print('stop!')  
+      sys.exit()
 
     
    # Zaccf
-#     aggregate_zaccf = [
-#         {
-#            "$match":
-#            {
-#                'W_ORG_1'                       :{'$gt'     : 0},
-#                "$or":[
-#                     {'createdAt': {'$gte' : todayTimeStamp,'$lte' : endTodayTimeStamp}},
-#                     {'updatedAt': {'$gte' : todayTimeStamp,'$lte' : endTodayTimeStamp}}
-#                ]
+    aggregate_zaccf = [
+        {
+           "$match":
+           {
+               'W_ORG_1'                       :{'$gt'     : 0},
+               "$or":[
+                    {'createdAt': {'$gte' : startMonth,'$lte' : endMonth}},
+                    {'updatedAt': {'$gte' : todayTimeStamp,'$lte' : endTodayTimeStamp}}
+               ]
                
-#            }
-#        },
+           }
+       },
       
-#        {
-#             "$lookup":
-#                 {
-#                 "from": product_collection,
-#                 "localField":"PRODGRP_ID",
-#                 "foreignField": "code",
-#                 "as" : "product"
-#                 }
-#         },
-#        {
-#             "$unwind":
-#                 {
-#                 "path": "$product",
-#                 "preserveNullAndEmptyArrays": True
-#                 }
-#         },
-#        {
-#             "$lookup":
-#                 {
-#                 "from": province_collection,
-#                 "localField":"STAT_CD",
-#                 "foreignField": "code",
-#                 "as" : "province"
-#                 }
-#         },
-#          {
-#             "$unwind":
-#                 {
-#                 "path": "$province",
-#                 "preserveNullAndEmptyArrays": True
-#                 }
-#         },
-#        {
-#            "$project":
-#            {    
-#             #    col field
-#                "account_number": 1,
-#                "CUS_ID"        : 1,
-#                "name"          : 1,
-#                "ODIND_FG"      : 1,
-#                "CAR_ID"        : 1,
-#                "TERM_ID"       : 1,
-#                "W_ORG"         : 1,
-#                "PRODGRP_ID"    : 1,
-#                "PRODGRP_NAME"  :"$product.name",
-#                "LIC_NO"        : 1,
-#                "INT_RATE"      : 1,
-#                "WRK_BRN"       : 1,
-#                "STAT_CD"       : 1,
-#                "STAT_CD_NAME"       : "$province.name"
+       {
+            "$lookup":
+                {
+                "from": product_collection,
+                "localField":"PRODGRP_ID",
+                "foreignField": "code",
+                "as" : "product"
+                }
+        },
+       {
+            "$unwind":
+                {
+                "path": "$product",
+                "preserveNullAndEmptyArrays": True
+                }
+        },
+       {
+            "$lookup":
+                {
+                "from": province_collection,
+                "localField":"STAT_CD",
+                "foreignField": "code",
+                "as" : "province"
+                }
+        },
+         {
+            "$unwind":
+                {
+                "path": "$province",
+                "preserveNullAndEmptyArrays": True
+                }
+        },
+       {
+           "$project":
+           {    
+            #    col field
+               "account_number": 1,
+               "CUS_ID"        : 1,
+               "name"          : 1,
+               "ODIND_FG"      : 1,
+               "CAR_ID"        : 1,
+               "TERM_ID"       : 1,
+               "W_ORG"         : 1,
+               "PRODGRP_ID"    : 1,
+               "PRODGRP_NAME"  :"$product.name",
+               "LIC_NO"        : 1,
+               "INT_RATE"      : 1,
+               "WRK_BRN"       : 1,
+               "STAT_CD"       : 1,
+               "STAT_CD_NAME"       : "$province.name"
 
                
-#            }
-#        }
-#    ]
-#     data = mongodb.aggregate_pipeline(MONGO_COLLECTION=zaccf_collection,aggregate_pipeline=aggregate_zaccf)
+           }
+       }
+   ]
+    data = mongodb.aggregate_pipeline(MONGO_COLLECTION=zaccf_collection,aggregate_pipeline=aggregate_zaccf)
     
-#     for row in data:
+    for row in data:
     
         
-#       if 'account_number' in row.keys():
+      if 'account_number' in row.keys():
             
-#             temp = {}
-#             temp['DT_TX'] = now.strftime("%d/%m/%Y")
-#             temp['ACC_ID'] = row['account_number']
-#             temp['CUS_ID'] = row['CUS_ID']
-#             temp['CUS_NM'] = row['name']
-#             temp['Loan_Group'] = convert_group(row['ODIND_FG'])
-#             temp['CAR_ID'] = row['CAR_ID']
-#             temp['TERM_ID'] = int(row['TERM_ID'])
-#             temp['W_ORG'] = int(float(row['W_ORG']))
-#             temp['TOTAL_ACC'] = 1
-#             temp['TOTAL_CUS'] = 1
-#             temp['PRODGRP_CODE'] = row['PRODGRP_ID']
-#             temp['PRODGRP_ID'] = row['PRODGRP_NAME'] if 'PRODGRP_NAME' in row.keys() else row['PRODGRP_ID']
-#             temp['LIC_NO'] =  row['LIC_NO']
-#             temp['interest_rate'] = float(row['INT_RATE'])
-#             temp['Dealer_code'] = row['WRK_BRN']
-#             temp['Province_code'] = row['STAT_CD_NAME'] if 'STAT_CD_NAME' in row.keys() else row['STAT_CD']
-#             temp['createdAt'] = todayTimeStamp  
-#             temp['createdBy'] = 'system'
+            temp = {}
+            temp['DT_TX'] = now.strftime("%d/%m/%Y")
+            temp['ACC_ID'] = row['account_number']
+            temp['CUS_ID'] = row['CUS_ID']
+            temp['CUS_NM'] = row['name']
+            temp['Loan_Group'] = convert_group(row['ODIND_FG'])
+            temp['CAR_ID'] = row['CAR_ID']
+            temp['TERM_ID'] = int(row['TERM_ID'])
+            temp['W_ORG'] = int(float(row['W_ORG']))
+            temp['TOTAL_ACC'] = 1
+            temp['TOTAL_CUS'] = 1
+            temp['PRODGRP_CODE'] = row['PRODGRP_ID']
+            temp['PRODGRP_ID'] = row['PRODGRP_NAME'] if 'PRODGRP_NAME' in row.keys() else row['PRODGRP_ID']
+            temp['LIC_NO'] =  row['LIC_NO']
+            temp['interest_rate'] = float(row['INT_RATE'])
+            temp['Dealer_code'] = row['WRK_BRN']
+            temp['Province_code'] = row['STAT_CD_NAME'] if 'STAT_CD_NAME' in row.keys() else row['STAT_CD']
+            temp['createdAt'] = time.time()   
+            temp['createdBy'] = 'system'
               
-#             insertData.append(temp)
+            insertData.append(temp)
     
-# #  # sbv
-#     aggregate_sbv = [
+#  # sbv
+    aggregate_sbv = [
       
         
        
-#         {
-#             "$project":
-#             {
-#             #    col field
-#                 "contract_no"            : 1,
-#                 "cus_no"                 : 1,
-#                 "name"                   : 1,
-#                 "delinquency_group"      : 1,
-#                 "CAR_ID"                 : 1,
-#                 "ob_principal_sale"      : 1,
-#                 "ob_principal_cash"      : 1,
-#                 "card_type"              : 1,
-#                 "license_no"             : 1,
-#                 "interest_rate"          : 1,
-#                 "state"                  : 1
+        {
+            "$project":
+            {
+            #    col field
+                "contract_no"            : 1,
+                "cus_no"                 : 1,
+                "name"                   : 1,
+                "delinquency_group"      : 1,
+                "CAR_ID"                 : 1,
+                "ob_principal_sale"      : 1,
+                "ob_principal_cash"      : 1,
+                "card_type"              : 1,
+                "license_no"             : 1,
+                "interest_rate"          : 1,
+                "state"                  : 1
                 
 
                 
-#             }
-#         }
-#     ]
-#     data1 = mongodb.aggregate_pipeline(MONGO_COLLECTION=sbv_collection,aggregate_pipeline=aggregate_sbv)
+            }
+        }
+    ]
+    data1 = mongodb.aggregate_pipeline(MONGO_COLLECTION=sbv_collection,aggregate_pipeline=aggregate_sbv)
 
 
-#     for row1 in data1:
+    for row1 in data1:
         
 
-#         temp1 = {}
-#         province = mongodb.getOne(MONGO_COLLECTION=province_collection, WHERE={'code': "0"+row1['state']},SELECT=['name'])
-#         if 'contract_no' in row1.keys() and int(row1['ob_principal_sale']) + int(row1['ob_principal_cash']) > 0:
+        temp1 = {}
+        province = mongodb.getOne(MONGO_COLLECTION=province_collection, WHERE={'code': "0"+row1['state']},SELECT=['name'])
+        if 'contract_no' in row1.keys() and int(row1['ob_principal_sale']) + int(row1['ob_principal_cash']) > 0:
           
                 
-#             temp1['DT_TX'] = now.strftime("%d/%m/%Y")
-#             temp1['ACC_ID'] = row1['contract_no']
-#             temp1['CUS_ID'] = row1['cus_no']
-#             temp1['CUS_NM'] = row1['name']
-#             temp1['Loan_Group'] = row1['delinquency_group']
-#             temp1['CAR_ID'] = ''
-#             temp1['TERM_ID'] = ''
-#             temp1['W_ORG'] = int(row1['ob_principal_sale']) + int(row1['ob_principal_cash'])
-#             temp1['TOTAL_ACC'] = 1
-#             temp1['TOTAL_CUS'] = 1
-#             temp1['PRODGRP_CODE'] = "301" if int(row1['card_type']) < 100 else "302"
-#             temp1['PRODGRP_ID'] = "301 – Credit card" if int(row1['card_type']) < 100 else "302 – Cash card"
-#             temp1['LIC_NO'] =  row1['license_no']
-#             temp1['interest_rate'] = float(row1['interest_rate'])
-#             temp1['Dealer_code'] = ''
-#             temp1['Province_code'] = province['name'] if 'name' in province.keys() else row1['state']
-#             temp1['createdAt'] = todayTimeStamp   
-#             temp1['createdBy'] = 'system'
+            temp1['DT_TX'] = now.strftime("%d/%m/%Y")
+            temp1['ACC_ID'] = row1['contract_no']
+            temp1['CUS_ID'] = row1['cus_no']
+            temp1['CUS_NM'] = row1['name']
+            temp1['Loan_Group'] = row1['delinquency_group']
+            temp1['CAR_ID'] = ''
+            temp1['TERM_ID'] = ''
+            temp1['W_ORG'] = int(row1['ob_principal_sale']) + int(row1['ob_principal_cash'])
+            temp1['TOTAL_ACC'] = 1
+            temp1['TOTAL_CUS'] = 1
+            temp1['PRODGRP_CODE'] = "301" if int(row1['card_type']) < 100 else "302"
+            temp1['PRODGRP_ID'] = "301 – Credit card" if int(row1['card_type']) < 100 else "302 – Cash card"
+            temp1['LIC_NO'] =  row1['license_no']
+            temp1['interest_rate'] = float(row1['interest_rate'])
+            temp1['Dealer_code'] = ''
+            temp1['Province_code'] = province['name'] if province!=None else row1['state']
+            temp1['createdAt'] = time.time()   
+            temp1['createdBy'] = 'system'
     
-#             insertData.append(temp1)
-#     if len(insertData) > 0:
-#     #   mongodb.remove_document(MONGO_COLLECTION=collection)
-#         mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertData)
+            insertData.append(temp1)
+    if len(insertData) > 0:
+    #   mongodb.remove_document(MONGO_COLLECTION=collection)
+        mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertData)
     
     for group in list_group:
         temp_group = {}
@@ -272,12 +272,12 @@ try:
                     {
                         "$match"                            : {
                             'Loan_Group'                    : group,
-                            # "$and"                           : [{
-                            #     "createdAt"                 : {
-                            #         "$gte"                  : todayTimeStamp,
-                            #         "$lte"                  : endTodayTimeStamp
-                            #     },
-                            # }] 
+                            "$and"                           : [{
+                                "createdAt"                 : {
+                                    "$gte"                  : todayTimeStamp,
+                                    "$lte"                  : endTodayTimeStamp
+                                },
+                            }] 
                         }
                     }, 
                     {
@@ -369,7 +369,7 @@ try:
                     temp_group["a"+product_value['code']] = total_report[0]["a"+product_value['code']]
                     temp_group['t_g']             =   total_report[0]["t_g"+group]
                     temp_group['t_a']             =   total_report[0]["t_a"+group]
-                    temp_group['createdAt'] = todayTimeStamp
+                    temp_group['createdAt'] = time.time()
                     # if total_report[0]['group'] == "A":  
                     #     temp_group['group'] = "01"
                     #     temp_group["g"+product_value['code']] =  total_report[0]["g"+product_value['code']]  
@@ -419,12 +419,12 @@ try:
                 {
                     "$match"                            : {
                         
-                        # "$and"                           : [{
-                        #     "createdAt"                 : {
-                        #         "$gte"                  : todayTimeStamp,
-                        #         "$lte"                  : endTodayTimeStamp
-                        #     },
-                        # }] 
+                        "$and"                           : [{
+                            "createdAt"                 : {
+                                "$gte"                  : todayTimeStamp,
+                                "$lte"                  : endTodayTimeStamp
+                            },
+                        }] 
                     }
                 }, 
                 {
@@ -495,7 +495,7 @@ try:
             tt_temp["a"+product_value['code']] = total_report1[0]["a"+product_value['code']]
             tt_temp['t_g']             =   total_report1[0]["t_g"]
             tt_temp['t_a']             =   total_report1[0]["t_a"]
-            tt_temp['createdAt'] = todayTimeStamp
+            tt_temp['createdAt'] = time.time()
     insertData1.append(tt_temp)
 
     

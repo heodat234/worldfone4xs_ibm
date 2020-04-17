@@ -11,35 +11,3 @@
 13/12/2019, 18:41:12: End Log
 13/12/2019, 18:50:30: name 'my_dataframe' is not defined
 13/12/2019, 18:52:56: End Log
-24/12/2019, 14:00:40: End Log
-25/12/2019, 20:30:15: End Log
-25/12/2019, 20:35:52: End Log
-31/12/2019, 14:38:20: End Log
-31/12/2019, 14:40:08: End Log
-31/12/2019, 15:22:03: End Log
-01/01/2020, 15:51:38: End Log
-01/01/2020, 16:13:37: End Log
-01/01/2020, 16:24:56: End Log
-01/01/2020, 16:41:45: End Log
-01/01/2020, 16:55:03: End Log
-01/01/2020, 17:17:25: End Log
-01/01/2020, 17:30:20: End Log
-01/01/2020, 17:47:05: End Log
-01/01/2020, 18:00:12: End Log
-02/01/2020, 11:04:04: End Log
-05/02/2020, 11:26:24: not enough values to unpack (expected 2, got 1)
-05/02/2020, 11:40:28: not enough values to unpack (expected 2, got 1)
-05/02/2020, 11:42:28: not enough values to unpack (expected 2, got 1)
-05/02/2020, 11:53:39: not enough values to unpack (expected 2, got 1)
-05/02/2020, 12:04:42: _write_number() takes from 4 to 5 positional arguments but 6 were given
-05/02/2020, 12:06:27: not enough values to unpack (expected 2, got 1)
-05/02/2020, 12:20:11: not enough values to unpack (expected 2, got 1)
-05/02/2020, 12:22:14: not enough values to unpack (expected 2, got 1)
-05/02/2020, 13:13:20: not enough values to unpack (expected 2, got 1)
-05/02/2020, 13:16:09: End Log
-05/02/2020, 13:18:34: End Log
-05/02/2020, 13:21:43: End Log
-05/02/2020, 13:24:47: End Log
-05/02/2020, 13:26:31: End Log
-28/02/2020, 17:15:59: End Log
-28/02/2020, 17:19:21: End Log

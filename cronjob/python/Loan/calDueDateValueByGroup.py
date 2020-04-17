@@ -72,6 +72,7 @@ try:
     if day == 1:
         mongodb.create_db(collectionName)
 
+    mongodb.remove_document(MONGO_COLLECTION=collection, WHERE={'created_at': {'$gte': todayTimeStamp, '$lte': endTodayTimeStamp} })
 
     mainProduct = {}
     mainProductRaw = mongodb.get(MONGO_COLLECTION=product_collection)
@@ -113,7 +114,8 @@ try:
                         name = name.replace('G1','')
                         groupInfoByName = mongodb.get(MONGO_COLLECTION=group_collection, WHERE={'name': {"$regex": name} })
                         for groupInfo in list(groupInfoByName):
-                            members += groupInfo['members']
+                            if 'members' in groupInfo.keys():
+                                members += groupInfo['members']
 
                         temp = {
                             'due_date'              : todayTimeStamp - 86400,
@@ -257,8 +259,9 @@ try:
                         else:
                             lastmonth = month
 
-
-                        members = groupCell['members']
+                        members = []
+                        if 'members' in groupCell.keys():
+                            members = groupCell['members']
                         name = groupCell['name']
 
                         temp = {

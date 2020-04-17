@@ -31,7 +31,7 @@ try:
     log = open(base_url + "cronjob/python/Loan/log/importSBV.txt","a")
     now = datetime.now()
     subUserType = 'LO'
-    collection = common.getSubUser(subUserType, 'SBV_01042020')
+    collection = common.getSubUser(subUserType, 'SBV')
 
     modelColumns = []
     modelConverters = {}
@@ -45,13 +45,12 @@ try:
     errorData = []
     total = 0
     complete = 0
-    # today = date.today()
-    today = datetime.strptime('01/04/2020', "%d/%m/%Y").date()
+    today = date.today()
+    # today = datetime.strptime('13/12/2019', "%d/%m/%Y").date()
     yesterday = today - timedelta(days=1)
     day = today.day
     month = today.month
     year = today.year
-    todayString = today.strftime("%d/%m/%Y")
     fileName = "sbv_" + yesterday.strftime("%Y%m%d") + ".dat"
     sep = ';'
     logDbName = "LO_Input_result_" + str(year) + str(month)
@@ -61,7 +60,7 @@ try:
         mongodbresult = Mongodb(logDbName, wff_env)
     else:
         mongodbresult = Mongodb(logDbName, wff_env)
-
+    
     ftpLocalUrl = common.getDownloadFolder() + fileName
 
     try:
@@ -88,10 +87,10 @@ try:
             sys.exit()
 
         importLogInfo = {
-            'collection'    : collection,
+            'collection'    : collection, 
             'begin_import'  : time.time(),
             'file_name'     : fileName,
-            'file_path'     : ftpLocalUrl,
+            'file_path'     : ftpLocalUrl, 
             'source'        : 'ftp',
             'status'        : 2,
             'command'       : '/usr/local/bin/python3.6 ' + base_url + "cronjob/python/Loan/importSBV.py > /dev/null &",
@@ -99,8 +98,8 @@ try:
         }
         importLogId = mongodb.insert(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), insert_data=importLogInfo)
 
-    models = _mongodb.get(MONGO_COLLECTION='Model', WHERE={'collection': common.getSubUser(subUserType, 'SBV')}, SORT=[('index', 1)], SELECT=['index', 'collection', 'field', 'type', 'sub_type'], TAKE=1000)
-
+    models = _mongodb.get(MONGO_COLLECTION='Model', WHERE={'collection': collection}, SORT=[('index', 1)], SELECT=['index', 'collection', 'field', 'type', 'sub_type'], TAKE=1000)
+    
     for model in models:
         modelColumns.append(model['field'])
         modelConverters[model['field']] = model['type']
@@ -120,7 +119,7 @@ try:
             else:
                 modelPosition[model['field']] = ''
                 modelPosition1.append('')
-
+            
     filenameExtension = fileName.split('.')
 
     mongodb.remove_document(MONGO_COLLECTION=collection)
@@ -146,8 +145,7 @@ try:
                         temp['result'] = 'error'
                         result = False
                 temp['created_by'] = 'system'
-                # temp['created_at'] = time.time()
-                temp['created_at'] = int(time.mktime(time.strptime(str(todayString + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
+                temp['created_at'] = time.time()
                 temp['import_id'] = str(importLogId)
                 if(result == False):
                     errorData.append(temp)
@@ -175,8 +173,7 @@ try:
                                 temp['result'] = 'error'
                                 result = False
                     temp['created_by'] = 'system'
-                    # temp['created_at'] = time.time()
-                    temp['created_at'] = int(time.mktime(time.strptime(str(todayString + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
+                    temp['created_at'] = time.time()
                     temp['import_id'] = str(importLogId)
                     if(result == False):
                         errorData.append(temp)

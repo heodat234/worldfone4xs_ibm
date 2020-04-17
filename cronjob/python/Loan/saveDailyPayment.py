@@ -15,6 +15,7 @@ from bson import ObjectId
 from helper.common import Common
 from helper.jaccs import Config
 import pandas as pd
+import xlsxwriter
 
 common      = Common()
 base_url    = common.base_url()
@@ -74,7 +75,7 @@ try:
    yesterdayTimeStamp = int(time.mktime(time.strptime(str(yesterdayString + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
    endYesterdayTimeStamp = int(time.mktime(time.strptime(str(yesterdayString + " 23:59:59"), "%d/%m/%Y %H:%M:%S")))
 
-
+   mongodb.remove_document(MONGO_COLLECTION=collection, WHERE={'createdAt': {'$gte': yesterdayTimeStamp, '$lte': endYesterdayTimeStamp} })
 
    i = 1
    acc__sibs_arr = []
@@ -537,10 +538,7 @@ try:
       mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertDataPayment_1)
 
 
-
-   # export file
    fileOutput  = base_url + 'upload/loan/export/DailyPayment_'+ yesterday.strftime("%d%m%Y") +'.xlsx'
-
    aggregate_acc = [
       {
           "$match":
@@ -548,8 +546,8 @@ try:
               "createdAt": {'$gte' : yesterdayTimeStamp, '$lte' : endYesterdayTimeStamp},
           }
       },
-         "$project":{
-
+      {
+         "$project":
           {
               "_id": 0,
           }
@@ -603,6 +601,7 @@ try:
    worksheet.set_column('D:E', 20, format2)
 
    writer.save()
+   
 
    now_end         = datetime.now()
    log.write(now_end.strftime("%d/%m/%Y, %H:%M:%S") + ': End Log' + '\n')

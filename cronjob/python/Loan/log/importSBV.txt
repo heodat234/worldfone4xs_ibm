@@ -1,6 +1,42 @@
-04/11/2019, 10:09:11: 'open_date'
-04/11/2019, 10:10:11: 'open_date'
-04/11/2019, 10:12:08: 'account_no'
-04/11/2019, 10:12:39: 'open_date'
-05/11/2019, 12:31:11: [Errno -5] No address associated with hostname
-05/11/2019, 12:31:56: [Errno -5] No address associated with hostname
+
+05/11/2019, 15:01:49: 'cif_birth_date'
+05/11/2019, 15:03:51: 'cif_birth_date'
+05/11/2019, 15:04:21: 'cif_birth_date'
+05/11/2019, 15:04:48: 'cif_birth_date'
+05/11/2019, 15:05:19: 'cif_birth_date'
+05/11/2019, 15:06:25: 'cif_birth_date'
+05/11/2019, 15:06:54: 'cif_birth_date'
+05/11/2019, 15:07:16: 'cif_birth_date'
+05/11/2019, 15:45:48: 'approved_limit'
+05/11/2019, 15:47:58: 'approved_limit'
+05/11/2019, 15:48:17: 'approved_limit'
+05/11/2019, 15:49:41: 'approved_limit'
+05/11/2019, 16:17:15: 'temp'
+05/11/2019, 16:18:10: documents must be a non-empty list
+27/11/2019, 00:16:57: name 'result' is not defined
+09/12/2019, 16:37:37: [Errno 2] No such file or directory: '/data/upload_file/20191209/sbv_2019129_Masked.dat'
+09/12/2019, 16:38:06: [Errno 2] No such file or directory: '/data/upload_file/20191209/sbv_20191209_Masked.dat'
+16/12/2019, 14:12:10: An object representing an expression must have exactly one field: { $gte: 1575133200, $lte: 1577811599 }
+16/12/2019, 14:17:15: An object representing an expression must have exactly one field: { $gte: [ "$FRELD8", 1575133200 ], $lte: [ "$FRELD8", 1577811599 ] }
+16/12/2019, 14:21:02: An object representing an expression must have exactly one field: { $gte: [ "$FRELD8", 1575133200 ], $lte: [ "$FRELD8", 1577811599 ] }
+16/12/2019, 14:47:09: invalid literal for int() with base 10: '14500000.00'
+16/12/2019, 15:10:04: 'CommandCursor' object does not support indexing
+16/12/2019, 15:10:32: list index out of range
+16/12/2019, 15:41:15: name 'zaccf' is not defined
+16/12/2019, 15:53:09: 'CommandCursor' object does not support indexing
+16/12/2019, 16:22:07: pprint() missing 1 required positional argument: 'object'
+16/12/2019, 16:58:33: list index out of range
+16/12/2019, 17:00:28: list index out of range
+16/12/2019, 17:05:31: list index out of range
+16/12/2019, 17:25:27: insert() got an unexpected keyword argument 'inser_date'
+16/12/2019, 17:26:19: document must be an instance of dict, bson.son.SON, bson.raw_bson.RawBSONDocument, or a type that inherits from collections.MutableMapping
+16/12/2019, 17:33:32: 'int' object is not subscriptable
+16/12/2019, 17:33:57: 'int' object is not subscriptable
+16/12/2019, 20:49:49: Expression $cond takes exactly 3 arguments. 2 were passed in.
+16/12/2019, 21:36:32: unsupported operand type(s) for +: 'float' and 'list'
+17/12/2019, 10:10:53: 'release_acc_no_sibs'
+17/12/2019, 13:56:38: 'int' object is not iterable
+17/12/2019, 15:15:56: name 'insertData' is not defined
+17/12/2019, 17:48:46: append() takes exactly one argument (2 given)
+18/12/2019, 09:38:04: Unrecognized expression '$ODIND_FG'
+18/12/2019, 16:23:37: type object 'datetime.datetime' has no attribute 'timedelta'

@@ -1,2 +1,1 @@
 13/12/2019, 18:52:08: line contains NULL byte
-08/01/2020, 14:48:01: 'account_number'

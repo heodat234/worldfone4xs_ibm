@@ -1,1 +1,0 @@
-13/02/2020, 09:42:07: name 'timedelta' is not defined

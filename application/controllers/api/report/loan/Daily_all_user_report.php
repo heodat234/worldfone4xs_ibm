@@ -65,6 +65,11 @@ Class Daily_all_user_report extends CI_Controller {
         }
     }
     
+    function saveReport()
+    {
+      shell_exec('/usr/local/bin/python3.6 /data/worldfone4xs/cronjob/python/Loan/saveProdAllUser.py  > /dev/null &');
+      echo json_encode(array("status" => 1, "data" => []));
+    }
 
    function exportExcel()
    {

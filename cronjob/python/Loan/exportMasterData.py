@@ -35,7 +35,7 @@ try:
    errorData   = []
 
    today = date.today()
-   # today = datetime.strptime('14/01/2020', "%d/%m/%Y").date()
+   # today = datetime.strptime('06/02/2020', "%d/%m/%Y").date()
 
 
    day = today.day

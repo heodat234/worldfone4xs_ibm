@@ -14,6 +14,8 @@ from pprint import pprint
 from bson import ObjectId
 from helper.common import Common
 from helper.jaccs import Config
+import pandas as pd
+import xlsxwriter
 
 common      = Common()
 base_url    = common.base_url()
@@ -67,6 +69,7 @@ try:
    if holidayOfMonth != None:
       sys.exit()
 
+   mongodb.remove_document(MONGO_COLLECTION=collection, WHERE={'createdAt': {'$gte': todayTimeStamp, '$lte': endTodayTimeStamp} })
 
    # SIBS
    aggregate_pipeline = [
@@ -148,14 +151,14 @@ try:
          if row['current_add'] == '0' or row['current_add'] == '':
             row['current_add']    = row['address']
 
+         # today    = datetime.now()
          FMT      = '%d-%m-%y'
          d1       = today.strftime(FMT)
          date_time = datetime.fromtimestamp(row['due_date'])
          d2       = date_time.strftime(FMT)
          tdelta   = datetime.strptime(d1, FMT) - datetime.strptime(d2, FMT)
-         
-         row['CURRENT_DPD'] = int(tdelta.days)
 
+         row['CURRENT_DPD'] = int(tdelta.days)
 
          # first_day = today.replace(day=1)
          FMT      = '%d-%m-%y'
@@ -186,6 +189,7 @@ try:
                   user = _mongodb.getOne(MONGO_COLLECTION=user_collection, WHERE={'extension': str(diallist['assign'])},SELECT=['agentname'])
                   if user != None:
                      row['COMPANY']          += '-' + user['agentname']
+                     # print(row['COMPANY'])
                else: 
                   name = row['officer_id']
                   extension = name[6:10]
@@ -193,6 +197,7 @@ try:
                   user = _mongodb.getOne(MONGO_COLLECTION=user_collection, WHERE={'extension': str(extension)},SELECT=['agentname'])
                   if user != None:
                      row['COMPANY']          += '-' + user['agentname']
+                     # print(row['COMPANY'])
 
          if row['COMPANY'] == '':
             name = row['officer_id']
@@ -201,10 +206,12 @@ try:
             user = _mongodb.getOne(MONGO_COLLECTION=user_collection, WHERE={'extension': str(extension)},SELECT=['agentname'])
             if user != None:
                row['COMPANY']          += '-' + user['agentname']
+               # print(row['COMPANY'])
          
          row['current_balance'] = float(row['current_balance'])
          row.pop('_id')
          row.pop('officer_name')
+         # row.pop('officer_id')
          row.pop('due_date')
          row['createdAt'] = int(todayTimeStamp)
          row['createdBy'] = 'system'
@@ -559,6 +566,63 @@ try:
    if len(insertData) > 0:
       # mongodb.remove_document(MONGO_COLLECTION=collection)
       mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertData)
+
+   
+   # export file
+   fileOutput  = base_url + 'upload/loan/export/MasterData_'+ today.strftime("%d%m%Y") +'.xlsx' 
+
+   aggregate_acc = [
+      {
+          "$match":
+          {
+              "createdAt" : {'$gte' : todayTimeStamp,'$lte' : endTodayTimeStamp},
+          }
+      },
+      {
+         "$project":
+          {
+              "_id": 0,
+          }
+      }
+   ]
+   data = mongodb.aggregate_pipeline(MONGO_COLLECTION=collection,aggregate_pipeline=aggregate_acc)
+   dataReport = []
+   for row in data:
+      temp = row
+      try:
+         if 'createdAt' in row.keys():
+            date_time = datetime.fromtimestamp(int(row['createdAt']))
+            temp['createdAt']      = date_time.strftime('%d-%m-%Y')
+      except Exception as e:
+         temp['createdAt']      = row['createdAt']
+
+      dataReport.append(temp)
+
+   df = pd.DataFrame(dataReport, columns= ['createdAt','group_id','account_number','cus_name','BIR_DT8','CUS_ID','FRELD8','product_name','LIC_NO','APPROV_LMT','TERM_ID','RPY_PRD','F_PDT','DT_MAT','current_balance','CURRENT_DPD','MOBILE_NO','WRK_REF','current_add','current_district','current_province','pernament_add','pernament_district','pernament_province','W_ORG','INT_RATE','OVER_DY','DATE_HANDOVER','license_plates_no','COMPANY'])
+
+   writer = pd.ExcelWriter(fileOutput, engine='xlsxwriter')
+
+   df.to_excel(writer,sheet_name='Sheet1',header=['Date Export','GROUP','CONTRACTNR','CLIENT_NAME','BIRTH_DATE','CIF','SIGNED_DATE','PRODUCTNAME','ID NO','CREDIT AMOUNT','INSTALLMENT NUMBER','INSTALMENT AMOUNT','DATE_FIRST_DUE','DATE_LAST_DUE','CURRENT_DEBT','CURRENT_DPD','PHONE NUMBER','REFERENCE PHONE','Current_ADDRESS (if any)','District','PROVINCE','PERNAMENT_ADDRESS','District','PROVINCE','PRINCIPAL','INTEREST/ year','DPD','DATE HANDOVER','lICENSE PLATES NO','COMPANY']) 
+
+   workbook  = writer.book
+   worksheet = writer.sheets['Sheet1']
+
+   # Add some cell formats.
+   format1 = workbook.add_format({'num_format': '#,##0', 'bottom':1, 'top':1, 'left':1, 'right':1})
+   # format2 = workbook.add_format({'num_format': '0%'})
+   border_fmt = workbook.add_format({'bottom':1, 'top':1, 'left':1, 'right':1})
+
+   # Set the column width and format.
+   worksheet.set_column('A:AD', 20, border_fmt)
+
+   worksheet.set_column('J:J', 20, format1)
+   worksheet.set_column('L:L', 20, format1)
+   worksheet.set_column('O:O', 20, format1)
+   worksheet.set_column('Y:Y', 20, format1)
+   # Close the Pandas Excel writer and output the Excel file.
+   writer.save()
+
+
    now_end         = datetime.now()
    log.write(now_end.strftime("%d/%m/%Y, %H:%M:%S") + ': End Log' + '\n')
    print('DONE')

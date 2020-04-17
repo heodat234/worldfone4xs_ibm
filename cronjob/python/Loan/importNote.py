@@ -25,29 +25,30 @@ try:
 
     mongodb = Mongodb(MONGODB="worldfone4xs", WFF_ENV=wff_env)
     _mongodb = Mongodb(MONGODB="_worldfone4xs", WFF_ENV=wff_env)
-    file_path = '/mnt/nas/upload_file/20191213/importNote.xlsx'
-    # subUserType = 'LO'
-    # collection = common.getSubUser(subUserType, 'Note')
+    file_path = '/mnt/nas/upload_file/20191226/CARD_A02_26122019.xlsx'
+    subUserType = 'LO'
+    collection = common.getSubUser(subUserType, 'Note')
 
-    # inputDataRaw = excel.getDataExcel(file_path=file_path, active_sheet="Sheet1", header=None, na_values='')
-    # inputData = inputDataRaw.to_dict('records')
+    inputDataRaw = excel.getDataExcel(file_path=file_path, active_sheet="Sheet1", header=None, na_values='')
+    inputData = inputDataRaw.to_dict('records')
     skip =0
     insertData = []
-    pprint(time.time())
-    # for idx, row in enumerate(inputData):
-    #     if skip == 0: 
-    #         skip = skip + 1
-    #         continue
-    #     if skip > 1000:
-    #         break
-    #     temp = {}
-    #     temp['created_by']  = 'import'
-    #     temp['created_at']  = time.time()
-    #     temp["content"]     = row[0]
-    #     temp["foreign_id"]  = row[1]
-    #     insertData.append(temp)
 
-    # mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertData)
+    for idx, row in enumerate(inputData):
+        if skip == 0: 
+            skip = skip + 1
+            continue
+        # if skip > 10:
+        #     break
+        temp = {}
+        temp['created_by']  = 'import'
+        temp['created_at']  = time.time()
+        temp["content"]     = row[1]
+        temp["foreign_id"]  = row[0]
+        insertData.append(temp)
+
+    
+    mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertData)
 
     
 except Exception as e:

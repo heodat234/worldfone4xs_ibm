@@ -44,7 +44,7 @@ try:
     insertData = []
     errorData = []
     today = date.today()
-    today = datetime.strptime('31/03/2020', "%d/%m/%Y").date()
+    # today = datetime.strptime('20/11/2019', "%d/%m/%Y").date()
     yesterday = today - timedelta(days=1)
     day = today.day
     month = today.month
@@ -112,7 +112,7 @@ try:
     updateDate = []
     errorData = []
 
-    # temp = {}
+    temp = {}
     countList = 0
     for idx, row in enumerate(inputData):
         total += 1
@@ -155,6 +155,8 @@ try:
             mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertData)
         if len(updateDate) > 0:
             for updateD in updateDate:
+                temp['updated_at'] = time.time()
+                temp['updated_by'] = 'system'
                 mongodb.update(MONGO_COLLECTION=collection, WHERE={'CONTRACTNR': updateD['CONTRACTNR']}, VALUE=updateD)
         mongodb.update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': importLogId}, VALUE={'status': 1, 'complete_import': time.time(), 'total': total, 'complete': complete})
 except Exception as e:

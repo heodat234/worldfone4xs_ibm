@@ -9,6 +9,10 @@
                 <a role="button" class="btn btn-sm" onclick="saveAsExcel()"><i class="fa fa-file-excel-o"></i> <b>@Export@ All Loan Group</b></a>
                 
             </div>
+            <div class="btn-group btn-group-sm">
+                <a role="button" class="btn btn-sm" style="color:#1bbae1" onclick="reloadReport()"><i class="fa fa-refresh"></i> <b>Reload Report</b></a>
+
+            </div>
         </li>
     </ul>
     <!-- END Table Styles Header -->
@@ -552,7 +556,6 @@
               Table1.fromDate = fromDateTime
               Table1.toDate = toDateTime
               Table1.init();
-              
           });
          
           var observable = kendo.observable({
@@ -655,22 +658,40 @@
         }
 
         function exportedExcel(){
-         $.ajax({
-            url: ENV.reportApi + "loan/List_of_all_customer_report/exportExcel",
-            data:{month : '1/'+$("#start-date").val(),export:$("#start-date").val()},
-            type: 'POST',
-            dataType: 'json',
-            timeout: 30000
-        })
-        .done(function(response) {
-            if (response.status == 1) {
-            window.location = response.data
-            }
-        })
-        .fail(function() {
-            console.log("error");
-        });
-    }
+             $.ajax({
+                url: ENV.reportApi + "loan/List_of_all_customer_report/exportExcel",
+                data:{month : '1/'+$("#start-date").val(),export:$("#start-date").val()},
+                type: 'POST',
+                dataType: 'json',
+                timeout: 30000
+            })
+            .done(function(response) {
+                if (response.status == 1) {
+                window.location = response.data
+                }
+            })
+            .fail(function() {
+                console.log("error");
+            });
+        }
+        
+        function reloadReport() {
+            $.ajax({
+              url: ENV.reportApi + "loan/List_of_all_customer_report/saveReport",
+              type: 'POST',
+              dataType: 'json',
+              timeout: 30000,
+            })
+            .done(function(response) {
+              if (response.status == 1) {
+                notification.show('@Xin vui lòng đợi trong ít phút@', 'success');     
+              }       
+            })
+            .fail(function() {
+              console.log("error");
+            });
+
+        }
     </script>
 </div>
 
