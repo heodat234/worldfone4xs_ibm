@@ -1,0 +1,35 @@
+[2020-04-21 13:45:01] lumen.ERROR: exception 'Symfony\Component\Debug\Exception\FatalErrorException' with message 'Call to undefined method Illuminate\Console\Scheduling\Schedule::withoutOverlapping()' in /var/www/html/worldfone4xs_ibm/cronjob/console/app/Console/Kernel.php:34
+Stack trace:
+#0 /var/www/html/worldfone4xs_ibm/cronjob/console/vendor/laravel/lumen-framework/src/Concerns/RegistersExceptionHandlers.php(54): Laravel\Lumen\Application->handleShutdown()
+#1 [internal function]: Laravel\Lumen\Application->Laravel\Lumen\Concerns\{closure}()
+#2 {main}  
+[2020-04-21 13:45:08] lumen.ERROR: exception 'Symfony\Component\Debug\Exception\FatalErrorException' with message 'Call to undefined method Illuminate\Console\Scheduling\Schedule::withoutOverlapping()' in /var/www/html/worldfone4xs_ibm/cronjob/console/app/Console/Kernel.php:34
+Stack trace:
+#0 /var/www/html/worldfone4xs_ibm/cronjob/console/vendor/laravel/lumen-framework/src/Concerns/RegistersExceptionHandlers.php(54): Laravel\Lumen\Application->handleShutdown()
+#1 [internal function]: Laravel\Lumen\Application->Laravel\Lumen\Concerns\{closure}()
+#2 {main}  
+[2020-04-21 13:46:01] lumen.ERROR: exception 'Symfony\Component\Debug\Exception\FatalErrorException' with message 'Call to undefined method Illuminate\Console\Scheduling\Schedule::withoutOverlapping()' in /var/www/html/worldfone4xs_ibm/cronjob/console/app/Console/Kernel.php:34
+Stack trace:
+#0 /var/www/html/worldfone4xs_ibm/cronjob/console/vendor/laravel/lumen-framework/src/Concerns/RegistersExceptionHandlers.php(54): Laravel\Lumen\Application->handleShutdown()
+#1 [internal function]: Laravel\Lumen\Application->Laravel\Lumen\Concerns\{closure}()
+#2 {main}  
+[2020-04-21 13:47:02] lumen.ERROR: exception 'Symfony\Component\Debug\Exception\FatalErrorException' with message 'Call to undefined method Illuminate\Console\Scheduling\Schedule::withoutOverlapping()' in /var/www/html/worldfone4xs_ibm/cronjob/console/app/Console/Kernel.php:34
+Stack trace:
+#0 /var/www/html/worldfone4xs_ibm/cronjob/console/vendor/laravel/lumen-framework/src/Concerns/RegistersExceptionHandlers.php(54): Laravel\Lumen\Application->handleShutdown()
+#1 [internal function]: Laravel\Lumen\Application->Laravel\Lumen\Concerns\{closure}()
+#2 {main}  
+[2020-04-21 13:48:01] lumen.ERROR: exception 'Symfony\Component\Debug\Exception\FatalErrorException' with message 'Call to undefined method Illuminate\Console\Scheduling\Schedule::withoutOverlapping()' in /var/www/html/worldfone4xs_ibm/cronjob/console/app/Console/Kernel.php:34
+Stack trace:
+#0 /var/www/html/worldfone4xs_ibm/cronjob/console/vendor/laravel/lumen-framework/src/Concerns/RegistersExceptionHandlers.php(54): Laravel\Lumen\Application->handleShutdown()
+#1 [internal function]: Laravel\Lumen\Application->Laravel\Lumen\Concerns\{closure}()
+#2 {main}  
+[2020-04-21 13:49:01] lumen.ERROR: exception 'Symfony\Component\Debug\Exception\FatalErrorException' with message 'Call to undefined method Illuminate\Console\Scheduling\Schedule::withoutOverlapping()' in /var/www/html/worldfone4xs_ibm/cronjob/console/app/Console/Kernel.php:34
+Stack trace:
+#0 /var/www/html/worldfone4xs_ibm/cronjob/console/vendor/laravel/lumen-framework/src/Concerns/RegistersExceptionHandlers.php(54): Laravel\Lumen\Application->handleShutdown()
+#1 [internal function]: Laravel\Lumen\Application->Laravel\Lumen\Concerns\{closure}()
+#2 {main}  
+[2020-04-21 13:50:01] lumen.ERROR: exception 'Symfony\Component\Debug\Exception\FatalErrorException' with message 'Call to undefined method Illuminate\Console\Scheduling\Schedule::withoutOverlapping()' in /var/www/html/worldfone4xs_ibm/cronjob/console/app/Console/Kernel.php:34
+Stack trace:
+#0 /var/www/html/worldfone4xs_ibm/cronjob/console/vendor/laravel/lumen-framework/src/Concerns/RegistersExceptionHandlers.php(54): Laravel\Lumen\Application->handleShutdown()
+#1 [internal function]: Laravel\Lumen\Application->Laravel\Lumen\Concerns\{closure}()
+#2 {main}  
