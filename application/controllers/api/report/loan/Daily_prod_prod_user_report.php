@@ -141,12 +141,12 @@ Class Daily_prod_prod_user_report extends WFF_Controller {
             ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
             ->getStartColor()->setRGB('DDEBF7');
         
-        $worksheet->setCellValue($this->stringFromColumnIndex($startAmt) . '2', 'Total outstanding balance Incidence');
+        $worksheet->setCellValue($this->stringFromColumnIndex($startAmt) . '2', 'Total outstanding balance Incidence (OS at due date)');
         $worksheet->getStyle($this->stringFromColumnIndex($startAmt) . '2')->getFill()
         ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
         ->getStartColor()->setRGB('F4B084');
         
-        $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + count($product) + 1) . '2', 'Total Collected amount (actual collected amount)');
+        $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + count($product) + 1) . '2', 'Payment amount received');
         $worksheet->getStyle($this->stringFromColumnIndex($startAmt + count($product) + 1) . '2')->getFill()
         ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
         ->getStartColor()->setRGB('F4B084');
@@ -212,7 +212,7 @@ Class Daily_prod_prod_user_report extends WFF_Controller {
             ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
             ->getStartColor()->setRGB('DDEBF7');
 
-        $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + count($product) + $keyprod + 3) . '2', 'Remaining');
+        $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + count($product) + $keyprod + 3) . '2', 'Remaining (OS at current)');
         $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + count($product) + $keyprod + 4) . '2', 'Flow rate');
         $worksheet->setCellValue($this->stringFromColumnIndex($startAmt + count($product) + $keyprod + 5) . '2', 'Collected ratio');
         $worksheet->getStyle($this->stringFromColumnIndex($startAmt + count($product) + $keyprod + 3) . '2' . ':' . $this->stringFromColumnIndex($startAmt + count($product) + $keyprod + 5) . '2')->getFill()

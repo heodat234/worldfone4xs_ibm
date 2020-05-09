@@ -152,33 +152,30 @@ try:
             row['current_add']    = row['address']
 
          # today    = datetime.now()
-         FMT      = '%d-%m-%y'
-         d1       = today.strftime(FMT)
-         date_time = datetime.fromtimestamp(row['due_date'])
-         d2       = date_time.strftime(FMT)
-         tdelta   = datetime.strptime(d1, FMT) - datetime.strptime(d2, FMT)
+         if row['due_date'] != "":
+            FMT      = '%d-%m-%y'
+            d1       = today.strftime(FMT)
+            date_time = datetime.fromtimestamp(row['due_date'])
+            d2       = date_time.strftime(FMT)
+            tdelta   = datetime.strptime(d1, FMT) - datetime.strptime(d2, FMT)
 
-         row['CURRENT_DPD'] = int(tdelta.days)
-
-         # first_day = today.replace(day=1)
-         FMT      = '%d-%m-%y'
-         d3       = today.strftime(FMT)
-         date_time = datetime.fromtimestamp(row['due_date'])
-         d4       = date_time.strftime(FMT)
-         tdelta1   = datetime.strptime(d3, FMT) - datetime.strptime(d4, FMT)
-         
-         if int(tdelta1.days) < 30:
-            row['OVER_DY'] = '<30'
-         if int(tdelta1.days) >= 30 and int(tdelta1.days) < 60:
-            row['OVER_DY'] = '30+'
-         if int(tdelta1.days) >= 60 and int(tdelta1.days) < 90:
-            row['OVER_DY'] = '60+'
-         if int(tdelta1.days) >= 90 and int(tdelta1.days) < 180:
-            row['OVER_DY'] = '90+'
-         if int(tdelta1.days) >= 180 and int(tdelta1.days) < 360:
-            row['OVER_DY'] = '180+'
-         if int(tdelta1.days) >= 360:
-            row['OVER_DY'] = '360+'
+            row['CURRENT_DPD'] = int(tdelta.days)
+            
+            if int(tdelta.days) < 30:
+               row['OVER_DY'] = '<30'
+            if int(tdelta.days) >= 30 and int(tdelta.days) < 60:
+               row['OVER_DY'] = '30+'
+            if int(tdelta.days) >= 60 and int(tdelta.days) < 90:
+               row['OVER_DY'] = '60+'
+            if int(tdelta.days) >= 90 and int(tdelta.days) < 180:
+               row['OVER_DY'] = '90+'
+            if int(tdelta.days) >= 180 and int(tdelta.days) < 360:
+               row['OVER_DY'] = '180+'
+            if int(tdelta.days) >= 360:
+               row['OVER_DY'] = '360+'
+         else:
+            row['CURRENT_DPD'] = 0
+            row['OVER_DY'] = ''
 
          diallist = mongodb.getOne(MONGO_COLLECTION=diallistDetail_collection, WHERE={'account_number': str(row['account_number']),'createdAt': {'$gte' : todayTimeStamp,'$lte' : endTodayTimeStamp}},
             SELECT=['assign'])
@@ -335,35 +332,29 @@ try:
                         row['COMPANY']          += '-' + user['agentname']
 
          # today    = datetime.now()
-         FMT      = '%d/%m/%Y'
-         d1       = today.strftime(FMT)
-         # d2       = row['overdue']
-         date_time   = datetime.fromtimestamp(row['overdue_date'])
-         d2          = date_time.strftime(FMT)
-         tdelta   = datetime.strptime(d1, FMT) - datetime.strptime(d2, FMT)
-         row['CURRENT_DPD'] = tdelta.days
-
-
-         # first_day = today.replace(day=1)
-         FMT      = '%d/%m/%Y'
-         d3       = today.strftime(FMT)
-         date_time = datetime.fromtimestamp(row['overdue_date'])
-         d4       = date_time.strftime(FMT)
-         tdelta1   = datetime.strptime(d3, FMT) - datetime.strptime(d4, FMT)
-         
-         if int(tdelta1.days) < 30:
-            row['OVER_DY'] = '<30'
-         if int(tdelta1.days) >= 30 and int(tdelta1.days) < 60:
-            row['OVER_DY'] = '30+'
-         if int(tdelta1.days) >= 60 and int(tdelta1.days) < 90:
-            row['OVER_DY'] = '60+'
-         if int(tdelta1.days) >= 90 and int(tdelta1.days) < 180:
-            row['OVER_DY'] = '90+'
-         if int(tdelta1.days) >= 180 and int(tdelta1.days) < 360:
-            row['OVER_DY'] = '180+'
-         if int(tdelta1.days) >= 360:
-            row['OVER_DY'] = '360+'
-
+         if row['overdue_date'] !="":
+            FMT      = '%d/%m/%Y'
+            d1       = today.strftime(FMT)
+            date_time   = datetime.fromtimestamp(row['overdue_date'])
+            d2          = date_time.strftime(FMT)
+            tdelta   = datetime.strptime(d1, FMT) - datetime.strptime(d2, FMT)
+            row['CURRENT_DPD'] = tdelta.days
+            
+            if int(tdelta.days) < 30:
+               row['OVER_DY'] = '<30'
+            if int(tdelta.days) >= 30 and int(tdelta.days) < 60:
+               row['OVER_DY'] = '30+'
+            if int(tdelta.days) >= 60 and int(tdelta.days) < 90:
+               row['OVER_DY'] = '60+'
+            if int(tdelta.days) >= 90 and int(tdelta.days) < 180:
+               row['OVER_DY'] = '90+'
+            if int(tdelta.days) >= 180 and int(tdelta.days) < 360:
+               row['OVER_DY'] = '180+'
+            if int(tdelta.days) >= 360:
+               row['OVER_DY'] = '360+'
+         else:
+            row['CURRENT_DPD'] = 0
+            row['OVER_DY'] = ''
             
 
          overdue_date = datetime.strptime(d2, "%d/%m/%Y").date()

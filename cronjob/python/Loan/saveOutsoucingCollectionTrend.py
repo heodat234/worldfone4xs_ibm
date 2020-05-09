@@ -28,20 +28,20 @@ common = Common()
 log = open(base_url + "cronjob/python/Loan/log/saveOutsoucingCollectionTrend.txt","a")
 now = datetime.now()
 subUserType = 'LO'
-collection              = common.getSubUser(subUserType, 'Cus_assigned_partner')
-collection_temp         = common.getSubUser(subUserType, 'Outsoucing_Collection_Trend_report_temp')
-collection_lnjc05       = common.getSubUser(subUserType, 'LNJC05_start_of_month')
-collection_listofAccount = common.getSubUser(subUserType, 'List_of_account_in_collection_start_of_month')
+collection                 = common.getSubUser(subUserType, 'Cus_assigned_partner')
+collection_temp            = common.getSubUser(subUserType, 'Outsoucing_Collection_Trend_report_temp')
+collection_lnjc05          = common.getSubUser(subUserType, 'LNJC05_start_of_month')
+collection_listofAccount   = common.getSubUser(subUserType, 'List_of_account_in_collection_start_of_month')
 
-collection_ln3206f      =  common.getSubUser(subUserType, 'LN3206F')
-collection_gl_2018      =  common.getSubUser(subUserType, 'Report_input_payment_of_card')
+collection_ln3206f         =  common.getSubUser(subUserType, 'LN3206F')
+collection_gl_2018         =  common.getSubUser(subUserType, 'Report_input_payment_of_card')
 
-collection_amount_report = common.getSubUser(subUserType, 'Outsoucing_Collection_Trend_Amount_Report')
+collection_amount_report   = common.getSubUser(subUserType, 'Outsoucing_Collection_Trend_Amount_Report')
 collection_assigned_report = common.getSubUser(subUserType, 'Outsoucing_Collection_Trend_AssignDPD_Report')
 try :
    insertData = []
    today = date.today()
-   # today = datetime.strptime('12/10/2019', "%d/%m/%Y").date()
+   # today = datetime.strptime('1/05/2020', "%d/%m/%Y").date()
 
    day = today.day
    month = today.month
@@ -70,16 +70,18 @@ try :
 
       # todayString = "26/03/2020"
       day_of_month      = monthrange(lastYear, lastMonth)[1]
-      end_day_of_month  = today.replace(day=day_of_month)
+      end_day_of_month  = yesterday.replace(day=day_of_month)
       endDayString      = end_day_of_month.strftime("%d/%m/%Y")
       endDayTimeStamp   = int(time.mktime(time.strptime(str(endDayString + " 23:59:59"), "%d/%m/%Y %H:%M:%S")))
 
-      start_day_of_month   = today.replace(day=1)
+      start_day_of_month   = yesterday.replace(day=1)
       startDayString       = start_day_of_month.strftime("%d/%m/%Y")
       startDayTimeStamp      = int(time.mktime(time.strptime(str(startDayString + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
    else:
       lastMonth = month
 
+   firstDayOfMonth = datetime(year, lastMonth, 1, 0, 0)
+   
 
    # TẠO ROW CHO TỪNG PARTNER NẾU CHƯA TỒN TẠI
    partner_lists = mongodb.getDistinct(MONGO_COLLECTION=collection , SELECT="COMPANY")
@@ -251,60 +253,102 @@ try :
       for idx,row_result in enumerate(results_outsoucing):
          count_account  = 0
          payment        = 0
-         firstDayOfMonth = datetime(year, month, 1, 0, 0)
+         subdate        = None
+         os_balance     = 0
          if "lnjc05" in row_result:
-            due_date    = datetime.fromtimestamp(row_result['lnjc05']['due_date'])
+            if row_result['lnjc05']['due_date'] != "":
+               due_date    = datetime.fromtimestamp(row_result['lnjc05']['due_date'])
+               subdate     = firstDayOfMonth - due_date
+
             os_balance  = row_result['lnjc05']['current_balance']
             # check_ln3206f = mongodb.count(MONGO_COLLECTION=collection_ln3206f, WHERE={'account_number':str(row_result['CONTRACTNR']), 'code':'10'})
             check_ln3206f = mongodb.count(MONGO_COLLECTION=collection_ln3206f, WHERE={'account_number':str(row_result['CONTRACTNR']), 'code':'10', 'created_at': { '$gte' :  startDayTimeStamp + 86400,'$lte' : endDayTimeStamp + 86400}})
             if check_ln3206f > 0:
                # get_ln3206f = mongodb.get(MONGO_COLLECTION=collection_ln3206f, WHERE={'account_number':str(row_result['CONTRACTNR']), 'code':'10'})
-               get_ln3206f = mongodb.get(MONGO_COLLECTION=collection_ln3206f, WHERE={'account_number':str(row_result['CONTRACTNR']), 'code':'10', 'created_at': { '$gte' :  startDayTimeStamp + 86400,'$lte' : endDayTimeStamp + 86400}})
+               # get_ln3206f = mongodb.get(MONGO_COLLECTION=collection_ln3206f, WHERE={'account_number':str(row_result['CONTRACTNR']), 'code':'10', 'created_at': { '$gte' :  startDayTimeStamp + 86400,'$lte' : endDayTimeStamp + 86400}})
                print('SIBS: '+str(idx))
+               aggregate_pipeline = [
+                  {
+                     '$match' : {
+                        'created_at': { '$gte' :  startDayTimeStamp + 86400,'$lte' : endDayTimeStamp + 86400},
+                        'account_number':str(row_result['CONTRACTNR']), 
+                        'code': '10'
+                     }
+                  },
+                  {
+                     "$group":
+                     {
+                        "_id": 'null',
+                        "sum_amount": {'$sum': '$amt'},
+                     }
+                  }
+               ]
+               get_ln3206f = mongodb.aggregate_pipeline(MONGO_COLLECTION=collection_ln3206f,aggregate_pipeline=aggregate_pipeline)
                if get_ln3206f != None:
                   count_account  = 1
                   for row_3026 in get_ln3206f:
-                     payment         += row_3026['amt']
+                     payment         = row_3026['sum_amount']
 
          elif "listofAccount" in row_result:
-            due_date    = datetime.fromtimestamp(row_result['listofAccount']['overdue_date'])
+            if row_result['listofAccount']['overdue_date'] !="":
+               due_date    = datetime.fromtimestamp(row_result['listofAccount']['overdue_date'])
+               subdate     = firstDayOfMonth - due_date
+
             os_balance  =  row_result['listofAccount']['cur_bal']
             # check_gl    = mongodb.count(MONGO_COLLECTION=collection_gl_2018, WHERE={'$and' : [{'account_number':str(row_result['CONTRACTNR'])}, {'$or' : [{'code': '2000'}, {'code': '2100'}, {'code': '2700'}]}]})
-            check_gl    = mongodb.count(MONGO_COLLECTION=collection_gl_2018, WHERE={'$and' : [{'created_at': { '$gte' :  startDayTimeStamp + 86400,'$lte' : endDayTimeStamp + 86400}},{'account_number':str(row_result['CONTRACTNR'])}, {'$or' : [{'code': '2000'}, {'code': '2100'}, {'code': '2700'}]}]})
+            check_gl    = mongodb.count(MONGO_COLLECTION=collection_gl_2018, WHERE={'created_at': { '$gte' :  startDayTimeStamp + 86400,'$lte' : endDayTimeStamp + 86400},'account_number':str(row_result['CONTRACTNR']), 'code': {'$in': ['2000','2100', '2700']} })
             if check_gl > 0:
                # get_gl_2018 = mongodb.get(MONGO_COLLECTION=collection_gl_2018, WHERE={'$and' : [ {'account_number':str(row_result['CONTRACTNR'])}, {'$or' : [{'code': '2000'}, {'code': '2100'}, {'code': '2700'}]}]})
-               get_gl_2018 = mongodb.get(MONGO_COLLECTION=collection_gl_2018, WHERE={'$and' : [{'created_at': { '$gte' :  startDayTimeStamp + 86400,'$lte' : endDayTimeStamp + 86400}}, {'account_number':str(row_result['CONTRACTNR'])}, {'$or' : [{'code': '2000'}, {'code': '2100'}, {'code': '2700'}]}]})
+               # get_gl_2018 = mongodb.get(MONGO_COLLECTION=collection_gl_2018, WHERE={'created_at': { '$gte' :  startDayTimeStamp + 86400,'$lte' : endDayTimeStamp + 86400},'account_number':str(row_result['CONTRACTNR']), 'code': {'$in': ['2000','2100', '2700']} })
                print('Card: '+str(idx))
+               aggregate_pipeline = [
+                  {
+                     '$match' : {
+                        'created_at': { '$gte' :  startDayTimeStamp + 86400,'$lte' : endDayTimeStamp + 86400},
+                        'account_number':str(row_result['CONTRACTNR']), 
+                        'code': {'$in': ['2000','2100', '2700']}
+                     }
+                  },
+                  {
+                     "$group":
+                     {
+                        "_id": '$code',
+                        "sum_amount": {'$sum': '$amount'},
+                     }
+                  }
+               ]
+               get_gl_2018 = mongodb.aggregate_pipeline(MONGO_COLLECTION=collection_gl_2018,aggregate_pipeline=aggregate_pipeline)
                code_amount_2000 = 0
                code_amount_2100 = 0
                code_amount_2700 = 0
                if get_gl_2018 != None:
                   for row_code in get_gl_2018:
-                     if row_code['code'] == '2000':
-                        code_amount_2000 += row_code['amount']
-                     if row_code['code'] == '2100':
-                        code_amount_2100 += row_code['amount']
-                     if row_code['code'] == '2700':
-                        code_amount_2700 += row_code['amount']
+                     if row_code['_id'] == '2000':
+                        code_amount_2000 = row_code['sum_amount']
+                     if row_code['_id'] == '2100':
+                        code_amount_2100 = row_code['sum_amount']
+                     if row_code['_id'] == '2700':
+                        code_amount_2700 = row_code['sum_amount']
                if (code_amount_2000+code_amount_2100-code_amount_2700)>0:
                   count_account = 1
                   payment = code_amount_2000+code_amount_2100-code_amount_2700
          else: continue
 
-         subdate = firstDayOfMonth - due_date
+         
          temp_DPD = ''
-         if(subdate.days<30):
-            temp_DPD = '<30'
-         elif(subdate.days>=30 and subdate.days < 60):
-            temp_DPD = '30+'
-         elif(subdate.days>=60 and subdate.days < 90):
-            temp_DPD = '60+'
-         elif(subdate.days>=90 and subdate.days < 180):
-            temp_DPD = '90+'
-         elif(subdate.days>=180 and subdate.days < 360):
-            temp_DPD = '180+'
-         else:
-            temp_DPD = '360+'
+         if subdate != None:
+            if(subdate.days<30):
+               temp_DPD = '<30'
+            elif(subdate.days>=30 and subdate.days < 60):
+               temp_DPD = '30+'
+            elif(subdate.days>=60 and subdate.days < 90):
+               temp_DPD = '60+'
+            elif(subdate.days>=90 and subdate.days < 180):
+               temp_DPD = '90+'
+            elif(subdate.days>=180 and subdate.days < 360):
+               temp_DPD = '180+'
+            else:
+               temp_DPD = '360+'
 
          temp = {
             'account_number' : row_result['CONTRACTNR'],
@@ -321,7 +365,7 @@ try :
    if len(insertData) > 0:
       mongodb.batch_insert(MONGO_COLLECTION=collection_temp, insert_data=insertData)
 
-
+   # sys.exit()
 
    #1.OUTSOURCING
    # đọc dữ liệu từ bảng tạm ra
@@ -348,15 +392,15 @@ try :
          if data != None:
             for row_result in data:
                if(row_result['_id'] == '<30'):
-                  modified = mongodb.update(MONGO_COLLECTION=collection_amount_report,WHERE=where,VALUE={'outsoucing.account.before.l30.T'+str(month) :row_result['sum_acc'], 'outsoucing.amount.before.l30.T'+str(month) : row_result['sum_amount']})
+                  modified = mongodb.update(MONGO_COLLECTION=collection_amount_report,WHERE=where,VALUE={'outsoucing.account.before.l30.T'+str(lastMonth) :row_result['sum_acc'], 'outsoucing.amount.before.l30.T'+str(lastMonth) : row_result['sum_amount']})
                elif(row_result['_id'] == '30+'):
-                  modified = mongodb.update(MONGO_COLLECTION=collection_amount_report,WHERE=where,VALUE={'outsoucing.account.before.l30.T'+str(month) :row_result['sum_acc'], 'outsoucing.amount.before.l30.T'+str(month) : row_result['sum_amount']})
+                  modified = mongodb.update(MONGO_COLLECTION=collection_amount_report,WHERE=where,VALUE={'outsoucing.account.before.l30.T'+str(lastMonth) :row_result['sum_acc'], 'outsoucing.amount.before.l30.T'+str(lastMonth) : row_result['sum_amount']})
                elif(row_result['_id'] == '60+'):
-                  modified = mongodb.update(MONGO_COLLECTION=collection_amount_report,WHERE=where,VALUE={'outsoucing.account.before.p60.T'+str(month) :row_result['sum_acc'], 'outsoucing.amount.before.p60.T'+str(month) : row_result['sum_amount']})
+                  modified = mongodb.update(MONGO_COLLECTION=collection_amount_report,WHERE=where,VALUE={'outsoucing.account.before.p60.T'+str(lastMonth) :row_result['sum_acc'], 'outsoucing.amount.before.p60.T'+str(lastMonth) : row_result['sum_amount']})
                elif(row_result['_id'] == '90+'):
-                  modified = mongodb.update(MONGO_COLLECTION=collection_amount_report,WHERE=where,VALUE={'outsoucing.account.before.p90.T'+str(month) :row_result['sum_acc'], 'outsoucing.amount.before.p90.T'+str(month) : row_result['sum_amount']})
+                  modified = mongodb.update(MONGO_COLLECTION=collection_amount_report,WHERE=where,VALUE={'outsoucing.account.before.p90.T'+str(lastMonth) :row_result['sum_acc'], 'outsoucing.amount.before.p90.T'+str(lastMonth) : row_result['sum_amount']})
                elif(row_result['_id'] == '180+'):
-                  modified = mongodb.update(MONGO_COLLECTION=collection_amount_report,WHERE=where,VALUE={'outsoucing.account.before.p180.T'+str(month):row_result['sum_acc'], 'outsoucing.amount.before.p180.T'+str(month) : row_result['sum_amount']})
+                  modified = mongodb.update(MONGO_COLLECTION=collection_amount_report,WHERE=where,VALUE={'outsoucing.account.before.p180.T'+str(lastMonth):row_result['sum_acc'], 'outsoucing.amount.before.p180.T'+str(lastMonth) : row_result['sum_amount']})
                else: continue
 
 
@@ -380,7 +424,7 @@ try :
          data = mongodb.aggregate_pipeline(MONGO_COLLECTION=collection_temp,aggregate_pipeline=aggregate_pipeline)
          if data != None:
             for row_result in data:
-               modified = mongodb.update(MONGO_COLLECTION=collection_amount_report,WHERE=where,VALUE={'outsoucing.account.before.subtotal.T'+str(month) :row_result['sum_acc'], 'outsoucing.amount.before.subtotal.T'+str(month) : row_result['sum_amount']})
+               modified = mongodb.update(MONGO_COLLECTION=collection_amount_report,WHERE=where,VALUE={'outsoucing.account.before.subtotal.T'+str(lastMonth) :row_result['sum_acc'], 'outsoucing.amount.before.subtotal.T'+str(lastMonth) : row_result['sum_amount']})
 
 
 
@@ -448,6 +492,11 @@ try :
 
 
 
+   
+
+
+
+
    #SHEET ASSIGNED DPD------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
    #1.OUTSOURCING
    print('OUTSOURCING SHEET ASSIGNED DPD')
@@ -477,21 +526,21 @@ try :
             total_amount_p60 = 0
             for row_result in data:
                if(row_result['_id'] == '<30'):
-                  modified = mongodb.update(MONGO_COLLECTION=collection_assigned_report,WHERE=where,VALUE={'outsoucing.account.before.l30.T'+str(month) :row_result['sum_acc'], 'outsoucing.amount.before.l30.T'+str(month) : row_result['sum_amount']})
+                  modified = mongodb.update(MONGO_COLLECTION=collection_assigned_report,WHERE=where,VALUE={'outsoucing.account.before.l30.T'+str(lastMonth) :row_result['sum_acc'], 'outsoucing.amount.before.l30.T'+str(lastMonth) : row_result['sum_amount']})
                elif(row_result['_id'] == '30+' or row_result['_id'] == '<60'):
                   total_account_p60    += row_result['sum_acc']
                   total_amount_p60  += row_result['sum_amount']
                elif(row_result['_id'] == '60+'):
-                  modified = mongodb.update(MONGO_COLLECTION=collection_assigned_report,WHERE=where,VALUE={'outsoucing.account.before.p60.T'+str(month) :row_result['sum_acc'], 'outsoucing.amount.before.p60.T'+str(month) : row_result['sum_amount']})
+                  modified = mongodb.update(MONGO_COLLECTION=collection_assigned_report,WHERE=where,VALUE={'outsoucing.account.before.p60.T'+str(lastMonth) :row_result['sum_acc'], 'outsoucing.amount.before.p60.T'+str(lastMonth) : row_result['sum_amount']})
                elif(row_result['_id'] == '90+'):
-                  modified = mongodb.update(MONGO_COLLECTION=collection_assigned_report,WHERE=where,VALUE={'outsoucing.account.before.p90.T'+str(month) :row_result['sum_acc'], 'outsoucing.amount.before.p90.T'+str(month) : row_result['sum_amount']})
+                  modified = mongodb.update(MONGO_COLLECTION=collection_assigned_report,WHERE=where,VALUE={'outsoucing.account.before.p90.T'+str(lastMonth) :row_result['sum_acc'], 'outsoucing.amount.before.p90.T'+str(lastMonth) : row_result['sum_amount']})
                elif(row_result['_id'] == '180+'):
-                  modified = mongodb.update(MONGO_COLLECTION=collection_assigned_report,WHERE=where,VALUE={'outsoucing.account.before.p180.T'+str(month):row_result['sum_acc'], 'outsoucing.amount.before.p180.T'+str(month) : row_result['sum_amount']})
+                  modified = mongodb.update(MONGO_COLLECTION=collection_assigned_report,WHERE=where,VALUE={'outsoucing.account.before.p180.T'+str(lastMonth):row_result['sum_acc'], 'outsoucing.amount.before.p180.T'+str(lastMonth) : row_result['sum_amount']})
                elif(row_result['_id'] == '360+'):
-                  modified = mongodb.update(MONGO_COLLECTION=collection_assigned_report,WHERE=where,VALUE={'outsoucing.account.writeof.p360.T'+str(month):row_result['sum_acc'], 'outsoucing.amount.writeof.p360.T'+str(month) : row_result['sum_amount']})
+                  modified = mongodb.update(MONGO_COLLECTION=collection_assigned_report,WHERE=where,VALUE={'outsoucing.account.writeof.p360.T'+str(lastMonth):row_result['sum_acc'], 'outsoucing.amount.writeof.p360.T'+str(lastMonth) : row_result['sum_amount']})
                else: continue
 
-            modified = mongodb.update(MONGO_COLLECTION=collection_assigned_report,WHERE=where,VALUE={'outsoucing.account.before.p30.T'+str(month) :total_account_p60, 'outsoucing.amount.before.p30.T'+str(month) : total_amount_p60})
+            modified = mongodb.update(MONGO_COLLECTION=collection_assigned_report,WHERE=where,VALUE={'outsoucing.account.before.p30.T'+str(lastMonth) :total_account_p60, 'outsoucing.amount.before.p30.T'+str(lastMonth) : total_amount_p60})
 
 
          # tinh subtotal
@@ -515,7 +564,7 @@ try :
          data = mongodb.aggregate_pipeline(MONGO_COLLECTION=collection,aggregate_pipeline=aggregate_pipeline)
          if data != None:
             for row_result in data:
-               modified = mongodb.update(MONGO_COLLECTION=collection_assigned_report,WHERE=where,VALUE={'outsoucing.account.before.subtotal.T'+str(month) :row_result['sum_acc'], 'outsoucing.amount.before.subtotal.T'+str(month) : row_result['sum_amount']})
+               modified = mongodb.update(MONGO_COLLECTION=collection_assigned_report,WHERE=where,VALUE={'outsoucing.account.before.subtotal.T'+str(lastMonth) :row_result['sum_acc'], 'outsoucing.amount.before.subtotal.T'+str(lastMonth) : row_result['sum_amount']})
 
 
 
@@ -548,69 +597,106 @@ try :
             total_account_p60 = 0
             total_amount_p60 = 0
             for row_result in data:
-               if row_result['_id'] != '360+':
-                  account = 0
-                  amount = 0
-                  aggregate_payment = [
-                     {
-                        '$match' : {
-                           'created_at': { '$gte' :  startDayTimeStamp + 86400,'$lte' : endDayTimeStamp + 86400},
-                           'account_number': {'$in': row_result['acc_arr']},
-                           'code':'10'
-                        }
-                     },
-                     {
-                        "$group":
-                        {
-                           "_id": 'null',
-                           "sum_amount": {'$sum': '$amt'},
-                           "sum_account": {'$sum': 1},
-                        }
+               account = 0
+               amount = 0
+               aggregate_payment = [
+                  {
+                     '$match' : {
+                        'created_at': { '$gte' :  startDayTimeStamp + 86400,'$lte' : endDayTimeStamp + 86400},
+                        'account_number': {'$in': row_result['acc_arr']},
+                        'code':'10'
                      }
+                  },
+                  {
+                     "$group":
+                     {
+                        "_id": 'null',
+                        "sum_amount": {'$sum': '$amt'},
+                        "sum_account": {'$sum': 1},
+                     }
+                  }
 
-                  ]
-                  dataLn3206f = mongodb.aggregate_pipeline(MONGO_COLLECTION=collection_ln3206f,aggregate_pipeline=aggregate_payment)
-                  if dataLn3206f != None:
-                     for row in dataLn3206f:
-                        account  = row['sum_account']
-                        amount   = row['sum_amount']
+               ]
+               dataLn3206f = mongodb.aggregate_pipeline(MONGO_COLLECTION=collection_ln3206f,aggregate_pipeline=aggregate_payment)
+               if dataLn3206f != None:
+                  for row in dataLn3206f:
+                     account  = row['sum_account']
+                     amount   = row['sum_amount']
+                     if(row_result['_id'] != '360+'):
                         subtotal_account   += row['sum_account']
                         subtotal_amount    += row['sum_amount']
 
-                  for acc in row_result['acc_arr']:
-                     # check_gl    = mongodb.count(MONGO_COLLECTION=collection_gl_2018, WHERE={'$and' : [{'account_number':str(acc)}, {'$or' : [{'code': '2000'}, {'code': '2100'}, {'code': '2700'}]}]})
-                     check_gl    = mongodb.count(MONGO_COLLECTION=collection_gl_2018, WHERE={'$and' : [{'created_at': { '$gte' :  startDayTimeStamp + 86400,'$lte' : endDayTimeStamp + 86400}},{'account_number':str(acc)}, {'$or' : [{'code': '2000'}, {'code': '2100'}, {'code': '2700'}]}]})
-                     if check_gl > 0:
-                        # get_gl_2018 = mongodb.get(MONGO_COLLECTION=collection_gl_2018, WHERE={'$and' : [ {'account_number':acc}, {'$or' : [{'code': '2000'}, {'code': '2100'}, {'code': '2700'}]}]})
-                        get_gl_2018 = mongodb.get(MONGO_COLLECTION=collection_gl_2018, WHERE={'$and' : [{'created_at': { '$gte' :  startDayTimeStamp + 86400,'$lte' : endDayTimeStamp + 86400}}, {'account_number':acc}, {'$or' : [{'code': '2000'}, {'code': '2100'}, {'code': '2700'}]}]})
-                        code_amount_2000 = 0
-                        code_amount_2100 = 0
-                        code_amount_2700 = 0
+               for acc in row_result['acc_arr']:
+                  # check_gl    = mongodb.count(MONGO_COLLECTION=collection_gl_2018, WHERE={'$and' : [{'account_number':str(acc)}, {'$or' : [{'code': '2000'}, {'code': '2100'}, {'code': '2700'}]}]})
+                  check_gl    = mongodb.count(MONGO_COLLECTION=collection_gl_2018, WHERE={'$and' : [{'created_at': { '$gte' :  startDayTimeStamp + 86400,'$lte' : endDayTimeStamp + 86400}},{'account_number':str(acc)}, {'$or' : [{'code': '2000'}, {'code': '2100'}, {'code': '2700'}]}]})
+                  if check_gl > 0:
+                     # get_gl_2018 = mongodb.get(MONGO_COLLECTION=collection_gl_2018, WHERE={'$and' : [ {'account_number':acc}, {'$or' : [{'code': '2000'}, {'code': '2100'}, {'code': '2700'}]}]})
+                     # get_gl_2018 = mongodb.get(MONGO_COLLECTION=collection_gl_2018, WHERE={'$and' : [{'created_at': { '$gte' :  startDayTimeStamp + 86400,'$lte' : endDayTimeStamp + 86400}}, {'account_number':acc}, {'$or' : [{'code': '2000'}, {'code': '2100'}, {'code': '2700'}]}]})
+                     # code_amount_2000 = 0
+                     # code_amount_2100 = 0
+                     # code_amount_2700 = 0
+                     # for row_code in get_gl_2018:
+                     #    if row_code['code'] == '2000':
+                     #       code_amount_2000 = row_code['amount']
+                     #    if row_code['code'] == '2100':
+                     #       code_amount_2100 = row_code['amount']
+                     #    if row_code['code'] == '2700':
+                     #       code_amount_2700 = row_code['amount']
+                     # if (code_amount_2000+code_amount_2100-code_amount_2700)>0:
+                     #    account  += 1
+                     #    amount   += code_amount_2000+code_amount_2100-code_amount_2700
+                     #    subtotal_account += 1
+                     #    subtotal_amount += amount
+
+                     aggregate_pipeline = [
+                        {
+                           '$match' : {
+                              'created_at': { '$gte' :  startDayTimeStamp + 86400,'$lte' : endDayTimeStamp + 86400},
+                              'account_number':str(acc), 
+                              'code': {'$in': ['2000','2100', '2700']}
+                           }
+                        },
+                        {
+                           "$group":
+                           {
+                              "_id": '$code',
+                              "sum_amount": {'$sum': '$amount'},
+                           }
+                        }
+                     ]
+                     get_gl_2018 = mongodb.aggregate_pipeline(MONGO_COLLECTION=collection_gl_2018,aggregate_pipeline=aggregate_pipeline)
+                     code_amount_2000 = 0
+                     code_amount_2100 = 0
+                     code_amount_2700 = 0
+                     if get_gl_2018 != None:
                         for row_code in get_gl_2018:
-                           if row_code['code'] == '2000':
-                              code_amount_2000 = row_code['amount']
-                           if row_code['code'] == '2100':
-                              code_amount_2100 = row_code['amount']
-                           if row_code['code'] == '2700':
-                              code_amount_2700 = row_code['amount']
-                        if (code_amount_2000+code_amount_2100-code_amount_2700)>0:
-                           account  += 1
-                           amount   += code_amount_2000+code_amount_2100-code_amount_2700
+                           if row_code['_id'] == '2000':
+                              code_amount_2000 = row_code['sum_amount']
+                           if row_code['_id'] == '2100':
+                              code_amount_2100 = row_code['sum_amount']
+                           if row_code['_id'] == '2700':
+                              code_amount_2700 = row_code['sum_amount']
+                     if (code_amount_2000+code_amount_2100-code_amount_2700)>0:
+                        account  += 1
+                        amount   += code_amount_2000+code_amount_2100-code_amount_2700
+                        if(row_result['_id'] != '360+'):
                            subtotal_account += 1
                            subtotal_amount += code_amount_2000+code_amount_2100-code_amount_2700
 
-                  if(row_result['_id'] == '<30'):
-                     modified = mongodb.update(MONGO_COLLECTION=collection_assigned_report,WHERE=where,VALUE={'collected.account.before.l30.T'+str(lastMonth) :account, 'collected.amount.before.l30.T'+str(lastMonth) : amount})
-                  elif(row_result['_id'] == '30+' or row_result['_id'] == '<60'):
-                     total_account_p60 += account
-                     total_amount_p60 += amount
-                  elif(row_result['_id'] == '60+'):
-                     modified = mongodb.update(MONGO_COLLECTION=collection_assigned_report,WHERE=where,VALUE={'collected.account.before.p60.T'+str(lastMonth) :account, 'collected.amount.before.p60.T'+str(lastMonth) : amount})
-                  elif(row_result['_id'] == '90+'):
-                     modified = mongodb.update(MONGO_COLLECTION=collection_assigned_report,WHERE=where,VALUE={'collected.account.before.p90.T'+str(lastMonth) :account, 'collected.amount.before.p90.T'+str(lastMonth) : amount})
-                  elif(row_result['_id'] == '180+'):
-                     modified = mongodb.update(MONGO_COLLECTION=collection_assigned_report,WHERE=where,VALUE={'collected.account.before.p180.T'+str(lastMonth):account, 'collected.amount.before.p180.T'+str(lastMonth) : amount})
-                  else: continue
+
+
+               if(row_result['_id'] == '<30'):
+                  modified = mongodb.update(MONGO_COLLECTION=collection_assigned_report,WHERE=where,VALUE={'collected.account.before.l30.T'+str(lastMonth) :account, 'collected.amount.before.l30.T'+str(lastMonth) : amount})
+               elif(row_result['_id'] == '30+' or row_result['_id'] == '<60'):
+                  total_account_p60 += account
+                  total_amount_p60 += amount
+               elif(row_result['_id'] == '60+'):
+                  modified = mongodb.update(MONGO_COLLECTION=collection_assigned_report,WHERE=where,VALUE={'collected.account.before.p60.T'+str(lastMonth) :account, 'collected.amount.before.p60.T'+str(lastMonth) : amount})
+               elif(row_result['_id'] == '90+'):
+                  modified = mongodb.update(MONGO_COLLECTION=collection_assigned_report,WHERE=where,VALUE={'collected.account.before.p90.T'+str(lastMonth) :account, 'collected.amount.before.p90.T'+str(lastMonth) : amount})
+               elif(row_result['_id'] == '180+'):
+                  modified = mongodb.update(MONGO_COLLECTION=collection_assigned_report,WHERE=where,VALUE={'collected.account.before.p180.T'+str(lastMonth):account, 'collected.amount.before.p180.T'+str(lastMonth) : amount})
+               else: continue
 
             modified = mongodb.update(MONGO_COLLECTION=collection_assigned_report,WHERE=where,VALUE={'collected.account.before.p30.T'+str(lastMonth) :total_account_p60, 'collected.amount.before.p30.T'+str(lastMonth) : total_amount_p60})
 

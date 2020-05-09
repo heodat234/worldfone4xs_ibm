@@ -8,6 +8,7 @@ import sys
 import os
 import json
 import csv
+import traceback
 from pprint import pprint
 from datetime import datetime
 from datetime import date
@@ -26,7 +27,7 @@ base_url = common.base_url()
 wff_env = common.wff_env(base_url)
 mongodb = Mongodb(MONGODB="worldfone4xs", WFF_ENV=wff_env)
 _mongodb = Mongodb(MONGODB="_worldfone4xs", WFF_ENV=wff_env)
-log = open(base_url + "cronjob/python/Loan/log/importlnjc05.txt","a")
+log = open(base_url + "cronjob/python/Loan/log/importlnjc05.txt", "a")
 now = datetime.now()
 subUserType = 'LO'
 collection = common.getSubUser(subUserType, 'LNJC05')
@@ -45,10 +46,11 @@ try:
     total = 0
     complete = 0
     today = date.today()
-    # today = datetime.strptime('17/12/2019', "%d/%m/%Y").date()
+    # today = datetime.strptime('19/03/2020', "%d/%m/%Y").date()
     day = today.day
     month = today.month
     year = today.year
+    todayString = today.strftime("%d/%m/%Y")
     fileName = "LNJC05F"
     sep = ';'
     logDbName = "LO_Input_result_" + str(year) + str(month)
@@ -58,45 +60,50 @@ try:
         mongodbresult = Mongodb(logDbName, WFF_ENV=wff_env)
     else:
         mongodbresult = Mongodb(logDbName, WFF_ENV=wff_env)
-    
+
     ftpLocalUrl = common.getDownloadFolder() + fileName
 
     try:
         sys.argv[1]
         importLogId = str(sys.argv[1])
-        importLogInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': ObjectId(sys.argv[1])})
+        importLogInfo = mongodb.getOne(MONGO_COLLECTION=common.getSubUser(
+            subUserType, 'Import'), WHERE={'_id': ObjectId(sys.argv[1])})
     except Exception as SysArgvError:
         if not os.path.isfile(ftpLocalUrl):
-            user_info = list(_mongodb.get(MONGO_COLLECTION=common.getSubUser(subUserType, 'User'), SELECT={'extension'}))
+            user_info = list(_mongodb.get(MONGO_COLLECTION=common.getSubUser(
+                subUserType, 'User'), SELECT={'extension'}))
             user = common.array_column(user_info, 'extension')
             notification = {
-                'title'     : f'Import {fileName} error',
-                'active'    : True,
-                'icon'      : 'fa fa-exclamation-triangle',
-                'color'     : 'text-warning',
-                'content'   : f'Không có file import đầu ngày <b style="font-size: 15px">{ftpLocalUrl}</b>. Xin vui lòng thông báo cho bộ phận IT',
-                'link'      : '/manage/data/import_file',
-                'to'        : list(user),
+                'title': f'Import {fileName} error',
+                'active': True,
+                'icon': 'fa fa-exclamation-triangle',
+                'color': 'text-warning',
+                'content': f'Không có file import đầu ngày <b style="font-size: 15px">{ftpLocalUrl}</b>. Xin vui lòng thông báo cho bộ phận IT',
+                'link': '/manage/data/import_file',
+                'to': list(user),
                 'notifyDate': datetime.utcnow(),
-                'createdBy' : 'System',
-                'createdAt' : time.time()
+                'createdBy': 'System',
+                'createdAt': time.time()
             }
-            mongodb.insert(MONGO_COLLECTION=common.getSubUser(subUserType, 'Notification'), insert_data=notification)
+            mongodb.insert(MONGO_COLLECTION=common.getSubUser(
+                subUserType, 'Notification'), insert_data=notification)
             sys.exit()
 
         importLogInfo = {
-            'collection'    : collection, 
-            'begin_import'  : time.time(),
-            'file_name'     : fileName,
-            'file_path'     : ftpLocalUrl, 
-            'source'        : 'ftp',
-            'status'        : 2,
-            'command'       : '/usr/local/bin/python3.6 ' + base_url + "cronjob/python/Loan/importLNJC05.py > /dev/null &",
-            'created_by'    : 'system'
+            'collection': collection,
+            'begin_import': time.time(),
+            'file_name': fileName,
+            'file_path': ftpLocalUrl,
+            'source': 'ftp',
+            'status': 2,
+            'command': '/usr/local/bin/python3.6 ' + base_url + "cronjob/python/Loan/importLNJC05.py > /dev/null &",
+            'created_by': 'system'
         }
-        importLogId = mongodb.insert(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), insert_data=importLogInfo)
+        importLogId = mongodb.insert(MONGO_COLLECTION=common.getSubUser(
+            subUserType, 'Import'), insert_data=importLogInfo)
 
-    models = _mongodb.get(MONGO_COLLECTION='Model', WHERE={'collection': collection}, SORT=[('index', 1)], SELECT=['index', 'collection', 'field', 'type', 'sub_type'])
+    models = _mongodb.get(MONGO_COLLECTION='Model', WHERE={'collection': common.getSubUser(
+        subUserType, 'LNJC05')}, SORT=[('index', 1)], SELECT=['index', 'collection', 'field', 'type', 'sub_type'])
 
     for model in models:
         if 'sub_type' in model.keys():
@@ -127,9 +134,11 @@ try:
 
     if filenameExtension[1] in ['csv', 'xlsx']:
         if(filenameExtension[1] == 'csv'):
-            inputDataRaw = excel.getDataCSV(file_path=importLogInfo['file_path'], dtype=object, sep=sep, header=None, names=modelColumns, na_values='')
+            inputDataRaw = excel.getDataCSV(
+                file_path=importLogInfo['file_path'], dtype=object, sep=sep, header=None, names=modelColumns, na_values='')
         else:
-            inputDataRaw = excel.getDataExcel(file_path=importLogInfo['file_path'], header=None, names=modelColumns, na_values='')
+            inputDataRaw = excel.getDataExcel(
+                file_path=importLogInfo['file_path'], header=None, names=modelColumns, na_values='')
 
         inputData = inputDataRaw.to_dict('records')
         for idx, row in enumerate(inputData):
@@ -139,7 +148,8 @@ try:
             if row['account_number'] not in ['', None]:
                 for cell in row:
                     try:
-                        temp[cell] = common.convertDataType(data=row[cell], datatype=modelConverters[cell], formatType=modelFormat[cell])
+                        temp[cell] = common.convertDataType(
+                            data=row[cell], datatype=modelConverters[cell], formatType=modelFormat[cell])
                     except Exception as errorConvertType:
                         temp['error_cell'] = cell + "_" + str(idx + 1)
                         temp['type'] = modelConverters[cell]
@@ -147,7 +157,9 @@ try:
                         temp['result'] = 'error'
                         result = False
                 temp['created_by'] = 'system'
-                temp['created_at'] = time.time()
+                # temp['created_at'] = time.time()
+                temp['created_at'] = int(time.mktime(time.strptime(
+                    str(todayString + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
                 temp['import_id'] = str(importLogId)
                 if(result == False):
                     errorData.append(temp)
@@ -166,15 +178,21 @@ try:
                     for keyCell, cell in enumerate(row):
                         if keyCell <= len(modelColumns) - 1:
                             try:
-                                temp[modelColumns[keyCell]] = common.convertDataType(data=cell, datatype=modelConverters1[keyCell], formatType=modelFormat1[keyCell])
+                                if cell not in [None, '']:
+                                    temp[modelColumns[keyCell]] = common.convertDataType(data=cell, datatype=modelConverters1[keyCell], formatType=modelFormat1[keyCell])
+                                else:
+                                    temp[modelColumns[keyCell]] = ''
                             except Exception as errorConvertType:
-                                temp['error_cell'] = modelColumns[keyCell] + "_" + str(idx + 1)
+                                temp['error_cell'] = modelColumns[keyCell] + \
+                                    "_" + str(idx + 1)
                                 temp['type'] = modelConverters1[keyCell]
                                 temp['error_mesg'] = 'Sai kiểu dữ liệu nhập'
                                 temp['result'] = 'error'
                                 result = False
                     temp['created_by'] = 'system'
-                    temp['created_at'] = time.time()
+                    # temp['created_at'] = time.time()
+                    temp['created_at'] = int(time.mktime(time.strptime(
+                        str(todayString + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
                     temp['import_id'] = str(importLogId)
                     if(result == False):
                         errorData.append(temp)
@@ -184,14 +202,21 @@ try:
                         complete += 1
 
     if(len(errorData) > 0):
-        mongodbresult.remove_document(MONGO_COLLECTION=common.getSubUser(subUserType, ('LNJC05_' + str(year) + str(month) + str(day))))
-        mongodbresult.batch_insert(common.getSubUser(subUserType, ('LNJC05_' + str(year) + str(month) + str(day))), errorData)
-        mongodb.update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': importLogId}, VALUE={'status': 0, 'complete_import': time.time(), 'total': total, 'complete': complete})
+        mongodbresult.remove_document(MONGO_COLLECTION=common.getSubUser(
+            subUserType, ('LNJC05_' + str(year) + str(month) + str(day))))
+        mongodbresult.batch_insert(common.getSubUser(
+            subUserType, ('LNJC05_' + str(year) + str(month) + str(day))), errorData)
+        mongodb.update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': importLogId}, VALUE={
+                       'status': 0, 'complete_import': time.time(), 'total': total, 'complete': complete})
     else:
         if len(insertData) > 0:
-            mongodb.batch_insert(MONGO_COLLECTION=collection, insert_data=insertData)
-        mongodb.update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': importLogId}, VALUE={'status': 1, 'complete_import': time.time(), 'total': total, 'complete': complete})
+            mongodb.batch_insert(
+                MONGO_COLLECTION=collection, insert_data=insertData)
+        mongodb.update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': importLogId}, VALUE={
+                       'status': 1, 'complete_import': time.time(), 'total': total, 'complete': complete})
 
 except Exception as e:
     log.write(now.strftime("%d/%m/%Y, %H:%M:%S") + ': ' + str(e) + '\n')
     pprint(str(e))
+    mongodb.update(MONGO_COLLECTION=common.getSubUser(subUserType, 'Import'), WHERE={'_id': importLogId}, VALUE={
+                       'status': 0, 'complete_import': time.time(), 'total': total, 'complete': complete, 'error': str(traceback.format_exc())})

@@ -138,8 +138,8 @@ try:
 
                         if groupProduct['value'] == 'SIBS':
                             lead = ['JIVF00' + groupCell['lead']] if 'lead' in groupCell.keys() else []
-                            member = ('JIVF00' + s for s in members)
-                            officerIdRaw = list(lead) + list(member)
+                            # member = ('JIVF00' + s for s in members)
+                            officerIdRaw = list(lead) 
                             officerId = list(dict.fromkeys(officerIdRaw))
                             lnjc05Detail = list(mongodb.get(MONGO_COLLECTION=lnjc05_collection, WHERE={'group_id': debtGroupCell, 'officer_id': {'$in': officerId}, "created_at": {'$gte': todayTimeStamp, '$lte' : endTodayTimeStamp} }))
                             for lnjc05 in lnjc05Detail:

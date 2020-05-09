@@ -89,9 +89,11 @@ class Common:
     %% - a literal % character
     '''
     def convertTimestamp(self, value, formatString="%d/%m/%Y"):
-        if formatString in ["%d/%m/%Y", "%d/%m/%y", "%d-%m-%Y", "%d-%m-%y", "%d%m%Y", "%d%m%y", "%Y-%m-%d %H:%M:%S"]:
+        if formatString in ["%d/%m/%Y", "%d/%m/%y", "%d-%m-%Y", "%d-%m-%y", "%d%m%Y", "%d%m%y", "%Y-%m-%d %H:%M:%S", "%D%m%Y", "%m%D%Y", "%D%m%y", "%m%D%y"]:
             if len(str(value)) < 6:
                 value = '0' + str(value)
+
+        # if value != 
         result = int(self.time.mktime(self.time.strptime(str(value), formatString)))
         return result
 
@@ -107,7 +109,7 @@ class Common:
 
     def convertBoolean(self, value, formatType=''):
         return bool(value)
-    
+
     def convertDouble(self, value, formatType=''):
         try:
             if value in ['']:
@@ -128,6 +130,7 @@ class Common:
         return result
 
     def convertDataType(self, data, datatype='', formatType=''):
+        # print()
         switcher = {
             'string'        : self.convertStr,
             'timestamp'     : self.convertTimestamp,
@@ -147,10 +150,11 @@ class Common:
 
     def getDownloadFolder(self):
         wff_env = self.wff_env(self.base_url())
-        
-        if wff_env in ['UAT','DEV']:
+
+        if wff_env in ['UAT', 'DEV', 'LIVE']:
             # serverfolder = 'YYYYMMDD'
-            today = self.datetime.strptime('01/01/2020', "%d/%m/%Y").date() 
+            # today = self.datetime.strptime('23/04/2020', "%d/%m/%Y").date()
+            today = self.date.today()
             serverfolder = today.strftime("%Y%m%d")
         else:
             today = self.date.today()
@@ -172,6 +176,7 @@ class Common:
 
     def base_url(self):
         config = {}
+        return "/var/www/html/worldfone4xs_ibm/"
         base_url = ''
         if self.os.path.isfile('/data/python_config.json'):
             with open('/data/python_config.json') as f:

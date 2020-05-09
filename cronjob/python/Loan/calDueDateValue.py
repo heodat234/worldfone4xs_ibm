@@ -13,9 +13,7 @@ from pprint import pprint
 from datetime import datetime
 from datetime import date, timedelta
 from bson import ObjectId
-from helper.ftp import Ftp
 from helper.mongod import Mongodb
-from helper.excel import Excel
 from helper.jaccs import Config
 from helper.common import Common
 from helper.mongodbaggregate import Mongodbaggregate
@@ -25,21 +23,16 @@ base_url    = common.base_url()
 wff_env     = common.wff_env(base_url)
 mongodb     = Mongodb(MONGODB="worldfone4xs", WFF_ENV=wff_env)
 _mongodb    = Mongodb(MONGODB="_worldfone4xs", WFF_ENV=wff_env)
-excel = Excel()
-config = Config()
-ftp = Ftp()
-log = open(base_url + "cronjob/python/Loan/log/calDueDateValue.txt","a")
-now = datetime.now()
+log         = open(base_url + "cronjob/python/Loan/log/calDueDateValue.txt","a")
+now         = datetime.now()
 subUserType = 'LO'
-collection = common.getSubUser(subUserType, 'Due_date_next_date')
+collection  = common.getSubUser(subUserType, 'Due_date_next_date')
 lnjc05_collection    = common.getSubUser(subUserType, 'LNJC05')
-# zaccf_collection     = common.getSubUser(subUserType, 'ZACCF')
 sbv_collection       = common.getSubUser(subUserType, 'SBV')
 store_collection     = common.getSubUser(subUserType, 'SBV_Stored')
 account_collection   = common.getSubUser(subUserType, 'List_of_account_in_collection')
 report_due_date_collection     = common.getSubUser(subUserType, 'Report_due_date')
 jsonData_collection  = common.getSubUser(subUserType, 'Jsondata')
-product_collection   = common.getSubUser(subUserType, 'Product')
 
 try:
     insertData = []
@@ -62,14 +55,12 @@ try:
     startMonth = int(time.mktime(time.strptime(str('01/' + str(month) + '/' + str(year) + " 00:00:00"), "%d/%m/%Y %H:%M:%S")))
     endMonth = int(time.mktime(time.strptime(str(str(lastDayOfMonth) + '/' + str(month) + '/' + str(year) + " 23:59:59"), "%d/%m/%Y %H:%M:%S")))
 
+    checkDueDateAdd1 = mongodb.getOne(MONGO_COLLECTION=report_due_date_collection, WHERE={'due_date_add_1': todayTimeStamp})
+    if checkDueDateAdd1 == None:
+        sys.exit()
 
     mongodb.remove_document(MONGO_COLLECTION=collection, WHERE={'created_at': {'$gte': todayTimeStamp, '$lte': endTodayTimeStamp} })
 
-
-    mainProduct = {}
-    mainProductRaw = mongodb.get(MONGO_COLLECTION=product_collection)
-    for prod in mainProductRaw:
-        mainProduct[prod['code']] = prod['name']
 
     debtGroup = _mongodb.getOne(MONGO_COLLECTION=jsonData_collection, WHERE={'tags': ['debt', 'group']})
     dueDate = _mongodb.getOne(MONGO_COLLECTION=jsonData_collection, WHERE={'tags': ['debt', 'duedate']})
@@ -102,8 +93,6 @@ try:
                             'product'               : groupProduct['value'],
                             'debt_group'            : debtGroupCell[0:1],
                             'due_date_code'         : debtGroupCell[1:3],
-                            # 'team_id'               : str(groupCell['_id']),
-                            # 'team_name'             : groupCell['name'],
                             'for_month'             : str(lastmonth),
                             'debt_acc_no'           : 0,
                             'current_balance_total' : 0,
@@ -111,21 +100,13 @@ try:
                             'acc_arr'               : []
                         }
 
-                        # for key, value in mainProduct.items():
-                        #     temp['debt_acc_' + key] = 0
-                        #     temp['current_balance_' + key] = 0
-
                         if groupProduct['value'] == 'SIBS':
                             lnjc05Info = list(mongodb.get(MONGO_COLLECTION=lnjc05_collection, WHERE={'group_id': debtGroupCell }))
                             for lnjc05 in lnjc05Info:
-                                # zaccfInfo = mongodb.getOne(MONGO_COLLECTION=zaccf_collection, WHERE={'account_number': lnjc05['account_number']})
                                 temp['debt_acc_no']            += 1
                                 temp['current_balance_total']  += float(lnjc05['current_balance'])
                                 temp['ob_principal_total']     += float(lnjc05['outstanding_principal'])
                                 temp['acc_arr'].append(lnjc05['account_number'])
-                                # if zaccfInfo is not None:
-                                #     temp['debt_acc_' + zaccfInfo['PRODGRP_ID']]        += 1
-                                #     temp['current_balance_' + zaccfInfo['PRODGRP_ID']] += float(lnjc05['current_balance'])
 
                         if groupProduct['value'] == 'Card':
                             aggregate_stored = [

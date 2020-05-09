@@ -157,8 +157,8 @@ Class Daily_prod_user_group_report extends WFF_Controller {
         $worksheet->getStyle("A3:C3")->applyFromArray($style);
 
         $worksheet->setCellValue('F3', 'Percentage');
-        $worksheet->setCellValue('G3', 'Amount');
-        $worksheet->setCellValue('H3', 'Gap (account)');
+        $worksheet->setCellValue('G3', 'Amount(Percentage * OS at due date)');
+        $worksheet->setCellValue('H3', 'Gap (account)(Amount - Payment amount received)');
         $worksheet->getStyle("F3:H3")->getFill()
             ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
             ->getStartColor()->setRGB('FFC000');
@@ -187,20 +187,20 @@ Class Daily_prod_user_group_report extends WFF_Controller {
         $worksheet->getStyle("N3:O3")->applyFromArray($style);
 
         $worksheet->setCellValue('P3', 'Payment amount received');
-        $worksheet->setCellValue('Q3', 'Remaining (Actual amount)');
-        $worksheet->setCellValue('R3', 'Collected Ratio (Actual amount)');
-        $worksheet->setCellValue('S3', 'Remaining (OS at current - OS at due date)');
+        $worksheet->setCellValue('Q3', 'Remaining (Actual amount)(OS at due date - Payment amount received)');
+        $worksheet->setCellValue('R3', 'Collected Ratio (Actual amount)(Payment amount received/OS at due date)');
+        $worksheet->setCellValue('S3', 'Remaining (OS at current)');
         $worksheet->getStyle("P3:S3")->getFill()
             ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
             ->getStartColor()->setRGB('DDEBF7');
         $worksheet->getStyle("P3:S3")->applyFromArray($style);
 
-        $worksheet->setCellValue('T3', 'Flow rate (OS at current - OS at due date)');
-        $worksheet->setCellValue('U3', 'Collected Ratio (OS at current - OS at due date)');
+        $worksheet->setCellValue('T3', 'Flow rate (OS at current / OS at due date)');
+        $worksheet->setCellValue('U3', 'Collected Ratio (Total Collected  amount / OS at due date)');
 
-        foreach(range('C','U') as $columnID) {
-            $worksheet->getColumnDimension($columnID)->setAutoSize(true);
-        }
+        // foreach(range('C','U') as $columnID) {
+        //     $worksheet->getColumnDimension($columnID)->setAutoSize(true);
+        // }
         $headerStyle = array(
             'font'          => array(
                 'bold'      => true,

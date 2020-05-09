@@ -4,8 +4,8 @@ use Pheanstalk\Pheanstalk;
 $queue = new Pheanstalk('127.0.0.1');
 
 //$inputFileName = "../../upload/ftp/telesales/ZACCF.csv";
-$folder = (string)(date("Ymd")); //"20191120";
-// $folder = '20200313'; //"20191120";
+// $folder = (string)(date("Ymd")); //"20191120";
+$folder = '20200423'; //"20191120";
 $inputFileName = "/data/upload_file/{$folder}/ZACCF.txt";
 echo $inputFileName;
 
@@ -123,10 +123,15 @@ while(!feof($file))
                     $date = substr($editedValue[$index], 0,2).'-'.substr($editedValue[$index], 2,2).'-'.substr($editedValue[$index], 4,8);
                     $doc['FRELD8_BJ'] = strtotime($date);
                 }
-                $doc[$field] = isset($editedValue[$index]) ? mb_convert_encoding($editedValue[$index], 'ISO-8859-1', 'UTF-8') : null;
+                if(isset($editedValue[$index]))
+                    mb_convert_encoding($editedValue[$index], 'ISO-8859-1', 'UTF-8');
+                else
+                    $editedValue[$index] = null;
+
+                $doc[$field] = $editedValue[$index];
+
             }
         }
-
         $queueData = array(
             "startTimestamp"    => time(),
             "doc"               => $doc,
@@ -135,10 +140,10 @@ while(!feof($file))
             // "key_field_2"       => $key_field_2,
             "import_id"         => $import_log["id"]
         );
-
-        $queue->useTube('import')->put(json_encode($queueData));
+        // print_r($doc);exit;
+        // $queue->useTube('import')->put(json_encode($queueData));
         ++$count;
-        //$mongo_db->insert("LO_Test", $doc);
+        $mongo_db->insert("LO_Test", $doc);
         echo "NO.{$count}\t";
         // print_r(implode("\t\t", $editedValue));
         echo PHP_EOL;
